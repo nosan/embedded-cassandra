@@ -38,7 +38,7 @@ class CassandraSupportConfig implements ISupportConfig {
 	@Override
 	public String messageOnException(Class<?> context, Exception exception) {
 		return "If you feel this is a bug, please open a new an issue. Follow this "
-				+ "link:" + getSupportUrl() + "\n" + "Thank you! :)";
+				+ "link: " + getSupportUrl() + "\n" + "Thank you! :)";
 	}
 
 }

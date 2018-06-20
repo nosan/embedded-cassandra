@@ -18,12 +18,13 @@ package com.github.nosan.embedded.cassandra.config;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * An Embedded Cassandra config.
+ * Configuration properties for Cassandra. <a href=
+ * "https://docs.datastax.com/en/cassandra/3.0/cassandra/configuration/configCassandra_yaml.html">See
+ * more</a>
  *
  * @author Dmytro Nosan
  */
@@ -70,8 +71,6 @@ public class CassandraConfig {
 	private ParameterizedClass seed_provider = new ParameterizedClass(
 			"org.apache.cassandra.locator.SimpleSeedProvider",
 			Collections.singletonMap("seeds", "127.0.01"));
-
-	private DiskAccessMode disk_access_mode = DiskAccessMode.auto;
 
 	private DiskFailurePolicy disk_failure_policy = DiskFailurePolicy.stop;
 
@@ -317,8 +316,6 @@ public class CassandraConfig {
 
 	private boolean inter_dc_tcp_nodelay = false;
 
-	private MemtableAllocationType memtable_allocation_type = MemtableAllocationType.heap_buffers;
-
 	private Integer tombstone_warn_threshold = 1000;
 
 	private Integer tombstone_failure_threshold = 100000;
@@ -360,8 +357,6 @@ public class CassandraConfig {
 	private Long user_defined_function_warn_timeout;
 
 	private Long user_defined_function_fail_timeout;
-
-	private UserFunctionTimeoutPolicy user_function_timeout_policy;
 
 	private boolean back_pressure_enabled = false;
 
@@ -526,14 +521,6 @@ public class CassandraConfig {
 
 	public void setSeedProvider(ParameterizedClass seedProvider) {
 		this.seed_provider = seedProvider;
-	}
-
-	public DiskAccessMode getDiskAccessMode() {
-		return this.disk_access_mode;
-	}
-
-	public void setDiskAccessMode(DiskAccessMode diskAccessMode) {
-		this.disk_access_mode = diskAccessMode;
 	}
 
 	public DiskFailurePolicy getDiskFailurePolicy() {
@@ -1532,14 +1519,6 @@ public class CassandraConfig {
 		this.inter_dc_tcp_nodelay = interDcTcpNodelay;
 	}
 
-	public MemtableAllocationType getMemtableAllocationType() {
-		return this.memtable_allocation_type;
-	}
-
-	public void setMemtableAllocationType(MemtableAllocationType memtableAllocationType) {
-		this.memtable_allocation_type = memtableAllocationType;
-	}
-
 	public Integer getTombstoneWarnThreshold() {
 		return this.tombstone_warn_threshold;
 	}
@@ -1714,15 +1693,6 @@ public class CassandraConfig {
 		this.user_defined_function_fail_timeout = userDefinedFunctionFailTimeout;
 	}
 
-	public UserFunctionTimeoutPolicy getUserFunctionTimeoutPolicy() {
-		return this.user_function_timeout_policy;
-	}
-
-	public void setUserFunctionTimeoutPolicy(
-			UserFunctionTimeoutPolicy userFunctionTimeoutPolicy) {
-		this.user_function_timeout_policy = userFunctionTimeoutPolicy;
-	}
-
 	public boolean isBackPressureEnabled() {
 		return this.back_pressure_enabled;
 	}
@@ -1739,87 +1709,178 @@ public class CassandraConfig {
 		this.back_pressure_strategy = backPressureStrategy;
 	}
 
+	/**
+	 * Policy for internode encryption.
+	 */
 	public enum InternodeEncryption {
 
-		all, none, dc, rack
+		/**
+		 * Encrypt all inter-node communications.
+		 */
+		all,
+		/**
+		 * No encryption.
+		 */
+		none,
+		/**
+		 * Encrypt the traffic between the datacenters (server only).
+		 */
+		dc,
+		/**
+		 * Encrypt the traffic between the racks (server only).
+		 */
+		rack
 
 	}
 
+	/**
+	 * Policy for commit log sync.
+	 */
 	public enum CommitLogSync {
 
-		periodic, batch
+		/**
+		 * Periodic mode.
+		 */
+		periodic,
+		/**
+		 * Batch mode.
+		 */
+		batch
 
 	}
 
+	/**
+	 * Compression controls whether traffic between nodes is compressed.
+	 */
 	public enum InternodeCompression {
 
-		all, none, dc
+		/**
+		 * all traffic is compressed.
+		 */
+		all,
+		/**
+		 * nothing is compressed.
+		 */
+		none,
+		/**
+		 * traffic between different datacenters is compressed.
+		 */
+		dc
 
 	}
 
-	public enum DiskAccessMode {
-
-		auto, mmap, mmap_index_only, standard,
-
-	}
-
-	public enum MemtableAllocationType {
-
-		unslabbed_heap_buffers, heap_buffers, offheap_buffers, offheap_objects
-
-	}
-
+	/**
+	 * Policy for data disk failures.
+	 */
 	public enum DiskFailurePolicy {
 
-		best_effort, stop, ignore, stop_paranoid, die
+		/**
+		 * Stop using the failed disk and respond to requests based on the remaining
+		 * available SSTables. This allows obsolete data at consistency level of ONE.
+		 */
+		best_effort,
+		/**
+		 * Shut down gossip and Thrift, leaving the node effectively dead, but available
+		 * for inspection using JMX.
+		 */
+		stop,
+		/**
+		 * Ignore fatal errors and lets the requests fail; all file system errors are
+		 * logged but otherwise ignored. Cassandra acts as in versions prior to 1.2.
+		 */
+		ignore,
+		/**
+		 * Shut down gossip and Thrift even for single SSTable errors.
+		 */
+		stop_paranoid,
+		/**
+		 * Shut down gossip and Thrift and kill the JVM for any file system errors or
+		 * single SSTable errors, so the node can be replaced.
+		 */
+		die
 
 	}
 
+	/**
+	 * Policy for commit disk failures.
+	 */
 	public enum CommitFailurePolicy {
 
-		stop, stop_commit, ignore, die,
+		/**
+		 * Shut down gossip and Thrift, leaving the node effectively dead, available for
+		 * inspection using JMX.
+		 */
+		stop,
+		/**
+		 * Shut down the commit log, letting writes collect but continuing to service
+		 * reads (as in pre-2.0.5 Cassandra).
+		 */
+		stop_commit,
+		/**
+		 * Ignore fatal errors and let the batches fail.
+		 */
+		ignore,
+		/**
+		 * Shut down gossip and Thrift and kill the JVM, so the node can be replaced.
+		 */
+		die,
 
 	}
 
-	public enum UserFunctionTimeoutPolicy {
-
-		ignore, die, die_immediate
-
-	}
-
+	/**
+	 * Policy for request scheduler id.
+	 */
 	public enum RequestSchedulerId {
 
+		/**
+		 * Keyspace request scheduler id.
+		 */
 		keyspace
 
 	}
 
+	/**
+	 * The strategy for optimizing disk read.
+	 */
 	public enum DiskOptimizationStrategy {
 
-		ssd, spinning
+		/**
+		 * SSD mode.
+		 */
+		ssd,
+		/**
+		 * Spinning mode.
+		 */
+		spinning
 
 	}
 
+	/**
+	 * Client-to-node encryption protects data in flight from client machines to a
+	 * database cluster using SSL (Secure Sockets Layer). It establishes a secure channel
+	 * between the client and the coordinator node.
+	 */
 	public static class ClientEncryptionOptions {
 
 		private String keystore;
 
-		private String keystorePassword;
+		private String keystore_password;
 
 		private String truststore;
 
-		private String truststorePassword;
+		private String truststore_password;
 
-		private List<String> cipherSuites = new ArrayList<>();
+		private List<String> cipher_suites;
 
 		private String protocol;
 
 		private String algorithm;
 
-		private String storeType;
+		private String store_type;
 
-		private boolean requireClientAuth;
+		private boolean require_client_auth;
 
-		private boolean requireEndpointVerification;
+		private boolean require_endpoint_verification;
 
 		private boolean enabled;
 
@@ -1834,11 +1895,11 @@ public class CassandraConfig {
 		}
 
 		public String getKeystorePassword() {
-			return this.keystorePassword;
+			return this.keystore_password;
 		}
 
 		public void setKeystorePassword(String keystorePassword) {
-			this.keystorePassword = keystorePassword;
+			this.keystore_password = keystorePassword;
 		}
 
 		public String getTruststore() {
@@ -1850,19 +1911,19 @@ public class CassandraConfig {
 		}
 
 		public String getTruststorePassword() {
-			return this.truststorePassword;
+			return this.truststore_password;
 		}
 
 		public void setTruststorePassword(String truststorePassword) {
-			this.truststorePassword = truststorePassword;
+			this.truststore_password = truststorePassword;
 		}
 
 		public List<String> getCipherSuites() {
-			return this.cipherSuites;
+			return this.cipher_suites;
 		}
 
 		public void setCipherSuites(List<String> cipherSuites) {
-			this.cipherSuites = cipherSuites;
+			this.cipher_suites = cipherSuites;
 		}
 
 		public String getProtocol() {
@@ -1882,27 +1943,27 @@ public class CassandraConfig {
 		}
 
 		public String getStoreType() {
-			return this.storeType;
+			return this.store_type;
 		}
 
 		public void setStoreType(String storeType) {
-			this.storeType = storeType;
+			this.store_type = storeType;
 		}
 
 		public boolean isRequireClientAuth() {
-			return this.requireClientAuth;
+			return this.require_client_auth;
 		}
 
 		public void setRequireClientAuth(boolean requireClientAuth) {
-			this.requireClientAuth = requireClientAuth;
+			this.require_client_auth = requireClientAuth;
 		}
 
 		public boolean isRequireEndpointVerification() {
-			return this.requireEndpointVerification;
+			return this.require_endpoint_verification;
 		}
 
 		public void setRequireEndpointVerification(boolean requireEndpointVerification) {
-			this.requireEndpointVerification = requireEndpointVerification;
+			this.require_endpoint_verification = requireEndpointVerification;
 		}
 
 		public boolean isEnabled() {
@@ -1923,29 +1984,33 @@ public class CassandraConfig {
 
 	}
 
+	/**
+	 * Node-to-node encryption protects data transferred between nodes in a cluster,
+	 * including gossip communications, using SSL (Secure Sockets Layer).
+	 */
 	public static class ServerEncryptionOptions {
 
 		private String keystore;
 
-		private String keystorePassword;
+		private String keystore_password;
 
 		private String truststore;
 
-		private String truststorePassword;
+		private String truststore_password;
 
-		private List<String> cipherSuites = new ArrayList<>();
+		private List<String> cipher_suites;
 
 		private String protocol;
 
 		private String algorithm;
 
-		private String storeType;
+		private String store_type;
 
-		private boolean requireClientAuth;
+		private boolean require_client_auth;
 
-		private boolean requireEndpointVerification;
+		private boolean require_endpoint_verification;
 
-		private InternodeEncryption internodeEncryption;
+		private InternodeEncryption internode_encryption;
 
 		public String getKeystore() {
 			return this.keystore;
@@ -1956,11 +2021,11 @@ public class CassandraConfig {
 		}
 
 		public String getKeystorePassword() {
-			return this.keystorePassword;
+			return this.keystore_password;
 		}
 
 		public void setKeystorePassword(String keystorePassword) {
-			this.keystorePassword = keystorePassword;
+			this.keystore_password = keystorePassword;
 		}
 
 		public String getTruststore() {
@@ -1972,19 +2037,19 @@ public class CassandraConfig {
 		}
 
 		public String getTruststorePassword() {
-			return this.truststorePassword;
+			return this.truststore_password;
 		}
 
 		public void setTruststorePassword(String truststorePassword) {
-			this.truststorePassword = truststorePassword;
+			this.truststore_password = truststorePassword;
 		}
 
 		public List<String> getCipherSuites() {
-			return this.cipherSuites;
+			return this.cipher_suites;
 		}
 
 		public void setCipherSuites(List<String> cipherSuites) {
-			this.cipherSuites = cipherSuites;
+			this.cipher_suites = cipherSuites;
 		}
 
 		public String getProtocol() {
@@ -2004,52 +2069,57 @@ public class CassandraConfig {
 		}
 
 		public String getStoreType() {
-			return this.storeType;
+			return this.store_type;
 		}
 
 		public void setStoreType(String storeType) {
-			this.storeType = storeType;
+			this.store_type = storeType;
 		}
 
 		public boolean isRequireClientAuth() {
-			return this.requireClientAuth;
+			return this.require_client_auth;
 		}
 
 		public void setRequireClientAuth(boolean requireClientAuth) {
-			this.requireClientAuth = requireClientAuth;
+			this.require_client_auth = requireClientAuth;
 		}
 
 		public boolean isRequireEndpointVerification() {
-			return this.requireEndpointVerification;
+			return this.require_endpoint_verification;
 		}
 
 		public void setRequireEndpointVerification(boolean requireEndpointVerification) {
-			this.requireEndpointVerification = requireEndpointVerification;
+			this.require_endpoint_verification = requireEndpointVerification;
 		}
 
 		public InternodeEncryption getInternodeEncryption() {
-			return this.internodeEncryption;
+			return this.internode_encryption;
 		}
 
 		public void setInternodeEncryption(InternodeEncryption internodeEncryption) {
-			this.internodeEncryption = internodeEncryption;
+			this.internode_encryption = internodeEncryption;
 		}
 
 	}
 
+	/**
+	 * Enables encryption of data at rest (on-disk). Recommendation: download and install
+	 * the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files
+	 * for your version of the JDK.
+	 */
 	public static class TransparentDataEncryptionOptions {
 
 		private boolean enabled;
 
-		private Integer chunkLengthKb;
+		private Integer chunk_length_kb;
 
 		private String cipher;
 
-		private String keyAlias;
+		private String key_alias;
 
-		private Integer ivLength;
+		private Integer iv_length;
 
-		private ParameterizedClass keyProvider;
+		private ParameterizedClass key_provider;
 
 		public boolean isEnabled() {
 			return this.enabled;
@@ -2060,11 +2130,11 @@ public class CassandraConfig {
 		}
 
 		public Integer getChunkLengthKb() {
-			return this.chunkLengthKb;
+			return this.chunk_length_kb;
 		}
 
 		public void setChunkLengthKb(Integer chunkLengthKb) {
-			this.chunkLengthKb = chunkLengthKb;
+			this.chunk_length_kb = chunkLengthKb;
 		}
 
 		public String getCipher() {
@@ -2076,43 +2146,46 @@ public class CassandraConfig {
 		}
 
 		public String getKeyAlias() {
-			return this.keyAlias;
+			return this.key_alias;
 		}
 
 		public void setKeyAlias(String keyAlias) {
-			this.keyAlias = keyAlias;
+			this.key_alias = keyAlias;
 		}
 
 		public Integer getIvLength() {
-			return this.ivLength;
+			return this.iv_length;
 		}
 
 		public void setIvLength(Integer ivLength) {
-			this.ivLength = ivLength;
+			this.iv_length = ivLength;
 		}
 
 		public ParameterizedClass getKeyProvider() {
-			return this.keyProvider;
+			return this.key_provider;
 		}
 
 		public void setKeyProvider(ParameterizedClass keyProvider) {
-			this.keyProvider = keyProvider;
+			this.key_provider = keyProvider;
 		}
 
 	}
 
+	/**
+	 * Request Scheduler options.
+	 */
 	public static class RequestSchedulerOptions {
 
-		private Integer throttleLimit;
+		private Integer throttle_limit;
 
-		private Integer defaultWeight;
+		private Integer default_weight;
 
-		private Map<String, Integer> weights = new LinkedHashMap<>();
+		private Map<String, Integer> weights;
 
 		public RequestSchedulerOptions(Integer throttleLimit, Integer defaultWeight,
 				Map<String, Integer> weights) {
-			this.throttleLimit = throttleLimit;
-			this.defaultWeight = defaultWeight;
+			this.throttle_limit = throttleLimit;
+			this.default_weight = defaultWeight;
 			this.weights = weights;
 		}
 
@@ -2120,19 +2193,19 @@ public class CassandraConfig {
 		}
 
 		public Integer getThrottleLimit() {
-			return this.throttleLimit;
+			return this.throttle_limit;
 		}
 
 		public void setThrottleLimit(Integer throttleLimit) {
-			this.throttleLimit = throttleLimit;
+			this.throttle_limit = throttleLimit;
 		}
 
 		public Integer getDefaultWeight() {
-			return this.defaultWeight;
+			return this.default_weight;
 		}
 
 		public void setDefaultWeight(Integer defaultWeight) {
-			this.defaultWeight = defaultWeight;
+			this.default_weight = defaultWeight;
 		}
 
 		public Map<String, Integer> getWeights() {
@@ -2145,14 +2218,17 @@ public class CassandraConfig {
 
 	}
 
+	/**
+	 * Simple Holder for complex properties.
+	 */
 	public static class ParameterizedClass {
 
-		private String className;
+		private String class_name;
 
-		private Map<String, String> parameters = new LinkedHashMap<>();
+		private Map<String, String> parameters;
 
 		public ParameterizedClass(String className, Map<String, String> parameters) {
-			this.className = className;
+			this.class_name = className;
 			this.parameters = parameters;
 		}
 
@@ -2160,11 +2236,11 @@ public class CassandraConfig {
 		}
 
 		public String getClassName() {
-			return this.className;
+			return this.class_name;
 		}
 
 		public void setClassName(String className) {
-			this.className = className;
+			this.class_name = className;
 		}
 
 		public Map<String, String> getParameters() {

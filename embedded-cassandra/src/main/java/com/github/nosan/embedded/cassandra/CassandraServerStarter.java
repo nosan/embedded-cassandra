@@ -38,21 +38,19 @@ public class CassandraServerStarter extends
 
 	/**
 	 * Create a new cassandra starter with
-	 * {@link CassandraRuntimeConfigBuilder#defaults(CassandraVersion)} settings.
+	 * {@link CassandraRuntimeConfigBuilder#defaults()} settings.
 	 */
 	public CassandraServerStarter() {
-		this(new CassandraRuntimeConfigBuilder().defaults(CassandraVersion.LATEST)
-				.build());
+		this(new CassandraRuntimeConfigBuilder().defaults().build());
 	}
 
 	/**
 	 * Create a new cassandra starter with
-	 * {@link CassandraRuntimeConfigBuilder#defaults(CassandraVersion, Logger)} settings.
+	 * {@link CassandraRuntimeConfigBuilder#defaults(Logger)} settings.
 	 * @param logger logger for process outputs.
 	 */
 	public CassandraServerStarter(Logger logger) {
-		this(new CassandraRuntimeConfigBuilder().defaults(CassandraVersion.LATEST, logger)
-				.build());
+		this(new CassandraRuntimeConfigBuilder().defaults(logger).build());
 	}
 
 	@Override

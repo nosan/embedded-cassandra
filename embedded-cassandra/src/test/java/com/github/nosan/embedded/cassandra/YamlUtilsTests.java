@@ -14,23 +14,33 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.config;
+package com.github.nosan.embedded.cassandra;
 
+import java.io.File;
+import java.io.StringWriter;
+import java.net.URISyntaxException;
+
+import com.github.nosan.embedded.cassandra.config.CassandraConfig;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
- * todo leave javadoc here.
+ * Tests for {@link YamlUtils}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraArtifactStoreBuilderTest {
+public class YamlUtilsTests {
 
 	@Test
-	public void defaults() {
-	}
+	public void serialize() throws URISyntaxException {
+		StringWriter writer = new StringWriter();
 
-	@Test
-	public void defaultsLogger() {
+		CassandraConfig cassandraConfig = new CassandraConfig();
+		YamlUtils.serialize(cassandraConfig, writer);
+
+		assertThat(new File(ClassLoader.getSystemResource("cassandra-test.yaml").toURI()))
+				.hasContent(writer.toString());
 	}
 
 }

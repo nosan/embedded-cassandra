@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.config;
+package com.github.nosan.embedded.cassandra;
 
-import org.junit.Test;
+import java.lang.reflect.Field;
 
 /**
- * todo leave javadoc here.
- *
  * @author Dmytro Nosan
  */
-public class CassandraDownloadConfigBuilderTest {
+public abstract class ReflectionUtils {
 
-	@Test
-	public void defaults() {
-	}
-
-	@Test
-	public void defaultsLogger() {
+	public static Object getField(String name, Object target)
+			throws NoSuchFieldException, IllegalAccessException {
+		Field field = target.getClass().getDeclaredField(name);
+		field.setAccessible(true);
+		return field.get(target);
 	}
 
 }

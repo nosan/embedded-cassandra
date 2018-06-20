@@ -22,7 +22,6 @@ import java.util.Objects;
 import com.github.nosan.embedded.cassandra.CassandraVersion;
 import de.flapdoodle.embed.process.config.IExecutableProcessConfig;
 import de.flapdoodle.embed.process.config.ISupportConfig;
-import de.flapdoodle.embed.process.distribution.GenericVersion;
 import de.flapdoodle.embed.process.distribution.IVersion;
 
 /**
@@ -41,11 +40,38 @@ public class CassandraProcessConfig implements IExecutableProcessConfig {
 	private CassandraConfig config = new CassandraConfig();
 
 	/**
+	 * Get an embedded cassandra version.
+	 * @return {@link IVersion} retrieves cassandra version.
+	 */
+	@Override
+	public IVersion version() {
+		return this.version;
+	}
+
+	/**
+	 * Retrieves support config.
+	 * @return {@link ISupportConfig} support config.
+	 * @see CassandraSupportConfig
+	 */
+	@Override
+	public ISupportConfig supportConfig() {
+		return SUPPORT_CONFIG;
+	}
+
+	/**
 	 * Sets the cassandra version.
 	 * @param version cassandra version.
 	 */
 	public void setVersion(CassandraVersion version) {
 		this.version = Objects.requireNonNull(version, "Version must not be null");
+	}
+
+	/**
+	 * Retrieves the cassandra version.
+	 * @return cassandra version
+	 */
+	public CassandraVersion getVersion() {
+		return this.version;
 	}
 
 	/**
@@ -57,41 +83,19 @@ public class CassandraProcessConfig implements IExecutableProcessConfig {
 	}
 
 	/**
-	 * Sets the cassandra startup timeout.
-	 * @param timeout cassandra startup timeout.
-	 */
-	public void setTimeout(Duration timeout) {
-		this.timeout = Objects.requireNonNull(timeout, "Timeout must not be null");
-	}
-
-	/**
-	 * Get an embedded cassandra version.
-	 * @return {@link IVersion} retrieves cassandra version.
-	 *
-	 * @see GenericVersion
-	 */
-	@Override
-	public IVersion version() {
-		return new GenericVersion(this.version.getVersion());
-	}
-
-	/**
-	 * Retrieves support config.
-	 * @return {@link ISupportConfig} support config.
-	 *
-	 * @see CassandraSupportConfig
-	 */
-	@Override
-	public ISupportConfig supportConfig() {
-		return SUPPORT_CONFIG;
-	}
-
-	/**
 	 * Retrieves an embedded cassandra config.
 	 * @return Cassandra config.
 	 */
 	public CassandraConfig getConfig() {
 		return this.config;
+	}
+
+	/**
+	 * Sets the cassandra startup timeout.
+	 * @param timeout cassandra startup timeout.
+	 */
+	public void setTimeout(Duration timeout) {
+		this.timeout = Objects.requireNonNull(timeout, "Timeout must not be null");
 	}
 
 	/**

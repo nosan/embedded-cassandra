@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
-import com.github.nosan.embedded.cassandra.CassandraVersion;
 import de.flapdoodle.embed.process.io.directories.PropertyOrTempDirInPlatformTempDir;
 import de.flapdoodle.embed.process.store.ArtifactStoreBuilder;
 import de.flapdoodle.embed.process.store.Downloader;
@@ -30,32 +29,29 @@ import org.slf4j.Logger;
 public class CassandraArtifactStoreBuilder extends ArtifactStoreBuilder {
 
 	/**
-	 * Configure builder with default settings for particular version.
-	 * @param version cassandra version.
+	 * Configure builder with default settings.
 	 * @return builder with defaults settings.
 	 */
-	public CassandraArtifactStoreBuilder defaults(CassandraVersion version) {
-		executableNaming().overwriteDefault((prefix, postfix) -> postfix);
+	public CassandraArtifactStoreBuilder defaults() {
+		executableNaming().overwriteDefault(new OriginTempNaming());
 		tempDir().overwriteDefault(new PropertyOrTempDirInPlatformTempDir());
 		downloader().overwriteDefault(new Downloader());
 		download().overwriteDefault(
-				new CassandraDownloadConfigBuilder().defaults(version).build());
+				new CassandraDownloadConfigBuilder().defaults().build());
 		return this;
 	}
 
 	/**
-	 * Configure builder with default settings for particular version and logger.
-	 * @param version cassandra version.
+	 * Configure builder with default settings and logger.
 	 * @param logger logger for process outputs.
 	 * @return builder with defaults settings.
 	 */
-	public CassandraArtifactStoreBuilder defaults(CassandraVersion version,
-			Logger logger) {
-		executableNaming().overwriteDefault((prefix, postfix) -> postfix);
+	public CassandraArtifactStoreBuilder defaults(Logger logger) {
+		executableNaming().overwriteDefault(new OriginTempNaming());
 		tempDir().overwriteDefault(new PropertyOrTempDirInPlatformTempDir());
 		downloader().overwriteDefault(new Downloader());
 		download().overwriteDefault(
-				new CassandraDownloadConfigBuilder().defaults(version, logger).build());
+				new CassandraDownloadConfigBuilder().defaults(logger).build());
 		return this;
 	}
 

@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.config;
 
-import org.junit.Test;
+import de.flapdoodle.embed.process.extract.ITempNaming;
 
 /**
- * todo leave javadoc here.
+ * Simple implementation for {@link ITempNaming} which use the original name.
  *
  * @author Dmytro Nosan
  */
-public class YamlUtilsTest {
+class OriginTempNaming implements ITempNaming {
 
-	@Test
-	public void serialize() {
+	@Override
+	public String nameFor(String prefix, String postfix) {
+		return postfix;
 	}
 
 }

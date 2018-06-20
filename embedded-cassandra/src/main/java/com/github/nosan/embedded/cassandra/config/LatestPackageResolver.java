@@ -80,10 +80,6 @@ class LatestPackageResolver implements IPackageResolver {
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/stop-server.ps1")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/conf/README.txt")
 				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/conf/cassandra-env.ps1")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/conf/cassandra-env.sh")
-				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/conf/cassandra-jaas.config")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/conf/cassandra-rackdc.properties")

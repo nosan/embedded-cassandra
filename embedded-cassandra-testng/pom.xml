@@ -11,10 +11,10 @@
     </parent>
 
 
-    <name>Embedded Cassandra Junit</name>
-    <description>Embedded Cassandra Junit</description>
+    <artifactId>embedded-cassandra-testng</artifactId>
 
-    <artifactId>embedded-cassandra-junit</artifactId>
+    <name>Embedded Cassandra TestNG</name>
+    <description>Embedded Cassandra TestNG</description>
 
 
     <dependencies>
@@ -23,8 +23,8 @@
             <artifactId>embedded-cassandra</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -39,5 +39,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 
 </project>

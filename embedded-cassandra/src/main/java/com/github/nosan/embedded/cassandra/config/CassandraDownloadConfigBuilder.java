@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
-import com.github.nosan.embedded.cassandra.CassandraVersion;
 import de.flapdoodle.embed.process.config.store.DownloadConfigBuilder;
 import de.flapdoodle.embed.process.extract.UUIDTempNaming;
 import de.flapdoodle.embed.process.io.directories.UserHome;
@@ -42,36 +41,33 @@ public class CassandraDownloadConfigBuilder extends DownloadConfigBuilder {
 			".embedded-cassandra");
 
 	/**
-	 * Configure builder with default settings for particular version.
-	 * {@link StandardConsoleProgressListener} listener will be used.
-	 * @param version cassandra version.
+	 * Configure builder with default settings. {@link StandardConsoleProgressListener}
+	 * listener will be used.
 	 * @return builder with defaults settings.
 	 */
-	public CassandraDownloadConfigBuilder defaults(CassandraVersion version) {
+	public CassandraDownloadConfigBuilder defaults() {
 		fileNaming(new UUIDTempNaming());
 		downloadPath(DOWNLOAD_PATH);
 		progressListener(new StandardConsoleProgressListener());
 		artifactStorePath(ARTIFACT_STORE_PATH);
 		downloadPrefix(DOWNLOAD_PREFIX);
-		packageResolver(new PackageResolverFactory().create(version));
+		packageResolver(new PackageResolverFactory());
 		userAgent(USER_AGENT);
 		return this;
 	}
 
 	/**
-	 * Configure builder with default settings for particular version and logger.
-	 * @param version cassandra version.
+	 * Configure builder with default settings and logger.
 	 * @param logger logger for process outputs.
 	 * @return builder with defaults settings.
 	 */
-	public CassandraDownloadConfigBuilder defaults(CassandraVersion version,
-			Logger logger) {
+	public CassandraDownloadConfigBuilder defaults(Logger logger) {
 		fileNaming(new UUIDTempNaming());
 		downloadPath(DOWNLOAD_PATH);
 		progressListener(new Slf4jProgressListener(logger));
 		artifactStorePath(ARTIFACT_STORE_PATH);
 		downloadPrefix(DOWNLOAD_PREFIX);
-		packageResolver(new PackageResolverFactory().create(version));
+		packageResolver(new PackageResolverFactory());
 		userAgent(USER_AGENT);
 		return this;
 	}
