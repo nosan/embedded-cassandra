@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.config;
+package com.github.nosan.embedded.cassandra;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
- * todo leave javadoc here.
+ * Tests for {@link CassandraVersion}.
  *
  * @author Dmytro Nosan
  */
-public class PackageResolverFactoryTest {
+public class CassandraVersionTests {
 
 	@Test
-	public void create() {
+	public void getVersion() {
+		assertThat(CassandraVersion.LATEST.getVersion()).isEqualTo("3.11.2");
+
 	}
 
 }

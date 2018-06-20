@@ -32,9 +32,8 @@ import de.flapdoodle.embed.process.runtime.Executable;
 public class CassandraServerExecutable
 		extends Executable<CassandraProcessConfig, CassandraServerProcess> {
 
-	public CassandraServerExecutable(Distribution distribution,
-			CassandraProcessConfig config, IRuntimeConfig runtimeConfig,
-			IExtractedFileSet executable) {
+	CassandraServerExecutable(Distribution distribution, CassandraProcessConfig config,
+			IRuntimeConfig runtimeConfig, IExtractedFileSet executable) {
 		super(distribution, config, runtimeConfig, executable);
 	}
 

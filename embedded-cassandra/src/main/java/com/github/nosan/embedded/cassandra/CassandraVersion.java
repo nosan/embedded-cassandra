@@ -16,12 +16,14 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import de.flapdoodle.embed.process.distribution.IVersion;
+
 /**
  * List of the cassandra versions.
  *
  * @author Dmytro Nosan
  */
-public enum CassandraVersion {
+public enum CassandraVersion implements IVersion {
 
 	/**
 	 * The version 3.11.2.
@@ -35,12 +37,16 @@ public enum CassandraVersion {
 	}
 
 	/**
-	 *
 	 * Retrieves the cassandra version.
 	 * @return Cassandra version.
 	 */
 	public String getVersion() {
 		return this.version;
+	}
+
+	@Override
+	public String asInDownloadPath() {
+		return getVersion();
 	}
 
 }

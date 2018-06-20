@@ -13,25 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.github.nosan.embedded.cassandra.junit;
+package com.github.nosan.embedded.cassandra.testng;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.github.nosan.embedded.cassandra.config.CassandraConfig;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 /**
- *
- * Tests for {@link EmbeddedCassandraServer}.
+ * Tests for {@link AbstractCassandraTests}.
  *
  * @author Dmytro Nosan
  */
-public class EmbeddedCassandraServerTests {
-
-	@ClassRule
-	public static EmbeddedCassandraServer embeddedCassandraServer = new EmbeddedCassandraServer();
+public class CassandraTests extends AbstractCassandraTests {
 
 	private static void keyspace(String keyspace, Session session) {
 		session.execute("CREATE KEYSPACE IF NOT EXISTS " + keyspace
@@ -49,14 +43,21 @@ public class EmbeddedCassandraServerTests {
 	}
 
 	@Test
-	public void testRule() {
-		CassandraConfig config = embeddedCassandraServer.getConfig();
-		try (Cluster cluster = cluster(config)) {
+	public void createUserTable() {
+		try (Cluster cluster = cluster(getConfig())) {
 			Session session = cluster.connect();
-			keyspace("boot", session);
-			table("boot", "user", session);
+			keyspace("test", session);
+			table("test", "user", session);
 		}
+	}
 
+	@Test
+	public void createRolesTable() {
+		try (Cluster cluster = cluster(getConfig())) {
+			Session session = cluster.connect();
+			keyspace("test", session);
+			table("test", "roles", session);
+		}
 	}
 
 }

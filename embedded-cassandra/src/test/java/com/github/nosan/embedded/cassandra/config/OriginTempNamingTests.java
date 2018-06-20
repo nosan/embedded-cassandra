@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.config;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
- * todo leave javadoc here.
+ * Tests for {@link OriginTempNaming}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraVersionTest {
+public class OriginTempNamingTests {
 
 	@Test
-	public void getVersion() {
+	public void nameFor() {
+		assertThat(new OriginTempNaming().nameFor("prefix", "postfix"))
+				.isEqualTo("postfix");
 	}
 
 }

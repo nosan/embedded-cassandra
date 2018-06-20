@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
-import com.github.nosan.embedded.cassandra.CassandraVersion;
 import de.flapdoodle.embed.process.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.io.Processors;
@@ -32,39 +31,40 @@ import org.slf4j.Logger;
 public class CassandraRuntimeConfigBuilder extends RuntimeConfigBuilder {
 
 	/**
-	 * Configure builder with default settings for particular version and logger.
-	 * @param version cassandra version.
-	 * @param logger logger for process outputs.
+	 * Configure builder with default settings. Process output will be redirected to the
+	 * console.
 	 * @return builder with defaults settings.
 	 */
-	public CassandraRuntimeConfigBuilder defaults(CassandraVersion version,
-			Logger logger) {
-		artifactStore().overwriteDefault(
-				new CassandraArtifactStoreBuilder().defaults(version, logger).build());
+	public CassandraRuntimeConfigBuilder defaults() {
+		artifactStore()
+				.overwriteDefault(new CassandraArtifactStoreBuilder().defaults().build());
 		commandLinePostProcessor().overwriteDefault(new ICommandLinePostProcessor.Noop());
-
 		ProcessOutput processOutput = new ProcessOutput(
-				Processors.logTo(logger, Slf4jLevel.INFO),
-				Processors.logTo(logger, Slf4jLevel.ERROR), Processors.named("[console>]",
-						Processors.logTo(logger, Slf4jLevel.DEBUG)));
+				Processors.namedConsole("[Cassandra > output]"),
+				Processors.namedConsole("[Cassandra > error]"),
+				Processors.namedConsole("[Cassandra > commands]"));
 
 		processOutput().overwriteDefault(processOutput);
-
 		return this;
 	}
 
 	/**
-	 * Configure builder with default settings for particular version. Process output will
-	 * be redirected to the console.
-	 * @param version cassandra version.
+	 * Configure builder with default settings and logger.
+	 * @param logger logger for process outputs.
 	 * @return builder with defaults settings.
 	 */
-	public CassandraRuntimeConfigBuilder defaults(CassandraVersion version) {
+	public CassandraRuntimeConfigBuilder defaults(Logger logger) {
 		artifactStore().overwriteDefault(
-				new CassandraArtifactStoreBuilder().defaults(version).build());
+				new CassandraArtifactStoreBuilder().defaults(logger).build());
 		commandLinePostProcessor().overwriteDefault(new ICommandLinePostProcessor.Noop());
-		processOutput()
-				.overwriteDefault(ProcessOutput.getDefaultInstance("Cassandra > "));
+
+		ProcessOutput processOutput = new ProcessOutput(
+				Processors.logTo(logger, Slf4jLevel.INFO),
+				Processors.logTo(logger, Slf4jLevel.ERROR),
+				Processors.logTo(logger, Slf4jLevel.DEBUG));
+
+		processOutput().overwriteDefault(processOutput);
+
 		return this;
 	}
 
