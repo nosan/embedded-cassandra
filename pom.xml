@@ -43,8 +43,8 @@
         <junit.version>4.12</junit.version>
         <de.flapdoodle.embed.process.version>2.0.3</de.flapdoodle.embed.process.version>
         <snakeyaml.version>1.21</snakeyaml.version>
-        <cassandra-driver-core.version>3.5.0</cassandra-driver-core.version>
         <testng.version>6.14.3</testng.version>
+        <cassandra-driver-core.version>3.5.0</cassandra-driver-core.version>
     </properties>
 
 
