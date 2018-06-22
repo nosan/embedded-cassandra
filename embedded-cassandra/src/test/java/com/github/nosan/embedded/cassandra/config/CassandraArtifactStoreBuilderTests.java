@@ -24,8 +24,8 @@ import de.flapdoodle.embed.process.store.CachingArtifactStore;
 import de.flapdoodle.embed.process.store.Downloader;
 import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,6 +35,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 public class CassandraArtifactStoreBuilderTests {
+
+	private static final Logger log = LoggerFactory
+			.getLogger(CassandraArtifactStoreBuilderTests.class);
 
 	@Test
 	public void defaults() throws Exception {
@@ -63,10 +66,8 @@ public class CassandraArtifactStoreBuilderTests {
 	@Test
 	public void defaultsLogger() throws Exception {
 
-		Logger logger = Mockito.mock(Logger.class);
-
 		IArtifactStore artifactStore = unwrap(
-				new CassandraArtifactStoreBuilder().defaults(logger).build());
+				new CassandraArtifactStoreBuilder().defaults(log).build());
 
 		assertThat(ReflectionUtils.getField("_downloader", artifactStore))
 				.isInstanceOf(Downloader.class);

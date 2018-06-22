@@ -14,33 +14,40 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.customizer;
 
 import java.io.File;
-import java.io.StringWriter;
-import java.net.URISyntaxException;
+import java.io.IOException;
+import java.nio.file.Files;
 
-import com.github.nosan.embedded.cassandra.config.CassandraConfig;
+import com.github.nosan.embedded.cassandra.config.Version;
+import de.flapdoodle.embed.process.distribution.Distribution;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link YamlUtils}.
+ * Tests for {@link JVMOptionsFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
-public class YamlUtilsTests {
+public class JVMOptionsFileCustomizerTests {
 
 	@Test
-	public void serialize() throws URISyntaxException {
-		StringWriter writer = new StringWriter();
+	public void jvmOptions() throws IOException {
+		File file = new File("jvm.options");
+		try {
+			new JVMOptionsFileCustomizer().customize(file,
+					Distribution.detectFor(Version.LATEST));
 
-		CassandraConfig cassandraConfig = new CassandraConfig();
-		YamlUtils.serialize(cassandraConfig, writer);
+			assertThat(file).hasContent("-ea\n" + "-Xms128m\n" + "-Xmx256m\n"
+					+ "-Djava.net.preferIPv4Stack=true");
 
-		assertThat(new File(ClassLoader.getSystemResource("cassandra-test.yaml").toURI()))
-				.hasContent(writer.toString());
+		}
+		finally {
+			Files.deleteIfExists(file.toPath());
+		}
+
 	}
 
 }

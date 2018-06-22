@@ -16,15 +16,12 @@
 
 package com.github.nosan.embedded.cassandra.junit;
 
-import java.time.Duration;
 import java.util.Objects;
 
-import com.github.nosan.embedded.cassandra.CassandraPortUtils;
-import com.github.nosan.embedded.cassandra.CassandraServerExecutable;
-import com.github.nosan.embedded.cassandra.CassandraServerStarter;
-import com.github.nosan.embedded.cassandra.CassandraVersion;
+import com.github.nosan.embedded.cassandra.CassandraExecutable;
+import com.github.nosan.embedded.cassandra.CassandraStarter;
 import com.github.nosan.embedded.cassandra.config.CassandraConfig;
-import com.github.nosan.embedded.cassandra.config.CassandraProcessConfig;
+import com.github.nosan.embedded.cassandra.config.CassandraConfigBuilder;
 import com.github.nosan.embedded.cassandra.config.CassandraRuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import org.junit.rules.TestRule;
@@ -40,101 +37,26 @@ public class Cassandra implements TestRule {
 
 	private final IRuntimeConfig runtimeConfig;
 
-	private final CassandraVersion version;
+	private final CassandraConfig cassandraConfig;
 
-	private final CassandraConfig config;
-
-	private final Duration timeout;
-
-	private final boolean useRandomPorts;
-
-	public Cassandra(CassandraVersion version, CassandraConfig config, Duration timeout,
-			boolean useRandomPorts, IRuntimeConfig runtimeConfig) {
-		this.version = Objects.requireNonNull(version, "Version must not be null");
-		this.config = Objects.requireNonNull(config, "Config must not be null");
-		this.timeout = Objects.requireNonNull(timeout, "Timeout must not be null");
+	public Cassandra(IRuntimeConfig runtimeConfig, CassandraConfig cassandraConfig) {
 		this.runtimeConfig = Objects.requireNonNull(runtimeConfig,
-				"Runtime Config must " + "not be null");
-		this.useRandomPorts = useRandomPorts;
-	}
-
-	public Cassandra(CassandraConfig config, Duration timeout, boolean useRandomPorts,
-			IRuntimeConfig runtimeConfig) {
-		this(CassandraVersion.LATEST, config, timeout, useRandomPorts, runtimeConfig);
-	}
-
-	public Cassandra(CassandraConfig config, Duration timeout, boolean useRandomPorts) {
-		this(config, timeout, useRandomPorts,
-				new CassandraRuntimeConfigBuilder().defaults().build());
-	}
-
-	public Cassandra(CassandraConfig config, Duration timeout,
-			IRuntimeConfig runtimeConfig) {
-		this(config, timeout, true, runtimeConfig);
-	}
-
-	public Cassandra(CassandraConfig config, boolean useRandomPorts) {
-		this(config, Duration.ofMinutes(1), useRandomPorts);
-	}
-
-	public Cassandra(CassandraConfig config, boolean useRandomPorts,
-			IRuntimeConfig runtimeConfig) {
-		this(config, Duration.ofMinutes(1), useRandomPorts, runtimeConfig);
-	}
-
-	public Cassandra(CassandraConfig config) {
-		this(config, Duration.ofMinutes(1), true);
-	}
-
-	public Cassandra(CassandraConfig config, IRuntimeConfig runtimeConfig) {
-		this(config, Duration.ofMinutes(1), true, runtimeConfig);
-	}
-
-	public Cassandra(Duration timeout, boolean useRandomPorts) {
-		this(new CassandraConfig(), timeout, useRandomPorts);
-
-	}
-
-	public Cassandra(Duration timeout, boolean useRandomPorts,
-			IRuntimeConfig runtimeConfig) {
-		this(new CassandraConfig(), timeout, useRandomPorts, runtimeConfig);
-
-	}
-
-	public Cassandra(boolean useRandomPorts) {
-		this(new CassandraConfig(), useRandomPorts);
-	}
-
-	public Cassandra(boolean useRandomPorts, IRuntimeConfig runtimeConfig) {
-		this(new CassandraConfig(), useRandomPorts, runtimeConfig);
-	}
-
-	public Cassandra(Duration timeout) {
-		this(new CassandraConfig(), timeout, true);
-	}
-
-	public Cassandra(Duration timeout, IRuntimeConfig runtimeConfig) {
-		this(new CassandraConfig(), timeout, true, runtimeConfig);
+				"RuntimeConfig must " + "not be null");
+		this.cassandraConfig = Objects.requireNonNull(cassandraConfig,
+				"Cassandra Config" + " must not be null");
 	}
 
 	public Cassandra(IRuntimeConfig runtimeConfig) {
-		this(new CassandraConfig(), Duration.ofMinutes(1), true, runtimeConfig);
+		this(runtimeConfig, new CassandraConfigBuilder().useRandomPorts(true).build());
 	}
 
-	public Cassandra(CassandraConfig config, Duration timeout) {
-		this(config, timeout, true);
+	public Cassandra(CassandraConfig cassandraConfig) {
+		this(new CassandraRuntimeConfigBuilder().defaults().build(), cassandraConfig);
 	}
 
 	public Cassandra() {
-		this(new CassandraConfig());
-	}
-
-	/**
-	 * Whether or not use random ports.
-	 * @return random ports was specified or not.
-	 */
-	public boolean isUseRandomPorts() {
-		return this.useRandomPorts;
+		this(new CassandraRuntimeConfigBuilder().defaults().build(),
+				new CassandraConfigBuilder().useRandomPorts(true).build());
 	}
 
 	/**
@@ -149,53 +71,20 @@ public class Cassandra implements TestRule {
 	 * Retrieves an embedded cassandra config.
 	 * @return Cassandra config.
 	 */
-	public CassandraConfig getConfig() {
-		return this.config;
-	}
-
-	/**
-	 * Retrieves an embedded cassandra version.
-	 * @return Cassandra version.
-	 */
-	public CassandraVersion getVersion() {
-		return this.version;
-	}
-
-	/**
-	 * Retrieves startup timeout.
-	 * @return Startup timeout.
-	 */
-	public Duration getTimeout() {
-		return this.timeout;
+	public CassandraConfig getCassandraConfig() {
+		return this.cassandraConfig;
 	}
 
 	@Override
 	public Statement apply(Statement base, Description description) {
-
-		Duration timeout = getTimeout();
-		CassandraVersion version = getVersion();
-		CassandraConfig config = getConfig();
+		CassandraConfig cassandraConfig = getCassandraConfig();
 		IRuntimeConfig runtimeConfig = getRuntimeConfig();
-
-		if (isUseRandomPorts()) {
-			CassandraPortUtils.setRandomPorts(config);
-		}
-
 		return new Statement() {
-
 			@Override
 			public void evaluate() throws Throwable {
-
-				CassandraServerStarter cassandraServerStarter = new CassandraServerStarter(
-						runtimeConfig);
-				CassandraProcessConfig cassandraProcessConfig = new CassandraProcessConfig();
-				cassandraProcessConfig.setConfig(config);
-				cassandraProcessConfig.setTimeout(timeout);
-				cassandraProcessConfig.setVersion(version);
-
-				CassandraServerExecutable executable = cassandraServerStarter
-						.prepare(cassandraProcessConfig);
-
+				CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
+				CassandraExecutable executable = cassandraStarter
+						.prepare(cassandraConfig);
 				executable.start();
 				try {
 					base.evaluate();
@@ -203,7 +92,6 @@ public class Cassandra implements TestRule {
 				finally {
 					executable.stop();
 				}
-
 			}
 		};
 	}

@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
+import java.util.Objects;
+
 import de.flapdoodle.embed.process.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.io.Processors;
@@ -54,6 +56,7 @@ public class CassandraRuntimeConfigBuilder extends RuntimeConfigBuilder {
 	 * @return builder with defaults settings.
 	 */
 	public CassandraRuntimeConfigBuilder defaults(Logger logger) {
+		Objects.requireNonNull(logger, "Logger must not be null");
 		artifactStore().overwriteDefault(
 				new CassandraArtifactStoreBuilder().defaults(logger).build());
 		commandLinePostProcessor().overwriteDefault(new ICommandLinePostProcessor.Noop());
