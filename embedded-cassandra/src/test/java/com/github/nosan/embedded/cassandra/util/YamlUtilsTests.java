@@ -14,22 +14,35 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.util;
 
+import java.io.File;
+import java.io.StringWriter;
+import java.net.URISyntaxException;
+
+import com.github.nosan.embedded.cassandra.config.Config;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraVersion}.
+ * Tests for {@link YamlUtils}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraVersionTests {
+public class YamlUtilsTests {
 
 	@Test
-	public void getVersion() {
-		assertThat(CassandraVersion.LATEST.getVersion()).isEqualTo("3.11.2");
+	public void deserializeAndSerialize() throws URISyntaxException {
+
+		Config config = YamlUtils.deserialize(
+				ClassLoader.getSystemResourceAsStream("cassandra-test.yaml"));
+
+		StringWriter writer = new StringWriter();
+		YamlUtils.serialize(config, writer);
+
+		assertThat(new File(ClassLoader.getSystemResource("cassandra-test.yaml").toURI()))
+				.hasContent(writer.toString());
 
 	}
 

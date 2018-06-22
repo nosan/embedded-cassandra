@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
-import com.github.nosan.embedded.cassandra.CassandraVersion;
 import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.config.store.IPackageResolver;
 import de.flapdoodle.embed.process.distribution.ArchiveType;
@@ -47,14 +46,14 @@ class PackageResolverFactory implements IPackageResolver {
 
 	private IPackageResolver getResolver(Distribution distribution) {
 		IVersion version = distribution.getVersion();
-		if (version instanceof CassandraVersion) {
-			return create(((CassandraVersion) version));
+		if (version instanceof Version) {
+			return create(((Version) version));
 		}
 		throw new IllegalArgumentException("Version '" + version + "' is not supported");
 	}
 
-	private IPackageResolver create(CassandraVersion version) {
-		if (CassandraVersion.LATEST == version) {
+	private IPackageResolver create(Version version) {
+		if (Version.LATEST == version) {
 			return new LatestPackageResolver();
 		}
 		throw new IllegalArgumentException("Version '" + version + "' is not supported");

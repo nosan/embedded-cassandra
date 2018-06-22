@@ -14,31 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.config;
+package com.github.nosan.embedded.cassandra.customizer;
 
-import de.flapdoodle.embed.process.config.ISupportConfig;
+import java.io.File;
+import java.io.IOException;
+
+import de.flapdoodle.embed.process.distribution.Distribution;
 
 /**
- * {@link ISupportConfig} support config. This config will be used for opening new issue.
+ * Callback interface that can be used to customize a {@link File}.
  *
  * @author Dmytro Nosan
  */
-class CassandraSupportConfig implements ISupportConfig {
+public interface FileCustomizer {
 
-	@Override
-	public String getName() {
-		return "Embedded Cassandra";
-	}
-
-	@Override
-	public String getSupportUrl() {
-		return "https://github.com/nosan/embedded-cassandra";
-	}
-
-	@Override
-	public String messageOnException(Class<?> context, Exception exception) {
-		return "If you feel this is a bug, please open a new an issue. Follow this "
-				+ "link: " + getSupportUrl() + "\n" + "Thank you! :)";
-	}
+	/**
+	 * Callback to customize a {@link File} instance.
+	 * @param file the file to customize
+	 * @param distribution the distribution
+	 * @throws IOException IO exception.
+	 */
+	void customize(File file, Distribution distribution) throws IOException;
 
 }

@@ -28,8 +28,8 @@ import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
 import de.flapdoodle.embed.process.store.CachingArtifactStore;
 import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,6 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 public class CassandraRuntimeConfigBuilderTests {
+
+	private static final Logger log = LoggerFactory
+			.getLogger(CassandraRuntimeConfigBuilderTests.class);
 
 	@Test
 	public void defaults() throws Exception {
@@ -62,18 +65,17 @@ public class CassandraRuntimeConfigBuilderTests {
 
 	@Test
 	public void defaultsLogger() throws Exception {
-		Logger logger = Mockito.mock(Logger.class);
 
-		IRuntimeConfig runtimeConfig = new CassandraRuntimeConfigBuilder()
-				.defaults(logger).build();
+		IRuntimeConfig runtimeConfig = new CassandraRuntimeConfigBuilder().defaults(log)
+				.build();
 
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
 
 		ProcessOutput processOutput = runtimeConfig.getProcessOutput();
-		assertLoggerOutputs(processOutput.getOutput(), logger, Slf4jLevel.INFO);
-		assertLoggerOutputs(processOutput.getError(), logger, Slf4jLevel.ERROR);
-		assertLoggerOutputs(processOutput.getCommands(), logger, Slf4jLevel.DEBUG);
+		assertLoggerOutputs(processOutput.getOutput(), Slf4jLevel.INFO);
+		assertLoggerOutputs(processOutput.getError(), Slf4jLevel.ERROR);
+		assertLoggerOutputs(processOutput.getCommands(), Slf4jLevel.DEBUG);
 
 		IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
 
@@ -81,10 +83,11 @@ public class CassandraRuntimeConfigBuilderTests {
 
 	}
 
-	private void assertLoggerOutputs(IStreamProcessor stream, Logger logger,
-			Slf4jLevel level) throws NoSuchFieldException, IllegalAccessException {
+	private void assertLoggerOutputs(IStreamProcessor stream, Slf4jLevel level)
+			throws NoSuchFieldException, IllegalAccessException {
 		assertThat(stream).isInstanceOf(Slf4jStreamProcessor.class);
-		assertThat(ReflectionUtils.getField("logger", stream)).isEqualTo(logger);
+		assertThat(ReflectionUtils.getField("logger", stream))
+				.isEqualTo(CassandraRuntimeConfigBuilderTests.log);
 		assertThat(ReflectionUtils.getField("level", stream)).isEqualTo(level);
 	}
 

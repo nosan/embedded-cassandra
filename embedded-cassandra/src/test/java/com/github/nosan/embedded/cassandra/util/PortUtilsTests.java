@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.util;
 
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
-import com.github.nosan.embedded.cassandra.config.CassandraConfig;
+import com.github.nosan.embedded.cassandra.config.Config;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraPortUtils}.
+ * Tests for {@link PortUtils}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraPortUtilsTest {
+public class PortUtilsTests {
 
 	@Test
 	public void apply() {
-		CassandraConfig config = new CassandraConfig();
+		Config config = new Config();
 		config.setNativeTransportPortSsl(1000);
-		CassandraPortUtils.setRandomPorts(config);
+		PortUtils.setRandomPorts(config, Objects::nonNull);
 
 		Set<Integer> ports = new LinkedHashSet<>();
 		ports.add(config.getRpcPort());
@@ -49,8 +50,8 @@ public class CassandraPortUtilsTest {
 
 	@Test
 	public void applyNullFilter() {
-		CassandraConfig config = new CassandraConfig();
-		CassandraPortUtils.setRandomPorts(config);
+		Config config = new Config();
+		PortUtils.setRandomPorts(config, Objects::nonNull);
 
 		Set<Integer> ports = new LinkedHashSet<>();
 		ports.add(config.getRpcPort());

@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
+import java.util.Objects;
+
 import de.flapdoodle.embed.process.io.directories.PropertyOrTempDirInPlatformTempDir;
 import de.flapdoodle.embed.process.store.ArtifactStoreBuilder;
 import de.flapdoodle.embed.process.store.Downloader;
@@ -47,6 +49,7 @@ public class CassandraArtifactStoreBuilder extends ArtifactStoreBuilder {
 	 * @return builder with defaults settings.
 	 */
 	public CassandraArtifactStoreBuilder defaults(Logger logger) {
+		Objects.requireNonNull(logger, "Logger must not be null");
 		executableNaming().overwriteDefault(new OriginTempNaming());
 		tempDir().overwriteDefault(new PropertyOrTempDirInPlatformTempDir());
 		downloader().overwriteDefault(new Downloader());

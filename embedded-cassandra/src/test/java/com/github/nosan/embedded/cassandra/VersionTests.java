@@ -14,31 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.config;
+package com.github.nosan.embedded.cassandra;
 
-import de.flapdoodle.embed.process.config.ISupportConfig;
+import com.github.nosan.embedded.cassandra.config.Version;
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link ISupportConfig} support config. This config will be used for opening new issue.
+ * Tests for {@link Version}.
  *
  * @author Dmytro Nosan
  */
-class CassandraSupportConfig implements ISupportConfig {
+public class VersionTests {
 
-	@Override
-	public String getName() {
-		return "Embedded Cassandra";
-	}
+	@Test
+	public void getVersion() {
+		assertThat(Version.LATEST.getVersion()).isEqualTo("3.11.2");
 
-	@Override
-	public String getSupportUrl() {
-		return "https://github.com/nosan/embedded-cassandra";
-	}
-
-	@Override
-	public String messageOnException(Class<?> context, Exception exception) {
-		return "If you feel this is a bug, please open a new an issue. Follow this "
-				+ "link: " + getSupportUrl() + "\n" + "Thank you! :)";
 	}
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.config;
 
 import de.flapdoodle.embed.process.distribution.IVersion;
 
@@ -23,7 +23,7 @@ import de.flapdoodle.embed.process.distribution.IVersion;
  *
  * @author Dmytro Nosan
  */
-public enum CassandraVersion implements IVersion {
+public enum Version implements IVersion {
 
 	/**
 	 * The version 3.11.2.
@@ -32,7 +32,7 @@ public enum CassandraVersion implements IVersion {
 
 	private final String version;
 
-	CassandraVersion(String version) {
+	Version(String version) {
 		this.version = version;
 	}
 

@@ -2,8 +2,10 @@ language: java
 install: true
 
 jdk:
-- oraclejdk8
-- oraclejdk9
+  - openjdk10
+  - oraclejdk10
+  - oraclejdk9
+  - oraclejdk8
 
 notifications:
   email:
