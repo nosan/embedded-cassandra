@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
-import com.github.nosan.embedded.cassandra.CassandraVersion;
 import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.distribution.ArchiveType;
 import de.flapdoodle.embed.process.distribution.Distribution;
@@ -35,18 +34,18 @@ public class PackageResolverFactoryTests {
 
 	@Test
 	public void getFileSet() {
-		Distribution distribution = Distribution.detectFor(CassandraVersion.LATEST);
+		Distribution distribution = Distribution.detectFor(Version.LATEST);
 
 		FileSet fileSet = this.factory.getFileSet(distribution);
 
-		assertThat(fileSet.entries()).hasSize(242);
+		assertThat(fileSet.entries()).hasSize(186);
 
 	}
 
 	@Test
 	public void getArchiveType() {
 
-		Distribution distribution = Distribution.detectFor(CassandraVersion.LATEST);
+		Distribution distribution = Distribution.detectFor(Version.LATEST);
 
 		ArchiveType archiveType = this.factory.getArchiveType(distribution);
 		assertThat(archiveType).isEqualTo(ArchiveType.TGZ);
@@ -54,7 +53,7 @@ public class PackageResolverFactoryTests {
 
 	@Test
 	public void getPath() {
-		Distribution distribution = Distribution.detectFor(CassandraVersion.LATEST);
+		Distribution distribution = Distribution.detectFor(Version.LATEST);
 
 		String path = this.factory.getPath(distribution);
 

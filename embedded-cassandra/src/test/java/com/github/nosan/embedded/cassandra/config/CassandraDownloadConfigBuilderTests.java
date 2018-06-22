@@ -21,8 +21,8 @@ import de.flapdoodle.embed.process.extract.UUIDTempNaming;
 import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
 import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,6 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 public class CassandraDownloadConfigBuilderTests {
+
+	private static final Logger log = LoggerFactory
+			.getLogger(CassandraDownloadConfigBuilderTests.class);
 
 	@Test
 	public void defaults() {
@@ -59,10 +62,8 @@ public class CassandraDownloadConfigBuilderTests {
 	@Test
 	public void defaultsLogger() {
 
-		Logger logger = Mockito.mock(Logger.class);
-
 		IDownloadConfig downloadConfig = new CassandraDownloadConfigBuilder()
-				.defaults(logger).build();
+				.defaults(log).build();
 
 		assertThat(downloadConfig.getArtifactStorePath().asFile().getAbsolutePath())
 				.contains(".embedded-cassandra");

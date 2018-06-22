@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
+import java.util.Objects;
+
 import de.flapdoodle.embed.process.config.store.DownloadConfigBuilder;
 import de.flapdoodle.embed.process.extract.UUIDTempNaming;
 import de.flapdoodle.embed.process.io.directories.UserHome;
@@ -62,6 +64,7 @@ public class CassandraDownloadConfigBuilder extends DownloadConfigBuilder {
 	 * @return builder with defaults settings.
 	 */
 	public CassandraDownloadConfigBuilder defaults(Logger logger) {
+		Objects.requireNonNull(logger, "Logger must not be null");
 		fileNaming(new UUIDTempNaming());
 		downloadPath(DOWNLOAD_PATH);
 		progressListener(new Slf4jProgressListener(logger));

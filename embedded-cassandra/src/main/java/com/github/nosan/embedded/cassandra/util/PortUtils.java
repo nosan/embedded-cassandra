@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.util;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import com.github.nosan.embedded.cassandra.config.CassandraConfig;
+import com.github.nosan.embedded.cassandra.config.Config;
 import de.flapdoodle.embed.process.runtime.Network;
 
 /**
@@ -30,46 +30,37 @@ import de.flapdoodle.embed.process.runtime.Network;
  *
  * @author Dmytro Nosan
  */
-public abstract class CassandraPortUtils {
+public abstract class PortUtils {
 
 	/**
-	 * Set up random ports.
-	 * @param config cassandra config
-	 * @see #setRandomPorts(CassandraConfig, Predicate)
-	 */
-	public static void setRandomPorts(CassandraConfig config) {
-		setRandomPorts(config, Objects::nonNull);
-	}
-
-	/**
-	 * Set up random ports only if the filter result was true. Following properties will
-	 * be overriden. {@link CassandraConfig#setRpcPort(int)},
-	 * {@link CassandraConfig#setNativeTransportPort(int)},
-	 * {@link CassandraConfig#setStoragePort(int)},
-	 * {@link CassandraConfig#setSslStoragePort(int)},
-	 * {@link CassandraConfig#setNativeTransportPortSsl(Integer)}
+	 * Set up random ports only if the filter result was true. Following properties may be
+	 * overriden. {@link Config#setRpcPort(int)},
+	 * {@link Config#setNativeTransportPort(int)}, {@link Config#setStoragePort(int)},
+	 * {@link Config#setSslStoragePort(int)},
+	 * {@link Config#setNativeTransportPortSsl(Integer)}
 	 * @param config cassandra config.
-	 * @param filter port filter.
+	 * @param portFilter port filter.
 	 */
-	public static void setRandomPorts(CassandraConfig config, Predicate<Integer> filter) {
-		applyRandomPort(config::setRpcPort, config::getRpcPort, filter,
-				CassandraPortUtils::getRandomPort);
+	public static void setRandomPorts(Config config, Predicate<Integer> portFilter) {
+		Objects.requireNonNull(config, "Config must not be null");
+		Objects.requireNonNull(portFilter, "Port Filter must not be null");
+		applyRandomPort(config::setRpcPort, config::getRpcPort, portFilter,
+				PortUtils::getRandomPort);
 		applyRandomPort(config::setNativeTransportPort, config::getNativeTransportPort,
-				filter, CassandraPortUtils::getRandomPort);
-		applyRandomPort(config::setStoragePort, config::getStoragePort, filter,
-				CassandraPortUtils::getRandomPort);
-		applyRandomPort(config::setSslStoragePort, config::getSslStoragePort, filter,
-				CassandraPortUtils::getRandomPort);
+				portFilter, PortUtils::getRandomPort);
+		applyRandomPort(config::setStoragePort, config::getStoragePort, portFilter,
+				PortUtils::getRandomPort);
+		applyRandomPort(config::setSslStoragePort, config::getSslStoragePort, portFilter,
+				PortUtils::getRandomPort);
 		applyRandomPort(config::setNativeTransportPortSsl,
-				config::getNativeTransportPortSsl, filter,
-				CassandraPortUtils::getRandomPort);
+				config::getNativeTransportPortSsl, portFilter, PortUtils::getRandomPort);
 	}
 
 	/**
 	 * Trying to find free random port.
 	 * @return Free random port.
 	 */
-	public static Integer getRandomPort() {
+	public static int getRandomPort() {
 		try {
 			return Network.getFreeServerPort();
 		}

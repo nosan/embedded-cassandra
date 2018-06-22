@@ -31,7 +31,7 @@ public class CassandraSupportConfigTests {
 
 	@Test
 	public void getName() {
-		assertThat(this.supportConfig.getName()).isEqualTo("embedded-cassandra");
+		assertThat(this.supportConfig.getName()).isEqualTo("Embedded Cassandra");
 	}
 
 	@Test

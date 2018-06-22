@@ -37,22 +37,17 @@ class LatestPackageResolver implements IPackageResolver {
 		switch (distribution.getPlatform()) {
 		case Windows:
 			builder.addEntry(FileType.Executable,
-					"apache-cassandra-3.11.2/bin/cassandra.bat");
+					"apache-cassandra-3.11.2/bin/cassandra.ps1");
+			break;
 		default:
 			builder.addEntry(FileType.Executable,
 					"apache-cassandra-3.11.2/bin/cassandra");
 		}
-
 		builder.addEntry(FileType.Library, "apache-cassandra-3.11.2/.DS_Store")
-				.addEntry(FileType.Library, "apache-cassandra-3.11.2/CASSANDRA-14092.txt")
-				.addEntry(FileType.Library, "apache-cassandra-3.11.2/CHANGES.txt")
-				.addEntry(FileType.Library, "apache-cassandra-3.11.2/LICENSE.txt")
-				.addEntry(FileType.Library, "apache-cassandra-3.11.2/NEWS.txt")
-				.addEntry(FileType.Library, "apache-cassandra-3.11.2/NOTICE.txt")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/bin/cassandra.in.bat")
+				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cassandra.bat")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cassandra.in.sh")
-				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cassandra.ps1")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cqlsh")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cqlsh.bat")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cqlsh.py")
@@ -78,7 +73,10 @@ class LatestPackageResolver implements IPackageResolver {
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/stop-server")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/stop-server.bat")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/stop-server.ps1")
-				.addEntry(FileType.Library, "apache-cassandra-3.11.2/conf/README.txt")
+				.addEntry(FileType.Library,
+						"apache-cassandra-3.11.2/conf/cassandra-env.ps1")
+				.addEntry(FileType.Library,
+						"apache-cassandra-3.11.2/conf/cassandra-env.sh")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/conf/cassandra-jaas.config")
 				.addEntry(FileType.Library,
@@ -166,110 +164,6 @@ class LatestPackageResolver implements IPackageResolver {
 						"apache-cassandra-3.11.2/lib/jstackjunit-0.0.1.jar")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/lib/libthrift-0.9.2.jar")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/ST4-4.0.8.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/airline-0.6.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/antlr-runtime-3.5.2.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/asm-5.0.4.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/caffeine-2.2.6.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/cassandra-driver-3.0.1.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/commons-cli-1.1.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/commons-codec-1.9.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/commons-lang3-3.1.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/commons-math3-3.2.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/compress-lzf-0.8.4.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/concurrent-trees-2.4.0.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/concurrentlinkedhashmap-lru-1.4.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/disruptor-3.0.1.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/ecj-4.4.2.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/futures-2.1.6.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/guava-18.0.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/hdrhistogram-2.1.9.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/high-scale-lib-1.0.6.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/hppc-0.5.4.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/jackson-core-asl-1.9.13.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/jackson-mapper-asl-1.9.13.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/jamm-0.3.0.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/javax.inject.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/jbcrypt-0.3m.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/jcl-over-slf4j-1.7.7.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/jctools-core-1.2.1.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/jflex-1.6.0.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/jna-4.2.2.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/joda-time-2.4.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/json-simple-1.1.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/jstackjunit-0.0.1.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/libthrift-0.9.2.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/log4j-over-slf4j-1.7.7.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/logback-classic-1.1.3.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/logback-core-1.1.3.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/lz4-1.3.0.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/metrics-core-3.1.0.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/metrics-jvm-3.1.0.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/metrics-logback-3.1.0.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/netty-all-4.0.44.Final.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/ohc-0.4.4.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/reporter-config-base-3.0.3.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/reporter-config3-3.0.3.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/sigar-1.6.4.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/six-1.7.3.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/slf4j-api-1.7.7.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/snakeyaml-1.11.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/snappy-java-1.1.1.7.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/snowball-stemmer-1.3.0.581.1.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/stream-2.5.2.txt")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/lib/licenses/thrift-server-0.3.7.txt")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/lib/log4j-over-slf4j-1.7.7.jar")
 				.addEntry(FileType.Library,

@@ -8,7 +8,7 @@ This project use (http://www.apache.org/licenses/LICENSE-2.0).
 
 ## Java
 
-Minimum `java` version is `1.8`.
+Minimum `java` version is `1.8`. Also supports `java 9` and `java 10`.
 
 ## Dependencies
 Embedded Cassandra has `compile` dependency on `de.flapdoodle.embed:de.flapdoodle.embed.process:2.0.3` and 
@@ -22,17 +22,22 @@ Following code will create an `Embedded Cassandra` with the default properties.
 public class CassandraTests {
 
 	@Test
-	public void createUserTable(){
-		CassandraServerStarter cassandraServerStarter = new CassandraServerStarter();
-		CassandraProcessConfig processConfig = new CassandraProcessConfig();
-		CassandraServerExecutable executable = cassandraServerStarter
-				.prepare(processConfig);
-		executable.start();
-		try (Cluster cluster = cluster(processConfig.getConfig())) {
-        			Session session = cluster.connect();
-        			//
-        }
+	public void createUserTable() throws IOException {
+		CassandraStarter cassandraStarter = new CassandraStarter();
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().build();
+		CassandraExecutable executable = cassandraStarter.prepare(cassandraConfig);
+		try {
+			executable.start();
+			try (Cluster cluster = cluster(cassandraConfig.getConfig())) {
+				Session session = cluster.connect();
+				//
+			}
+		}
+		finally {
+			executable.stop();
+		}
 	}
+
 }
 ```
 
@@ -48,7 +53,7 @@ public class CassandraTests {
 
 	@Test
 	public void createUserTable() {
-		try (Cluster cluster = cluster(cassandra.getConfig())) {
+		try (Cluster cluster = cluster(cassandra.getCassandraConfig().getConfig())) {
 			Session session = cluster.connect();
 			//
 		}
@@ -69,7 +74,7 @@ public class CassandraTests extends AbstractCassandraTests {
 
 	@Test
 	public void createUserTable() {
-		try (Cluster cluster = cluster(getConfig())) {
+		try (Cluster cluster = cluster(getCassandraConfig().getConfig())) {
 			Session session = cluster.connect();
 			//
 		}
