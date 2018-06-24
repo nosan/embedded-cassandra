@@ -29,6 +29,7 @@ import de.flapdoodle.embed.process.distribution.Distribution;
  * @see JVMOptionsFileCustomizer
  * @see AbstractFileCustomizer
  * @see AbstractSourceLineFileCustomizer
+ * @see CompositeFileCustomizer
  */
 public interface FileCustomizer {
 

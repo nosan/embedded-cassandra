@@ -28,6 +28,7 @@ import java.util.Optional;
  * more</a>
  *
  * @author Dmytro Nosan
+ * @see com.github.nosan.embedded.cassandra.util.YamlUtils
  */
 public class Config {
 
