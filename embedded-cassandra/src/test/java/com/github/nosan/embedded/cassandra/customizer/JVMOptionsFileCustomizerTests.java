@@ -17,8 +17,11 @@
 package com.github.nosan.embedded.cassandra.customizer;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.util.Collections;
 
 import com.github.nosan.embedded.cassandra.config.Version;
 import de.flapdoodle.embed.process.distribution.Distribution;
@@ -40,8 +43,27 @@ public class JVMOptionsFileCustomizerTests {
 			new JVMOptionsFileCustomizer().customize(file,
 					Distribution.detectFor(Version.LATEST));
 
-			assertThat(file).hasContent("-ea\n" + "-Xms128m\n" + "-Xmx256m\n"
+			assertThat(file).hasContent("-ea\n" + "-Xms128m\n" + "-Xmx512m\n"
 					+ "-Djava.net.preferIPv4Stack=true");
+
+		}
+		finally {
+			Files.deleteIfExists(file.toPath());
+		}
+
+	}
+
+	@Test
+	public void jvmOptionsOverriding() throws IOException {
+		File file = new File("jvm.options");
+		try (PrintWriter ps = new PrintWriter(new FileWriter(file))) {
+			ps.println("text");
+		}
+		try {
+			new JVMOptionsFileCustomizer(Collections.emptySet()).customize(file,
+					Distribution.detectFor(Version.LATEST));
+
+			assertThat(file).hasContent("");
 
 		}
 		finally {
