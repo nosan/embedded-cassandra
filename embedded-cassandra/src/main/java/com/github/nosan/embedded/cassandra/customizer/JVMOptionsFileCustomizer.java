@@ -42,7 +42,7 @@ public class JVMOptionsFileCustomizer extends AbstractFileCustomizer {
 	}
 
 	public JVMOptionsFileCustomizer() {
-		this(new LinkedHashSet<>(Arrays.asList("-ea", "-Xms128m", "-Xmx256m",
+		this(new LinkedHashSet<>(Arrays.asList("-ea", "-Xms128m", "-Xmx512m",
 				"-Djava.net.preferIPv4Stack=true")));
 	}
 
