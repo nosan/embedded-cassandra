@@ -29,6 +29,10 @@ import de.flapdoodle.embed.process.distribution.Platform;
  */
 public class EnvironmentFileCustomizer extends AbstractSourceLineFileCustomizer {
 
+	private static final String[] COMMENT_LINE = new String[] {
+			"-Dcassandra.jmx.local" + ".port", "-Dcassandra.jmx.remote.port",
+			"-Xloggc:" };
+
 	@Override
 	protected boolean isMatch(File file, Distribution distribution) {
 		String fileName = file.getName();
@@ -39,14 +43,10 @@ public class EnvironmentFileCustomizer extends AbstractSourceLineFileCustomizer 
 
 	@Override
 	protected String processLine(String line, Distribution distribution) {
-		if (line.trim().contains("-Dcassandra.jmx.local.port")) {
-			return "#" + line;
-		}
-		if (line.trim().contains("-Dcassandra.jmx.remote.port")) {
-			return "#" + line;
-		}
-		if (line.trim().contains("-Xloggc:")) {
-			return "#" + line;
+		for (String cl : COMMENT_LINE) {
+			if (line.trim().contains(cl)) {
+				return "#" + line;
+			}
 		}
 		return line;
 	}

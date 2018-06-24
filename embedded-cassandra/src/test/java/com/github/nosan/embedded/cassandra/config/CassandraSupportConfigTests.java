@@ -44,7 +44,8 @@ public class CassandraSupportConfigTests {
 	public void messageOnException() {
 		assertThat(this.supportConfig.messageOnException(getClass(),
 				new RuntimeException("ex"))).isEqualTo(
-						"If you feel this is a bug, please open a new an issue. Follow this link: https://github.com/nosan/embedded-cassandra\n"
+						"If you feel this is [ex] a bug, please open a new an issue. "
+								+ "Follow this link: https://github.com/nosan/embedded-cassandra\n"
 								+ "Thank you! :)");
 	}
 

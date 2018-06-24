@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.config;
 import java.util.Objects;
 
 import de.flapdoodle.embed.process.config.store.DownloadConfigBuilder;
+import de.flapdoodle.embed.process.config.store.TimeoutConfigBuilder;
 import de.flapdoodle.embed.process.extract.UUIDTempNaming;
 import de.flapdoodle.embed.process.io.directories.UserHome;
 import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
@@ -35,7 +36,7 @@ public class CassandraDownloadConfigBuilder extends DownloadConfigBuilder {
 	private static final String USER_AGENT = "Mozilla/5.0 (compatible; Embedded Cassandra; "
 			+ "+https://github" + ".com/nosan/embedded-cassandra)";
 
-	private static final String DOWNLOAD_PATH = "http://apache.ip-connect.vn.ua";
+	private static final String DOWNLOAD_PATH = "http://www-eu.apache.org/dist";
 
 	private static final String DOWNLOAD_PREFIX = "embedded-cassandra-download";
 
@@ -55,6 +56,8 @@ public class CassandraDownloadConfigBuilder extends DownloadConfigBuilder {
 		downloadPrefix(DOWNLOAD_PREFIX);
 		packageResolver(new PackageResolverFactory());
 		userAgent(USER_AGENT);
+		timeoutConfig(new TimeoutConfigBuilder().connectionTimeout(30000)
+				.readTimeout(30000).build());
 		return this;
 	}
 
@@ -72,6 +75,8 @@ public class CassandraDownloadConfigBuilder extends DownloadConfigBuilder {
 		downloadPrefix(DOWNLOAD_PREFIX);
 		packageResolver(new PackageResolverFactory());
 		userAgent(USER_AGENT);
+		timeoutConfig(new TimeoutConfigBuilder().connectionTimeout(30000)
+				.readTimeout(30000).build());
 		return this;
 	}
 

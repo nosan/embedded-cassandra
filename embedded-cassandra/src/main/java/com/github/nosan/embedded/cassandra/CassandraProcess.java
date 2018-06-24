@@ -140,29 +140,45 @@ public class CassandraProcess
 
 	@Override
 	protected void stopInternal() {
-		if (isProcessRunning() && this.processKiller != null) {
-			log.info("Stopping the cassandra server...");
-			if (!this.processKiller.kill(getProcessId())) {
-				log.warn("Could not stop cassandra server. Trying to destroy it.");
-			}
-		}
-		try {
-			stopProcess();
-		}
-		catch (RuntimeException ex) {
+		for (int i = 0; i < 3; i++) {
 			try {
-				TimeUnit.SECONDS.sleep(5);
-				stopProcess();
+				killProcess();
 			}
-			catch (InterruptedException ignore) {
-				Thread.currentThread().interrupt();
+			catch (RuntimeException ex) {
+				try {
+					TimeUnit.SECONDS.sleep(5);
+				}
+				catch (InterruptedException ignore) {
+					Thread.currentThread().interrupt();
+				}
 			}
 		}
+
+		if (isProcessRunning()) {
+			ISupportConfig supportConfig = getConfig().supportConfig();
+			IllegalStateException ex = new IllegalStateException(
+					"Couldn't kill " + supportConfig.getName() + " " + "process!");
+			log.error(supportConfig.messageOnException(getClass(), ex));
+			throw ex;
+
+		}
+		log.info("Cassandra server has been stopped.");
+
 	}
 
 	@Override
 	protected void cleanupInternal() {
 
+	}
+
+	private void killProcess() {
+		if (isProcessRunning()) {
+			log.info("Stopping the cassandra server...");
+			if (this.processKiller != null && !this.processKiller.kill(getProcessId())) {
+				log.warn("Could not stop cassandra server. Trying to destroy it.");
+			}
+			stopProcess();
+		}
 	}
 
 	/**

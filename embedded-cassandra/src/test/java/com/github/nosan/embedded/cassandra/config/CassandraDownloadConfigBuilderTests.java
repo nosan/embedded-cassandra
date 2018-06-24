@@ -45,7 +45,7 @@ public class CassandraDownloadConfigBuilderTests {
 		assertThat(downloadConfig.getArtifactStorePath().asFile().getAbsolutePath())
 				.contains(".embedded-cassandra");
 		assertThat(downloadConfig.getDownloadPath().getPath(null))
-				.isEqualTo("http://apache.ip-connect.vn.ua");
+				.isEqualTo("http://www-eu.apache.org/dist");
 		assertThat(downloadConfig.getFileNaming()).isInstanceOf(UUIDTempNaming.class);
 		assertThat(downloadConfig.getDownloadPrefix())
 				.isEqualTo("embedded-cassandra-download");
@@ -56,6 +56,9 @@ public class CassandraDownloadConfigBuilderTests {
 		assertThat(downloadConfig.getProgressListener())
 				.isInstanceOf(StandardConsoleProgressListener.class);
 		assertThat(downloadConfig.getTimeoutConfig()).isNotNull();
+		assertThat(downloadConfig.getTimeoutConfig().getConnectionTimeout())
+				.isEqualTo(30000);
+		assertThat(downloadConfig.getTimeoutConfig().getReadTimeout()).isEqualTo(30000);
 
 	}
 
@@ -68,7 +71,7 @@ public class CassandraDownloadConfigBuilderTests {
 		assertThat(downloadConfig.getArtifactStorePath().asFile().getAbsolutePath())
 				.contains(".embedded-cassandra");
 		assertThat(downloadConfig.getDownloadPath().getPath(null))
-				.isEqualTo("http://apache.ip-connect.vn.ua");
+				.isEqualTo("http://www-eu.apache.org/dist");
 		assertThat(downloadConfig.getFileNaming()).isInstanceOf(UUIDTempNaming.class);
 		assertThat(downloadConfig.getDownloadPrefix())
 				.isEqualTo("embedded-cassandra-download");
@@ -79,6 +82,9 @@ public class CassandraDownloadConfigBuilderTests {
 		assertThat(downloadConfig.getProgressListener())
 				.isInstanceOf(Slf4jProgressListener.class);
 		assertThat(downloadConfig.getTimeoutConfig()).isNotNull();
+		assertThat(downloadConfig.getTimeoutConfig().getConnectionTimeout())
+				.isEqualTo(30000);
+		assertThat(downloadConfig.getTimeoutConfig().getReadTimeout()).isEqualTo(30000);
 
 	}
 
