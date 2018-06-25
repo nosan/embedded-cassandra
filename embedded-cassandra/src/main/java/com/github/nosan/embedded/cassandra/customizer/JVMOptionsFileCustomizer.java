@@ -28,7 +28,7 @@ import java.util.Set;
 import de.flapdoodle.embed.process.distribution.Distribution;
 
 /**
- * Java options file customizer.
+ * JVM options {@link FileCustomizer}.
  *
  * @author Dmytro Nosan
  */

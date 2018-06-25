@@ -32,6 +32,8 @@ import org.junit.runners.model.Statement;
  * {@link TestRule} for running an embedded cassandra.
  *
  * @author Dmytro Nosan
+ * @see CassandraRuntimeConfigBuilder
+ * @see CassandraConfigBuilder
  */
 public class Cassandra implements TestRule {
 
@@ -41,9 +43,9 @@ public class Cassandra implements TestRule {
 
 	public Cassandra(IRuntimeConfig runtimeConfig, CassandraConfig cassandraConfig) {
 		this.runtimeConfig = Objects.requireNonNull(runtimeConfig,
-				"RuntimeConfig must " + "not be null");
+				"RuntimeConfig must not be null");
 		this.cassandraConfig = Objects.requireNonNull(cassandraConfig,
-				"Cassandra Config" + " must not be null");
+				"Cassandra Config must not be null");
 	}
 
 	public Cassandra(IRuntimeConfig runtimeConfig) {

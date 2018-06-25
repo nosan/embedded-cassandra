@@ -30,6 +30,8 @@ import org.slf4j.Logger;
  * {@link Starter} for an embedded cassandra.
  *
  * @author Dmytro Nosan
+ * @see CassandraRuntimeConfigBuilder
+ * @see com.github.nosan.embedded.cassandra.config.CassandraConfigBuilder
  */
 public class CassandraStarter
 		extends Starter<CassandraConfig, CassandraExecutable, CassandraProcess> {

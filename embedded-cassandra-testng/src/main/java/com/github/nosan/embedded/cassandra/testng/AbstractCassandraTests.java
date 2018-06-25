@@ -32,6 +32,8 @@ import org.testng.annotations.BeforeClass;
  * Abstract Class for running an embedded cassandra.
  *
  * @author Dmytro Nosan
+ * @see CassandraRuntimeConfigBuilder
+ * @see CassandraConfigBuilder
  */
 public abstract class AbstractCassandraTests {
 
@@ -44,9 +46,9 @@ public abstract class AbstractCassandraTests {
 	public AbstractCassandraTests(IRuntimeConfig runtimeConfig,
 			CassandraConfig cassandraConfig) {
 		this.runtimeConfig = Objects.requireNonNull(runtimeConfig,
-				"RuntimeConfig must " + "not be null");
+				"RuntimeConfig must not be null");
 		this.cassandraConfig = Objects.requireNonNull(cassandraConfig,
-				"Cassandra Config" + " must not be null");
+				"Cassandra Config must not be null");
 	}
 
 	public AbstractCassandraTests(IRuntimeConfig runtimeConfig) {

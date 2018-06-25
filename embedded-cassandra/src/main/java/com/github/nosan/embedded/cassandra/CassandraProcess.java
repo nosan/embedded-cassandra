@@ -62,7 +62,7 @@ public class CassandraProcess
 
 	private static final Logger log = LoggerFactory.getLogger(CassandraProcess.class);
 
-	private ProcessKiller processKiller;
+	private Killer killer;
 
 	private IRuntimeConfig runtimeConfig;
 
@@ -83,18 +83,16 @@ public class CassandraProcess
 			CassandraConfig cassandraConfig, IExtractedFileSet fileSet)
 			throws IOException {
 
-		this.processKiller = new ProcessKiller(distribution, this.runtimeConfig,
-				cassandraConfig);
+		this.killer = new Killer(distribution, this.runtimeConfig, cassandraConfig);
 
 		FileCustomizer fileCustomizer = cassandraConfig.getFileCustomizer();
 		for (File file : fileSet.files(FileType.Library)) {
 			fileCustomizer.customize(file, distribution);
 		}
 
-		ProcessCommand processCommand = new ProcessCommand(distribution, cassandraConfig,
-				fileSet);
+		Command command = new Command(distribution, cassandraConfig, fileSet);
 
-		List<String> args = processCommand.getArgs();
+		List<String> args = command.getArgs();
 		log.info("Starting the new cassandra server using directory '" + fileSet.baseDir()
 				+ "' with arguments " + args);
 		return args;
@@ -108,33 +106,34 @@ public class CassandraProcess
 		CassandraConfig cassandraConfig = getConfig();
 		Duration timeout = cassandraConfig.getTimeout();
 
-		LogWatchWaiter logWatchWaiter = new LogWatchWaiter(processOutput,
-				cassandraConfig.getConfig(), timeout);
+		LogWatcher logWatcher = new LogWatcher(processOutput, cassandraConfig.getConfig(),
+				timeout);
 
-		Processors.connect(process.getReader(), logWatchWaiter);
+		Processors.connect(process.getReader(), logWatcher);
 		Processors.connect(process.getError(),
 				StreamToLineProcessor.wrap(processOutput.getError()));
 
 		long mark = System.currentTimeMillis();
 
-		if (!logWatchWaiter.waitForResult()) {
-			if (logWatchWaiter.getError() != null) {
+		if (!logWatcher.waitForResult()) {
+			if (logWatcher.getError() != null) {
 				throw new IOException(
-						"Could not start process. " + logWatchWaiter.getError());
+						"Could not start process. " + logWatcher.getError());
 			}
 			throw new IOException(
 					"Could not start process. Please increase your startup timeout");
 
 		}
 
-		NetworkWaiter networkWaiter = new NetworkWaiter(cassandraConfig.getConfig(),
+		NetworkWatcher networkWatcher = new NetworkWatcher(cassandraConfig.getConfig(),
 				timeout.minusMillis(System.currentTimeMillis() - mark));
 
-		if (!networkWaiter.waitForResult()) {
+		if (!networkWatcher.waitForResult()) {
 			throw new IOException(
 					"Could not start process. Please increase your startup timeout");
-
 		}
+
+		log.info("Cassandra server has been started.");
 
 	}
 
@@ -174,7 +173,7 @@ public class CassandraProcess
 	private void killProcess() {
 		if (isProcessRunning()) {
 			log.info("Stopping the cassandra server...");
-			if (this.processKiller != null && !this.processKiller.kill(getProcessId())) {
+			if (this.killer != null && !this.killer.kill(getProcessId())) {
 				log.warn("Could not stop cassandra server. Trying to destroy it.");
 			}
 			stopProcess();
@@ -182,15 +181,15 @@ public class CassandraProcess
 	}
 
 	/**
-	 * Utility class for watching cassandra logs and looking for error/success messages.
+	 * Utility class for watching cassandra's logs and looking for error/success messages.
 	 */
-	private static final class LogWatchWaiter implements IStreamProcessor {
+	private static final class LogWatcher implements IStreamProcessor {
 
 		private final Duration timeout;
 
 		private final LogWatchStreamProcessor logWatch;
 
-		LogWatchWaiter(ProcessOutput processOutput, Config config, Duration timeout) {
+		LogWatcher(ProcessOutput processOutput, Config config, Duration timeout) {
 			this.logWatch = new LogWatchStreamProcessor(getSuccess(config), getFailures(),
 					StreamToLineProcessor.wrap(processOutput.getOutput()));
 			this.timeout = timeout;
@@ -241,15 +240,15 @@ public class CassandraProcess
 	}
 
 	/**
-	 * Utility class for waiting while cassandras network is not ready.
+	 * Utility class for waiting while cassandra's network is ready.
 	 */
-	private static final class NetworkWaiter {
+	private static final class NetworkWatcher {
 
 		private final Config config;
 
 		private final Duration timeout;
 
-		NetworkWaiter(Config config, Duration timeout) {
+		NetworkWatcher(Config config, Duration timeout) {
 			this.config = config;
 			this.timeout = timeout;
 		}
@@ -305,7 +304,7 @@ public class CassandraProcess
 	/**
 	 * Utility class for destroying cassandra process.
 	 */
-	private static final class ProcessKiller {
+	private static final class Killer {
 
 		private final Distribution distribution;
 
@@ -313,7 +312,7 @@ public class CassandraProcess
 
 		private final CassandraConfig cassandraConfig;
 
-		private ProcessKiller(Distribution distribution, IRuntimeConfig runtimeConfig,
+		private Killer(Distribution distribution, IRuntimeConfig runtimeConfig,
 				CassandraConfig cassandraConfig) {
 			this.distribution = distribution;
 			this.runtimeConfig = runtimeConfig;
@@ -356,7 +355,7 @@ public class CassandraProcess
 	/**
 	 * Utility class for building command line.
 	 */
-	private static final class ProcessCommand {
+	private static final class Command {
 
 		private final Distribution distribution;
 
@@ -364,7 +363,7 @@ public class CassandraProcess
 
 		private final IExtractedFileSet fileSet;
 
-		ProcessCommand(Distribution distribution, CassandraConfig processConfig,
+		Command(Distribution distribution, CassandraConfig processConfig,
 				IExtractedFileSet fileSet) {
 			this.distribution = distribution;
 			this.processConfig = processConfig;
