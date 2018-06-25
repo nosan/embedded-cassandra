@@ -24,6 +24,7 @@ import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
 import com.github.nosan.embedded.cassandra.customizer.JVMOptionsFileCustomizer;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 import de.flapdoodle.embed.process.builder.AbstractBuilder;
+import de.flapdoodle.embed.process.builder.IProperty;
 import de.flapdoodle.embed.process.builder.TypedProperty;
 
 /**
@@ -48,13 +49,18 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	private static final TypedProperty<Boolean> RANDOM_PORTS = TypedProperty
 			.with("RandomPorts", Boolean.class);
 
-	public CassandraConfigBuilder() {
-		property(CONFIG).setDefault(new Config());
-		property(TIMEOUT).setDefault(Duration.ofMinutes(1));
-		property(VERSION).setDefault(Version.LATEST);
-		property(RANDOM_PORTS).setDefault(false);
-		property(FILE_CUSTOMIZER).setDefault(new CompositeFileCustomizer(
+	/**
+	 * Sets default settings.
+	 * @return builder with defaults settings.
+	 */
+	public CassandraConfigBuilder defaults() {
+		config().overwriteDefault(new Config());
+		timeout().overwriteDefault(Duration.ofMinutes(1));
+		version().overwriteDefault(Version.LATEST);
+		useRandomPorts().overwriteDefault(false);
+		fileCustomizer().overwriteDefault(new CompositeFileCustomizer(
 				new JVMOptionsFileCustomizer(), new EnvironmentFileCustomizer()));
+		return this;
 	}
 
 	/**
@@ -63,7 +69,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @return current builder
 	 */
 	public CassandraConfigBuilder version(Version version) {
-		property(VERSION).set(version);
+		version().set(version);
 		return this;
 	}
 
@@ -73,7 +79,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @return current builder.
 	 */
 	public CassandraConfigBuilder timeout(Duration timeout) {
-		property(TIMEOUT).set(timeout);
+		timeout().set(timeout);
 		return this;
 	}
 
@@ -83,7 +89,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @return current builder.
 	 */
 	public CassandraConfigBuilder config(Config config) {
-		property(CONFIG).set(config);
+		config().set(config);
 		return this;
 	}
 
@@ -93,7 +99,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @return current builder.
 	 */
 	public CassandraConfigBuilder fileCustomizer(FileCustomizer fileCustomizer) {
-		property(FILE_CUSTOMIZER).set(fileCustomizer);
+		fileCustomizer().set(fileCustomizer);
 		return this;
 	}
 
@@ -103,18 +109,58 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @return current builder.
 	 */
 	public CassandraConfigBuilder useRandomPorts(boolean useRandomPorts) {
-		property(RANDOM_PORTS).set(useRandomPorts);
+		useRandomPorts().set(useRandomPorts);
 		return this;
 	}
 
 	@Override
 	public CassandraConfig build() {
-		Config config = get(CONFIG);
-		if (property(RANDOM_PORTS).get()) {
+		Config config = config().get();
+		if (useRandomPorts().get()) {
 			PortUtils.setRandomPorts(config, Objects::nonNull);
 		}
-		return new ImmutableCassandraConfig(config, get(TIMEOUT), get(VERSION),
-				get(FILE_CUSTOMIZER));
+		return new ImmutableCassandraConfig(config, timeout().get(), version().get(),
+				fileCustomizer().get());
+	}
+
+	/**
+	 * Retrieves file customizer property.
+	 * @return file customizer {@link IProperty}.
+	 */
+	protected IProperty<FileCustomizer> fileCustomizer() {
+		return property(FILE_CUSTOMIZER);
+	}
+
+	/**
+	 * Retrieves random ports property.
+	 * @return random ports {@link IProperty}.
+	 */
+	protected IProperty<Boolean> useRandomPorts() {
+		return property(RANDOM_PORTS);
+	}
+
+	/**
+	 * Retrieves version property.
+	 * @return version {@link IProperty}.
+	 */
+	protected IProperty<Version> version() {
+		return property(VERSION);
+	}
+
+	/**
+	 * Retrieves timeout property.
+	 * @return timeout {@link IProperty}.
+	 */
+	protected IProperty<Duration> timeout() {
+		return property(TIMEOUT);
+	}
+
+	/**
+	 * Retrieves config property.
+	 * @return config {@link IProperty}.
+	 */
+	protected IProperty<Config> config() {
+		return property(CONFIG);
 	}
 
 	private static final class ImmutableCassandraConfig implements CassandraConfig {

@@ -49,7 +49,8 @@ public class Cassandra implements TestRule {
 	}
 
 	public Cassandra(IRuntimeConfig runtimeConfig) {
-		this(runtimeConfig, new CassandraConfigBuilder().useRandomPorts(true).build());
+		this(runtimeConfig,
+				new CassandraConfigBuilder().defaults().useRandomPorts(true).build());
 	}
 
 	public Cassandra(CassandraConfig cassandraConfig) {
@@ -58,7 +59,7 @@ public class Cassandra implements TestRule {
 
 	public Cassandra() {
 		this(new CassandraRuntimeConfigBuilder().defaults().build(),
-				new CassandraConfigBuilder().useRandomPorts(true).build());
+				new CassandraConfigBuilder().defaults().useRandomPorts(true).build());
 	}
 
 	/**

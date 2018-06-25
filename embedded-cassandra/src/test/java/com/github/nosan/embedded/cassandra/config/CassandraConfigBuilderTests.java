@@ -17,7 +17,7 @@
 package com.github.nosan.embedded.cassandra.config;
 
 import java.time.Duration;
-import java.util.Set;
+import java.util.Collection;
 
 import com.github.nosan.embedded.cassandra.ReflectionUtils;
 import com.github.nosan.embedded.cassandra.customizer.CompositeFileCustomizer;
@@ -34,13 +34,13 @@ public class CassandraConfigBuilderTests {
 
 	@Test
 	public void build() throws NoSuchFieldException, IllegalAccessException {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder().build();
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults().build();
 		assertThat(cassandraConfig.getConfig()).isNotNull();
 		assertThat(cassandraConfig.getTimeout()).isEqualTo(Duration.ofMinutes(1));
 		assertThat(cassandraConfig.getVersion()).isEqualTo(Version.LATEST);
 		assertThat(cassandraConfig.getFileCustomizer())
 				.isInstanceOf(CompositeFileCustomizer.class);
-		assertThat((Set<?>) ReflectionUtils.getField("customizers",
+		assertThat((Collection<?>) ReflectionUtils.getField("customizers",
 				cassandraConfig.getFileCustomizer())).hasSize(2);
 
 		Config config = cassandraConfig.getConfig();
@@ -54,7 +54,7 @@ public class CassandraConfigBuilderTests {
 
 	@Test
 	public void buildWithRandomPorts() {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults()
 				.useRandomPorts(true).build();
 
 		Config config = cassandraConfig.getConfig();

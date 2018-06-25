@@ -52,7 +52,8 @@ public abstract class AbstractCassandraTests {
 	}
 
 	public AbstractCassandraTests(IRuntimeConfig runtimeConfig) {
-		this(runtimeConfig, new CassandraConfigBuilder().useRandomPorts(true).build());
+		this(runtimeConfig,
+				new CassandraConfigBuilder().defaults().useRandomPorts(true).build());
 	}
 
 	public AbstractCassandraTests(CassandraConfig cassandraConfig) {
@@ -61,7 +62,7 @@ public abstract class AbstractCassandraTests {
 
 	public AbstractCassandraTests() {
 		this(new CassandraRuntimeConfigBuilder().defaults().build(),
-				new CassandraConfigBuilder().useRandomPorts(true).build());
+				new CassandraConfigBuilder().defaults().useRandomPorts(true).build());
 	}
 
 	/**

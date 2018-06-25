@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
+import java.util.concurrent.TimeUnit;
+
 import de.flapdoodle.embed.process.config.ISupportConfig;
 
 /**
@@ -36,10 +38,15 @@ class CassandraSupportConfig implements ISupportConfig {
 	}
 
 	@Override
+	public long maxStopTimeoutMillis() {
+		return TimeUnit.SECONDS.toMillis(5);
+	}
+
+	@Override
 	public String messageOnException(Class<?> context, Exception exception) {
 		return "If you feel this is [" + exception.getMessage()
-				+ "] a bug, please open a new an " + "issue. Follow " + "this " + "link: "
-				+ getSupportUrl() + "\n" + "Thank you! :)";
+				+ "] a bug, please open a new issue. Follow this link: " + getSupportUrl()
+				+ "\n" + "Thank you! :)";
 	}
 
 }

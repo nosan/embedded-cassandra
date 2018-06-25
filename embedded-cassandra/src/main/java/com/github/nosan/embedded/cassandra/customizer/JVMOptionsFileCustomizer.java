@@ -21,9 +21,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 
 import de.flapdoodle.embed.process.distribution.Distribution;
 
@@ -34,16 +33,15 @@ import de.flapdoodle.embed.process.distribution.Distribution;
  */
 public class JVMOptionsFileCustomizer extends AbstractFileCustomizer {
 
-	private final Set<String> jvmOptions;
+	private final Collection<String> jvmOptions;
 
-	public JVMOptionsFileCustomizer(Set<String> jvmOptions) {
+	public JVMOptionsFileCustomizer(Collection<String> jvmOptions) {
 		this.jvmOptions = Objects.requireNonNull(jvmOptions,
 				"JVM Options must null be null");
 	}
 
 	public JVMOptionsFileCustomizer() {
-		this(new LinkedHashSet<>(Arrays.asList("-ea", "-Xms128m", "-Xmx512m",
-				"-Djava.net.preferIPv4Stack=true")));
+		this(Arrays.asList("-Xms128m", "-Xmx256m"));
 	}
 
 	@Override

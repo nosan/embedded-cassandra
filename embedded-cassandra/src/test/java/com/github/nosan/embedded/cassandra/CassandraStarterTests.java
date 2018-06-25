@@ -56,7 +56,7 @@ public class CassandraStarterTests {
 
 	@Test
 	public void nativeTransport() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults()
 				.useRandomPorts(true).build();
 		start(cassandraConfig, () -> {
 			try (Cluster cluster = cluster(cassandraConfig.getConfig())) {
@@ -70,27 +70,28 @@ public class CassandraStarterTests {
 
 	@Test
 	public void multiplyInstances() throws Exception {
-		start(new CassandraConfigBuilder().useRandomPorts(true).build(),
-				() -> start(new CassandraConfigBuilder().useRandomPorts(true).build()));
+		start(new CassandraConfigBuilder().defaults().useRandomPorts(true).build(),
+				() -> start(new CassandraConfigBuilder().defaults().useRandomPorts(true)
+						.build()));
 	}
 
 	@Test(expected = IOException.class)
 	public void multiplyInstancesDoesNotWorkJmxNotDisable() throws Exception {
-		start(new CassandraConfigBuilder().useRandomPorts(true)
+		start(new CassandraConfigBuilder().defaults().useRandomPorts(true)
 				.fileCustomizer(new JVMOptionsFileCustomizer()).build(),
-				() -> start(new CassandraConfigBuilder().useRandomPorts(true)
+				() -> start(new CassandraConfigBuilder().defaults().useRandomPorts(true)
 						.fileCustomizer(new JVMOptionsFileCustomizer()).build()));
 	}
 
 	@Test(expected = IOException.class)
 	public void multiplyInstancesDoesNotWorkRandomPortNotEnable() throws Exception {
-		start(new CassandraConfigBuilder().build(),
-				() -> start(new CassandraConfigBuilder().build()));
+		start(new CassandraConfigBuilder().defaults().build(),
+				() -> start(new CassandraConfigBuilder().defaults().build()));
 	}
 
 	@Test(expected = IOException.class)
 	public void invalidConfig() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults()
 				.useRandomPorts(true).build();
 		cassandraConfig.getConfig().setCommitlogSync(null);
 		start(cassandraConfig);
@@ -98,14 +99,14 @@ public class CassandraStarterTests {
 
 	@Test(expected = IOException.class)
 	public void timeout() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults()
 				.timeout(Duration.ofSeconds(1)).build();
 		start(cassandraConfig);
 	}
 
 	@Test
 	public void rpcTransport() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults()
 				.useRandomPorts(true).build();
 		Config config = cassandraConfig.getConfig();
 		config.setStartNativeTransport(false);
@@ -115,7 +116,7 @@ public class CassandraStarterTests {
 
 	@Test
 	public void disableTransport() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults()
 				.useRandomPorts(true).build();
 		Config config = cassandraConfig.getConfig();
 		config.setStartNativeTransport(false);
