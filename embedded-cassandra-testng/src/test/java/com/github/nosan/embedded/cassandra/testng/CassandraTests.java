@@ -34,7 +34,7 @@ public class CassandraTests extends AbstractCassandraTests {
 	private static final Logger log = LoggerFactory.getLogger(CassandraTests.class);
 
 	public CassandraTests() {
-		super(new CassandraRuntimeConfigBuilder().defaults(log).build());
+		super(new CassandraRuntimeConfigBuilder(log).build());
 	}
 
 	private static void keyspace(String keyspace, Session session) {

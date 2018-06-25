@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.config;
 
 import java.time.Duration;
+import java.util.List;
 
 import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
 import de.flapdoodle.embed.process.config.IExecutableProcessConfig;
@@ -44,19 +45,30 @@ public interface CassandraConfig extends IExecutableProcessConfig {
 	Duration getTimeout();
 
 	/**
-	 * Retrieves an embedded cassandra {@link FileCustomizer}.
-	 * @return Cassandra Files customizer.
+	 * Retrieves an embedded cassandra {@link FileCustomizer}s.
+	 * @return Cassandra File customizers.
 	 *
-	 * @see com.github.nosan.embedded.cassandra.customizer.CompositeFileCustomizer
-	 * @see com.github.nosan.embedded.cassandra.customizer.AbstractFileCustomizer
+	 * @see com.github.nosan.embedded.cassandra.customizer.FileCustomizer
 	 */
-	FileCustomizer getFileCustomizer();
+	List<FileCustomizer> getFileCustomizers();
 
 	/**
 	 * Retrieves the cassandra version.
 	 * @return cassandra version
 	 */
 	Version getVersion();
+
+	/**
+	 * Retrieves an embedded cassandra JMX Port.
+	 * @return Cassandra JMX_PORT.
+	 */
+	int getJmxPort();
+
+	/**
+	 * Retrieves an embedded cassandra JVM Options.
+	 * @return Cassandra JVM Options.
+	 */
+	List<String> getJvmOptions();
 
 	/**
 	 * Retrieves the cassandra version.

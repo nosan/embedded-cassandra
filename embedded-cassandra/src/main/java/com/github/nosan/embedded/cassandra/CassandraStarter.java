@@ -41,20 +41,18 @@ public class CassandraStarter
 	}
 
 	/**
-	 * Create a new cassandra starter with
-	 * {@link CassandraRuntimeConfigBuilder#defaults()} settings.
+	 * Create a new cassandra starter with default runtime settings.
 	 */
 	public CassandraStarter() {
-		this(new CassandraRuntimeConfigBuilder().defaults().build());
+		this(new CassandraRuntimeConfigBuilder().build());
 	}
 
 	/**
-	 * Create a new cassandra starter with
-	 * {@link CassandraRuntimeConfigBuilder#defaults(Logger)} settings.
+	 * Create a new cassandra starter with default runtime settings.
 	 * @param logger logger for process outputs.
 	 */
 	public CassandraStarter(Logger logger) {
-		this(new CassandraRuntimeConfigBuilder().defaults(logger).build());
+		this(new CassandraRuntimeConfigBuilder(logger).build());
 	}
 
 	@Override

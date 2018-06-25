@@ -39,8 +39,7 @@ public class CassandraDownloadConfigBuilderTests {
 	@Test
 	public void defaults() {
 
-		IDownloadConfig downloadConfig = new CassandraDownloadConfigBuilder().defaults()
-				.build();
+		IDownloadConfig downloadConfig = new CassandraDownloadConfigBuilder().build();
 
 		assertThat(downloadConfig.getArtifactStorePath().asFile().getAbsolutePath())
 				.contains(".embedded-cassandra");
@@ -65,8 +64,7 @@ public class CassandraDownloadConfigBuilderTests {
 	@Test
 	public void defaultsLogger() {
 
-		IDownloadConfig downloadConfig = new CassandraDownloadConfigBuilder()
-				.defaults(log).build();
+		IDownloadConfig downloadConfig = new CassandraDownloadConfigBuilder(log).build();
 
 		assertThat(downloadConfig.getArtifactStorePath().asFile().getAbsolutePath())
 				.contains(".embedded-cassandra");

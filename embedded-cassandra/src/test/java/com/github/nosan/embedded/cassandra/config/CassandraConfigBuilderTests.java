@@ -17,10 +17,8 @@
 package com.github.nosan.embedded.cassandra.config;
 
 import java.time.Duration;
-import java.util.Collection;
 
-import com.github.nosan.embedded.cassandra.ReflectionUtils;
-import com.github.nosan.embedded.cassandra.customizer.CompositeFileCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,16 +31,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CassandraConfigBuilderTests {
 
 	@Test
-	public void build() throws NoSuchFieldException, IllegalAccessException {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults().build();
+	public void buildDefaults() {
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().build();
 		assertThat(cassandraConfig.getConfig()).isNotNull();
 		assertThat(cassandraConfig.getTimeout()).isEqualTo(Duration.ofMinutes(1));
 		assertThat(cassandraConfig.getVersion()).isEqualTo(Version.LATEST);
-		assertThat(cassandraConfig.getFileCustomizer())
-				.isInstanceOf(CompositeFileCustomizer.class);
-		assertThat((Collection<?>) ReflectionUtils.getField("customizers",
-				cassandraConfig.getFileCustomizer())).hasSize(2);
-
+		assertThat(cassandraConfig.getFileCustomizers()).hasSize(0);
+		assertThat(cassandraConfig.getJmxPort()).isEqualTo(7199);
 		Config config = cassandraConfig.getConfig();
 		assertThat(config.getRpcPort()).isEqualTo(9160);
 		assertThat(config.getNativeTransportPort()).isEqualTo(9042);
@@ -54,8 +49,14 @@ public class CassandraConfigBuilderTests {
 
 	@Test
 	public void buildWithRandomPorts() {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults()
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
 				.useRandomPorts(true).build();
+		assertThat(cassandraConfig.getConfig()).isNotNull();
+		assertThat(cassandraConfig.getTimeout()).isEqualTo(Duration.ofMinutes(1));
+		assertThat(cassandraConfig.getVersion()).isEqualTo(Version.LATEST);
+		assertThat(cassandraConfig.getFileCustomizers()).hasSize(0);
+		assertThat(cassandraConfig.getJmxPort()).isNotEqualTo(7199);
+		assertThat(cassandraConfig.getJvmOptions()).isEmpty();
 
 		Config config = cassandraConfig.getConfig();
 		assertThat(config.getRpcPort()).isNotEqualTo(9160);
@@ -64,6 +65,24 @@ public class CassandraConfigBuilderTests {
 		assertThat(config.getSslStoragePort()).isNotEqualTo(7001);
 		assertThat(config.getNativeTransportPortSsl()).isNull();
 
+	}
+
+	@Test
+	public void build() {
+		Config config = new Config();
+
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+				.jvmOptions("-Xmx512").jmxPort(5000)
+				.fileCustomizers((FileCustomizer) (file, distribution) -> {
+				}).version(Version.LATEST).timeout(Duration.ofMinutes(15)).config(config)
+				.build();
+
+		assertThat(cassandraConfig.getJvmOptions()).containsExactly("-Xmx512");
+		assertThat(cassandraConfig.getConfig()).isEqualTo(config);
+		assertThat(cassandraConfig.getTimeout()).isEqualTo(Duration.ofMinutes(15));
+		assertThat(cassandraConfig.getVersion()).isEqualTo(Version.LATEST);
+		assertThat(cassandraConfig.getFileCustomizers()).hasSize(1);
+		assertThat(cassandraConfig.getJmxPort()).isEqualTo(5000);
 	}
 
 }

@@ -45,8 +45,7 @@ public class CassandraRuntimeConfigBuilderTests {
 
 	@Test
 	public void defaults() throws Exception {
-		IRuntimeConfig runtimeConfig = new CassandraRuntimeConfigBuilder().defaults()
-				.build();
+		IRuntimeConfig runtimeConfig = new CassandraRuntimeConfigBuilder().build();
 
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
@@ -66,8 +65,7 @@ public class CassandraRuntimeConfigBuilderTests {
 	@Test
 	public void defaultsLogger() throws Exception {
 
-		IRuntimeConfig runtimeConfig = new CassandraRuntimeConfigBuilder().defaults(log)
-				.build();
+		IRuntimeConfig runtimeConfig = new CassandraRuntimeConfigBuilder(log).build();
 
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);

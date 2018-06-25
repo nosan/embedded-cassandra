@@ -17,20 +17,40 @@
 package com.github.nosan.embedded.cassandra.customizer;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Objects;
 
 import de.flapdoodle.embed.process.distribution.Distribution;
 
 /**
- * No operation {@link FileCustomizer}.
+ * JVM options {@link FileCustomizer}. JVM Options will be added at the end of file.
  *
  * @author Dmytro Nosan
  */
-public class NoopFileCustomizer implements FileCustomizer {
+public class JVMOptionsCustomizer extends AbstractFileCustomizer {
+
+	private final Collection<String> jvmOptions;
+
+	public JVMOptionsCustomizer(Collection<String> jvmOptions) {
+		this.jvmOptions = Objects.requireNonNull(jvmOptions,
+				"JVM Options must null be null");
+	}
 
 	@Override
-	public void customize(File file, Distribution distribution) throws IOException {
+	protected boolean isMatch(File file, Distribution distribution) {
+		return file.getName().equals("jvm.options");
+	}
 
+	@Override
+	protected void process(File file, Distribution distribution) throws IOException {
+		try (PrintWriter fileWriter = new PrintWriter(new FileWriter(file, true))) {
+			for (String line : this.jvmOptions) {
+				fileWriter.println(line);
+			}
+		}
 	}
 
 }

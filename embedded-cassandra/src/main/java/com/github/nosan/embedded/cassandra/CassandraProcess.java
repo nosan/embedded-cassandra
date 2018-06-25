@@ -23,14 +23,19 @@ import java.net.Socket;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import com.github.nosan.embedded.cassandra.config.CassandraConfig;
 import com.github.nosan.embedded.cassandra.config.Config;
 import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.JVMOptionsCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.JavaCompatibilityCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.JmxPortCustomizer;
 import com.github.nosan.embedded.cassandra.util.YamlUtils;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.ISupportConfig;
@@ -62,9 +67,11 @@ public class CassandraProcess
 
 	private static final Logger log = LoggerFactory.getLogger(CassandraProcess.class);
 
-	private Killer killer;
-
 	private IRuntimeConfig runtimeConfig;
+
+	private Distribution distribution;
+
+	private ProcessControl process;
 
 	CassandraProcess(Distribution distribution, CassandraConfig config,
 			IRuntimeConfig runtimeConfig, CassandraExecutable executable)
@@ -83,16 +90,21 @@ public class CassandraProcess
 			CassandraConfig cassandraConfig, IExtractedFileSet fileSet)
 			throws IOException {
 
-		this.killer = new Killer(distribution, this.runtimeConfig, cassandraConfig);
+		this.distribution = distribution;
 
-		FileCustomizer fileCustomizer = cassandraConfig.getFileCustomizer();
-		for (File file : fileSet.files(FileType.Library)) {
-			fileCustomizer.customize(file, distribution);
+		FileCustomizers fileCustomizers = new FileCustomizers(distribution,
+				cassandraConfig, fileSet);
+		fileCustomizers.customize();
+
+		File configurationFile = new File(fileSet.baseDir(), "cassandra.yaml");
+		try (FileWriter writer = new FileWriter(configurationFile)) {
+			YamlUtils.serialize(cassandraConfig.getConfig(), writer);
 		}
 
-		Command command = new Command(distribution, cassandraConfig, fileSet);
+		ProcessArguments processArguments = new ProcessArguments(distribution, fileSet,
+				configurationFile);
 
-		List<String> args = command.getArgs();
+		List<String> args = processArguments.get();
 		log.info("Starting the new cassandra server using directory '" + fileSet.baseDir()
 				+ "' with arguments " + args);
 		return args;
@@ -101,62 +113,45 @@ public class CassandraProcess
 	@Override
 	protected void onAfterProcessStart(ProcessControl process,
 			IRuntimeConfig runtimeConfig) throws IOException {
+		this.process = process;
+		Config config = getConfig().getConfig();
+		Duration duration = getConfig().getTimeout();
 
 		ProcessOutput processOutput = runtimeConfig.getProcessOutput();
-		CassandraConfig cassandraConfig = getConfig();
-		Duration timeout = cassandraConfig.getTimeout();
-
-		LogWatcher logWatcher = new LogWatcher(processOutput, cassandraConfig.getConfig(),
-				timeout);
-
-		Processors.connect(process.getReader(), logWatcher);
+		ProcessLogWait processLogWait = new ProcessLogWait(processOutput.getOutput(),
+				config);
+		Processors.connect(process.getReader(),
+				StreamToLineProcessor.wrap(processLogWait));
 		Processors.connect(process.getError(),
 				StreamToLineProcessor.wrap(processOutput.getError()));
 
-		long mark = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 
-		if (!logWatcher.waitForResult()) {
-			if (logWatcher.getError() != null) {
+		if (!processLogWait.await(duration)) {
+			if (processLogWait.hasError()) {
 				throw new IOException(
-						"Could not start process. " + logWatcher.getError());
+						"Could not start process. " + processLogWait.getError());
 			}
 			throw new IOException(
 					"Could not start process. Please increase your startup timeout");
-
 		}
+		long end = System.currentTimeMillis() - start;
 
-		NetworkWatcher networkWatcher = new NetworkWatcher(cassandraConfig.getConfig(),
-				timeout.minusMillis(System.currentTimeMillis() - mark));
-
-		if (!networkWatcher.waitForResult()) {
+		ProcessNetworkWait processNetworkWait = new ProcessNetworkWait(config);
+		if (!processNetworkWait.await(duration.minusMillis(end))) {
 			throw new IOException(
 					"Could not start process. Please increase your startup timeout");
 		}
-
 		log.info("Cassandra server has been started.");
 
 	}
 
 	@Override
 	protected void stopInternal() {
-		for (int i = 0; i < 3; i++) {
-			try {
-				killProcess();
-			}
-			catch (RuntimeException ignore) {
-			}
-		}
-
-		if (isProcessRunning()) {
-			ISupportConfig supportConfig = getConfig().supportConfig();
-			IllegalStateException ex = new IllegalStateException(
-					"Couldn't kill " + supportConfig.getName() + " " + "process!");
-			log.error(supportConfig.messageOnException(getClass(), ex));
-			throw ex;
-
-		}
+		ProcessKiller processKiller = new ProcessKiller(this.distribution,
+				this.runtimeConfig, getConfig(), this.process);
+		processKiller.kill();
 		log.info("Cassandra server has been stopped.");
-
 	}
 
 	@Override
@@ -164,38 +159,119 @@ public class CassandraProcess
 
 	}
 
-	private void killProcess() {
-		if (isProcessRunning()) {
-			log.info("Stopping the cassandra server...");
-			if (this.killer != null && !this.killer.kill(getProcessId())) {
-				log.warn("Could not stop cassandra server. Trying to destroy it.");
-			}
-			stopProcess();
+	/**
+	 * Utility class for running file customizers.
+	 */
+	static final class FileCustomizers {
+
+		private final Distribution distribution;
+
+		private final CassandraConfig cassandraConfig;
+
+		private final IExtractedFileSet fileSet;
+
+		FileCustomizers(Distribution distribution, CassandraConfig cassandraConfig,
+				IExtractedFileSet fileSet) {
+			this.distribution = distribution;
+			this.cassandraConfig = cassandraConfig;
+			this.fileSet = fileSet;
 		}
+
+		/**
+		 * Invokes {@link FileCustomizer} for each {@link FileType#Library} file.
+		 * @throws IOException Something happened during File customization.
+		 */
+		void customize() throws IOException {
+
+			CassandraConfig config = this.cassandraConfig;
+
+			List<FileCustomizer> fileCustomizers = new ArrayList<>(
+					getDefaultCustomizers());
+
+			fileCustomizers.add(new JmxPortCustomizer(config.getJmxPort()));
+			fileCustomizers.add(new JVMOptionsCustomizer(config.getJvmOptions()));
+			fileCustomizers.addAll(config.getFileCustomizers());
+			for (File file : this.fileSet.files(FileType.Library)) {
+				for (FileCustomizer fileCustomizer : fileCustomizers) {
+					fileCustomizer.customize(file, this.distribution);
+				}
+			}
+		}
+
+		private Collection<? extends FileCustomizer> getDefaultCustomizers() {
+			return Collections.singletonList(new JavaCompatibilityCustomizer());
+		}
+
+	}
+
+	/**
+	 * Utility class for building arguments.
+	 */
+	static final class ProcessArguments implements Supplier<List<String>> {
+
+		private final Distribution distribution;
+
+		private final IExtractedFileSet fileSet;
+
+		private final File configurationFile;
+
+		ProcessArguments(Distribution distribution, IExtractedFileSet fileSet,
+				File configurationFile) {
+			this.distribution = distribution;
+			this.fileSet = fileSet;
+			this.configurationFile = configurationFile;
+		}
+
+		@Override
+		public List<String> get() {
+			List<String> args = new ArrayList<>();
+			if (this.distribution.getPlatform() == Platform.Windows) {
+				args.add("powershell");
+				args.add("-ExecutionPolicy");
+				args.add("Bypass");
+			}
+			args.add(this.fileSet.executable().getAbsolutePath());
+			args.add("-f");
+			args.add(getConfig());
+			return args;
+		}
+
+		private String getConfig() {
+			StringBuilder arg = new StringBuilder();
+			if (this.distribution.getPlatform() == Platform.Windows) {
+				arg.append("`");
+			}
+			arg.append("-Dcassandra.config=file:");
+			arg.append(StringUtils.repeat(File.separatorChar, 3));
+			arg.append(this.configurationFile.getAbsolutePath());
+			return arg.toString();
+		}
+
 	}
 
 	/**
 	 * Utility class for watching cassandra's logs and looking for error/success messages.
 	 */
-	private static final class LogWatcher implements IStreamProcessor {
-
-		private final Duration timeout;
+	static final class ProcessLogWait implements IStreamProcessor {
 
 		private final LogWatchStreamProcessor logWatch;
 
-		LogWatcher(ProcessOutput processOutput, Config config, Duration timeout) {
+		ProcessLogWait(IStreamProcessor reader, Config config) {
 			this.logWatch = new LogWatchStreamProcessor(getSuccess(config), getFailures(),
-					StreamToLineProcessor.wrap(processOutput.getOutput()));
-			this.timeout = timeout;
+					reader);
 		}
 
-		boolean waitForResult() {
-			this.logWatch.waitForResult(this.timeout.toMillis());
+		boolean await(Duration timeout) {
+			this.logWatch.waitForResult(timeout.toMillis());
 			return this.logWatch.isInitWithSuccess();
 		}
 
 		String getError() {
 			return this.logWatch.getFailureFound();
+		}
+
+		boolean hasError() {
+			return getError() != null;
 		}
 
 		@Override
@@ -228,7 +304,7 @@ public class CassandraProcess
 		private LinkedHashSet<String> getFailures() {
 			return new LinkedHashSet<>(Arrays.asList("encountered during startup",
 					"Missing required", "Address already in use", "Port already in use",
-					"ConfigurationException"));
+					"ConfigurationException", "syntax error near unexpected"));
 		}
 
 	}
@@ -236,20 +312,17 @@ public class CassandraProcess
 	/**
 	 * Utility class for waiting while cassandra's network is ready.
 	 */
-	private static final class NetworkWatcher {
+	static final class ProcessNetworkWait {
 
 		private final Config config;
 
-		private final Duration timeout;
-
-		NetworkWatcher(Config config, Duration timeout) {
+		ProcessNetworkWait(Config config) {
 			this.config = config;
-			this.timeout = timeout;
 		}
 
-		boolean waitForResult() {
+		boolean await(Duration timeout) {
 			long startTime = System.nanoTime();
-			long rem = this.timeout.toNanos();
+			long rem = timeout.toNanos();
 			do {
 				if (tryConnect(this.config)) {
 					return true;
@@ -263,7 +336,7 @@ public class CassandraProcess
 						Thread.currentThread().interrupt();
 					}
 				}
-				rem = this.timeout.toNanos() - (System.nanoTime() - startTime);
+				rem = timeout.toNanos() - (System.nanoTime() - startTime);
 			}
 			while (rem > 0);
 			return false;
@@ -298,7 +371,9 @@ public class CassandraProcess
 	/**
 	 * Utility class for destroying cassandra process.
 	 */
-	private static final class Killer {
+	static final class ProcessKiller {
+
+		private static final Logger log = LoggerFactory.getLogger(ProcessKiller.class);
 
 		private final Distribution distribution;
 
@@ -306,20 +381,32 @@ public class CassandraProcess
 
 		private final CassandraConfig cassandraConfig;
 
-		private Killer(Distribution distribution, IRuntimeConfig runtimeConfig,
-				CassandraConfig cassandraConfig) {
+		private final ProcessControl process;
+
+		ProcessKiller(Distribution distribution, IRuntimeConfig runtimeConfig,
+				CassandraConfig cassandraConfig, ProcessControl process) {
 			this.distribution = distribution;
 			this.runtimeConfig = runtimeConfig;
 			this.cassandraConfig = cassandraConfig;
+			this.process = process;
 		}
 
-		boolean kill(long pid) {
-			Platform platform = this.distribution.getPlatform();
-			if (platform.isUnixLike()) {
-				return killProcess(pid);
+		/**
+		 * Trying to stop cassandra process.
+		 */
+		void kill() {
+			if (this.process != null && this.process.getPid() != null) {
+				long pid = this.process.getPid();
+				Platform platform = this.distribution.getPlatform();
+				if (Processes.isProcessRunning(platform, pid)) {
+					boolean killed = (platform != Platform.Windows ? killProcess(pid)
+							: taskKill(pid));
+					if (killed) {
+						log.warn("Process has not been stopped gracefully.");
+					}
+					this.process.stop();
+				}
 			}
-			return taskKill(pid);
-
 		}
 
 		private boolean killProcess(long pid) {
@@ -342,55 +429,6 @@ public class CassandraProcess
 					new ProcessConfig(
 							Arrays.asList("taskkill", "/F", "/T", "/pid", "" + pid),
 							output));
-		}
-
-	}
-
-	/**
-	 * Utility class for building command line.
-	 */
-	private static final class Command {
-
-		private final Distribution distribution;
-
-		private final CassandraConfig cassandraConfig;
-
-		private final IExtractedFileSet fileSet;
-
-		Command(Distribution distribution, CassandraConfig cassandraConfig,
-				IExtractedFileSet fileSet) {
-			this.distribution = distribution;
-			this.cassandraConfig = cassandraConfig;
-			this.fileSet = fileSet;
-		}
-
-		List<String> getArgs() throws IOException {
-			List<String> args = new ArrayList<>();
-			if (this.distribution.getPlatform() == Platform.Windows) {
-				args.add("powershell");
-				args.add("-ExecutionPolicy");
-				args.add("Bypass");
-			}
-			args.add(this.fileSet.executable().getAbsolutePath());
-			args.add("-f");
-			args.add(getConfig());
-			return args;
-		}
-
-		private String getConfig() throws IOException {
-			File configurationFile = new File(this.fileSet.baseDir(),
-					"cassandra-" + UUID.randomUUID() + ".yaml");
-			try (FileWriter writer = new FileWriter(configurationFile)) {
-				YamlUtils.serialize(this.cassandraConfig.getConfig(), writer);
-			}
-			StringBuilder arg = new StringBuilder();
-			if (this.distribution.getPlatform() == Platform.Windows) {
-				arg.append("`");
-			}
-			arg.append("-Dcassandra.config=file:");
-			arg.append(StringUtils.repeat(File.separatorChar, 3));
-			arg.append(configurationFile.getAbsolutePath());
-			return arg.toString();
 		}
 
 	}
