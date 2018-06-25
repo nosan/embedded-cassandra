@@ -39,7 +39,7 @@ class CassandraSupportConfig implements ISupportConfig {
 
 	@Override
 	public long maxStopTimeoutMillis() {
-		return TimeUnit.SECONDS.toMillis(5);
+		return TimeUnit.SECONDS.toMillis(10);
 	}
 
 	@Override

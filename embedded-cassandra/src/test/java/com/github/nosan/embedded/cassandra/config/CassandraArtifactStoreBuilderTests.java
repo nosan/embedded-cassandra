@@ -42,7 +42,7 @@ public class CassandraArtifactStoreBuilderTests {
 	@Test
 	public void defaults() throws Exception {
 		IArtifactStore artifactStore = unwrap(
-				new CassandraArtifactStoreBuilder().defaults().build());
+				new CassandraArtifactStoreBuilder().build());
 
 		assertThat(ReflectionUtils.getField("_downloader", artifactStore))
 				.isInstanceOf(Downloader.class);
@@ -67,7 +67,7 @@ public class CassandraArtifactStoreBuilderTests {
 	public void defaultsLogger() throws Exception {
 
 		IArtifactStore artifactStore = unwrap(
-				new CassandraArtifactStoreBuilder().defaults(log).build());
+				new CassandraArtifactStoreBuilder(log).build());
 
 		assertThat(ReflectionUtils.getField("_downloader", artifactStore))
 				.isInstanceOf(Downloader.class);

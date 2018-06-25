@@ -23,6 +23,7 @@ import de.flapdoodle.embed.process.config.store.DownloadPath;
 import de.flapdoodle.embed.process.config.store.TimeoutConfigBuilder;
 import de.flapdoodle.embed.process.extract.UUIDTempNaming;
 import de.flapdoodle.embed.process.io.directories.UserHome;
+import de.flapdoodle.embed.process.io.progress.IProgressListener;
 import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
 import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
 import org.slf4j.Logger;
@@ -47,38 +48,30 @@ public class CassandraDownloadConfigBuilder extends DownloadConfigBuilder {
 	/**
 	 * Configure builder with default settings. {@link StandardConsoleProgressListener}
 	 * listener will be used.
-	 * @return builder with defaults settings.
 	 */
-	public CassandraDownloadConfigBuilder defaults() {
-		fileNaming().overwriteDefault(new UUIDTempNaming());
-		downloadPath().overwriteDefault(new DownloadPath(DOWNLOAD_PATH));
-		progressListener().overwriteDefault(new StandardConsoleProgressListener());
-		artifactStorePath().overwriteDefault(ARTIFACT_STORE_PATH);
-		downloadPrefix().overwriteDefault(new DownloadPrefix(DOWNLOAD_PREFIX));
-		packageResolver().overwriteDefault(new PackageResolverFactory());
-		userAgent().overwriteDefault(new UserAgent(USER_AGENT));
-		timeoutConfig().overwriteDefault(new TimeoutConfigBuilder()
-				.connectionTimeout(30000).readTimeout(30000).build());
-		return this;
+	public CassandraDownloadConfigBuilder() {
+		this(new StandardConsoleProgressListener());
 	}
 
 	/**
 	 * Configure builder with default settings and logger.
 	 * @param logger logger for process outputs.
-	 * @return builder with defaults settings.
 	 */
-	public CassandraDownloadConfigBuilder defaults(Logger logger) {
-		Objects.requireNonNull(logger, "Logger must not be null");
+	public CassandraDownloadConfigBuilder(Logger logger) {
+		this(new Slf4jProgressListener(
+				Objects.requireNonNull(logger, "Logger must not be null")));
+	}
+
+	private CassandraDownloadConfigBuilder(IProgressListener progressListener) {
 		fileNaming().overwriteDefault(new UUIDTempNaming());
 		downloadPath().overwriteDefault(new DownloadPath(DOWNLOAD_PATH));
-		progressListener().overwriteDefault(new Slf4jProgressListener(logger));
+		progressListener().overwriteDefault(progressListener);
 		artifactStorePath().overwriteDefault(ARTIFACT_STORE_PATH);
 		downloadPrefix().overwriteDefault(new DownloadPrefix(DOWNLOAD_PREFIX));
 		packageResolver().overwriteDefault(new PackageResolverFactory());
 		userAgent().overwriteDefault(new UserAgent(USER_AGENT));
 		timeoutConfig().overwriteDefault(new TimeoutConfigBuilder()
 				.connectionTimeout(30000).readTimeout(30000).build());
-		return this;
 	}
 
 }

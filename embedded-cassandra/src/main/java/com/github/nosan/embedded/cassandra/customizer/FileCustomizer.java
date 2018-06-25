@@ -25,12 +25,11 @@ import de.flapdoodle.embed.process.distribution.Distribution;
  * Callback interface that can be used to customize a {@link File}.
  *
  * @author Dmytro Nosan
- * @see EnvironmentFileCustomizer
- * @see JVMOptionsFileCustomizer
+ * @see JmxPortCustomizer
+ * @see JVMOptionsCustomizer
+ * @see JavaCompatibilityCustomizer
  * @see AbstractFileCustomizer
  * @see AbstractSourceLineFileCustomizer
- * @see CompositeFileCustomizer
- * @see NoopFileCustomizer
  */
 public interface FileCustomizer {
 

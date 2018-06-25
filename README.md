@@ -25,7 +25,7 @@ public class CassandraTests {
 	@Test
 	public void createUserTable() throws IOException {
 		CassandraStarter cassandraStarter = new CassandraStarter();
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults().build();
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().build();
 		CassandraExecutable executable = cassandraStarter.prepare(cassandraConfig);
 		try {
 			executable.start();

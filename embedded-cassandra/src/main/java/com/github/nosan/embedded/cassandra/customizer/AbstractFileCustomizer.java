@@ -30,7 +30,7 @@ public abstract class AbstractFileCustomizer implements FileCustomizer {
 
 	@Override
 	public final void customize(File file, Distribution distribution) throws IOException {
-		if (isMatch(file, distribution)) {
+		if (file.exists() && file.isFile() && isMatch(file, distribution)) {
 			process(file, distribution);
 		}
 	}
