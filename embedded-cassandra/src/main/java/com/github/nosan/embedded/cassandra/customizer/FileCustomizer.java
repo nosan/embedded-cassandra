@@ -30,6 +30,7 @@ import de.flapdoodle.embed.process.distribution.Distribution;
  * @see AbstractFileCustomizer
  * @see AbstractSourceLineFileCustomizer
  * @see CompositeFileCustomizer
+ * @see NoopFileCustomizer
  */
 public interface FileCustomizer {
 

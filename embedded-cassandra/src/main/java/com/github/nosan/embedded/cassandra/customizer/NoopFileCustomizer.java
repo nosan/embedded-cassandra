@@ -18,40 +18,19 @@ package com.github.nosan.embedded.cassandra.customizer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
 
 import de.flapdoodle.embed.process.distribution.Distribution;
 
 /**
- * A basic class for {@link FileCustomizer FileCustomizers} composition.
+ * No operation {@link FileCustomizer}.
  *
  * @author Dmytro Nosan
- * @see JVMOptionsFileCustomizer
- * @see EnvironmentFileCustomizer
- * @see NoopFileCustomizer
  */
-public class CompositeFileCustomizer implements FileCustomizer {
-
-	private final Set<FileCustomizer> customizers;
-
-	public CompositeFileCustomizer(Set<FileCustomizer> customizers) {
-		this.customizers = Objects.requireNonNull(customizers,
-				"FileCustomizers must not be null");
-	}
-
-	public CompositeFileCustomizer(FileCustomizer... customizers) {
-		this(new LinkedHashSet<>(Arrays.asList(Objects.requireNonNull(customizers,
-				"FileCustomizers must not be null"))));
-	}
+public class NoopFileCustomizer implements FileCustomizer {
 
 	@Override
 	public void customize(File file, Distribution distribution) throws IOException {
-		for (FileCustomizer fileCustomizer : this.customizers) {
-			fileCustomizer.customize(file, distribution);
-		}
+
 	}
 
 }

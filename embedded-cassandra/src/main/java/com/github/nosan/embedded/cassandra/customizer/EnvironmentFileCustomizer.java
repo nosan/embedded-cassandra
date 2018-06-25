@@ -22,8 +22,8 @@ import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.Platform;
 
 /**
- * Environment file customizer. Basic implementation disable `Xloggc` , `jmx.local.port`
- * and `jmx.remote.port`.
+ * Environment {@link FileCustomizer}. Basic implementation disable `Xloggc` ,
+ * `jmx.local.port` and `jmx.remote.port`.
  *
  * @author Dmytro Nosan
  */
