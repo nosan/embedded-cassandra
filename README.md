@@ -1,17 +1,18 @@
 # Embedded Cassandra ![Build Status](https://travis-ci.org/nosan/embedded-cassandra.svg?branch=master)
 
-`Embedded Cassandra` provides an easy way to run `Cassandra` in the unit tests.
+`Embedded Cassandra` provides an easy way to run `Cassandra` in the unit tests. `Embedded Cassandra` is built 
+on top of [Flapdoodle OSS's embed process](https://github.com/flapdoodle-oss/de.flapdoodle.embed.process).
 
 ## License
 
-This project use (http://www.apache.org/licenses/LICENSE-2.0).
+This project use [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 ## Java
 
 Minimum `java` version is `1.8`. Also supports `java 9` and `java 10`.
 
 ## Dependencies
-Embedded Cassandra has `compile` dependency on `de.flapdoodle.embed:de.flapdoodle.embed.process:2.0.3` and 
+Embedded Cassandra has `compile` dependency on `de.flapdoodle.embed:de.flapdoodle.embed.process:2.0.5` and 
 `optional-compile` dependency  on `org.yaml:snakeyaml:1.21` (also supports lower versions)
 
 ## Usage
@@ -24,7 +25,7 @@ public class CassandraTests {
 	@Test
 	public void createUserTable() throws IOException {
 		CassandraStarter cassandraStarter = new CassandraStarter();
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder().build();
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults().build();
 		CassandraExecutable executable = cassandraStarter.prepare(cassandraConfig);
 		try {
 			executable.start();

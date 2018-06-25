@@ -143,13 +143,7 @@ public class CassandraProcess
 			try {
 				killProcess();
 			}
-			catch (RuntimeException ex) {
-				try {
-					TimeUnit.SECONDS.sleep(5);
-				}
-				catch (InterruptedException ignore) {
-					Thread.currentThread().interrupt();
-				}
+			catch (RuntimeException ignore) {
 			}
 		}
 
@@ -359,14 +353,14 @@ public class CassandraProcess
 
 		private final Distribution distribution;
 
-		private final CassandraConfig processConfig;
+		private final CassandraConfig cassandraConfig;
 
 		private final IExtractedFileSet fileSet;
 
-		Command(Distribution distribution, CassandraConfig processConfig,
+		Command(Distribution distribution, CassandraConfig cassandraConfig,
 				IExtractedFileSet fileSet) {
 			this.distribution = distribution;
-			this.processConfig = processConfig;
+			this.cassandraConfig = cassandraConfig;
 			this.fileSet = fileSet;
 		}
 
@@ -387,7 +381,7 @@ public class CassandraProcess
 			File configurationFile = new File(this.fileSet.baseDir(),
 					"cassandra-" + UUID.randomUUID() + ".yaml");
 			try (FileWriter writer = new FileWriter(configurationFile)) {
-				YamlUtils.serialize(this.processConfig.getConfig(), writer);
+				YamlUtils.serialize(this.cassandraConfig.getConfig(), writer);
 			}
 			StringBuilder arg = new StringBuilder();
 			if (this.distribution.getPlatform() == Platform.Windows) {

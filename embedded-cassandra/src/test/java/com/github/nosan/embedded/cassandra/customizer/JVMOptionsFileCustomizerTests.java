@@ -42,10 +42,7 @@ public class JVMOptionsFileCustomizerTests {
 		try {
 			new JVMOptionsFileCustomizer().customize(file,
 					Distribution.detectFor(Version.LATEST));
-
-			assertThat(file).hasContent("-ea\n" + "-Xms128m\n" + "-Xmx512m\n"
-					+ "-Djava.net.preferIPv4Stack=true");
-
+			assertThat(file).hasContent("-Xms128m\n-Xmx256m\n");
 		}
 		finally {
 			Files.deleteIfExists(file.toPath());
