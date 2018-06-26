@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CassandraProcessArguments {
+public class CassandraProcessArgumentsTests {
 
 	@Test
 	public void unixLike() {
