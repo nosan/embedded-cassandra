@@ -100,7 +100,7 @@ public class CassandraTests extends AbstractCassandraTests {
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.3</version>
         <scope>test</scope>
     </dependency>
 
@@ -108,7 +108,7 @@ public class CassandraTests extends AbstractCassandraTests {
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-junit</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.3</version>
         <scope>test</scope>
     </dependency>
 
@@ -116,7 +116,7 @@ public class CassandraTests extends AbstractCassandraTests {
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-testng</artifactId>
-        <version>0.0.2</version>
+        <version>0.0.3</version>
         <scope>test</scope>
     </dependency>
     

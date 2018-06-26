@@ -401,7 +401,7 @@ public class CassandraProcess
 				if (Processes.isProcessRunning(platform, pid)) {
 					boolean killed = (platform != Platform.Windows ? killProcess(pid)
 							: taskKill(pid));
-					if (killed) {
+					if (!killed) {
 						log.warn("Process has not been stopped gracefully.");
 					}
 					this.process.stop();
