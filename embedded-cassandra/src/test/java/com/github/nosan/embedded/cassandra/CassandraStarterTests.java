@@ -33,10 +33,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Dmytro Nosan
  */
-public class CassandraStarterIntegrationTests {
+public class CassandraStarterTests {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(CassandraStarterIntegrationTests.class);
+			.getLogger(CassandraStarterTests.class);
 
 	private static void keyspace(String keyspace, Session session) {
 		session.execute("CREATE KEYSPACE IF NOT EXISTS " + keyspace
