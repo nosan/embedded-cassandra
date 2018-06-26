@@ -36,7 +36,7 @@ public class CassandraTests {
 
 	@ClassRule
 	public static Cassandra cassandra = new Cassandra(
-			new CassandraRuntimeConfigBuilder().defaults(log).build());
+			new CassandraRuntimeConfigBuilder(log).build());
 
 	private static void keyspace(String keyspace, Session session) {
 		session.execute("CREATE KEYSPACE IF NOT EXISTS " + keyspace

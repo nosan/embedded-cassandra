@@ -5,7 +5,7 @@ on top of [Flapdoodle OSS's embed process](https://github.com/flapdoodle-oss/de.
 
 ## License
 
-This project use [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+This project uses [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 ## Java
 
@@ -17,7 +17,7 @@ Embedded Cassandra has `compile` dependency on `de.flapdoodle.embed:de.flapdoodl
 
 ## Usage
 
-Following code will create an `Embedded Cassandra` with the default properties.
+Following code will create an `Embedded Cassandra` with the default configuration.
 
 ```java
 public class CassandraTests {
@@ -25,7 +25,7 @@ public class CassandraTests {
 	@Test
 	public void createUserTable() throws IOException {
 		CassandraStarter cassandraStarter = new CassandraStarter();
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder().defaults().build();
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().build();
 		CassandraExecutable executable = cassandraStarter.prepare(cassandraConfig);
 		try {
 			executable.start();

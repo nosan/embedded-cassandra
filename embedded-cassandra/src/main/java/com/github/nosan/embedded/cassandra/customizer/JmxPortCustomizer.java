@@ -17,20 +17,28 @@
 package com.github.nosan.embedded.cassandra.customizer;
 
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.Platform;
 
 /**
- * Environment {@link FileCustomizer}. Basic implementation to disable `Xloggc` ,
- * `jmx.local.port` and `jmx.remote.port`.
+ * {@link FileCustomizer} to replace $JMX_PORT or JMX_PORT in the `cassandra-env.sh` or
+ * `cassandra-env.ps1` files.
  *
  * @author Dmytro Nosan
  */
-public class EnvironmentFileCustomizer extends AbstractSourceLineFileCustomizer {
+public class JmxPortCustomizer extends AbstractSourceLineFileCustomizer {
 
-	private static final String[] COMMENT_LINE = new String[] {
-			"-Dcassandra.jmx.local.port", "-Dcassandra.jmx.remote.port", "-Xloggc:" };
+	private static final Pattern REGEX = Pattern
+			.compile("(\\s*\\$?JMX_PORT=)((\")\\d+(\")\\s*)");
+
+	private final int port;
+
+	public JmxPortCustomizer(int port) {
+		this.port = port;
+	}
 
 	@Override
 	protected boolean isMatch(File file, Distribution distribution) {
@@ -41,11 +49,10 @@ public class EnvironmentFileCustomizer extends AbstractSourceLineFileCustomizer 
 	}
 
 	@Override
-	protected String processLine(String line, Distribution distribution) {
-		for (String cl : COMMENT_LINE) {
-			if (line.trim().contains(cl)) {
-				return "#" + line;
-			}
+	protected String process(String line, File file, Distribution distribution) {
+		Matcher matcher = REGEX.matcher(line);
+		if (matcher.matches()) {
+			return matcher.replaceAll("$1$3" + this.port + "$4");
 		}
 		return line;
 	}
