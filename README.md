@@ -5,7 +5,7 @@ on top of [Flapdoodle OSS's embed process](https://github.com/flapdoodle-oss/de.
 
 ## License
 
-This project use [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+This project uses [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 ## Java
 
