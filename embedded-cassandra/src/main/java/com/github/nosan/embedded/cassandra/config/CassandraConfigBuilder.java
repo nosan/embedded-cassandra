@@ -15,17 +15,19 @@
  */
 package com.github.nosan.embedded.cassandra.config;
 
+import java.io.IOException;
 import java.time.Duration;
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import com.github.nosan.embedded.cassandra.customizer.CompositeFileCustomizer;
-import com.github.nosan.embedded.cassandra.customizer.EnvironmentFileCustomizer;
 import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
-import com.github.nosan.embedded.cassandra.customizer.JVMOptionsFileCustomizer;
-import com.github.nosan.embedded.cassandra.util.PortUtils;
+import com.github.nosan.embedded.cassandra.customizer.JVMOptionsCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.JmxPortCustomizer;
 import de.flapdoodle.embed.process.builder.AbstractBuilder;
 import de.flapdoodle.embed.process.builder.IProperty;
 import de.flapdoodle.embed.process.builder.TypedProperty;
+import de.flapdoodle.embed.process.runtime.Network;
 
 /**
  * Simple builder for building {@link CassandraConfig}.
@@ -43,23 +45,50 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	private static final TypedProperty<Version> VERSION = TypedProperty.with("Version",
 			Version.class);
 
-	private static final TypedProperty<FileCustomizer> FILE_CUSTOMIZER = TypedProperty
-			.with("FileCustomizer", FileCustomizer.class);
+	private static final TypedProperty<FileCustomizer[]> FILE_CUSTOMIZERS = TypedProperty
+			.with("FileCustomizers", FileCustomizer[].class);
+
+	private static final TypedProperty<Integer> JMX_PORT = TypedProperty.with("JMXPort",
+			Integer.class);
+
+	private static final TypedProperty<String[]> JVM_OPTIONS = TypedProperty
+			.with("JvmOptions", String[].class);
 
 	private static final TypedProperty<Boolean> RANDOM_PORTS = TypedProperty
 			.with("RandomPorts", Boolean.class);
 
 	/**
-	 * Sets default settings.
-	 * @return builder with defaults settings.
+	 * Configure builder with default settings. JMX is disabled by default.
 	 */
-	public CassandraConfigBuilder defaults() {
+	public CassandraConfigBuilder() {
 		config().overwriteDefault(new Config());
 		timeout().overwriteDefault(Duration.ofMinutes(1));
 		version().overwriteDefault(Version.LATEST);
+		jmxPort().overwriteDefault(7199);
+		jvmOptions().overwriteDefault(new String[0]);
 		useRandomPorts().overwriteDefault(false);
-		fileCustomizer().overwriteDefault(new CompositeFileCustomizer(
-				new JVMOptionsFileCustomizer(), new EnvironmentFileCustomizer()));
+		fileCustomizers().overwriteDefault(new FileCustomizer[0]);
+	}
+
+	/**
+	 * Sets Cassandra JMX port.
+	 * @param jmxPort JMX port.
+	 * @return current builder.
+	 * @see JmxPortCustomizer
+	 */
+	public CassandraConfigBuilder jmxPort(int jmxPort) {
+		jmxPort().overwriteDefault(jmxPort);
+		return this;
+	}
+
+	/**
+	 * Sets Cassandra JVM Options.
+	 * @param jvmOptions JVM Options.
+	 * @return current builder
+	 * @see JVMOptionsCustomizer
+	 */
+	public CassandraConfigBuilder jvmOptions(String... jvmOptions) {
+		jvmOptions().set(jvmOptions);
 		return this;
 	}
 
@@ -94,18 +123,19 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	}
 
 	/**
-	 * Sets the cassandra files customizer.
-	 * @param fileCustomizer {@link FileCustomizer} file customizer.
+	 * Sets the cassandra file customizers.
+	 * @param fileCustomizers {@link FileCustomizer} file customizers.
 	 * @return current builder.
+	 * @see FileCustomizer
 	 */
-	public CassandraConfigBuilder fileCustomizer(FileCustomizer fileCustomizer) {
-		fileCustomizer().set(fileCustomizer);
+	public CassandraConfigBuilder fileCustomizers(FileCustomizer... fileCustomizers) {
+		fileCustomizers().set(fileCustomizers);
 		return this;
 	}
 
 	/**
-	 * Use random ports or not.
-	 * @param useRandomPorts use random port value.
+	 * Override {@link Config} and JMX with random ports.
+	 * @param useRandomPorts use random ports.
 	 * @return current builder.
 	 */
 	public CassandraConfigBuilder useRandomPorts(boolean useRandomPorts) {
@@ -115,20 +145,31 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 
 	@Override
 	public CassandraConfig build() {
+		int jmxPort = jmxPort().get();
 		Config config = config().get();
+
 		if (useRandomPorts().get()) {
-			PortUtils.setRandomPorts(config, Objects::nonNull);
+			config.setSslStoragePort(getRandomPort());
+			config.setStoragePort(getRandomPort());
+			config.setNativeTransportPort(getRandomPort());
+			config.setRpcPort(getRandomPort());
+			if (config.getNativeTransportPortSsl() != null) {
+				config.setNativeTransportPortSsl(getRandomPort());
+			}
+			jmxPort = getRandomPort();
 		}
+
 		return new ImmutableCassandraConfig(config, timeout().get(), version().get(),
-				fileCustomizer().get());
+				jmxPort, Arrays.asList(fileCustomizers().get()),
+				Arrays.asList(jvmOptions().get()));
 	}
 
 	/**
 	 * Retrieves file customizer property.
 	 * @return file customizer {@link IProperty}.
 	 */
-	protected IProperty<FileCustomizer> fileCustomizer() {
-		return property(FILE_CUSTOMIZER);
+	protected IProperty<FileCustomizer[]> fileCustomizers() {
+		return property(FILE_CUSTOMIZERS);
 	}
 
 	/**
@@ -156,11 +197,36 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	}
 
 	/**
+	 * Retrieves JMX port property.
+	 * @return JMX port {@link IProperty}.
+	 */
+	protected IProperty<Integer> jmxPort() {
+		return property(JMX_PORT);
+	}
+
+	/**
 	 * Retrieves config property.
 	 * @return config {@link IProperty}.
 	 */
 	protected IProperty<Config> config() {
 		return property(CONFIG);
+	}
+
+	/**
+	 * Retrieves jvm options property.
+	 * @return jvm options {@link IProperty}.
+	 */
+	protected IProperty<String[]> jvmOptions() {
+		return property(JVM_OPTIONS);
+	}
+
+	private int getRandomPort() {
+		try {
+			return Network.getFreeServerPort();
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 	private static final class ImmutableCassandraConfig implements CassandraConfig {
@@ -171,14 +237,21 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 
 		private final Version version;
 
-		private final FileCustomizer fileCustomizer;
+		private final int jmxPort;
+
+		private final List<FileCustomizer> fileCustomizers;
+
+		private final List<String> jvmOptions;
 
 		ImmutableCassandraConfig(Config config, Duration timeout, Version version,
-				FileCustomizer fileCustomizer) {
+				int jmxPort, List<FileCustomizer> fileCustomizers,
+				List<String> jvmOptions) {
 			this.config = config;
 			this.timeout = timeout;
 			this.version = version;
-			this.fileCustomizer = fileCustomizer;
+			this.jmxPort = jmxPort;
+			this.fileCustomizers = Collections.unmodifiableList(fileCustomizers);
+			this.jvmOptions = Collections.unmodifiableList(jvmOptions);
 		}
 
 		@Override
@@ -197,8 +270,18 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 		}
 
 		@Override
-		public FileCustomizer getFileCustomizer() {
-			return this.fileCustomizer;
+		public int getJmxPort() {
+			return this.jmxPort;
+		}
+
+		@Override
+		public List<String> getJvmOptions() {
+			return this.jvmOptions;
+		}
+
+		@Override
+		public List<FileCustomizer> getFileCustomizers() {
+			return this.fileCustomizers;
 		}
 
 	}

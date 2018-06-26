@@ -35,40 +35,30 @@ public class CassandraRuntimeConfigBuilder extends RuntimeConfigBuilder {
 	/**
 	 * Configure builder with default settings. Process output will be redirected to the
 	 * console.
-	 * @return builder with defaults settings.
 	 */
-	public CassandraRuntimeConfigBuilder defaults() {
-		artifactStore()
-				.overwriteDefault(new CassandraArtifactStoreBuilder().defaults().build());
+	public CassandraRuntimeConfigBuilder() {
+		artifactStore().overwriteDefault(new CassandraArtifactStoreBuilder().build());
 		commandLinePostProcessor().overwriteDefault(new ICommandLinePostProcessor.Noop());
 		ProcessOutput processOutput = new ProcessOutput(
 				Processors.namedConsole("[Cassandra > output]"),
 				Processors.namedConsole("[Cassandra > error]"),
 				Processors.namedConsole("[Cassandra > commands]"));
-
 		processOutput().overwriteDefault(processOutput);
-		return this;
 	}
 
 	/**
 	 * Configure builder with default settings and logger.
 	 * @param logger logger for process outputs.
-	 * @return builder with defaults settings.
 	 */
-	public CassandraRuntimeConfigBuilder defaults(Logger logger) {
+	public CassandraRuntimeConfigBuilder(Logger logger) {
 		Objects.requireNonNull(logger, "Logger must not be null");
-		artifactStore().overwriteDefault(
-				new CassandraArtifactStoreBuilder().defaults(logger).build());
+		artifactStore().overwriteDefault(new CassandraArtifactStoreBuilder().build());
 		commandLinePostProcessor().overwriteDefault(new ICommandLinePostProcessor.Noop());
-
 		ProcessOutput processOutput = new ProcessOutput(
 				Processors.logTo(logger, Slf4jLevel.INFO),
 				Processors.logTo(logger, Slf4jLevel.ERROR),
 				Processors.logTo(logger, Slf4jLevel.DEBUG));
-
 		processOutput().overwriteDefault(processOutput);
-
-		return this;
 	}
 
 }

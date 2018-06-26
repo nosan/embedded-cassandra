@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.config;
 
 import java.util.Objects;
 
+import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.io.directories.PropertyOrTempDirInPlatformTempDir;
 import de.flapdoodle.embed.process.store.ArtifactStoreBuilder;
 import de.flapdoodle.embed.process.store.Downloader;
@@ -32,30 +33,25 @@ public class CassandraArtifactStoreBuilder extends ArtifactStoreBuilder {
 
 	/**
 	 * Configure builder with default settings.
-	 * @return builder with defaults settings.
 	 */
-	public CassandraArtifactStoreBuilder defaults() {
-		executableNaming().overwriteDefault(new OriginTempNaming());
-		tempDir().overwriteDefault(new PropertyOrTempDirInPlatformTempDir());
-		downloader().overwriteDefault(new Downloader());
-		download().overwriteDefault(
-				new CassandraDownloadConfigBuilder().defaults().build());
-		return this;
+	public CassandraArtifactStoreBuilder() {
+		this(new CassandraDownloadConfigBuilder().build());
 	}
 
 	/**
 	 * Configure builder with default settings and logger.
 	 * @param logger logger for process outputs.
-	 * @return builder with defaults settings.
 	 */
-	public CassandraArtifactStoreBuilder defaults(Logger logger) {
-		Objects.requireNonNull(logger, "Logger must not be null");
+	public CassandraArtifactStoreBuilder(Logger logger) {
+		this(new CassandraDownloadConfigBuilder(
+				Objects.requireNonNull(logger, "Logger must not be null")).build());
+	}
+
+	private CassandraArtifactStoreBuilder(IDownloadConfig downloadConfig) {
 		executableNaming().overwriteDefault(new OriginTempNaming());
 		tempDir().overwriteDefault(new PropertyOrTempDirInPlatformTempDir());
 		downloader().overwriteDefault(new Downloader());
-		download().overwriteDefault(
-				new CassandraDownloadConfigBuilder().defaults(logger).build());
-		return this;
+		download().overwriteDefault(downloadConfig);
 	}
 
 }

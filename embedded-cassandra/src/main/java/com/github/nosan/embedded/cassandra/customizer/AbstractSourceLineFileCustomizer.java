@@ -17,13 +17,12 @@
 package com.github.nosan.embedded.cassandra.customizer;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import de.flapdoodle.embed.process.distribution.Distribution;
 
@@ -37,26 +36,27 @@ public abstract class AbstractSourceLineFileCustomizer extends AbstractFileCusto
 	@Override
 	protected final void process(File file, Distribution distribution)
 			throws IOException {
-		List<String> lines = new ArrayList<>();
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		try (PrintWriter printWriter = new PrintWriter(result);
+				BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				lines.add(processLine(line, distribution));
+				String process = process(line, file, distribution);
+				printWriter.println(process);
 			}
 		}
 		try (PrintWriter fileWriter = new PrintWriter(new FileWriter(file))) {
-			for (String line : lines) {
-				fileWriter.println(line);
-			}
+			fileWriter.print(result.toString());
 		}
 	}
 
 	/**
 	 * Process the provided line.
 	 * @param line Source line.
+	 * @param file Source {@link File}.
 	 * @param distribution {@link Distribution}.
 	 * @return processed line.
 	 */
-	protected abstract String processLine(String line, Distribution distribution);
+	protected abstract String process(String line, File file, Distribution distribution);
 
 }
