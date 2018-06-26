@@ -17,7 +17,7 @@ Embedded Cassandra has `compile` dependency on `de.flapdoodle.embed:de.flapdoodl
 
 ## Usage
 
-Following code will create an `Embedded Cassandra` with the default properties.
+Following code will create an `Embedded Cassandra` with the default configuration.
 
 ```java
 public class CassandraTests {
