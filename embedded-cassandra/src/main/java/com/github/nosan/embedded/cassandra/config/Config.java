@@ -40,23 +40,23 @@ public class Config {
 
 	private String role_manager = "CassandraRoleManager";
 
-	private Integer permissions_validity_in_ms = 2000;
+	private Long permissions_validity_in_ms = 2000L;
 
 	private Integer permissions_cache_max_entries;
 
-	private Integer permissions_update_interval_in_ms;
+	private Long permissions_update_interval_in_ms;
 
-	private Integer roles_validity_in_ms = 2000;
+	private Long roles_validity_in_ms = 2000L;
 
 	private Integer roles_cache_max_entries;
 
-	private Integer roles_update_interval_in_ms;
+	private Long roles_update_interval_in_ms;
 
-	private Integer credentials_validity_in_ms = 2000;
+	private Long credentials_validity_in_ms = 2000L;
 
 	private Integer credentials_cache_max_entries;
 
-	private Integer credentials_update_interval_in_ms;
+	private Long credentials_update_interval_in_ms;
 
 	private String partitioner = "org.apache.cassandra.dht.Murmur3Partitioner";
 
@@ -66,7 +66,7 @@ public class Config {
 
 	private List<String> hinted_handoff_disabled_datacenters = new ArrayList<>();
 
-	private Integer max_hint_window_in_ms = 10800000;
+	private Long max_hint_window_in_ms = 10800000L;
 
 	private String hints_directory;
 
@@ -100,7 +100,7 @@ public class Config {
 
 	private Long truncate_request_timeout_in_ms = 60000L;
 
-	private Integer streaming_keep_alive_period_in_secs;
+	private Long streaming_keep_alive_period_in_secs;
 
 	private boolean cross_node_timeout = false;
 
@@ -178,9 +178,9 @@ public class Config {
 
 	private Integer native_transport_max_frame_size_in_mb;
 
-	private Long native_transport_max_concurrent_connections;
+	private Integer native_transport_max_concurrent_connections;
 
-	private Long native_transport_max_concurrent_connections_per_ip;
+	private Integer native_transport_max_concurrent_connections_per_ip;
 
 	private Integer max_value_size_in_mb;
 
@@ -212,7 +212,7 @@ public class Config {
 
 	private Integer inter_dc_stream_throughput_outbound_megabits_per_sec;
 
-	private List<String> data_file_directories = new ArrayList<>();
+	private List<String> data_file_directories;
 
 	private String saved_caches_directory;
 
@@ -224,7 +224,7 @@ public class Config {
 
 	private Double commitlog_sync_batch_window_in_ms;
 
-	private Integer commitlog_sync_period_in_ms = 10000;
+	private Long commitlog_sync_period_in_ms = 10000L;
 
 	private Long commitlog_segment_size_in_mb = 32L;
 
@@ -242,15 +242,15 @@ public class Config {
 
 	private Integer cdc_total_space_in_mb;
 
-	private Integer cdc_free_space_check_interval_ms;
+	private Long cdc_free_space_check_interval_ms;
 
 	private String endpoint_snitch = "SimpleSnitch";
 
 	private boolean dynamic_snitch;
 
-	private Integer dynamic_snitch_update_interval_in_ms = 100;
+	private Long dynamic_snitch_update_interval_in_ms = 100L;
 
-	private Integer dynamic_snitch_reset_interval_in_ms = 600000;
+	private Long dynamic_snitch_reset_interval_in_ms = 600000L;
 
 	private Double dynamic_snitch_badness_threshold = 0.1;
 
@@ -274,7 +274,7 @@ public class Config {
 
 	private Integer max_hints_delivery_threads = 2;
 
-	private Integer hints_flush_period_in_ms = 10000;
+	private Long hints_flush_period_in_ms = 10000L;
 
 	private Integer max_hints_file_size_in_mb = 128;
 
@@ -288,23 +288,23 @@ public class Config {
 
 	private Integer trickle_fsync_interval_in_kb = 10240;
 
-	private Long key_cache_size_in_mb;
+	private Integer key_cache_size_in_mb;
 
-	private Integer key_cache_save_period = 14400;
+	private Long key_cache_save_period = 14400L;
 
 	private Integer key_cache_keys_to_save;
 
 	private String row_cache_class_name;
 
-	private Long row_cache_size_in_mb;
+	private Integer row_cache_size_in_mb;
 
-	private Integer row_cache_save_period;
+	private Long row_cache_save_period;
 
 	private Integer row_cache_keys_to_save;
 
-	private Long counter_cache_size_in_mb;
+	private Integer counter_cache_size_in_mb;
 
-	private Integer counter_cache_save_period = 7200;
+	private Long counter_cache_save_period = 7200L;
 
 	private Integer counter_cache_keys_to_save;
 
@@ -326,31 +326,31 @@ public class Config {
 
 	private Integer tombstone_failure_threshold = 100000;
 
-	private Long index_summary_capacity_in_mb;
+	private Integer index_summary_capacity_in_mb;
 
 	private Integer index_summary_resize_interval_in_minutes = 60;
 
-	private Integer gc_log_threshold_in_ms;
+	private Long gc_log_threshold_in_ms;
 
-	private Integer gc_warn_threshold_in_ms = 1000;
+	private Long gc_warn_threshold_in_ms = 1000L;
 
-	private Integer tracetype_query_ttl = 86400;
+	private Long tracetype_query_ttl = 86400L;
 
-	private Integer tracetype_repair_ttl = 604800;
+	private Long tracetype_repair_ttl = 604800L;
 
 	private String otc_coalescing_strategy;
 
-	private Integer otc_coalescing_window_us;
+	private Long otc_coalescing_window_us;
 
 	private Integer otc_coalescing_enough_coalesced_messages;
 
-	private Integer otc_backlog_expiration_interval_ms;
+	private Long otc_backlog_expiration_interval_ms;
 
 	private Integer windows_timer_interval = 1;
 
-	private Long prepared_statements_cache_size_mb;
+	private Integer prepared_statements_cache_size_mb;
 
-	private Long thrift_prepared_statements_cache_size_mb;
+	private Integer thrift_prepared_statements_cache_size_mb;
 
 	private boolean enable_user_defined_functions = false;
 
@@ -364,9 +364,31 @@ public class Config {
 
 	private Long user_defined_function_fail_timeout;
 
+	private Integer thrift_max_message_length_in_mb;
+
+	private Long streaming_socket_timeout_in_ms;
+
+	private Integer rpc_max_threads;
+
 	private boolean back_pressure_enabled = false;
 
 	private ParameterizedClass back_pressure_strategy;
+
+	public Integer getRpcMaxThreads() {
+		return this.rpc_max_threads;
+	}
+
+	public void setRpcMaxThreads(Integer rpcMaxThreads) {
+		this.rpc_max_threads = rpcMaxThreads;
+	}
+
+	public Long getStreamingSocketTimeoutInMs() {
+		return this.streaming_socket_timeout_in_ms;
+	}
+
+	public void setStreamingSocketTimeoutInMs(Long streamingSocketTimeoutInMs) {
+		this.streaming_socket_timeout_in_ms = streamingSocketTimeoutInMs;
+	}
 
 	public String getClusterName() {
 		return this.cluster_name;
@@ -400,11 +422,11 @@ public class Config {
 		this.role_manager = roleManager;
 	}
 
-	public Integer getPermissionsValidityInMs() {
+	public Long getPermissionsValidityInMs() {
 		return this.permissions_validity_in_ms;
 	}
 
-	public void setPermissionsValidityInMs(Integer permissionsValidityInMs) {
+	public void setPermissionsValidityInMs(Long permissionsValidityInMs) {
 		this.permissions_validity_in_ms = permissionsValidityInMs;
 	}
 
@@ -416,19 +438,19 @@ public class Config {
 		this.permissions_cache_max_entries = permissionsCacheMaxEntries;
 	}
 
-	public Integer getPermissionsUpdateIntervalInMs() {
+	public Long getPermissionsUpdateIntervalInMs() {
 		return this.permissions_update_interval_in_ms;
 	}
 
-	public void setPermissionsUpdateIntervalInMs(Integer permissionsUpdateIntervalInMs) {
+	public void setPermissionsUpdateIntervalInMs(Long permissionsUpdateIntervalInMs) {
 		this.permissions_update_interval_in_ms = permissionsUpdateIntervalInMs;
 	}
 
-	public Integer getRolesValidityInMs() {
+	public Long getRolesValidityInMs() {
 		return this.roles_validity_in_ms;
 	}
 
-	public void setRolesValidityInMs(Integer rolesValidityInMs) {
+	public void setRolesValidityInMs(Long rolesValidityInMs) {
 		this.roles_validity_in_ms = rolesValidityInMs;
 	}
 
@@ -440,19 +462,19 @@ public class Config {
 		this.roles_cache_max_entries = rolesCacheMaxEntries;
 	}
 
-	public Integer getRolesUpdateIntervalInMs() {
+	public Long getRolesUpdateIntervalInMs() {
 		return this.roles_update_interval_in_ms;
 	}
 
-	public void setRolesUpdateIntervalInMs(Integer rolesUpdateIntervalInMs) {
+	public void setRolesUpdateIntervalInMs(Long rolesUpdateIntervalInMs) {
 		this.roles_update_interval_in_ms = rolesUpdateIntervalInMs;
 	}
 
-	public Integer getCredentialsValidityInMs() {
+	public Long getCredentialsValidityInMs() {
 		return this.credentials_validity_in_ms;
 	}
 
-	public void setCredentialsValidityInMs(Integer credentialsValidityInMs) {
+	public void setCredentialsValidityInMs(Long credentialsValidityInMs) {
 		this.credentials_validity_in_ms = credentialsValidityInMs;
 	}
 
@@ -464,11 +486,11 @@ public class Config {
 		this.credentials_cache_max_entries = credentialsCacheMaxEntries;
 	}
 
-	public Integer getCredentialsUpdateIntervalInMs() {
+	public Long getCredentialsUpdateIntervalInMs() {
 		return this.credentials_update_interval_in_ms;
 	}
 
-	public void setCredentialsUpdateIntervalInMs(Integer credentialsUpdateIntervalInMs) {
+	public void setCredentialsUpdateIntervalInMs(Long credentialsUpdateIntervalInMs) {
 		this.credentials_update_interval_in_ms = credentialsUpdateIntervalInMs;
 	}
 
@@ -505,11 +527,11 @@ public class Config {
 		this.hinted_handoff_disabled_datacenters = hintedHandoffDisabledDatacenters;
 	}
 
-	public Integer getMaxHintWindowInMs() {
+	public Long getMaxHintWindowInMs() {
 		return this.max_hint_window_in_ms;
 	}
 
-	public void setMaxHintWindowInMs(Integer maxHintWindowInMs) {
+	public void setMaxHintWindowInMs(Long maxHintWindowInMs) {
 		this.max_hint_window_in_ms = maxHintWindowInMs;
 	}
 
@@ -625,12 +647,11 @@ public class Config {
 		this.truncate_request_timeout_in_ms = truncateRequestTimeoutInMs;
 	}
 
-	public Integer getStreamingKeepAlivePeriodInSecs() {
+	public Long getStreamingKeepAlivePeriodInSecs() {
 		return this.streaming_keep_alive_period_in_secs;
 	}
 
-	public void setStreamingKeepAlivePeriodInSecs(
-			Integer streamingKeepAlivePeriodInSecs) {
+	public void setStreamingKeepAlivePeriodInSecs(Long streamingKeepAlivePeriodInSecs) {
 		this.streaming_keep_alive_period_in_secs = streamingKeepAlivePeriodInSecs;
 	}
 
@@ -940,21 +961,21 @@ public class Config {
 		this.native_transport_max_frame_size_in_mb = nativeTransportMaxFrameSizeInMb;
 	}
 
-	public Long getNativeTransportMaxConcurrentConnections() {
+	public Integer getNativeTransportMaxConcurrentConnections() {
 		return this.native_transport_max_concurrent_connections;
 	}
 
 	public void setNativeTransportMaxConcurrentConnections(
-			Long nativeTransportMaxConcurrentConnections) {
+			Integer nativeTransportMaxConcurrentConnections) {
 		this.native_transport_max_concurrent_connections = nativeTransportMaxConcurrentConnections;
 	}
 
-	public Long getNativeTransportMaxConcurrentConnectionsPerIp() {
+	public Integer getNativeTransportMaxConcurrentConnectionsPerIp() {
 		return this.native_transport_max_concurrent_connections_per_ip;
 	}
 
 	public void setNativeTransportMaxConcurrentConnectionsPerIp(
-			Long nativeTransportMaxConcurrentConnectionsPerIp) {
+			Integer nativeTransportMaxConcurrentConnectionsPerIp) {
 		this.native_transport_max_concurrent_connections_per_ip = nativeTransportMaxConcurrentConnectionsPerIp;
 	}
 
@@ -1130,11 +1151,11 @@ public class Config {
 		this.commitlog_sync_batch_window_in_ms = commitlogSyncBatchWindowInMs;
 	}
 
-	public Integer getCommitlogSyncPeriodInMs() {
+	public Long getCommitlogSyncPeriodInMs() {
 		return this.commitlog_sync_period_in_ms;
 	}
 
-	public void setCommitlogSyncPeriodInMs(Integer commitlogSyncPeriodInMs) {
+	public void setCommitlogSyncPeriodInMs(Long commitlogSyncPeriodInMs) {
 		this.commitlog_sync_period_in_ms = commitlogSyncPeriodInMs;
 	}
 
@@ -1204,11 +1225,11 @@ public class Config {
 		this.cdc_total_space_in_mb = cdcTotalSpaceInMb;
 	}
 
-	public Integer getCdcFreeSpaceCheckIntervalMs() {
+	public Long getCdcFreeSpaceCheckIntervalMs() {
 		return this.cdc_free_space_check_interval_ms;
 	}
 
-	public void setCdcFreeSpaceCheckIntervalMs(Integer cdcFreeSpaceCheckIntervalMs) {
+	public void setCdcFreeSpaceCheckIntervalMs(Long cdcFreeSpaceCheckIntervalMs) {
 		this.cdc_free_space_check_interval_ms = cdcFreeSpaceCheckIntervalMs;
 	}
 
@@ -1228,21 +1249,19 @@ public class Config {
 		this.dynamic_snitch = dynamicSnitch;
 	}
 
-	public Integer getDynamicSnitchUpdateIntervalInMs() {
+	public Long getDynamicSnitchUpdateIntervalInMs() {
 		return this.dynamic_snitch_update_interval_in_ms;
 	}
 
-	public void setDynamicSnitchUpdateIntervalInMs(
-			Integer dynamicSnitchUpdateIntervalInMs) {
+	public void setDynamicSnitchUpdateIntervalInMs(Long dynamicSnitchUpdateIntervalInMs) {
 		this.dynamic_snitch_update_interval_in_ms = dynamicSnitchUpdateIntervalInMs;
 	}
 
-	public Integer getDynamicSnitchResetIntervalInMs() {
+	public Long getDynamicSnitchResetIntervalInMs() {
 		return this.dynamic_snitch_reset_interval_in_ms;
 	}
 
-	public void setDynamicSnitchResetIntervalInMs(
-			Integer dynamicSnitchResetIntervalInMs) {
+	public void setDynamicSnitchResetIntervalInMs(Long dynamicSnitchResetIntervalInMs) {
 		this.dynamic_snitch_reset_interval_in_ms = dynamicSnitchResetIntervalInMs;
 	}
 
@@ -1329,11 +1348,11 @@ public class Config {
 		this.max_hints_delivery_threads = maxHintsDeliveryThreads;
 	}
 
-	public Integer getHintsFlushPeriodInMs() {
+	public Long getHintsFlushPeriodInMs() {
 		return this.hints_flush_period_in_ms;
 	}
 
-	public void setHintsFlushPeriodInMs(Integer hintsFlushPeriodInMs) {
+	public void setHintsFlushPeriodInMs(Long hintsFlushPeriodInMs) {
 		this.hints_flush_period_in_ms = hintsFlushPeriodInMs;
 	}
 
@@ -1386,19 +1405,19 @@ public class Config {
 		this.trickle_fsync_interval_in_kb = trickleFsyncIntervalInKb;
 	}
 
-	public Long getKeyCacheSizeInMb() {
+	public Integer getKeyCacheSizeInMb() {
 		return this.key_cache_size_in_mb;
 	}
 
-	public void setKeyCacheSizeInMb(Long keyCacheSizeInMb) {
+	public void setKeyCacheSizeInMb(Integer keyCacheSizeInMb) {
 		this.key_cache_size_in_mb = keyCacheSizeInMb;
 	}
 
-	public Integer getKeyCacheSavePeriod() {
+	public Long getKeyCacheSavePeriod() {
 		return this.key_cache_save_period;
 	}
 
-	public void setKeyCacheSavePeriod(Integer keyCacheSavePeriod) {
+	public void setKeyCacheSavePeriod(Long keyCacheSavePeriod) {
 		this.key_cache_save_period = keyCacheSavePeriod;
 	}
 
@@ -1418,19 +1437,19 @@ public class Config {
 		this.row_cache_class_name = rowCacheClassName;
 	}
 
-	public Long getRowCacheSizeInMb() {
+	public Integer getRowCacheSizeInMb() {
 		return this.row_cache_size_in_mb;
 	}
 
-	public void setRowCacheSizeInMb(Long rowCacheSizeInMb) {
+	public void setRowCacheSizeInMb(Integer rowCacheSizeInMb) {
 		this.row_cache_size_in_mb = rowCacheSizeInMb;
 	}
 
-	public Integer getRowCacheSavePeriod() {
+	public Long getRowCacheSavePeriod() {
 		return this.row_cache_save_period;
 	}
 
-	public void setRowCacheSavePeriod(Integer rowCacheSavePeriod) {
+	public void setRowCacheSavePeriod(Long rowCacheSavePeriod) {
 		this.row_cache_save_period = rowCacheSavePeriod;
 	}
 
@@ -1442,19 +1461,19 @@ public class Config {
 		this.row_cache_keys_to_save = rowCacheKeysToSave;
 	}
 
-	public Long getCounterCacheSizeInMb() {
+	public Integer getCounterCacheSizeInMb() {
 		return this.counter_cache_size_in_mb;
 	}
 
-	public void setCounterCacheSizeInMb(Long counterCacheSizeInMb) {
+	public void setCounterCacheSizeInMb(Integer counterCacheSizeInMb) {
 		this.counter_cache_size_in_mb = counterCacheSizeInMb;
 	}
 
-	public Integer getCounterCacheSavePeriod() {
+	public Long getCounterCacheSavePeriod() {
 		return this.counter_cache_save_period;
 	}
 
-	public void setCounterCacheSavePeriod(Integer counterCacheSavePeriod) {
+	public void setCounterCacheSavePeriod(Long counterCacheSavePeriod) {
 		this.counter_cache_save_period = counterCacheSavePeriod;
 	}
 
@@ -1541,11 +1560,11 @@ public class Config {
 		this.tombstone_failure_threshold = tombstoneFailureThreshold;
 	}
 
-	public Long getIndexSummaryCapacityInMb() {
+	public Integer getIndexSummaryCapacityInMb() {
 		return this.index_summary_capacity_in_mb;
 	}
 
-	public void setIndexSummaryCapacityInMb(Long indexSummaryCapacityInMb) {
+	public void setIndexSummaryCapacityInMb(Integer indexSummaryCapacityInMb) {
 		this.index_summary_capacity_in_mb = indexSummaryCapacityInMb;
 	}
 
@@ -1558,16 +1577,20 @@ public class Config {
 		this.index_summary_resize_interval_in_minutes = indexSummaryResizeIntervalInMinutes;
 	}
 
-	public Integer getGcLogThresholdInMs() {
+	public Long getGcLogThresholdInMs() {
 		return this.gc_log_threshold_in_ms;
 	}
 
-	public void setGcLogThresholdInMs(Integer gcLogThresholdInMs) {
+	public void setGcLogThresholdInMs(Long gcLogThresholdInMs) {
 		this.gc_log_threshold_in_ms = gcLogThresholdInMs;
 	}
 
-	public Integer getGcWarnThresholdInMs() {
+	public Long getGcWarnThresholdInMs() {
 		return this.gc_warn_threshold_in_ms;
+	}
+
+	public void setGcWarnThresholdInMs(Long gcWarnThresholdInMs) {
+		this.gc_warn_threshold_in_ms = gcWarnThresholdInMs;
 	}
 
 	public MemtableAllocationType getMemtableAllocationType() {
@@ -1578,23 +1601,19 @@ public class Config {
 		this.memtable_allocation_type = memtableAllocationType;
 	}
 
-	public void setGcWarnThresholdInMs(Integer gcWarnThresholdInMs) {
-		this.gc_warn_threshold_in_ms = gcWarnThresholdInMs;
-	}
-
-	public Integer getTracetypeQueryTtl() {
+	public Long getTracetypeQueryTtl() {
 		return this.tracetype_query_ttl;
 	}
 
-	public void setTracetypeQueryTtl(Integer tracetypeQueryTtl) {
+	public void setTracetypeQueryTtl(Long tracetypeQueryTtl) {
 		this.tracetype_query_ttl = tracetypeQueryTtl;
 	}
 
-	public Integer getTracetypeRepairTtl() {
+	public Long getTracetypeRepairTtl() {
 		return this.tracetype_repair_ttl;
 	}
 
-	public void setTracetypeRepairTtl(Integer tracetypeRepairTtl) {
+	public void setTracetypeRepairTtl(Long tracetypeRepairTtl) {
 		this.tracetype_repair_ttl = tracetypeRepairTtl;
 	}
 
@@ -1606,11 +1625,11 @@ public class Config {
 		this.otc_coalescing_strategy = otcCoalescingStrategy;
 	}
 
-	public Integer getOtcCoalescingWindowUs() {
+	public Long getOtcCoalescingWindowUs() {
 		return this.otc_coalescing_window_us;
 	}
 
-	public void setOtcCoalescingWindowUs(Integer otcCoalescingWindowUs) {
+	public void setOtcCoalescingWindowUs(Long otcCoalescingWindowUs) {
 		this.otc_coalescing_window_us = otcCoalescingWindowUs;
 	}
 
@@ -1623,12 +1642,11 @@ public class Config {
 		this.otc_coalescing_enough_coalesced_messages = otcCoalescingEnoughCoalescedMessages;
 	}
 
-	public Integer getOtcBacklogExpirationIntervalMs() {
+	public Long getOtcBacklogExpirationIntervalMs() {
 		return this.otc_backlog_expiration_interval_ms;
 	}
 
-	public void setOtcBacklogExpirationIntervalMs(
-			Integer otcBacklogExpirationIntervalMs) {
+	public void setOtcBacklogExpirationIntervalMs(Long otcBacklogExpirationIntervalMs) {
 		this.otc_backlog_expiration_interval_ms = otcBacklogExpirationIntervalMs;
 	}
 
@@ -1640,20 +1658,20 @@ public class Config {
 		this.windows_timer_interval = windowsTimerInterval;
 	}
 
-	public Long getPreparedStatementsCacheSizeMb() {
+	public Integer getPreparedStatementsCacheSizeMb() {
 		return this.prepared_statements_cache_size_mb;
 	}
 
-	public void setPreparedStatementsCacheSizeMb(Long preparedStatementsCacheSizeMb) {
+	public void setPreparedStatementsCacheSizeMb(Integer preparedStatementsCacheSizeMb) {
 		this.prepared_statements_cache_size_mb = preparedStatementsCacheSizeMb;
 	}
 
-	public Long getThriftPreparedStatementsCacheSizeMb() {
+	public Integer getThriftPreparedStatementsCacheSizeMb() {
 		return this.thrift_prepared_statements_cache_size_mb;
 	}
 
 	public void setThriftPreparedStatementsCacheSizeMb(
-			Long thriftPreparedStatementsCacheSizeMb) {
+			Integer thriftPreparedStatementsCacheSizeMb) {
 		this.thrift_prepared_statements_cache_size_mb = thriftPreparedStatementsCacheSizeMb;
 	}
 
@@ -1729,6 +1747,14 @@ public class Config {
 
 	public void setDiskAccessMode(DiskAccessMode diskAccessMode) {
 		this.disk_access_mode = diskAccessMode;
+	}
+
+	public Integer getThriftMaxMessageLengthInMb() {
+		return this.thrift_max_message_length_in_mb;
+	}
+
+	public void setThriftMaxMessageLengthInMb(Integer thriftMaxMessageLengthInMb) {
+		this.thrift_max_message_length_in_mb = thriftMaxMessageLengthInMb;
 	}
 
 	/**
