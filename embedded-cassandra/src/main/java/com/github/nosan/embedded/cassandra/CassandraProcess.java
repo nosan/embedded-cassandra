@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import com.github.nosan.embedded.cassandra.config.CassandraConfig;
 import com.github.nosan.embedded.cassandra.config.Config;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
 import com.github.nosan.embedded.cassandra.customizer.JVMOptionsCustomizer;
 import com.github.nosan.embedded.cassandra.customizer.JavaCompatibilityCustomizer;
@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Nosan
  */
 public class CassandraProcess
-		extends AbstractProcess<CassandraConfig, CassandraExecutable, CassandraProcess> {
+		extends AbstractProcess<ExecutableConfig, CassandraExecutable, CassandraProcess> {
 
 	private static final Logger log = LoggerFactory.getLogger(CassandraProcess.class);
 
@@ -73,7 +73,7 @@ public class CassandraProcess
 
 	private ProcessControl process;
 
-	CassandraProcess(Distribution distribution, CassandraConfig config,
+	CassandraProcess(Distribution distribution, ExecutableConfig config,
 			IRuntimeConfig runtimeConfig, CassandraExecutable executable)
 			throws IOException {
 		super(distribution, config, runtimeConfig, executable);
@@ -87,18 +87,18 @@ public class CassandraProcess
 
 	@Override
 	protected List<String> getCommandLine(Distribution distribution,
-			CassandraConfig cassandraConfig, IExtractedFileSet fileSet)
+			ExecutableConfig executableConfig, IExtractedFileSet fileSet)
 			throws IOException {
 
 		this.distribution = distribution;
 
 		FileCustomizers fileCustomizers = new FileCustomizers(distribution,
-				cassandraConfig, fileSet);
+				executableConfig, fileSet);
 		fileCustomizers.customize();
 
 		File configurationFile = new File(fileSet.baseDir(), "cassandra.yaml");
 		try (FileWriter writer = new FileWriter(configurationFile)) {
-			YamlUtils.serialize(cassandraConfig.getConfig(), writer);
+			YamlUtils.serialize(executableConfig.getConfig(), writer);
 		}
 
 		ProcessArguments processArguments = new ProcessArguments(distribution, fileSet,
@@ -166,14 +166,14 @@ public class CassandraProcess
 
 		private final Distribution distribution;
 
-		private final CassandraConfig cassandraConfig;
+		private final ExecutableConfig executableConfig;
 
 		private final IExtractedFileSet fileSet;
 
-		FileCustomizers(Distribution distribution, CassandraConfig cassandraConfig,
+		FileCustomizers(Distribution distribution, ExecutableConfig executableConfig,
 				IExtractedFileSet fileSet) {
 			this.distribution = distribution;
-			this.cassandraConfig = cassandraConfig;
+			this.executableConfig = executableConfig;
 			this.fileSet = fileSet;
 		}
 
@@ -183,7 +183,7 @@ public class CassandraProcess
 		 */
 		void customize() throws IOException {
 
-			CassandraConfig config = this.cassandraConfig;
+			ExecutableConfig config = this.executableConfig;
 
 			List<FileCustomizer> fileCustomizers = new ArrayList<>(
 					getDefaultCustomizers());
@@ -379,15 +379,15 @@ public class CassandraProcess
 
 		private final IRuntimeConfig runtimeConfig;
 
-		private final CassandraConfig cassandraConfig;
+		private final ExecutableConfig executableConfig;
 
 		private final ProcessControl process;
 
 		ProcessKiller(Distribution distribution, IRuntimeConfig runtimeConfig,
-				CassandraConfig cassandraConfig, ProcessControl process) {
+				ExecutableConfig executableConfig, ProcessControl process) {
 			this.distribution = distribution;
 			this.runtimeConfig = runtimeConfig;
-			this.cassandraConfig = cassandraConfig;
+			this.executableConfig = executableConfig;
 			this.process = process;
 		}
 
@@ -412,7 +412,7 @@ public class CassandraProcess
 		private boolean killProcess(long pid) {
 			IStreamProcessor output = StreamToLineProcessor
 					.wrap(this.runtimeConfig.getProcessOutput().getCommands());
-			ISupportConfig sc = this.cassandraConfig.supportConfig();
+			ISupportConfig sc = this.executableConfig.supportConfig();
 			Platform pl = this.distribution.getPlatform();
 			return Processes.killProcess(sc, pl, output, pid)
 					|| Processes.termProcess(sc, pl, output, pid)
@@ -424,7 +424,7 @@ public class CassandraProcess
 		private boolean taskKill(long pid) {
 			IStreamProcessor output = StreamToLineProcessor
 					.wrap(this.runtimeConfig.getProcessOutput().getCommands());
-			ISupportConfig supportConfig = this.cassandraConfig.supportConfig();
+			ISupportConfig supportConfig = this.executableConfig.supportConfig();
 			return ProcessControl.executeCommandLine(supportConfig, "[taskkill process]",
 					new ProcessConfig(
 							Arrays.asList("taskkill", "/F", "/T", "/pid", "" + pid),

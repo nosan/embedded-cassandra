@@ -30,19 +30,18 @@ import org.slf4j.LoggerFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraArtifactStoreBuilder}.
+ * Tests for {@link ArtifactStoreBuilder}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraArtifactStoreBuilderTests {
+public class ArtifactStoreBuilderTests {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(CassandraArtifactStoreBuilderTests.class);
+			.getLogger(ArtifactStoreBuilderTests.class);
 
 	@Test
 	public void defaults() throws Exception {
-		IArtifactStore artifactStore = unwrap(
-				new CassandraArtifactStoreBuilder().build());
+		IArtifactStore artifactStore = unwrap(new ArtifactStoreBuilder().build());
 
 		assertThat(ReflectionUtils.getField("_downloader", artifactStore))
 				.isInstanceOf(Downloader.class);
@@ -66,8 +65,7 @@ public class CassandraArtifactStoreBuilderTests {
 	@Test
 	public void defaultsLogger() throws Exception {
 
-		IArtifactStore artifactStore = unwrap(
-				new CassandraArtifactStoreBuilder(log).build());
+		IArtifactStore artifactStore = unwrap(new ArtifactStoreBuilder(log).build());
 
 		assertThat(ReflectionUtils.getField("_downloader", artifactStore))
 				.isInstanceOf(Downloader.class);

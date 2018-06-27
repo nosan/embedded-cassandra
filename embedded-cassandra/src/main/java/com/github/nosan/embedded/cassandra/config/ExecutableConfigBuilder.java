@@ -30,11 +30,11 @@ import de.flapdoodle.embed.process.builder.TypedProperty;
 import de.flapdoodle.embed.process.runtime.Network;
 
 /**
- * Simple builder for building {@link CassandraConfig}.
+ * Simple builder for building {@link ExecutableConfig}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
+public class ExecutableConfigBuilder extends AbstractBuilder<ExecutableConfig> {
 
 	private static final TypedProperty<Config> CONFIG = TypedProperty.with("Config",
 			Config.class);
@@ -60,7 +60,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	/**
 	 * Configure builder with default settings. JMX is disabled by default.
 	 */
-	public CassandraConfigBuilder() {
+	public ExecutableConfigBuilder() {
 		config().overwriteDefault(new Config());
 		timeout().overwriteDefault(Duration.ofMinutes(1));
 		version().overwriteDefault(Version.LATEST);
@@ -71,23 +71,23 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	}
 
 	/**
-	 * Sets Cassandra JMX port.
+	 * Sets Cassandra's JMX port.
 	 * @param jmxPort JMX port.
 	 * @return current builder.
 	 * @see JmxPortCustomizer
 	 */
-	public CassandraConfigBuilder jmxPort(int jmxPort) {
+	public ExecutableConfigBuilder jmxPort(int jmxPort) {
 		jmxPort().overwriteDefault(jmxPort);
 		return this;
 	}
 
 	/**
-	 * Sets Cassandra JVM Options.
+	 * Sets Cassandra's JVM Options.
 	 * @param jvmOptions JVM Options.
 	 * @return current builder
 	 * @see JVMOptionsCustomizer
 	 */
-	public CassandraConfigBuilder jvmOptions(String... jvmOptions) {
+	public ExecutableConfigBuilder jvmOptions(String... jvmOptions) {
 		jvmOptions().set(jvmOptions);
 		return this;
 	}
@@ -97,7 +97,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @param version cassandra version.
 	 * @return current builder
 	 */
-	public CassandraConfigBuilder version(Version version) {
+	public ExecutableConfigBuilder version(Version version) {
 		version().set(version);
 		return this;
 	}
@@ -107,7 +107,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @param timeout cassandra startup timeout.
 	 * @return current builder.
 	 */
-	public CassandraConfigBuilder timeout(Duration timeout) {
+	public ExecutableConfigBuilder timeout(Duration timeout) {
 		timeout().set(timeout);
 		return this;
 	}
@@ -117,7 +117,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @param config cassandra config.
 	 * @return current builder.
 	 */
-	public CassandraConfigBuilder config(Config config) {
+	public ExecutableConfigBuilder config(Config config) {
 		config().set(config);
 		return this;
 	}
@@ -128,7 +128,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @return current builder.
 	 * @see FileCustomizer
 	 */
-	public CassandraConfigBuilder fileCustomizers(FileCustomizer... fileCustomizers) {
+	public ExecutableConfigBuilder fileCustomizers(FileCustomizer... fileCustomizers) {
 		fileCustomizers().set(fileCustomizers);
 		return this;
 	}
@@ -138,13 +138,13 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	 * @param useRandomPorts use random ports.
 	 * @return current builder.
 	 */
-	public CassandraConfigBuilder useRandomPorts(boolean useRandomPorts) {
+	public ExecutableConfigBuilder useRandomPorts(boolean useRandomPorts) {
 		useRandomPorts().set(useRandomPorts);
 		return this;
 	}
 
 	@Override
-	public CassandraConfig build() {
+	public ExecutableConfig build() {
 		int jmxPort = jmxPort().get();
 
 		Config config = config().get();
@@ -181,7 +181,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 			jmxPort = getRandomPort();
 		}
 
-		return new ImmutableCassandraConfig(config, timeout().get(), version().get(),
+		return new ImmutableExecutableConfig(config, timeout().get(), version().get(),
 				jmxPort, Arrays.asList(fileCustomizers().get()),
 				Arrays.asList(jvmOptions().get()));
 	}
@@ -251,7 +251,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 		}
 	}
 
-	private static final class ImmutableCassandraConfig implements CassandraConfig {
+	private static final class ImmutableExecutableConfig implements ExecutableConfig {
 
 		private final Config config;
 
@@ -265,7 +265,7 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 
 		private final List<String> jvmOptions;
 
-		ImmutableCassandraConfig(Config config, Duration timeout, Version version,
+		ImmutableExecutableConfig(Config config, Duration timeout, Version version,
 				int jmxPort, List<FileCustomizer> fileCustomizers,
 				List<String> jvmOptions) {
 			this.config = config;
