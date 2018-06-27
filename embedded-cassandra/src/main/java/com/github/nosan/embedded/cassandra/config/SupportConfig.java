@@ -39,7 +39,7 @@ class SupportConfig implements ISupportConfig {
 
 	@Override
 	public long maxStopTimeoutMillis() {
-		return TimeUnit.SECONDS.toMillis(10);
+		return TimeUnit.SECONDS.toMillis(15);
 	}
 
 	@Override

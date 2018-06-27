@@ -404,7 +404,14 @@ public class CassandraProcess
 					if (!killed) {
 						log.warn("Process has not been stopped gracefully.");
 					}
-					this.process.stop();
+					try {
+						this.process.stop();
+					}
+					catch (RuntimeException ex) {
+						if (Processes.isProcessRunning(platform, pid)) {
+							throw ex;
+						}
+					}
 				}
 			}
 		}
