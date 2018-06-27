@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.config;
 
 import java.util.Objects;
 
-import de.flapdoodle.embed.process.config.store.DownloadConfigBuilder;
 import de.flapdoodle.embed.process.config.store.DownloadPath;
 import de.flapdoodle.embed.process.config.store.TimeoutConfigBuilder;
 import de.flapdoodle.embed.process.extract.UUIDTempNaming;
@@ -29,11 +28,13 @@ import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
 import org.slf4j.Logger;
 
 /**
- * {@link DownloadConfigBuilder} builder with defaults methods.
+ * {@link de.flapdoodle.embed.process.config.store.DownloadConfigBuilder} builder with
+ * defaults methods.
  *
  * @author Dmytro Nosan
  */
-public class CassandraDownloadConfigBuilder extends DownloadConfigBuilder {
+public class DownloadConfigBuilder
+		extends de.flapdoodle.embed.process.config.store.DownloadConfigBuilder {
 
 	private static final String USER_AGENT = "Mozilla/5.0 (compatible; Embedded Cassandra; "
 			+ "+https://github" + ".com/nosan/embedded-cassandra)";
@@ -49,7 +50,7 @@ public class CassandraDownloadConfigBuilder extends DownloadConfigBuilder {
 	 * Configure builder with default settings. {@link StandardConsoleProgressListener}
 	 * listener will be used.
 	 */
-	public CassandraDownloadConfigBuilder() {
+	public DownloadConfigBuilder() {
 		this(new StandardConsoleProgressListener());
 	}
 
@@ -57,12 +58,12 @@ public class CassandraDownloadConfigBuilder extends DownloadConfigBuilder {
 	 * Configure builder with default settings and logger.
 	 * @param logger logger for process outputs.
 	 */
-	public CassandraDownloadConfigBuilder(Logger logger) {
+	public DownloadConfigBuilder(Logger logger) {
 		this(new Slf4jProgressListener(
 				Objects.requireNonNull(logger, "Logger must not be null")));
 	}
 
-	private CassandraDownloadConfigBuilder(IProgressListener progressListener) {
+	private DownloadConfigBuilder(IProgressListener progressListener) {
 		fileNaming().overwriteDefault(new UUIDTempNaming());
 		downloadPath().overwriteDefault(new DownloadPath(DOWNLOAD_PATH));
 		progressListener().overwriteDefault(progressListener);

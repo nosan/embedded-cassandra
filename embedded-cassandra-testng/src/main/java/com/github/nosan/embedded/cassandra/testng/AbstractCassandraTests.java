@@ -21,9 +21,9 @@ import java.util.Objects;
 
 import com.github.nosan.embedded.cassandra.CassandraExecutable;
 import com.github.nosan.embedded.cassandra.CassandraStarter;
-import com.github.nosan.embedded.cassandra.config.CassandraConfig;
-import com.github.nosan.embedded.cassandra.config.CassandraConfigBuilder;
-import com.github.nosan.embedded.cassandra.config.CassandraRuntimeConfigBuilder;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
+import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -32,8 +32,8 @@ import org.testng.annotations.BeforeClass;
  * Abstract Class for running an embedded cassandra.
  *
  * @author Dmytro Nosan
- * @see CassandraRuntimeConfigBuilder
- * @see CassandraConfigBuilder
+ * @see RuntimeConfigBuilder
+ * @see ExecutableConfigBuilder
  */
 public abstract class AbstractCassandraTests {
 
@@ -41,27 +41,27 @@ public abstract class AbstractCassandraTests {
 
 	private final IRuntimeConfig runtimeConfig;
 
-	private final CassandraConfig cassandraConfig;
+	private final ExecutableConfig executableConfig;
 
 	public AbstractCassandraTests(IRuntimeConfig runtimeConfig,
-			CassandraConfig cassandraConfig) {
+			ExecutableConfig executableConfig) {
 		this.runtimeConfig = Objects.requireNonNull(runtimeConfig,
 				"RuntimeConfig must not be null");
-		this.cassandraConfig = Objects.requireNonNull(cassandraConfig,
+		this.executableConfig = Objects.requireNonNull(executableConfig,
 				"Cassandra Config must not be null");
 	}
 
 	public AbstractCassandraTests(IRuntimeConfig runtimeConfig) {
-		this(runtimeConfig, new CassandraConfigBuilder().useRandomPorts(true).build());
+		this(runtimeConfig, new ExecutableConfigBuilder().useRandomPorts(true).build());
 	}
 
-	public AbstractCassandraTests(CassandraConfig cassandraConfig) {
-		this(new CassandraRuntimeConfigBuilder().build(), cassandraConfig);
+	public AbstractCassandraTests(ExecutableConfig executableConfig) {
+		this(new RuntimeConfigBuilder().build(), executableConfig);
 	}
 
 	public AbstractCassandraTests() {
-		this(new CassandraRuntimeConfigBuilder().build(),
-				new CassandraConfigBuilder().useRandomPorts(true).build());
+		this(new RuntimeConfigBuilder().build(),
+				new ExecutableConfigBuilder().useRandomPorts(true).build());
 	}
 
 	/**
@@ -76,8 +76,8 @@ public abstract class AbstractCassandraTests {
 	 * Retrieves an embedded cassandra config.
 	 * @return Cassandra config.
 	 */
-	public CassandraConfig getCassandraConfig() {
-		return this.cassandraConfig;
+	public ExecutableConfig getExecutableConfig() {
+		return this.executableConfig;
 	}
 
 	/**
@@ -87,9 +87,9 @@ public abstract class AbstractCassandraTests {
 	@BeforeClass
 	public void startCassandra() throws IOException {
 		IRuntimeConfig runtimeConfig = getRuntimeConfig();
-		CassandraConfig cassandraConfig = getCassandraConfig();
+		ExecutableConfig executableConfig = getExecutableConfig();
 		CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
-		this.executable = cassandraStarter.prepare(cassandraConfig);
+		this.executable = cassandraStarter.prepare(executableConfig);
 		this.executable.start();
 
 	}

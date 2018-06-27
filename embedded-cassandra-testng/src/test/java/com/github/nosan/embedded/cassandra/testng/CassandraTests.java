@@ -18,8 +18,8 @@ package com.github.nosan.embedded.cassandra.testng;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.config.CassandraRuntimeConfigBuilder;
 import com.github.nosan.embedded.cassandra.config.Config;
+import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -34,7 +34,7 @@ public class CassandraTests extends AbstractCassandraTests {
 	private static final Logger log = LoggerFactory.getLogger(CassandraTests.class);
 
 	public CassandraTests() {
-		super(new CassandraRuntimeConfigBuilder(log).build());
+		super(new RuntimeConfigBuilder(log).build());
 	}
 
 	private static void keyspace(String keyspace, Session session) {
@@ -54,7 +54,7 @@ public class CassandraTests extends AbstractCassandraTests {
 
 	@Test
 	public void createUserTable() {
-		try (Cluster cluster = cluster(getCassandraConfig().getConfig())) {
+		try (Cluster cluster = cluster(getExecutableConfig().getConfig())) {
 			Session session = cluster.connect();
 			keyspace("test", session);
 			table("test", "user", session);
@@ -63,7 +63,7 @@ public class CassandraTests extends AbstractCassandraTests {
 
 	@Test
 	public void createRolesTable() {
-		try (Cluster cluster = cluster(getCassandraConfig().getConfig())) {
+		try (Cluster cluster = cluster(getExecutableConfig().getConfig())) {
 			Session session = cluster.connect();
 			keyspace("test", session);
 			table("test", "roles", session);

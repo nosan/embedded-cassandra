@@ -25,7 +25,7 @@ import de.flapdoodle.embed.process.config.ISupportConfig;
  *
  * @author Dmytro Nosan
  */
-class CassandraSupportConfig implements ISupportConfig {
+class SupportConfig implements ISupportConfig {
 
 	@Override
 	public String getName() {

@@ -25,12 +25,12 @@ import de.flapdoodle.embed.process.config.ISupportConfig;
 import de.flapdoodle.embed.process.distribution.IVersion;
 
 /**
- * An Embedded Cassandra {@link IExecutableProcessConfig process config}.
+ * An Embedded Cassandra {@link IExecutableProcessConfig executable config}.
  *
  * @author Dmytro Nosan
- * @see CassandraConfigBuilder
+ * @see ExecutableConfigBuilder
  */
-public interface CassandraConfig extends IExecutableProcessConfig {
+public interface ExecutableConfig extends IExecutableProcessConfig {
 
 	/**
 	 * Retrieves an embedded cassandra config.
@@ -82,11 +82,11 @@ public interface CassandraConfig extends IExecutableProcessConfig {
 	/**
 	 * Retrieves support config.
 	 * @return {@link ISupportConfig} support config.
-	 * @see CassandraSupportConfig
+	 * @see SupportConfig
 	 */
 	@Override
 	default ISupportConfig supportConfig() {
-		return new CassandraSupportConfig();
+		return new SupportConfig();
 	}
 
 }

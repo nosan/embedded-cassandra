@@ -21,13 +21,13 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraSupportConfig}.
+ * Tests for {@link SupportConfig}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraSupportConfigTests {
+public class SupportConfigTests {
 
-	private final CassandraSupportConfig supportConfig = new CassandraSupportConfig();
+	private final SupportConfig supportConfig = new SupportConfig();
 
 	@Test
 	public void getName() {
