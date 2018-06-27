@@ -85,4 +85,30 @@ public class CassandraConfigBuilderTests {
 		assertThat(cassandraConfig.getJmxPort()).isEqualTo(5000);
 	}
 
+	@Test
+	public void buildSetRandomPortIfZero() {
+
+		Config config = new Config();
+
+		config.setNativeTransportPort(0);
+		config.setNativeTransportPortSsl(0);
+
+		CassandraConfig cassandraConfig = new CassandraConfigBuilder().config(config)
+				.build();
+
+		assertThat(cassandraConfig.getConfig()).isNotNull();
+		assertThat(cassandraConfig.getTimeout()).isEqualTo(Duration.ofMinutes(1));
+		assertThat(cassandraConfig.getVersion()).isEqualTo(Version.LATEST);
+		assertThat(cassandraConfig.getFileCustomizers()).hasSize(0);
+		assertThat(cassandraConfig.getJmxPort()).isEqualTo(7199);
+		assertThat(cassandraConfig.getJvmOptions()).isEmpty();
+
+		assertThat(config.getRpcPort()).isEqualTo(9160);
+		assertThat(config.getNativeTransportPort()).isNotEqualTo(0);
+		assertThat(config.getStoragePort()).isEqualTo(7000);
+		assertThat(config.getSslStoragePort()).isEqualTo(7001);
+		assertThat(config.getNativeTransportPortSsl()).isNotEqualTo(0);
+
+	}
+
 }
