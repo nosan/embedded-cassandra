@@ -18,8 +18,9 @@ package com.github.nosan.embedded.cassandra;
 
 import java.util.Objects;
 
-import com.github.nosan.embedded.cassandra.config.CassandraConfig;
-import com.github.nosan.embedded.cassandra.config.CassandraRuntimeConfigBuilder;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
+import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
@@ -30,11 +31,11 @@ import org.slf4j.Logger;
  * {@link Starter} for an embedded cassandra.
  *
  * @author Dmytro Nosan
- * @see CassandraRuntimeConfigBuilder
- * @see com.github.nosan.embedded.cassandra.config.CassandraConfigBuilder
+ * @see RuntimeConfigBuilder
+ * @see ExecutableConfigBuilder
  */
 public class CassandraStarter
-		extends Starter<CassandraConfig, CassandraExecutable, CassandraProcess> {
+		extends Starter<ExecutableConfig, CassandraExecutable, CassandraProcess> {
 
 	public CassandraStarter(IRuntimeConfig config) {
 		super(Objects.requireNonNull(config, "RuntimeConfig must not be null"));
@@ -44,7 +45,7 @@ public class CassandraStarter
 	 * Create a new cassandra starter with default runtime settings.
 	 */
 	public CassandraStarter() {
-		this(new CassandraRuntimeConfigBuilder().build());
+		this(new RuntimeConfigBuilder().build());
 	}
 
 	/**
@@ -52,11 +53,11 @@ public class CassandraStarter
 	 * @param logger logger for process outputs.
 	 */
 	public CassandraStarter(Logger logger) {
-		this(new CassandraRuntimeConfigBuilder(logger).build());
+		this(new RuntimeConfigBuilder(logger).build());
 	}
 
 	@Override
-	protected CassandraExecutable newExecutable(CassandraConfig config,
+	protected CassandraExecutable newExecutable(ExecutableConfig config,
 			Distribution distribution, IRuntimeConfig runtime, IExtractedFileSet exe) {
 		return new CassandraExecutable(distribution, config, runtime, exe);
 	}

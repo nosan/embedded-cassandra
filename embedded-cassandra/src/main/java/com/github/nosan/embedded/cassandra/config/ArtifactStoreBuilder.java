@@ -20,34 +20,35 @@ import java.util.Objects;
 
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.io.directories.PropertyOrTempDirInPlatformTempDir;
-import de.flapdoodle.embed.process.store.ArtifactStoreBuilder;
 import de.flapdoodle.embed.process.store.Downloader;
 import org.slf4j.Logger;
 
 /**
- * {@link ArtifactStoreBuilder} builder with defaults methods.
+ * {@link de.flapdoodle.embed.process.store.ArtifactStoreBuilder} builder with defaults
+ * methods.
  *
  * @author Dmytro Nosan
  */
-public class CassandraArtifactStoreBuilder extends ArtifactStoreBuilder {
+public class ArtifactStoreBuilder
+		extends de.flapdoodle.embed.process.store.ArtifactStoreBuilder {
 
 	/**
 	 * Configure builder with default settings.
 	 */
-	public CassandraArtifactStoreBuilder() {
-		this(new CassandraDownloadConfigBuilder().build());
+	public ArtifactStoreBuilder() {
+		this(new DownloadConfigBuilder().build());
 	}
 
 	/**
 	 * Configure builder with default settings and logger.
 	 * @param logger logger for process outputs.
 	 */
-	public CassandraArtifactStoreBuilder(Logger logger) {
-		this(new CassandraDownloadConfigBuilder(
+	public ArtifactStoreBuilder(Logger logger) {
+		this(new DownloadConfigBuilder(
 				Objects.requireNonNull(logger, "Logger must not be null")).build());
 	}
 
-	private CassandraArtifactStoreBuilder(IDownloadConfig downloadConfig) {
+	private ArtifactStoreBuilder(IDownloadConfig downloadConfig) {
 		executableNaming().overwriteDefault(new OriginTempNaming());
 		tempDir().overwriteDefault(new PropertyOrTempDirInPlatformTempDir());
 		downloader().overwriteDefault(new Downloader());
