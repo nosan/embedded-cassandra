@@ -21,9 +21,9 @@ import java.time.Duration;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.config.CassandraConfig;
-import com.github.nosan.embedded.cassandra.config.CassandraConfigBuilder;
 import com.github.nosan.embedded.cassandra.config.Config;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,10 +55,10 @@ public class CassandraStarterTests {
 
 	@Test
 	public void nativeTransport() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder()
 				.useRandomPorts(true).build();
-		start(cassandraConfig, () -> {
-			try (Cluster cluster = cluster(cassandraConfig.getConfig())) {
+		start(executableConfig, () -> {
+			try (Cluster cluster = cluster(executableConfig.getConfig())) {
 				Session session = cluster.connect();
 				keyspace("test", session);
 				table("test", "user", session);
@@ -69,74 +69,74 @@ public class CassandraStarterTests {
 
 	@Test
 	public void startStop() throws Exception {
-		start(new CassandraConfigBuilder().build());
-		start(new CassandraConfigBuilder().build());
+		start(new ExecutableConfigBuilder().build());
+		start(new ExecutableConfigBuilder().build());
 	}
 
 	@Test
 	public void multiplyInstancesShouldWorkRandomPorts() throws Exception {
-		start(new CassandraConfigBuilder().useRandomPorts(true).build(),
-				() -> start(new CassandraConfigBuilder().useRandomPorts(true).build()));
+		start(new ExecutableConfigBuilder().useRandomPorts(true).build(),
+				() -> start(new ExecutableConfigBuilder().useRandomPorts(true).build()));
 	}
 
 	@Test(expected = IOException.class)
 	public void multiplyInstancesShouldNotWork() throws Exception {
-		start(new CassandraConfigBuilder().build(),
-				() -> start(new CassandraConfigBuilder().build()));
+		start(new ExecutableConfigBuilder().build(),
+				() -> start(new ExecutableConfigBuilder().build()));
 	}
 
 	@Test(expected = IOException.class)
 	public void multiplyInstancesDoesNotWorkRandomPortNotEnable() throws Exception {
-		start(new CassandraConfigBuilder().build(),
-				() -> start(new CassandraConfigBuilder().build()));
+		start(new ExecutableConfigBuilder().build(),
+				() -> start(new ExecutableConfigBuilder().build()));
 	}
 
 	@Test(expected = IOException.class)
 	public void invalidConfig() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder()
 				.useRandomPorts(true).build();
-		cassandraConfig.getConfig().setCommitlogSync(null);
-		start(cassandraConfig);
+		executableConfig.getConfig().setCommitlogSync(null);
+		start(executableConfig);
 	}
 
 	@Test(expected = IOException.class)
 	public void timeout() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder()
 				.timeout(Duration.ofSeconds(1)).build();
-		start(cassandraConfig);
+		start(executableConfig);
 	}
 
 	@Test
 	public void rpcTransport() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder()
 				.useRandomPorts(true).build();
-		Config config = cassandraConfig.getConfig();
+		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(true);
-		start(cassandraConfig);
+		start(executableConfig);
 	}
 
 	@Test
 	public void disableTransport() throws Exception {
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder()
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder()
 				.useRandomPorts(true).build();
-		Config config = cassandraConfig.getConfig();
+		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(false);
 
-		start(cassandraConfig);
+		start(executableConfig);
 
 	}
 
-	private static void start(CassandraConfig cassandraConfig) throws Exception {
-		start(cassandraConfig, () -> {
+	private static void start(ExecutableConfig executableConfig) throws Exception {
+		start(executableConfig, () -> {
 		});
 	}
 
-	private static void start(CassandraConfig cassandraConfig, Callback callback)
+	private static void start(ExecutableConfig executableConfig, Callback callback)
 			throws Exception {
 		CassandraExecutable executable = new CassandraStarter(log)
-				.prepare(cassandraConfig);
+				.prepare(executableConfig);
 		try {
 			executable.start();
 			callback.run();

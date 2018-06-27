@@ -34,18 +34,18 @@ import org.slf4j.LoggerFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraRuntimeConfigBuilder}.
+ * Tests for {@link RuntimeConfigBuilder}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraRuntimeConfigBuilderTests {
+public class RuntimeConfigBuilderTests {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(CassandraRuntimeConfigBuilderTests.class);
+			.getLogger(RuntimeConfigBuilderTests.class);
 
 	@Test
 	public void defaults() throws Exception {
-		IRuntimeConfig runtimeConfig = new CassandraRuntimeConfigBuilder().build();
+		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder().build();
 
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
@@ -65,7 +65,7 @@ public class CassandraRuntimeConfigBuilderTests {
 	@Test
 	public void defaultsLogger() throws Exception {
 
-		IRuntimeConfig runtimeConfig = new CassandraRuntimeConfigBuilder(log).build();
+		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder(log).build();
 
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
@@ -85,7 +85,7 @@ public class CassandraRuntimeConfigBuilderTests {
 			throws NoSuchFieldException, IllegalAccessException {
 		assertThat(stream).isInstanceOf(Slf4jStreamProcessor.class);
 		assertThat(ReflectionUtils.getField("logger", stream))
-				.isEqualTo(CassandraRuntimeConfigBuilderTests.log);
+				.isEqualTo(RuntimeConfigBuilderTests.log);
 		assertThat(ReflectionUtils.getField("level", stream)).isEqualTo(level);
 	}
 

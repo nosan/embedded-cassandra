@@ -18,7 +18,7 @@ package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
 
-import com.github.nosan.embedded.cassandra.config.CassandraConfig;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
@@ -29,17 +29,18 @@ import de.flapdoodle.embed.process.runtime.Executable;
  *
  * @author Dmytro Nosan
  */
-public class CassandraExecutable extends Executable<CassandraConfig, CassandraProcess> {
+public class CassandraExecutable extends Executable<ExecutableConfig, CassandraProcess> {
 
-	CassandraExecutable(Distribution distribution, CassandraConfig config,
+	CassandraExecutable(Distribution distribution, ExecutableConfig config,
 			IRuntimeConfig runtimeConfig, IExtractedFileSet executable) {
 		super(distribution, config, runtimeConfig, executable);
 	}
 
 	@Override
-	protected CassandraProcess start(Distribution distribution, CassandraConfig config,
-			IRuntimeConfig runtime) throws IOException {
-		return new CassandraProcess(distribution, config, runtime, this);
+	protected CassandraProcess start(Distribution distribution,
+			ExecutableConfig executableConfig, IRuntimeConfig runtime)
+			throws IOException {
+		return new CassandraProcess(distribution, executableConfig, runtime, this);
 	}
 
 }

@@ -18,8 +18,8 @@ package com.github.nosan.embedded.cassandra.junit;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.config.CassandraRuntimeConfigBuilder;
 import com.github.nosan.embedded.cassandra.config.Config;
+import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ public class CassandraTests {
 
 	@ClassRule
 	public static Cassandra cassandra = new Cassandra(
-			new CassandraRuntimeConfigBuilder(log).build());
+			new RuntimeConfigBuilder(log).build());
 
 	private static void keyspace(String keyspace, Session session) {
 		session.execute("CREATE KEYSPACE IF NOT EXISTS " + keyspace
@@ -55,7 +55,7 @@ public class CassandraTests {
 
 	@Test
 	public void createUserTable() {
-		try (Cluster cluster = cluster(cassandra.getCassandraConfig().getConfig())) {
+		try (Cluster cluster = cluster(cassandra.getExecutableConfig().getConfig())) {
 			Session session = cluster.connect();
 			keyspace("test", session);
 			table("test", "user", session);
@@ -64,7 +64,7 @@ public class CassandraTests {
 
 	@Test
 	public void createRolesTable() {
-		try (Cluster cluster = cluster(cassandra.getCassandraConfig().getConfig())) {
+		try (Cluster cluster = cluster(cassandra.getExecutableConfig().getConfig())) {
 			Session session = cluster.connect();
 			keyspace("test", session);
 			table("test", "roles", session);

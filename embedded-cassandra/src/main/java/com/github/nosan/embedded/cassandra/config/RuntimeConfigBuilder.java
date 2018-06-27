@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.config;
 
 import java.util.Objects;
 
-import de.flapdoodle.embed.process.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.io.Slf4jLevel;
@@ -26,18 +25,20 @@ import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
 import org.slf4j.Logger;
 
 /**
- * {@link RuntimeConfigBuilder} builder with defaults methods.
+ * {@link de.flapdoodle.embed.process.config.RuntimeConfigBuilder} builder with defaults
+ * methods.
  *
  * @author Dmytro Nosan
  */
-public class CassandraRuntimeConfigBuilder extends RuntimeConfigBuilder {
+public class RuntimeConfigBuilder
+		extends de.flapdoodle.embed.process.config.RuntimeConfigBuilder {
 
 	/**
 	 * Configure builder with default settings. Process output will be redirected to the
 	 * console.
 	 */
-	public CassandraRuntimeConfigBuilder() {
-		artifactStore().overwriteDefault(new CassandraArtifactStoreBuilder().build());
+	public RuntimeConfigBuilder() {
+		artifactStore().overwriteDefault(new ArtifactStoreBuilder().build());
 		commandLinePostProcessor().overwriteDefault(new ICommandLinePostProcessor.Noop());
 		ProcessOutput processOutput = new ProcessOutput(
 				Processors.namedConsole("[Cassandra > output]"),
@@ -50,9 +51,9 @@ public class CassandraRuntimeConfigBuilder extends RuntimeConfigBuilder {
 	 * Configure builder with default settings and logger.
 	 * @param logger logger for process outputs.
 	 */
-	public CassandraRuntimeConfigBuilder(Logger logger) {
+	public RuntimeConfigBuilder(Logger logger) {
 		Objects.requireNonNull(logger, "Logger must not be null");
-		artifactStore().overwriteDefault(new CassandraArtifactStoreBuilder().build());
+		artifactStore().overwriteDefault(new ArtifactStoreBuilder().build());
 		commandLinePostProcessor().overwriteDefault(new ICommandLinePostProcessor.Noop());
 		ProcessOutput processOutput = new ProcessOutput(
 				Processors.logTo(logger, Slf4jLevel.INFO),

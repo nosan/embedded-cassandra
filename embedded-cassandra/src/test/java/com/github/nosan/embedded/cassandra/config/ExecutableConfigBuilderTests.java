@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CassandraConfigBuilderTests {
+public class ExecutableConfigBuilderTests {
 
 	@Test
 	public void buildDefaults() {
@@ -83,6 +83,32 @@ public class CassandraConfigBuilderTests {
 		assertThat(executableConfig.getVersion()).isEqualTo(Version.LATEST);
 		assertThat(executableConfig.getFileCustomizers()).hasSize(1);
 		assertThat(executableConfig.getJmxPort()).isEqualTo(5000);
+	}
+
+	@Test
+	public void buildSetRandomPortIfZero() {
+
+		Config config = new Config();
+
+		config.setNativeTransportPort(0);
+		config.setNativeTransportPortSsl(0);
+
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder().config(config)
+				.build();
+
+		assertThat(executableConfig.getConfig()).isNotNull();
+		assertThat(executableConfig.getTimeout()).isEqualTo(Duration.ofMinutes(1));
+		assertThat(executableConfig.getVersion()).isEqualTo(Version.LATEST);
+		assertThat(executableConfig.getFileCustomizers()).hasSize(0);
+		assertThat(executableConfig.getJmxPort()).isEqualTo(7199);
+		assertThat(executableConfig.getJvmOptions()).isEmpty();
+
+		assertThat(config.getRpcPort()).isEqualTo(9160);
+		assertThat(config.getNativeTransportPort()).isNotEqualTo(0);
+		assertThat(config.getStoragePort()).isEqualTo(7000);
+		assertThat(config.getSslStoragePort()).isEqualTo(7001);
+		assertThat(config.getNativeTransportPortSsl()).isNotEqualTo(0);
+
 	}
 
 }

@@ -27,19 +27,19 @@ import org.slf4j.LoggerFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraDownloadConfigBuilder}.
+ * Tests for {@link DownloadConfigBuilder}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraDownloadConfigBuilderTests {
+public class DownloadConfigBuilderTests {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(CassandraDownloadConfigBuilderTests.class);
+			.getLogger(DownloadConfigBuilderTests.class);
 
 	@Test
 	public void defaults() {
 
-		IDownloadConfig downloadConfig = new CassandraDownloadConfigBuilder().build();
+		IDownloadConfig downloadConfig = new DownloadConfigBuilder().build();
 
 		assertThat(downloadConfig.getArtifactStorePath().asFile().getAbsolutePath())
 				.contains(".embedded-cassandra");
@@ -64,7 +64,7 @@ public class CassandraDownloadConfigBuilderTests {
 	@Test
 	public void defaultsLogger() {
 
-		IDownloadConfig downloadConfig = new CassandraDownloadConfigBuilder(log).build();
+		IDownloadConfig downloadConfig = new DownloadConfigBuilder(log).build();
 
 		assertThat(downloadConfig.getArtifactStorePath().asFile().getAbsolutePath())
 				.contains(".embedded-cassandra");
