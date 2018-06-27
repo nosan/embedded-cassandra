@@ -36,7 +36,7 @@ public class JVMOptionsCustomizer extends AbstractFileCustomizer {
 
 	public JVMOptionsCustomizer(Collection<String> jvmOptions) {
 		this.jvmOptions = Objects.requireNonNull(jvmOptions,
-				"JVM Options must null be null");
+				"JVM Options must not be null");
 	}
 
 	@Override
