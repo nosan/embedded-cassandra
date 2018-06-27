@@ -146,16 +146,38 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	@Override
 	public CassandraConfig build() {
 		int jmxPort = jmxPort().get();
+
 		Config config = config().get();
 
 		if (useRandomPorts().get()) {
-			config.setSslStoragePort(getRandomPort());
-			config.setStoragePort(getRandomPort());
-			config.setNativeTransportPort(getRandomPort());
-			config.setRpcPort(getRandomPort());
+			config.setSslStoragePort(0);
+			config.setStoragePort(0);
+			config.setNativeTransportPort(0);
+			config.setRpcPort(0);
 			if (config.getNativeTransportPortSsl() != null) {
-				config.setNativeTransportPortSsl(getRandomPort());
+				config.setNativeTransportPortSsl(0);
 			}
+			jmxPort = 0;
+		}
+
+		if (config.getSslStoragePort() == 0) {
+			config.setSslStoragePort(getRandomPort());
+		}
+		if (config.getStoragePort() == 0) {
+			config.setStoragePort(getRandomPort());
+		}
+		if (config.getNativeTransportPort() == 0) {
+			config.setNativeTransportPort(getRandomPort());
+		}
+		if (config.getRpcPort() == 0) {
+			config.setRpcPort(getRandomPort());
+		}
+		if (config.getNativeTransportPortSsl() != null
+				&& config.getNativeTransportPortSsl() == 0) {
+			config.setNativeTransportPortSsl(getRandomPort());
+		}
+
+		if (jmxPort == 0) {
 			jmxPort = getRandomPort();
 		}
 
