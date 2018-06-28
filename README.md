@@ -17,13 +17,13 @@ Embedded Cassandra has `compile` dependency on `de.flapdoodle.embed:de.flapdoodl
 
 ## Usage
 
-Following code will create an `Embedded Cassandra` with the default configuration.
+Following code will create `Embedded Cassandra` with the default configuration. 
 
 ```java
 public class CassandraTests {
 
 	@Test
-	public void createUserTable() throws IOException {
+	public void test() throws Exception {
 		CassandraStarter cassandraStarter = new CassandraStarter();
 		CassandraConfig cassandraConfig = new CassandraConfigBuilder().build();
 		CassandraExecutable executable = cassandraStarter.prepare(cassandraConfig);
@@ -38,8 +38,14 @@ public class CassandraTests {
 			executable.stop();
 		}
 	}
+	
+	private static Cluster cluster(Config config) {
+    		return Cluster.builder().addContactPoint(config.getListenAddress())
+    				.withPort(config.getNativeTransportPort()).build(); 
+	}
 
 }
+
 ```
 
 ### JUnit
@@ -53,12 +59,17 @@ public class CassandraTests {
 	public static Cassandra cassandra = new Cassandra();
 
 	@Test
-	public void createUserTable() {
+	public void test() throws Exception {
 		try (Cluster cluster = cluster(cassandra.getCassandraConfig().getConfig())) {
 			Session session = cluster.connect();
 			//
 		}
 	}
+	
+	private static Cluster cluster(Config config) {
+    		return Cluster.builder().addContactPoint(config.getListenAddress())
+    				.withPort(config.getNativeTransportPort()).build(); 
+	}	
 }
 ```
 
@@ -74,16 +85,47 @@ public class CassandraTests extends AbstractCassandraTests {
 
 
 	@Test
-	public void createUserTable() {
+	public void test() throws Exception{
 		try (Cluster cluster = cluster(getCassandraConfig().getConfig())) {
 			Session session = cluster.connect();
 			//
 		}
 	}
-
+	
+	private static Cluster cluster(Config config) {
+    		return Cluster.builder().addContactPoint(config.getListenAddress())
+    				.withPort(config.getNativeTransportPort()).build(); 
+	}
 }
 ```
 
+
+### JUnit5
+
+For running `Embedded Cassandra ` with `Junit 5` you should use `@RegisterExtension` feature. Following example 
+will start `Embedded Cassandra` on the random ports.
+
+```java
+public class CassandraTests {
+
+	
+	@RegisterExtension
+	public static Cassandra cassandra = new Cassandra();
+	
+	@Test
+	public void test() throws Exception {
+		try (Cluster cluster = cluster(getCassandraConfig().getConfig())) {
+			Session session = cluster.connect();
+		}
+	}
+	
+	private static Cluster cluster(Config config) {
+    		return Cluster.builder().addContactPoint(config.getListenAddress())
+    				.withPort(config.getNativeTransportPort()).build(); 
+	}
+
+}
+```
 
 ## Maven
 
@@ -100,7 +142,7 @@ public class CassandraTests extends AbstractCassandraTests {
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.4-SNAPSHOT</version>
         <scope>test</scope>
     </dependency>
 
@@ -108,7 +150,7 @@ public class CassandraTests extends AbstractCassandraTests {
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-junit</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.4-SNAPSHOT</version>
         <scope>test</scope>
     </dependency>
 
@@ -116,9 +158,20 @@ public class CassandraTests extends AbstractCassandraTests {
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-testng</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.4-SNAPSHOT</version>
         <scope>test</scope>
     </dependency>
+    
+    <!--JUnit5-->
+    
+     <dependency>
+        <groupId>com.github.nosan</groupId>
+        <artifactId>embedded-cassandra-jupiter</artifactId>
+        <version>0.0.4-SNAPSHOT</version>
+         <scope>test</scope>
+     </dependency>
+    
+
     
 </dependencies>
 ```
