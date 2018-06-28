@@ -122,7 +122,7 @@ public class CassandraTests {
 	
 	@Test
 	public void test() throws Exception {
-		try (Cluster cluster = cluster(getExecutableConfig().getConfig())) {
+		try (Cluster cluster = cluster(cassandra.getExecutableConfig).getConfig())) {
 			Session session = cluster.connect();
 		}
 	}
