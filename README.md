@@ -25,11 +25,11 @@ public class CassandraTests {
 	@Test
 	public void test() throws Exception {
 		CassandraStarter cassandraStarter = new CassandraStarter();
-		CassandraConfig cassandraConfig = new CassandraConfigBuilder().build();
-		CassandraExecutable executable = cassandraStarter.prepare(cassandraConfig);
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder().build();
+		CassandraExecutable executable = cassandraStarter.prepare(executableConfig);
 		try {
 			executable.start();
-			try (Cluster cluster = cluster(cassandraConfig.getConfig())) {
+			try (Cluster cluster = cluster(executableConfig.getConfig())) {
 				Session session = cluster.connect();
 				//
 			}
@@ -48,6 +48,9 @@ public class CassandraTests {
 
 ```
 
+For start `Embedded Cassandra` on the random ports you can use either `0` for port properties
+ or `new ExecutableConfigBuilder().useRandomPorts().build()` builder method.
+ 
 ### JUnit
 
 `Embedded Cassandra` also could be run via JUnit `ClassRule`. `Embedded Cassandra` will be started on the random ports.
@@ -60,7 +63,7 @@ public class CassandraTests {
 
 	@Test
 	public void test() throws Exception {
-		try (Cluster cluster = cluster(cassandra.getCassandraConfig().getConfig())) {
+		try (Cluster cluster = cluster(cassandra.getExecutableConfig().getConfig())) {
 			Session session = cluster.connect();
 			//
 		}
@@ -86,7 +89,7 @@ public class CassandraTests extends AbstractCassandraTests {
 
 	@Test
 	public void test() throws Exception{
-		try (Cluster cluster = cluster(getCassandraConfig().getConfig())) {
+		try (Cluster cluster = cluster(getExecutableConfig().getConfig())) {
 			Session session = cluster.connect();
 			//
 		}
@@ -114,7 +117,7 @@ public class CassandraTests {
 	
 	@Test
 	public void test() throws Exception {
-		try (Cluster cluster = cluster(getCassandraConfig().getConfig())) {
+		try (Cluster cluster = cluster(getExecutableConfig().getConfig())) {
 			Session session = cluster.connect();
 		}
 	}
