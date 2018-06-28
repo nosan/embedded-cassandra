@@ -1,4 +1,6 @@
-# Embedded Cassandra ![Build Status](https://travis-ci.org/nosan/embedded-cassandra.svg?branch=master)
+# Embedded Cassandra 
+![Build Status](https://travis-ci.org/nosan/embedded-cassandra.svg?branch=master) [![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra)
+
 
 `Embedded Cassandra` provides an easy way to run `Cassandra` in the unit tests. `Embedded Cassandra` is built 
 on top of [Flapdoodle OSS's embed process](https://github.com/flapdoodle-oss/de.flapdoodle.embed.process).
@@ -17,7 +19,7 @@ Embedded Cassandra has `compile` dependency on `de.flapdoodle.embed:de.flapdoodl
 
 ## Usage
 
-Following code will create `Embedded Cassandra` with the default configuration. 
+Following code creates `Embedded Cassandra` with the default configuration. 
 
 ```java
 public class CassandraTests {
@@ -48,12 +50,12 @@ public class CassandraTests {
 
 ```
 
-For start `Embedded Cassandra` on the random ports you can use either `0` for port properties
- or `new ExecutableConfigBuilder().useRandomPorts().build()` builder method.
+For start `Embedded Cassandra` on the random ports it is possible use either `0` for port properties
+ or `new ExecutableConfigBuilder().useRandomPorts().build()`  method.
  
 ### JUnit
 
-`Embedded Cassandra` also could be run via JUnit `ClassRule`. `Embedded Cassandra` will be started on the random ports.
+`Embedded Cassandra` also could be run via JUnit `ClassRule`. 
 
 ```java
 public class CassandraTests {
@@ -76,12 +78,14 @@ public class CassandraTests {
 }
 ```
 
+By default `Embedded Cassandra` will be started on the random ports.
+`Embedded Cassandra` configuration could be overriden via `constructor`.
+
+
 
 ### TestNG
 
-For running `Embedded Cassandra` with `TestNG` you should extend `AbstractCassandraTests` class.
-`Embedded Cassandra` will be started on the random ports.
- 
+For running `Embedded Cassandra` with `TestNG`, `AbstractCassandraTests` has to be extended.
 
 ```java
 public class CassandraTests extends AbstractCassandraTests {
@@ -102,11 +106,12 @@ public class CassandraTests extends AbstractCassandraTests {
 }
 ```
 
+By default `Embedded Cassandra` will be started on the random ports.
+`Embedded Cassandra` configuration could be overriden via `super(...) Constructor`.
 
 ### JUnit5
 
-For running `Embedded Cassandra ` with `Junit 5` you should use `@RegisterExtension` feature. Following example 
-will start `Embedded Cassandra` on the random ports.
+For running `Embedded Cassandra ` with `Junit 5`, `@RegisterExtension` has to be used. 
 
 ```java
 public class CassandraTests {
@@ -130,6 +135,9 @@ public class CassandraTests {
 }
 ```
 
+By default `Embedded Cassandra` will be started on the random ports.
+`Embedded Cassandra` configuration could be overriden via `constructor`.
+
 ## Maven
 
 ```xml
@@ -145,7 +153,7 @@ public class CassandraTests {
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>${version}</version>
         <scope>test</scope>
     </dependency>
 
@@ -153,7 +161,7 @@ public class CassandraTests {
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-junit</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>${version}</version>
         <scope>test</scope>
     </dependency>
 
@@ -161,7 +169,7 @@ public class CassandraTests {
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-testng</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>${version}</version>
         <scope>test</scope>
     </dependency>
     
@@ -170,7 +178,7 @@ public class CassandraTests {
      <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-jupiter</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>${version}</version>
          <scope>test</scope>
      </dependency>
     
