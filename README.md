@@ -50,7 +50,7 @@ public class CassandraTests {
 
 ```
 
-For start `Embedded Cassandra` on the random ports it is possible use either `0` for port properties
+For start `Embedded Cassandra` on the random ports it is possible to use either `0` for port properties
  or `new ExecutableConfigBuilder().useRandomPorts().build()`  method.
  
 ### JUnit
