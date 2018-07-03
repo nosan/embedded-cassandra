@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CqlScriptUtilsTest {
+public class CqlScriptUtilsTests {
 
 	@Test
 	public void executeClassAwareScriptsClassPathResources() throws IOException {
