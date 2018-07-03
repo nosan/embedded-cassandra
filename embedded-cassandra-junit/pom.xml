@@ -11,16 +11,18 @@
     </parent>
 
 
-    <name>Embedded Cassandra Junit</name>
-    <description>Embedded Cassandra Junit</description>
-
     <artifactId>embedded-cassandra-junit</artifactId>
+    <description>Embedded Cassandra JUnit</description>
 
 
     <dependencies>
         <dependency>
             <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.nosan</groupId>
+            <artifactId>embedded-cassandra-cql</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -35,7 +37,7 @@
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-core</artifactId>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

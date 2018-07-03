@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.time.Duration;
 
 import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
 import com.github.nosan.embedded.cassandra.config.Config;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,16 +38,6 @@ public class CassandraStarterTests {
 	private static final Logger log = LoggerFactory
 			.getLogger(CassandraStarterTests.class);
 
-	private static void keyspace(String keyspace, Session session) {
-		session.execute("CREATE KEYSPACE IF NOT EXISTS " + keyspace
-				+ "  WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };");
-	}
-
-	private static void table(String keyspace, String table, Session session) {
-		session.execute("CREATE TABLE IF NOT EXISTS " + keyspace + "." + table + " ( "
-				+ "  id text PRIMARY KEY )");
-	}
-
 	private static Cluster cluster(Config config) {
 		return Cluster.builder().addContactPoint(config.getListenAddress())
 				.withPort(config.getNativeTransportPort()).build();
@@ -59,12 +49,9 @@ public class CassandraStarterTests {
 				.useRandomPorts(true).build();
 		start(executableConfig, () -> {
 			try (Cluster cluster = cluster(executableConfig.getConfig())) {
-				Session session = cluster.connect();
-				keyspace("test", session);
-				table("test", "user", session);
+				CqlScriptUtils.executeScripts(cluster.connect(), "init.cql");
 			}
 		});
-
 	}
 
 	@Test

@@ -14,42 +14,40 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.junit;
+package com.github.nosan.embedded.cassandra.testng;
+
+import java.io.IOException;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 /**
- * JUnit {@link TestRule TestRule} for running an Embedded Cassandra. Cassandra will be
- * started on the random ports. <pre> public class CassandraTests {
+ * Abstract Class for running an Embedded Cassandra. This class provides two new methods
+ * {@link #startCassandra()} and {@link #stopCassandra()}. Cassandra will be started on
+ * the random ports. <pre>
+ * public class CassandraTests extends Cassandra {
  *
- * 	 &#64;ClassRule
- * 	public static Cassandra cassandra = new Cassandra();
- *
-
- * 	 &#64;Before
+ * 	&#64;BeforeMethod
  * 	public void setUp() throws Exception {
- * 	CqlScriptUtils.executeScripts(cassandra.getSession(), "init.cql");
- * 	}
- *
- * 	 &#64;After
- * 	public void tearDown() throws Exception {
- * 	CqlScriptUtils.executeScripts(cassandra.getSession(), "drop.cql");
+ * 		CqlScriptUtils.executeScripts(getSession(), "init.cql");
  * 	}
  *
 
- * 	 &#64;Test
- * 	public void test() {
- * 	//test me
+ * 	&#64;AfterMethod
+ * 	public void tearDown() throws Exception {
+ * 		CqlScriptUtils.executeScripts(getSession(), "drop.cql");
  * 	}
  *
+ * 	&#64;Test
+ * 	public void test() {
+ * 	// test me...
  * 	}
+ * }
  * }</pre>
  *
  * @author Dmytro Nosan
@@ -58,7 +56,7 @@ import org.junit.runners.model.Statement;
  * @see EmbeddedCassandra
  * @see CqlScriptUtils
  */
-public class Cassandra extends EmbeddedCassandra implements TestRule {
+public abstract class Cassandra extends EmbeddedCassandra {
 
 	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
 		super(runtimeConfig, executableConfig);
@@ -76,20 +74,23 @@ public class Cassandra extends EmbeddedCassandra implements TestRule {
 		this(new ExecutableConfigBuilder().useRandomPorts(true).build());
 	}
 
-	@Override
-	public Statement apply(Statement base, Description description) {
-		return new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				start();
-				try {
-					base.evaluate();
-				}
-				finally {
-					stop();
-				}
-			}
-		};
+	/**
+	 * Startup an Embedded Cassandra.
+	 * @throws IOException Process could not be started.
+	 * @see #start()
+	 */
+	@BeforeClass
+	public void startCassandra() throws IOException {
+		start();
+	}
+
+	/**
+	 * Stop an Embedded Cassandra.
+	 * @see #stop()
+	 */
+	@AfterClass
+	public void stopCassandra() {
+		stop();
 	}
 
 }
