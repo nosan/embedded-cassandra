@@ -14,36 +14,40 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
+package com.github.nosan.embedded.cassandra.jupiter;
 
 import com.datastax.driver.core.Session;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link Cassandra}.
+ * Tests for {@link CassandraExtension}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraTests extends Cassandra {
+public class CassandraExtensionTests {
 
-	@BeforeMethod
+	@RegisterExtension
+	public static CassandraExtension cassandra = new CassandraExtension();
+
+	@BeforeEach
 	public void setUp() throws Exception {
-		CqlScriptUtils.executeScripts(getSession(), "init.cql");
+		CqlScriptUtils.executeScripts(cassandra.getSession(), "init.cql");
 	}
 
-	@AfterMethod
+	@AfterEach
 	public void tearDown() throws Exception {
-		CqlScriptUtils.executeScripts(getSession(), "drop.cql");
+		CqlScriptUtils.executeScripts(cassandra.getSession(), "drop.cql");
 	}
 
 	@Test
 	public void select() {
-		Session session = getSession();
+		Session session = cassandra.getSession();
 		assertThat(session.execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
 	}
 

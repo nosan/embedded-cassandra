@@ -18,7 +18,7 @@ package com.github.nosan.embedded.cassandra.testng;
 
 import java.io.IOException;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
+import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
@@ -30,47 +30,44 @@ import org.testng.annotations.BeforeClass;
  * Abstract Class for running an Embedded Cassandra. This class provides two new methods
  * {@link #startCassandra()} and {@link #stopCassandra()}. Cassandra will be started on
  * the random ports. <pre>
- * public class CassandraTests extends Cassandra {
- *
+ * public class CassandraTests extends AbstractCassandraTestNG {
  * 	&#64;BeforeMethod
  * 	public void setUp() throws Exception {
  * 		CqlScriptUtils.executeScripts(getSession(), "init.cql");
- * 	}
- *
-
+ *    }
  * 	&#64;AfterMethod
  * 	public void tearDown() throws Exception {
  * 		CqlScriptUtils.executeScripts(getSession(), "drop.cql");
- * 	}
- *
+ *    }
  * 	&#64;Test
  * 	public void test() {
  * 	// test me...
- * 	}
+ *    }
  * }
  * }</pre>
  *
  * @author Dmytro Nosan
  * @see com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder
  * @see ExecutableConfigBuilder
- * @see EmbeddedCassandra
+ * @see Cassandra
  * @see CqlScriptUtils
  */
-public abstract class Cassandra extends EmbeddedCassandra {
+public abstract class AbstractCassandraTestNG extends Cassandra {
 
-	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
+	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig,
+			ExecutableConfig executableConfig) {
 		super(runtimeConfig, executableConfig);
 	}
 
-	public Cassandra(IRuntimeConfig runtimeConfig) {
+	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig) {
 		super(runtimeConfig, new ExecutableConfigBuilder().useRandomPorts(true).build());
 	}
 
-	public Cassandra(ExecutableConfig executableConfig) {
+	public AbstractCassandraTestNG(ExecutableConfig executableConfig) {
 		super(executableConfig);
 	}
 
-	public Cassandra() {
+	public AbstractCassandraTestNG() {
 		this(new ExecutableConfigBuilder().useRandomPorts(true).build());
 	}
 
@@ -79,16 +76,17 @@ public abstract class Cassandra extends EmbeddedCassandra {
 	 * @throws IOException Process could not be started.
 	 * @see #start()
 	 */
-	@BeforeClass
+	@BeforeClass(alwaysRun = true)
 	public void startCassandra() throws IOException {
 		start();
 	}
 
 	/**
 	 * Stop an Embedded Cassandra.
+	 *
 	 * @see #stop()
 	 */
-	@AfterClass
+	@AfterClass(alwaysRun = true)
 	public void stopCassandra() {
 		stop();
 	}

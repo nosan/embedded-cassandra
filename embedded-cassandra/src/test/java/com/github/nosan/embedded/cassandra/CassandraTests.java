@@ -23,36 +23,36 @@ import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import org.junit.Test;
 
 /**
- * Tests for {@link EmbeddedCassandra}.
+ * Tests for {@link Cassandra}.
  *
  * @author Dmytro Nosan
  *
  */
-public class EmbeddedCassandraTests {
+public class CassandraTests {
 
 	@Test
 	public void initScriptUsingSession() throws IOException {
-		EmbeddedCassandra embeddedCassandra = new EmbeddedCassandra();
+		Cassandra cassandra = new Cassandra();
 		try {
-			embeddedCassandra.start();
-			Session session = embeddedCassandra.getSession();
+			cassandra.start();
+			Session session = cassandra.getSession();
 			CqlScriptUtils.executeScripts(session, "init.cql");
 		}
 		finally {
-			embeddedCassandra.stop();
+			cassandra.stop();
 		}
 	}
 
 	@Test
 	public void initScriptUsingCluster() throws IOException {
-		EmbeddedCassandra embeddedCassandra = new EmbeddedCassandra();
+		Cassandra cassandra = new Cassandra();
 		try {
-			embeddedCassandra.start();
-			Session session = embeddedCassandra.getCluster().connect();
+			cassandra.start();
+			Session session = cassandra.getCluster().connect();
 			CqlScriptUtils.executeScripts(session, "init.cql");
 		}
 		finally {
-			embeddedCassandra.stop();
+			cassandra.stop();
 		}
 	}
 

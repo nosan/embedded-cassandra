@@ -47,6 +47,7 @@
         <logback-classic.version>1.2.3</logback-classic.version>
         <junit.jupiter.version>5.1.1</junit.jupiter.version>
         <junit.platform.version>1.1.1</junit.platform.version>
+        <spring-javaformat.version>0.0.3</spring-javaformat.version>
     </properties>
 
 
@@ -156,7 +157,7 @@
                         <dependency>
                             <groupId>io.spring.javaformat</groupId>
                             <artifactId>spring-javaformat-checkstyle</artifactId>
-                            <version>0.0.3</version>
+                            <version>${spring-javaformat.version}</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -164,7 +165,7 @@
                 <plugin>
                     <groupId>io.spring.javaformat</groupId>
                     <artifactId>spring-javaformat-maven-plugin</artifactId>
-                    <version>0.0.3</version>
+                    <version>${spring-javaformat.version}</version>
                 </plugin>
 
                 <plugin>
@@ -279,8 +280,7 @@
                         <phase>validate</phase>
                         <inherited>true</inherited>
                         <configuration>
-                            <configLocation>io/spring/javaformat/checkstyle/checkstyle.xml
-                            </configLocation>
+                            <configLocation>src/checkstyle/checkstyle.xml</configLocation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                         </configuration>
                         <goals>

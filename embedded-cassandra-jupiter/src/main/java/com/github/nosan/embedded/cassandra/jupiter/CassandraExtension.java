@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.jupiter;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
+import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
@@ -29,49 +29,45 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * JUnit {@link org.junit.jupiter.api.extension.RegisterExtension RegisterExtension} for
  * running an Embedded Cassandra. Cassandra will be started on the random ports.
  * <pre> public class CassandraTests {
- *
  * 	&#64;RegisterExtension
- * 	public static Cassandra cassandra = new Cassandra();
- *
-
+ * 	public static CassandraExtension cassandra = new CassandraExtension();
  * 	&#64;BeforeEach
  * 	public void setUp() throws Exception {
  * 		CqlScriptUtils.executeScripts(cassandra.getSession(), "init.cql");
- * 	}
- *
+ *    }
  * 	&#64;AfterEach
  * 	public void tearDown() throws Exception {
  * 		CqlScriptUtils.executeScripts(cassandra.getSession(), "drop.cql");
- * 	}
- *
+ *    }
  * 	&#64;Test
  * 	public void test() {
  * 		//test me
- * 	}
+ *    }
  * }</pre>
  *
  * @author Dmytro Nosan
  * @see com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder
  * @see ExecutableConfigBuilder
- * @see EmbeddedCassandra
+ * @see Cassandra
  * @see CqlScriptUtils
  */
-public class Cassandra extends EmbeddedCassandra
+public class CassandraExtension extends Cassandra
 		implements BeforeAllCallback, AfterAllCallback {
 
-	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
+	public CassandraExtension(IRuntimeConfig runtimeConfig,
+			ExecutableConfig executableConfig) {
 		super(runtimeConfig, executableConfig);
 	}
 
-	public Cassandra(IRuntimeConfig runtimeConfig) {
+	public CassandraExtension(IRuntimeConfig runtimeConfig) {
 		super(runtimeConfig, new ExecutableConfigBuilder().useRandomPorts(true).build());
 	}
 
-	public Cassandra(ExecutableConfig executableConfig) {
+	public CassandraExtension(ExecutableConfig executableConfig) {
 		super(executableConfig);
 	}
 
-	public Cassandra() {
+	public CassandraExtension() {
 		this(new ExecutableConfigBuilder().useRandomPorts(true).build());
 	}
 

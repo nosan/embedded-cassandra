@@ -58,9 +58,9 @@ import org.slf4j.LoggerFactory;
  * @see ExecutableConfigBuilder
  * @see CassandraStarter
  */
-public class EmbeddedCassandra {
+public class Cassandra {
 
-	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandra.class);
+	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
 	private CassandraExecutable executable;
 
@@ -72,23 +72,22 @@ public class EmbeddedCassandra {
 
 	private final ExecutableConfig executableConfig;
 
-	public EmbeddedCassandra(IRuntimeConfig runtimeConfig,
-			ExecutableConfig executableConfig) {
+	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
 		this.runtimeConfig = Objects.requireNonNull(runtimeConfig,
 				"RuntimeConfig must not be null");
 		this.executableConfig = Objects.requireNonNull(executableConfig,
 				"Cassandra Config must not be null");
 	}
 
-	public EmbeddedCassandra(IRuntimeConfig runtimeConfig) {
+	public Cassandra(IRuntimeConfig runtimeConfig) {
 		this(runtimeConfig, new ExecutableConfigBuilder().build());
 	}
 
-	public EmbeddedCassandra(ExecutableConfig executableConfig) {
+	public Cassandra(ExecutableConfig executableConfig) {
 		this(new RuntimeConfigBuilder(log).build(), executableConfig);
 	}
 
-	public EmbeddedCassandra() {
+	public Cassandra() {
 		this(new RuntimeConfigBuilder(log).build(),
 				new ExecutableConfigBuilder().build());
 	}

@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.jupiter;
+package com.github.nosan.embedded.cassandra.junit;
 
 import com.datastax.driver.core.Session;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link Cassandra}.
+ * Tests for {@link CassandraRule}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraTests {
+public class CassandraRuleTests {
 
-	@RegisterExtension
-	public static Cassandra cassandra = new Cassandra();
+	@ClassRule
+	public static CassandraRule cassandra = new CassandraRule();
 
-	@BeforeEach
+	@Before
 	public void setUp() throws Exception {
 		CqlScriptUtils.executeScripts(cassandra.getSession(), "init.cql");
 	}
 
-	@AfterEach
+	@After
 	public void tearDown() throws Exception {
 		CqlScriptUtils.executeScripts(cassandra.getSession(), "drop.cql");
 	}

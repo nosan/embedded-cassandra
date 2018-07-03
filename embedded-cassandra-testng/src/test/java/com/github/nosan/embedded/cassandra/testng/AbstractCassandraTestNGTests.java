@@ -14,40 +14,36 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.junit;
+package com.github.nosan.embedded.cassandra.testng;
 
 import com.datastax.driver.core.Session;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link Cassandra}.
+ * Tests for {@link AbstractCassandraTestNG}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraTests {
+public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
 
-	@ClassRule
-	public static Cassandra cassandra = new Cassandra();
-
-	@Before
+	@BeforeMethod
 	public void setUp() throws Exception {
-		CqlScriptUtils.executeScripts(cassandra.getSession(), "init.cql");
+		CqlScriptUtils.executeScripts(getSession(), "init.cql");
 	}
 
-	@After
+	@AfterMethod
 	public void tearDown() throws Exception {
-		CqlScriptUtils.executeScripts(cassandra.getSession(), "drop.cql");
+		CqlScriptUtils.executeScripts(getSession(), "drop.cql");
 	}
 
 	@Test
 	public void select() {
-		Session session = cassandra.getSession();
+		Session session = getSession();
 		assertThat(session.execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
 	}
 
