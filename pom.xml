@@ -65,6 +65,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.github.nosan</groupId>
+                <artifactId>embedded-cassandra-cql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.datastax.cassandra</groupId>
                 <artifactId>cassandra-driver-core</artifactId>
                 <version>${cassandra-driver-core.version}</version>
@@ -366,6 +372,7 @@
         <module>embedded-cassandra-junit</module>
         <module>embedded-cassandra-testng</module>
         <module>embedded-cassandra-jupiter</module>
+        <module>embedded-cassandra-cql</module>
     </modules>
 
 

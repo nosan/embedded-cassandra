@@ -16,14 +16,14 @@
 
 package com.github.nosan.embedded.cassandra.jupiter;
 
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.config.Config;
-import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link Cassandra}.
@@ -32,43 +32,23 @@ import org.slf4j.LoggerFactory;
  */
 public class CassandraTests {
 
-	private static final Logger log = LoggerFactory.getLogger(CassandraTests.class);
-
 	@RegisterExtension
-	public static Cassandra cassandra = new Cassandra(
-			new RuntimeConfigBuilder(log).build());
+	public static Cassandra cassandra = new Cassandra();
 
-	private static void keyspace(String keyspace, Session session) {
-		session.execute("CREATE KEYSPACE IF NOT EXISTS " + keyspace
-				+ "  WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };");
+	@BeforeEach
+	public void setUp() throws Exception {
+		CqlScriptUtils.executeScripts(cassandra.getSession(), "init.cql");
 	}
 
-	private static void table(String keyspace, String table, Session session) {
-		session.execute("CREATE TABLE IF NOT EXISTS " + keyspace + "." + table + " ( "
-				+ "  id text PRIMARY KEY )");
-	}
-
-	private static Cluster cluster(Config config) {
-		return Cluster.builder().addContactPoint(config.getListenAddress())
-				.withPort(config.getNativeTransportPort()).build();
+	@AfterEach
+	public void tearDown() throws Exception {
+		CqlScriptUtils.executeScripts(cassandra.getSession(), "drop.cql");
 	}
 
 	@Test
-	public void createUserTable() {
-		try (Cluster cluster = cluster(cassandra.getExecutableConfig().getConfig())) {
-			Session session = cluster.connect();
-			keyspace("test", session);
-			table("test", "user", session);
-		}
-	}
-
-	@Test
-	public void createRolesTable() {
-		try (Cluster cluster = cluster(cassandra.getExecutableConfig().getConfig())) {
-			Session session = cluster.connect();
-			keyspace("test", session);
-			table("test", "roles", session);
-		}
+	public void select() {
+		Session session = cassandra.getSession();
+		assertThat(session.execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
 	}
 
 }
