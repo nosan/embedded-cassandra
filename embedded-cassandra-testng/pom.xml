@@ -13,7 +13,6 @@
 
     <artifactId>embedded-cassandra-testng</artifactId>
 
-    <name>Embedded Cassandra TestNG</name>
     <description>Embedded Cassandra TestNG</description>
 
 
@@ -21,6 +20,10 @@
         <dependency>
             <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.nosan</groupId>
+            <artifactId>embedded-cassandra-cql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -36,7 +39,7 @@
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-core</artifactId>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

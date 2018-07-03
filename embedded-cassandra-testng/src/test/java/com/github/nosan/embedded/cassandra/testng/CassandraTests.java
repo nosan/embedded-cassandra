@@ -16,58 +16,35 @@
 
 package com.github.nosan.embedded.cassandra.testng;
 
-import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.config.Config;
-import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
- * Tests for {@link AbstractCassandraTests}.
+ * Tests for {@link Cassandra}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraTests extends AbstractCassandraTests {
+public class CassandraTests extends Cassandra {
 
-	private static final Logger log = LoggerFactory.getLogger(CassandraTests.class);
-
-	public CassandraTests() {
-		super(new RuntimeConfigBuilder(log).build());
+	@BeforeMethod
+	public void setUp() throws Exception {
+		CqlScriptUtils.executeScripts(getSession(), "init.cql");
 	}
 
-	private static void keyspace(String keyspace, Session session) {
-		session.execute("CREATE KEYSPACE IF NOT EXISTS " + keyspace
-				+ "  WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };");
-	}
-
-	private static void table(String keyspace, String table, Session session) {
-		session.execute("CREATE TABLE IF NOT EXISTS " + keyspace + "." + table + " ( "
-				+ "  id text PRIMARY KEY )");
-	}
-
-	private static Cluster cluster(Config config) {
-		return Cluster.builder().addContactPoint(config.getListenAddress())
-				.withPort(config.getNativeTransportPort()).build();
+	@AfterMethod
+	public void tearDown() throws Exception {
+		CqlScriptUtils.executeScripts(getSession(), "drop.cql");
 	}
 
 	@Test
-	public void createUserTable() {
-		try (Cluster cluster = cluster(getExecutableConfig().getConfig())) {
-			Session session = cluster.connect();
-			keyspace("test", session);
-			table("test", "user", session);
-		}
-	}
-
-	@Test
-	public void createRolesTable() {
-		try (Cluster cluster = cluster(getExecutableConfig().getConfig())) {
-			Session session = cluster.connect();
-			keyspace("test", session);
-			table("test", "roles", session);
-		}
+	public void select() {
+		Session session = getSession();
+		assertThat(session.execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
 	}
 
 }
