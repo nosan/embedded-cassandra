@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
-import com.github.nosan.embedded.cassandra.ReflectionUtils;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.io.ConsoleOutputStreamProcessor;
@@ -30,6 +29,8 @@ import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

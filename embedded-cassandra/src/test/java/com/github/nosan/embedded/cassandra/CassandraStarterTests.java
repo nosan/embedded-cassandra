@@ -20,13 +20,14 @@ import java.io.IOException;
 import java.time.Duration;
 
 import com.datastax.driver.core.Cluster;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.nosan.embedded.cassandra.config.Config;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Tests for {@link CassandraStarter}.

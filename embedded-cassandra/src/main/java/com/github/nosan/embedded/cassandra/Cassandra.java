@@ -21,14 +21,15 @@ import java.util.Objects;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.config.Config;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
-import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.config.Config;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
+import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
 
 /**
  * Simple class for starting an Embedded Cassandra using {@link IRuntimeConfig} and

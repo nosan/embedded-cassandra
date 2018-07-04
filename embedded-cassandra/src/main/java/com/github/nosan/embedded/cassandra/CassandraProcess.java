@@ -30,13 +30,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import com.github.nosan.embedded.cassandra.config.Config;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
-import com.github.nosan.embedded.cassandra.customizer.JVMOptionsCustomizer;
-import com.github.nosan.embedded.cassandra.customizer.JavaCompatibilityCustomizer;
-import com.github.nosan.embedded.cassandra.customizer.JmxPortCustomizer;
-import com.github.nosan.embedded.cassandra.util.YamlUtils;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.ISupportConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
@@ -56,6 +49,14 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.config.Config;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.JVMOptionsCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.JavaCompatibilityCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.JmxPortCustomizer;
+import com.github.nosan.embedded.cassandra.util.YamlUtils;
 
 /**
  * {@link AbstractProcess} for an embedded cassandra server.

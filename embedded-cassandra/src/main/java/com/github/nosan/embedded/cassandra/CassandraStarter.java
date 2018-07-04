@@ -18,14 +18,15 @@ package com.github.nosan.embedded.cassandra;
 
 import java.util.Objects;
 
-import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
-import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.runtime.Starter;
 import org.slf4j.Logger;
+
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
+import com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder;
 
 /**
  * {@link Starter} for an embedded cassandra.

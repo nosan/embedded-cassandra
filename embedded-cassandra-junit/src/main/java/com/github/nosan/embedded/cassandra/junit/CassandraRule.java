@@ -16,14 +16,15 @@
 
 package com.github.nosan.embedded.cassandra.junit;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+
+import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 /**
  * JUnit {@link TestRule TestRule} for running an Embedded Cassandra. Cassandra will be

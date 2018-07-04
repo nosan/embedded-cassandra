@@ -18,10 +18,11 @@ package com.github.nosan.embedded.cassandra.customizer;
 
 import java.util.Arrays;
 
-import com.github.nosan.embedded.cassandra.config.Version;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.config.Version;
 
 /**
  * Tests for {@link JVMOptionsCustomizer}.

@@ -18,13 +18,14 @@ package com.github.nosan.embedded.cassandra;
 
 import java.io.File;
 
-import com.github.nosan.embedded.cassandra.config.Version;
 import de.flapdoodle.embed.process.distribution.BitSize;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.Platform;
 import de.flapdoodle.embed.process.extract.ImmutableExtractedFileSet;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.config.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

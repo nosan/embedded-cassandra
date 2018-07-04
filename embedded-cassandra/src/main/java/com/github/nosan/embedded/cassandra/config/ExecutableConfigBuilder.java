@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.github.nosan.embedded.cassandra.config;
 
 import java.io.IOException;
@@ -21,13 +22,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
-import com.github.nosan.embedded.cassandra.customizer.JVMOptionsCustomizer;
-import com.github.nosan.embedded.cassandra.customizer.JmxPortCustomizer;
 import de.flapdoodle.embed.process.builder.AbstractBuilder;
 import de.flapdoodle.embed.process.builder.IProperty;
 import de.flapdoodle.embed.process.builder.TypedProperty;
 import de.flapdoodle.embed.process.runtime.Network;
+
+import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.JVMOptionsCustomizer;
+import com.github.nosan.embedded.cassandra.customizer.JmxPortCustomizer;
 
 /**
  * Simple builder for building {@link ExecutableConfig}.

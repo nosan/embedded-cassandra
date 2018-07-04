@@ -20,8 +20,9 @@ import java.io.File;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
 
-import com.github.nosan.embedded.cassandra.config.Config;
 import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.config.Config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

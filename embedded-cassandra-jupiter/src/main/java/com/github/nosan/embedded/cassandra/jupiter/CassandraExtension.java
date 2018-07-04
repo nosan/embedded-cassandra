@@ -16,14 +16,15 @@
 
 package com.github.nosan.embedded.cassandra.jupiter;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+
+import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 /**
  * JUnit {@link org.junit.jupiter.api.extension.RegisterExtension RegisterExtension} for

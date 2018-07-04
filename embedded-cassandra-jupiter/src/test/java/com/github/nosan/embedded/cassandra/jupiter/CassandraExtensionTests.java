@@ -17,11 +17,12 @@
 package com.github.nosan.embedded.cassandra.jupiter;
 
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

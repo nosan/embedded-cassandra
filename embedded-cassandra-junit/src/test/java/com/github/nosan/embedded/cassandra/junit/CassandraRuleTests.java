@@ -17,11 +17,12 @@
 package com.github.nosan.embedded.cassandra.junit;
 
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -18,13 +18,14 @@ package com.github.nosan.embedded.cassandra.testng;
 
 import java.io.IOException;
 
+import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 
 /**
  * Abstract Class for running an Embedded Cassandra. This class provides two new methods

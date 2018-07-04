@@ -17,10 +17,11 @@
 package com.github.nosan.embedded.cassandra.testng;
 
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

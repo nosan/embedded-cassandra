@@ -18,8 +18,9 @@ package com.github.nosan.embedded.cassandra.config;
 
 import java.time.Duration;
 
-import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
 import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

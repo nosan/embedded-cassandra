@@ -19,8 +19,9 @@ package com.github.nosan.embedded.cassandra;
 import java.io.IOException;
 
 import com.datastax.driver.core.Session;
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 /**
  * Tests for {@link Cassandra}.

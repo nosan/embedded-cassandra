@@ -16,8 +16,9 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import com.github.nosan.embedded.cassandra.config.Version;
 import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.config.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

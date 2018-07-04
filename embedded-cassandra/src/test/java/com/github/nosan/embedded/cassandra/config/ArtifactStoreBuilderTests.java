@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.config;
 
-import com.github.nosan.embedded.cassandra.ReflectionUtils;
 import de.flapdoodle.embed.process.io.directories.PropertyOrTempDirInPlatformTempDir;
 import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
 import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
@@ -26,6 +25,8 @@ import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

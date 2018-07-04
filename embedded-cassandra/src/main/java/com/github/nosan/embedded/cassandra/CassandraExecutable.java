@@ -18,11 +18,12 @@ package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
 
-import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.runtime.Executable;
+
+import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
 
 /**
  * {@link Executable} for embedded cassandra server.

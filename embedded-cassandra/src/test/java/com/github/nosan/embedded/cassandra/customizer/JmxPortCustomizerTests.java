@@ -16,12 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.customizer;
 
-import com.github.nosan.embedded.cassandra.config.Version;
 import de.flapdoodle.embed.process.distribution.BitSize;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.Platform;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.config.Version;
 
 /**
  * Tests for {@link JmxPortCustomizer}.

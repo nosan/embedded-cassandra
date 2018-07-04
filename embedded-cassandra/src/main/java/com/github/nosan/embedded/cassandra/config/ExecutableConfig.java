@@ -19,10 +19,11 @@ package com.github.nosan.embedded.cassandra.config;
 import java.time.Duration;
 import java.util.List;
 
-import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
 import de.flapdoodle.embed.process.config.IExecutableProcessConfig;
 import de.flapdoodle.embed.process.config.ISupportConfig;
 import de.flapdoodle.embed.process.distribution.IVersion;
+
+import com.github.nosan.embedded.cassandra.customizer.FileCustomizer;
 
 /**
  * An Embedded Cassandra {@link IExecutableProcessConfig executable config}.
