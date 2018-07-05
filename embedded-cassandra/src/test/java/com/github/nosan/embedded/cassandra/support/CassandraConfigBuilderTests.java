@@ -17,6 +17,8 @@
 package com.github.nosan.embedded.cassandra.support;
 
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -113,6 +115,24 @@ public class CassandraConfigBuilderTests {
 		assertThat(config.getSslStoragePort()).isEqualTo(7001);
 		assertThat(config.getNativeTransportPortSsl()).isNotEqualTo(0);
 
+	}
+
+	@Test
+	public void randomPorts() {
+		Set<Integer> ports = new HashSet<>();
+		for (int i = 0; i < 100; i++) {
+			Config config = new Config();
+			config.setNativeTransportPortSsl(0);
+			CassandraConfig cassandraConfig = new CassandraConfigBuilder().config(config)
+					.useRandomPorts(true).build();
+			ports.add(cassandraConfig.getJmxPort());
+			ports.add(config.getRpcPort());
+			ports.add(config.getNativeTransportPort());
+			ports.add(config.getStoragePort());
+			ports.add(config.getSslStoragePort());
+			ports.add(config.getNativeTransportPortSsl());
+		}
+		assertThat(ports).hasSize(100 * 6);
 	}
 
 }
