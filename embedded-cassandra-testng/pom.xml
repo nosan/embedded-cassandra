@@ -22,10 +22,6 @@
             <artifactId>embedded-cassandra</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.nosan</groupId>
-            <artifactId>embedded-cassandra-cql</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <optional>true</optional>

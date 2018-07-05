@@ -20,10 +20,6 @@
             <artifactId>embedded-cassandra</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.nosan</groupId>
-            <artifactId>embedded-cassandra-cql</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <optional>true</optional>

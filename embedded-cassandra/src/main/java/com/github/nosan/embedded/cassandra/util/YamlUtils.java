@@ -37,10 +37,10 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.BaseRepresenter;
 import org.yaml.snakeyaml.representer.Representer;
 
-import com.github.nosan.embedded.cassandra.config.Config;
+import com.github.nosan.embedded.cassandra.Config;
 
 /**
- * Utility class for serializing and deserializing{@link Config config}.
+ * Utility class to serialize and deserialize {@link Config config} instance.
  *
  * @author Dmytro Nosan
  */
@@ -61,7 +61,7 @@ public abstract class YamlUtils {
 	}
 
 	/**
-	 * Deserialize Cassandra config from the YAML resource.
+	 * Deserialize Cassandra config.
 	 * @param stream yaml resource.
 	 * @return Cassandra config
 	 */
@@ -72,7 +72,7 @@ public abstract class YamlUtils {
 	}
 
 	/**
-	 * Utility class for serializing {@link Config.ParameterizedClass}.
+	 * Utility class to serialize {@link Config.ParameterizedClass}.
 	 */
 	private static final class ConfigSerializer extends Representer {
 
@@ -128,7 +128,7 @@ public abstract class YamlUtils {
 	}
 
 	/**
-	 * A custom constructor for overriding {@link BeanAccess}.
+	 * A custom constructor to use {@link BeanAccess#FIELD Field Access}.
 	 */
 	private static final class ConfigConstructor extends Constructor {
 

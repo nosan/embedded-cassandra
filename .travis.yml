@@ -9,27 +9,16 @@ before_install:
 
 matrix:
   include:
-    - env: JDK='Oracle JDK 8'
-      jdk: oraclejdk8
     - env: JDK='OpenJDK 8'
       jdk: openjdk8
-    - env: JDK='Oracle JDK 9'
-      jdk: oraclejdk9
     - env: JDK='OpenJDK 9'
       install: . ./install-jdk.sh -F 9
-    - env: JDK='Oracle JDK 10'
-      jdk: oraclejdk10
     - env: JDK='OpenJDK 10'
       install: . ./install-jdk.sh -F 10 -L GPL
 
 
 script:
-  - ./mvnw clean package -B
-
-
-notifications:
-  email:
-    - dimanosan@gmail.com
+  - ./mvnw -B clean test
 
 cache:
   directories:

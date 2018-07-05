@@ -21,10 +21,6 @@
             <artifactId>embedded-cassandra</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.nosan</groupId>
-            <artifactId>embedded-cassandra-cql</artifactId>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <optional>true</optional>

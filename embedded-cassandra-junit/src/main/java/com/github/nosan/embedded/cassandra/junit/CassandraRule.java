@@ -22,22 +22,24 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.CassandraConfig;
+import com.github.nosan.embedded.cassandra.support.CassandraConfigBuilder;
+import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
 /**
  * JUnit {@link TestRule TestRule} for running an Embedded Cassandra. Cassandra will be
- * started on the random ports. <pre> public class CassandraTests {
+ * started on the random ports. <pre>
+ *     public class CassandraTests {
  * 	 &#64;ClassRule
  * 	public static CassandraRule cassandra = new CassandraRule();
+ *
  * 	 &#64;Before
  * 	public void setUp() throws Exception {
- * 	CqlScriptUtils.executeScripts(cassandra.getSession(), "init.cql");
+ * 	 //before actions
  *    }
  * 	 &#64;After
  * 	public void tearDown() throws Exception {
- * 	CqlScriptUtils.executeScripts(cassandra.getSession(), "drop.cql");
+ * 	 //after actions
  *    }
  * 	 &#64;Test
  * 	public void test() {
@@ -47,28 +49,26 @@ import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
  * }</pre>
  *
  * @author Dmytro Nosan
- * @see com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder
- * @see ExecutableConfigBuilder
+ * @see RuntimeConfigBuilder
+ * @see CassandraConfigBuilder
  * @see Cassandra
- * @see CqlScriptUtils
  */
 public class CassandraRule extends Cassandra implements TestRule {
 
-	public CassandraRule(IRuntimeConfig runtimeConfig,
-			ExecutableConfig executableConfig) {
-		super(runtimeConfig, executableConfig);
+	public CassandraRule(IRuntimeConfig runtimeConfig, CassandraConfig cassandraConfig) {
+		super(runtimeConfig, cassandraConfig);
 	}
 
 	public CassandraRule(IRuntimeConfig runtimeConfig) {
-		super(runtimeConfig, new ExecutableConfigBuilder().useRandomPorts(true).build());
+		super(runtimeConfig, new CassandraConfigBuilder().useRandomPorts(true).build());
 	}
 
-	public CassandraRule(ExecutableConfig executableConfig) {
-		super(executableConfig);
+	public CassandraRule(CassandraConfig cassandraConfig) {
+		super(cassandraConfig);
 	}
 
 	public CassandraRule() {
-		this(new ExecutableConfigBuilder().useRandomPorts(true).build());
+		this(new CassandraConfigBuilder().useRandomPorts(true).build());
 	}
 
 	@Override

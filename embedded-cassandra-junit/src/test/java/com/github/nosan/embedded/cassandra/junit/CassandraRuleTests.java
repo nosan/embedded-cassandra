@@ -16,13 +16,14 @@
 
 package com.github.nosan.embedded.cassandra.junit;
 
+import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.Config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,20 +37,33 @@ public class CassandraRuleTests {
 	@ClassRule
 	public static CassandraRule cassandra = new CassandraRule();
 
+	private Cluster cluster;
+
 	@Before
 	public void setUp() throws Exception {
-		CqlScriptUtils.executeScripts(cassandra.getSession(), "init.cql");
+		Config config = cassandra.getCassandraConfig().getConfig();
+		this.cluster = Cluster.builder().withPort(config.getNativeTransportPort())
+				.addContactPoint(config.getListenAddress()).build();
+		try (Session session = this.cluster.connect()) {
+			session.execute("CREATE KEYSPACE  test  WITH REPLICATION = { 'class' : "
+					+ "'SimpleStrategy', 'replication_factor' : 1 }; ");
+			session.execute("CREATE TABLE  test.roles (   id text PRIMARY KEY );");
+		}
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		CqlScriptUtils.executeScripts(cassandra.getSession(), "drop.cql");
+		if (this.cluster != null) {
+			this.cluster.close();
+		}
 	}
 
 	@Test
 	public void select() {
-		Session session = cassandra.getSession();
-		assertThat(session.execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
+		try (Session session = this.cluster.connect()) {
+			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
+					.isTrue();
+		}
 	}
 
 }
