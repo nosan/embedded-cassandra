@@ -120,7 +120,8 @@ public class CassandraConfigBuilderTests {
 	@Test
 	public void randomPorts() {
 		Set<Integer> ports = new HashSet<>();
-		for (int i = 0; i < 100; i++) {
+		int count = 50;
+		for (int i = 0; i < count; i++) {
 			Config config = new Config();
 			config.setNativeTransportPortSsl(0);
 			CassandraConfig cassandraConfig = new CassandraConfigBuilder().config(config)
@@ -132,7 +133,7 @@ public class CassandraConfigBuilderTests {
 			ports.add(config.getSslStoragePort());
 			ports.add(config.getNativeTransportPortSsl());
 		}
-		assertThat(ports).hasSize(100 * 6);
+		assertThat(ports).hasSize(count * 6);
 	}
 
 }
