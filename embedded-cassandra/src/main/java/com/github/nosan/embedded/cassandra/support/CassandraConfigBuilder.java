@@ -136,9 +136,10 @@ public class CassandraConfigBuilder extends AbstractBuilder<CassandraConfig> {
 	}
 
 	/**
-	 * Use random ports for {@link Config Config} and JMX.
+	 * Tries to use random ports for {@link Config Config} and JMX port.
 	 * @param useRandomPorts whether use random ports or not.
 	 * @return current builder.
+	 * @see Network#getFreeServerPort()
 	 */
 	public CassandraConfigBuilder useRandomPorts(boolean useRandomPorts) {
 		useRandomPorts().set(useRandomPorts);
