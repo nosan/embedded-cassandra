@@ -94,7 +94,7 @@ public class Cassandra {
 	 * Start the Cassandra Server.
 	 * @throws IOException Cassandra's process has not been started correctly.
 	 */
-	public void start() throws IOException {
+	public synchronized void start() throws IOException {
 		if (this.initialized) {
 			throw new IllegalStateException("Cassandra has already been initialized.");
 		}
@@ -115,7 +115,7 @@ public class Cassandra {
 	 * Stop the Cassandra Server.
 	 * @see CassandraExecutable#stop
 	 */
-	public void stop() {
+	public synchronized void stop() {
 		try {
 			if (this.executable != null) {
 				this.executable.stop();
