@@ -21,16 +21,32 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link Version}.
+ * Tests for {@link SupportConfig}.
  *
  * @author Dmytro Nosan
  */
-public class VersionTests {
+public class SupportConfigTests {
+
+	private final SupportConfig supportConfig = new SupportConfig();
 
 	@Test
-	public void getVersion() {
-		assertThat(Version.LATEST.getValue()).isEqualTo("3.11.2");
+	public void getName() {
+		assertThat(this.supportConfig.getName()).isEqualTo("Embedded Cassandra");
+	}
 
+	@Test
+	public void getSupportUrl() {
+		assertThat(this.supportConfig.getSupportUrl())
+				.isEqualTo("https://github.com/nosan/embedded-cassandra");
+	}
+
+	@Test
+	public void messageOnException() {
+		assertThat(this.supportConfig.messageOnException(getClass(),
+				new RuntimeException("ex"))).isEqualTo(
+						"If you feel this is [ex] a bug, please open a new issue. "
+								+ "Follow this link: https://github.com/nosan/embedded-cassandra\n"
+								+ "Thank you! :)");
 	}
 
 }

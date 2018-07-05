@@ -23,9 +23,9 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.config.ExecutableConfigBuilder;
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.CassandraConfig;
+import com.github.nosan.embedded.cassandra.support.CassandraConfigBuilder;
+import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
 /**
  * Abstract Class for running an Embedded Cassandra. This class provides two new methods
@@ -34,11 +34,11 @@ import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
  * public class CassandraTests extends AbstractCassandraTestNG {
  * 	&#64;BeforeMethod
  * 	public void setUp() throws Exception {
- * 		CqlScriptUtils.executeScripts(getSession(), "init.cql");
+ * 		// before actions
  *    }
  * 	&#64;AfterMethod
  * 	public void tearDown() throws Exception {
- * 		CqlScriptUtils.executeScripts(getSession(), "drop.cql");
+ * 		// after actions
  *    }
  * 	&#64;Test
  * 	public void test() {
@@ -48,28 +48,27 @@ import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
  * }</pre>
  *
  * @author Dmytro Nosan
- * @see com.github.nosan.embedded.cassandra.config.RuntimeConfigBuilder
- * @see ExecutableConfigBuilder
+ * @see RuntimeConfigBuilder
+ * @see CassandraConfigBuilder
  * @see Cassandra
- * @see CqlScriptUtils
  */
 public abstract class AbstractCassandraTestNG extends Cassandra {
 
 	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig,
-			ExecutableConfig executableConfig) {
-		super(runtimeConfig, executableConfig);
+			CassandraConfig cassandraConfig) {
+		super(runtimeConfig, cassandraConfig);
 	}
 
 	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig) {
-		super(runtimeConfig, new ExecutableConfigBuilder().useRandomPorts(true).build());
+		super(runtimeConfig, new CassandraConfigBuilder().useRandomPorts(true).build());
 	}
 
-	public AbstractCassandraTestNG(ExecutableConfig executableConfig) {
-		super(executableConfig);
+	public AbstractCassandraTestNG(CassandraConfig cassandraConfig) {
+		super(cassandraConfig);
 	}
 
 	public AbstractCassandraTestNG() {
-		this(new ExecutableConfigBuilder().useRandomPorts(true).build());
+		super(new CassandraConfigBuilder().useRandomPorts(true).build());
 	}
 
 	/**

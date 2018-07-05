@@ -16,12 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.testng;
 
+import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.Config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,20 +33,33 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
 
+	private Cluster cluster;
+
 	@BeforeMethod
 	public void setUp() throws Exception {
-		CqlScriptUtils.executeScripts(getSession(), "init.cql");
+		Config config = getCassandraConfig().getConfig();
+		this.cluster = Cluster.builder().withPort(config.getNativeTransportPort())
+				.addContactPoint(config.getListenAddress()).build();
+		try (Session session = this.cluster.connect()) {
+			session.execute("CREATE KEYSPACE  test  WITH REPLICATION = { 'class' : "
+					+ "'SimpleStrategy', 'replication_factor' : 1 }; ");
+			session.execute("CREATE TABLE  test.roles (   id text PRIMARY KEY );");
+		}
 	}
 
 	@AfterMethod
 	public void tearDown() throws Exception {
-		CqlScriptUtils.executeScripts(getSession(), "drop.cql");
+		if (this.cluster != null) {
+			this.cluster.close();
+		}
 	}
 
 	@Test
 	public void select() {
-		Session session = getSession();
-		assertThat(session.execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
+		try (Session session = this.cluster.connect()) {
+			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
+					.isTrue();
+		}
 	}
 
 }

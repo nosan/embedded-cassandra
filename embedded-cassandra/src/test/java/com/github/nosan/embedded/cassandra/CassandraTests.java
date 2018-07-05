@@ -18,10 +18,8 @@ package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
 
-import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Cluster;
 import org.junit.Test;
-
-import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 /**
  * Tests for {@link Cassandra}.
@@ -31,26 +29,23 @@ import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
  */
 public class CassandraTests {
 
-	@Test
-	public void initScriptUsingSession() throws IOException {
-		Cassandra cassandra = new Cassandra();
-		try {
-			cassandra.start();
-			Session session = cassandra.getSession();
-			CqlScriptUtils.executeScripts(session, "init.cql");
-		}
-		finally {
-			cassandra.stop();
-		}
+	private static Cluster cluster(Config config) {
+		return Cluster.builder().addContactPoint(config.getListenAddress())
+				.withPort(config.getNativeTransportPort()).build();
 	}
 
 	@Test
-	public void initScriptUsingCluster() throws IOException {
+	public void successfullyStarted() throws IOException {
 		Cassandra cassandra = new Cassandra();
 		try {
 			cassandra.start();
-			Session session = cassandra.getCluster().connect();
-			CqlScriptUtils.executeScripts(session, "init.cql");
+			CassandraConfig cassandraConfig = cassandra.getCassandraConfig();
+			Config config = cassandraConfig.getConfig();
+			try (Cluster cluster = cluster(config)) {
+				cluster.connect().execute("CREATE KEYSPACE IF NOT EXISTS test  WITH "
+						+ "REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };");
+			}
+
 		}
 		finally {
 			cassandra.stop();

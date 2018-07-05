@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.support;
 
-import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import de.flapdoodle.embed.process.extract.ITempNaming;
 
 /**
- * Tests for {@link Version}.
+ * Simple {@link ITempNaming Temp Naming} implementation which uses the original name.
  *
  * @author Dmytro Nosan
  */
-public class VersionTests {
+public class OriginTempNaming implements ITempNaming {
 
-	@Test
-	public void getVersion() {
-		assertThat(Version.LATEST.getValue()).isEqualTo("3.11.2");
-
+	@Override
+	public String nameFor(String prefix, String postfix) {
+		return postfix;
 	}
 
 }

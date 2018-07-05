@@ -14,37 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.util;
-
-import java.io.File;
-import java.io.StringWriter;
-import java.net.URISyntaxException;
+package com.github.nosan.embedded.cassandra.support;
 
 import org.junit.Test;
-
-import com.github.nosan.embedded.cassandra.Config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link YamlUtils}.
+ * Tests for {@link OriginTempNaming}.
  *
  * @author Dmytro Nosan
  */
-public class YamlUtilsTests {
+public class OriginTempNamingTests {
 
 	@Test
-	public void deserializeAndSerialize() throws URISyntaxException {
-
-		Config config = YamlUtils.deserialize(
-				ClassLoader.getSystemResourceAsStream("cassandra-test.yaml"));
-
-		StringWriter writer = new StringWriter();
-		YamlUtils.serialize(config, writer);
-
-		assertThat(new File(ClassLoader.getSystemResource("cassandra-test.yaml").toURI()))
-				.hasContent(writer.toString());
-
+	public void nameFor() {
+		assertThat(new OriginTempNaming().nameFor("prefix", "postfix"))
+				.isEqualTo("postfix");
 	}
 
 }

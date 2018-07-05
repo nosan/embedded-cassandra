@@ -16,21 +16,35 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import org.junit.Test;
+import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import de.flapdoodle.embed.process.distribution.IVersion;
 
 /**
- * Tests for {@link Version}.
+ * Basic implementation of {@link IVersion Version}.
  *
  * @author Dmytro Nosan
  */
-public class VersionTests {
+public final class ExecutableVersion implements IVersion {
 
-	@Test
-	public void getVersion() {
-		assertThat(Version.LATEST.getValue()).isEqualTo("3.11.2");
+	private final Version version;
 
+	public ExecutableVersion(Version version) {
+		this.version = Objects.requireNonNull(version, "Version must not be null");
+	}
+
+	public Version getVersion() {
+		return this.version;
+	}
+
+	@Override
+	public String asInDownloadPath() {
+		return getVersion().getValue();
+	}
+
+	@Override
+	public String toString() {
+		return this.version.toString();
 	}
 
 }

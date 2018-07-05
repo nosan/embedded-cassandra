@@ -16,21 +16,30 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
- * Tests for {@link Version}.
+ * List of Cassandra's versions.
  *
  * @author Dmytro Nosan
  */
-public class VersionTests {
+public enum Version {
 
-	@Test
-	public void getVersion() {
-		assertThat(Version.LATEST.getValue()).isEqualTo("3.11.2");
+	/**
+	 * The version 3.11.2.
+	 */
+	LATEST("3.11.2");
 
+	private final String value;
+
+	Version(String value) {
+		this.value = value;
+	}
+
+	/**
+	 * Retrieves Cassandra's version.
+	 * @return Version to use.
+	 */
+	public String getValue() {
+		return this.value;
 	}
 
 }
