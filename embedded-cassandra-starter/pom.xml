@@ -12,7 +12,6 @@
 
     <artifactId>embedded-cassandra-starter</artifactId>
     <description>Embedded Cassandra Starter</description>
-    <packaging>pom</packaging>
 
 
     <dependencies>
