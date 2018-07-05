@@ -62,9 +62,9 @@ import com.github.nosan.embedded.cassandra.util.YamlUtils;
 /**
  * A basic implemtation of {@link AbstractProcess Cassandra Process}.
  *
+ * @author Dmytro Nosan
  * @see CassandraStarter
  * @see CassandraExecutable
- * @author Dmytro Nosan
  */
 public class CassandraProcess
 		extends AbstractProcess<ExecutableConfig, CassandraExecutable, CassandraProcess> {
