@@ -60,7 +60,7 @@ import com.github.nosan.embedded.cassandra.process.customizer.JmxPortCustomizer;
 import com.github.nosan.embedded.cassandra.util.YamlUtils;
 
 /**
- * A basic implemtation of {@link AbstractProcess Cassandra Process}.
+ * A basic implementation of {@link AbstractProcess Cassandra Process}.
  *
  * @author Dmytro Nosan
  * @see CassandraStarter
