@@ -18,7 +18,8 @@
     <dependencies>
         <dependency>
             <groupId>com.github.nosan</groupId>
-            <artifactId>embedded-cassandra</artifactId>
+            <artifactId>embedded-cassandra-starter</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -26,14 +27,9 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-core</artifactId>
-            <optional>true</optional>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
