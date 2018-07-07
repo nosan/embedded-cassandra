@@ -17,8 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>com.github.nosan</groupId>
-            <artifactId>embedded-cassandra-starter</artifactId>
-            <optional>true</optional>
+            <artifactId>embedded-cassandra</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

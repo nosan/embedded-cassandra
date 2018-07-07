@@ -16,65 +16,37 @@
 
 package com.github.nosan.embedded.cassandra.process;
 
-import java.io.File;
-
-import de.flapdoodle.embed.process.distribution.BitSize;
-import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.Platform;
-import de.flapdoodle.embed.process.extract.ImmutableExtractedFileSet;
-import org.apache.commons.lang3.StringUtils;
+import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import org.junit.Test;
-
-import com.github.nosan.embedded.cassandra.ExecutableVersion;
-import com.github.nosan.embedded.cassandra.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraProcess.ProcessArguments}.
+ * Tests for {@link CassandraProcess.Arguments}.
  *
  * @author Dmytro Nosan
  */
 public class CassandraProcessArgumentsTests {
 
 	@Test
-	public void unixLike() {
-
-		Distribution distribution = new Distribution(
-				new ExecutableVersion(Version.LATEST), Platform.Linux, BitSize.detect());
-		File executable = new File("exe");
-		File configurationFile = new File("config.yaml");
-
-		CassandraProcess.ProcessArguments processArguments = new CassandraProcess.ProcessArguments(
-				distribution, ImmutableExtractedFileSet.builder(new File(""))
-						.executable(executable).build(),
-				configurationFile);
-
-		assertThat(processArguments.get()).containsExactly(executable.getAbsolutePath(),
-				"-f",
-				"-Dcassandra.config=file:" + StringUtils.repeat(File.separatorChar, 3)
-						+ configurationFile.getAbsolutePath());
+	public void unixLikeArguments() {
+		TestContext context = new TestContext().withPlatform(Platform.Linux);
+		IExtractedFileSet fileSet = context.getExtractedFileSet();
+		assertThat(CassandraProcess.Arguments.get(context)).containsExactly(
+				fileSet.executable().getAbsolutePath(), "-f",
+				"-Dcassandra.jmx.local.port=0");
 
 	}
 
 	@Test
-	public void windows() {
-
-		Distribution distribution = new Distribution(
-				new ExecutableVersion(Version.LATEST), Platform.Windows,
-				BitSize.detect());
-		File executable = new File("exe");
-		File configurationFile = new File("config.yaml");
-
-		CassandraProcess.ProcessArguments processArguments = new CassandraProcess.ProcessArguments(
-				distribution, ImmutableExtractedFileSet.builder(new File(""))
-						.executable(executable).build(),
-				configurationFile);
-
-		assertThat(processArguments.get()).containsExactly("powershell",
-				"-ExecutionPolicy", "Bypass", executable.getAbsolutePath(), "-f",
-				"`-Dcassandra.config=file:" + StringUtils.repeat(File.separatorChar, 3)
-						+ configurationFile.getAbsolutePath());
+	public void windowsArguments() {
+		TestContext context = new TestContext().withPlatform(Platform.Windows);
+		IExtractedFileSet fileSet = context.getExtractedFileSet();
+		assertThat(CassandraProcess.Arguments.get(context)).containsExactly("powershell",
+				"-ExecutionPolicy", "Unrestricted",
+				fileSet.executable().getAbsolutePath(), "-f",
+				"`-Dcassandra.jmx.local.port=0");
 
 	}
 

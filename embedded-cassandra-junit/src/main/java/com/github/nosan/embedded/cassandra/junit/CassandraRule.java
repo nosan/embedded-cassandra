@@ -22,8 +22,8 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraConfig;
-import com.github.nosan.embedded.cassandra.support.CassandraConfigBuilder;
+import com.github.nosan.embedded.cassandra.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
 /**
@@ -32,7 +32,6 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  *     public class CassandraTests {
  * 	 &#64;ClassRule
  * 	public static CassandraRule cassandra = new CassandraRule();
- *
  * 	 &#64;Before
  * 	public void setUp() throws Exception {
  * 	 //before actions
@@ -50,25 +49,26 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
- * @see CassandraConfigBuilder
+ * @see ExecutableConfigBuilder
  * @see Cassandra
  */
 public class CassandraRule extends Cassandra implements TestRule {
 
-	public CassandraRule(IRuntimeConfig runtimeConfig, CassandraConfig cassandraConfig) {
-		super(runtimeConfig, cassandraConfig);
+	public CassandraRule(IRuntimeConfig runtimeConfig,
+			ExecutableConfig executableConfig) {
+		super(runtimeConfig, executableConfig);
 	}
 
 	public CassandraRule(IRuntimeConfig runtimeConfig) {
-		super(runtimeConfig, new CassandraConfigBuilder().useRandomPorts(true).build());
+		super(runtimeConfig, new ExecutableConfigBuilder().build());
 	}
 
-	public CassandraRule(CassandraConfig cassandraConfig) {
-		super(cassandraConfig);
+	public CassandraRule(ExecutableConfig executableConfig) {
+		super(executableConfig);
 	}
 
 	public CassandraRule() {
-		this(new CassandraConfigBuilder().useRandomPorts(true).build());
+		this(new ExecutableConfigBuilder().build());
 	}
 
 	@Override

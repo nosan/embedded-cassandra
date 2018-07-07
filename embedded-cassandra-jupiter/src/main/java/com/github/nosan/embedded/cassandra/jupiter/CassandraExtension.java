@@ -22,8 +22,8 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraConfig;
-import com.github.nosan.embedded.cassandra.support.CassandraConfigBuilder;
+import com.github.nosan.embedded.cassandra.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
 /**
@@ -48,27 +48,27 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
- * @see CassandraConfigBuilder
+ * @see ExecutableConfigBuilder
  * @see Cassandra
  */
 public class CassandraExtension extends Cassandra
 		implements BeforeAllCallback, AfterAllCallback {
 
 	public CassandraExtension(IRuntimeConfig runtimeConfig,
-			CassandraConfig cassandraConfig) {
-		super(runtimeConfig, cassandraConfig);
+			ExecutableConfig executableConfig) {
+		super(runtimeConfig, executableConfig);
 	}
 
 	public CassandraExtension(IRuntimeConfig runtimeConfig) {
-		super(runtimeConfig, new CassandraConfigBuilder().useRandomPorts(true).build());
+		super(runtimeConfig, new ExecutableConfigBuilder().build());
 	}
 
-	public CassandraExtension(CassandraConfig cassandraConfig) {
-		super(cassandraConfig);
+	public CassandraExtension(ExecutableConfig executableConfig) {
+		super(executableConfig);
 	}
 
 	public CassandraExtension() {
-		super(new CassandraConfigBuilder().useRandomPorts(true).build());
+		super(new ExecutableConfigBuilder().build());
 	}
 
 	@Override

@@ -14,39 +14,37 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.process;
 
 import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.Config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link SupportConfig}.
+ * todo leave javadoc here.
  *
  * @author Dmytro Nosan
  */
-public class SupportConfigTests {
+public class ConfigFileCustomizerTests extends AbstractFileCustomizerSupport {
 
-	private final SupportConfig supportConfig = new SupportConfig();
-
-	@Test
-	public void getName() {
-		assertThat(this.supportConfig.getName()).isEqualTo("Embedded Cassandra");
-	}
+	private final ConfigFileCustomizer customizer = new ConfigFileCustomizer();
 
 	@Test
-	public void getSupportUrl() {
-		assertThat(this.supportConfig.getSupportUrl())
-				.isEqualTo("https://github.com/nosan/embedded-cassandra");
-	}
+	public void customize() throws Exception {
+		Config config = new Config();
+		config.setNativeTransportPort(9042);
+		config.setStoragePort(7000);
+		config.setSslStoragePort(7001);
+		config.setRpcPort(9160);
 
-	@Test
-	public void messageOnException() {
-		assertThat(this.supportConfig.messageOnException(getClass(),
-				new RuntimeException("ex"))).isEqualTo(
-				"If you feel this is [ex] a bug, please open a new issue. "
-						+ "Follow this link: https://github.com/nosan/embedded-cassandra\n"
-						+ "Thank you! :)");
+		withFile("cassandra.yaml").accept((file) -> {
+			this.customizer.customize(file, new TestContext().withConfig(config));
+			assertThat(file)
+					.hasSameContentAs(classpath("customizers/config/cassandra.yaml"));
+		});
+
 	}
 
 }

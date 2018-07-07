@@ -24,7 +24,7 @@ import de.flapdoodle.embed.process.io.NamedOutputStreamProcessor;
 import de.flapdoodle.embed.process.io.Slf4jLevel;
 import de.flapdoodle.embed.process.io.Slf4jStreamProcessor;
 import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
-import de.flapdoodle.embed.process.store.CachingArtifactStore;
+import de.flapdoodle.embed.process.store.ArtifactStore;
 import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -49,6 +49,7 @@ public class RuntimeConfigBuilderTests {
 	public void defaults() throws Exception {
 		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder().build();
 
+		assertThat(runtimeConfig.isDaemonProcess()).isFalse();
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
 
@@ -60,7 +61,7 @@ public class RuntimeConfigBuilderTests {
 
 		IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
 
-		assertThat(artifactStore).isInstanceOf(CachingArtifactStore.class);
+		assertThat(artifactStore).isInstanceOf(ArtifactStore.class);
 
 	}
 
@@ -69,6 +70,7 @@ public class RuntimeConfigBuilderTests {
 
 		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder(log).build();
 
+		assertThat(runtimeConfig.isDaemonProcess()).isFalse();
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
 
@@ -79,7 +81,7 @@ public class RuntimeConfigBuilderTests {
 
 		IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
 
-		assertThat(artifactStore).isInstanceOf(CachingArtifactStore.class);
+		assertThat(artifactStore).isInstanceOf(ArtifactStore.class);
 
 	}
 

@@ -36,13 +36,14 @@ public class LatestPackageResolver implements IPackageResolver {
 		FileSet.Builder builder = FileSet.builder();
 
 		switch (distribution.getPlatform()) {
-		case Windows:
-			builder.addEntry(FileType.Executable,
-					"apache-cassandra-3.11.2/bin/cassandra.ps1");
-			break;
-		default:
-			builder.addEntry(FileType.Executable,
-					"apache-cassandra-3.11.2/bin/cassandra");
+			case Windows:
+				builder.addEntry(FileType.Executable,
+						"apache-cassandra-3.11.2/bin/cassandra.ps1");
+				break;
+
+			default:
+				builder.addEntry(FileType.Executable,
+						"apache-cassandra-3.11.2/bin/cassandra");
 		}
 		builder.addEntry(FileType.Library, "apache-cassandra-3.11.2/.DS_Store")
 				.addEntry(FileType.Library,

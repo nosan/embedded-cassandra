@@ -33,7 +33,7 @@ import com.github.nosan.embedded.cassandra.ExecutableConfig;
  * @see CassandraExecutable
  * @see CassandraProcess
  */
-public class CassandraStarter
+public final class CassandraStarter
 		extends Starter<ExecutableConfig, CassandraExecutable, CassandraProcess> {
 
 	public CassandraStarter(IRuntimeConfig config) {

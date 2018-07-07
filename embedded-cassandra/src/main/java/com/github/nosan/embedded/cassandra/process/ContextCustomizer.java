@@ -14,33 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.process;
 
 /**
- * List of Cassandra's versions.
+ * Callback interface that can be used to customize a {@link Context}.
  *
  * @author Dmytro Nosan
  */
-public enum Version {
+interface ContextCustomizer {
 
 	/**
-	 * The version 3.11.2.
-	 */
-	LATEST("3.11.2");
-
-	private final String value;
-
-	Version(String value) {
-		this.value = value;
-	}
-
-	/**
-	 * Retrieves Cassandra's version.
+	 * Callback to customize a {@link Context} instance.
 	 *
-	 * @return Version to use.
+	 * @param context context to customize.
 	 */
-	public String getValue() {
-		return this.value;
-	}
+	void customize(Context context);
 
 }

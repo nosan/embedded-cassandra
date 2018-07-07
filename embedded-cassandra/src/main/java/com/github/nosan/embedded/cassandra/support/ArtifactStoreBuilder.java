@@ -46,6 +46,7 @@ public class ArtifactStoreBuilder
 		tempDir().overwriteDefault(new PropertyOrTempDirInPlatformTempDir());
 		downloader().overwriteDefault(new Downloader());
 		download().overwriteDefault(downloadConfig);
+		useCache(false);
 	}
 
 }

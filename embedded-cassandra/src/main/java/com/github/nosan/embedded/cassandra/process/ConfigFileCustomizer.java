@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.util;
+package com.github.nosan.embedded.cassandra.process;
 
-import java.io.InputStream;
-import java.io.Writer;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -38,37 +38,36 @@ import org.yaml.snakeyaml.representer.BaseRepresenter;
 import org.yaml.snakeyaml.representer.Representer;
 
 import com.github.nosan.embedded.cassandra.Config;
+import com.github.nosan.embedded.cassandra.ExecutableConfig;
 
 /**
- * Utility class to serialize and deserialize {@link Config config} instance.
+ * {@link FileCustomizer File Customizer} which serializes {@link Config } into the
+ * cassandra.yaml file.
  *
  * @author Dmytro Nosan
  */
-public abstract class YamlUtils {
+class ConfigFileCustomizer extends AbstractFileCustomizer {
 
-	/**
-	 * Serialize Cassandra config.
-	 * @param config cassandra config.
-	 * @param writer yaml output.
-	 */
-	public static void serialize(Config config, Writer writer) {
-		Objects.requireNonNull(config, "Config must not be null");
-		Objects.requireNonNull(writer, "Writer must not be null");
-		DumperOptions options = new DumperOptions();
-		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		Yaml yaml = new Yaml(new ConfigConstructor(), new ConfigSerializer(), options);
-		yaml.dump(config, writer);
+	@Override
+	protected boolean isMatch(File file, Context context) throws IOException {
+		return file.getName().equals("cassandra.yaml");
 	}
 
-	/**
-	 * Deserialize Cassandra config.
-	 * @param stream yaml resource.
-	 * @return Cassandra config
-	 */
-	public static Config deserialize(InputStream stream) {
-		Objects.requireNonNull(stream, "InputStream must not be null");
-		Yaml yaml = new Yaml(new ConfigConstructor());
-		return yaml.loadAs(stream, Config.class);
+	@Override
+	protected void process(File file, Context context) throws IOException {
+		Config config = getConfig(context);
+		try (FileWriter writer = new FileWriter(file)) {
+			DumperOptions options = new DumperOptions();
+			options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+			Yaml yaml = new Yaml(new ConfigConstructor(), new ConfigSerializer(),
+					options);
+			yaml.dump(config, writer);
+		}
+	}
+
+	private Config getConfig(Context context) {
+		ExecutableConfig executableConfig = context.getExecutableConfig();
+		return executableConfig.getConfig();
 	}
 
 	/**

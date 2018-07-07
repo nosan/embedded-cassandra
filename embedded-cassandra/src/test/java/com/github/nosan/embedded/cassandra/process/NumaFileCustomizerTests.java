@@ -14,37 +14,32 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.util;
+package com.github.nosan.embedded.cassandra.process;
 
-import java.io.File;
-import java.io.StringWriter;
-import java.net.URISyntaxException;
-
+import de.flapdoodle.embed.process.runtime.NUMA;
 import org.junit.Test;
-
-import com.github.nosan.embedded.cassandra.Config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link YamlUtils}.
+ * Tests for {@link NumaFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
-public class YamlUtilsTests {
+public class NumaFileCustomizerTests extends AbstractFileCustomizerSupport {
+
+	private final NumaFileCustomizer customizer = new NumaFileCustomizer();
 
 	@Test
-	public void deserializeAndSerialize() throws URISyntaxException {
-
-		Config config = YamlUtils.deserialize(
-				ClassLoader.getSystemResourceAsStream("cassandra-test.yaml"));
-
-		StringWriter writer = new StringWriter();
-		YamlUtils.serialize(config, writer);
-
-		assertThat(new File(ClassLoader.getSystemResource("cassandra-test.yaml").toURI()))
-				.hasContent(writer.toString());
+	public void customize() throws Exception {
+		TestContext testContext = new TestContext();
+		if (!NUMA.isNUMA(testContext.getExecutableConfig().supportConfig(),
+				testContext.getDistribution().getPlatform())) {
+			withFile("jvm.options").from(classpath("jvm.options")).accept(file -> {
+				this.customizer.customize(file, testContext);
+				assertThat(file).hasSameContentAs(classpath("customizers/numa/jvm.options"));
+			});
+		}
 
 	}
-
 }

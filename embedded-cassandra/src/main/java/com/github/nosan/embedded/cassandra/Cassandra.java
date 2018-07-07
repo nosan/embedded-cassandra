@@ -25,103 +25,103 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.process.CassandraExecutable;
 import com.github.nosan.embedded.cassandra.process.CassandraStarter;
-import com.github.nosan.embedded.cassandra.support.CassandraConfigBuilder;
+import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
 /**
- * Simple class for running an Embedded Cassandra using {@link CassandraConfig Cassandra
- * Config}. <pre>public class CassandraTests {
- *
+ * Simple class for running an Embedded Cassandra. <pre>public class CassandraTests {
  *        &#64;Test
  * 	public void test() throws IOException {
  * 		Cassandra cassandra = new Cassandra();
  * 		try {
  * 			cassandra.start();
  * 			// test me
- * 		}
+ *        }
  * 		finally {
  * 			cassandra.stop();
- * 		}
- * 	}
- *
+ *        }
+ *    }
  * }</pre>
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
- * @see CassandraConfigBuilder
- * @see CassandraStarter
+ * @see ExecutableConfigBuilder
  */
 public class Cassandra {
 
-	protected static final Logger log = LoggerFactory.getLogger(Cassandra.class);
-
-	private boolean initialized;
+	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
 	private CassandraExecutable executable;
 
 	private final IRuntimeConfig runtimeConfig;
 
-	private final CassandraConfig cassandraConfig;
+	private final ExecutableConfig executableConfig;
 
-	public Cassandra(IRuntimeConfig runtimeConfig, CassandraConfig cassandraConfig) {
+	private boolean initialized = false;
+
+	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
 		this.runtimeConfig = Objects.requireNonNull(runtimeConfig,
 				"Runtime Config must not be null");
-		this.cassandraConfig = Objects.requireNonNull(cassandraConfig,
-				"Cassandra Config must not be null");
+		this.executableConfig = Objects.requireNonNull(executableConfig,
+				"Executable Config must not be null");
 	}
 
 	public Cassandra(IRuntimeConfig runtimeConfig) {
-		this(runtimeConfig, new CassandraConfigBuilder().build());
+		this(runtimeConfig, new ExecutableConfigBuilder().build());
 	}
 
-	public Cassandra(CassandraConfig cassandraConfig) {
-		this(new RuntimeConfigBuilder(log).build(), cassandraConfig);
+	public Cassandra(ExecutableConfig executableConfig) {
+		this(new RuntimeConfigBuilder(log).build(), executableConfig);
 	}
 
 	public Cassandra() {
-		this(new RuntimeConfigBuilder(log).build(), new CassandraConfigBuilder().build());
+		this(new RuntimeConfigBuilder(log).build(),
+				new ExecutableConfigBuilder().build());
 	}
 
-	public final CassandraConfig getCassandraConfig() {
-		return this.cassandraConfig;
+	/**
+	 * Retrieves {@link ExecutableConfig Executable Config}.
+	 *
+	 * @return executable config.
+	 */
+	public final ExecutableConfig getExecutableConfig() {
+		return this.executableConfig;
 	}
 
+	/**
+	 * Retrieves {@link IRuntimeConfig Runtime Config}.
+	 *
+	 * @return runtime config.
+	 */
 	public final IRuntimeConfig getRuntimeConfig() {
 		return this.runtimeConfig;
 	}
 
 	/**
 	 * Start the Cassandra Server.
+	 *
 	 * @throws IOException Cassandra's process has not been started correctly.
 	 */
-	public synchronized void start() throws IOException {
+	public synchronized final void start() throws IOException {
 		if (this.initialized) {
-			throw new IllegalStateException("Cassandra has already been initialized.");
+			throw new IOException("Cassandra has already been started");
 		}
-		try {
-			CassandraConfig cassandraConfig = getCassandraConfig();
-			IRuntimeConfig runtimeConfig = getRuntimeConfig();
-			CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
-			this.executable = cassandraStarter
-					.prepare(new ExecutableConfig(cassandraConfig));
-			this.executable.start();
-		}
-		finally {
-			this.initialized = true;
-		}
+		ExecutableConfig executableConfig = getExecutableConfig();
+		IRuntimeConfig runtimeConfig = getRuntimeConfig();
+		CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
+		this.executable = cassandraStarter.prepare(executableConfig);
+		this.executable.start();
+		this.initialized = true;
 	}
 
 	/**
 	 * Stop the Cassandra Server.
+	 *
 	 * @see CassandraExecutable#stop
 	 */
-	public synchronized void stop() {
-		try {
-			if (this.executable != null) {
-				this.executable.stop();
-			}
-		}
-		finally {
+	public synchronized final void stop() {
+		if (this.executable != null) {
+			this.executable.stop();
 			this.initialized = false;
 		}
 	}

@@ -37,9 +37,9 @@ public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
 
 	@BeforeMethod
 	public void setUp() throws Exception {
-		Config config = getCassandraConfig().getConfig();
+		Config config = getExecutableConfig().getConfig();
 		this.cluster = Cluster.builder().withPort(config.getNativeTransportPort())
-				.addContactPoint(config.getListenAddress()).build();
+				.addContactPoint(config.getRpcAddress()).build();
 		try (Session session = this.cluster.connect()) {
 			session.execute("CREATE KEYSPACE  test  WITH REPLICATION = { 'class' : "
 					+ "'SimpleStrategy', 'replication_factor' : 1 }; ");

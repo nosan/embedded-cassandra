@@ -19,8 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.github.nosan</groupId>
-            <artifactId>embedded-cassandra-starter</artifactId>
-            <optional>true</optional>
+            <artifactId>embedded-cassandra</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.yaml</groupId>
