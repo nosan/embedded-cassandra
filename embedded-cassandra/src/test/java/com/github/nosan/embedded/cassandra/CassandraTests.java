@@ -19,37 +19,70 @@ package com.github.nosan.embedded.cassandra;
 import java.io.IOException;
 
 import com.datastax.driver.core.Cluster;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * Tests for {@link Cassandra}.
  *
  * @author Dmytro Nosan
- *
  */
 public class CassandraTests {
 
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
+
 	private static Cluster cluster(Config config) {
-		return Cluster.builder().addContactPoint(config.getListenAddress())
+		return Cluster.builder().addContactPoint(config.getRpcAddress())
 				.withPort(config.getNativeTransportPort()).build();
 	}
 
 	@Test
-	public void successfullyStarted() throws IOException {
+	public void shouldStartCassandraUsingDefaultConfiguration() throws Exception {
 		Cassandra cassandra = new Cassandra();
-		try {
-			cassandra.start();
-			CassandraConfig cassandraConfig = cassandra.getCassandraConfig();
+		start(cassandra, () -> {
+			ExecutableConfig cassandraConfig = cassandra.getExecutableConfig();
 			Config config = cassandraConfig.getConfig();
 			try (Cluster cluster = cluster(config)) {
 				cluster.connect().execute("CREATE KEYSPACE IF NOT EXISTS test  WITH "
 						+ "REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };");
 			}
+		});
+	}
 
+	@Test
+	public void shouldNotStartCassandraIfCassandraHasBeenAlreadyStarted()
+			throws Exception {
+		this.expectedException.expect(IOException.class);
+		this.expectedException.expectMessage("Cassandra has already been started");
+		Cassandra cassandra = new Cassandra();
+		start(cassandra, cassandra::start);
+	}
+
+	@Test
+	public void shouldBeAbleToRestartCassandra() throws Exception {
+		Cassandra cassandra = new Cassandra();
+		start(cassandra, () -> {
+		});
+		start(cassandra, () -> {
+		});
+	}
+
+	private static void start(Cassandra cassandra, Callback callback) throws Exception {
+		try {
+			cassandra.start();
+			callback.run();
 		}
 		finally {
 			cassandra.stop();
 		}
+	}
+
+	interface Callback {
+
+		void run() throws Exception;
+
 	}
 
 }

@@ -14,31 +14,27 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.process.customizer;
+package com.github.nosan.embedded.cassandra.process;
 
 import java.io.File;
 import java.io.IOException;
-
-import de.flapdoodle.embed.process.distribution.Distribution;
 
 /**
  * Callback interface that can be used to customize a {@link File File}.
  *
  * @author Dmytro Nosan
- * @see JmxPortCustomizer
- * @see JVMOptionsCustomizer
- * @see JavaCompatibilityCustomizer
  * @see AbstractFileCustomizer
  * @see AbstractSourceLineFileCustomizer
  */
-public interface FileCustomizer {
+interface FileCustomizer {
 
 	/**
 	 * Callback to customize a {@link File} instance.
+	 *
 	 * @param file the file to customize
-	 * @param distribution the distribution
+	 * @param context the processContext
 	 * @throws IOException if an I/O error occurs.
 	 */
-	void customize(File file, Distribution distribution) throws IOException;
+	void customize(File file, Context context) throws IOException;
 
 }

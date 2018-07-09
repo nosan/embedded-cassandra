@@ -14,44 +14,42 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.process.customizer;
+package com.github.nosan.embedded.cassandra.process;
 
 import java.io.File;
 import java.io.IOException;
-
-import de.flapdoodle.embed.process.distribution.Distribution;
 
 /**
  * A basic {@link FileCustomizer File Customizer}.
  *
  * @author Dmytro Nosan
  */
-public abstract class AbstractFileCustomizer implements FileCustomizer {
+abstract class AbstractFileCustomizer implements FileCustomizer {
 
 	@Override
-	public final void customize(File file, Distribution distribution) throws IOException {
-		if (file.exists() && file.isFile() && isMatch(file, distribution)) {
-			process(file, distribution);
+	public final void customize(File file, Context context) throws IOException {
+		if (file.exists() && file.isFile() && isMatch(file, context)) {
+			process(file, context);
 		}
 	}
 
 	/**
 	 * Determine if the specified file matches or not.
+	 *
 	 * @param file source file.
-	 * @param distribution {@link Distribution distribution}.
+	 * @param context {@link Context processContext}.
 	 * @return Whether source file is match or not.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	protected abstract boolean isMatch(File file, Distribution distribution)
-			throws IOException;
+	protected abstract boolean isMatch(File file, Context context) throws IOException;
 
 	/**
 	 * Process the provided file.
+	 *
 	 * @param file source file.
-	 * @param distribution {@link Distribution distribution}.
+	 * @param context {@link Context processContext}.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	protected abstract void process(File file, Distribution distribution)
-			throws IOException;
+	protected abstract void process(File file, Context context) throws IOException;
 
 }

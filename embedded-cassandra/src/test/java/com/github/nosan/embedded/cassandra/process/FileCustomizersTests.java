@@ -14,33 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra;
+package com.github.nosan.embedded.cassandra.process;
+
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
 
 /**
- * List of Cassandra's versions.
+ * todo leave javadoc here.
  *
  * @author Dmytro Nosan
  */
-public enum Version {
+public class FileCustomizersTests {
 
-	/**
-	 * The version 3.11.2.
-	 */
-	LATEST("3.11.2");
+	private final FileCustomizers customizers = new FileCustomizers();
 
-	private final String value;
+	@Test
+	@SuppressWarnings("unchecked")
+	public void addCustomizer() {
+		final boolean[] invoked = {false};
+		FileCustomizer fileCustomizer = (file, context) -> invoked[0] = true;
+		this.customizers.addCustomizer(fileCustomizer);
+		this.customizers.customize(new TestContext());
+		Assertions.assertThat(invoked[0]).describedAs("Should be invoked").isTrue();
 
-	Version(String value) {
-		this.value = value;
-	}
-
-	/**
-	 * Retrieves Cassandra's version.
-	 *
-	 * @return Version to use.
-	 */
-	public String getValue() {
-		return this.value;
 	}
 
 }

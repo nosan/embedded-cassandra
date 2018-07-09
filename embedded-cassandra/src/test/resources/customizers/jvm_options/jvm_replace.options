@@ -1,0 +1,2 @@
+-Dcassandra.local.port=555
+-Dcassandra.remote.port=444

@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.support;
 import de.flapdoodle.embed.process.io.directories.PropertyOrTempDirInPlatformTempDir;
 import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
 import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
-import de.flapdoodle.embed.process.store.CachingArtifactStore;
 import de.flapdoodle.embed.process.store.Downloader;
 import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.assertj.core.api.Assertions;
@@ -43,7 +42,7 @@ public class ArtifactStoreBuilderTests {
 
 	@Test
 	public void defaults() throws Exception {
-		IArtifactStore artifactStore = unwrap(new ArtifactStoreBuilder().build());
+		IArtifactStore artifactStore = new ArtifactStoreBuilder().build();
 
 		Assertions.assertThat(ReflectionUtils.getField("_downloader", artifactStore))
 				.isInstanceOf(Downloader.class);
@@ -67,7 +66,7 @@ public class ArtifactStoreBuilderTests {
 	@Test
 	public void defaultsLogger() throws Exception {
 
-		IArtifactStore artifactStore = unwrap(new ArtifactStoreBuilder(log).build());
+		IArtifactStore artifactStore = new ArtifactStoreBuilder(log).build();
 
 		assertThat(ReflectionUtils.getField("_downloader", artifactStore))
 				.isInstanceOf(Downloader.class);
@@ -87,14 +86,5 @@ public class ArtifactStoreBuilderTests {
 				.isInstanceOf(Slf4jProgressListener.class);
 	}
 
-	private IArtifactStore unwrap(IArtifactStore store)
-			throws NoSuchFieldException, IllegalAccessException {
-		assertThat(store).isInstanceOf(CachingArtifactStore.class);
-		CachingArtifactStore cachingArtifactStore = (CachingArtifactStore) store;
-
-		return (IArtifactStore) ReflectionUtils.getField("_delegate",
-				cachingArtifactStore);
-
-	}
 
 }

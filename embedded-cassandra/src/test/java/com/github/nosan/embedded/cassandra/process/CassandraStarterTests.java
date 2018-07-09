@@ -17,17 +17,20 @@
 package com.github.nosan.embedded.cassandra.process;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.Socket;
 import java.time.Duration;
 
 import com.datastax.driver.core.Cluster;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.CassandraConfig;
 import com.github.nosan.embedded.cassandra.Config;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.support.CassandraConfigBuilder;
+import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
 /**
@@ -37,18 +40,20 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  */
 public class CassandraStarterTests {
 
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
+
 	private static final Logger log = LoggerFactory
 			.getLogger(CassandraStarterTests.class);
 
 	private static Cluster cluster(Config config) {
-		return Cluster.builder().addContactPoint(config.getListenAddress())
+		return Cluster.builder().addContactPoint(config.getRpcAddress())
 				.withPort(config.getNativeTransportPort()).build();
 	}
 
 	@Test
-	public void nativeTransport() throws Exception {
-		CassandraConfig executableConfig = new CassandraConfigBuilder()
-				.useRandomPorts(true).build();
+	public void shouldStartCassandraWithNativeTransport() throws Exception {
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder().build();
 		start(executableConfig, () -> {
 			try (Cluster cluster = cluster(executableConfig.getConfig())) {
 				cluster.connect().execute("CREATE KEYSPACE IF NOT EXISTS test  "
@@ -58,76 +63,74 @@ public class CassandraStarterTests {
 	}
 
 	@Test
-	public void startStop() throws Exception {
-		start(new CassandraConfigBuilder().build());
-		start(new CassandraConfigBuilder().build());
+	public void shouldBeRestartedUsingNativeTransportPort() throws Exception {
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder().build();
+		Config config = new Config();
+		config.setNativeTransportPort(9042);
+		executableConfig.setConfig(config);
+		start(executableConfig);
+		start(executableConfig);
 	}
 
 	@Test
-	public void multiplyInstancesShouldWorkRandomPorts() throws Exception {
-		start(new CassandraConfigBuilder().useRandomPorts(true).build(),
-				() -> start(new CassandraConfigBuilder().useRandomPorts(true).build()));
+	public void shouldBePossibleToStartMultiplyInstances() throws Exception {
+		start(new ExecutableConfigBuilder().build(),
+				() -> start(new ExecutableConfigBuilder().build()));
 	}
 
-	@Test(expected = IOException.class)
-	public void multiplyInstancesShouldNotWork() throws Exception {
-		start(new CassandraConfigBuilder().build(),
-				() -> start(new CassandraConfigBuilder().build()));
-	}
-
-	@Test(expected = IOException.class)
-	public void multiplyInstancesDoesNotWorkRandomPortNotEnable() throws Exception {
-		start(new CassandraConfigBuilder().build(),
-				() -> start(new CassandraConfigBuilder().build()));
-	}
-
-	@Test(expected = IOException.class)
-	public void invalidConfig() throws Exception {
-		CassandraConfig executableConfig = new CassandraConfigBuilder()
-				.useRandomPorts(true).build();
+	@Test
+	public void shouldFailWithInvalidConfigurationError() throws Exception {
+		this.expectedException.expect(IOException.class);
+		this.expectedException.expectMessage("Missing required directive CommitLogSync");
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder().build();
 		executableConfig.getConfig().setCommitlogSync(null);
 		start(executableConfig);
 	}
 
-	@Test(expected = IOException.class)
-	public void timeout() throws Exception {
-		CassandraConfig executableConfig = new CassandraConfigBuilder()
+	@Test
+	public void shouldFailWithTimeoutError() throws Exception {
+		this.expectedException.expect(IOException.class);
+		this.expectedException.expectMessage("Could not start a process.");
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder()
 				.timeout(Duration.ofSeconds(1)).build();
 		start(executableConfig);
 	}
 
 	@Test
-	public void rpcTransport() throws Exception {
-		CassandraConfig executableConfig = new CassandraConfigBuilder()
-				.useRandomPorts(true).build();
+	public void shouldStartCassandraUsingRpcTransport() throws Exception {
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder().build();
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(true);
-		start(executableConfig);
+		start(executableConfig,
+				() -> new Socket(executableConfig.getConfig().getRpcAddress(),
+						executableConfig.getConfig().getRpcPort()));
 	}
 
 	@Test
-	public void disableTransport() throws Exception {
-		CassandraConfig executableConfig = new CassandraConfigBuilder()
-				.useRandomPorts(true).build();
+	public void shouldStartCassandraWithDisableRpcAndNativeTransportPorts()
+			throws Exception {
+		this.expectedException.expect(ConnectException.class);
+		this.expectedException.expectMessage("Connection refused");
+		ExecutableConfig executableConfig = new ExecutableConfigBuilder().build();
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(false);
-
-		start(executableConfig);
+		start(executableConfig,
+				() -> new Socket(executableConfig.getConfig().getRpcAddress(),
+						executableConfig.getConfig().getRpcPort()));
 
 	}
 
-	private static void start(CassandraConfig cassandraConfig) throws Exception {
-		start(cassandraConfig, () -> {
+	private static void start(ExecutableConfig executableConfig) throws Exception {
+		start(executableConfig, () -> {
 		});
 	}
 
-	private static void start(CassandraConfig cassandraConfig, Callback callback)
+	private static void start(ExecutableConfig executableConfig, Callback callback)
 			throws Exception {
 		CassandraExecutable executable = new CassandraStarter(
-				new RuntimeConfigBuilder(log).build())
-						.prepare(new ExecutableConfig(cassandraConfig));
+				new RuntimeConfigBuilder(log).build()).prepare(executableConfig);
 		try {
 			executable.start();
 			callback.run();

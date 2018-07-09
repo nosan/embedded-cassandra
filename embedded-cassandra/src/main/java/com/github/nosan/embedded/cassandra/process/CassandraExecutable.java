@@ -31,9 +31,11 @@ import com.github.nosan.embedded.cassandra.ExecutableConfig;
  *
  * @author Dmytro Nosan
  * @see CassandraProcess
+ * @see CassandraStarter
  * @see ExecutableConfig
  */
-public class CassandraExecutable extends Executable<ExecutableConfig, CassandraProcess> {
+public final class CassandraExecutable
+		extends Executable<ExecutableConfig, CassandraProcess> {
 
 	CassandraExecutable(Distribution distribution, ExecutableConfig executableConfig,
 			IRuntimeConfig runtimeConfig, IExtractedFileSet executable) {

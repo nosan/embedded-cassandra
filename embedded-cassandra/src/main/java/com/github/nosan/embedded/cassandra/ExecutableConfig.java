@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.time.Duration;
 import java.util.Objects;
 
 import de.flapdoodle.embed.process.config.IExecutableProcessConfig;
@@ -26,45 +27,94 @@ import de.flapdoodle.embed.process.distribution.IVersion;
  * Basic implementation of {@link IExecutableProcessConfig Executable Config}.
  *
  * @author Dmytro Nosan
+ * @see com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder
  */
 public final class ExecutableConfig implements IExecutableProcessConfig {
 
-	private final CassandraConfig cassandraConfig;
-
 	private static final SupportConfig SUPPORT_CONFIG = new SupportConfig();
 
-	public ExecutableConfig(CassandraConfig cassandraConfig) {
-		this.cassandraConfig = Objects.requireNonNull(cassandraConfig,
-				"Cassandra Config must not be null");
+	private Config config = new Config();
+
+	private Version version = Version.LATEST;
+
+	private Duration timeout = Duration.ofMinutes(1);
+
+	/**
+	 * Retrieves cassandra's startup timeout.
+	 *
+	 * @return startup timeout.
+	 */
+	public Duration getTimeout() {
+		return this.timeout;
 	}
 
 	/**
-	 * Retrieves executable version.
-	 * @return {@link ExecutableVersion Executable Version}
-	 * @see ExecutableVersion
+	 * Sets startup timeout.
+	 *
+	 * @param timeout startup timeout.
 	 */
-	@Override
-	public IVersion version() {
-		return new ExecutableVersion(this.cassandraConfig.getVersion());
+	public void setTimeout(Duration timeout) {
+		this.timeout = Objects.requireNonNull(timeout, "Timeout must not be null");
 	}
 
 	/**
-	 * Retrieves Cassandra's config.
-	 * @return {@link CassandraConfig Cassandra Config}
-	 * @see CassandraConfig
+	 * Retrieves cassandra's version.
+	 *
+	 * @return {@link Version version}
+	 * @see Version
 	 */
-	public CassandraConfig getCassandraConfig() {
-		return this.cassandraConfig;
+	public Version getVersion() {
+		return this.version;
+	}
+
+	/**
+	 * Sets version.
+	 *
+	 * @param version version to use.
+	 */
+	public void setVersion(Version version) {
+		this.version = Objects.requireNonNull(version, "Version must not be null");
+	}
+
+	/**
+	 * Retrieves cassandra's config.
+	 *
+	 * @return {@link Cassandra Cassandra Config}
+	 * @see Config
+	 */
+	public Config getConfig() {
+		return this.config;
+	}
+
+	/**
+	 * Sets config.
+	 *
+	 * @param config {@link Config config} to use.
+	 */
+	public void setConfig(Config config) {
+		this.config = Objects.requireNonNull(config, "Config must not be null");
 	}
 
 	/**
 	 * Retrieves support config.
+	 *
 	 * @return {@link ISupportConfig Support Config}
 	 * @see SupportConfig
 	 */
 	@Override
 	public ISupportConfig supportConfig() {
 		return SUPPORT_CONFIG;
+	}
+
+	/**
+	 * Retrieves executable version.
+	 *
+	 * @return {@link ExecutableVersion Executable Version}
+	 * @see ExecutableVersion
+	 */
+	@Override
+	public IVersion version() {
+		return new ExecutableVersion(this.version);
 	}
 
 }

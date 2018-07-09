@@ -17,10 +17,9 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Configuration properties for Cassandra. <a href=
@@ -28,7 +27,6 @@ import java.util.Optional;
  * more</a>
  *
  * @author Dmytro Nosan
- * @see com.github.nosan.embedded.cassandra.util.YamlUtils
  */
 public class Config {
 
@@ -70,9 +68,7 @@ public class Config {
 
 	private String hints_directory;
 
-	private ParameterizedClass seed_provider = new ParameterizedClass(
-			"org.apache.cassandra.locator.SimpleSeedProvider",
-			Collections.singletonMap("seeds", "127.0.01"));
+	private ParameterizedClass seed_provider = createSeedProvider();
 
 	private DiskAccessMode disk_access_mode = DiskAccessMode.auto;
 
@@ -124,9 +120,9 @@ public class Config {
 
 	private Float memtable_cleanup_threshold;
 
-	private int storage_port = 7000;
+	private int storage_port = 0;
 
-	private int ssl_storage_port = 7001;
+	private int ssl_storage_port = 0;
 
 	private String listen_address = "localhost";
 
@@ -150,7 +146,7 @@ public class Config {
 
 	private String broadcast_rpc_address;
 
-	private int rpc_port = 9160;
+	private int rpc_port = 0;
 
 	private Integer rpc_listen_backlog;
 
@@ -170,7 +166,7 @@ public class Config {
 
 	private boolean start_native_transport = true;
 
-	private int native_transport_port = 9042;
+	private int native_transport_port = 0;
 
 	private Integer native_transport_port_ssl;
 
@@ -184,7 +180,7 @@ public class Config {
 
 	private Integer max_value_size_in_mb;
 
-	private Integer thrift_framed_transport_size_in_mb;
+	private Integer thrift_framed_transport_size_in_mb = 15;
 
 	private boolean snapshot_before_compaction = false;
 
@@ -212,7 +208,7 @@ public class Config {
 
 	private Integer inter_dc_stream_throughput_outbound_megabits_per_sec;
 
-	private List<String> data_file_directories;
+	private List<String> data_file_directories = new ArrayList<>();
 
 	private String saved_caches_directory;
 
@@ -296,9 +292,9 @@ public class Config {
 
 	private String row_cache_class_name;
 
-	private Integer row_cache_size_in_mb;
+	private Integer row_cache_size_in_mb = 0;
 
-	private Long row_cache_save_period;
+	private Long row_cache_save_period = 0L;
 
 	private Integer row_cache_keys_to_save;
 
@@ -373,6 +369,26 @@ public class Config {
 	private boolean back_pressure_enabled = false;
 
 	private ParameterizedClass back_pressure_strategy;
+
+	private transient int jmx_port = 0;
+
+	private transient JvmOptions jvm_options = new JvmOptions();
+
+	public int getJmxPort() {
+		return this.jmx_port;
+	}
+
+	public void setJmxPort(int jmxPort) {
+		this.jmx_port = jmxPort;
+	}
+
+	public JvmOptions getJvmOptions() {
+		return this.jvm_options;
+	}
+
+	public void setJvmOptions(JvmOptions jvmOptions) {
+		this.jvm_options = jvmOptions;
+	}
 
 	public Integer getRpcMaxThreads() {
 		return this.rpc_max_threads;
@@ -1757,6 +1773,14 @@ public class Config {
 		this.thrift_max_message_length_in_mb = thriftMaxMessageLengthInMb;
 	}
 
+	private static ParameterizedClass createSeedProvider() {
+		ParameterizedClass parameterizedClass = new ParameterizedClass();
+		parameterizedClass
+				.setClassName("org.apache.cassandra.locator.SimpleSeedProvider");
+		parameterizedClass.getParameters().put("seeds", "localhost");
+		return parameterizedClass;
+	}
+
 	/**
 	 * Policy for internode encryption.
 	 */
@@ -1962,7 +1986,7 @@ public class Config {
 
 		private String truststore_password;
 
-		private List<String> cipher_suites;
+		private List<String> cipher_suites = new ArrayList<>();
 
 		private String protocol;
 
@@ -2090,7 +2114,7 @@ public class Config {
 
 		private String truststore_password;
 
-		private List<String> cipher_suites;
+		private List<String> cipher_suites = new ArrayList<>();
 
 		private String protocol;
 
@@ -2272,17 +2296,7 @@ public class Config {
 
 		private Integer default_weight;
 
-		private Map<String, Integer> weights;
-
-		public RequestSchedulerOptions(Integer throttleLimit, Integer defaultWeight,
-				Map<String, Integer> weights) {
-			this.throttle_limit = throttleLimit;
-			this.default_weight = defaultWeight;
-			this.weights = weights;
-		}
-
-		public RequestSchedulerOptions() {
-		}
+		private Map<String, Integer> weights = new LinkedHashMap<>();
 
 		public Integer getThrottleLimit() {
 			return this.throttle_limit;
@@ -2317,26 +2331,7 @@ public class Config {
 
 		private String class_name;
 
-		private Map<String, String> parameters;
-
-		public ParameterizedClass(String className, Map<String, String> parameters) {
-			this.class_name = className;
-			this.parameters = parameters;
-		}
-
-		public ParameterizedClass() {
-		}
-
-		// Yaml Deserialize.
-		@SuppressWarnings("unchecked")
-		private ParameterizedClass(Map<String, ?> properties) {
-			this.class_name = (String) properties.get("class_name");
-			this.parameters = Optional
-					.ofNullable((List<Map<String, String>>) properties.get("parameters"))
-					.filter((it) -> !it.isEmpty()).map((it) -> it.get(0))
-					.orElse(Collections.emptyMap());
-
-		}
+		private Map<String, String> parameters = new LinkedHashMap<>();
 
 		public String getClassName() {
 			return this.class_name;

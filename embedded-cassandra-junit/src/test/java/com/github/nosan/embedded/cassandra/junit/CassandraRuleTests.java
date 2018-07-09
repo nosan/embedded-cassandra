@@ -41,9 +41,9 @@ public class CassandraRuleTests {
 
 	@Before
 	public void setUp() throws Exception {
-		Config config = cassandra.getCassandraConfig().getConfig();
+		Config config = cassandra.getExecutableConfig().getConfig();
 		this.cluster = Cluster.builder().withPort(config.getNativeTransportPort())
-				.addContactPoint(config.getListenAddress()).build();
+				.addContactPoint(config.getRpcAddress()).build();
 		try (Session session = this.cluster.connect()) {
 			session.execute("CREATE KEYSPACE  test  WITH REPLICATION = { 'class' : "
 					+ "'SimpleStrategy', 'replication_factor' : 1 }; ");

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.process.customizer;
+package com.github.nosan.embedded.cassandra.process;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-abstract class FileCustomizerUtils {
+abstract class AbstractFileCustomizerSupport {
 
 	static File classpath(String classpath) throws Exception {
 		return new File(ClassLoader.getSystemResource(classpath).toURI());
@@ -30,7 +30,9 @@ abstract class FileCustomizerUtils {
 
 	static FileAssertion withFile(String name) throws IOException {
 		Path directory = Files.createTempDirectory("test");
-		return new FileAssertion(directory.resolve(name).toFile(), (file) -> {
+		File candidate = directory.resolve(name).toFile();
+		Files.createFile(candidate.toPath());
+		return new FileAssertion(candidate, (file) -> {
 		});
 	}
 

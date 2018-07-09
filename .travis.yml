@@ -1,25 +1,26 @@
+language: java
 sudo: false
 dist: trusty
-language: java
 
-before_install:
-- unset -f cd
-- wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+os:
+- linux
+- osx
 
+jdk:
+- openjdk9
+- openjdk10
 
 matrix:
   include:
-    - env: JDK='OpenJDK 8'
-      jdk: openjdk8
-    - env: JDK='OpenJDK 9'
-      install: . ./install-jdk.sh -F 9
-    - env: JDK='OpenJDK 10'
-      install: . ./install-jdk.sh -F 10 -L GPL
+  - os: linux
+    jdk: openjdk8
 
+before_script:
+- echo JAVA_HOME = ${JAVA_HOME}
+- echo PATH = ${PATH}
 
 script:
-  - ./mvnw -B clean test
-
-cache:
-  directories:
-  - $HOME/.m2
+  - echo PATH = ${PATH}
+  - echo JAVA_HOME = ${JAVA_HOME}
+  - java -version
+  - ./mvnw -B clean test -DtrimStackTrace=false

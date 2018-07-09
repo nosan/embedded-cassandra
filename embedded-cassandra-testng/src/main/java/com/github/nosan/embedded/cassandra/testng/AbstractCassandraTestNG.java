@@ -23,8 +23,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraConfig;
-import com.github.nosan.embedded.cassandra.support.CassandraConfigBuilder;
+import com.github.nosan.embedded.cassandra.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
 /**
@@ -49,30 +49,31 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
- * @see CassandraConfigBuilder
+ * @see ExecutableConfigBuilder
  * @see Cassandra
  */
 public abstract class AbstractCassandraTestNG extends Cassandra {
 
 	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig,
-			CassandraConfig cassandraConfig) {
-		super(runtimeConfig, cassandraConfig);
+			ExecutableConfig executableConfig) {
+		super(runtimeConfig, executableConfig);
 	}
 
 	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig) {
-		super(runtimeConfig, new CassandraConfigBuilder().useRandomPorts(true).build());
+		super(runtimeConfig, new ExecutableConfigBuilder().build());
 	}
 
-	public AbstractCassandraTestNG(CassandraConfig cassandraConfig) {
-		super(cassandraConfig);
+	public AbstractCassandraTestNG(ExecutableConfig executableConfig) {
+		super(executableConfig);
 	}
 
 	public AbstractCassandraTestNG() {
-		super(new CassandraConfigBuilder().useRandomPorts(true).build());
+		super(new ExecutableConfigBuilder().build());
 	}
 
 	/**
 	 * Startup an Embedded Cassandra.
+	 *
 	 * @throws IOException Process could not be started.
 	 * @see #start()
 	 */

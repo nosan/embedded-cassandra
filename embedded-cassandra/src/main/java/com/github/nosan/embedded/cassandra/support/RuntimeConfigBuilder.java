@@ -44,21 +44,24 @@ public class RuntimeConfigBuilder
 				Processors.namedConsole("[Cassandra > error]"),
 				Processors.namedConsole("[Cassandra > commands]"));
 		processOutput().overwriteDefault(processOutput);
+		daemonProcess(false);
 	}
 
 	/**
 	 * Configure builder with default settings and logger.
+	 *
 	 * @param logger logger for process outputs.
 	 */
 	public RuntimeConfigBuilder(Logger logger) {
 		Objects.requireNonNull(logger, "Logger must not be null");
-		artifactStore().overwriteDefault(new ArtifactStoreBuilder().build());
+		artifactStore().overwriteDefault(new ArtifactStoreBuilder(logger).build());
 		commandLinePostProcessor().overwriteDefault(new ICommandLinePostProcessor.Noop());
 		ProcessOutput processOutput = new ProcessOutput(
 				Processors.logTo(logger, Slf4jLevel.INFO),
 				Processors.logTo(logger, Slf4jLevel.ERROR),
 				Processors.logTo(logger, Slf4jLevel.DEBUG));
 		processOutput().overwriteDefault(processOutput);
+		daemonProcess(false);
 	}
 
 }

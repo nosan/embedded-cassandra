@@ -24,6 +24,11 @@
                       value="false"/>
         </module>
 
+        <module name="LineLength">
+            <property name="max" value="120"/>
+            <property name="tabWidth" value="4"/>
+        </module>
+
         <!-- Block Checks -->
         <module name="com.puppycrawl.tools.checkstyle.checks.blocks.EmptyBlockCheck">
             <property name="option" value="text"/>
@@ -158,10 +163,6 @@
         <module name="com.puppycrawl.tools.checkstyle.checks.whitespace.TypecastParenPadCheck"/>
         <module name="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAfterCheck"/>
         <module name="com.puppycrawl.tools.checkstyle.checks.whitespace.WhitespaceAroundCheck"/>
-        <!--Spring checks-->
-        <module name="io.spring.javaformat.checkstyle.check.SpringLambdaCheck"/>
-        <module name="io.spring.javaformat.checkstyle.check.SpringTernaryCheck"/>
-        <module name="io.spring.javaformat.checkstyle.check.SpringCatchCheck"/>
 
     </module>
 </module>

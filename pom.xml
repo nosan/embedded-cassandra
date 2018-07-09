@@ -44,24 +44,19 @@
         <snakeyaml.version>1.21</snakeyaml.version>
         <testng.version>6.14.3</testng.version>
         <cassandra-driver-core.version>3.5.0</cassandra-driver-core.version>
-        <logback-classic.version>1.2.3</logback-classic.version>
         <junit.jupiter.version>5.1.1</junit.jupiter.version>
         <junit.platform.version>1.1.1</junit.platform.version>
-        <spring-javaformat.version>0.0.5</spring-javaformat.version>
         <checkstyle.version>8.8</checkstyle.version>
         <commons-lang3.version>3.7</commons-lang3.version>
         <commons-compress.version>1.17</commons-compress.version>
         <slf4j-api.version>1.7.25</slf4j-api.version>
+        <jna.version>4.5.1</jna.version>
+        <logback-classic.version>1.2.3</logback-classic.version>
     </properties>
 
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.github.nosan</groupId>
-                <artifactId>embedded-cassandra-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.github.nosan</groupId>
                 <artifactId>embedded-cassandra</artifactId>
@@ -93,6 +88,11 @@
                 <version>${assertj.version}</version>
             </dependency>
             <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback-classic.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>de.flapdoodle.embed</groupId>
                 <artifactId>de.flapdoodle.embed.process</artifactId>
                 <version>${de.flapdoodle.embed.process.version}</version>
@@ -120,6 +120,11 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>net.java.dev.jna</groupId>
+                <artifactId>jna-platform</artifactId>
+                <version>${jna.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress.version}</version>
@@ -134,18 +139,6 @@
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
             </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback-classic.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
@@ -195,18 +188,7 @@
                             <artifactId>checkstyle</artifactId>
                             <version>${checkstyle.version}</version>
                         </dependency>
-                        <dependency>
-                            <groupId>io.spring.javaformat</groupId>
-                            <artifactId>spring-javaformat-checkstyle</artifactId>
-                            <version>${spring-javaformat.version}</version>
-                        </dependency>
                     </dependencies>
-                </plugin>
-
-                <plugin>
-                    <groupId>io.spring.javaformat</groupId>
-                    <artifactId>spring-javaformat-maven-plugin</artifactId>
-                    <version>${spring-javaformat.version}</version>
                 </plugin>
 
                 <plugin>
@@ -264,16 +246,9 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.20</version>
                     <configuration>
-                        <includes>
-                            <include>**/*Tests.java</include>
-                            <include>**/*Test.java</include>
-                        </includes>
-                        <excludes>
-                            <exclude>**/Abstract*.java</exclude>
-                        </excludes>
+                        <failIfNoTests>false</failIfNoTests>
                     </configuration>
                 </plugin>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
@@ -298,19 +273,6 @@
 
         <plugins>
 
-            <plugin>
-                <groupId>io.spring.javaformat</groupId>
-                <artifactId>spring-javaformat-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <inherited>true</inherited>
-                        <goals>
-                            <goal>validate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -421,7 +383,6 @@
         <module>embedded-cassandra-junit</module>
         <module>embedded-cassandra-testng</module>
         <module>embedded-cassandra-jupiter</module>
-        <module>embedded-cassandra-starter</module>
     </modules>
 
 

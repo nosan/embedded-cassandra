@@ -1,5 +1,8 @@
 # Embedded Cassandra 
-![Build Status](https://travis-ci.org/nosan/embedded-cassandra.svg?branch=master) [![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra)
+
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra)
+[![Build Status (Travis: Linux/OSX)](https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?label=linux%2Fosx%20%28java%208%209%2010%29)](https://travis-ci.org/nosan/embedded-cassandra) 
+[![Build Status (AppVeyor: Windows)](https://img.shields.io/appveyor/ci/viliusl/wix-embedded-mysql/master.svg?label=windows%20%28java%208%29)](https://ci.appveyor.com/project/viliusl/wix-embedded-mysql) 
 
 
 `Embedded Cassandra` provides an easy way to run `Cassandra` in the unit tests. `Embedded Cassandra` is built 
@@ -42,7 +45,7 @@ public class CassandraTests {
 	}
 	
 	private static Cluster cluster(Config config) {
-    		return Cluster.builder().addContactPoint(config.getListenAddress())
+    		return Cluster.builder().addContactPoint(config.getRpcAddress())
     				.withPort(config.getNativeTransportPort()).build(); 
 	}
 
@@ -72,7 +75,7 @@ public class CassandraTests {
 	}
 	
 	private static Cluster cluster(Config config) {
-    		return Cluster.builder().addContactPoint(config.getListenAddress())
+    		return Cluster.builder().addContactPoint(config.getRpcAddress())
     				.withPort(config.getNativeTransportPort()).build(); 
 	}	
 }
@@ -100,7 +103,7 @@ public class CassandraTests extends AbstractCassandraTests {
 	}
 	
 	private static Cluster cluster(Config config) {
-    		return Cluster.builder().addContactPoint(config.getListenAddress())
+    		return Cluster.builder().addContactPoint(config.getRpcAddress())
     				.withPort(config.getNativeTransportPort()).build(); 
 	}
 }
@@ -128,7 +131,7 @@ public class CassandraTests {
 	}
 	
 	private static Cluster cluster(Config config) {
-    		return Cluster.builder().addContactPoint(config.getListenAddress())
+    		return Cluster.builder().addContactPoint(config.getRpcAddress())
     				.withPort(config.getNativeTransportPort()).build(); 
 	}
 
