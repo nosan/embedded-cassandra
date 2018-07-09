@@ -37,3 +37,16 @@ public class CassandraTests {
 
 It is possible to use a custom configuration via `constuctor`. 
 
+## Maven
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.github.nosan</groupId>
+        <artifactId>embedded-cassandra</artifactId>
+        <version>${version}</version>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+```
+
