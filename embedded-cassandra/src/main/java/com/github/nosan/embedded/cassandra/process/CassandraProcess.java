@@ -83,6 +83,12 @@ public final class CassandraProcess
 	}
 
 	@Override
+	protected void onBeforeProcessStart(ProcessBuilder processBuilder, ExecutableConfig config,
+			IRuntimeConfig runtimeConfig) {
+		log.info("Start Cassandra Process using command {}", processBuilder.command());
+	}
+
+	@Override
 	protected void onAfterProcessStart(ProcessControl process,
 			IRuntimeConfig runtimeConfig) throws IOException {
 		setProcessId(getProcessId());

@@ -44,8 +44,7 @@ public final class SupportConfig implements ISupportConfig {
 
 	@Override
 	public String messageOnException(Class<?> context, Exception exception) {
-		return "If you feel this is [" + exception.getMessage()
-				+ "] a bug, please open a new issue. Follow this link: " + getSupportUrl()
+		return "If you feel this is a bug, please open a new issue. Follow this link: " + getSupportUrl()
 				+ "\n" + "Thank you! :)";
 	}
 
