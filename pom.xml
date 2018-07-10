@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.nosan</groupId>
     <artifactId>embedded-cassandra-parent</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5-SNAPHOST</version>
     <packaging>pom</packaging>
 
     <name>Embedded Cassandra Parent</name>
@@ -247,6 +247,8 @@
                     <version>2.20</version>
                     <configuration>
                         <failIfNoTests>false</failIfNoTests>
+                        <trimStackTrace>false</trimStackTrace>
+                        <useFile>false</useFile>
                     </configuration>
                 </plugin>
                 <plugin>
