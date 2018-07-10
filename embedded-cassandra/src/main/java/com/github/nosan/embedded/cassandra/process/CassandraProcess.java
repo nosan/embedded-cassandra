@@ -104,11 +104,9 @@ public final class CassandraProcess
 		logWatch.waitForResult(executableConfig.getTimeout().toMillis());
 
 		if (!logWatch.isInitWithSuccess()) {
-			String failureFound = logWatch.getFailureFound();
-			if (failureFound == null) {
-				throw new IOException("Could not start a process.");
-			}
-			throw new IOException("Could not start a process." + failureFound);
+			String msg = "Could not start a process.\nFailure:" + logWatch.getFailureFound() +
+					"\nOutput:\n--- START --- \n" + getLastLines(logWatch.getOutput(), 5) + "--- END --- ";
+			throw new IOException(msg);
 		}
 		checkTransport(config);
 		log.info("Cassandra process has been started.");
@@ -132,6 +130,19 @@ public final class CassandraProcess
 
 	@Override
 	protected void cleanupInternal() {
+
+	}
+
+	private static String getLastLines(String output, int l) {
+		String[] lines = output.split("\n");
+		if (lines.length <= l) {
+			return output;
+		}
+		StringBuilder result = new StringBuilder();
+		for (int i = 1; i <= l; i++) {
+			result.append(lines[lines.length - i]).append("\n");
+		}
+		return String.valueOf(result);
 
 	}
 
