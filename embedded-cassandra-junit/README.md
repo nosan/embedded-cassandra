@@ -1,4 +1,6 @@
 # Embedded Cassandra JUnit
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-junit)
+
 
 `Embedded Cassandra` could be run via JUnit `ClassRule`. 
 

@@ -1,4 +1,6 @@
-# Embedded Cassandra 
+# Embedded Cassandra
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra)
+ 
 
 `Embedded Cassandra` provides an easy way to run `Cassandra` in the unit tests.
 
