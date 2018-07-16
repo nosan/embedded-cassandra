@@ -35,7 +35,7 @@ public class CassandraTests {
 
 ```
 
-It is possible to use a custom configuration via `constuctor`. 
+It is possible to use a custom configuration via `constructor`. 
 
 ## Maven
 
