@@ -1,6 +1,6 @@
 # Embedded Cassandra 
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-parent)
 [![Build Status (Travis: Linux/OSX)](https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?label=linux/osx)](https://travis-ci.org/nosan/embedded-cassandra) 
 [![Build Status (AppVeyor: Windows)](https://img.shields.io/appveyor/ci/nosan/embedded-cassandra/master.svg?label=windows)](https://ci.appveyor.com/project/nosan/embedded-cassandra) 
 
