@@ -22,8 +22,8 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import com.github.nosan.embedded.cassandra.ClusterFactory;
-import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
+import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
@@ -36,7 +36,6 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * &#64;Before
  * public void setUp() {
  * 		    cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
-
  * }
  * &#64;Test
  * public void select() {

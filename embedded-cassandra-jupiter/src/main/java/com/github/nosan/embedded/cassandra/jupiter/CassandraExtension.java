@@ -23,8 +23,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.ClusterFactory;
-import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
+import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
@@ -38,7 +38,6 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * &#64;BeforeEach
  * public void setUp() {
  * 		    cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
-
  * }
  * &#64;Test
  * public void select() {
