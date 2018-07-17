@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
+package com.github.nosan.embedded.cassandra;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Configuration;
+import com.datastax.driver.core.ProtocolOptions;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link AbstractCassandraTestNG}.
+ * Tests for {@link DefaultClusterFactory}.
  *
  * @author Dmytro Nosan
  */
-public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
-
-	@BeforeMethod
-	public void setUp() {
-		executeScripts(new ClassPathCqlResource("init.cql"));
-	}
+public class DefaultClusterFactoryTests {
 
 	@Test
-	public void select() {
-		assertThat(getSession().execute("SELECT * FROM  test.roles").wasApplied())
-				.isTrue();
+	public void defaultCluster() {
+		Config config = new Config();
+		config.setNativeTransportPort(9042);
+		Cluster cluster = new DefaultClusterFactory().getCluster(config, Version.LATEST);
+		Configuration configuration = cluster.getConfiguration();
+		ProtocolOptions protocolOptions = configuration.getProtocolOptions();
+		assertThat(protocolOptions.getPort()).isEqualTo(9042);
 	}
-
 }

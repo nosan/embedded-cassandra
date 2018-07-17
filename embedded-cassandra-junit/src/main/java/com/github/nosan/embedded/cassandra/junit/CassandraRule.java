@@ -21,7 +21,8 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.ClusterFactory;
+import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
@@ -29,30 +30,32 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 /**
  * JUnit {@link TestRule TestRule} for running an Embedded Cassandra. Cassandra will be
  * started on the random ports. <pre>
- *     public class CassandraTests {
- * 	 &#64;ClassRule
- * 	public static CassandraRule cassandra = new CassandraRule();
- * 	 &#64;Before
- * 	public void setUp() throws Exception {
- * 	 //before actions
- *    }
- * 	 &#64;After
- * 	public void tearDown() throws Exception {
- * 	 //after actions
- *    }
- * 	 &#64;Test
- * 	public void test() {
- * 	//test me
- *    }
- *    }
- * }</pre>
+ * public class CassandraRuleTests {
+ * &#64;ClassRule
+ * public static CassandraRule cassandra = new CassandraRule();
+ * &#64;Before
+ * public void setUp() {
+ * 		    cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+ * }
+ * &#64;Test
+ * public void select() {
+ * assertThat(cassandra.getSession().execute("query").wasApplied())
+ * .isTrue();
+ * }
+ * }
+ * </pre>
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
  * @see ExecutableConfigBuilder
- * @see Cassandra
+ * @see EmbeddedCassandra
  */
-public class CassandraRule extends Cassandra implements TestRule {
+public class CassandraRule extends EmbeddedCassandra implements TestRule {
+	public CassandraRule(IRuntimeConfig runtimeConfig,
+			ExecutableConfig executableConfig,
+			ClusterFactory clusterFactory) {
+		super(runtimeConfig, executableConfig, clusterFactory);
+	}
 
 	public CassandraRule(IRuntimeConfig runtimeConfig,
 			ExecutableConfig executableConfig) {
@@ -60,15 +63,28 @@ public class CassandraRule extends Cassandra implements TestRule {
 	}
 
 	public CassandraRule(IRuntimeConfig runtimeConfig) {
-		super(runtimeConfig, new ExecutableConfigBuilder().build());
+		super(runtimeConfig);
 	}
 
 	public CassandraRule(ExecutableConfig executableConfig) {
 		super(executableConfig);
 	}
 
+	public CassandraRule(IRuntimeConfig runtimeConfig,
+			ClusterFactory clusterFactory) {
+		super(runtimeConfig, clusterFactory);
+	}
+
+	public CassandraRule(ExecutableConfig executableConfig,
+			ClusterFactory clusterFactory) {
+		super(executableConfig, clusterFactory);
+	}
+
+	public CassandraRule(ClusterFactory clusterFactory) {
+		super(clusterFactory);
+	}
+
 	public CassandraRule() {
-		this(new ExecutableConfigBuilder().build());
 	}
 
 	@Override

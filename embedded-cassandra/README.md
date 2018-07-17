@@ -12,26 +12,24 @@ Following code creates `Embedded Cassandra` with the default configuration.
 
 public class CassandraTests {
 
-	private static Cluster cluster(Config config) {
-		return Cluster.builder().addContactPoint(config.getRpcAddress())
-				.withPort(config.getNativeTransportPort()).build();
+	private final EmbeddedCassandra cassandra = new EmbeddedCassandra();
+
+	@Before
+	public void setUp() throws Exception {
+		this.cassandra.start();
+		this.cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		this.cassandra.stop();
+
 	}
 
 	@Test
-	public void test() throws Exception {
-		Cassandra cassandra = new Cassandra();
-		try {
-			cassandra.start();
-			ExecutableConfig executableConfig = cassandra.getExecutableConfig();
-			Config config = executableConfig.getConfig();
-			try (Cluster cluster = cluster(config)) {
-				//tests 
-			}
-		}
-		finally {
-			cassandra.stop();
-		}
-
+	public void test() throws IOException {
+		assertThat(this.cassandra.getSession().execute("SELECT * FROM  test.roles").wasApplied())
+				.isTrue();
 	}
 }
 

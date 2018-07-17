@@ -14,31 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
+package com.github.nosan.embedded.cassandra;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import java.util.Objects;
 
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.datastax.driver.core.Cluster;
 
 /**
- * Tests for {@link AbstractCassandraTestNG}.
+ * {@link ClusterFactory} with a default strategy.
  *
  * @author Dmytro Nosan
  */
-public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
+public class DefaultClusterFactory implements ClusterFactory {
 
-	@BeforeMethod
-	public void setUp() {
-		executeScripts(new ClassPathCqlResource("init.cql"));
+	@Override
+	public Cluster getCluster(Config config, Version version) {
+		Objects.requireNonNull(config, "Config must not be null");
+		Objects.requireNonNull(version, "Version must not be null");
+		return Cluster.builder()
+				.addContactPoint(config.getRpcAddress())
+				.withoutJMXReporting()
+				.withPort(config.getNativeTransportPort()).build();
 	}
-
-	@Test
-	public void select() {
-		assertThat(getSession().execute("SELECT * FROM  test.roles").wasApplied())
-				.isTrue();
-	}
-
 }

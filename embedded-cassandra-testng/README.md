@@ -5,19 +5,19 @@
 For running `Embedded Cassandra` with `TestNG`, `AbstractCassandraTests` has to be extended.
 
 ```java
-public class CassandraTests extends AbstractCassandraTests {
+public class CassandraTests extends AbstractCassandraTestNG {
+
+	@BeforeMethod
+	public void setUp() {
+		executeScripts(new ClassPathCqlResource("init.cql"));
+	}
 
 	@Test
-	public void test() throws Exception {
-		try (Cluster cluster = cluster(getExecutableConfig().getConfig())) {
-			Session session = cluster.connect();
-			//
-		}
+	public void select() {
+		assertThat(getSession().execute("SELECT * FROM  test.roles").wasApplied())
+				.isTrue();
 	}
-	private static Cluster cluster(Config config) {
-    		return Cluster.builder().addContactPoint(config.getRpcAddress())
-    				.withPort(config.getNativeTransportPort()).build(); 
-	}
+
 }
 ```
 
