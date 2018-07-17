@@ -98,14 +98,13 @@ public final class CassandraProcess
 		LogWatch logWatch = new LogWatch(config, processOutput.getOutput());
 
 		Processors.connect(process.getReader(), StreamToLineProcessor.wrap(logWatch));
-		Processors.connect(process.getError(),
-				StreamToLineProcessor.wrap(processOutput.getError()));
+		Processors.connect(process.getError(), StreamToLineProcessor.wrap(processOutput.getError()));
 
 		logWatch.waitForResult(executableConfig.getTimeout().toMillis());
 
 		if (!logWatch.isInitWithSuccess()) {
 			String msg = "Could not start a process.\nFailure:" + logWatch.getFailureFound() +
-					"\nOutput:\n--- START --- \n" + getLastLines(logWatch.getOutput(), 5) + "--- END --- ";
+					"\nOutput:\n--- START --- \n" + logWatch.getOutput() + "--- END --- ";
 			throw new IOException(msg);
 		}
 		checkTransport(config);
@@ -133,19 +132,6 @@ public final class CassandraProcess
 
 	}
 
-	private static String getLastLines(String output, int l) {
-		String[] lines = output.split("\n");
-		if (lines.length <= l) {
-			return output;
-		}
-		StringBuilder result = new StringBuilder();
-		for (int i = 1; i <= l; i++) {
-			result.append(lines[lines.length - i]).append("\n");
-		}
-		return String.valueOf(result);
-
-	}
-
 	static List<ContextCustomizer> getCustomizers() {
 		List<ContextCustomizer> customizers = new ArrayList<>();
 		FileCustomizers fileCustomizers = new FileCustomizers();
@@ -165,8 +151,11 @@ public final class CassandraProcess
 	 */
 	static final class LogWatch extends LogWatchStreamProcessor {
 
-		LogWatch(Config config, IStreamProcessor output) {
-			super(getSuccess(config), getFailures(), output);
+		private final IStreamProcessor delegate;
+
+		LogWatch(Config config, IStreamProcessor delegate) {
+			super(getSuccess(config), getFailures(), delegate);
+			this.delegate = delegate;
 		}
 
 		private static String getSuccess(Config config) {
@@ -190,6 +179,21 @@ public final class CassandraProcess
 					"Cassandra 3.0 and later require Java"));
 		}
 
+		@Override
+		public void process(String block) {
+			if (isInitWithSuccess() || getFailureFound() != null) {
+				this.delegate.process(block);
+			}
+			else {
+				super.process(block);
+			}
+		}
+
+		@Override
+		public void onProcessed() {
+			super.onProcessed();
+			this.delegate.onProcessed();
+		}
 	}
 
 	/**
