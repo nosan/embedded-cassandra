@@ -45,6 +45,7 @@ public class CqlScriptsTests {
 		MockSession mockSession = new MockSession();
 		CqlScripts.executeScripts(mockSession, new ClassPathCqlResource("init.cql"),
 				new ClassPathCqlResource("test.cql"));
+		assertThat(mockSession.queries).hasSize(3);
 		assertThat(mockSession.queries).containsExactly("CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION =" +
 						" { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }",
 				"CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )",

@@ -36,9 +36,7 @@ public abstract class CqlScriptsParser {
 
 	private static final char STATEMENT = ';';
 
-	private static final char NEW_LINE = '\n';
-
-	private static final char TAB = '\t';
+	private static final String LINE_SEPARATOR = System.lineSeparator();
 
 	private static final String SINGLE_DASH_COMMENT = "--";
 
@@ -47,8 +45,6 @@ public abstract class CqlScriptsParser {
 	private static final String BLOCK_START_COMMENT = "/*";
 
 	private static final String BLOCK_END_COMMENT = "*/";
-
-	private static final char SPACE = ' ';
 
 	/**
 	 * Parsing provided script into the statements using default CQL rules.
@@ -80,10 +76,10 @@ public abstract class CqlScriptsParser {
 				// single comments
 				if (cqlScript.startsWith(SINGLE_DASH_COMMENT, index)
 						|| cqlScript.startsWith(SINGLE_SLASH_COMMENT, index)) {
-					if (cqlScript.indexOf(NEW_LINE, index) < 0) {
+					if (cqlScript.indexOf(LINE_SEPARATOR, index) < 0) {
 						break;
 					}
-					index = cqlScript.indexOf(NEW_LINE, index);
+					index = cqlScript.indexOf(LINE_SEPARATOR, index);
 					continue;
 				}
 				// block comment
@@ -103,13 +99,11 @@ public abstract class CqlScriptsParser {
 					index = cqlScript.indexOf(STATEMENT, index);
 					continue;
 				}
-				// superfluous spaces, new-lines and tabs.
-				else if (c == NEW_LINE || c == TAB || c == SPACE) {
-					if ((StringUtils.isNotEmpty(result) && last(result) == SPACE) || StringUtils.isEmpty(result)) {
+				else if (c == '\n' || c == '\r' || c == '\t' || c == ' ') {
+					if ((StringUtils.isNotEmpty(result) && last(result) == ' ') || StringUtils.isEmpty(result)) {
 						continue;
 					}
-					// replace tab and new-line with space.
-					c = SPACE;
+					c = ' ';
 				}
 			}
 			result.append(c);
