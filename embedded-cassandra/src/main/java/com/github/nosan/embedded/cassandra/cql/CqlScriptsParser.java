@@ -36,7 +36,7 @@ public abstract class CqlScriptsParser {
 
 	private static final char STATEMENT = ';';
 
-	private static final String LINE_SEPARATOR = System.lineSeparator();
+	private static final char LINE_SEPARATOR = '\n';
 
 	private static final String SINGLE_DASH_COMMENT = "--";
 
