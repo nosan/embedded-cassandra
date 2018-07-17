@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import org.slf4j.Logger;
@@ -60,23 +59,20 @@ public class Cassandra {
 	private boolean initialized = false;
 
 	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
-		this.runtimeConfig = Objects.requireNonNull(runtimeConfig,
-				"Runtime Config must not be null");
-		this.executableConfig = Objects.requireNonNull(executableConfig,
-				"Executable Config must not be null");
+		this.runtimeConfig = (runtimeConfig != null ? runtimeConfig : new RuntimeConfigBuilder(log).build());
+		this.executableConfig = (executableConfig != null ? executableConfig : new ExecutableConfigBuilder().build());
 	}
 
 	public Cassandra(IRuntimeConfig runtimeConfig) {
-		this(runtimeConfig, new ExecutableConfigBuilder().build());
+		this(runtimeConfig, null);
 	}
 
 	public Cassandra(ExecutableConfig executableConfig) {
-		this(new RuntimeConfigBuilder(log).build(), executableConfig);
+		this(null, executableConfig);
 	}
 
 	public Cassandra() {
-		this(new RuntimeConfigBuilder(log).build(),
-				new ExecutableConfigBuilder().build());
+		this(null, null);
 	}
 
 	/**
@@ -84,7 +80,7 @@ public class Cassandra {
 	 *
 	 * @return executable config.
 	 */
-	public final ExecutableConfig getExecutableConfig() {
+	public ExecutableConfig getExecutableConfig() {
 		return this.executableConfig;
 	}
 
@@ -93,7 +89,7 @@ public class Cassandra {
 	 *
 	 * @return runtime config.
 	 */
-	public final IRuntimeConfig getRuntimeConfig() {
+	public IRuntimeConfig getRuntimeConfig() {
 		return this.runtimeConfig;
 	}
 
@@ -102,7 +98,7 @@ public class Cassandra {
 	 *
 	 * @throws IOException Cassandra's process has not been started correctly.
 	 */
-	public synchronized final void start() throws IOException {
+	public void start() throws IOException {
 		if (this.initialized) {
 			throw new IOException("Cassandra has already been started");
 		}
@@ -119,7 +115,7 @@ public class Cassandra {
 	 *
 	 * @see CassandraExecutable#stop
 	 */
-	public synchronized final void stop() {
+	public void stop() {
 		if (this.executable != null) {
 			this.executable.stop();
 			this.initialized = false;

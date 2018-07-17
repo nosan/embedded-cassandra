@@ -14,31 +14,34 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
-
-import static org.assertj.core.api.Assertions.assertThat;
+package com.github.nosan.embedded.cassandra.cql;
 
 /**
- * Tests for {@link AbstractCassandraTestNG}.
+ * Utility class to detect {@link ClassLoader}.
  *
  * @author Dmytro Nosan
  */
-public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
+abstract class ClassLoaderUtils {
 
-	@BeforeMethod
-	public void setUp() {
-		executeScripts(new ClassPathCqlResource("init.cql"));
+	static ClassLoader getClassLoader() {
+		try {
+			ClassLoader cl = Thread.currentThread().getContextClassLoader();
+			if (cl != null) {
+				return cl;
+			}
+		}
+		catch (Throwable ignore) {
+		}
+
+		try {
+			ClassLoader cl = ClassLoader.getSystemClassLoader();
+			if (cl != null) {
+				return cl;
+			}
+		}
+		catch (Throwable ignore) {
+		}
+		return null;
 	}
-
-	@Test
-	public void select() {
-		assertThat(getSession().execute("SELECT * FROM  test.roles").wasApplied())
-				.isTrue();
-	}
-
 }

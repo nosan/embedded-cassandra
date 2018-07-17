@@ -23,6 +23,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.ClusterFactory;
+import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
@@ -31,28 +33,30 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * Abstract Class for running an Embedded Cassandra. This class provides two new methods
  * {@link #startCassandra()} and {@link #stopCassandra()}. Cassandra will be started on
  * the random ports. <pre>
- * public class CassandraTests extends AbstractCassandraTestNG {
- * 	&#64;BeforeMethod
- * 	public void setUp() throws Exception {
- * 		// before actions
- *    }
- * 	&#64;AfterMethod
- * 	public void tearDown() throws Exception {
- * 		// after actions
- *    }
- * 	&#64;Test
- * 	public void test() {
- * 	// test me...
- *    }
+ * public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
+ * &#64;BeforeMethod
+ * public void setUp() {
+ * 		    executeScripts(new ClassPathCqlResource("init.cql"));
  * }
- * }</pre>
+ * &#64;Test
+ * public void select() {
+ * assertThat(getSession().execute("query").wasApplied())
+ * .isTrue();
+ * }
+ * }
+ * </pre>
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
  * @see ExecutableConfigBuilder
  * @see Cassandra
  */
-public abstract class AbstractCassandraTestNG extends Cassandra {
+public abstract class AbstractCassandraTestNG extends EmbeddedCassandra {
+	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig,
+			ExecutableConfig executableConfig,
+			ClusterFactory clusterFactory) {
+		super(runtimeConfig, executableConfig, clusterFactory);
+	}
 
 	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig,
 			ExecutableConfig executableConfig) {
@@ -60,15 +64,28 @@ public abstract class AbstractCassandraTestNG extends Cassandra {
 	}
 
 	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig) {
-		super(runtimeConfig, new ExecutableConfigBuilder().build());
+		super(runtimeConfig);
 	}
 
 	public AbstractCassandraTestNG(ExecutableConfig executableConfig) {
 		super(executableConfig);
 	}
 
+	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig,
+			ClusterFactory clusterFactory) {
+		super(runtimeConfig, clusterFactory);
+	}
+
+	public AbstractCassandraTestNG(ExecutableConfig executableConfig,
+			ClusterFactory clusterFactory) {
+		super(executableConfig, clusterFactory);
+	}
+
+	public AbstractCassandraTestNG(ClusterFactory clusterFactory) {
+		super(clusterFactory);
+	}
+
 	public AbstractCassandraTestNG() {
-		super(new ExecutableConfigBuilder().build());
 	}
 
 	/**

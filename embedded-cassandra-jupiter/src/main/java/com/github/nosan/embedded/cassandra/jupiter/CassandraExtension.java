@@ -22,37 +22,45 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.ClusterFactory;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
 /**
  * JUnit {@link org.junit.jupiter.api.extension.RegisterExtension RegisterExtension} for
  * running an Embedded Cassandra. Cassandra will be started on the random ports.
- * <pre> public class CassandraTests {
- * 	&#64;RegisterExtension
- * 	public static CassandraExtension cassandra = new CassandraExtension();
- * 	&#64;BeforeEach
- * 	public void setUp() throws Exception {
- * 		//before actions
- *    }
- * 	&#64;AfterEach
- * 	public void tearDown() throws Exception {
- * 		//after actions
- *    }
- * 	&#64;Test
- * 	public void test() {
- * 		//test me
- *    }
- * }</pre>
+ * <pre>
+ * public class CassandraExtensionTests {
+ * &#64;RegisterExtension
+ * public static CassandraExtension cassandra = new CassandraExtension();
+ * &#64;BeforeEach
+ * public void setUp() {
+ * 		    cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+
+ * }
+ * &#64;Test
+ * public void select() {
+ * assertThat(cassandra.getSession().execute("query").wasApplied())
+ * .isTrue();
+ * }
+ * }
+ * </pre>
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
  * @see ExecutableConfigBuilder
  * @see Cassandra
  */
-public class CassandraExtension extends Cassandra
+public class CassandraExtension extends EmbeddedCassandra
 		implements BeforeAllCallback, AfterAllCallback {
+
+	public CassandraExtension(IRuntimeConfig runtimeConfig,
+			ExecutableConfig executableConfig,
+			ClusterFactory clusterFactory) {
+		super(runtimeConfig, executableConfig, clusterFactory);
+	}
 
 	public CassandraExtension(IRuntimeConfig runtimeConfig,
 			ExecutableConfig executableConfig) {
@@ -60,15 +68,28 @@ public class CassandraExtension extends Cassandra
 	}
 
 	public CassandraExtension(IRuntimeConfig runtimeConfig) {
-		super(runtimeConfig, new ExecutableConfigBuilder().build());
+		super(runtimeConfig);
 	}
 
 	public CassandraExtension(ExecutableConfig executableConfig) {
 		super(executableConfig);
 	}
 
+	public CassandraExtension(IRuntimeConfig runtimeConfig,
+			ClusterFactory clusterFactory) {
+		super(runtimeConfig, clusterFactory);
+	}
+
+	public CassandraExtension(ExecutableConfig executableConfig,
+			ClusterFactory clusterFactory) {
+		super(executableConfig, clusterFactory);
+	}
+
+	public CassandraExtension(ClusterFactory clusterFactory) {
+		super(clusterFactory);
+	}
+
 	public CassandraExtension() {
-		super(new ExecutableConfigBuilder().build());
 	}
 
 	@Override

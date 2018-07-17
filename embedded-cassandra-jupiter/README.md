@@ -7,20 +7,18 @@ For running `Embedded Cassandra ` with `Junit 5`, `@RegisterExtension` has to be
 ```java
 public class CassandraTests {
 
-	
 	@RegisterExtension
-	public static Cassandra cassandra = new Cassandra();
-	
-	@Test
-	public void test() throws Exception {
-		try (Cluster cluster = cluster(cassandra.getExecutableConfig().getConfig())) {
-			Session session = cluster.connect();
-		}
+	public static CassandraExtension cassandra = new CassandraExtension();
+
+	@BeforeEach
+	public void setUp() {
+		cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
 	}
-	
-	private static Cluster cluster(Config config) {
-    		return Cluster.builder().addContactPoint(config.getRpcAddress())
-    				.withPort(config.getNativeTransportPort()).build(); 
+
+	@Test
+	public void select() {
+		assertThat(cassandra.getSession().execute("SELECT * FROM  test.roles").wasApplied())
+				.isTrue();
 	}
 
 }

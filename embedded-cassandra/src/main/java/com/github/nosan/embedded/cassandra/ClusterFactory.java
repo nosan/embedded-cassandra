@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
+package com.github.nosan.embedded.cassandra;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.datastax.driver.core.Cluster;
 
 /**
- * Tests for {@link AbstractCassandraTestNG}.
+ * Strategy to create {@link Cluster}.
  *
  * @author Dmytro Nosan
  */
-public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
-
-	@BeforeMethod
-	public void setUp() {
-		executeScripts(new ClassPathCqlResource("init.cql"));
-	}
-
-	@Test
-	public void select() {
-		assertThat(getSession().execute("SELECT * FROM  test.roles").wasApplied())
-				.isTrue();
-	}
-
+public interface ClusterFactory {
+	/**
+	 * Creates a new {@link Cluster}.
+	 *
+	 * @param config Cassandra's config.
+	 * @param version Cassandra's version.
+	 * @return a {@link Cluster} to Cassandra.
+	 */
+	Cluster getCluster(Config config, Version version);
 }

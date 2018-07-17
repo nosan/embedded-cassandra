@@ -8,20 +8,19 @@
 public class CassandraTests {
 
 	@ClassRule
-	public static Cassandra cassandra = new Cassandra();
+	public static CassandraRule cassandra = new CassandraRule();
+
+	@Before
+	public void setUp() {
+		cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+	}
 
 	@Test
-	public void test() throws Exception {
-		try (Cluster cluster = cluster(cassandra.getExecutableConfig().getConfig())) {
-			Session session = cluster.connect();
-			//
-		}
+	public void select() {
+		assertThat(cassandra.getSession().execute("SELECT * FROM  test.roles").wasApplied())
+				.isTrue();
 	}
-	
-	private static Cluster cluster(Config config) {
-    		return Cluster.builder().addContactPoint(config.getRpcAddress())
-    				.withPort(config.getNativeTransportPort()).build(); 
-	}	
+
 }
 ```
 

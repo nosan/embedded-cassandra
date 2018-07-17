@@ -14,31 +14,42 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
+package com.github.nosan.embedded.cassandra;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import java.io.IOException;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link AbstractCassandraTestNG}.
+ * Tests for {@link EmbeddedCassandra}.
  *
  * @author Dmytro Nosan
  */
-public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
+public class EmbeddedCassandraTests {
 
-	@BeforeMethod
-	public void setUp() {
-		executeScripts(new ClassPathCqlResource("init.cql"));
+	private final EmbeddedCassandra embeddedCassandra = new EmbeddedCassandra();
+
+	@Before
+	public void setUp() throws Exception {
+		this.embeddedCassandra.start();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		this.embeddedCassandra.stop();
+
 	}
 
 	@Test
-	public void select() {
-		assertThat(getSession().execute("SELECT * FROM  test.roles").wasApplied())
+	public void select() throws IOException {
+		this.embeddedCassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+		assertThat(this.embeddedCassandra.getSession().execute("SELECT * FROM  test.roles").wasApplied())
 				.isTrue();
 	}
-
 }

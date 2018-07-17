@@ -14,31 +14,27 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
+package com.github.nosan.embedded.cassandra.cql;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import java.io.File;
+import java.net.URISyntaxException;
 
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
+import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link AbstractCassandraTestNG}.
+ * Tests for {@link FileCqlResource}.
  *
  * @author Dmytro Nosan
  */
-public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
-
-	@BeforeMethod
-	public void setUp() {
-		executeScripts(new ClassPathCqlResource("init.cql"));
-	}
+public class FileCqlResourceTests {
 
 	@Test
-	public void select() {
-		assertThat(getSession().execute("SELECT * FROM  test.roles").wasApplied())
-				.isTrue();
+	public void getStatements() throws URISyntaxException {
+		assertThat(
+				new FileCqlResource(new File(ClassLoader.getSystemResource("test.cql").toURI())).getStatements())
+				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )");
 	}
 
 }

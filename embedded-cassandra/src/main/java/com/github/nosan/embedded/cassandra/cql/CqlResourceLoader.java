@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
-
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
-
-import static org.assertj.core.api.Assertions.assertThat;
+package com.github.nosan.embedded.cassandra.cql;
 
 /**
- * Tests for {@link AbstractCassandraTestNG}.
+ * Strategy interface for loading resources (e.g. class path or file system
+ * resources).
  *
  * @author Dmytro Nosan
+ * @see CqlResource
  */
-public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
+public interface CqlResourceLoader {
 
-	@BeforeMethod
-	public void setUp() {
-		executeScripts(new ClassPathCqlResource("init.cql"));
-	}
-
-	@Test
-	public void select() {
-		assertThat(getSession().execute("SELECT * FROM  test.roles").wasApplied())
-				.isTrue();
-	}
-
+	/**
+	 * Load a Resource handle for the specified resource location.
+	 *
+	 * @param location the resource location
+	 * @return {@link CqlResource} resource.
+	 */
+	CqlResource load(String location);
 }
