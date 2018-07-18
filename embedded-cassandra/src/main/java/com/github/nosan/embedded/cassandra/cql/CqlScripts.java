@@ -16,9 +16,12 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import com.datastax.driver.core.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for executing {@link CqlResource Scripts}.
@@ -26,6 +29,9 @@ import com.datastax.driver.core.Session;
  * @author Dmytro Nosan
  */
 public abstract class CqlScripts {
+
+	private static final Logger log = LoggerFactory.getLogger(CqlScripts.class);
+
 
 	/**
 	 * Executes the provided scripts.
@@ -37,8 +43,10 @@ public abstract class CqlScripts {
 	public static void executeScripts(Session session, CqlResource... cqlResources) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(cqlResources, "CQL Resources must not be null");
+		log.debug("Executing CQL Scripts: {}", Arrays.toString(cqlResources));
 		for (CqlResource cqlResource : cqlResources) {
 			for (String statement : cqlResource.getStatements()) {
+				log.debug("Execute Statement:  {}", statement);
 				session.execute(statement);
 			}
 		}

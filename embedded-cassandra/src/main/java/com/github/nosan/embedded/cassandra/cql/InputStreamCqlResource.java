@@ -47,6 +47,6 @@ public class InputStreamCqlResource extends AbstractCqlResource {
 
 	@Override
 	public String getName() {
-		return "InputStream Scripts";
+		return "InputStream CQL Statements";
 	}
 }
