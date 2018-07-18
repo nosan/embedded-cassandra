@@ -1,8 +1,8 @@
-# Embedded Cassandra JUnit
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-junit)
+= Embedded Cassandra JUnit image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-junit.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-junit"]
 
+`Embedded Cassandra` could be run via JUnit `ClassRule`.
 
-`Embedded Cassandra` could be run via JUnit `ClassRule`. 
+== Usage
 
 ```java
 public class CassandraTests {
@@ -29,7 +29,7 @@ By default `Embedded Cassandra` will be started on the random ports.
 
 
 
-## Maven
+== Maven
 
 ```xml
 <dependencies>
@@ -51,7 +51,7 @@ By default `Embedded Cassandra` will be started on the random ports.
         <artifactId>cassandra-driver-core</artifactId>
         <version>${cassandra-driver-core.version}</version>
         <scope>test</scope>
-    </dependency>    
+    </dependency>
 </dependencies>
 ```
 

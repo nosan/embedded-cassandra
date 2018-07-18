@@ -1,12 +1,10 @@
-# Embedded Cassandra
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra)
- 
+= Embedded Cassandra image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra"]
 
 `Embedded Cassandra` provides an easy way to run `Cassandra` in the unit tests.
 
-## Usage
+== Usage
 
-Following code creates `Embedded Cassandra` with the default configuration. 
+Following code creates `Embedded Cassandra` with the default configuration.
 
 ```java
 
@@ -35,9 +33,9 @@ public class CassandraTests {
 
 ```
 
-It is possible to use a custom configuration via `constructor`. 
+It is possible to use a custom configuration via `constructor`.
 
-## Maven
+== Maven
 
 ```xml
 <dependencies>
@@ -58,7 +56,7 @@ It is possible to use a custom configuration via `constructor`.
         <artifactId>cassandra-driver-core</artifactId>
         <version>${cassandra-driver-core.version}</version>
         <scope>test</scope>
-    </dependency>    
+    </dependency>
 </dependencies>
 ```
 
