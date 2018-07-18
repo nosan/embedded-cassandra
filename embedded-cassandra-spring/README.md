@@ -2,7 +2,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-spring)
  
 
-For running `Embedded Cassandra` withing `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
+For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
 
 ```java
 @RunWith(SpringRunner.class)
