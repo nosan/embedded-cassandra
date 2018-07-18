@@ -1,4 +1,4 @@
-= Embedded Cassandra TestNG image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-testng.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-tesng"]
+= Embedded Cassandra TestNG image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-testng.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-testng"]
 
 For running `Embedded Cassandra` with `TestNG`, `AbstractCassandraTests` has to be extended.
 
