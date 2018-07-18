@@ -17,5 +17,5 @@ install:
   - cmd: echo %JAVA_HOME%
 
 build_script:
-  - mvnw.cmd -B clean test -Djna.nosys=true
+  - mvnw.cmd -B -e clean test -Djna.nosys=true
 

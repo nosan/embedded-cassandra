@@ -23,4 +23,4 @@ script:
   - echo PATH = ${PATH}
   - echo JAVA_HOME = ${JAVA_HOME}
   - java -version
-  - ./mvnw -B clean test
+  - ./mvnw -B -e clean test
