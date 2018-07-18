@@ -16,13 +16,18 @@
 
 package com.github.nosan.embedded.cassandra.spring;
 
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import java.util.LinkedHashMap;
+
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link ContextCustomizer} to add {@link EmbeddedCassandraConfiguration} if
@@ -32,22 +37,31 @@ import org.springframework.util.Assert;
  */
 class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
-	private final EmbeddedCassandra embeddedCassandra;
+	private final EmbeddedCassandra annotation;
 
-	EmbeddedCassandraContextCustomizer(EmbeddedCassandra embeddedCassandra) {
-		this.embeddedCassandra = embeddedCassandra;
+	EmbeddedCassandraContextCustomizer(EmbeddedCassandra annotation) {
+		this.annotation = annotation;
 	}
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context,
 			MergedContextConfiguration mergedConfig) {
-		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-		Assert.isInstanceOf(BeanDefinitionRegistry.class, beanFactory,
+		Assert.isInstanceOf(BeanDefinitionRegistry.class, context.getBeanFactory(),
 				"Embedded Cassandra Context Customizer can only be used with a BeanDefinitionRegistry");
-		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(EmbeddedCassandraConfiguration.class);
-		beanDefinition.getConstructorArgumentValues().addGenericArgumentValue(this.embeddedCassandra);
-		registry.registerBeanDefinition("embeddedCassandraConfiguration", beanDefinition);
+		addProperties(context, mergedConfig.getTestClass());
+		((BeanDefinitionRegistry) context.getBeanFactory()).registerBeanDefinition("EmbeddedCassandraConfiguration",
+				new RootBeanDefinition(EmbeddedCassandraConfiguration.class));
+	}
+
+	private void addProperties(ConfigurableApplicationContext context, Class<?> testClass) {
+		ConfigurableEnvironment environment = context.getEnvironment();
+		LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
+		properties.put("embedded-cassandra.scripts",
+				StringUtils.arrayToCommaDelimitedString(
+						TestContextResourceUtils.convertToClasspathResourcePaths(testClass, this.annotation.value())));
+		properties.put("embedded-cassandra.encoding", this.annotation.encoding());
+		environment.getPropertySources().addFirst(new MapPropertySource(EmbeddedCassandra.class.getName(),
+				properties));
 	}
 
 }

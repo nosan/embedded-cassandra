@@ -31,7 +31,7 @@ import org.springframework.core.annotation.AliasFor;
  * defined {@link com.datastax.driver.core.Cluster Cluster}. <pre>
  * &#64;RunWith(SpringRunner.class)
  * &#64;ContextConfiguration
- * &#64;EmbeddedCassandra
+ * &#64;EmbeddedCassandra(scripts = "...")
  * public class CassandraTests {
  * 	&#64;Autowired
  * 	private Cluster cluster;
@@ -41,6 +41,8 @@ import org.springframework.core.annotation.AliasFor;
  *    }
  * }
  * </pre>
+ * Note! You can declare your own `ExecutableConfig`, `IRuntimeConfig` and `ClusterFactory` beans to take control of
+ * the Cassandra instance's configuration.
  *
  * @author Dmytro Nosan
  * @see EmbeddedCassandraConfiguration
@@ -52,12 +54,50 @@ import org.springframework.core.annotation.AliasFor;
 @Inherited
 public @interface EmbeddedCassandra {
 
+	/**
+	 * Alias for {@link #scripts}.
+	 * <p>
+	 * This attribute may <strong>not</strong> be used in conjunction with
+	 * {@link #scripts}, but it may be used instead of {@link #scripts}.
+	 *
+	 * @return CQL scripts.
+	 * @see #scripts
+	 */
 	@AliasFor("scripts")
 	String[] value() default {};
 
+	/**
+	 * The paths to the CQL scripts to execute.
+	 * <p>
+	 * This attribute may <strong>not</strong> be used in conjunction with {@link #value},
+	 * but it may be used instead of {@link #value}.
+	 * <h3>Path Resource Semantics</h3>
+	 * <p>
+	 * Each path will be interpreted as a Spring
+	 * {@link org.springframework.core.io.Resource Resource}. A plain path &mdash; for
+	 * example, {@code "schema.cql"} &mdash; will be treated as a classpath resource that
+	 * is <em>relative</em> to the package in which the test class is defined. A path
+	 * starting with a slash will be treated as an <em>absolute</em> classpath resource,
+	 * for example: {@code "/org/example/schema.cql"}. A path which references a URL
+	 * (e.g., a path prefixed with
+	 * {@code http:}, etc.) will be loaded using the specified resource protocol. A path which contains
+	 * <em>"&frasl;**&frasl;**.cql"</em>
+	 * will be treated by
+	 * {@link org.springframework.core.io.support.ResourcePatternResolver ResourcePatternResolver}.
+	 *
+	 * @return CQL Scripts
+	 * @see #value
+	 */
 	@AliasFor("value")
 	String[] scripts() default {};
 
+	/**
+	 * The encoding for the supplied CQL scripts, if different from the platform
+	 * encoding.
+	 * <p>An empty string denotes that the platform encoding should be used.
+	 *
+	 * @return CQL scripts encoding.
+	 */
 	String encoding() default "";
 
 }

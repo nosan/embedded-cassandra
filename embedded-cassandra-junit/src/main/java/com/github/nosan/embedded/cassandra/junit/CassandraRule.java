@@ -21,8 +21,8 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.ClusterFactory;
-import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
@@ -35,7 +35,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * public static CassandraRule cassandra = new CassandraRule();
  * &#64;Before
  * public void setUp() {
- * 		    cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+ * 		 CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
  * }
  * &#64;Test
  * public void select() {
@@ -48,9 +48,9 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
  * @see ExecutableConfigBuilder
- * @see EmbeddedCassandra
+ * @see Cassandra
  */
-public class CassandraRule extends EmbeddedCassandra implements TestRule {
+public class CassandraRule extends Cassandra implements TestRule {
 	public CassandraRule(IRuntimeConfig runtimeConfig,
 			ExecutableConfig executableConfig,
 			ClusterFactory clusterFactory) {

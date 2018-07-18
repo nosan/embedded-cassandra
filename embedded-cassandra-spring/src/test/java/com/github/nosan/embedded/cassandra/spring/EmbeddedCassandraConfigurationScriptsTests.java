@@ -36,14 +36,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@EmbeddedCassandra("init.cql")
-public class EmbeddedCassandraConfigurationTests {
-
-	@Autowired
-	private TestService testService;
+@EmbeddedCassandra("/*.cql")
+public class EmbeddedCassandraConfigurationScriptsTests {
 
 	@Rule
 	public ExpectedException throwable = ExpectedException.none();
+
+	@Autowired
+	private TestService testService;
 
 	@Test
 	public void createKeyspace() {

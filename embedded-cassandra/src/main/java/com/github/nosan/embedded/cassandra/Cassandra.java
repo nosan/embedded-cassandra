@@ -18,6 +18,8 @@ package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * 		Cassandra cassandra = new Cassandra();
  * 		try {
  * 			cassandra.start();
+ * 			CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.sql"));
  * 			// test me
  *        }
  * 		finally {
@@ -45,34 +48,62 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
  * @see ExecutableConfigBuilder
+ * @see ClusterFactory
+ * @see com.github.nosan.embedded.cassandra.cql.CqlScripts
  */
 public class Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
-	private CassandraExecutable executable;
+	private final ClusterFactory clusterFactory;
 
 	private final IRuntimeConfig runtimeConfig;
 
 	private final ExecutableConfig executableConfig;
 
+	private CassandraExecutable executable;
+
+	private Cluster cluster;
+
+	private Session session;
+
 	private boolean initialized = false;
 
-	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
+
+	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig,
+			ClusterFactory clusterFactory) {
 		this.runtimeConfig = (runtimeConfig != null ? runtimeConfig : new RuntimeConfigBuilder(log).build());
 		this.executableConfig = (executableConfig != null ? executableConfig : new ExecutableConfigBuilder().build());
+		this.clusterFactory = (clusterFactory != null ? clusterFactory : new DefaultClusterFactory());
+	}
+
+
+	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
+		this(runtimeConfig, executableConfig, null);
 	}
 
 	public Cassandra(IRuntimeConfig runtimeConfig) {
-		this(runtimeConfig, null);
+		this(runtimeConfig, null, null);
 	}
 
 	public Cassandra(ExecutableConfig executableConfig) {
-		this(null, executableConfig);
+		this(null, executableConfig, null);
+	}
+
+	public Cassandra(IRuntimeConfig runtimeConfig, ClusterFactory clusterFactory) {
+		this(runtimeConfig, null, clusterFactory);
+	}
+
+	public Cassandra(ExecutableConfig executableConfig, ClusterFactory clusterFactory) {
+		this(null, executableConfig, clusterFactory);
+	}
+
+	public Cassandra(ClusterFactory clusterFactory) {
+		this(null, null, clusterFactory);
 	}
 
 	public Cassandra() {
-		this(null, null);
+		this(null, null, null);
 	}
 
 	/**
@@ -92,6 +123,36 @@ public class Cassandra {
 	public IRuntimeConfig getRuntimeConfig() {
 		return this.runtimeConfig;
 	}
+
+
+	/**
+	 * Retrieves Cassandra's {@link Cluster Cluster} using {@link ClusterFactory ClusterFactory}.
+	 *
+	 * @return Cassandra's Cluster.
+	 * @see ClusterFactory
+	 */
+	public Cluster getCluster() {
+		if (this.cluster == null) {
+			ExecutableConfig executableConfig = getExecutableConfig();
+			this.cluster = this.clusterFactory.getCluster(executableConfig.getConfig(), executableConfig.getVersion());
+		}
+		return this.cluster;
+	}
+
+	/**
+	 * Retrieves Cassandra's {@link Session Session} using {@link #getCluster()}.
+	 *
+	 * @return Cassandra's Session.
+	 * @see #getCluster()
+	 */
+
+	public Session getSession() {
+		if (this.session == null) {
+			this.session = getCluster().connect();
+		}
+		return this.session;
+	}
+
 
 	/**
 	 * Start the Cassandra Server.
@@ -116,10 +177,15 @@ public class Cassandra {
 	 * @see CassandraExecutable#stop
 	 */
 	public void stop() {
+		if (this.cluster != null) {
+			this.cluster.closeAsync();
+			this.cluster = null;
+			this.session = null;
+		}
 		if (this.executable != null) {
 			this.executable.stop();
-			this.initialized = false;
 		}
+		this.initialized = false;
 	}
 
 }

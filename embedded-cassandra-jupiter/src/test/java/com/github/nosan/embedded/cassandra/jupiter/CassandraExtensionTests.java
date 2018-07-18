@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
+import com.github.nosan.embedded.cassandra.cql.CqlScripts;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +37,7 @@ public class CassandraExtensionTests {
 
 	@BeforeEach
 	public void setUp() {
-		cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+		CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
 	}
 
 	@Test

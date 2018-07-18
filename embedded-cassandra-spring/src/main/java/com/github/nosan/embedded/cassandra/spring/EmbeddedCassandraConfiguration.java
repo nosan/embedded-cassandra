@@ -16,11 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.spring;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -33,20 +35,23 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.ClusterFactory;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.cql.CqlResource;
-import com.github.nosan.embedded.cassandra.cql.CqlResourceLoader;
 import com.github.nosan.embedded.cassandra.cql.CqlScripts;
-import com.github.nosan.embedded.cassandra.cql.DefaultCqlResourceLoader;
+import com.github.nosan.embedded.cassandra.cql.UrlCqlResource;
 
 /**
  * {@link Configuration Configuration} for {@link EmbeddedCassandra Embedded Cassandra}
@@ -57,34 +62,15 @@ import com.github.nosan.embedded.cassandra.cql.DefaultCqlResourceLoader;
  */
 @Configuration
 @Order
-class EmbeddedCassandraConfiguration implements InitializingBean {
+public class EmbeddedCassandraConfiguration {
 
 	private static final String DEFAULT_BEAN_NAME = "cluster";
-
-	private final Cluster cluster;
-
-	private final EmbeddedCassandra annotation;
-
-	EmbeddedCassandraConfiguration(Cluster cluster, EmbeddedCassandra annotation) {
-		this.cluster = cluster;
-		this.annotation = annotation;
-	}
 
 	@Bean
 	public static EmbeddedClusterBeanFactoryPostProcessor embeddedClusterBeanFactoryPostProcessor() {
 		return new EmbeddedClusterBeanFactoryPostProcessor();
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		try (Session session = this.cluster.connect()) {
-			String encoding = this.annotation.encoding();
-			Charset charset = (!StringUtils.hasText(encoding) ? null : Charset.forName(encoding));
-			CqlResourceLoader loader = new DefaultCqlResourceLoader(getClass().getClassLoader(), charset);
-			CqlScripts.executeScripts(session, Arrays.stream(this.annotation.scripts())
-					.map(loader::load).toArray(CqlResource[]::new));
-		}
-	}
 
 	private static class EmbeddedClusterBeanFactoryPostProcessor
 			implements BeanDefinitionRegistryPostProcessor, Ordered {
@@ -150,19 +136,27 @@ class EmbeddedCassandraConfiguration implements InitializingBean {
 	private static class EmbeddedClusterFactoryBean
 			implements FactoryBean<Cluster>, InitializingBean, DisposableBean {
 
-		private final com.github.nosan.embedded.cassandra.EmbeddedCassandra cassandra;
+		private final Cassandra cassandra;
+
+		private final ApplicationContext applicationContext;
+
+		private final Environment environment;
 
 		EmbeddedClusterFactoryBean(
 				ObjectProvider<ClusterFactory> clusterFactory,
 				ObjectProvider<ExecutableConfig> executableConfig,
-				ObjectProvider<IRuntimeConfig> runtimeConfig) {
-			this.cassandra = new com.github.nosan.embedded.cassandra.EmbeddedCassandra(runtimeConfig.getIfAvailable(),
+				ObjectProvider<IRuntimeConfig> runtimeConfig, ApplicationContext applicationContext,
+				Environment environment) {
+			this.applicationContext = applicationContext;
+			this.environment = environment;
+			this.cassandra = new Cassandra(runtimeConfig.getIfAvailable(),
 					executableConfig.getIfAvailable(), clusterFactory.getIfAvailable());
 		}
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
 			this.cassandra.start();
+			CqlScripts.executeScripts(this.cassandra.getSession(), getCqlResources());
 		}
 
 		@Override
@@ -183,6 +177,28 @@ class EmbeddedCassandraConfiguration implements InitializingBean {
 		@Override
 		public void destroy() throws Exception {
 			this.cassandra.stop();
+		}
+
+
+		private CqlResource[] getCqlResources() throws IOException {
+			List<CqlResource> cqlResources = new ArrayList<>();
+			String[] scripts = StringUtils
+					.commaDelimitedListToStringArray(this.environment.getProperty("embedded-cassandra.scripts"));
+
+			if (!ObjectUtils.isEmpty(scripts)) {
+				String encoding = this.environment.getProperty("embedded-cassandra.encoding");
+				Charset charset = (!StringUtils.hasText(encoding) ? null : Charset.forName(encoding));
+				List<Resource> resources = new ArrayList<>();
+				for (String script : scripts) {
+					resources.addAll(Arrays.asList(this.applicationContext.getResources(script)));
+				}
+				for (Resource resource : resources) {
+					cqlResources.add(new UrlCqlResource(resource.getURL(), charset));
+				}
+			}
+
+
+			return cqlResources.toArray(new CqlResource[0]);
 		}
 
 	}

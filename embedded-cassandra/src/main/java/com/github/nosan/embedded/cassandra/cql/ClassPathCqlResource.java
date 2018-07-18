@@ -66,7 +66,12 @@ public class ClassPathCqlResource extends AbstractCqlResource {
 	private ClassPathCqlResource(String location, ClassLoader classLoader, Class<?> contextClass, Charset charset) {
 		super(charset);
 		Objects.requireNonNull(location, "Location must not be null");
-		this.location = location.startsWith("/") ? location.substring(1) : location;
+		if (contextClass == null) {
+			this.location = location.startsWith("/") ? location.substring(1) : location;
+		}
+		else {
+			this.location = location;
+		}
 		this.classLoader = (classLoader != null ? classLoader : ClassLoaderUtils.getClassLoader());
 		this.contextClass = contextClass;
 	}

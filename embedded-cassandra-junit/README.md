@@ -12,12 +12,12 @@ public class CassandraTests {
 
 	@Before
 	public void setUp() {
-		cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+		CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
 	}
 
 	@Test
 	public void select() {
-		assertThat(cassandra.getSession().execute("SELECT * FROM  test.roles").wasApplied())
+		assertThat(cassandra.getSession().execute("query").wasApplied())
 				.isTrue();
 	}
 
@@ -37,10 +37,21 @@ By default `Embedded Cassandra` will be started on the random ports.
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-junit</artifactId>
-        <version>${version}</version>
+        <version>${embedded-cassandra-junit.version}</version>
         <scope>test</scope>
     </dependency>
-    
+    <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${snakeyaml.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.datastax.cassandra</groupId>
+        <artifactId>cassandra-driver-core</artifactId>
+        <version>${cassandra-driver-core.version}</version>
+        <scope>test</scope>
+    </dependency>    
 </dependencies>
 ```
 
