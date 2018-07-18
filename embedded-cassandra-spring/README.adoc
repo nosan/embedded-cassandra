@@ -1,8 +1,8 @@
-# Embedded Cassandra Spring
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-spring)
- 
+= Embedded Cassandra Spring image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-spring.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-spring"]
 
 For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
+
+== Usage
 
 ```java
 @RunWith(SpringRunner.class)
@@ -20,11 +20,11 @@ public class CassandraTests {
 }
 ```
 
-You can declare your own `ExecutableConfig`, `IRuntimeConfig` and `ClusterFactory` 
+You can declare your own `ExecutableConfig`, `IRuntimeConfig` and `ClusterFactory`
 beans to take control of the Cassandra instance's
 
 
-## Maven
+== Maven
 
 ```xml
 <dependencies>
