@@ -12,7 +12,7 @@ public class CassandraTests {
 
 	@BeforeEach
 	public void setUp() {
-		CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
+		CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql"));
 	}
 
 	@Test

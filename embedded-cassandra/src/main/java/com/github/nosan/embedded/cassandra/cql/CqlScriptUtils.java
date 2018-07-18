@@ -24,28 +24,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Utility class for executing {@link CqlResource Scripts}.
+ * Utility class for working with {@link CqlScript Scripts}.
  *
  * @author Dmytro Nosan
  */
-public abstract class CqlScripts {
+public abstract class CqlScriptUtils {
 
-	private static final Logger log = LoggerFactory.getLogger(CqlScripts.class);
-
+	private static final Logger log = LoggerFactory.getLogger(CqlScriptUtils.class);
 
 	/**
 	 * Executes the provided scripts.
 	 *
-	 * @param cqlResources the CQL resources to execute.
+	 * @param cqlScripts the CQL resources to execute.
 	 * @param session Cassandra's Session to use.
-	 * @see CqlResource
+	 * @see CqlScript
 	 */
-	public static void executeScripts(Session session, CqlResource... cqlResources) {
+	public static void executeScripts(Session session, CqlScript... cqlScripts) {
 		Objects.requireNonNull(session, "Session must not be null");
-		Objects.requireNonNull(cqlResources, "CQL Resources must not be null");
-		log.debug("Executing CQL Scripts: {}", Arrays.toString(cqlResources));
-		for (CqlResource cqlResource : cqlResources) {
-			for (String statement : cqlResource.getStatements()) {
+		Objects.requireNonNull(cqlScripts, "CQL Scripts must not be null");
+		log.debug("Executing CQL Scripts: {}", Arrays.toString(cqlScripts));
+		for (CqlScript cqlScript : cqlScripts) {
+			for (String statement : cqlScript.getStatements()) {
 				log.debug("Execute Statement:  {}", statement);
 				session.execute(statement);
 			}

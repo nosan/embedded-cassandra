@@ -24,12 +24,12 @@ import java.util.Objects;
 
 
 /**
- * {@link CqlResource} implementation for class path resources. Uses a
+ * {@link CqlScript} implementation for class path resources. Uses a
  * given {@link ClassLoader} or a given {@link Class} for loading resources.
  *
  * @author Dmytro Nosan
  */
-public class ClassPathCqlResource extends AbstractCqlResource {
+public class ClassPathCqlScript extends AbstractCqlScript {
 
 	private final String location;
 
@@ -37,33 +37,32 @@ public class ClassPathCqlResource extends AbstractCqlResource {
 
 	private final Class<?> contextClass;
 
-	public ClassPathCqlResource(String location) {
+	public ClassPathCqlScript(String location) {
 		this(location, null, null, null);
 	}
 
-	public ClassPathCqlResource(String location, Charset charset) {
+	public ClassPathCqlScript(String location, Charset charset) {
 		this(location, null, null, charset);
 	}
 
-	public ClassPathCqlResource(String location, ClassLoader classLoader) {
+	public ClassPathCqlScript(String location, ClassLoader classLoader) {
 		this(location, classLoader, null);
 	}
 
-	public ClassPathCqlResource(String location, ClassLoader classLoader, Charset charset) {
+	public ClassPathCqlScript(String location, ClassLoader classLoader, Charset charset) {
 		this(location, classLoader, null, charset);
 	}
 
-	public ClassPathCqlResource(String location, Class<?> contextClass) {
+	public ClassPathCqlScript(String location, Class<?> contextClass) {
 		this(location, null, contextClass, null);
 	}
 
 
-	public ClassPathCqlResource(String location, Class<?> contextClass, Charset charset) {
+	public ClassPathCqlScript(String location, Class<?> contextClass, Charset charset) {
 		this(location, null, contextClass, charset);
 	}
 
-
-	private ClassPathCqlResource(String location, ClassLoader classLoader, Class<?> contextClass, Charset charset) {
+	private ClassPathCqlScript(String location, ClassLoader classLoader, Class<?> contextClass, Charset charset) {
 		super(charset);
 		Objects.requireNonNull(location, "Location must not be null");
 		if (contextClass == null) {
@@ -74,6 +73,34 @@ public class ClassPathCqlResource extends AbstractCqlResource {
 		}
 		this.classLoader = (classLoader != null ? classLoader : ClassLoaderUtils.getClassLoader());
 		this.contextClass = contextClass;
+	}
+
+
+	/**
+	 * Returns the underlying classpath.
+	 *
+	 * @return Classpath location.
+	 */
+	public String getLocation() {
+		return this.location;
+	}
+
+	/**
+	 * Returns the ClassLoader that this resource will be obtained from.
+	 *
+	 * @return ClassLoader to load resources.
+	 */
+	public ClassLoader getClassLoader() {
+		return this.classLoader;
+	}
+
+	/**
+	 * Return the Class that this resource will be obtained from.
+	 *
+	 * @return Class to load resources.
+	 */
+	public Class<?> getContextClass() {
+		return this.contextClass;
 	}
 
 	@Override

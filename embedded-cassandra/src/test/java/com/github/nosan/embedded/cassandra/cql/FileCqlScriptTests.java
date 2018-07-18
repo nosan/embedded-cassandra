@@ -14,35 +14,27 @@
  * limitations under the License.
  */
 
-
 package com.github.nosan.embedded.cassandra.cql;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.io.File;
+import java.net.URISyntaxException;
+
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link CqlResource} implementation for a given CQL statements.
+ * Tests for {@link FileCqlScript}.
  *
  * @author Dmytro Nosan
  */
-public class StaticCqlResource implements CqlResource {
+public class FileCqlScriptTests {
 
-	private final List<String> statements;
-
-	public StaticCqlResource(String... statements) {
-		this.statements = new ArrayList<>(statements != null ? Arrays.asList(statements) : Collections.emptyList());
+	@Test
+	public void getStatements() throws URISyntaxException {
+		assertThat(
+				new FileCqlScript(new File(ClassLoader.getSystemResource("test.cql").toURI())).getStatements())
+				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )");
 	}
 
-	@Override
-	public String getName() {
-		return "Resource: 'Static CQL Statements'";
-	}
-
-	@Override
-	public Collection<String> getStatements() {
-		return Collections.unmodifiableList(this.statements);
-	}
 }

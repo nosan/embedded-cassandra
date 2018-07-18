@@ -16,22 +16,37 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
-import org.junit.Test;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link UrlCqlResource}.
+ * {@link CqlScript} implementation for {@link InputStream}.
  *
  * @author Dmytro Nosan
  */
-public class UrlCqlResourceTests {
+public class InputStreamCqlScript extends AbstractCqlScript {
 
+	private final InputStream location;
 
-	@Test
-	public void getStatements() {
-		assertThat(
-				new UrlCqlResource(ClassLoader.getSystemResource("test.cql")).getStatements())
-				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )");
+	public InputStreamCqlScript(InputStream location) {
+		this(location, null);
+	}
+
+	public InputStreamCqlScript(InputStream location, Charset charset) {
+		super(charset);
+		this.location = Objects.requireNonNull(location, "Location must not be null");
+	}
+
+	@Override
+	public InputStream getInputStream() throws IOException {
+		return this.location;
+	}
+
+	@Override
+	public String getName() {
+		return "InputStream CQL Statements";
 	}
 }

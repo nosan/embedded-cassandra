@@ -22,8 +22,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
-import com.github.nosan.embedded.cassandra.cql.CqlScripts;
+import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 /**
  * Tests for {@link Cassandra}.
@@ -49,7 +49,7 @@ public class CassandraTests {
 	public void shouldStartCassandraUsingDefaultConfiguration() throws Exception {
 		Cassandra cassandra = new Cassandra();
 		start(cassandra, () -> {
-			CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
+			CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql"));
 		});
 	}
 

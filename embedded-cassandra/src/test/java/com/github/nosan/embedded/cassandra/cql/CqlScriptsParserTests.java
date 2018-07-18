@@ -23,7 +23,7 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CqlScriptsParser}.
+ * Tests for {@link CqlScriptParser}.
  *
  * @author Dmytro Nosan
  */
@@ -31,67 +31,67 @@ public class CqlScriptsParserTests {
 
 	@Test
 	public void skipSpaces() {
-		List<String> statements = CqlScriptsParser.getStatements("   ");
+		List<String> statements = CqlScriptParser.getStatements("   ");
 		assertThat(statements).isEmpty();
 	}
 
 	@Test
 	public void oneStatements() {
-		List<String> statements = CqlScriptsParser
+		List<String> statements = CqlScriptParser
 				.getStatements("USE KEYSPACE '\"test\"'");
 		assertThat(statements).containsExactly("USE KEYSPACE '\"test\"'");
 	}
 
 	@Test
 	public void multiStatements() {
-		List<String> statements = CqlScriptsParser
+		List<String> statements = CqlScriptParser
 				.getStatements("USE KEYSPACE \n\t test; DROP KEYSPACE \n\n   test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "DROP KEYSPACE test");
 	}
 
 	@Test
 	public void blockComment() {
-		List<String> statements = CqlScriptsParser.getStatements(
+		List<String> statements = CqlScriptParser.getStatements(
 				"USE KEYSPACE test; /*DROP     KEYSPACE test*/USE KEYSPACE test;");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void blockCommentInvalid() {
-		CqlScriptsParser.getStatements("USE KEYSPACE test; /*DROP KEYSPACE test");
+		CqlScriptParser.getStatements("USE KEYSPACE test; /*DROP KEYSPACE test");
 	}
 
 	@Test
 	public void singleSlashCommentWithNewLine() {
-		List<String> statements = CqlScriptsParser.getStatements(
+		List<String> statements = CqlScriptParser.getStatements(
 				"USE KEYSPACE test; //DROP KEYSPACE test\nUSE KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
 	@Test
 	public void singleDashCommentWithNewLine() {
-		List<String> statements = CqlScriptsParser.getStatements(
+		List<String> statements = CqlScriptParser.getStatements(
 				"USE KEYSPACE test; --DROP KEYSPACE test\nUSE KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
 	@Test
 	public void singleDashComment() {
-		List<String> statements = CqlScriptsParser
+		List<String> statements = CqlScriptParser
 				.getStatements("USE KEYSPACE test; --DROP KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test");
 	}
 
 	@Test
 	public void singleSlashComment() {
-		List<String> statements = CqlScriptsParser
+		List<String> statements = CqlScriptParser
 				.getStatements("USE KEYSPACE test; //DROP KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test");
 	}
 
 	@Test
 	public void ignoreCommentSingleQuotes() {
-		List<String> statements = CqlScriptsParser
+		List<String> statements = CqlScriptParser
 				.getStatements("USE KEYSPACE test; DROP KEYSPACE '//test'");
 		assertThat(statements).containsExactly("USE KEYSPACE test",
 				"DROP KEYSPACE '//test'");
@@ -99,7 +99,7 @@ public class CqlScriptsParserTests {
 
 	@Test
 	public void ignoreCommentDoubleQuotes() {
-		List<String> statements = CqlScriptsParser
+		List<String> statements = CqlScriptParser
 				.getStatements("USE KEYSPACE test; DROP KEYSPACE \"//test\"");
 		assertThat(statements).containsExactly("USE KEYSPACE test",
 				"DROP KEYSPACE \"//test\"");
@@ -107,7 +107,7 @@ public class CqlScriptsParserTests {
 
 	@Test
 	public void ignoreStatementQuotes() {
-		List<String> statements = CqlScriptsParser
+		List<String> statements = CqlScriptParser
 				.getStatements("USE KEYSPACE 'test;' DROP KEYSPACE 'test'");
 		assertThat(statements)
 				.containsExactly("USE KEYSPACE 'test;' DROP KEYSPACE 'test'");
@@ -115,7 +115,7 @@ public class CqlScriptsParserTests {
 
 	@Test
 	public void ignoreStatementDoubleQuotes() {
-		List<String> statements = CqlScriptsParser
+		List<String> statements = CqlScriptParser
 				.getStatements("USE KEYSPACE \"test;\" DROP KEYSPACE 'test'");
 		assertThat(statements)
 				.containsExactly("USE KEYSPACE \"test;\" DROP KEYSPACE 'test'");
@@ -123,19 +123,19 @@ public class CqlScriptsParserTests {
 
 	@Test
 	public void blockCommentEmpty() {
-		List<String> statements = CqlScriptsParser.getStatements("/**/");
+		List<String> statements = CqlScriptParser.getStatements("/**/");
 		assertThat(statements).isEmpty();
 	}
 
 	@Test
 	public void singleDashCommentEmpty() {
-		List<String> statements = CqlScriptsParser.getStatements("//");
+		List<String> statements = CqlScriptParser.getStatements("//");
 		assertThat(statements).isEmpty();
 	}
 
 	@Test
 	public void singleSlashCommentEmpty() {
-		List<String> statements = CqlScriptsParser.getStatements("//");
+		List<String> statements = CqlScriptParser.getStatements("//");
 		assertThat(statements).isEmpty();
 	}
 

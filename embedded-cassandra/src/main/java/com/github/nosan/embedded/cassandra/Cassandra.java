@@ -24,6 +24,7 @@ import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import com.github.nosan.embedded.cassandra.process.CassandraExecutable;
 import com.github.nosan.embedded.cassandra.process.CassandraStarter;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
@@ -36,7 +37,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * 		Cassandra cassandra = new Cassandra();
  * 		try {
  * 			cassandra.start();
- * 			CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
+ * 			CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql"));
  * 			// test me
  *        }
  * 		finally {
@@ -49,7 +50,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * @see RuntimeConfigBuilder
  * @see ExecutableConfigBuilder
  * @see ClusterFactory
- * @see com.github.nosan.embedded.cassandra.cql.CqlScripts
+ * @see CqlScriptUtils
  */
 public class Cassandra {
 
