@@ -16,27 +16,26 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.util.Objects;
 
 /**
- * {@link CqlResource} implementation for {@link Path}.
+ * {@link CqlScript} implementation for {@link URL}.
  *
  * @author Dmytro Nosan
  */
-public class PathCqlResource extends AbstractCqlResource {
+public class UrlCqlScript extends AbstractCqlScript {
 
-	private final Path location;
+	private final URL location;
 
-	public PathCqlResource(Path location) {
+	public UrlCqlScript(URL location) {
 		this(location, null);
 	}
 
-	public PathCqlResource(Path location, Charset charset) {
+	public UrlCqlScript(URL location, Charset charset) {
 		super(charset);
 		this.location = Objects.requireNonNull(location, "Location must not be null");
 	}
@@ -47,7 +46,16 @@ public class PathCqlResource extends AbstractCqlResource {
 	}
 
 	@Override
-	public InputStream getInputStream() throws FileNotFoundException {
-		return new FileInputStream(this.location.toFile());
+	public InputStream getInputStream() throws IOException {
+		return this.location.openStream();
+	}
+
+	/**
+	 * Returns the underlying URL reference.
+	 *
+	 * @return URL location.
+	 */
+	public URL getLocation() {
+		return this.location;
 	}
 }

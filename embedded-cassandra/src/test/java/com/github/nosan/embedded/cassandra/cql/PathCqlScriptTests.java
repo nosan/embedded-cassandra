@@ -16,21 +16,24 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link StaticCqlResource}.
+ * Tests for {@link PathCqlScript}.
  *
  * @author Dmytro Nosan
  */
-public class StaticCqlResourceTests {
+public class PathCqlScriptTests {
 
 	@Test
-	public void getStatements() {
+	public void getStatements() throws URISyntaxException {
 		assertThat(
-				new StaticCqlResource("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )").getStatements())
+				new PathCqlScript(Paths.get(ClassLoader.getSystemResource("test.cql").toURI())).getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )");
 	}
 }

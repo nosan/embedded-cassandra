@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Dmytro Nosan
  */
-public abstract class CqlScriptsParser {
+public abstract class CqlScriptParser {
 
 	private static final char SINGLE_QUOTE = '\'';
 

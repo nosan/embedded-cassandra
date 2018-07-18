@@ -35,7 +35,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * public static CassandraRule cassandra = new CassandraRule();
  * &#64;Before
  * public void setUp() {
- * 		 CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
+ * 		 CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql"));
  * }
  * &#64;Test
  * public void select() {

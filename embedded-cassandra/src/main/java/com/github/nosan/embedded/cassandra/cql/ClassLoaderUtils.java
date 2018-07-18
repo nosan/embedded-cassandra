@@ -22,9 +22,16 @@ package com.github.nosan.embedded.cassandra.cql;
  *
  * @author Dmytro Nosan
  */
-abstract class ClassLoaderUtils {
+public abstract class ClassLoaderUtils {
 
-	static ClassLoader getClassLoader() {
+	/**
+	 * Return the default ClassLoader to use: typically the thread context
+	 * ClassLoader, if not available System ClassLoader will be returned.
+	 *
+	 * @return the default ClassLoader (only {@code null} if even the system
+	 * ClassLoader isn't accessible)
+	 */
+	public static ClassLoader getClassLoader() {
 		try {
 			ClassLoader cl = Thread.currentThread().getContextClassLoader();
 			if (cl != null) {

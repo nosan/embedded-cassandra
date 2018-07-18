@@ -17,7 +17,7 @@ public class CassandraTests {
 	@Before
 	public void setUp() throws Exception {
 		this.cassandra.start();
-		CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
+		CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql"));
 	}
 
 	@After

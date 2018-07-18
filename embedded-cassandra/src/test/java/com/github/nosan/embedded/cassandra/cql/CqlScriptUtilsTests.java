@@ -34,17 +34,17 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CqlScripts}.
+ * Tests for {@link CqlScriptUtils}.
  *
  * @author Dmytro Nosan
  */
-public class CqlScriptsTests {
+public class CqlScriptUtilsTests {
 
 	@Test
 	public void executeScripts() {
 		MockSession mockSession = new MockSession();
-		CqlScripts.executeScripts(mockSession, new ClassPathCqlResource("init.cql"),
-				new ClassPathCqlResource("test.cql"));
+		CqlScriptUtils.executeScripts(mockSession, new ClassPathCqlScript("init.cql"),
+				new ClassPathCqlScript("test.cql"));
 		assertThat(mockSession.queries).hasSize(3);
 		assertThat(mockSession.queries).containsExactly("CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION =" +
 						" { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }",

@@ -17,34 +17,32 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
-import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * CQL resource that abstracts from the actual type of underlying resource.
+ * {@link CqlScript} implementation for a given CQL statements.
  *
  * @author Dmytro Nosan
- * @see UrlCqlResource
- * @see ClassPathCqlResource
- * @see StaticCqlResource
- * @see FileCqlResource
- * @see PathCqlResource
- * @see InputStreamCqlResource
  */
-public interface CqlResource {
+public class StaticCqlScript implements CqlScript {
 
-	/**
-	 * Return a description for this resource.
-	 *
-	 * @return Description of the resource.
-	 */
-	String getName();
+	private final List<String> statements;
 
-	/**
-	 * Return a list of CQL statements.
-	 *
-	 * @return CQL statements.
-	 * @throws UncheckedIOException if an I/O error occurs
-	 */
-	Collection<String> getStatements();
+	public StaticCqlScript(String... statements) {
+		this.statements = new ArrayList<>(statements != null ? Arrays.asList(statements) : Collections.emptyList());
+	}
+
+	@Override
+	public String getName() {
+		return "Script: 'Static CQL Statements'";
+	}
+
+	@Override
+	public Collection<String> getStatements() {
+		return Collections.unmodifiableList(this.statements);
+	}
 }

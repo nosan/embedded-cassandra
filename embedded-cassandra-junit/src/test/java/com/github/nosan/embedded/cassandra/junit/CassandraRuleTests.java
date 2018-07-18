@@ -20,8 +20,8 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
-import com.github.nosan.embedded.cassandra.cql.CqlScripts;
+import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +37,7 @@ public class CassandraRuleTests {
 
 	@Before
 	public void setUp() {
-		CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
+		CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql"));
 	}
 
 	@Test

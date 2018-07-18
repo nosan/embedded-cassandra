@@ -21,23 +21,17 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ClassPathCqlResource}.
+ * Tests for {@link InputStreamCqlScript}.
  *
  * @author Dmytro Nosan
  */
-public class ClassPathCqlResourceTests {
+public class InputStreamCqlScriptTests {
+
 
 	@Test
-	public void systemResource() {
-		ClassPathCqlResource classPathCqlResource = new ClassPathCqlResource("test.cql");
-		assertThat(classPathCqlResource.getStatements())
+	public void getStatements() {
+		assertThat(
+				new InputStreamCqlScript(ClassLoader.getSystemResourceAsStream("test.cql")).getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )");
-	}
-
-	@Test
-	public void contextResource() {
-		ClassPathCqlResource classPathCqlResource = new ClassPathCqlResource("test.cql", getClass());
-		assertThat(classPathCqlResource.getStatements()).containsExactly("CREATE TABLE IF NOT EXISTS test.users ( id " +
-				"text PRIMARY KEY )");
 	}
 }

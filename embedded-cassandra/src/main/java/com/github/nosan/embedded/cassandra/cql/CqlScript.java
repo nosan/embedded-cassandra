@@ -14,24 +14,35 @@
  * limitations under the License.
  */
 
+
 package com.github.nosan.embedded.cassandra.cql;
 
-import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Collection;
 
 /**
- * Tests for {@link InputStreamCqlResource}.
+ * CQL Script that abstracts from the actual type of underlying resource.
  *
  * @author Dmytro Nosan
+ * @see UrlCqlScript
+ * @see ClassPathCqlScript
+ * @see StaticCqlScript
+ * @see FileCqlScript
+ * @see PathCqlScript
+ * @see InputStreamCqlScript
  */
-public class InputStreamCqlResourceTests {
+public interface CqlScript {
 
+	/**
+	 * Return a description for this script.
+	 *
+	 * @return Description of the script.
+	 */
+	String getName();
 
-	@Test
-	public void getStatements() {
-		assertThat(
-				new InputStreamCqlResource(ClassLoader.getSystemResourceAsStream("test.cql")).getStatements())
-				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )");
-	}
+	/**
+	 * Return a list of CQL statements.
+	 *
+	 * @return CQL statements.
+	 */
+	Collection<String> getStatements();
 }

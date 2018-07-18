@@ -49,9 +49,9 @@ import org.springframework.util.StringUtils;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.ClusterFactory;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.cql.CqlResource;
-import com.github.nosan.embedded.cassandra.cql.CqlScripts;
-import com.github.nosan.embedded.cassandra.cql.UrlCqlResource;
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 
 /**
  * {@link Configuration Configuration} for {@link EmbeddedCassandra Embedded Cassandra}
@@ -156,7 +156,7 @@ public class EmbeddedCassandraConfiguration {
 		@Override
 		public void afterPropertiesSet() throws Exception {
 			this.cassandra.start();
-			CqlScripts.executeScripts(this.cassandra.getSession(), getCqlResources());
+			CqlScriptUtils.executeScripts(this.cassandra.getSession(), getCqlScripts());
 		}
 
 		@Override
@@ -180,8 +180,8 @@ public class EmbeddedCassandraConfiguration {
 		}
 
 
-		private CqlResource[] getCqlResources() throws IOException {
-			List<CqlResource> cqlResources = new ArrayList<>();
+		private CqlScript[] getCqlScripts() throws IOException {
+			List<CqlScript> cqlScripts = new ArrayList<>();
 			String[] scripts = StringUtils
 					.commaDelimitedListToStringArray(this.environment.getProperty("embedded-cassandra.scripts"));
 
@@ -193,12 +193,12 @@ public class EmbeddedCassandraConfiguration {
 					resources.addAll(Arrays.asList(this.applicationContext.getResources(script)));
 				}
 				for (Resource resource : resources) {
-					cqlResources.add(new UrlCqlResource(resource.getURL(), charset));
+					cqlScripts.add(new UrlCqlScript(resource.getURL(), charset));
 				}
 			}
 
 
-			return cqlResources.toArray(new CqlResource[0]);
+			return cqlScripts.toArray(new CqlScript[0]);
 		}
 
 	}

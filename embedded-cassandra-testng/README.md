@@ -9,7 +9,7 @@ public class CassandraTests extends AbstractCassandraTestNG {
 
 	@BeforeMethod
 	public void setUp() {
-		CqlScripts.executeScripts(getSession(), new ClassPathCqlResource("init.cql"));
+		CqlScriptUtils.executeScripts(getSession(), new ClassPathCqlScript("init.cql"));
 	}
 
 	@Test

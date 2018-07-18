@@ -19,8 +19,8 @@ package com.github.nosan.embedded.cassandra.testng;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
-import com.github.nosan.embedded.cassandra.cql.CqlScripts;
+import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +33,7 @@ public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
 
 	@BeforeMethod
 	public void setUp() {
-		CqlScripts.executeScripts(getSession(), new ClassPathCqlResource("init.cql"));
+		CqlScriptUtils.executeScripts(getSession(), new ClassPathCqlScript("init.cql"));
 	}
 
 	@Test

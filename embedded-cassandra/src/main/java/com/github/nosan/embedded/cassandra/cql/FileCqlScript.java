@@ -16,37 +16,48 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-
 /**
- * {@link CqlResource} implementation for {@link InputStream}.
+ * {@link CqlScript} implementation for {@link File}.
  *
  * @author Dmytro Nosan
  */
-public class InputStreamCqlResource extends AbstractCqlResource {
+public class FileCqlScript extends AbstractCqlScript {
 
-	private final InputStream location;
+	private final File location;
 
-	public InputStreamCqlResource(InputStream location) {
+	public FileCqlScript(File location) {
 		this(location, null);
 	}
 
-	public InputStreamCqlResource(InputStream location, Charset charset) {
+	public FileCqlScript(File location, Charset charset) {
 		super(charset);
 		this.location = Objects.requireNonNull(location, "Location must not be null");
 	}
 
 	@Override
-	protected InputStream getInputStream() throws IOException {
-		return this.location;
+	public String getName() {
+		return String.valueOf(this.location);
 	}
 
 	@Override
-	public String getName() {
-		return "InputStream CQL Statements";
+	public InputStream getInputStream() throws IOException {
+		return new FileInputStream(this.location);
+	}
+
+
+	/**
+	 * Returns the underlying File reference.
+	 *
+	 * @return File location.
+	 */
+	public File getLocation() {
+		return this.location;
 	}
 }
