@@ -35,7 +35,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
  * &#64;BeforeMethod
  * public void setUp() {
- * CqlScripts.executeScripts(getSession(), new ClassPathCqlResource("init.sql"));
+ * CqlScripts.executeScripts(getSession(), new ClassPathCqlResource("init.cql"));
  * }
  * &#64;Test
  * public void select() {

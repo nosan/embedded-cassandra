@@ -36,7 +36,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * 		Cassandra cassandra = new Cassandra();
  * 		try {
  * 			cassandra.start();
- * 			CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.sql"));
+ * 			CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
  * 			// test me
  *        }
  * 		finally {
