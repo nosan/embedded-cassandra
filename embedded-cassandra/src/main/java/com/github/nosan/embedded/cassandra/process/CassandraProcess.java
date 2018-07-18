@@ -35,7 +35,6 @@ import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.io.IStreamProcessor;
 import de.flapdoodle.embed.process.io.LogWatchStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
-import de.flapdoodle.embed.process.io.StreamToLineProcessor;
 import de.flapdoodle.embed.process.runtime.AbstractProcess;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import org.apache.commons.lang3.JavaVersion;
@@ -67,19 +66,23 @@ public final class CassandraProcess
 		super(distribution, config, runtimeConfig, executable);
 	}
 
-	@Override
-	protected void onBeforeProcess(IRuntimeConfig runtimeConfig) throws IOException {
-		this.runtimeConfig = runtimeConfig;
+	static List<ContextCustomizer> getCustomizers() {
+		List<ContextCustomizer> customizers = new ArrayList<>();
+		FileCustomizers fileCustomizers = new FileCustomizers();
+		if (SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_9)) {
+			fileCustomizers.addCustomizer(new Java9CompatibilityFileCustomizer());
+		}
+		fileCustomizers.addCustomizer(new NumaFileCustomizer());
+		fileCustomizers.addCustomizer(new JVMOptionsFileCustomizer());
+		fileCustomizers.addCustomizer(new ConfigFileCustomizer());
+		customizers.add(new RandomPortCustomizer());
+		customizers.add(fileCustomizers);
+		return customizers;
 	}
 
 	@Override
-	protected List<String> getCommandLine(Distribution distribution,
-			ExecutableConfig config, IExtractedFileSet fileSet) throws IOException {
-		this.context = new Context(distribution, this.runtimeConfig, config, fileSet);
-		for (ContextCustomizer customizer : getCustomizers()) {
-			customizer.customize(this.context);
-		}
-		return Arguments.get(this.context);
+	protected void onBeforeProcess(IRuntimeConfig runtimeConfig) throws IOException {
+		this.runtimeConfig = runtimeConfig;
 	}
 
 	@Override
@@ -97,15 +100,14 @@ public final class CassandraProcess
 		Config config = executableConfig.getConfig();
 		LogWatch logWatch = new LogWatch(config, processOutput.getOutput());
 
-		Processors.connect(process.getReader(), StreamToLineProcessor.wrap(logWatch));
-		Processors.connect(process.getError(),
-				StreamToLineProcessor.wrap(processOutput.getError()));
+		Processors.connect(process.getReader(), logWatch);
+		Processors.connect(process.getError(), processOutput.getError());
 
 		logWatch.waitForResult(executableConfig.getTimeout().toMillis());
 
 		if (!logWatch.isInitWithSuccess()) {
 			String msg = "Could not start a process.\nFailure:" + logWatch.getFailureFound() +
-					"\nOutput:\n--- START --- \n" + getLastLines(logWatch.getOutput(), 5) + "--- END --- ";
+					"\nOutput:\n--- START --- \n" + logWatch.getOutput() + "\n--- END --- ";
 			throw new IOException(msg);
 		}
 		checkTransport(config);
@@ -113,13 +115,14 @@ public final class CassandraProcess
 
 	}
 
-	private void checkTransport(Config config) throws IOException {
-		int maxAttempts = 5;
-		Duration sleep = Duration.ofSeconds(2);
-		if (ClientConnection.isEnabled(config) && !ClientConnection.isConnected(config, maxAttempts, sleep)) {
-			throw new IOException(
-					"Could not start a process. Something wrong with a client transport.");
+	@Override
+	protected List<String> getCommandLine(Distribution distribution,
+			ExecutableConfig config, IExtractedFileSet fileSet) throws IOException {
+		this.context = new Context(distribution, this.runtimeConfig, config, fileSet);
+		for (ContextCustomizer customizer : getCustomizers()) {
+			customizer.customize(this.context);
 		}
+		return Arguments.get(this.context);
 	}
 
 	@Override
@@ -133,31 +136,13 @@ public final class CassandraProcess
 
 	}
 
-	private static String getLastLines(String output, int l) {
-		String[] lines = output.split("\n");
-		if (lines.length <= l) {
-			return output;
+	private void checkTransport(Config config) throws IOException {
+		int maxAttempts = 5;
+		Duration sleep = Duration.ofSeconds(2);
+		if (ClientConnection.isEnabled(config) && !ClientConnection.isConnected(config, maxAttempts, sleep)) {
+			throw new IOException(
+					"Could not start a process. Something wrong with a client transport.");
 		}
-		StringBuilder result = new StringBuilder();
-		for (int i = 1; i <= l; i++) {
-			result.append(lines[lines.length - i]).append("\n");
-		}
-		return String.valueOf(result);
-
-	}
-
-	static List<ContextCustomizer> getCustomizers() {
-		List<ContextCustomizer> customizers = new ArrayList<>();
-		FileCustomizers fileCustomizers = new FileCustomizers();
-		if (SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_9)) {
-			fileCustomizers.addCustomizer(new Java9CompatibilityFileCustomizer());
-		}
-		fileCustomizers.addCustomizer(new NumaFileCustomizer());
-		fileCustomizers.addCustomizer(new JVMOptionsFileCustomizer());
-		fileCustomizers.addCustomizer(new ConfigFileCustomizer());
-		customizers.add(new RandomPortCustomizer());
-		customizers.add(fileCustomizers);
-		return customizers;
 	}
 
 	/**
@@ -165,8 +150,11 @@ public final class CassandraProcess
 	 */
 	static final class LogWatch extends LogWatchStreamProcessor {
 
-		LogWatch(Config config, IStreamProcessor output) {
-			super(getSuccess(config), getFailures(), output);
+		private final IStreamProcessor delegate;
+
+		LogWatch(Config config, IStreamProcessor delegate) {
+			super(getSuccess(config), getFailures(), delegate);
+			this.delegate = delegate;
 		}
 
 		private static String getSuccess(Config config) {
@@ -190,6 +178,21 @@ public final class CassandraProcess
 					"Cassandra 3.0 and later require Java"));
 		}
 
+		@Override
+		public void process(String block) {
+			if (isInitWithSuccess() || getFailureFound() != null) {
+				this.delegate.process(block);
+			}
+			else {
+				super.process(block);
+			}
+		}
+
+		@Override
+		public void onProcessed() {
+			super.onProcessed();
+			this.delegate.onProcessed();
+		}
 	}
 
 	/**
@@ -256,8 +259,7 @@ public final class CassandraProcess
 		private static void killProcess(Context context, long pid) {
 			IRuntimeConfig runtimeConfig = context.getRuntimeConfig();
 			ExecutableConfig executableConfig = context.getExecutableConfig();
-			IStreamProcessor output = StreamToLineProcessor
-					.wrap(runtimeConfig.getProcessOutput().getCommands());
+			IStreamProcessor output = runtimeConfig.getProcessOutput().getCommands();
 			ProcessControl.executeCommandLine(executableConfig.supportConfig(),
 					"[kill process]",
 					new ProcessConfig(Arrays.asList("kill", "-9", "" + pid), output));
@@ -266,10 +268,9 @@ public final class CassandraProcess
 		private static void taskKill(Context context, long pid) {
 			IRuntimeConfig runtimeConfig = context.getRuntimeConfig();
 			ExecutableConfig executableConfig = context.getExecutableConfig();
-			IStreamProcessor output = StreamToLineProcessor
-					.wrap(runtimeConfig.getProcessOutput().getCommands());
+			IStreamProcessor output = runtimeConfig.getProcessOutput().getCommands();
 			ProcessControl.executeCommandLine(executableConfig.supportConfig(),
-					"[taskkill" + " process]",
+					"[taskkill process]",
 					new ProcessConfig(
 							Arrays.asList("taskkill", "/F", "/T", "/pid", "" + pid),
 							output));

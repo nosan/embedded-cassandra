@@ -23,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.ClusterFactory;
-import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
@@ -37,7 +36,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * public static CassandraExtension cassandra = new CassandraExtension();
  * &#64;BeforeEach
  * public void setUp() {
- * 		    cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+ * 		CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
  * }
  * &#64;Test
  * public void select() {
@@ -52,7 +51,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * @see ExecutableConfigBuilder
  * @see Cassandra
  */
-public class CassandraExtension extends EmbeddedCassandra
+public class CassandraExtension extends Cassandra
 		implements BeforeAllCallback, AfterAllCallback {
 
 	public CassandraExtension(IRuntimeConfig runtimeConfig,

@@ -12,12 +12,12 @@ Following code creates `Embedded Cassandra` with the default configuration.
 
 public class CassandraTests {
 
-	private final EmbeddedCassandra cassandra = new EmbeddedCassandra();
+	private final Cassandra cassandra = new Cassandra();
 
 	@Before
 	public void setUp() throws Exception {
 		this.cassandra.start();
-		this.cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+		CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
 	}
 
 	@After
@@ -28,7 +28,7 @@ public class CassandraTests {
 
 	@Test
 	public void test() throws IOException {
-		assertThat(this.cassandra.getSession().execute("SELECT * FROM  test.roles").wasApplied())
+		assertThat(this.cassandra.getSession().execute("query").wasApplied())
 				.isTrue();
 	}
 }
@@ -44,9 +44,21 @@ It is possible to use a custom configuration via `constructor`.
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra</artifactId>
-        <version>${version}</version>
+        <version>${embedded-cassandra.version}</version>
         <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>${snakeyaml.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.datastax.cassandra</groupId>
+        <artifactId>cassandra-driver-core</artifactId>
+        <version>${cassandra-driver-core.version}</version>
+        <scope>test</scope>
+    </dependency>    
 </dependencies>
 ```
 

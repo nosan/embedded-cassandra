@@ -96,17 +96,6 @@ public final class ExecutableConfig implements IExecutableProcessConfig {
 	}
 
 	/**
-	 * Retrieves support config.
-	 *
-	 * @return {@link ISupportConfig Support Config}
-	 * @see SupportConfig
-	 */
-	@Override
-	public ISupportConfig supportConfig() {
-		return SUPPORT_CONFIG;
-	}
-
-	/**
 	 * Retrieves executable version.
 	 *
 	 * @return {@link ExecutableVersion Executable Version}
@@ -115,6 +104,17 @@ public final class ExecutableConfig implements IExecutableProcessConfig {
 	@Override
 	public IVersion version() {
 		return new ExecutableVersion(this.version);
+	}
+
+	/**
+	 * Retrieves support config.
+	 *
+	 * @return {@link ISupportConfig Support Config}
+	 * @see SupportConfig
+	 */
+	@Override
+	public ISupportConfig supportConfig() {
+		return SUPPORT_CONFIG;
 	}
 
 }

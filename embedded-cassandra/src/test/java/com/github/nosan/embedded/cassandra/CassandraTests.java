@@ -18,10 +18,12 @@ package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
 
-import com.datastax.driver.core.Cluster;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
+import com.github.nosan.embedded.cassandra.cql.CqlScripts;
 
 /**
  * Tests for {@link Cassandra}.
@@ -33,21 +35,21 @@ public class CassandraTests {
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
-	private static Cluster cluster(Config config) {
-		return Cluster.builder().addContactPoint(config.getRpcAddress())
-				.withPort(config.getNativeTransportPort()).build();
+	private static void start(Cassandra cassandra, Callback callback) throws Exception {
+		try {
+			cassandra.start();
+			callback.run();
+		}
+		finally {
+			cassandra.stop();
+		}
 	}
 
 	@Test
 	public void shouldStartCassandraUsingDefaultConfiguration() throws Exception {
 		Cassandra cassandra = new Cassandra();
 		start(cassandra, () -> {
-			ExecutableConfig cassandraConfig = cassandra.getExecutableConfig();
-			Config config = cassandraConfig.getConfig();
-			try (Cluster cluster = cluster(config)) {
-				cluster.connect().execute("CREATE KEYSPACE IF NOT EXISTS test  WITH "
-						+ "REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };");
-			}
+			CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
 		});
 	}
 
@@ -67,16 +69,6 @@ public class CassandraTests {
 		});
 		start(cassandra, () -> {
 		});
-	}
-
-	private static void start(Cassandra cassandra, Callback callback) throws Exception {
-		try {
-			cassandra.start();
-			callback.run();
-		}
-		finally {
-			cassandra.stop();
-		}
 	}
 
 	interface Callback {

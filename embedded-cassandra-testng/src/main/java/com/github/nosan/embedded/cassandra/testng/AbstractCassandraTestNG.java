@@ -24,7 +24,6 @@ import org.testng.annotations.BeforeClass;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.ClusterFactory;
-import com.github.nosan.embedded.cassandra.EmbeddedCassandra;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
@@ -36,7 +35,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
  * &#64;BeforeMethod
  * public void setUp() {
- * 		    executeScripts(new ClassPathCqlResource("init.cql"));
+ * CqlScripts.executeScripts(getSession(), new ClassPathCqlResource("init.cql"));
  * }
  * &#64;Test
  * public void select() {
@@ -51,7 +50,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * @see ExecutableConfigBuilder
  * @see Cassandra
  */
-public abstract class AbstractCassandraTestNG extends EmbeddedCassandra {
+public abstract class AbstractCassandraTestNG extends Cassandra {
 	public AbstractCassandraTestNG(IRuntimeConfig runtimeConfig,
 			ExecutableConfig executableConfig,
 			ClusterFactory clusterFactory) {

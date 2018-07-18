@@ -21,6 +21,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.cql.ClassPathCqlResource;
+import com.github.nosan.embedded.cassandra.cql.CqlScripts;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +37,7 @@ public class CassandraRuleTests {
 
 	@Before
 	public void setUp() {
-		cassandra.executeScripts(new ClassPathCqlResource("init.cql"));
+		CqlScripts.executeScripts(cassandra.getSession(), new ClassPathCqlResource("init.cql"));
 	}
 
 	@Test

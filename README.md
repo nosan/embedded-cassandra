@@ -21,10 +21,11 @@ This project uses [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.
  - Experimentally supports `java 9` and `java 10` (only for `unix-like`).
 
 ## See More
- - [Embedded Cassandra](embedded-cassandra/README.md)
+ - [Embedded Cassandra](embedded-cassandra)
  - [Embedded Cassandra JUnit](embedded-cassandra-junit)
  - [Embedded Cassandra JUnit5](embedded-cassandra-jupiter)
  - [Embedded Cassandra TestNG](embedded-cassandra-testng)
+ - [Embedded Cassandra Spring](embedded-cassandra-spring)
 
 
 

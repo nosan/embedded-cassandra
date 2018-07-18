@@ -374,6 +374,14 @@ public class Config {
 
 	private transient JvmOptions jvm_options = new JvmOptions();
 
+	private static ParameterizedClass createSeedProvider() {
+		ParameterizedClass parameterizedClass = new ParameterizedClass();
+		parameterizedClass
+				.setClassName("org.apache.cassandra.locator.SimpleSeedProvider");
+		parameterizedClass.getParameters().put("seeds", "localhost");
+		return parameterizedClass;
+	}
+
 	public int getJmxPort() {
 		return this.jmx_port;
 	}
@@ -1771,14 +1779,6 @@ public class Config {
 
 	public void setThriftMaxMessageLengthInMb(Integer thriftMaxMessageLengthInMb) {
 		this.thrift_max_message_length_in_mb = thriftMaxMessageLengthInMb;
-	}
-
-	private static ParameterizedClass createSeedProvider() {
-		ParameterizedClass parameterizedClass = new ParameterizedClass();
-		parameterizedClass
-				.setClassName("org.apache.cassandra.locator.SimpleSeedProvider");
-		parameterizedClass.getParameters().put("seeds", "localhost");
-		return parameterizedClass;
 	}
 
 	/**

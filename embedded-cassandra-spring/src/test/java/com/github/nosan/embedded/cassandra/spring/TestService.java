@@ -14,22 +14,31 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.cql;
+package com.github.nosan.embedded.cassandra.spring;
+
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
- * Strategy interface for loading resources (e.g. class path or file system
- * resources).
+ * todo leave javadoc here.
  *
  * @author Dmytro Nosan
- * @see CqlResource
  */
-public interface CqlResourceLoader {
+@Service
+class TestService {
 
-	/**
-	 * Load a Resource handle for the specified resource location.
-	 *
-	 * @param location the resource location
-	 * @return {@link CqlResource} resource.
-	 */
-	CqlResource load(String location);
+	@Autowired
+	private Cluster cluster;
+
+	boolean createKeyspace(String keyspace) {
+		try (Session connect = this.cluster.connect()) {
+			return connect.execute(String.format(""
+					+ "CREATE KEYSPACE  %s  WITH REPLICATION = { 'class' : 'SimpleStrategy', "
+					+ "'replication_factor' : 1 };", keyspace)).wasApplied();
+		}
+
+	}
+
 }

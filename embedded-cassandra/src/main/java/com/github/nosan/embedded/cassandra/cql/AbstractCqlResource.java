@@ -45,6 +45,14 @@ public abstract class AbstractCqlResource implements CqlResource {
 		this.charset = (charset != null ? charset : Charset.defaultCharset());
 	}
 
+	private static String readAll(InputStream resource, Charset charset) throws IOException {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource, charset))) {
+			return reader
+					.lines()
+					.collect(Collectors.joining(System.lineSeparator()));
+		}
+	}
+
 	@Override
 	public List<String> getStatements() {
 		try {
@@ -52,14 +60,6 @@ public abstract class AbstractCqlResource implements CqlResource {
 		}
 		catch (IOException e) {
 			throw new UncheckedIOException(e);
-		}
-	}
-
-	private static String readAll(InputStream resource, Charset charset) throws IOException {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource, charset))) {
-			return reader
-					.lines()
-					.collect(Collectors.joining(System.lineSeparator()));
 		}
 	}
 

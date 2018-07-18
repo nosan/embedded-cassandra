@@ -49,7 +49,7 @@ public class RuntimeConfigBuilderTests {
 	public void defaults() throws Exception {
 		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder().build();
 
-		assertThat(runtimeConfig.isDaemonProcess()).isFalse();
+		assertThat(runtimeConfig.isDaemonProcess()).isTrue();
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
 
@@ -70,7 +70,7 @@ public class RuntimeConfigBuilderTests {
 
 		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder(log).build();
 
-		assertThat(runtimeConfig.isDaemonProcess()).isFalse();
+		assertThat(runtimeConfig.isDaemonProcess()).isTrue();
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
 

@@ -40,15 +40,33 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  */
 public class CassandraStarterTests {
 
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-
 	private static final Logger log = LoggerFactory
 			.getLogger(CassandraStarterTests.class);
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 	private static Cluster cluster(Config config) {
 		return Cluster.builder().addContactPoint(config.getRpcAddress())
 				.withPort(config.getNativeTransportPort()).build();
+	}
+
+	private static void start(ExecutableConfig executableConfig) throws Exception {
+		start(executableConfig, () -> {
+		});
+	}
+
+	private static void start(ExecutableConfig executableConfig, Callback callback)
+			throws Exception {
+		CassandraExecutable executable = new CassandraStarter(
+				new RuntimeConfigBuilder(log).build()).prepare(executableConfig);
+		try {
+			executable.start();
+			callback.run();
+		}
+		finally {
+			executable.stop();
+		}
 	}
 
 	@Test
@@ -120,24 +138,6 @@ public class CassandraStarterTests {
 				() -> new Socket(executableConfig.getConfig().getRpcAddress(),
 						executableConfig.getConfig().getRpcPort()));
 
-	}
-
-	private static void start(ExecutableConfig executableConfig) throws Exception {
-		start(executableConfig, () -> {
-		});
-	}
-
-	private static void start(ExecutableConfig executableConfig, Callback callback)
-			throws Exception {
-		CassandraExecutable executable = new CassandraStarter(
-				new RuntimeConfigBuilder(log).build()).prepare(executableConfig);
-		try {
-			executable.start();
-			callback.run();
-		}
-		finally {
-			executable.stop();
-		}
 	}
 
 	interface Callback {
