@@ -26,14 +26,15 @@ public class CassandraTests {
 
 	@Test
 	public void test() throws IOException {
-		assertThat(this.cassandra.getSession().execute("query").wasApplied())
+		assertThat(this.cassandra.getSession().execute(...).wasApplied())
 				.isTrue();
 	}
 }
 
 ```
 
-It is possible to use a custom configuration via `constructor`.
+TIP: `Embedded Cassandra` will be started on the random ports. `Embedded Cassandra` configuration could be overriden via `constructor`.
+
 
 == Maven
 

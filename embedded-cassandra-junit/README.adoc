@@ -17,15 +17,14 @@ public class CassandraTests {
 
 	@Test
 	public void select() {
-		assertThat(cassandra.getSession().execute("query").wasApplied())
+		assertThat(cassandra.getSession().execute(...).wasApplied())
 				.isTrue();
 	}
 
 }
 ```
 
-By default `Embedded Cassandra` will be started on the random ports.
-`Embedded Cassandra` configuration could be overriden via `constructor`.
+TIP: `Embedded Cassandra` will be started on the random ports. `Embedded Cassandra` configuration could be overriden via `constructor`.
 
 
 

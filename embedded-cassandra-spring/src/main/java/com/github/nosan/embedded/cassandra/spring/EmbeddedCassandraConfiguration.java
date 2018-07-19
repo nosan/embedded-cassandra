@@ -42,6 +42,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -51,6 +52,7 @@ import com.github.nosan.embedded.cassandra.ClusterFactory;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
 import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 
 /**
@@ -62,7 +64,7 @@ import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
  */
 @Configuration
 @Order
-public class EmbeddedCassandraConfiguration {
+class EmbeddedCassandraConfiguration {
 
 	private static final String DEFAULT_BEAN_NAME = "cluster";
 
@@ -182,22 +184,26 @@ public class EmbeddedCassandraConfiguration {
 
 		private CqlScript[] getCqlScripts() throws IOException {
 			List<CqlScript> cqlScripts = new ArrayList<>();
-			String[] scripts = StringUtils
-					.commaDelimitedListToStringArray(this.environment.getProperty("embedded-cassandra.scripts"));
-
+			Environment env = this.environment;
+			String[] scripts =
+					env.getProperty("com.github.nosan.embedded-cassandra.scripts", String[].class, new String[0]);
+			String[] statements =
+					env.getProperty("com.github.nosan.embedded-cassandra.statements", String[].class, new String[0]);
+			Class<?> testClass = env.getProperty("com.github.nosan.embedded-cassandra.test-class", Class.class);
 			if (!ObjectUtils.isEmpty(scripts)) {
-				String encoding = this.environment.getProperty("embedded-cassandra.encoding");
+				String encoding = env.getProperty("com.github.nosan.embedded-cassandra.encoding");
 				Charset charset = (!StringUtils.hasText(encoding) ? null : Charset.forName(encoding));
 				List<Resource> resources = new ArrayList<>();
-				for (String script : scripts) {
+				for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
 					resources.addAll(Arrays.asList(this.applicationContext.getResources(script)));
 				}
 				for (Resource resource : resources) {
 					cqlScripts.add(new UrlCqlScript(resource.getURL(), charset));
 				}
 			}
-
-
+			if (!ObjectUtils.isEmpty(statements)) {
+				cqlScripts.add(new StaticCqlScript(statements));
+			}
 			return cqlScripts.toArray(new CqlScript[0]);
 		}
 

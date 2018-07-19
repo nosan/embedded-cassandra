@@ -39,7 +39,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  * }
  * &#64;Test
  * public void select() {
- * assertThat(cassandra.getSession().execute("query").wasApplied())
+ * assertThat(cassandra.getSession().execute(...).wasApplied())
  * .isTrue();
  * }
  * }
