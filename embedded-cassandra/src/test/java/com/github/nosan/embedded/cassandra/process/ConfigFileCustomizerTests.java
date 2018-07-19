@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class ConfigFileCustomizerTests extends AbstractFileCustomizerSupport {
+public class ConfigFileCustomizerTests extends AbstractFileCustomizerTests {
 
 	private final ConfigFileCustomizer customizer = new ConfigFileCustomizer();
 

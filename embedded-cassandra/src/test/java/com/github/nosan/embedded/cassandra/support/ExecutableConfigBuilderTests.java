@@ -16,12 +16,17 @@
 
 package com.github.nosan.embedded.cassandra.support;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Duration;
 
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.Config;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.JvmOptions;
 import com.github.nosan.embedded.cassandra.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,14 +48,20 @@ public class ExecutableConfigBuilderTests {
 	}
 
 	@Test
-	public void build() {
+	public void build() throws URISyntaxException, MalformedURLException {
 		Config config = new Config();
+		JvmOptions jvmOptions = new JvmOptions();
+		URL logback = new URI("http://localhost:8080").toURL();
 		ExecutableConfig executableConfig = new ExecutableConfigBuilder()
 				.version(Version.LATEST).timeout(Duration.ofMinutes(15)).config(config)
+				.jvmOptions(jvmOptions)
+				.logback(logback)
 				.build();
 		assertThat(executableConfig.getConfig()).isEqualTo(config);
 		assertThat(executableConfig.getTimeout()).isEqualTo(Duration.ofMinutes(15));
 		assertThat(executableConfig.getVersion()).isEqualTo(Version.LATEST);
+		assertThat(executableConfig.getLogback()).isEqualTo(logback);
+		assertThat(executableConfig.getJvmOptions()).isEqualTo(jvmOptions);
 	}
 
 }

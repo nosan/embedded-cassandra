@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.process;
 
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.Config;
 import com.github.nosan.embedded.cassandra.JvmOptions;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class JVMOptionsFileCustomizerTests extends AbstractFileCustomizerSupport {
+public class JVMOptionsFileCustomizerTests extends AbstractFileCustomizerTests {
 
 	private final TestContext context = new TestContext();
 
@@ -36,11 +35,9 @@ public class JVMOptionsFileCustomizerTests extends AbstractFileCustomizerSupport
 
 	@Test
 	public void customizeAppend() throws Exception {
-		Config config = new Config();
-		config.setJvmOptions(new JvmOptions(JvmOptions.Mode.ADD,
-				"-Dcassandra.local.port=555", "-Dcassandra.remote.port=444"));
 		withFile("jvm.options").from(classpath("jvm.options")).accept((file) -> {
-			this.customizer.process(file, this.context.withConfig(config));
+			this.customizer.process(file, this.context.withJvmOptions(new JvmOptions(JvmOptions.Mode.ADD,
+					"-Dcassandra.local.port=555", "-Dcassandra.remote.port=444")));
 			assertThat(file).hasSameContentAs(
 					classpath("customizers/jvm_options/jvm_append.options"));
 		});
@@ -48,11 +45,9 @@ public class JVMOptionsFileCustomizerTests extends AbstractFileCustomizerSupport
 
 	@Test
 	public void customizeOverride() throws Exception {
-		Config config = new Config();
-		config.setJvmOptions(new JvmOptions(JvmOptions.Mode.REPLACE,
-				"-Dcassandra.local.port=555", "-Dcassandra.remote.port=444"));
 		withFile("jvm.options").from(classpath("jvm.options")).accept((file) -> {
-			this.customizer.process(file, this.context.withConfig(config));
+			this.customizer.process(file, this.context.withJvmOptions(new JvmOptions(JvmOptions.Mode.REPLACE,
+					"-Dcassandra.local.port=555", "-Dcassandra.remote.port=444")));
 			assertThat(file).hasSameContentAs(
 					classpath("customizers/jvm_options/jvm_replace.options"));
 		});

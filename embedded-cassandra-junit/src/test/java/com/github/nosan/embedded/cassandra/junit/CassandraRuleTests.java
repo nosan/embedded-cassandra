@@ -20,8 +20,10 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import com.github.nosan.embedded.cassandra.JvmOptions;
 import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CassandraRuleTests {
 
 	@ClassRule
-	public static CassandraRule cassandra = new CassandraRule();
+	public static CassandraRule cassandra =
+			new CassandraRule(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256")).build());
 
 	@Before
 	public void setUp() {

@@ -32,16 +32,6 @@ import com.github.nosan.embedded.cassandra.ExecutableConfig;
  */
 class RandomPortCustomizer implements ContextCustomizer {
 
-	private static Iterator<Integer> ports() {
-		try {
-			int[] ports = Network.getFreeServerPorts(Network.getLocalHost(), 6);
-			return Arrays.stream(ports).iterator();
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException(ex);
-		}
-	}
-
 	@Override
 	public void customize(Context context) {
 		ExecutableConfig executableConfig = context.getExecutableConfig();
@@ -65,6 +55,16 @@ class RandomPortCustomizer implements ContextCustomizer {
 		if (config.getNativeTransportPortSsl() != null
 				&& config.getNativeTransportPortSsl() == 0) {
 			config.setNativeTransportPortSsl(ports.next());
+		}
+	}
+
+	private static Iterator<Integer> ports() {
+		try {
+			int[] ports = Network.getFreeServerPorts(Network.getLocalHost(), 6);
+			return Arrays.stream(ports).iterator();
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 

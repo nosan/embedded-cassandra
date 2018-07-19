@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = TestConfiguration.class)
 @EmbeddedCassandra(scripts = "/keyspace.cql", statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
 		"  KEY );")
 public class EmbeddedCassandraConfigurationStatementsTests {

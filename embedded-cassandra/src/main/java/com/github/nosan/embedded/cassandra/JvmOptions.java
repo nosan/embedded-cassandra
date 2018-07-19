@@ -38,6 +38,11 @@ public final class JvmOptions {
 		this.mode = Objects.requireNonNull(mode, "Mode must not be null");
 	}
 
+	public JvmOptions(String... options) {
+		this(Mode.ADD, options);
+	}
+
+
 	public JvmOptions() {
 		this(Mode.ADD);
 	}
@@ -60,6 +65,11 @@ public final class JvmOptions {
 		return this.mode;
 	}
 
+	@Override
+	public String toString() {
+		return "mode = " + getMode() + " , options = " + getOptions();
+	}
+
 	/**
 	 * Mode how to work with jvm.options file.
 	 *
@@ -77,5 +87,4 @@ public final class JvmOptions {
 		ADD
 
 	}
-
 }

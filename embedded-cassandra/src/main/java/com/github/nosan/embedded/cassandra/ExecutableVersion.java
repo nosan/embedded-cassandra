@@ -44,7 +44,7 @@ public final class ExecutableVersion implements IVersion {
 
 	@Override
 	public String toString() {
-		return this.version.toString();
+		return getVersion().toString();
 	}
 
 }

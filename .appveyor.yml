@@ -14,8 +14,10 @@ environment:
     JAVA_HOME: C:\Program Files (x86)\Java\jdk1.8.0
 
 install:
-  - cmd: echo %JAVA_HOME%
+  - cmd: echo JAVA_HOME = %JAVA_HOME%
+  - cmd: echo PATH = %PATH%
 
 build_script:
   - mvnw.cmd -B -e clean test -Djna.nosys=true
+
 

@@ -29,20 +29,20 @@ import com.github.nosan.embedded.cassandra.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraProcess#getCustomizers()}.
+ * Tests for {@link CassandraProcess.CustomizerUtils}.
  *
  * @author Dmytro Nosan
  */
-public class Java9CassandraProcessCustomizerTests {
+public class CassandraProcessCustomizerUtilsTests {
 
 	@ClassRule
 	public static JavaVersionRule javaVersionRule = new JavaVersionRule(
-			JavaVersion.JAVA_9, true);
+			JavaVersion.JAVA_1_8, false);
 
 	@Test
 	public void getDefaultCustomizers()
 			throws NoSuchFieldException, IllegalAccessException {
-		List<ContextCustomizer> customizers = CassandraProcess.getCustomizers();
+		List<ContextCustomizer> customizers = CassandraProcess.CustomizerUtils.getCustomizers();
 		assertThat(customizers).hasSize(2);
 		ContextCustomizer fileCustomizers = customizers.get(1);
 		assertThat(fileCustomizers).isInstanceOf(FileCustomizers.class);

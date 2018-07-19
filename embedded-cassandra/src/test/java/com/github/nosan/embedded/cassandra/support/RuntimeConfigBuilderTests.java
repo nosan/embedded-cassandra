@@ -49,7 +49,7 @@ public class RuntimeConfigBuilderTests {
 	public void defaults() throws Exception {
 		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder().build();
 
-		assertThat(runtimeConfig.isDaemonProcess()).isTrue();
+		assertThat(runtimeConfig.isDaemonProcess()).isFalse();
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
 
@@ -70,14 +70,14 @@ public class RuntimeConfigBuilderTests {
 
 		IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder(log).build();
 
-		assertThat(runtimeConfig.isDaemonProcess()).isTrue();
+		assertThat(runtimeConfig.isDaemonProcess()).isFalse();
 		assertThat(runtimeConfig.getCommandLinePostProcessor())
 				.isInstanceOf(ICommandLinePostProcessor.Noop.class);
 
 		ProcessOutput processOutput = runtimeConfig.getProcessOutput();
 		assertLoggerOutputs(processOutput.getOutput(), Slf4jLevel.INFO);
 		assertLoggerOutputs(processOutput.getError(), Slf4jLevel.ERROR);
-		assertLoggerOutputs(processOutput.getCommands(), Slf4jLevel.DEBUG);
+		assertLoggerOutputs(processOutput.getCommands(), Slf4jLevel.INFO);
 
 		IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
 

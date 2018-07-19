@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.net.URL;
 import java.time.Duration;
 import java.util.Objects;
 
@@ -38,6 +39,48 @@ public final class ExecutableConfig implements IExecutableProcessConfig {
 	private Version version = Version.LATEST;
 
 	private Duration timeout = Duration.ofMinutes(1);
+
+	private URL logback = ClassLoader.getSystemResource("embedded/cassandra/logback.xml");
+
+	private JvmOptions jvmOptions = new JvmOptions();
+
+
+	/**
+	 * Retrieves cassandra's JVM options.
+	 *
+	 * @return JVM options.
+	 */
+	public JvmOptions getJvmOptions() {
+		return this.jvmOptions;
+	}
+
+
+	/**
+	 * Sets JVM Options.
+	 *
+	 * @param jvmOptions {@link JvmOptions JvmOptions} to use.
+	 */
+	public void setJvmOptions(JvmOptions jvmOptions) {
+		this.jvmOptions = Objects.requireNonNull(jvmOptions, "JVM Options must not be null");
+	}
+
+	/**
+	 * Retrieves cassandra's logback.xml file.
+	 *
+	 * @return logback configuration file URL.
+	 */
+	public URL getLogback() {
+		return this.logback;
+	}
+
+	/**
+	 * Sets logback configuration file.
+	 *
+	 * @param logback logback configuration file.
+	 */
+	public void setLogback(URL logback) {
+		this.logback = Objects.requireNonNull(logback, "Logback location must not be null");
+	}
 
 	/**
 	 * Retrieves cassandra's startup timeout.
@@ -103,7 +146,7 @@ public final class ExecutableConfig implements IExecutableProcessConfig {
 	 */
 	@Override
 	public IVersion version() {
-		return new ExecutableVersion(this.version);
+		return new ExecutableVersion(getVersion());
 	}
 
 	/**

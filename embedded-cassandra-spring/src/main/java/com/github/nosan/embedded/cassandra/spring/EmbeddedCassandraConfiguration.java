@@ -24,6 +24,8 @@ import java.util.List;
 
 import com.datastax.driver.core.Cluster;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -68,6 +70,9 @@ class EmbeddedCassandraConfiguration {
 
 	private static final String DEFAULT_BEAN_NAME = "cluster";
 
+	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraConfiguration.class);
+
+
 	@Bean
 	public static EmbeddedClusterBeanFactoryPostProcessor embeddedClusterBeanFactoryPostProcessor() {
 		return new EmbeddedClusterBeanFactoryPostProcessor();
@@ -93,7 +98,12 @@ class EmbeddedCassandraConfiguration {
 		private void process(BeanDefinitionRegistry registry,
 				ConfigurableListableBeanFactory beanFactory) {
 			BeanDefinitionHolder holder = getClusterBeanDefinition(beanFactory);
-			registry.removeBeanDefinition(holder.getBeanName());
+			if (registry.containsBeanDefinition(holder.getBeanName())) {
+				boolean primary = holder.getBeanDefinition().isPrimary();
+				log.info("Replacing '{}' Cluster bean with " + (primary ? "primary " : "") + "embedded version",
+						holder.getBeanName());
+				registry.removeBeanDefinition(holder.getBeanName());
+			}
 			registry.registerBeanDefinition(holder.getBeanName(),
 					holder.getBeanDefinition());
 		}

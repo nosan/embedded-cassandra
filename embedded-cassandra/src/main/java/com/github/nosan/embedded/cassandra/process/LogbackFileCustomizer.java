@@ -16,52 +16,34 @@
 
 package com.github.nosan.embedded.cassandra.process;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
-import com.github.nosan.embedded.cassandra.JvmOptions;
 
 /**
- * JVM options {@link FileCustomizer File Customizer}. JVM Options will be added at the
- * end of file.
+ * {@link FileCustomizer} to override {@code logback.xml} file.
  *
  * @author Dmytro Nosan
  */
-class JVMOptionsFileCustomizer extends AbstractFileCustomizer {
+class LogbackFileCustomizer extends AbstractFileCustomizer {
 
 	@Override
 	protected boolean isMatch(File file, Context context) {
-		return file.getName().equals("jvm.options");
+		return file.getName().equalsIgnoreCase("logback.xml");
 	}
 
 	@Override
 	protected void process(File file, Context context) throws IOException {
-		JvmOptions options = getJvmOptions(context);
-		if (options != null) {
-			writeOptions(file, options);
-		}
-	}
-
-	private void writeOptions(File file, JvmOptions options) throws IOException {
-		try (PrintWriter fileWriter = new PrintWriter(
-				new FileWriter(file, isAppend(options)))) {
-			for (String line : options.getOptions()) {
-				fileWriter.println(line);
-			}
-		}
-	}
-
-	private boolean isAppend(JvmOptions options) {
-		return options.getMode() == JvmOptions.Mode.ADD;
-	}
-
-	private JvmOptions getJvmOptions(Context context) {
 		ExecutableConfig executableConfig = context.getExecutableConfig();
-		return executableConfig.getJvmOptions();
-
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(executableConfig.getLogback().openStream()));
+				PrintWriter printWriter = new PrintWriter(new FileWriter(file))) {
+			reader.lines().forEach(printWriter::println);
+		}
 	}
-
 }

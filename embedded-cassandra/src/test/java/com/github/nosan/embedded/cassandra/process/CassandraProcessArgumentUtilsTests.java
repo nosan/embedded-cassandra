@@ -23,17 +23,17 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraProcess.Arguments}.
+ * Tests for {@link CassandraProcess.ArgumentUtils}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraProcessArgumentsTests {
+public class CassandraProcessArgumentUtilsTests {
 
 	@Test
 	public void unixLikeArguments() {
 		TestContext context = new TestContext().withPlatform(Platform.Linux);
 		IExtractedFileSet fileSet = context.getExtractedFileSet();
-		assertThat(CassandraProcess.Arguments.get(context)).containsExactly(
+		assertThat(CassandraProcess.ArgumentUtils.get(context)).containsExactly(
 				fileSet.executable().getAbsolutePath(), "-f",
 				"-Dcassandra.jmx.local.port=0");
 
@@ -43,7 +43,7 @@ public class CassandraProcessArgumentsTests {
 	public void windowsArguments() {
 		TestContext context = new TestContext().withPlatform(Platform.Windows);
 		IExtractedFileSet fileSet = context.getExtractedFileSet();
-		assertThat(CassandraProcess.Arguments.get(context)).containsExactly("powershell",
+		assertThat(CassandraProcess.ArgumentUtils.get(context)).containsExactly("powershell",
 				"-ExecutionPolicy", "Unrestricted",
 				fileSet.executable().getAbsolutePath(), "-f",
 				"`-Dcassandra.jmx.local.port=0");

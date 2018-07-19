@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class Java9CompatibilityFileCustomizerTests extends AbstractFileCustomizerSupport {
+public class Java9CompatibilityFileCustomizerTests extends AbstractFileCustomizerTests {
 
 
 	private final Java9CompatibilityFileCustomizer customizer = new Java9CompatibilityFileCustomizer();

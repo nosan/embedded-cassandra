@@ -28,6 +28,7 @@ import de.flapdoodle.embed.process.extract.ImmutableExtractedFileSet;
 import com.github.nosan.embedded.cassandra.Config;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.ExecutableVersion;
+import com.github.nosan.embedded.cassandra.JvmOptions;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
@@ -52,10 +53,27 @@ class TestContext extends Context {
 		super(distribution, runtimeConfig, executableConfig, extractedFileSet);
 	}
 
+
+	TestContext withJvmOptions(JvmOptions jvmOptions) {
+		ExecutableConfig executableConfig = getExecutableConfig();
+		return new TestContext(getDistribution(), getRuntimeConfig(),
+				new ExecutableConfigBuilder()
+						.jvmOptions(jvmOptions)
+						.logback(executableConfig.getLogback())
+						.config(executableConfig.getConfig())
+						.timeout(executableConfig.getTimeout())
+						.version(executableConfig.getVersion())
+						.build(),
+				getExtractedFileSet());
+
+	}
+
 	TestContext withConfig(Config config) {
 		ExecutableConfig executableConfig = getExecutableConfig();
 		return new TestContext(getDistribution(), getRuntimeConfig(),
 				new ExecutableConfigBuilder().config(config)
+						.logback(executableConfig.getLogback())
+						.jvmOptions(executableConfig.getJvmOptions())
 						.timeout(executableConfig.getTimeout())
 						.version(executableConfig.getVersion()).build(),
 				getExtractedFileSet());
