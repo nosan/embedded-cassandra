@@ -93,6 +93,7 @@ class EmbeddedCassandraConfiguration {
 		private void process(BeanDefinitionRegistry registry,
 				ConfigurableListableBeanFactory beanFactory) {
 			BeanDefinitionHolder holder = getClusterBeanDefinition(beanFactory);
+			registry.removeBeanDefinition(holder.getBeanName());
 			registry.registerBeanDefinition(holder.getBeanName(),
 					holder.getBeanDefinition());
 		}
