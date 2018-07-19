@@ -25,9 +25,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link ContextCustomizer} to add {@link EmbeddedCassandraConfiguration} if
@@ -56,10 +54,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	private void addProperties(ConfigurableApplicationContext context, Class<?> testClass) {
 		ConfigurableEnvironment environment = context.getEnvironment();
 		LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
-		properties.put("embedded-cassandra.scripts",
-				StringUtils.arrayToCommaDelimitedString(
-						TestContextResourceUtils.convertToClasspathResourcePaths(testClass, this.annotation.value())));
-		properties.put("embedded-cassandra.encoding", this.annotation.encoding());
+		properties.put("com.github.nosan.embedded-cassandra.test-class", testClass);
+		properties.put("com.github.nosan.embedded-cassandra.scripts", this.annotation.value());
+		properties.put("com.github.nosan.embedded-cassandra.encoding", this.annotation.encoding());
+		properties.put("com.github.nosan.embedded-cassandra.statements", this.annotation.statements());
 		environment.getPropertySources().addFirst(new MapPropertySource(EmbeddedCassandra.class.getName(),
 				properties));
 	}

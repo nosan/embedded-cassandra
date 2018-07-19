@@ -7,7 +7,7 @@ For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` a
 ```java
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@EmbeddedCassandra("init.cql")
+@EmbeddedCassandra(scripts = "/cql-scripts/*.cql")
 public class CassandraTests {
 
 	@Autowired
@@ -19,9 +19,9 @@ public class CassandraTests {
 
 }
 ```
-
-You can declare your own `ExecutableConfig`, `IRuntimeConfig` and `ClusterFactory`
-beans to take control of the Cassandra instance's
+TIP: Configuration overrides any existing `Cluster` beans with an `Embedded Cluster` bean.
+Also it is possible to declare you own `ExecutableConfig`, `IRuntimeConfig` and `ClusterFactory`
+beans to take control of the Cassandra instance's.
 
 
 == Maven

@@ -82,7 +82,7 @@ public @interface EmbeddedCassandra {
 	 * (e.g., a path prefixed with
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol. A path which contains
 	 * <em>"&frasl;**&frasl;**.cql"</em>
-	 * will be treated by
+	 * will be handled by
 	 * {@link org.springframework.core.io.support.ResourcePatternResolver ResourcePatternResolver}.
 	 *
 	 * @return CQL Scripts
@@ -90,6 +90,19 @@ public @interface EmbeddedCassandra {
 	 */
 	@AliasFor("value")
 	String[] scripts() default {};
+
+	/**
+	 * <em>Inlined CQL statements</em> to execute.
+	 * <p>This attribute may be used in conjunction with or instead of
+	 * {@link #scripts}.
+	 * <h3>Ordering</h3>
+	 * <p>Statements declared via this attribute will be executed after
+	 * statements loaded from resource {@link #scripts}.
+	 *
+	 * @return CQL statements
+	 * @see #scripts
+	 */
+	String[] statements() default {};
 
 	/**
 	 * The encoding for the supplied CQL scripts, if different from the platform

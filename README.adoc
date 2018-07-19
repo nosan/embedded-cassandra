@@ -18,11 +18,11 @@ This project uses link:http://www.apache.org/licenses/LICENSE-2.0[Apache License
 
 == See More
 
- - link:embedded-cassandra[Embedded Cassandra]
- - link:embedded-cassandra-junit[Embedded Cassandra JUnit4]
- - link:embedded-cassandra-jupiter[Embedded Cassandra JUnit5]
- - link:embedded-cassandra-testng[Embedded Cassandra TestNG]
- - link:embedded-cassandra-spring[Embedded Cassandra Spring]
+ - link:embedded-cassandra/README.adoc[Embedded Cassandra]
+ - link:embedded-cassandra-junit/README.adoc[Embedded Cassandra JUnit4]
+ - link:embedded-cassandra-jupiter/README.adoc[Embedded Cassandra JUnit5]
+ - link:embedded-cassandra-testng/README.adoc[Embedded Cassandra TestNG]
+ - link:embedded-cassandra-spring/README.adoc[Embedded Cassandra Spring]
 
 
 

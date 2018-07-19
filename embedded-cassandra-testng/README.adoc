@@ -15,7 +15,7 @@ public class CassandraTests extends AbstractCassandraTestNG {
 
 	@Test
 	public void select() {
-		assertThat(getSession().execute("query").wasApplied())
+		assertThat(getSession().execute(...).wasApplied())
 				.isTrue();
 	}
 
