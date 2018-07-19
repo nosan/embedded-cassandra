@@ -97,7 +97,7 @@ public @interface EmbeddedCassandra {
 	 * {@link #scripts}.
 	 * <h3>Ordering</h3>
 	 * <p>Statements declared via this attribute will be executed after
-	 * statements loaded from resource {@link #scripts}.
+	 * statements loaded from {@link #scripts}.
 	 *
 	 * @return CQL statements
 	 * @see #scripts
