@@ -40,11 +40,11 @@ public class CassandraProcessTransportUtilsTests {
 	public ExpectedException throwable = ExpectedException.none();
 
 	@Test
-	public void checkTransport() throws IOException {
+	public void checkConnection() throws IOException {
 		this.throwable.expect(IOException.class);
 		this.throwable.expectMessage("Something wrong with a client transport");
 		Config config = new Config();
-		CassandraProcess.TransportUtils.check(config);
+		CassandraProcess.TransportUtils.checkConnection(config);
 	}
 
 	@Test

@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import de.flapdoodle.embed.process.config.ISupportConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.config.process.ProcessConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
@@ -83,20 +84,27 @@ public final class CassandraProcess
 			IRuntimeConfig runtimeConfig) throws IOException {
 		long processId = getProcessId();
 		setProcessId(processId);
-		ProcessOutput processOutput = runtimeConfig.getProcessOutput();
+
 		ExecutableConfig executableConfig = getConfig();
 		Config config = executableConfig.getConfig();
+		ISupportConfig supportConfig = executableConfig.supportConfig();
+
+		ProcessOutput processOutput = runtimeConfig.getProcessOutput();
 		LogWatchProcessor logWatchProcessor = new LogWatchProcessor(config, processOutput.getOutput());
 		Processors.connect(process.getReader(), StreamToLineProcessor.wrap(logWatchProcessor));
 		Processors.connect(process.getError(), StreamToLineProcessor.wrap(processOutput.getError()));
+
 		logWatchProcessor.waitForResult(executableConfig.getTimeout().toMillis());
+
 		if (!logWatchProcessor.isInitWithSuccess()) {
-			String msg = "Could not start a process '" + processId + "'.\nFailure:" +
-					logWatchProcessor.getFailureFound() +
-					"\nOutput:\n--- START --- \n" + logWatchProcessor.getOutput() + "\n--- END --- ";
+			String msg = "Could not start a process '" + processId + "'. " + logWatchProcessor.getFailureFound() +
+					"\nOutput:\n----- START ----- \n" + logWatchProcessor.getOutput() + "\n----- END ----- \n" +
+					"Support Url:\t" + supportConfig.getSupportUrl() + "\n";
 			throw new IOException(msg);
 		}
-		TransportUtils.check(config);
+
+		TransportUtils.checkConnection(config);
+
 		log.info("Cassandra process '{}' has been started.", processId);
 	}
 
@@ -264,7 +272,7 @@ public final class CassandraProcess
 		}
 
 
-		static void check(Config config) throws IOException {
+		static void checkConnection(Config config) throws IOException {
 			int maxAttempts = 5;
 			Duration sleep = Duration.ofSeconds(2);
 			if (isEnabled(config) && !isConnected(config, maxAttempts, sleep)) {
