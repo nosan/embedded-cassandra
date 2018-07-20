@@ -20,7 +20,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 /**
- * todo leave javadoc here.
+ * Tests for {@link FileCustomizers}.
  *
  * @author Dmytro Nosan
  */

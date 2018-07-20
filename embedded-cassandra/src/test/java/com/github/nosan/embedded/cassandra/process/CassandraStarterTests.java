@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.Config;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.JvmOptions;
+import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
+import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
@@ -49,12 +51,10 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldStartCassandraWithNativeTransport() throws Exception {
-		ExecutableConfig executableConfig =
-				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
+		ExecutableConfig executableConfig = executableBuilder().build();
 		invoke(executableConfig, () -> {
 			try (Cluster cluster = cluster(executableConfig.getConfig())) {
-				cluster.connect().execute("CREATE KEYSPACE IF NOT EXISTS test  "
-						+ "WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }");
+				CqlScriptUtils.executeScripts(cluster.connect(), new ClassPathCqlScript("init.cql"));
 			}
 		});
 	}
@@ -62,7 +62,7 @@ public class CassandraStarterTests {
 	@Test
 	public void shouldBeRestartedUsingNativeTransportPort() throws Exception {
 		ExecutableConfig executableConfig =
-				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
+				executableBuilder().build();
 		Config config = new Config();
 		config.setNativeTransportPort(9042);
 		executableConfig.setConfig(config);
@@ -72,16 +72,14 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldBePossibleToStartMultiplyInstances() throws Exception {
-		invoke(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build(),
-				() -> invoke(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build()));
+		invoke(executableBuilder().build(), () -> invoke(executableBuilder().build()));
 	}
 
 	@Test
 	public void shouldFailWithInvalidConfigurationError() throws Exception {
 		this.throwable.expect(IOException.class);
 		this.throwable.expectMessage("Missing required directive CommitLogSync");
-		ExecutableConfig executableConfig =
-				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
+		ExecutableConfig executableConfig = executableBuilder().build();
 		executableConfig.getConfig().setCommitlogSync(null);
 		invoke(executableConfig);
 	}
@@ -97,14 +95,12 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldStartCassandraUsingRpcTransport() throws Exception {
-		ExecutableConfig executableConfig =
-				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
+		ExecutableConfig executableConfig = executableBuilder().build();
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(true);
-		invoke(executableConfig,
-				() -> new Socket(executableConfig.getConfig().getRpcAddress(),
-						executableConfig.getConfig().getRpcPort()));
+		invoke(executableConfig, () -> new Socket(executableConfig.getConfig().getRpcAddress(),
+				executableConfig.getConfig().getRpcPort()));
 	}
 
 	@Test
@@ -112,15 +108,17 @@ public class CassandraStarterTests {
 			throws Exception {
 		this.throwable.expect(ConnectException.class);
 		this.throwable.expectMessage("Connection refused");
-		ExecutableConfig executableConfig =
-				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
+		ExecutableConfig executableConfig = executableBuilder().build();
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(false);
-		invoke(executableConfig,
-				() -> new Socket(executableConfig.getConfig().getRpcAddress(),
-						executableConfig.getConfig().getRpcPort()));
+		invoke(executableConfig, () -> new Socket(executableConfig.getConfig().getRpcAddress(),
+				executableConfig.getConfig().getRpcPort()));
 
+	}
+
+	private static ExecutableConfigBuilder executableBuilder() {
+		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m"));
 	}
 
 	private static Cluster cluster(Config config) {

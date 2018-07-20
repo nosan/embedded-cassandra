@@ -45,7 +45,7 @@ class TestContext extends Context {
 				new RuntimeConfigBuilder().build(), new ExecutableConfigBuilder().build(),
 				ImmutableExtractedFileSet.builder(new File(".embedded-cassandra"))
 						.executable(new File("cassandra"))
-						.file(FileType.Library, new File("test")).build());
+						.file(FileType.Library, new File("cassandra-env.sh")).build());
 	}
 
 	private TestContext(Distribution distribution, IRuntimeConfig runtimeConfig,

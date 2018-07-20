@@ -23,6 +23,11 @@ import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.JvmOptions;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 
+/**
+ * Test configuration.
+ *
+ * @author Dmytro Nosan
+ */
 @Configuration
 class TestConfiguration {
 

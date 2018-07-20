@@ -23,7 +23,7 @@ import com.github.nosan.embedded.cassandra.Config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * todo leave javadoc here.
+ * Tests for {@link ConfigFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
@@ -38,7 +38,6 @@ public class ConfigFileCustomizerTests extends AbstractFileCustomizerTests {
 		config.setStoragePort(7000);
 		config.setSslStoragePort(7001);
 		config.setRpcPort(9160);
-
 		withFile("cassandra.yaml").accept((file) -> {
 			this.customizer.customize(file, new TestContext().withConfig(config));
 			assertThat(file)

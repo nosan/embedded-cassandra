@@ -38,8 +38,7 @@ public class CassandraTests {
 
 	@Test
 	public void shouldStartCassandraUsingDefaultConfiguration() throws Exception {
-		Cassandra cassandra =
-				new Cassandra(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build());
+		Cassandra cassandra = new Cassandra(executableBuilder().build());
 		invoke(cassandra,
 				() -> CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql")));
 	}
@@ -49,19 +48,21 @@ public class CassandraTests {
 			throws Exception {
 		this.expectedException.expect(IOException.class);
 		this.expectedException.expectMessage("Cassandra has already been started");
-		Cassandra cassandra =
-				new Cassandra(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build());
+		Cassandra cassandra = new Cassandra(executableBuilder().build());
 		invoke(cassandra, cassandra::start);
 	}
 
 	@Test
 	public void shouldBeAbleToRestartCassandra() throws Exception {
-		Cassandra cassandra =
-				new Cassandra(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build());
+		Cassandra cassandra = new Cassandra(executableBuilder().build());
 		invoke(cassandra);
 		invoke(cassandra);
 	}
 
+
+	private static ExecutableConfigBuilder executableBuilder() {
+		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m"));
+	}
 
 	private static void invoke(Cassandra cassandra) throws Exception {
 		try {
