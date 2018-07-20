@@ -68,7 +68,7 @@ import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 @Order
 class EmbeddedCassandraConfiguration {
 
-	private static final String DEFAULT_BEAN_NAME = "cluster";
+	private static final String BEAN_NAME = "cluster";
 
 	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraConfiguration.class);
 
@@ -99,38 +99,40 @@ class EmbeddedCassandraConfiguration {
 				ConfigurableListableBeanFactory beanFactory) {
 			BeanDefinitionHolder holder = getClusterBeanDefinition(beanFactory);
 			if (registry.containsBeanDefinition(holder.getBeanName())) {
-				boolean primary = holder.getBeanDefinition().isPrimary();
-				log.info("Replacing '{}' Cluster bean with " + (primary ? "primary " : "") + "embedded version",
-						holder.getBeanName());
 				registry.removeBeanDefinition(holder.getBeanName());
 			}
-			registry.registerBeanDefinition(holder.getBeanName(),
-					holder.getBeanDefinition());
+			registry.registerBeanDefinition(holder.getBeanName(), holder.getBeanDefinition());
 		}
 
 		private BeanDefinitionHolder getClusterBeanDefinition(
 				ConfigurableListableBeanFactory beanFactory) {
 			String[] beanNames = beanFactory.getBeanNamesForType(Cluster.class);
-			if (ObjectUtils.isEmpty(beanNames)) {
-				return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
-						DEFAULT_BEAN_NAME);
-			}
+
+
 			if (beanNames.length == 1) {
 				String beanName = beanNames[0];
 				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+				log.info("Replacing '{}' Cluster bean with {} embedded version",
+						beanName, (!beanDefinition.isPrimary() ? "" : "a primary"));
 				return new BeanDefinitionHolder(
 						createEmbeddedBeanDefinition(beanDefinition.isPrimary()),
 						beanName);
 			}
+
 			for (String beanName : beanNames) {
 				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 				if (beanDefinition.isPrimary()) {
+					log.info("Replacing primary '{}' Cluster bean with a primary embedded version",
+							beanName);
 					return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
 							beanName);
 				}
 			}
+
+			log.info("There is no 'Cluster' beans. Embedded primary '{}' Cluster bean will be registered", BEAN_NAME);
+
 			return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
-					DEFAULT_BEAN_NAME);
+					BEAN_NAME);
 		}
 
 		private BeanDefinition createEmbeddedBeanDefinition(boolean primary) {

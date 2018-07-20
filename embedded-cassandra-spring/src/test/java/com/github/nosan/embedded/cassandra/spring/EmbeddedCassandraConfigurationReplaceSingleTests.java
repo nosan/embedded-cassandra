@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestConfiguration.class)
+@ContextConfiguration
 @EmbeddedCassandra
 public class EmbeddedCassandraConfigurationReplaceSingleTests {
 
@@ -47,7 +47,7 @@ public class EmbeddedCassandraConfigurationReplaceSingleTests {
 	}
 
 	@Configuration
-	@Import(TestService.class)
+	@Import({TestService.class, TestConfiguration.class})
 	static class Context {
 
 		@Bean

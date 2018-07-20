@@ -9,8 +9,8 @@
     </appender>
     `
 
-    <logger name="com.github.nosan.embedded.cassandra" level="INFO">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
-    </logger>
+    </root>
 
 </configuration>

@@ -51,10 +51,4 @@ public class EmbeddedCassandraConfigurationScriptsTests {
 		}
 	}
 
-	@Configuration
-	@Import(TestService.class)
-	static class Context {
-
-	}
-
 }
