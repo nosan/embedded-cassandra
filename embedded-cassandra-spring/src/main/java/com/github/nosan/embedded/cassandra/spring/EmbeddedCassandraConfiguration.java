@@ -129,7 +129,7 @@ class EmbeddedCassandraConfiguration {
 				}
 			}
 
-			log.info("There is no 'Cluster' beans. Embedded primary '{}' Cluster bean will be registered", BEAN_NAME);
+			log.info("There is no Cluster beans. Embedded primary '{}' Cluster bean will be registered", BEAN_NAME);
 
 			return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
 					BEAN_NAME);
