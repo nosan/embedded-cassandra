@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.support;
 
+import java.net.URL;
 import java.time.Duration;
 
 import de.flapdoodle.embed.process.builder.AbstractBuilder;
@@ -23,6 +24,7 @@ import de.flapdoodle.embed.process.builder.TypedProperty;
 
 import com.github.nosan.embedded.cassandra.Config;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.JvmOptions;
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
@@ -41,10 +43,18 @@ public class ExecutableConfigBuilder extends AbstractBuilder<ExecutableConfig> {
 	private static final TypedProperty<Version> VERSION = TypedProperty.with("Version",
 			Version.class);
 
+	private static final TypedProperty<URL> LOGBACK = TypedProperty.with("Logback",
+			URL.class);
+
+	private static final TypedProperty<JvmOptions> JVM_OPTIONS = TypedProperty.with("JvmOptions",
+			JvmOptions.class);
+
 	public ExecutableConfigBuilder() {
 		property(CONFIG).overwriteDefault(new Config());
 		property(TIMEOUT).overwriteDefault(Duration.ofMinutes(1));
 		property(VERSION).overwriteDefault(Version.LATEST);
+		property(LOGBACK).overwriteDefault(ClassLoader.getSystemResource("embedded/cassandra/logback.xml"));
+		property(JVM_OPTIONS).overwriteDefault(new JvmOptions());
 
 	}
 
@@ -81,12 +91,36 @@ public class ExecutableConfigBuilder extends AbstractBuilder<ExecutableConfig> {
 		return this;
 	}
 
+	/**
+	 * Set logback configuration file location.
+	 *
+	 * @param logback file location.
+	 * @return current builder.
+	 */
+	public ExecutableConfigBuilder logback(URL logback) {
+		property(LOGBACK).set(logback);
+		return this;
+	}
+
+	/**
+	 * Sets JVM Options.
+	 *
+	 * @param jvmOptions {@link JvmOptions JvmOptions} to use.
+	 * @return current builder.
+	 */
+	public ExecutableConfigBuilder jvmOptions(JvmOptions jvmOptions) {
+		property(JVM_OPTIONS).set(jvmOptions);
+		return this;
+	}
+
 	@Override
 	public ExecutableConfig build() {
 		ExecutableConfig executableConfig = new ExecutableConfig();
 		executableConfig.setConfig(get(CONFIG));
 		executableConfig.setTimeout(get(TIMEOUT));
 		executableConfig.setVersion(get(VERSION));
+		executableConfig.setLogback(get(LOGBACK));
+		executableConfig.setJvmOptions(get(JVM_OPTIONS));
 		return executableConfig;
 	}
 

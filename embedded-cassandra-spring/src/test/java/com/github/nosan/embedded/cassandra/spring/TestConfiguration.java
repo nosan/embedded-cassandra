@@ -14,29 +14,26 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.process;
+package com.github.nosan.embedded.cassandra.spring;
 
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.github.nosan.embedded.cassandra.ExecutableConfig;
+import com.github.nosan.embedded.cassandra.JvmOptions;
+import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 
 /**
- * Tests for {@link FileCustomizers}.
+ * Test configuration.
  *
  * @author Dmytro Nosan
  */
-public class FileCustomizersTests {
+@Configuration
+class TestConfiguration {
 
-	private final FileCustomizers customizers = new FileCustomizers();
 
-	@Test
-	@SuppressWarnings("unchecked")
-	public void addCustomizer() {
-		final boolean[] invoked = {false};
-		FileCustomizer fileCustomizer = (file, context) -> invoked[0] = true;
-		this.customizers.addCustomizer(fileCustomizer);
-		this.customizers.customize(new TestContext());
-		Assertions.assertThat(invoked[0]).describedAs("Should be invoked").isTrue();
-
+	@Bean
+	public ExecutableConfig executableConfig() {
+		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
 	}
-
 }

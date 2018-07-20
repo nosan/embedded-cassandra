@@ -21,8 +21,6 @@ import com.datastax.driver.core.Session;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -34,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = TestConfiguration.class)
 @EmbeddedCassandra(scripts = "/keyspace.cql", statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
 		"  KEY );")
 public class EmbeddedCassandraConfigurationStatementsTests {
@@ -50,12 +48,6 @@ public class EmbeddedCassandraConfigurationStatementsTests {
 			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
 					.isTrue();
 		}
-	}
-
-	@Configuration
-	@Import(TestService.class)
-	static class Context {
-
 	}
 
 }

@@ -19,8 +19,10 @@ package com.github.nosan.embedded.cassandra.testng;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.github.nosan.embedded.cassandra.JvmOptions;
 import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,6 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
+
+	public AbstractCassandraTestNGTests() {
+		super(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build());
+	}
 
 	@BeforeMethod
 	public void setUp() {

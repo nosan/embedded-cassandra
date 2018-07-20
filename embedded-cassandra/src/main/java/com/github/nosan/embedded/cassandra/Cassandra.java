@@ -125,6 +125,14 @@ public class Cassandra {
 		return this.runtimeConfig;
 	}
 
+	/**
+	 * Retrieves {@link ClusterFactory Cluster Factory}.
+	 *
+	 * @return cluster factory to use.
+	 */
+	public ClusterFactory getClusterFactory() {
+		return this.clusterFactory;
+	}
 
 	/**
 	 * Retrieves Cassandra's {@link Cluster Cluster} using {@link ClusterFactory ClusterFactory}.
@@ -135,7 +143,7 @@ public class Cassandra {
 	public Cluster getCluster() {
 		if (this.cluster == null) {
 			ExecutableConfig executableConfig = getExecutableConfig();
-			this.cluster = this.clusterFactory.getCluster(executableConfig.getConfig(), executableConfig.getVersion());
+			this.cluster = getClusterFactory().getCluster(executableConfig.getConfig(), executableConfig.getVersion());
 		}
 		return this.cluster;
 	}

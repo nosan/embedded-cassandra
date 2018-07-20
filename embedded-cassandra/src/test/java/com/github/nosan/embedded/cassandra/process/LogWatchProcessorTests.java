@@ -27,18 +27,19 @@ import com.github.nosan.embedded.cassandra.Config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraProcess.LogWatch}.
+ * Tests for {@link CassandraProcess.LogWatchProcessor}.
  *
  * @author Dmytro Nosan
  */
-public class LogWatchTests {
+public class LogWatchProcessorTests {
 
 
 	@Test
 	public void cqlListening() {
-		CassandraProcess.LogWatch logWatch = new CassandraProcess.LogWatch(new Config(), new NullProcessor());
-		logWatch.process("Starting listening for CQL");
-		assertThat(logWatch.isInitWithSuccess()).isTrue();
+		CassandraProcess.LogWatchProcessor logWatchProcessor =
+				new CassandraProcess.LogWatchProcessor(new Config(), new NullProcessor());
+		logWatchProcessor.process("Starting listening for CQL");
+		assertThat(logWatchProcessor.isInitWithSuccess()).isTrue();
 	}
 
 	@Test
@@ -46,9 +47,10 @@ public class LogWatchTests {
 		Config config = new Config();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(true);
-		CassandraProcess.LogWatch logWatch = new CassandraProcess.LogWatch(config, new NullProcessor());
-		logWatch.process("Listening for thrift clients");
-		assertThat(logWatch.isInitWithSuccess()).isTrue();
+		CassandraProcess.LogWatchProcessor logWatchProcessor =
+				new CassandraProcess.LogWatchProcessor(config, new NullProcessor());
+		logWatchProcessor.process("Listening for thrift clients");
+		assertThat(logWatchProcessor.isInitWithSuccess()).isTrue();
 	}
 
 	@Test
@@ -56,9 +58,10 @@ public class LogWatchTests {
 		Config config = new Config();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(false);
-		CassandraProcess.LogWatch logWatch = new CassandraProcess.LogWatch(config, new NullProcessor());
-		logWatch.process("Starting Messaging Service");
-		assertThat(logWatch.isInitWithSuccess()).isTrue();
+		CassandraProcess.LogWatchProcessor logWatchProcessor =
+				new CassandraProcess.LogWatchProcessor(config, new NullProcessor());
+		logWatchProcessor.process("Starting Messaging Service");
+		assertThat(logWatchProcessor.isInitWithSuccess()).isTrue();
 	}
 
 	@Test
@@ -70,9 +73,10 @@ public class LogWatchTests {
 				"Cassandra 3.0 and later require Java");
 
 		for (String error : errors) {
-			CassandraProcess.LogWatch logWatch = new CassandraProcess.LogWatch(new Config(), new NullProcessor());
-			logWatch.process(error);
-			assertThat(logWatch.getFailureFound()).isEqualTo(error);
+			CassandraProcess.LogWatchProcessor
+					logWatchProcessor = new CassandraProcess.LogWatchProcessor(new Config(), new NullProcessor());
+			logWatchProcessor.process(error);
+			assertThat(logWatchProcessor.getFailureFound()).isEqualTo(error);
 
 		}
 

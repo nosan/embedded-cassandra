@@ -47,7 +47,7 @@ public class EmbeddedCassandraConfigurationReplaceSingleTests {
 	}
 
 	@Configuration
-	@Import(TestService.class)
+	@Import({TestService.class, TestConfiguration.class})
 	static class Context {
 
 		@Bean

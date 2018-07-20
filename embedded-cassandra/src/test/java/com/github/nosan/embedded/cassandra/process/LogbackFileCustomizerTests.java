@@ -14,36 +14,31 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.spring;
+package com.github.nosan.embedded.cassandra.process;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandraConfiguration}.
+ * Tests for {@link LogbackFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestConfiguration.class)
-@EmbeddedCassandra
-public class EmbeddedCassandraConfigurationDefaultTests {
+public class LogbackFileCustomizerTests extends AbstractFileCustomizerTests {
 
-	@Autowired
-	private Cluster cluster;
+
+	private final LogbackFileCustomizer customizer = new LogbackFileCustomizer();
 
 	@Test
-	public void testConnect() {
-		try (Session session = this.cluster.connect()) {
-			assertThat(session).isNotNull();
-		}
-	}
+	public void customize() throws Exception {
+		withFile("logback.xml").accept((file) -> {
+			this.customizer.customize(file, new TestContext());
+			assertThat(file)
+					.hasSameContentAs(classpath("customizers/logback/logback.xml"));
+		});
 
+	}
 }
+
+

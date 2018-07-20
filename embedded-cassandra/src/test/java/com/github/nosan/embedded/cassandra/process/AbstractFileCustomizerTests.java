@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-abstract class AbstractFileCustomizerSupport {
+abstract class AbstractFileCustomizerTests {
 
 	static File classpath(String classpath) throws Exception {
 		return new File(ClassLoader.getSystemResource(classpath).toURI());

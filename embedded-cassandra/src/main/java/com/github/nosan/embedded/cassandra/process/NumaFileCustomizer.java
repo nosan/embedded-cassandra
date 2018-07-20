@@ -35,12 +35,6 @@ class NumaFileCustomizer extends AbstractSourceLineFileCustomizer {
 
 	private final static Pattern REGEX = Pattern.compile("-XX:\\+UseNUMA");
 
-	private static boolean isNUMA(Context context) {
-		ExecutableConfig executableConfig = context.getExecutableConfig();
-		Distribution distribution = context.getDistribution();
-		return NUMA.isNUMA(executableConfig.supportConfig(), distribution.getPlatform());
-	}
-
 	@Override
 	protected boolean isMatch(File file, Context context) throws IOException {
 		String fileName = file.getName();
@@ -57,6 +51,12 @@ class NumaFileCustomizer extends AbstractSourceLineFileCustomizer {
 			return "-XX:-UseNUMA";
 		}
 		return line;
+	}
+
+	private static boolean isNUMA(Context context) {
+		ExecutableConfig executableConfig = context.getExecutableConfig();
+		Distribution distribution = context.getDistribution();
+		return NUMA.isNUMA(executableConfig.supportConfig(), distribution.getPlatform());
 	}
 
 }

@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class NumaFileCustomizerTests extends AbstractFileCustomizerSupport {
+public class NumaFileCustomizerTests extends AbstractFileCustomizerTests {
 
 	private final NumaFileCustomizer customizer = new NumaFileCustomizer();
 

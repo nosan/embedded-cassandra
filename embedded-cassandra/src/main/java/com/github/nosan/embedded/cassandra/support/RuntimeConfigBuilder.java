@@ -44,6 +44,7 @@ public class RuntimeConfigBuilder
 				Processors.namedConsole("[Cassandra > error]"),
 				Processors.namedConsole("[Cassandra > commands]"));
 		processOutput().overwriteDefault(processOutput);
+		daemonProcess(false);
 	}
 
 	/**
@@ -58,8 +59,9 @@ public class RuntimeConfigBuilder
 		ProcessOutput processOutput = new ProcessOutput(
 				Processors.logTo(logger, Slf4jLevel.INFO),
 				Processors.logTo(logger, Slf4jLevel.ERROR),
-				Processors.logTo(logger, Slf4jLevel.DEBUG));
+				Processors.logTo(logger, Slf4jLevel.INFO));
 		processOutput().overwriteDefault(processOutput);
+		daemonProcess(false);
 	}
 
 }

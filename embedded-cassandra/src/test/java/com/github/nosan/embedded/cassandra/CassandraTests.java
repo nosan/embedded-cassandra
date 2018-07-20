@@ -24,6 +24,7 @@ import org.junit.rules.ExpectedException;
 
 import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 
 /**
  * Tests for {@link Cassandra}.
@@ -35,22 +36,11 @@ public class CassandraTests {
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
-	private static void start(Cassandra cassandra, Callback callback) throws Exception {
-		try {
-			cassandra.start();
-			callback.run();
-		}
-		finally {
-			cassandra.stop();
-		}
-	}
-
 	@Test
 	public void shouldStartCassandraUsingDefaultConfiguration() throws Exception {
-		Cassandra cassandra = new Cassandra();
-		start(cassandra, () -> {
-			CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql"));
-		});
+		Cassandra cassandra = new Cassandra(executableBuilder().build());
+		invoke(cassandra,
+				() -> CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql")));
 	}
 
 	@Test
@@ -58,17 +48,39 @@ public class CassandraTests {
 			throws Exception {
 		this.expectedException.expect(IOException.class);
 		this.expectedException.expectMessage("Cassandra has already been started");
-		Cassandra cassandra = new Cassandra();
-		start(cassandra, cassandra::start);
+		Cassandra cassandra = new Cassandra(executableBuilder().build());
+		invoke(cassandra, cassandra::start);
 	}
 
 	@Test
 	public void shouldBeAbleToRestartCassandra() throws Exception {
-		Cassandra cassandra = new Cassandra();
-		start(cassandra, () -> {
-		});
-		start(cassandra, () -> {
-		});
+		Cassandra cassandra = new Cassandra(executableBuilder().build());
+		invoke(cassandra);
+		invoke(cassandra);
+	}
+
+
+	private static ExecutableConfigBuilder executableBuilder() {
+		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m"));
+	}
+
+	private static void invoke(Cassandra cassandra) throws Exception {
+		try {
+			cassandra.start();
+		}
+		finally {
+			cassandra.stop();
+		}
+	}
+
+	private static void invoke(Cassandra cassandra, Callback callback) throws Exception {
+		try {
+			cassandra.start();
+			callback.run();
+		}
+		finally {
+			cassandra.stop();
+		}
 	}
 
 	interface Callback {
