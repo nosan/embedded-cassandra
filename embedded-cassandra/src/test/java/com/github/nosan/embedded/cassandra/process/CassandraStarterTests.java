@@ -49,7 +49,8 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldStartCassandraWithNativeTransport() throws Exception {
-		ExecutableConfig executableConfig = new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256")).build();
+		ExecutableConfig executableConfig =
+				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
 		invoke(executableConfig, () -> {
 			try (Cluster cluster = cluster(executableConfig.getConfig())) {
 				cluster.connect().execute("CREATE KEYSPACE IF NOT EXISTS test  "
@@ -60,7 +61,8 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldBeRestartedUsingNativeTransportPort() throws Exception {
-		ExecutableConfig executableConfig = new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256")).build();
+		ExecutableConfig executableConfig =
+				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
 		Config config = new Config();
 		config.setNativeTransportPort(9042);
 		executableConfig.setConfig(config);
@@ -70,15 +72,16 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldBePossibleToStartMultiplyInstances() throws Exception {
-		invoke(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256")).build(),
-				() -> invoke(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256")).build()));
+		invoke(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build(),
+				() -> invoke(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build()));
 	}
 
 	@Test
 	public void shouldFailWithInvalidConfigurationError() throws Exception {
 		this.throwable.expect(IOException.class);
 		this.throwable.expectMessage("Missing required directive CommitLogSync");
-		ExecutableConfig executableConfig = new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256")).build();
+		ExecutableConfig executableConfig =
+				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
 		executableConfig.getConfig().setCommitlogSync(null);
 		invoke(executableConfig);
 	}
@@ -94,7 +97,8 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldStartCassandraUsingRpcTransport() throws Exception {
-		ExecutableConfig executableConfig = new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256")).build();
+		ExecutableConfig executableConfig =
+				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(true);
@@ -108,7 +112,8 @@ public class CassandraStarterTests {
 			throws Exception {
 		this.throwable.expect(ConnectException.class);
 		this.throwable.expectMessage("Connection refused");
-		ExecutableConfig executableConfig = new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256")).build();
+		ExecutableConfig executableConfig =
+				new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(false);

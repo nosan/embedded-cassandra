@@ -29,6 +29,6 @@ class TestConfiguration {
 
 	@Bean
 	public ExecutableConfig executableConfig() {
-		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256")).build();
+		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build();
 	}
 }
