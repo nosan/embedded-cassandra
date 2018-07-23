@@ -43,7 +43,7 @@ public class EmbeddedCassandraConfigurationTests {
 
 
 	@Test
-	public void createKeyspace() {
+	public void shouldSelectFromRoles() {
 		try (Session session = this.cluster.connect()) {
 			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
 					.isTrue();
