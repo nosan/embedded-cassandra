@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.spring;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,16 +34,27 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = TestConfiguration.class)
-@EmbeddedCassandra
-public class EmbeddedCassandraConfigurationDefaultTests {
+@EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
+public class CqlScriptTests {
 
 	@Autowired
 	private Cluster cluster;
 
 	@Test
-	public void testConnect() {
+	@CqlScript(scripts = {"/users-data.cql"})
+	@CqlScript(statements = "TRUNCATE test.users", executionPhase = CqlScript.ExecutionPhase.AFTER_TEST_METHOD)
+	public void shouldHaveUser() {
 		try (Session session = this.cluster.connect()) {
-			assertThat(session).isNotNull();
+			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
+			assertThat(rs.one().getLong(0)).isEqualTo(1);
+		}
+	}
+
+	@Test
+	public void shouldNotHaveUser() {
+		try (Session session = this.cluster.connect()) {
+			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
+			assertThat(rs.one().getLong(0)).isZero();
 		}
 	}
 

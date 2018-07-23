@@ -54,10 +54,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	private void addProperties(ConfigurableApplicationContext context, Class<?> testClass) {
 		ConfigurableEnvironment environment = context.getEnvironment();
 		LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
-		properties.put("com.github.nosan.embedded-cassandra.test-class", testClass);
-		properties.put("com.github.nosan.embedded-cassandra.scripts", this.annotation.value());
-		properties.put("com.github.nosan.embedded-cassandra.encoding", this.annotation.encoding());
-		properties.put("com.github.nosan.embedded-cassandra.statements", this.annotation.statements());
+		properties.put(EmbeddedCassandraConfiguration.TEST_CLASS, testClass);
+		properties.put(EmbeddedCassandraConfiguration.SCRIPTS, this.annotation.value());
+		properties.put(EmbeddedCassandraConfiguration.ENCODING, this.annotation.encoding());
+		properties.put(EmbeddedCassandraConfiguration.STATEMENTS, this.annotation.statements());
 		environment.getPropertySources().addFirst(new MapPropertySource(EmbeddedCassandra.class.getName(),
 				properties));
 	}

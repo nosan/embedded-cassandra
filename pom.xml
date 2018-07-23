@@ -75,6 +75,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.github.nosan</groupId>
+                <artifactId>embedded-cassandra-junit</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
