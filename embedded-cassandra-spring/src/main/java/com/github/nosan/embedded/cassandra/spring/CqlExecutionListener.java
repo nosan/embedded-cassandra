@@ -49,9 +49,9 @@ import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
  * @see Cql
  * @see CqlScripts
  */
-class CqlTestExecutionListener extends AbstractTestExecutionListener {
+class CqlExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Logger log = LoggerFactory.getLogger(CqlTestExecutionListener.class);
+	private static final Logger log = LoggerFactory.getLogger(CqlExecutionListener.class);
 
 
 	/**

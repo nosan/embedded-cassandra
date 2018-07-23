@@ -30,14 +30,14 @@ import org.springframework.core.annotation.AliasFor;
  * {@code @Cql} is used to annotate a test method to configure
  * CQL {@link #scripts} and {@link #statements} to be executed against a given
  * cluster during integration tests.
- * <p>Script execution is performed by the {@link CqlTestExecutionListener},
+ * <p>Script execution is performed by the {@link CqlExecutionListener},
  * which is enabled by default.
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
  *
  * @author Dmytro Nosan
  * @see CqlScripts
- * @see CqlTestExecutionListener
+ * @see CqlExecutionListener
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

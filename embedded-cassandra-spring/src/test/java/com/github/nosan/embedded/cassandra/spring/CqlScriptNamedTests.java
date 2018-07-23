@@ -80,8 +80,6 @@ public class CqlScriptNamedTests {
 		@Bean
 		public Cluster customCluster() {
 			return cassandra.getCluster();
-
-
 		}
 
 		@Bean

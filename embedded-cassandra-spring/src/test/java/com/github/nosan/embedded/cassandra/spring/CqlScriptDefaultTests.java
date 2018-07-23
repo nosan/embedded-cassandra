@@ -79,7 +79,6 @@ public class CqlScriptDefaultTests {
 		@Bean
 		public Cluster customCluster() {
 			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
-
 		}
 
 		@Bean
