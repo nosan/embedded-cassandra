@@ -55,7 +55,8 @@ public class CqlScriptNamedTests {
 
 	@Test
 	@CqlScript(cluster = "customCluster", scripts = {"/keyspace.cql", "/users.cql", "/users-data.cql"})
-	@CqlScript(cluster = "customCluster", statements = "DROP KEYSPACE test", executionPhase = CqlScript.ExecutionPhase.AFTER_TEST_METHOD)
+	@CqlScript(cluster = "customCluster", statements = "DROP KEYSPACE test",
+			executionPhase = CqlScript.ExecutionPhase.AFTER_TEST_METHOD)
 	public void shouldHaveUser() {
 		try (Session session = this.customCluster.connect()) {
 			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
