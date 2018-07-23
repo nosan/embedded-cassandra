@@ -46,6 +46,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  *        }
  *    }
  * }</pre>
+ * Note! This class is not a {@code Thread Safe}.
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
@@ -139,7 +140,7 @@ public class Cassandra {
 	 * Retrieves Cassandra's {@link Cluster Cluster} using {@link ClusterFactory ClusterFactory}.
 	 *
 	 * @return Cassandra's Cluster.
-	 * @throws IllegalStateException when cassandra has not been initialized.
+	 * @throws IllegalStateException Cassandra has not been initialized.
 	 * @see ClusterFactory
 	 */
 	public Cluster getCluster() {
@@ -157,7 +158,7 @@ public class Cassandra {
 	 * Retrieves Cassandra's {@link Session Session} using {@link #getCluster()}.
 	 *
 	 * @return Cassandra's Session
-	 * @throws IllegalStateException when cassandra has not been initialized.
+	 * @throws IllegalStateException Cassandra has not been initialized.
 	 * @see #getCluster()
 	 */
 
@@ -176,7 +177,7 @@ public class Cassandra {
 	 * Start the Cassandra Server.
 	 *
 	 * @throws IOException Cassandra's process has not been started correctly.
-	 * @throws IllegalStateException when cassandra has not been initialized.
+	 * @throws IllegalStateException Cassandra has already been initialized.
 	 */
 	public void start() throws IOException {
 		if (this.initialized.compareAndSet(false, true)) {
