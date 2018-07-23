@@ -47,7 +47,7 @@ abstract class SpringCqlUtils {
 	 * @return CQL scripts.
 	 * @throws IOException if an I/O error occurs
 	 */
-	static CqlScript[] getCqlScripts(ResourcePatternResolver resolver, CqlConfig config) throws IOException {
+	static CqlScript[] getScripts(ResourcePatternResolver resolver, CqlConfig config) throws IOException {
 		List<CqlScript> cqlScripts = new ArrayList<>();
 
 		String[] scripts = config.getScripts();

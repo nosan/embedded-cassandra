@@ -27,6 +27,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -93,42 +94,38 @@ class CqlExecutionListener extends AbstractTestExecutionListener {
 		if (executionPhase != cql.executionPhase()) {
 			return;
 		}
+		ApplicationContext applicationContext = testContext.getApplicationContext();
 		Cluster cluster = getCluster(cql.cluster(), testContext);
 		Assert.state(cluster != null, () -> String.format("Failed to execute CQL scripts for a test context %s: " +
 				"supply a Cluster bean", testContext));
-
 		try (Session session = cluster.connect()) {
-			CqlConfig config = new CqlConfig(testContext.getTestClass(),
-					cql.scripts(), cql.statements(), cql.encoding());
-			CqlScriptUtils.executeScripts(session,
-					SpringCqlUtils.getCqlScripts(testContext.getApplicationContext(), config));
+			CqlConfig config = new CqlConfig(testContext.getTestClass(), cql.scripts(),
+					cql.statements(), cql.encoding());
+			CqlScriptUtils.executeScripts(session, SpringCqlUtils.getScripts(applicationContext, config));
 		}
 
 	}
 
 	private Cluster getCluster(String name, TestContext testContext) {
 		BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
-
 		try {
 			if (StringUtils.hasText(name)) {
 				return bf.getBean(name, Cluster.class);
 			}
 		}
 		catch (BeansException ex) {
-			log.error(String.format("Failed to retrieve Cluster named '%s' bean for a test context %s",
-					name, testContext), ex);
+			log.error(String.format("Failed to retrieve Cluster named '%s' bean for a test context %s", name,
+					testContext), ex);
 			throw ex;
 		}
 
 		try {
 			if (bf instanceof ListableBeanFactory) {
 				ListableBeanFactory lbf = (ListableBeanFactory) bf;
-				Map<String, Cluster> clusters =
-						BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, Cluster.class);
+				Map<String, Cluster> clusters = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, Cluster.class);
 				if (clusters.size() == 1) {
 					return clusters.values().iterator().next();
 				}
-
 				try {
 					return bf.getBean(Cluster.class);
 				}

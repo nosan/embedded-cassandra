@@ -89,8 +89,7 @@ class EmbeddedCassandraConfiguration {
 		}
 
 		@Override
-		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-				throws BeansException {
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		}
 
 		private void process(BeanDefinitionRegistry registry,
@@ -105,37 +104,29 @@ class EmbeddedCassandraConfiguration {
 		private BeanDefinitionHolder getClusterBeanDefinition(
 				ConfigurableListableBeanFactory beanFactory) {
 			String[] beanNames = beanFactory.getBeanNamesForType(Cluster.class);
-
-
 			if (beanNames.length == 1) {
 				String beanName = beanNames[0];
 				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 				log.info("Replacing '{}' Cluster bean with {} embedded version",
 						beanName, (!beanDefinition.isPrimary() ? "" : "a primary"));
-				return new BeanDefinitionHolder(
-						createEmbeddedBeanDefinition(beanDefinition.isPrimary()),
-						beanName);
+				return new BeanDefinitionHolder(createEmbeddedBeanDefinition(beanDefinition.isPrimary()), beanName);
 			}
 
 			for (String beanName : beanNames) {
 				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 				if (beanDefinition.isPrimary()) {
-					log.info("Replacing primary '{}' Cluster bean with a primary embedded version",
-							beanName);
-					return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
-							beanName);
+					log.info("Replacing primary '{}' Cluster bean with a primary embedded version", beanName);
+					return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true), beanName);
 				}
 			}
 
 			log.info("There is no Cluster beans. Embedded primary '{}' Cluster bean will be registered", BEAN_NAME);
 
-			return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
-					BEAN_NAME);
+			return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true), BEAN_NAME);
 		}
 
 		private BeanDefinition createEmbeddedBeanDefinition(boolean primary) {
-			BeanDefinition beanDefinition = new RootBeanDefinition(
-					EmbeddedClusterFactoryBean.class);
+			BeanDefinition beanDefinition = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
 			beanDefinition.setPrimary(primary);
 			return beanDefinition;
 		}
@@ -146,8 +137,7 @@ class EmbeddedCassandraConfiguration {
 		}
 	}
 
-	private static class EmbeddedClusterFactoryBean
-			implements FactoryBean<Cluster>, InitializingBean, DisposableBean {
+	private static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean, DisposableBean {
 
 		private final Cassandra cassandra;
 
@@ -196,8 +186,7 @@ class EmbeddedCassandraConfiguration {
 			String[] statements = env.getProperty(STATEMENTS, String[].class, new String[0]);
 			Class<?> testClass = env.getProperty(TEST_CLASS, Class.class);
 			String encoding = env.getProperty(ENCODING);
-			return SpringCqlUtils
-					.getCqlScripts(context, new CqlConfig(testClass, scripts, statements, encoding));
+			return SpringCqlUtils.getScripts(context, new CqlConfig(testClass, scripts, statements, encoding));
 
 		}
 
