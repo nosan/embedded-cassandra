@@ -51,7 +51,7 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldStartCassandraWithNativeTransport() throws Exception {
-		ExecutableConfig executableConfig = executableBuilder().build();
+		ExecutableConfig executableConfig = execBuilder().build();
 		run(executableConfig, () -> {
 			try (Cluster cluster = cluster(executableConfig.getConfig())) {
 				CqlScriptUtils.executeScripts(cluster.connect(), new ClassPathCqlScript("init.cql"));
@@ -62,7 +62,7 @@ public class CassandraStarterTests {
 	@Test
 	public void shouldBeRestartedUsingNativeTransportPort() throws Exception {
 		ExecutableConfig executableConfig =
-				executableBuilder().build();
+				execBuilder().build();
 		Config config = new Config();
 		config.setNativeTransportPort(9042);
 		executableConfig.setConfig(config);
@@ -72,14 +72,14 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldBePossibleToStartMultiplyInstances() throws Exception {
-		run(executableBuilder().build(), () -> run(executableBuilder().build()));
+		run(execBuilder().build(), () -> run(execBuilder().build()));
 	}
 
 	@Test
 	public void shouldFailWithInvalidConfigurationError() throws Exception {
 		this.throwable.expect(IOException.class);
 		this.throwable.expectMessage("Missing required directive CommitLogSync");
-		ExecutableConfig executableConfig = executableBuilder().build();
+		ExecutableConfig executableConfig = execBuilder().build();
 		executableConfig.getConfig().setCommitlogSync(null);
 		run(executableConfig);
 	}
@@ -95,7 +95,7 @@ public class CassandraStarterTests {
 
 	@Test
 	public void shouldStartCassandraUsingRpcTransport() throws Exception {
-		ExecutableConfig executableConfig = executableBuilder().build();
+		ExecutableConfig executableConfig = execBuilder().build();
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(true);
@@ -108,7 +108,7 @@ public class CassandraStarterTests {
 			throws Exception {
 		this.throwable.expect(ConnectException.class);
 		this.throwable.expectMessage("Connection refused");
-		ExecutableConfig executableConfig = executableBuilder().build();
+		ExecutableConfig executableConfig = execBuilder().build();
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(false);
@@ -117,7 +117,7 @@ public class CassandraStarterTests {
 
 	}
 
-	private static ExecutableConfigBuilder executableBuilder() {
+	private static ExecutableConfigBuilder execBuilder() {
 		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m"));
 	}
 

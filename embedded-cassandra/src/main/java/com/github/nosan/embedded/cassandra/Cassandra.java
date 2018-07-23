@@ -139,9 +139,13 @@ public class Cassandra {
 	 * Retrieves Cassandra's {@link Cluster Cluster} using {@link ClusterFactory ClusterFactory}.
 	 *
 	 * @return Cassandra's Cluster.
+	 * @throws IllegalStateException when cassandra has not been initialized.
 	 * @see ClusterFactory
 	 */
 	public Cluster getCluster() {
+		if (!this.initialized.get()) {
+			throw new IllegalStateException("Cassandra has not been initialized");
+		}
 		if (this.cluster == null) {
 			ExecutableConfig executableConfig = getExecutableConfig();
 			this.cluster = getClusterFactory().getCluster(executableConfig.getConfig(), executableConfig.getVersion());
@@ -152,11 +156,15 @@ public class Cassandra {
 	/**
 	 * Retrieves Cassandra's {@link Session Session} using {@link #getCluster()}.
 	 *
-	 * @return Cassandra's Session.
+	 * @return Cassandra's Session
+	 * @throws IllegalStateException when cassandra has not been initialized.
 	 * @see #getCluster()
 	 */
 
 	public Session getSession() {
+		if (!this.initialized.get()) {
+			throw new IllegalStateException("Cassandra has not been initialized");
+		}
 		if (this.session == null) {
 			this.session = getCluster().connect();
 		}
@@ -168,6 +176,7 @@ public class Cassandra {
 	 * Start the Cassandra Server.
 	 *
 	 * @throws IOException Cassandra's process has not been started correctly.
+	 * @throws IllegalStateException when cassandra has not been initialized.
 	 */
 	public void start() throws IOException {
 		if (this.initialized.compareAndSet(false, true)) {
@@ -178,7 +187,7 @@ public class Cassandra {
 			this.executable.start();
 		}
 		else {
-			throw new IOException("Cassandra has already been started");
+			throw new IllegalStateException("Cassandra has already been initialized");
 		}
 	}
 

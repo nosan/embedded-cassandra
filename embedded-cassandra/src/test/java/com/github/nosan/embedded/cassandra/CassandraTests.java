@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import java.io.IOException;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -38,7 +36,7 @@ public class CassandraTests {
 
 	@Test
 	public void shouldStartCassandraUsingDefaultConfiguration() throws Exception {
-		Cassandra cassandra = new Cassandra(executableBuilder().build());
+		Cassandra cassandra = new Cassandra(execBuilder().build());
 		run(cassandra,
 				() -> CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql")));
 	}
@@ -46,21 +44,21 @@ public class CassandraTests {
 	@Test
 	public void shouldNotStartCassandraIfCassandraHasBeenAlreadyStarted()
 			throws Exception {
-		this.expectedException.expect(IOException.class);
-		this.expectedException.expectMessage("Cassandra has already been started");
-		Cassandra cassandra = new Cassandra(executableBuilder().build());
+		this.expectedException.expect(IllegalStateException.class);
+		this.expectedException.expectMessage("Cassandra has already been initialized");
+		Cassandra cassandra = new Cassandra(execBuilder().build());
 		run(cassandra, cassandra::start);
 	}
 
 	@Test
 	public void shouldBeAbleToRestartCassandra() throws Exception {
-		Cassandra cassandra = new Cassandra(executableBuilder().build());
+		Cassandra cassandra = new Cassandra(execBuilder().build());
 		run(cassandra);
 		run(cassandra);
 	}
 
 
-	private static ExecutableConfigBuilder executableBuilder() {
+	private static ExecutableConfigBuilder execBuilder() {
 		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m"));
 	}
 
