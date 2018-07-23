@@ -1,6 +1,6 @@
 = Embedded Cassandra JUnit5 image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-jupiter.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-jupiter"]
 
-For running `Embedded Cassandra ` with `Junit 5`, `@RegisterExtension` has to be used.
+For running `Embedded Cassandra` with `Junit 5`, `@RegisterExtension` has to be used.
 
 == Usage
 
