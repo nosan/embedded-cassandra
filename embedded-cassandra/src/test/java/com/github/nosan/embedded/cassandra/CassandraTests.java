@@ -39,7 +39,7 @@ public class CassandraTests {
 	@Test
 	public void shouldStartCassandraUsingDefaultConfiguration() throws Exception {
 		Cassandra cassandra = new Cassandra(executableBuilder().build());
-		invoke(cassandra,
+		run(cassandra,
 				() -> CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql")));
 	}
 
@@ -49,14 +49,14 @@ public class CassandraTests {
 		this.expectedException.expect(IOException.class);
 		this.expectedException.expectMessage("Cassandra has already been started");
 		Cassandra cassandra = new Cassandra(executableBuilder().build());
-		invoke(cassandra, cassandra::start);
+		run(cassandra, cassandra::start);
 	}
 
 	@Test
 	public void shouldBeAbleToRestartCassandra() throws Exception {
 		Cassandra cassandra = new Cassandra(executableBuilder().build());
-		invoke(cassandra);
-		invoke(cassandra);
+		run(cassandra);
+		run(cassandra);
 	}
 
 
@@ -64,7 +64,7 @@ public class CassandraTests {
 		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m"));
 	}
 
-	private static void invoke(Cassandra cassandra) throws Exception {
+	private static void run(Cassandra cassandra) throws Exception {
 		try {
 			cassandra.start();
 		}
@@ -73,7 +73,7 @@ public class CassandraTests {
 		}
 	}
 
-	private static void invoke(Cassandra cassandra, Callback callback) throws Exception {
+	private static void run(Cassandra cassandra, Callback callback) throws Exception {
 		try {
 			cassandra.start();
 			callback.run();

@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
@@ -68,7 +69,7 @@ public class Cassandra {
 
 	private Session session;
 
-	private boolean initialized = false;
+	private AtomicBoolean initialized = new AtomicBoolean(false);
 
 
 	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig,
@@ -169,15 +170,16 @@ public class Cassandra {
 	 * @throws IOException Cassandra's process has not been started correctly.
 	 */
 	public void start() throws IOException {
-		if (this.initialized) {
+		if (this.initialized.compareAndSet(false, true)) {
+			ExecutableConfig executableConfig = getExecutableConfig();
+			IRuntimeConfig runtimeConfig = getRuntimeConfig();
+			CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
+			this.executable = cassandraStarter.prepare(executableConfig);
+			this.executable.start();
+		}
+		else {
 			throw new IOException("Cassandra has already been started");
 		}
-		ExecutableConfig executableConfig = getExecutableConfig();
-		IRuntimeConfig runtimeConfig = getRuntimeConfig();
-		CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
-		this.executable = cassandraStarter.prepare(executableConfig);
-		this.executable.start();
-		this.initialized = true;
 	}
 
 	/**
@@ -186,15 +188,16 @@ public class Cassandra {
 	 * @see CassandraExecutable#stop
 	 */
 	public void stop() {
-		if (this.cluster != null) {
-			this.cluster.closeAsync();
-			this.cluster = null;
-			this.session = null;
+		if (this.initialized.compareAndSet(true, false)) {
+			if (this.cluster != null) {
+				this.cluster.closeAsync();
+				this.cluster = null;
+				this.session = null;
+			}
+			if (this.executable != null) {
+				this.executable.stop();
+			}
 		}
-		if (this.executable != null) {
-			this.executable.stop();
-		}
-		this.initialized = false;
 	}
 
 }

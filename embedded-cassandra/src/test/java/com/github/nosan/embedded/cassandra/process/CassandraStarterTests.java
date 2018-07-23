@@ -52,7 +52,7 @@ public class CassandraStarterTests {
 	@Test
 	public void shouldStartCassandraWithNativeTransport() throws Exception {
 		ExecutableConfig executableConfig = executableBuilder().build();
-		invoke(executableConfig, () -> {
+		run(executableConfig, () -> {
 			try (Cluster cluster = cluster(executableConfig.getConfig())) {
 				CqlScriptUtils.executeScripts(cluster.connect(), new ClassPathCqlScript("init.cql"));
 			}
@@ -66,13 +66,13 @@ public class CassandraStarterTests {
 		Config config = new Config();
 		config.setNativeTransportPort(9042);
 		executableConfig.setConfig(config);
-		invoke(executableConfig);
-		invoke(executableConfig);
+		run(executableConfig);
+		run(executableConfig);
 	}
 
 	@Test
 	public void shouldBePossibleToStartMultiplyInstances() throws Exception {
-		invoke(executableBuilder().build(), () -> invoke(executableBuilder().build()));
+		run(executableBuilder().build(), () -> run(executableBuilder().build()));
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class CassandraStarterTests {
 		this.throwable.expectMessage("Missing required directive CommitLogSync");
 		ExecutableConfig executableConfig = executableBuilder().build();
 		executableConfig.getConfig().setCommitlogSync(null);
-		invoke(executableConfig);
+		run(executableConfig);
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class CassandraStarterTests {
 		this.throwable.expectMessage("Could not start a process");
 		ExecutableConfig executableConfig = new ExecutableConfigBuilder()
 				.timeout(Duration.ofSeconds(1)).build();
-		invoke(executableConfig);
+		run(executableConfig);
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class CassandraStarterTests {
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(true);
-		invoke(executableConfig, () -> new Socket(executableConfig.getConfig().getRpcAddress(),
+		run(executableConfig, () -> new Socket(executableConfig.getConfig().getRpcAddress(),
 				executableConfig.getConfig().getRpcPort()));
 	}
 
@@ -112,7 +112,7 @@ public class CassandraStarterTests {
 		Config config = executableConfig.getConfig();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(false);
-		invoke(executableConfig, () -> new Socket(executableConfig.getConfig().getRpcAddress(),
+		run(executableConfig, () -> new Socket(executableConfig.getConfig().getRpcAddress(),
 				executableConfig.getConfig().getRpcPort()));
 
 	}
@@ -126,15 +126,15 @@ public class CassandraStarterTests {
 				.withPort(config.getNativeTransportPort()).build();
 	}
 
-	private static void invoke(ExecutableConfig executableConfig) throws Exception {
-		invoke(executableConfig, () -> {
+	private static void run(ExecutableConfig executableConfig) throws Exception {
+		run(executableConfig, () -> {
 		});
 	}
 
-	private static void invoke(ExecutableConfig executableConfig, Callback callback)
+	private static void run(ExecutableConfig executableConfig, Callback callback)
 			throws Exception {
-		CassandraExecutable executable = new CassandraStarter(
-				new RuntimeConfigBuilder(log).build()).prepare(executableConfig);
+		CassandraExecutable executable =
+				new CassandraStarter(new RuntimeConfigBuilder(log).build()).prepare(executableConfig);
 		try {
 			executable.start();
 			callback.run();
