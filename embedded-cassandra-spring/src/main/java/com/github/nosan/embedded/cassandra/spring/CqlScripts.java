@@ -24,16 +24,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Container annotation that aggregates several {@link CqlScript} annotations.
- * <p>Can be used natively, declaring several nested {@code @CqlScript} annotations.
+ * Container annotation that aggregates several {@link Cql} annotations.
+ * <p>Can be used natively, declaring several nested {@code @Cql} annotations.
  * Can also be used in conjunction with Java 8's support for repeatable
- * annotations, where {@code @CqlScript} can simply be declared several times on the
+ * annotations, where {@code @Cql} can simply be declared several times on the
  * same method, implicitly generating this container annotation.
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
  *
  * @author Dmytro Nosan
- * @see CqlScript
+ * @see Cql
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -42,10 +42,10 @@ import java.lang.annotation.Target;
 public @interface CqlScripts {
 
 	/**
-	 * An array of one or more {@link CqlScript @CqlScript} declarations.
+	 * An array of one or more {@link Cql @Cql} declarations.
 	 *
 	 * @return CQL scripts to use.
 	 */
-	CqlScript[] value();
+	Cql[] value();
 
 }

@@ -35,7 +35,7 @@ import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CqlScript}.
+ * Tests for {@link Cql}.
  *
  * @author Dmytro Nosan
  */
@@ -54,9 +54,9 @@ public class CqlScriptNamedTests {
 	private Cluster customCluster;
 
 	@Test
-	@CqlScript(cluster = "customCluster", scripts = {"/keyspace.cql", "/users.cql", "/users-data.cql"})
-	@CqlScript(cluster = "customCluster", statements = "DROP KEYSPACE test",
-			executionPhase = CqlScript.ExecutionPhase.AFTER_TEST_METHOD)
+	@Cql(cluster = "customCluster", scripts = {"/keyspace.cql", "/users.cql", "/users-data.cql"})
+	@Cql(cluster = "customCluster", statements = "DROP KEYSPACE test",
+			executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void shouldHaveUser() {
 		try (Session session = this.customCluster.connect()) {
 			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
@@ -65,7 +65,7 @@ public class CqlScriptNamedTests {
 	}
 
 	@Test
-	@CqlScript(cluster = "customCluster", scripts = {"/keyspace.cql", "/users.cql"})
+	@Cql(cluster = "customCluster", scripts = {"/keyspace.cql", "/users.cql"})
 	public void shouldNotHaveUser() {
 		try (Session session = this.customCluster.connect()) {
 			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");

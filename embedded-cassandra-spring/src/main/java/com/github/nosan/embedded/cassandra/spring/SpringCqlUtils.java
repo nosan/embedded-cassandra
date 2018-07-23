@@ -37,17 +37,17 @@ import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
  *
  * @author Dmytro Nosan
  */
-abstract class SpringCqlScriptUtils {
+abstract class SpringCqlUtils {
 
 	/**
-	 * Retrieves {@link CqlScript CqlScripts} using {@link ResourcePatternResolver} and {@link CqlScriptConfig}.
+	 * Retrieves {@link CqlScript CqlScripts} using {@link ResourcePatternResolver} and {@link CqlConfig}.
 	 *
 	 * @param resolver {@link ResourcePatternResolver Resolver} for Spring resources.
-	 * @param config {@link CqlScriptConfig}
+	 * @param config {@link CqlConfig}
 	 * @return CQL scripts.
 	 * @throws IOException if an I/O error occurs
 	 */
-	static CqlScript[] getCqlScripts(ResourcePatternResolver resolver, CqlScriptConfig config) throws IOException {
+	static CqlScript[] getCqlScripts(ResourcePatternResolver resolver, CqlConfig config) throws IOException {
 		List<CqlScript> cqlScripts = new ArrayList<>();
 
 		String[] scripts = config.getScripts();

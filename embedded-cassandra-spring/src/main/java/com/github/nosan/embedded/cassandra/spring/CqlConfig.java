@@ -20,11 +20,11 @@ import java.util.Arrays;
 
 /**
  * {@code CqlScriptConfig} encapsulates the
- * attributes declared via {@link EmbeddedCassandra} or {@link CqlScript}.
+ * attributes declared via {@link EmbeddedCassandra} or {@link Cql}.
  *
  * @author Dmytro Nosan
  */
-class CqlScriptConfig {
+class CqlConfig {
 
 	private final Class<?> testClass;
 
@@ -34,7 +34,7 @@ class CqlScriptConfig {
 
 	private final String encoding;
 
-	CqlScriptConfig(Class<?> testClass, String[] scripts, String[] statements, String encoding) {
+	CqlConfig(Class<?> testClass, String[] scripts, String[] statements, String encoding) {
 		this.testClass = testClass;
 		this.scripts = scripts;
 		this.statements = statements;

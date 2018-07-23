@@ -27,24 +27,24 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * {@code @CqlScript} is used to annotate a test method to configure
+ * {@code @Cql} is used to annotate a test method to configure
  * CQL {@link #scripts} and {@link #statements} to be executed against a given
  * cluster during integration tests.
- * <p>Script execution is performed by the {@link CqlScriptsTestExecutionListener},
+ * <p>Script execution is performed by the {@link CqlTestExecutionListener},
  * which is enabled by default.
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em> with attribute overrides.
  *
  * @author Dmytro Nosan
  * @see CqlScripts
- * @see CqlScriptsTestExecutionListener
+ * @see CqlTestExecutionListener
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
 @Repeatable(CqlScripts.class)
-public @interface CqlScript {
+public @interface Cql {
 
 	/**
 	 * Alias for {@link #scripts}.
@@ -123,7 +123,7 @@ public @interface CqlScript {
 	 * <p>Defaults to an empty string, requiring that one of the following is
 	 * true:
 	 * <ol>
-	 * <li>An explicit bean name is defined in a {@code @CqlScript}.
+	 * <li>An explicit bean name is defined in a {@code @Cql}.
 	 * <li>There is only one bean of type {@code Cluster} in the test's
 	 * {@code ApplicationContext}.</li>
 	 * <li>The {@code Cluster} to use is named {@code "cluster"}.</li>

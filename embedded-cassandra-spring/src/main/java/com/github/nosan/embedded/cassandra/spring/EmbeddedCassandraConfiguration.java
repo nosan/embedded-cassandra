@@ -196,8 +196,8 @@ class EmbeddedCassandraConfiguration {
 			String[] statements = env.getProperty(STATEMENTS, String[].class, new String[0]);
 			Class<?> testClass = env.getProperty(TEST_CLASS, Class.class);
 			String encoding = env.getProperty(ENCODING);
-			return SpringCqlScriptUtils
-					.getCqlScripts(context, new CqlScriptConfig(testClass, scripts, statements, encoding));
+			return SpringCqlUtils
+					.getCqlScripts(context, new CqlConfig(testClass, scripts, statements, encoding));
 
 		}
 
