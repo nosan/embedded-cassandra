@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import java.io.IOException;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -38,33 +36,33 @@ public class CassandraTests {
 
 	@Test
 	public void shouldStartCassandraUsingDefaultConfiguration() throws Exception {
-		Cassandra cassandra = new Cassandra(executableBuilder().build());
-		invoke(cassandra,
+		Cassandra cassandra = new Cassandra(execBuilder().build());
+		run(cassandra,
 				() -> CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql")));
 	}
 
 	@Test
 	public void shouldNotStartCassandraIfCassandraHasBeenAlreadyStarted()
 			throws Exception {
-		this.expectedException.expect(IOException.class);
-		this.expectedException.expectMessage("Cassandra has already been started");
-		Cassandra cassandra = new Cassandra(executableBuilder().build());
-		invoke(cassandra, cassandra::start);
+		this.expectedException.expect(IllegalStateException.class);
+		this.expectedException.expectMessage("Cassandra has already been initialized");
+		Cassandra cassandra = new Cassandra(execBuilder().build());
+		run(cassandra, cassandra::start);
 	}
 
 	@Test
 	public void shouldBeAbleToRestartCassandra() throws Exception {
-		Cassandra cassandra = new Cassandra(executableBuilder().build());
-		invoke(cassandra);
-		invoke(cassandra);
+		Cassandra cassandra = new Cassandra(execBuilder().build());
+		run(cassandra);
+		run(cassandra);
 	}
 
 
-	private static ExecutableConfigBuilder executableBuilder() {
+	private static ExecutableConfigBuilder execBuilder() {
 		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m"));
 	}
 
-	private static void invoke(Cassandra cassandra) throws Exception {
+	private static void run(Cassandra cassandra) throws Exception {
 		try {
 			cassandra.start();
 		}
@@ -73,7 +71,7 @@ public class CassandraTests {
 		}
 	}
 
-	private static void invoke(Cassandra cassandra, Callback callback) throws Exception {
+	private static void run(Cassandra cassandra, Callback callback) throws Exception {
 		try {
 			cassandra.start();
 			callback.run();

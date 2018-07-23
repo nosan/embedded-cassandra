@@ -94,11 +94,13 @@ public final class CassandraProcess
 		Processors.connect(process.getReader(), StreamToLineProcessor.wrap(logWatchProcessor));
 		Processors.connect(process.getError(), StreamToLineProcessor.wrap(processOutput.getError()));
 
-		logWatchProcessor.waitForResult(executableConfig.getTimeout().toMillis());
+		long millis = executableConfig.getTimeout().toMillis();
+		logWatchProcessor.waitForResult(millis);
 
 		if (!logWatchProcessor.isInitWithSuccess()) {
-			String msg = "Could not start a process '" + processId + "'. " + logWatchProcessor.getFailureFound() +
-					"\nOutput:\n----- START ----- \n" + logWatchProcessor.getOutput() + "\n----- END ----- \n" +
+			String msg = "Could not start a process '" + processId + "'. Timeout : " + millis +
+					" ms.\nFailure:" + logWatchProcessor.getFailureFound() +
+					"\nOutput:\n----- START ----- \n" + logWatchProcessor.getOutput() + "----- END ----- \n" +
 					"Support Url:\t" + supportConfig.getSupportUrl() + "\n";
 			throw new IOException(msg);
 		}

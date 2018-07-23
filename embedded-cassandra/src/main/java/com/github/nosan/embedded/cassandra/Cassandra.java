@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
@@ -45,6 +46,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  *        }
  *    }
  * }</pre>
+ * Note! This class is not a {@code Thread Safe}.
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
@@ -68,7 +70,7 @@ public class Cassandra {
 
 	private Session session;
 
-	private boolean initialized = false;
+	private AtomicBoolean initialized = new AtomicBoolean(false);
 
 
 	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig,
@@ -138,9 +140,13 @@ public class Cassandra {
 	 * Retrieves Cassandra's {@link Cluster Cluster} using {@link ClusterFactory ClusterFactory}.
 	 *
 	 * @return Cassandra's Cluster.
+	 * @throws IllegalStateException Cassandra has not been initialized.
 	 * @see ClusterFactory
 	 */
 	public Cluster getCluster() {
+		if (!this.initialized.get()) {
+			throw new IllegalStateException("Cassandra has not been initialized");
+		}
 		if (this.cluster == null) {
 			ExecutableConfig executableConfig = getExecutableConfig();
 			this.cluster = getClusterFactory().getCluster(executableConfig.getConfig(), executableConfig.getVersion());
@@ -151,11 +157,15 @@ public class Cassandra {
 	/**
 	 * Retrieves Cassandra's {@link Session Session} using {@link #getCluster()}.
 	 *
-	 * @return Cassandra's Session.
+	 * @return Cassandra's Session
+	 * @throws IllegalStateException Cassandra has not been initialized.
 	 * @see #getCluster()
 	 */
 
 	public Session getSession() {
+		if (!this.initialized.get()) {
+			throw new IllegalStateException("Cassandra has not been initialized");
+		}
 		if (this.session == null) {
 			this.session = getCluster().connect();
 		}
@@ -167,17 +177,19 @@ public class Cassandra {
 	 * Start the Cassandra Server.
 	 *
 	 * @throws IOException Cassandra's process has not been started correctly.
+	 * @throws IllegalStateException Cassandra has already been initialized.
 	 */
 	public void start() throws IOException {
-		if (this.initialized) {
-			throw new IOException("Cassandra has already been started");
+		if (this.initialized.compareAndSet(false, true)) {
+			ExecutableConfig executableConfig = getExecutableConfig();
+			IRuntimeConfig runtimeConfig = getRuntimeConfig();
+			CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
+			this.executable = cassandraStarter.prepare(executableConfig);
+			this.executable.start();
 		}
-		ExecutableConfig executableConfig = getExecutableConfig();
-		IRuntimeConfig runtimeConfig = getRuntimeConfig();
-		CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
-		this.executable = cassandraStarter.prepare(executableConfig);
-		this.executable.start();
-		this.initialized = true;
+		else {
+			throw new IllegalStateException("Cassandra has already been initialized");
+		}
 	}
 
 	/**
@@ -186,15 +198,16 @@ public class Cassandra {
 	 * @see CassandraExecutable#stop
 	 */
 	public void stop() {
-		if (this.cluster != null) {
-			this.cluster.closeAsync();
-			this.cluster = null;
-			this.session = null;
+		if (this.initialized.compareAndSet(true, false)) {
+			if (this.cluster != null) {
+				this.cluster.closeAsync();
+				this.cluster = null;
+				this.session = null;
+			}
+			if (this.executable != null) {
+				this.executable.stop();
+			}
 		}
-		if (this.executable != null) {
-			this.executable.stop();
-		}
-		this.initialized = false;
 	}
 
 }

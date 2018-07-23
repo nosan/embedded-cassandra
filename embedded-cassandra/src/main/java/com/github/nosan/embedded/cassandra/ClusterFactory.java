@@ -22,6 +22,7 @@ import com.datastax.driver.core.Cluster;
  * Strategy to create {@link Cluster}.
  *
  * @author Dmytro Nosan
+ * @see DefaultClusterFactory
  */
 public interface ClusterFactory {
 	/**

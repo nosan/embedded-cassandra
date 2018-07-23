@@ -55,7 +55,6 @@ public class ExecutableConfigBuilder extends AbstractBuilder<ExecutableConfig> {
 		property(VERSION).overwriteDefault(Version.LATEST);
 		property(LOGBACK).overwriteDefault(ClassLoader.getSystemResource("embedded/cassandra/logback.xml"));
 		property(JVM_OPTIONS).overwriteDefault(new JvmOptions());
-
 	}
 
 	/**
