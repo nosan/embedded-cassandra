@@ -22,6 +22,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.QueryOptions;
+import com.datastax.driver.core.SocketOptions;
 
 /**
  * {@link ClusterFactory} with a default strategy.
@@ -41,18 +42,26 @@ public class DefaultClusterFactory implements ClusterFactory {
 		queryOptions.setRefreshSchemaIntervalMillis(0);
 
 		PoolingOptions poolingOptions = new PoolingOptions()
-				.setPoolTimeoutMillis(30000)
+				.setPoolTimeoutMillis(10000)
 				.setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
-				.setMaxRequestsPerConnection(HostDistance.REMOTE, 32768);
+				.setMaxRequestsPerConnection(HostDistance.REMOTE, 2048)
+				.setConnectionsPerHost(HostDistance.LOCAL, 4, 10)
+				.setConnectionsPerHost(HostDistance.REMOTE, 2, 4);
 
-		return configure(Cluster.builder()
+		SocketOptions socketOptions = new SocketOptions();
+		socketOptions.setConnectTimeoutMillis(10000);
+		socketOptions.setReadTimeoutMillis(10000);
+
+		return Objects.requireNonNull(configure(Cluster.builder()
 				.addContactPoint(config.getRpcAddress())
+				.withPort(config.getNativeTransportPort()))
+				.withSocketOptions(socketOptions)
 				.withQueryOptions(queryOptions)
 				.withPoolingOptions(poolingOptions)
 				.withoutJMXReporting()
-				.withoutMetrics()
-				.withPort(config.getNativeTransportPort()))
+				.withoutMetrics(), "Cluster.Builder must not be null")
 				.build();
+
 	}
 
 	protected Cluster.Builder configure(Cluster.Builder builder) {

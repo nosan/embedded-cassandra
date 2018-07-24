@@ -43,7 +43,6 @@ public class RuntimeConfigBuilder extends de.flapdoodle.embed.process.config.Run
 				Processors.namedConsole("[Cassandra > error]"),
 				Processors.namedConsole("[Cassandra > commands]"));
 		processOutput().overwriteDefault(processOutput);
-		daemonProcess(false);
 	}
 
 	/**
@@ -60,7 +59,6 @@ public class RuntimeConfigBuilder extends de.flapdoodle.embed.process.config.Run
 				Processors.logTo(logger, Slf4jLevel.ERROR),
 				Processors.logTo(logger, Slf4jLevel.INFO));
 		processOutput().overwriteDefault(processOutput);
-		daemonProcess(false);
 	}
 
 }

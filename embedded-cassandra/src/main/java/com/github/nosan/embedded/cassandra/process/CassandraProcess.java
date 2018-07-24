@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.ISupportConfig;
@@ -64,7 +65,7 @@ public final class CassandraProcess implements IStopable {
 	 * <li>Create a command line</li>
 	 * <li>Create a process</li>
 	 * <li>Watching logs</li>
-	 * <li>Check Transport connection</li>
+	 * <li>Waits for transport connection</li>
 	 * </ol>.
 	 *
 	 * @throws IOException IOCassandra's process has not been started correctly.
@@ -83,20 +84,17 @@ public final class CassandraProcess implements IStopable {
 		Processors.connect(this.process.getReader(), StreamToLineProcessor.wrap(logWatch));
 		Processors.connect(this.process.getError(), StreamToLineProcessor.wrap(processOutput.getError()));
 
-		long millis = executableConfig.getTimeout().toMillis();
-		logWatch.waitForResult(millis);
 
-		if (!logWatch.isInitWithSuccess()) {
-			String msg = "Could not start a process '" + getPid(this.process) + "'. Timeout : " + millis + " ms." +
-					"\nFailure:" + logWatch.getFailureFound() + "\nOutput:\n----- START ----- \n" +
-					logWatch.getOutput() + "----- END ----- \n" + "Support Url:\t" +
-					executableConfig.supportConfig().getSupportUrl() + "\n";
-			throw new IOException(msg);
+		long start = System.nanoTime();
+		Duration timeout = executableConfig.getTimeout();
+		logWatch.waitForResult(timeout.toMillis());
+		if (!logWatch.isInitWithSuccess() && logWatch.getFailureFound() != null) {
+			throw new IOException(
+					"Could not start a process '" + getPid(this.process) + "'. " + logWatch.getFailureFound());
 		}
-
-		TransportUtils.check(executableConfig.getConfig(), 10, Duration.ofSeconds(2));
+		long await = Math.max(timeout.toNanos() - (System.nanoTime() - start), TimeUnit.SECONDS.toNanos(15));
+		TransportUtils.await(executableConfig.getConfig(), Duration.ofNanos(await));
 		log.info("Cassandra process '{}' has been started.", getPid(this.process));
-
 	}
 
 	/**

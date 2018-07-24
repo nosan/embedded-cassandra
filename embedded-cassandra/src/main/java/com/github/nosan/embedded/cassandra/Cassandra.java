@@ -17,7 +17,7 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.io.UncheckedIOException;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
@@ -46,7 +46,6 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  *        }
  *    }
  * }</pre>
- * Note! This class is not a {@code Thread Safe}.
  *
  * @author Dmytro Nosan
  * @see RuntimeConfigBuilder
@@ -64,13 +63,11 @@ public class Cassandra {
 
 	private final ExecutableConfig executableConfig;
 
-	private CassandraExecutable executable;
+	private volatile CassandraExecutable executable;
 
-	private Cluster cluster;
+	private volatile Cluster cluster;
 
-	private Session session;
-
-	private AtomicBoolean initialized = new AtomicBoolean(false);
+	private volatile Session session;
 
 
 	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig,
@@ -112,7 +109,7 @@ public class Cassandra {
 	/**
 	 * Retrieves {@link ExecutableConfig Executable Config}.
 	 *
-	 * @return executable config.
+	 * @return Executable Config.
 	 */
 	public ExecutableConfig getExecutableConfig() {
 		return this.executableConfig;
@@ -121,7 +118,7 @@ public class Cassandra {
 	/**
 	 * Retrieves {@link IRuntimeConfig Runtime Config}.
 	 *
-	 * @return runtime config.
+	 * @return Runtime Config.
 	 */
 	public IRuntimeConfig getRuntimeConfig() {
 		return this.runtimeConfig;
@@ -130,62 +127,81 @@ public class Cassandra {
 	/**
 	 * Retrieves {@link ClusterFactory Cluster Factory}.
 	 *
-	 * @return cluster factory to use.
+	 * @return Cluster Factory to use.
 	 */
 	public ClusterFactory getClusterFactory() {
 		return this.clusterFactory;
 	}
 
 	/**
-	 * Retrieves Cassandra's {@link Cluster Cluster} using {@link ClusterFactory ClusterFactory}.
+	 * Lazy initialize Cassandra's {@link Cluster Cluster} using {@link ClusterFactory ClusterFactory}.
+	 * Note! This method should be called only after {@link #start()} method.
 	 *
 	 * @return Cassandra's Cluster.
-	 * @throws IllegalStateException Cassandra has not been initialized.
 	 * @see ClusterFactory
 	 */
 	public Cluster getCluster() {
-		if (!this.initialized.get()) {
-			throw new IllegalStateException("Cassandra has not been initialized");
-		}
 		if (this.cluster == null) {
-			ExecutableConfig executableConfig = getExecutableConfig();
-			this.cluster = getClusterFactory().getCluster(executableConfig.getConfig(), executableConfig.getVersion());
+			synchronized (this) {
+				if (this.cluster == null) {
+					ExecutableConfig executableConfig = getExecutableConfig();
+					this.cluster = getClusterFactory()
+							.getCluster(executableConfig.getConfig(), executableConfig.getVersion());
+				}
+			}
 		}
 		return this.cluster;
 	}
 
 	/**
-	 * Retrieves Cassandra's {@link Session Session} using {@link #getCluster()}.
+	 * Lazy initialize Cassandra's {@link Session Session} using {@link #getCluster() Cluster}.
+	 * Note! This method should be called only after {@link #start()} method.
 	 *
 	 * @return Cassandra's Session
-	 * @throws IllegalStateException Cassandra has not been initialized.
 	 * @see #getCluster()
 	 */
-
 	public Session getSession() {
-		if (!this.initialized.get()) {
-			throw new IllegalStateException("Cassandra has not been initialized");
-		}
 		if (this.session == null) {
-			this.session = getCluster().connect();
+			synchronized (this) {
+				if (this.session == null) {
+					this.session = getCluster().connect();
+				}
+			}
 		}
 		return this.session;
 	}
 
 
 	/**
-	 * Start the Cassandra Server.
+	 * Starts the Cassandra. {@code Session} and {@code Cluster} will not be initialized.
+	 * This method registers a shutdown hook if {@link IRuntimeConfig#isDaemonProcess()} was set as a {@code true}.
 	 *
-	 * @throws IOException Cassandra's process has not been started correctly.
+	 * @throws UncheckedIOException Cassandra's process has not been started correctly.
 	 * @throws IllegalStateException Cassandra has already been initialized.
+	 * @see CassandraStarter
 	 */
-	public void start() throws IOException {
-		if (this.initialized.compareAndSet(false, true)) {
-			ExecutableConfig executableConfig = getExecutableConfig();
-			IRuntimeConfig runtimeConfig = getRuntimeConfig();
-			CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
-			this.executable = cassandraStarter.prepare(executableConfig);
-			this.executable.start();
+	public void start() {
+		if (this.executable == null) {
+			synchronized (this) {
+				if (this.executable == null) {
+					IRuntimeConfig runtimeConfig = getRuntimeConfig();
+					ExecutableConfig executableConfig = getExecutableConfig();
+					if (runtimeConfig.isDaemonProcess()) {
+						Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+					}
+					try {
+						CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
+						this.executable = cassandraStarter.prepare(executableConfig);
+						this.executable.start();
+					}
+					catch (IOException ex) {
+						throw new UncheckedIOException(ex);
+					}
+				}
+				else {
+					throw new IllegalStateException("Cassandra has already been initialized");
+				}
+			}
 		}
 		else {
 			throw new IllegalStateException("Cassandra has already been initialized");
@@ -193,20 +209,33 @@ public class Cassandra {
 	}
 
 	/**
-	 * Stop the Cassandra Server.
-	 *
-	 * @see CassandraExecutable#stop
+	 * Stops the Cassandra. This method stops not only Cassandra  but calls a close method against {@code
+	 * Cluster},
+	 * {@code Session}.
 	 */
 	public void stop() {
-		if (this.initialized.compareAndSet(true, false)) {
-			if (this.cluster != null) {
-				this.cluster.closeAsync();
-				this.cluster = null;
+		synchronized (this) {
+			if (this.session != null) {
+				close(() -> this.session.close());
 				this.session = null;
 			}
-			if (this.executable != null) {
-				this.executable.stop();
+			if (this.cluster != null) {
+				close(() -> this.cluster.close());
+				this.cluster = null;
 			}
+			if (this.executable != null) {
+				close(() -> this.executable.stop());
+				this.executable = null;
+			}
+		}
+	}
+
+	private static void close(Runnable runnable) {
+		try {
+			runnable.run();
+		}
+		catch (Exception ex) {
+			log.error(ex.getMessage(), ex);
 		}
 	}
 

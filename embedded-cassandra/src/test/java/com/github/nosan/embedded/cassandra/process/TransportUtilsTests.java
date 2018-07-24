@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.Duration;
 
-import de.flapdoodle.embed.process.runtime.Network;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -42,7 +41,7 @@ public class TransportUtilsTests {
 		this.throwable.expect(IOException.class);
 		this.throwable.expectMessage("Cassandra process transport has not been started correctly.");
 		Config config = new Config();
-		TransportUtils.check(config, 1, Duration.ZERO);
+		TransportUtils.await(config, Duration.ofSeconds(1));
 	}
 
 
@@ -51,28 +50,27 @@ public class TransportUtilsTests {
 		Config config = new Config();
 		config.setStartRpc(false);
 		config.setStartNativeTransport(false);
-		TransportUtils.check(config, 1, Duration.ZERO);
+		TransportUtils.await(config, Duration.ofSeconds(1));
 	}
 
 	@Test
 	public void rpcTransport() throws IOException {
-		Config config = new Config();
-		config.setRpcPort(Network.getFreeServerPort());
-		config.setStartRpc(true);
-		config.setStartNativeTransport(false);
-		try (ServerSocket ignore = new ServerSocket(config.getRpcPort())) {
-			TransportUtils.check(config, 1, Duration.ZERO);
+		try (ServerSocket ss = new ServerSocket(0)) {
+			Config config = new Config();
+			config.setStartRpc(true);
+			config.setStartNativeTransport(false);
+			config.setRpcPort(ss.getLocalPort());
+			TransportUtils.await(config, Duration.ofSeconds(1));
 		}
 
 	}
 
 	@Test
 	public void nativeTransport() throws IOException {
-		Config config = new Config();
-		config.setNativeTransportPort(Network.getFreeServerPort());
-		try (ServerSocket ignore = new ServerSocket(config.getNativeTransportPort())) {
-			TransportUtils.check(config, 1, Duration.ZERO);
-
+		try (ServerSocket ss = new ServerSocket(0)) {
+			Config config = new Config();
+			config.setNativeTransportPort(ss.getLocalPort());
+			TransportUtils.await(config, Duration.ofSeconds(1));
 		}
 	}
 }

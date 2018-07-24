@@ -35,15 +35,7 @@ public class CassandraTests {
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@Test
-	public void shouldStartCassandraUsingDefaultConfiguration() throws Exception {
-		Cassandra cassandra = new Cassandra(execBuilder().build());
-		run(cassandra,
-				() -> CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql")));
-	}
-
-	@Test
-	public void shouldNotStartCassandraIfCassandraHasBeenAlreadyStarted()
-			throws Exception {
+	public void shouldNotStartCassandraIfCassandraHasBeenAlreadyStarted() {
 		this.expectedException.expect(IllegalStateException.class);
 		this.expectedException.expectMessage("Cassandra has already been initialized");
 		Cassandra cassandra = new Cassandra(execBuilder().build());
@@ -51,10 +43,10 @@ public class CassandraTests {
 	}
 
 	@Test
-	public void shouldBeAbleToRestartCassandra() throws Exception {
+	public void shouldBeAbleToRestartCassandra() {
 		Cassandra cassandra = new Cassandra(execBuilder().build());
-		run(cassandra);
-		run(cassandra);
+		run(cassandra, () -> CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql")));
+		run(cassandra, () -> CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql")));
 	}
 
 
@@ -62,29 +54,15 @@ public class CassandraTests {
 		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx384m", "-Xms384m"));
 	}
 
-	private static void run(Cassandra cassandra) throws Exception {
+	private static void run(Cassandra cassandra, Runnable runnable) {
 		try {
 			cassandra.start();
+			runnable.run();
 		}
 		finally {
 			cassandra.stop();
 		}
 	}
 
-	private static void run(Cassandra cassandra, Callback callback) throws Exception {
-		try {
-			cassandra.start();
-			callback.run();
-		}
-		finally {
-			cassandra.stop();
-		}
-	}
-
-	interface Callback {
-
-		void run() throws Exception;
-
-	}
 
 }

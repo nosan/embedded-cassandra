@@ -22,13 +22,11 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Config;
 
 /**
- * Utility class to check cassandra is ready to accept connections.
+ * Utility class to await when cassandra is ready to accept connections.
  *
  * @author Dmytro Nosan
  */
@@ -36,44 +34,39 @@ abstract class TransportUtils {
 
 	private static final String LOCALHOST = "localhost";
 
-	private static final Logger log = LoggerFactory.getLogger(TransportUtils.class);
-
-
 	/**
-	 * Check whether cassandra transport is ready or not.
+	 * Waits when Cassandra is ready to accept connections.
 	 *
 	 * @param config Cassandra's config.
-	 * @param attempts how many times to try to connect.
-	 * @param wait how long to wait between connections.
+	 * @param timeout how long to wait between connections.
 	 * @throws IOException Cassandra transport has not been started.
 	 */
-	static void check(Config config, int attempts, Duration wait) throws IOException {
-		if (isEnabled(config) && !isConnected(config, attempts, wait)) {
-			throw new IOException("Cassandra process transport has not been started correctly.");
+	static void await(Config config, Duration timeout) throws IOException {
+		if (!isEnabled(config)) {
+			return;
 		}
+		long start = System.nanoTime();
+		long rem = timeout.toNanos();
+		do {
+			if (tryConnect(config)) {
+				return;
+			}
+			if (rem > 0) {
+				try {
+					Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
+			}
+			rem = timeout.toNanos() - (System.nanoTime() - start);
+		}
+		while (rem > 0);
+		throw new IOException("Cassandra process transport has not been started correctly.");
 	}
 
 	private static boolean isEnabled(Config config) {
 		return config.isStartNativeTransport() || config.isStartRpc();
-	}
-
-	private static boolean isConnected(Config config, int maxAttempts, Duration sleep) {
-		for (int i = 0; i < maxAttempts; i++) {
-			log.debug("Trying to connect to cassandra... Attempt:" + (i + 1));
-			boolean connected = tryConnect(config);
-			if (connected) {
-				log.info("Connection to Cassandra has been established successfully.");
-				return true;
-			}
-			try {
-				TimeUnit.MILLISECONDS.sleep(sleep.toMillis());
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
-		}
-		log.error("Connection to Cassandra has not been established...");
-		return false;
 	}
 
 	private static boolean tryConnect(Config config) {

@@ -23,6 +23,7 @@ import com.datastax.driver.core.MetricsOptions;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.QueryOptions;
+import com.datastax.driver.core.SocketOptions;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +46,11 @@ public class DefaultClusterFactoryTests {
 		ProtocolOptions protocolOptions = configuration.getProtocolOptions();
 		assertThat(protocolOptions.getPort()).isEqualTo(9042);
 
+
+		SocketOptions socketOptions = configuration.getSocketOptions();
+		assertThat(socketOptions.getConnectTimeoutMillis()).isEqualTo(10000);
+		assertThat(socketOptions.getReadTimeoutMillis()).isEqualTo(10000);
+
 		MetricsOptions metricsOptions = configuration.getMetricsOptions();
 		assertThat(metricsOptions.isEnabled()).isFalse();
 		assertThat(metricsOptions.isJMXReportingEnabled()).isFalse();
@@ -57,8 +63,12 @@ public class DefaultClusterFactoryTests {
 
 		PoolingOptions poolingOptions = configuration.getPoolingOptions();
 		assertThat(poolingOptions.getMaxRequestsPerConnection(HostDistance.LOCAL)).isEqualTo(32768);
-		assertThat(poolingOptions.getMaxRequestsPerConnection(HostDistance.REMOTE)).isEqualTo(32768);
-		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(30000);
+		assertThat(poolingOptions.getMaxRequestsPerConnection(HostDistance.REMOTE)).isEqualTo(2048);
+		assertThat(poolingOptions.getCoreConnectionsPerHost(HostDistance.LOCAL)).isEqualTo(4);
+		assertThat(poolingOptions.getMaxConnectionsPerHost(HostDistance.LOCAL)).isEqualTo(10);
+		assertThat(poolingOptions.getCoreConnectionsPerHost(HostDistance.REMOTE)).isEqualTo(2);
+		assertThat(poolingOptions.getMaxConnectionsPerHost(HostDistance.REMOTE)).isEqualTo(4);
+		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(10000);
 
 
 	}

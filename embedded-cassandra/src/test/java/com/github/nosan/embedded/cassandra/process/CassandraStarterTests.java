@@ -43,8 +43,7 @@ import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
  */
 public class CassandraStarterTests {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(CassandraStarterTests.class);
+	private static final Logger log = LoggerFactory.getLogger(CassandraStarterTests.class);
 
 	@Rule
 	public ExpectedException throwable = ExpectedException.none();
@@ -57,17 +56,6 @@ public class CassandraStarterTests {
 				CqlScriptUtils.executeScripts(cluster.connect(), new ClassPathCqlScript("init.cql"));
 			}
 		});
-	}
-
-	@Test
-	public void shouldBeRestartedUsingNativeTransportPort() throws Exception {
-		ExecutableConfig executableConfig =
-				execBuilder().build();
-		Config config = new Config();
-		config.setNativeTransportPort(9042);
-		executableConfig.setConfig(config);
-		run(executableConfig);
-		run(executableConfig);
 	}
 
 	@Test
@@ -127,24 +115,22 @@ public class CassandraStarterTests {
 	}
 
 	private static void run(ExecutableConfig executableConfig) throws Exception {
-		run(executableConfig, () -> {
-		});
+		run(executableConfig, System.out::println);
 	}
 
-	private static void run(ExecutableConfig executableConfig, Callback callback)
-			throws Exception {
+	private static void run(ExecutableConfig executableConfig, ExceptionRunnable runnable) throws Exception {
 		CassandraExecutable executable =
 				new CassandraStarter(new RuntimeConfigBuilder(log).build()).prepare(executableConfig);
 		try {
 			executable.start();
-			callback.run();
+			runnable.run();
 		}
 		finally {
 			executable.stop();
 		}
 	}
 
-	interface Callback {
+	interface ExceptionRunnable {
 
 		void run() throws Exception;
 
