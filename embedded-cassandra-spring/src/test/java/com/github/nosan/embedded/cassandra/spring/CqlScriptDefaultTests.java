@@ -46,7 +46,7 @@ public class CqlScriptDefaultTests {
 
 	@ClassRule
 	public static CassandraRule cassandra = new CassandraRule(new ExecutableConfigBuilder()
-			.jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m"))
+			.jvmOptions(new JvmOptions("-Xmx384m", "-Xms384m"))
 			.build());
 
 

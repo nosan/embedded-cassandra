@@ -37,7 +37,7 @@ public class CassandraExtensionTests {
 	@RegisterExtension
 	public static CassandraExtension cassandra =
 			new CassandraExtension(
-					new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build());
+					new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx384m", "-Xms384m")).build());
 
 	@BeforeEach
 	public void setUp() {
