@@ -27,7 +27,7 @@ import com.github.nosan.embedded.cassandra.Config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraProcess.LogWatchProcessor}.
+ * Tests for {@link LogWatchProcessor}.
  *
  * @author Dmytro Nosan
  */
@@ -36,8 +36,7 @@ public class LogWatchProcessorTests {
 
 	@Test
 	public void cqlListening() {
-		CassandraProcess.LogWatchProcessor logWatchProcessor =
-				new CassandraProcess.LogWatchProcessor(new Config(), new NullProcessor());
+		LogWatchProcessor logWatchProcessor = new LogWatchProcessor(new Config(), new NullProcessor());
 		logWatchProcessor.process("Starting listening for CQL");
 		assertThat(logWatchProcessor.isInitWithSuccess()).isTrue();
 	}
@@ -47,8 +46,7 @@ public class LogWatchProcessorTests {
 		Config config = new Config();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(true);
-		CassandraProcess.LogWatchProcessor logWatchProcessor =
-				new CassandraProcess.LogWatchProcessor(config, new NullProcessor());
+		LogWatchProcessor logWatchProcessor = new LogWatchProcessor(config, new NullProcessor());
 		logWatchProcessor.process("Listening for thrift clients");
 		assertThat(logWatchProcessor.isInitWithSuccess()).isTrue();
 	}
@@ -58,8 +56,7 @@ public class LogWatchProcessorTests {
 		Config config = new Config();
 		config.setStartNativeTransport(false);
 		config.setStartRpc(false);
-		CassandraProcess.LogWatchProcessor logWatchProcessor =
-				new CassandraProcess.LogWatchProcessor(config, new NullProcessor());
+		LogWatchProcessor logWatchProcessor = new LogWatchProcessor(config, new NullProcessor());
 		logWatchProcessor.process("Starting Messaging Service");
 		assertThat(logWatchProcessor.isInitWithSuccess()).isTrue();
 	}
@@ -73,8 +70,7 @@ public class LogWatchProcessorTests {
 				"Cassandra 3.0 and later require Java");
 
 		for (String error : errors) {
-			CassandraProcess.LogWatchProcessor
-					logWatchProcessor = new CassandraProcess.LogWatchProcessor(new Config(), new NullProcessor());
+			LogWatchProcessor logWatchProcessor = new LogWatchProcessor(new Config(), new NullProcessor());
 			logWatchProcessor.process(error);
 			assertThat(logWatchProcessor.getFailureFound()).isEqualTo(error);
 

@@ -27,14 +27,12 @@ import org.junit.rules.ExpectedException;
 
 import com.github.nosan.embedded.cassandra.Config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
- * Tests for {@link CassandraProcess.TransportUtils}.
+ * Tests for {@link TransportUtils}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraProcessTransportUtilsTests {
+public class TransportUtilsTests {
 
 	@Rule
 	public ExpectedException throwable = ExpectedException.none();
@@ -42,35 +40,18 @@ public class CassandraProcessTransportUtilsTests {
 	@Test
 	public void checkConnection() throws IOException {
 		this.throwable.expect(IOException.class);
-		this.throwable.expectMessage("Something wrong with a client transport");
+		this.throwable.expectMessage("Cassandra process transport has not been started correctly.");
 		Config config = new Config();
-		CassandraProcess.TransportUtils.checkConnection(config, 1, Duration.ZERO);
-	}
-
-	@Test
-	public void isEnabledTransportNativeIsEnabled() {
-		Config config = new Config();
-		assertThat(CassandraProcess.TransportUtils.isEnabled(config))
-				.isTrue();
+		TransportUtils.check(config, 1, Duration.ZERO);
 	}
 
 
 	@Test
-	public void isEnabledTransportRpcIsEnabled() {
-		Config config = new Config();
-		config.setStartRpc(true);
-		config.setStartNativeTransport(false);
-		assertThat(CassandraProcess.TransportUtils.isEnabled(config))
-				.isTrue();
-	}
-
-	@Test
-	public void shouldNotEnabledTransport() {
+	public void shouldNotEnabledTransport() throws IOException {
 		Config config = new Config();
 		config.setStartRpc(false);
 		config.setStartNativeTransport(false);
-		assertThat(CassandraProcess.TransportUtils.isEnabled(config))
-				.isFalse();
+		TransportUtils.check(config, 1, Duration.ZERO);
 	}
 
 	@Test
@@ -79,11 +60,8 @@ public class CassandraProcessTransportUtilsTests {
 		config.setRpcPort(Network.getFreeServerPort());
 		config.setStartRpc(true);
 		config.setStartNativeTransport(false);
-		assertThat(CassandraProcess.TransportUtils.isConnected(config, 1, Duration.ZERO))
-				.isFalse();
 		try (ServerSocket ignore = new ServerSocket(config.getRpcPort())) {
-			assertThat(CassandraProcess.TransportUtils.isConnected(config, 1, Duration.ZERO))
-					.isTrue();
+			TransportUtils.check(config, 1, Duration.ZERO);
 		}
 
 	}
@@ -92,11 +70,9 @@ public class CassandraProcessTransportUtilsTests {
 	public void nativeTransport() throws IOException {
 		Config config = new Config();
 		config.setNativeTransportPort(Network.getFreeServerPort());
-		assertThat(CassandraProcess.TransportUtils.isConnected(config, 1, Duration.ZERO))
-				.isFalse();
 		try (ServerSocket ignore = new ServerSocket(config.getNativeTransportPort())) {
-			assertThat(CassandraProcess.TransportUtils.isConnected(config, 1, Duration.ZERO))
-					.isTrue();
+			TransportUtils.check(config, 1, Duration.ZERO);
+
 		}
 	}
 }
