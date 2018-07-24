@@ -17,17 +17,42 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * @author Dmytro Nosan
  */
 public abstract class ReflectionUtils {
 
-	public static Object getField(String name, Object target)
-			throws NoSuchFieldException, IllegalAccessException {
+	public static Object getField(Object target, String name) throws NoSuchFieldException, IllegalAccessException {
 		Field field = target.getClass().getDeclaredField(name);
 		field.setAccessible(true);
 		return field.get(target);
 	}
 
+	public static Object getMethod(Object target, String name, Object[] arguments)
+			throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		Method method = target.getClass().getDeclaredMethod(name, Arrays.stream(arguments)
+				.map(Object::getClass).toArray(Class[]::new));
+		method.setAccessible(true);
+		return method.invoke(target, arguments);
+	}
+
+
+	public static Object getStaticField(Class<?> target, String name)
+			throws NoSuchFieldException, IllegalAccessException {
+		Field field = target.getDeclaredField(name);
+		field.setAccessible(true);
+		return field.get(null);
+	}
+
+	public static Object getStaticMethod(Class<?> target, String name, Object[] arguments)
+			throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+		Method method = target.getDeclaredMethod(name, Arrays.stream(arguments)
+				.map(Object::getClass).toArray(Class[]::new));
+		method.setAccessible(true);
+		return method.invoke(null, arguments);
+	}
 }

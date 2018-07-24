@@ -24,9 +24,7 @@ import de.flapdoodle.embed.process.io.NamedOutputStreamProcessor;
 import de.flapdoodle.embed.process.io.Slf4jLevel;
 import de.flapdoodle.embed.process.io.Slf4jStreamProcessor;
 import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
-import de.flapdoodle.embed.process.store.ArtifactStore;
 import de.flapdoodle.embed.process.store.IArtifactStore;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +59,7 @@ public class RuntimeConfigBuilderTests {
 
 		IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
 
-		assertThat(artifactStore).isInstanceOf(ArtifactStore.class);
+		assertThat(artifactStore).isInstanceOf(SafeArtifactStore.class);
 
 	}
 
@@ -81,16 +79,16 @@ public class RuntimeConfigBuilderTests {
 
 		IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
 
-		assertThat(artifactStore).isInstanceOf(ArtifactStore.class);
+		assertThat(artifactStore).isInstanceOf(SafeArtifactStore.class);
 
 	}
 
 	private void assertLoggerOutputs(IStreamProcessor stream, Slf4jLevel level)
 			throws NoSuchFieldException, IllegalAccessException {
 		assertThat(stream).isInstanceOf(Slf4jStreamProcessor.class);
-		Assertions.assertThat(ReflectionUtils.getField("logger", stream))
+		assertThat(ReflectionUtils.getField(stream, "logger"))
 				.isEqualTo(RuntimeConfigBuilderTests.log);
-		assertThat(ReflectionUtils.getField("level", stream)).isEqualTo(level);
+		assertThat(ReflectionUtils.getField(stream, "level")).isEqualTo(level);
 	}
 
 	private void assertConsoleOutputs(IStreamProcessor stream, String name)
@@ -98,8 +96,8 @@ public class RuntimeConfigBuilderTests {
 		assertThat(stream).isInstanceOf(NamedOutputStreamProcessor.class);
 		NamedOutputStreamProcessor processor = (NamedOutputStreamProcessor) stream;
 
-		assertThat(ReflectionUtils.getField("name", processor)).isEqualTo(name);
-		assertThat(ReflectionUtils.getField("destination", processor))
+		assertThat(ReflectionUtils.getField(processor, "name")).isEqualTo(name);
+		assertThat(ReflectionUtils.getField(processor, "destination"))
 				.isInstanceOf(ConsoleOutputStreamProcessor.class);
 	}
 

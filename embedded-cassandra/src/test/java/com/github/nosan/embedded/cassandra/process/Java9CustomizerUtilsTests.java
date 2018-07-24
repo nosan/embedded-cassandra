@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.process;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,27 +30,28 @@ import com.github.nosan.embedded.cassandra.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CassandraProcess.CustomizerUtils}.
+ * Tests for {@link CustomizerUtils}.
  *
  * @author Dmytro Nosan
  */
-public class CassandraProcessCustomizerUtilsTests {
+public class Java9CustomizerUtilsTests {
 
 	@ClassRule
 	public static JavaVersionRule javaVersionRule = new JavaVersionRule(
-			JavaVersion.JAVA_1_8, false);
+			JavaVersion.JAVA_9, true);
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void getDefaultCustomizers()
-			throws NoSuchFieldException, IllegalAccessException {
-		List<ContextCustomizer> customizers = CassandraProcess.CustomizerUtils.getCustomizers();
+			throws NoSuchFieldException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		List<ContextCustomizer> customizers =
+				(List<ContextCustomizer>) ReflectionUtils
+						.getStaticMethod(CustomizerUtils.class, "getCustomizers", new Object[0]);
 		assertThat(customizers).hasSize(2);
 		ContextCustomizer fileCustomizers = customizers.get(1);
 		assertThat(fileCustomizers).isInstanceOf(FileCustomizers.class);
-		assertThat(
-				(Collection<?>) ReflectionUtils.getField("customizers", fileCustomizers))
-				.hasSize(4);
-
+		assertThat((Collection<?>) ReflectionUtils.getField(fileCustomizers, "customizers"))
+				.hasSize(5);
 	}
 
 }

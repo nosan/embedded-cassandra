@@ -32,8 +32,7 @@ import org.slf4j.Logger;
  *
  * @author Dmytro Nosan
  */
-public class DownloadConfigBuilder
-		extends de.flapdoodle.embed.process.config.store.DownloadConfigBuilder {
+public class DownloadConfigBuilder extends de.flapdoodle.embed.process.config.store.DownloadConfigBuilder {
 
 	private static final String USER_AGENT = "Mozilla/5.0 (compatible; Embedded Cassandra; "
 			+ "+https://github.com/nosan/embedded-cassandra)";

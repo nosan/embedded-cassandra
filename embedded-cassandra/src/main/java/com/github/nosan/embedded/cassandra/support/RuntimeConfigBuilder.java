@@ -29,8 +29,7 @@ import org.slf4j.Logger;
  *
  * @author Dmytro Nosan
  */
-public class RuntimeConfigBuilder
-		extends de.flapdoodle.embed.process.config.RuntimeConfigBuilder {
+public class RuntimeConfigBuilder extends de.flapdoodle.embed.process.config.RuntimeConfigBuilder {
 
 	/**
 	 * Configure builder with default settings. Process output will be redirected to the

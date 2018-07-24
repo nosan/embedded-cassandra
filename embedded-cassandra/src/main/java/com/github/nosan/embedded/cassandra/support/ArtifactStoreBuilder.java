@@ -21,6 +21,7 @@ import java.util.Objects;
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.io.directories.PropertyOrTempDirInPlatformTempDir;
 import de.flapdoodle.embed.process.store.Downloader;
+import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.slf4j.Logger;
 
 /**
@@ -29,16 +30,14 @@ import org.slf4j.Logger;
  *
  * @author Dmytro Nosan
  */
-public class ArtifactStoreBuilder
-		extends de.flapdoodle.embed.process.store.ArtifactStoreBuilder {
+public class ArtifactStoreBuilder extends de.flapdoodle.embed.process.store.ArtifactStoreBuilder {
 
 	public ArtifactStoreBuilder() {
 		this(new DownloadConfigBuilder().build());
 	}
 
 	public ArtifactStoreBuilder(Logger logger) {
-		this(new DownloadConfigBuilder(
-				Objects.requireNonNull(logger, "Logger must not be null")).build());
+		this(new DownloadConfigBuilder(Objects.requireNonNull(logger, "Logger must not be null")).build());
 	}
 
 	private ArtifactStoreBuilder(IDownloadConfig downloadConfig) {
@@ -49,4 +48,8 @@ public class ArtifactStoreBuilder
 		useCache().overwriteDefault(false);
 	}
 
+	@Override
+	public IArtifactStore build() {
+		return new SafeArtifactStore(super.build());
+	}
 }

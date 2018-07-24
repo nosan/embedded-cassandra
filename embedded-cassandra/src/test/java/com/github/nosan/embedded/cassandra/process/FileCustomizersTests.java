@@ -16,8 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.process;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link FileCustomizers}.
@@ -35,7 +36,7 @@ public class FileCustomizersTests {
 		FileCustomizer fileCustomizer = (file, context) -> invoked[0] = true;
 		this.customizers.addCustomizer(fileCustomizer);
 		this.customizers.customize(new TestContext());
-		Assertions.assertThat(invoked[0]).describedAs("Should be invoked").isTrue();
+		assertThat(invoked[0]).describedAs("Should be invoked").isTrue();
 
 	}
 

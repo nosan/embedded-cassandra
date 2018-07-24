@@ -21,7 +21,6 @@ import de.flapdoodle.embed.process.io.progress.Slf4jProgressListener;
 import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
 import de.flapdoodle.embed.process.store.Downloader;
 import de.flapdoodle.embed.process.store.IArtifactStore;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,28 +36,28 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ArtifactStoreBuilderTests {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(ArtifactStoreBuilderTests.class);
+	private static final Logger log = LoggerFactory.getLogger(ArtifactStoreBuilderTests.class);
 
 	@Test
 	public void defaults() throws Exception {
-		IArtifactStore artifactStore = new ArtifactStoreBuilder().build();
+		IArtifactStore artifactStore =
+				(IArtifactStore) ReflectionUtils.getField(new ArtifactStoreBuilder().build(), "delegate");
 
-		Assertions.assertThat(ReflectionUtils.getField("_downloader", artifactStore))
+		assertThat(ReflectionUtils.getField(artifactStore, "_downloader"))
 				.isInstanceOf(Downloader.class);
 
-		assertThat(ReflectionUtils.getField("_executableNaming", artifactStore))
+		assertThat(ReflectionUtils.getField(artifactStore, "_executableNaming"))
 				.isInstanceOf(OriginTempNaming.class);
 
-		assertThat(ReflectionUtils.getField("_tempDirFactory", artifactStore))
+		assertThat(ReflectionUtils.getField(artifactStore, "_tempDirFactory"))
 				.isInstanceOf(PropertyOrTempDirInPlatformTempDir.class);
 
-		Object downloadConfig = ReflectionUtils.getField("_downloadConfig",
-				artifactStore);
+		Object downloadConfig = ReflectionUtils.getField(artifactStore,
+				"_downloadConfig");
 
 		assertThat(downloadConfig).isNotNull();
 
-		assertThat(ReflectionUtils.getField("_progressListener", downloadConfig))
+		assertThat(ReflectionUtils.getField(downloadConfig, "_progressListener"))
 				.isInstanceOf(StandardConsoleProgressListener.class);
 
 	}
@@ -66,23 +65,24 @@ public class ArtifactStoreBuilderTests {
 	@Test
 	public void defaultsLogger() throws Exception {
 
-		IArtifactStore artifactStore = new ArtifactStoreBuilder(log).build();
+		IArtifactStore artifactStore =
+				(IArtifactStore) ReflectionUtils.getField(new ArtifactStoreBuilder(log).build(), "delegate");
 
-		assertThat(ReflectionUtils.getField("_downloader", artifactStore))
+
+		assertThat(ReflectionUtils.getField(artifactStore, "_downloader"))
 				.isInstanceOf(Downloader.class);
 
-		assertThat(ReflectionUtils.getField("_executableNaming", artifactStore))
+		assertThat(ReflectionUtils.getField(artifactStore, "_executableNaming"))
 				.isInstanceOf(OriginTempNaming.class);
 
-		assertThat(ReflectionUtils.getField("_tempDirFactory", artifactStore))
+		assertThat(ReflectionUtils.getField(artifactStore, "_tempDirFactory"))
 				.isInstanceOf(PropertyOrTempDirInPlatformTempDir.class);
 
-		Object downloadConfig = ReflectionUtils.getField("_downloadConfig",
-				artifactStore);
+		Object downloadConfig = ReflectionUtils.getField(artifactStore, "_downloadConfig");
 
 		assertThat(downloadConfig).isNotNull();
 
-		assertThat(ReflectionUtils.getField("_progressListener", downloadConfig))
+		assertThat(ReflectionUtils.getField(downloadConfig, "_progressListener"))
 				.isInstanceOf(Slf4jProgressListener.class);
 	}
 
