@@ -30,7 +30,7 @@ import com.github.nosan.embedded.cassandra.Config;
  *
  * @author Dmytro Nosan
  */
-final class LogWatchProcessor extends LogWatchStreamProcessor {
+class LogWatchProcessor extends LogWatchStreamProcessor {
 
 	private final IStreamProcessor delegate;
 
