@@ -87,9 +87,8 @@ public final class CassandraProcess implements IStopable {
 		logWatch.waitForResult(millis);
 
 		if (!logWatch.isInitWithSuccess()) {
-			String msg = "Could not start a process '" + getPid(this.process) +
-					"'. Timeout : " + millis + " ms.\nFailure:" +
-					logWatch.getFailureFound() + "\nOutput:\n----- START ----- \n" +
+			String msg = "Could not start a process '" + getPid(this.process) + "'. Timeout : " + millis + " ms." +
+					"\nFailure:" + logWatch.getFailureFound() + "\nOutput:\n----- START ----- \n" +
 					logWatch.getOutput() + "----- END ----- \n" + "Support Url:\t" +
 					executableConfig.supportConfig().getSupportUrl() + "\n";
 			throw new IOException(msg);

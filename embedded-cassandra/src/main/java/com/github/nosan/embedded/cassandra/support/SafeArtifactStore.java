@@ -63,7 +63,7 @@ public class SafeArtifactStore implements IArtifactStore {
 				return;
 			}
 			catch (IOException ex) {
-				log.debug(ex.getMessage(), ex);
+				log.error(ex.getMessage(), ex);
 			}
 		}
 		for (FileType type : FileType.values()) {
@@ -72,7 +72,7 @@ public class SafeArtifactStore implements IArtifactStore {
 					Files.forceDelete(file.toPath());
 				}
 				catch (IOException ex) {
-					log.debug(ex.getMessage(), ex);
+					log.error(ex.getMessage(), ex);
 				}
 			}
 		}
