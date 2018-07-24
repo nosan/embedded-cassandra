@@ -24,7 +24,6 @@ import de.flapdoodle.embed.process.io.NamedOutputStreamProcessor;
 import de.flapdoodle.embed.process.io.Slf4jLevel;
 import de.flapdoodle.embed.process.io.Slf4jStreamProcessor;
 import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
-import de.flapdoodle.embed.process.store.ArtifactStore;
 import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -60,7 +59,7 @@ public class RuntimeConfigBuilderTests {
 
 		IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
 
-		assertThat(artifactStore).isInstanceOf(ArtifactStore.class);
+		assertThat(artifactStore).isInstanceOf(SafeArtifactStore.class);
 
 	}
 
@@ -80,7 +79,7 @@ public class RuntimeConfigBuilderTests {
 
 		IArtifactStore artifactStore = runtimeConfig.getArtifactStore();
 
-		assertThat(artifactStore).isInstanceOf(ArtifactStore.class);
+		assertThat(artifactStore).isInstanceOf(SafeArtifactStore.class);
 
 	}
 
