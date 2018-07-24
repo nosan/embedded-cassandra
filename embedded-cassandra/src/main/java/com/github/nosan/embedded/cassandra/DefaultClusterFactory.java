@@ -19,6 +19,9 @@ package com.github.nosan.embedded.cassandra;
 import java.util.Objects;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.HostDistance;
+import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.QueryOptions;
 
 /**
  * {@link ClusterFactory} with a default strategy.
@@ -31,9 +34,28 @@ public class DefaultClusterFactory implements ClusterFactory {
 	public Cluster getCluster(Config config, Version version) {
 		Objects.requireNonNull(config, "Config must not be null");
 		Objects.requireNonNull(version, "Version must not be null");
-		return Cluster.builder()
+
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.setRefreshNodeIntervalMillis(0);
+		queryOptions.setRefreshNodeListIntervalMillis(0);
+		queryOptions.setRefreshSchemaIntervalMillis(0);
+
+		PoolingOptions poolingOptions = new PoolingOptions()
+				.setPoolTimeoutMillis(30000)
+				.setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
+				.setMaxRequestsPerConnection(HostDistance.REMOTE, 32768);
+
+		return configure(Cluster.builder()
 				.addContactPoint(config.getRpcAddress())
+				.withQueryOptions(queryOptions)
+				.withPoolingOptions(poolingOptions)
 				.withoutJMXReporting()
-				.withPort(config.getNativeTransportPort()).build();
+				.withoutMetrics()
+				.withPort(config.getNativeTransportPort()))
+				.build();
+	}
+
+	protected Cluster.Builder configure(Cluster.Builder builder) {
+		return builder;
 	}
 }

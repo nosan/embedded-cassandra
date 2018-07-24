@@ -18,7 +18,11 @@ package com.github.nosan.embedded.cassandra;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Configuration;
+import com.datastax.driver.core.HostDistance;
+import com.datastax.driver.core.MetricsOptions;
+import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.ProtocolOptions;
+import com.datastax.driver.core.QueryOptions;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,8 +39,27 @@ public class DefaultClusterFactoryTests {
 		Config config = new Config();
 		config.setNativeTransportPort(9042);
 		Cluster cluster = new DefaultClusterFactory().getCluster(config, Version.LATEST);
+
 		Configuration configuration = cluster.getConfiguration();
+
 		ProtocolOptions protocolOptions = configuration.getProtocolOptions();
 		assertThat(protocolOptions.getPort()).isEqualTo(9042);
+
+		MetricsOptions metricsOptions = configuration.getMetricsOptions();
+		assertThat(metricsOptions.isEnabled()).isFalse();
+		assertThat(metricsOptions.isJMXReportingEnabled()).isFalse();
+
+		QueryOptions queryOptions = configuration.getQueryOptions();
+		assertThat(queryOptions.getRefreshNodeIntervalMillis()).isZero();
+		assertThat(queryOptions.getRefreshSchemaIntervalMillis()).isZero();
+		assertThat(queryOptions.getRefreshNodeListIntervalMillis()).isZero();
+
+
+		PoolingOptions poolingOptions = configuration.getPoolingOptions();
+		assertThat(poolingOptions.getMaxRequestsPerConnection(HostDistance.LOCAL)).isEqualTo(32768);
+		assertThat(poolingOptions.getMaxRequestsPerConnection(HostDistance.REMOTE)).isEqualTo(32768);
+		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(30000);
+
+
 	}
 }
