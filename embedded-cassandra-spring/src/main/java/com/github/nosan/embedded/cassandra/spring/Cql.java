@@ -123,10 +123,11 @@ public @interface Cql {
 	 * <p>Defaults to an empty string, requiring that one of the following is
 	 * true:
 	 * <ol>
-	 * <li>An explicit bean name is defined in a {@code @Cql}.
 	 * <li>There is only one bean of type {@code Cluster} in the test's
 	 * {@code ApplicationContext}.</li>
-	 * <li>The {@code Cluster} to use is named {@code "cluster"}.</li>
+	 * <li>There is a primary bean of type {@code Cluster} in the test's
+	 * {@code ApplicationContext}.</li>
+	 * <li>The {@code Cluster} bean to use is named {@code "cluster"}.</li>
 	 * </ol>
 	 *
 	 * @return {@code Cluster} bean name.
