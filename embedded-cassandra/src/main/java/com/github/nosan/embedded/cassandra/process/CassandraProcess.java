@@ -117,6 +117,13 @@ public final class CassandraProcess implements IStopable {
 					return;
 				}
 			}
+
+			try {
+				this.process.waitFor();
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 			log.info("Cassandra process '{}' has been stopped.", pid);
 		}
 	}
