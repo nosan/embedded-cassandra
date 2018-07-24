@@ -30,8 +30,7 @@ import org.slf4j.Logger;
  *
  * @author Dmytro Nosan
  */
-public class ArtifactStoreBuilder
-		extends de.flapdoodle.embed.process.store.ArtifactStoreBuilder {
+public class ArtifactStoreBuilder extends de.flapdoodle.embed.process.store.ArtifactStoreBuilder {
 
 	public ArtifactStoreBuilder() {
 		this(new DownloadConfigBuilder().build());
