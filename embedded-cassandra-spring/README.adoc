@@ -1,12 +1,22 @@
 = Embedded Cassandra Spring image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-spring.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-spring"]
 
-For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
+When writing integration tests against a `Cassandra`, it is often needs to execute `CQL` scripts to modify the `Cassandra` storage.
+The `embedded-cassandra-spring` module provides support for initializing an embedded or existing cassandra by executing
+`CQL` scripts when the `Spring ApplicationContext` is loaded.
 
-== Usage
+
+
+== @EmbeddedCassandra
+
+For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
+Cassandra will be started on the random ports. Also it is possible to initialize `Embedded Cassandra`  with `CQL` scripts using
+`scripts` and `statements` attributes. `EmbeddedCassandraConfiguration` overrides any existing `cluster` beans with an `embedded cluster` bean.
+Configuration class will be imported only if `@EmbeddedCassandra` was used on the test class.
+
 
 ```java
 @RunWith(SpringRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = ...)
 @EmbeddedCassandra(scripts = "/cql-scripts/*.cql")
 public class CassandraTests {
 
@@ -19,9 +29,46 @@ public class CassandraTests {
 
 }
 ```
-TIP: Configuration overrides any existing `Cluster` beans with an `Embedded Cluster` bean.
-Also it is possible to declare you own `ExecutableConfig`, `IRuntimeConfig` and `ClusterFactory`
+TIP: You can declare `ExecutableConfig`, `IRuntimeConfig` and `ClusterFactory`
 beans to take control of the Cassandra instance's.
+
+== @Cql
+
+`@Cql` annotation is used to annotate a test method to configure `CQL` scripts to be executed against
+a given `cluster` during integration tests.  Script execution is performed by the `CqlExecutionListener`, which is enabled by default.
+
+```java
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = ...)
+@EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
+public class CqlScriptTests {
+
+	@Autowired
+	private Cluster cluster;
+
+	@Test
+	@Cql(scripts = {"/users-data.cql"})
+	@Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+	public void shouldHaveUser() {
+		try (Session session = this.cluster.connect()) {
+			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
+			assertThat(rs.one().getLong(0)).isEqualTo(1);
+		}
+	}
+
+	@Test
+	public void shouldNotHaveUser() {
+		try (Session session = this.cluster.connect()) {
+			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
+			assertThat(rs.one().getLong(0)).isZero();
+		}
+	}
+
+}
+```
+
+TIP: Multiple sets of `@Cql` scripts could be configured for
+a given test method with a different syntax configuration or different execution phases per set.
 
 
 == Maven

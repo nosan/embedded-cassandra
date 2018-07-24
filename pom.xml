@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.nosan</groupId>
     <artifactId>embedded-cassandra-parent</artifactId>
-    <version>0.0.9-SNAPSHOT</version>
+    <version>0.0.9.RELEASE</version>
     <packaging>pom</packaging>
 
     <name>Embedded Cassandra Parent</name>
@@ -288,6 +288,21 @@
                     <version>3.0.2</version>
                 </plugin>
 
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <updatePomFile>true</updatePomFile>
+                        <flattenMode>oss</flattenMode>
+                        <pomElements>
+                            <parent>expand</parent>
+                            <distributionManagement>remove</distributionManagement>
+                            <repositories>remove</repositories>
+                        </pomElements>
+                    </configuration>
+                </plugin>
+
             </plugins>
         </pluginManagement>
 
@@ -354,7 +369,6 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
@@ -376,6 +390,26 @@
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>flatten-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>flatten</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>flatten</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>flatten.clean</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>clean</goal>
                                 </goals>
                             </execution>
                         </executions>
