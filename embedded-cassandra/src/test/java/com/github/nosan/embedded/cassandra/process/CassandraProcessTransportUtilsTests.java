@@ -44,7 +44,7 @@ public class CassandraProcessTransportUtilsTests {
 		this.throwable.expect(IOException.class);
 		this.throwable.expectMessage("Something wrong with a client transport");
 		Config config = new Config();
-		CassandraProcess.TransportUtils.checkConnection(config);
+		CassandraProcess.TransportUtils.checkConnection(config, 1, Duration.ZERO);
 	}
 
 	@Test
