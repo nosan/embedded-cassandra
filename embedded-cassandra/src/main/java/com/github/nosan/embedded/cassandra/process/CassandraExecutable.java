@@ -46,7 +46,10 @@ public final class CassandraExecutable
 	protected CassandraProcess start(Distribution distribution,
 			ExecutableConfig executableConfig, IRuntimeConfig runtime)
 			throws IOException {
-		return new CassandraProcess(distribution, executableConfig, runtime, this);
+		CassandraProcess cassandraProcess =
+				new CassandraProcess(new Context(distribution, runtime, executableConfig, getFile()));
+		cassandraProcess.start();
+		return cassandraProcess;
 	}
 
 }

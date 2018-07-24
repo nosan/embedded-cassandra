@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -37,8 +38,9 @@ import de.flapdoodle.embed.process.io.IStreamProcessor;
 import de.flapdoodle.embed.process.io.LogWatchStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.io.StreamToLineProcessor;
-import de.flapdoodle.embed.process.runtime.AbstractProcess;
+import de.flapdoodle.embed.process.runtime.IStopable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
+import de.flapdoodle.embed.process.runtime.Processes;
 import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -49,83 +51,146 @@ import com.github.nosan.embedded.cassandra.Config;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 
 /**
- * Basic implementation of {@link AbstractProcess} for Cassandra.
+ * Basic implementation of Cassandra Process.
  *
  * @author Dmytro Nosan
  */
-public final class CassandraProcess
-		extends AbstractProcess<ExecutableConfig, CassandraExecutable, CassandraProcess> {
+public final class CassandraProcess implements IStopable {
 
 	private static final Logger log = LoggerFactory.getLogger(CassandraProcess.class);
 
-	private IRuntimeConfig runtimeConfig;
+	private ProcessControl process;
 
-	private Context context;
+	private final Context context;
 
-	CassandraProcess(Distribution distribution, ExecutableConfig config,
-			IRuntimeConfig runtimeConfig, CassandraExecutable executable)
-			throws IOException {
-		super(distribution, config, runtimeConfig, executable);
+	CassandraProcess(Context context) {
+		this.context = Objects.requireNonNull(context, "Context must not be null");
 	}
 
-	@Override
-	protected void onBeforeProcess(IRuntimeConfig runtimeConfig) {
-		this.runtimeConfig = runtimeConfig;
-	}
-
-	@Override
-	protected void onBeforeProcessStart(ProcessBuilder processBuilder, ExecutableConfig config,
-			IRuntimeConfig runtimeConfig) {
-		log.info("Starting Cassandra Process using command {}", processBuilder.command());
-	}
-
-	@Override
-	protected void onAfterProcessStart(ProcessControl process,
-			IRuntimeConfig runtimeConfig) throws IOException {
-		long processId = getProcessId();
-		setProcessId(processId);
-
-		ExecutableConfig executableConfig = getConfig();
-		Config config = executableConfig.getConfig();
-		ISupportConfig supportConfig = executableConfig.supportConfig();
-
+	void start() throws IOException {
+		this.process = ProcessUtils.start(this.context);
+		IRuntimeConfig runtimeConfig = this.context.getRuntimeConfig();
+		ExecutableConfig executableConfig = this.context.getExecutableConfig();
 		ProcessOutput processOutput = runtimeConfig.getProcessOutput();
-		LogWatchProcessor logWatchProcessor = new LogWatchProcessor(config, processOutput.getOutput());
-		Processors.connect(process.getReader(), StreamToLineProcessor.wrap(logWatchProcessor));
-		Processors.connect(process.getError(), StreamToLineProcessor.wrap(processOutput.getError()));
 
+		LogWatchProcessor logWatchProcessor =
+				new LogWatchProcessor(executableConfig.getConfig(), processOutput.getOutput());
+		Processors.connect(this.process.getReader(), StreamToLineProcessor.wrap(logWatchProcessor));
+		Processors.connect(this.process.getError(), StreamToLineProcessor.wrap(processOutput.getError()));
 		long millis = executableConfig.getTimeout().toMillis();
 		logWatchProcessor.waitForResult(millis);
-
 		if (!logWatchProcessor.isInitWithSuccess()) {
-			String msg = "Could not start a process '" + processId + "'. Timeout : " + millis +
+			String msg = "Could not start a process '" + ProcessUtils.getPid(this.process) + "'. Timeout : " + millis +
 					" ms.\nFailure:" + logWatchProcessor.getFailureFound() +
 					"\nOutput:\n----- START ----- \n" + logWatchProcessor.getOutput() + "----- END ----- \n" +
-					"Support Url:\t" + supportConfig.getSupportUrl() + "\n";
+					"Support Url:\t" + executableConfig.supportConfig().getSupportUrl() + "\n";
 			throw new IOException(msg);
 		}
-
-		TransportUtils.checkConnection(config, 10, Duration.ofSeconds(2));
-
-		log.info("Cassandra process '{}' has been started.", processId);
+		TransportUtils.checkConnection(executableConfig.getConfig(), 10, Duration.ofSeconds(2));
+		log.info("Cassandra process '{}' has been started.", ProcessUtils.getPid(this.process));
 	}
 
+
 	@Override
-	protected List<String> getCommandLine(Distribution distribution,
-			ExecutableConfig config, IExtractedFileSet fileSet) {
-		this.context = new Context(distribution, this.runtimeConfig, config, fileSet);
-		CustomizerUtils.customize(this.context);
-		return ArgumentUtils.get(this.context);
+	public void stop() {
+		ProcessUtils.stop(this.process, this.context);
 	}
 
-	@Override
-	protected void stopInternal() {
-		ProcessUtils.stop(this);
 
+	@Override
+	public boolean isRegisteredJobKiller() {
+		return false;
 	}
 
-	@Override
-	protected void cleanupInternal() {
+
+	/**
+	 * Utility class to start/stop an embedded cassandra process.
+	 */
+	private static abstract class ProcessUtils {
+
+		static ProcessControl start(Context context) throws IOException {
+			Distribution distribution = context.getDistribution();
+			ExecutableConfig executableConfig = context.getExecutableConfig();
+			IRuntimeConfig runtimeConfig = context.getRuntimeConfig();
+			ISupportConfig supportConfig = executableConfig.supportConfig();
+
+			CustomizerUtils.customize(context);
+
+			List<String> args = runtimeConfig.getCommandLinePostProcessor()
+					.process(distribution, ArgumentUtils.get(context));
+
+			ProcessBuilder processBuilder = ProcessControl.newProcessBuilder(args, true);
+
+			log.info("Starting Cassandra Process with a command line {}", processBuilder.command());
+
+			return ProcessControl.start(supportConfig, processBuilder);
+		}
+
+
+		static void stop(ProcessControl processControl, Context context) {
+			long pid = getPid(processControl);
+			if (isRunning(processControl, context)) {
+				tryStop(context, pid);
+				try {
+					processControl.stop();
+				}
+				catch (RuntimeException ex) {
+					if (isRunning(processControl, context)) {
+						log.error(String.format("Cassandra process '%s' still running", pid), ex);
+					}
+				}
+			}
+			log.info("Cassandra process '{}' has been stopped.", pid);
+		}
+
+
+		static boolean isRunning(ProcessControl process, Context context) {
+			if (getPid(process) > 0) {
+				Distribution distribution = context.getDistribution();
+				return Processes.isProcessRunning(distribution.getPlatform(), getPid(process));
+			}
+			return false;
+		}
+
+		static long getPid(ProcessControl process) {
+			Long pid = null;
+			if (process != null) {
+				pid = process.getPid();
+			}
+			return (pid != null ? pid : 0);
+		}
+
+		private static void tryStop(Context context, long pid) {
+			Distribution distribution = context.getDistribution();
+			Platform platform = distribution.getPlatform();
+			if (platform.isUnixLike()) {
+				killProcess(context, pid);
+			}
+			else {
+				taskKill(context, pid);
+			}
+		}
+
+		private static void killProcess(Context context, long pid) {
+			IRuntimeConfig runtimeConfig = context.getRuntimeConfig();
+			ExecutableConfig executableConfig = context.getExecutableConfig();
+			IStreamProcessor output = StreamToLineProcessor.wrap(runtimeConfig.getProcessOutput().getCommands());
+			ProcessControl.executeCommandLine(executableConfig.supportConfig(),
+					"[kill process]",
+					new ProcessConfig(Arrays.asList("kill", "-9", "" + pid), output));
+		}
+
+		private static void taskKill(Context context, long pid) {
+			IRuntimeConfig runtimeConfig = context.getRuntimeConfig();
+			ExecutableConfig executableConfig = context.getExecutableConfig();
+			IStreamProcessor output = StreamToLineProcessor.wrap(runtimeConfig.getProcessOutput().getCommands());
+			ProcessControl.executeCommandLine(executableConfig.supportConfig(),
+					"[taskkill process]",
+					new ProcessConfig(
+							Arrays.asList("taskkill", "/F", "/T", "/pid", "" + pid),
+							output));
+		}
+
 	}
 
 
@@ -182,61 +247,6 @@ public final class CassandraProcess
 		private static String getJmxOpt(Distribution distribution) {
 			return (distribution.getPlatform() != Platform.Windows
 					? "-Dcassandra.jmx.local.port=" : "`-Dcassandra.jmx.local.port=");
-		}
-
-	}
-
-	/**
-	 * Utility class to stop an embedded cassandra process.
-	 */
-	private static abstract class ProcessUtils {
-
-		static void stop(CassandraProcess process) {
-			Context context = process.context;
-			long pid = process.getProcessId();
-			if (process.isProcessRunning()) {
-				tryStop(context, pid);
-				try {
-					process.stopProcess();
-				}
-				catch (RuntimeException ex) {
-					if (process.isProcessRunning()) {
-						throw ex;
-					}
-				}
-			}
-			log.info("Cassandra process '{}' has been stopped.", pid);
-		}
-
-		private static void tryStop(Context context, long pid) {
-			Distribution distribution = context.getDistribution();
-			Platform platform = distribution.getPlatform();
-			if (platform.isUnixLike()) {
-				killProcess(context, pid);
-			}
-			else {
-				taskKill(context, pid);
-			}
-		}
-
-		private static void killProcess(Context context, long pid) {
-			IRuntimeConfig runtimeConfig = context.getRuntimeConfig();
-			ExecutableConfig executableConfig = context.getExecutableConfig();
-			IStreamProcessor output = StreamToLineProcessor.wrap(runtimeConfig.getProcessOutput().getCommands());
-			ProcessControl.executeCommandLine(executableConfig.supportConfig(),
-					"[kill process]",
-					new ProcessConfig(Arrays.asList("kill", "-9", "" + pid), output));
-		}
-
-		private static void taskKill(Context context, long pid) {
-			IRuntimeConfig runtimeConfig = context.getRuntimeConfig();
-			ExecutableConfig executableConfig = context.getExecutableConfig();
-			IStreamProcessor output = StreamToLineProcessor.wrap(runtimeConfig.getProcessOutput().getCommands());
-			ProcessControl.executeCommandLine(executableConfig.supportConfig(),
-					"[taskkill process]",
-					new ProcessConfig(
-							Arrays.asList("taskkill", "/F", "/T", "/pid", "" + pid),
-							output));
 		}
 
 	}
@@ -355,5 +365,6 @@ public final class CassandraProcess
 					"Cassandra 3.0 and later require Java"));
 		}
 	}
+
 
 }

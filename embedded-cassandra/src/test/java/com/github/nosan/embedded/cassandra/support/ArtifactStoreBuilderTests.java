@@ -37,12 +37,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ArtifactStoreBuilderTests {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(ArtifactStoreBuilderTests.class);
+	private static final Logger log = LoggerFactory.getLogger(ArtifactStoreBuilderTests.class);
 
 	@Test
 	public void defaults() throws Exception {
-		IArtifactStore artifactStore = new ArtifactStoreBuilder().build();
+		IArtifactStore artifactStore =
+				(IArtifactStore) ReflectionUtils.getField("delegate", new ArtifactStoreBuilder().build());
 
 		Assertions.assertThat(ReflectionUtils.getField("_downloader", artifactStore))
 				.isInstanceOf(Downloader.class);
@@ -66,7 +66,9 @@ public class ArtifactStoreBuilderTests {
 	@Test
 	public void defaultsLogger() throws Exception {
 
-		IArtifactStore artifactStore = new ArtifactStoreBuilder(log).build();
+		IArtifactStore artifactStore =
+				(IArtifactStore) ReflectionUtils.getField("delegate", new ArtifactStoreBuilder(log).build());
+
 
 		assertThat(ReflectionUtils.getField("_downloader", artifactStore))
 				.isInstanceOf(Downloader.class);
