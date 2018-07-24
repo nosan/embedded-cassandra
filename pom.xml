@@ -263,7 +263,8 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.20</version>
                     <configuration>
-                        <failIfNoTests>false</failIfNoTests>
+                        <failIfNoTests>true</failIfNoTests>
+                        <failIfNoSpecifiedTests>true</failIfNoSpecifiedTests>
                         <trimStackTrace>false</trimStackTrace>
                         <useFile>false</useFile>
                         <rerunFailingTestsCount>1</rerunFailingTestsCount>
