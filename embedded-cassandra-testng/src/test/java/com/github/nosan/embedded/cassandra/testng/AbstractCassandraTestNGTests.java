@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AbstractCassandraTestNGTests extends AbstractCassandraTestNG {
 
 	public AbstractCassandraTestNGTests() {
-		super(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build());
+		super(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx384m", "-Xms384m")).build());
 	}
 
 	@BeforeMethod

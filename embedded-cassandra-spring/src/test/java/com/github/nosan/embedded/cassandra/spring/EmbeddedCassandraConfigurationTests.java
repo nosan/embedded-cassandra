@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = TestConfiguration.class)
 @EmbeddedCassandra(scripts = "/keyspace.cql", statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
 		"  KEY );")
-public class EmbeddedCassandraConfigurationStatementsTests {
+public class EmbeddedCassandraConfigurationTests {
 
 
 	@Autowired
@@ -43,7 +43,7 @@ public class EmbeddedCassandraConfigurationStatementsTests {
 
 
 	@Test
-	public void createKeyspace() {
+	public void shouldSelectFromRoles() {
 		try (Session session = this.cluster.connect()) {
 			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
 					.isTrue();

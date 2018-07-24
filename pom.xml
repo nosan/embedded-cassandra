@@ -75,6 +75,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.github.nosan</groupId>
+                <artifactId>embedded-cassandra-junit</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
@@ -261,6 +266,7 @@
                         <failIfNoTests>false</failIfNoTests>
                         <trimStackTrace>false</trimStackTrace>
                         <useFile>false</useFile>
+                        <rerunFailingTestsCount>1</rerunFailingTestsCount>
                     </configuration>
                 </plugin>
                 <plugin>

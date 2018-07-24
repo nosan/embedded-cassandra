@@ -36,7 +36,7 @@ public class CassandraRuleTests {
 
 	@ClassRule
 	public static CassandraRule cassandra =
-			new CassandraRule(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m")).build());
+			new CassandraRule(new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx384m", "-Xms384m")).build());
 
 	@Before
 	public void setUp() {

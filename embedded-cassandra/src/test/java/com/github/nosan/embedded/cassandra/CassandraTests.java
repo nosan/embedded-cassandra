@@ -59,7 +59,7 @@ public class CassandraTests {
 
 
 	private static ExecutableConfigBuilder execBuilder() {
-		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx256m", "-Xms256m"));
+		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx384m", "-Xms384m"));
 	}
 
 	private static void run(Cassandra cassandra) throws Exception {

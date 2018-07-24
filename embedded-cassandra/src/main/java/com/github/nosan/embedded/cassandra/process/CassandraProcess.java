@@ -105,7 +105,7 @@ public final class CassandraProcess
 			throw new IOException(msg);
 		}
 
-		TransportUtils.checkConnection(config);
+		TransportUtils.checkConnection(config, 10, Duration.ofSeconds(2));
 
 		log.info("Cassandra process '{}' has been started.", processId);
 	}
@@ -249,6 +249,17 @@ public final class CassandraProcess
 		private static final String LOCALHOST = "localhost";
 
 
+		static boolean isEnabled(Config config) {
+			return config.isStartNativeTransport() || config.isStartRpc();
+		}
+
+
+		static void checkConnection(Config config, int attempts, Duration sleep) throws IOException {
+			if (isEnabled(config) && !isConnected(config, attempts, sleep)) {
+				throw new IOException("Could not start a process. Something wrong with a client transport.");
+			}
+		}
+
 		static boolean isConnected(Config config, int maxAttempts, Duration sleep) {
 			for (int i = 0; i < maxAttempts; i++) {
 				log.info("Trying to connect to cassandra... Attempt:" + (i + 1));
@@ -267,19 +278,6 @@ public final class CassandraProcess
 			}
 			log.error("Connection to Cassandra has not been established...");
 			return false;
-		}
-
-		static boolean isEnabled(Config config) {
-			return config.isStartNativeTransport() || config.isStartRpc();
-		}
-
-
-		static void checkConnection(Config config) throws IOException {
-			int maxAttempts = 5;
-			Duration sleep = Duration.ofSeconds(2);
-			if (isEnabled(config) && !isConnected(config, maxAttempts, sleep)) {
-				throw new IOException("Could not start a process. Something wrong with a client transport.");
-			}
 		}
 
 		private static boolean tryConnect(Config config) {

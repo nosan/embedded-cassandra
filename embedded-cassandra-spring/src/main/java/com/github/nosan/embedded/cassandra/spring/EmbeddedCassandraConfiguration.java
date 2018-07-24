@@ -17,10 +17,6 @@
 package com.github.nosan.embedded.cassandra.spring;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import com.datastax.driver.core.Cluster;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
@@ -43,19 +39,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.Resource;
-import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.ClusterFactory;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
-import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
-import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 
 /**
  * {@link Configuration Configuration} for {@link EmbeddedCassandra Embedded Cassandra}
@@ -68,7 +58,15 @@ import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 @Order
 class EmbeddedCassandraConfiguration {
 
-	private static final String BEAN_NAME = "cluster";
+	static final String BEAN_NAME = "cluster";
+
+	static final String TEST_CLASS = "com.github.nosan.embedded-cassandra.test-class";
+
+	static final String SCRIPTS = "com.github.nosan.embedded-cassandra.scripts";
+
+	static final String ENCODING = "com.github.nosan.embedded-cassandra.encoding";
+
+	static final String STATEMENTS = "com.github.nosan.embedded-cassandra.statements";
 
 	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraConfiguration.class);
 
@@ -91,8 +89,7 @@ class EmbeddedCassandraConfiguration {
 		}
 
 		@Override
-		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-				throws BeansException {
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		}
 
 		private void process(BeanDefinitionRegistry registry,
@@ -107,37 +104,29 @@ class EmbeddedCassandraConfiguration {
 		private BeanDefinitionHolder getClusterBeanDefinition(
 				ConfigurableListableBeanFactory beanFactory) {
 			String[] beanNames = beanFactory.getBeanNamesForType(Cluster.class);
-
-
 			if (beanNames.length == 1) {
 				String beanName = beanNames[0];
 				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 				log.info("Replacing '{}' Cluster bean with {} embedded version",
 						beanName, (!beanDefinition.isPrimary() ? "" : "a primary"));
-				return new BeanDefinitionHolder(
-						createEmbeddedBeanDefinition(beanDefinition.isPrimary()),
-						beanName);
+				return new BeanDefinitionHolder(createEmbeddedBeanDefinition(beanDefinition.isPrimary()), beanName);
 			}
 
 			for (String beanName : beanNames) {
 				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 				if (beanDefinition.isPrimary()) {
-					log.info("Replacing primary '{}' Cluster bean with a primary embedded version",
-							beanName);
-					return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
-							beanName);
+					log.info("Replacing primary '{}' Cluster bean with a primary embedded version", beanName);
+					return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true), beanName);
 				}
 			}
 
 			log.info("There is no Cluster beans. Embedded primary '{}' Cluster bean will be registered", BEAN_NAME);
 
-			return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
-					BEAN_NAME);
+			return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true), BEAN_NAME);
 		}
 
 		private BeanDefinition createEmbeddedBeanDefinition(boolean primary) {
-			BeanDefinition beanDefinition = new RootBeanDefinition(
-					EmbeddedClusterFactoryBean.class);
+			BeanDefinition beanDefinition = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
 			beanDefinition.setPrimary(primary);
 			return beanDefinition;
 		}
@@ -148,30 +137,26 @@ class EmbeddedCassandraConfiguration {
 		}
 	}
 
-	private static class EmbeddedClusterFactoryBean
-			implements FactoryBean<Cluster>, InitializingBean, DisposableBean {
+	private static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean, DisposableBean {
 
 		private final Cassandra cassandra;
 
-		private final ApplicationContext applicationContext;
-
-		private final Environment environment;
+		private final ApplicationContext context;
 
 		EmbeddedClusterFactoryBean(
 				ObjectProvider<ClusterFactory> clusterFactory,
 				ObjectProvider<ExecutableConfig> executableConfig,
-				ObjectProvider<IRuntimeConfig> runtimeConfig, ApplicationContext applicationContext,
-				Environment environment) {
-			this.applicationContext = applicationContext;
-			this.environment = environment;
-			this.cassandra = new Cassandra(runtimeConfig.getIfAvailable(),
-					executableConfig.getIfAvailable(), clusterFactory.getIfAvailable());
+				ObjectProvider<IRuntimeConfig> runtimeConfig,
+				ApplicationContext applicationContext) {
+			this.context = applicationContext;
+			this.cassandra = new Cassandra(runtimeConfig.getIfAvailable(), executableConfig.getIfAvailable(),
+					clusterFactory.getIfAvailable());
 		}
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
 			this.cassandra.start();
-			CqlScriptUtils.executeScripts(this.cassandra.getSession(), getCqlScripts());
+			CqlScriptUtils.executeScripts(this.cassandra.getSession(), getCqlScripts(this.context));
 		}
 
 		@Override
@@ -195,29 +180,14 @@ class EmbeddedCassandraConfiguration {
 		}
 
 
-		private CqlScript[] getCqlScripts() throws IOException {
-			List<CqlScript> cqlScripts = new ArrayList<>();
-			Environment env = this.environment;
-			String[] scripts =
-					env.getProperty("com.github.nosan.embedded-cassandra.scripts", String[].class, new String[0]);
-			String[] statements =
-					env.getProperty("com.github.nosan.embedded-cassandra.statements", String[].class, new String[0]);
-			Class<?> testClass = env.getProperty("com.github.nosan.embedded-cassandra.test-class", Class.class);
-			if (!ObjectUtils.isEmpty(scripts)) {
-				String encoding = env.getProperty("com.github.nosan.embedded-cassandra.encoding");
-				Charset charset = (!StringUtils.hasText(encoding) ? null : Charset.forName(encoding));
-				List<Resource> resources = new ArrayList<>();
-				for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
-					resources.addAll(Arrays.asList(this.applicationContext.getResources(script)));
-				}
-				for (Resource resource : resources) {
-					cqlScripts.add(new UrlCqlScript(resource.getURL(), charset));
-				}
-			}
-			if (!ObjectUtils.isEmpty(statements)) {
-				cqlScripts.add(new StaticCqlScript(statements));
-			}
-			return cqlScripts.toArray(new CqlScript[0]);
+		private static CqlScript[] getCqlScripts(ApplicationContext context) throws IOException {
+			Environment env = context.getEnvironment();
+			String[] scripts = env.getProperty(SCRIPTS, String[].class, new String[0]);
+			String[] statements = env.getProperty(STATEMENTS, String[].class, new String[0]);
+			Class<?> testClass = env.getProperty(TEST_CLASS, Class.class);
+			String encoding = env.getProperty(ENCODING);
+			return SpringCqlUtils.getScripts(context, new CqlConfig(testClass, scripts, statements, encoding));
+
 		}
 
 	}
