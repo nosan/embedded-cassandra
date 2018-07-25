@@ -18,6 +18,7 @@ install:
   - cmd: echo PATH = %PATH%
 
 build_script:
-  - mvnw.cmd -B -e clean test -Djna.nosys=true
+  - mvnw.cmd -B -e clean test -Djna.nosys=true -DrerunFailingTestsCount=1
+
 
 
