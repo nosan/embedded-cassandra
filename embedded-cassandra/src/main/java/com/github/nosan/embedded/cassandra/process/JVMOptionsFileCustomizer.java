@@ -46,8 +46,7 @@ class JVMOptionsFileCustomizer extends AbstractFileCustomizer {
 	}
 
 	private void writeOptions(File file, JvmOptions options) throws IOException {
-		try (PrintWriter fileWriter = new PrintWriter(
-				new FileWriter(file, isAppend(options)))) {
+		try (PrintWriter fileWriter = new PrintWriter(new FileWriter(file, isAppend(options)))) {
 			for (String line : options.getOptions()) {
 				fileWriter.println(line);
 			}

@@ -45,8 +45,7 @@ public class LatestPackageResolver implements IPackageResolver {
 				builder.addEntry(FileType.Executable,
 						"apache-cassandra-3.11.2/bin/cassandra");
 		}
-		builder.addEntry(FileType.Library, "apache-cassandra-3.11.2/.DS_Store")
-				.addEntry(FileType.Library,
+		builder.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/bin/cassandra.in.bat")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cassandra.bat")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cassandra.in.sh")
@@ -251,47 +250,25 @@ public class LatestPackageResolver implements IPackageResolver {
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/__init__.py")
 				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/__init__.pyc")
-				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/copyutil.py")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/copyutil.pyc")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/cql3handling.py")
 				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/cql3handling.pyc")
-				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/cqlhandling.py")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/cqlhandling.pyc")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/cqlshhandling.py")
 				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/cqlshhandling.pyc")
-				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/displaying.py")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/displaying.pyc")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/formatting.py")
 				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/formatting.pyc")
-				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/helptopics.py")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/helptopics.pyc")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/pylexotron.py")
 				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/pylexotron.pyc")
-				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/saferscanner.py")
 				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/saferscanner.pyc")
-				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/sslhandling.py")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/sslhandling.pyc")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/test/__init__.py")
 				.addEntry(FileType.Library,
@@ -321,15 +298,9 @@ public class LatestPackageResolver implements IPackageResolver {
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/tracing.py")
 				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/tracing.pyc")
-				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/util.py")
 				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/util.pyc")
-				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/pylib/cqlshlib/wcwidth.py")
-				.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/pylib/cqlshlib/wcwidth.pyc")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/pylib/setup.py")
 				.addEntry(FileType.Library,
 						"apache-cassandra-3.11.2/tools/bin/cassandra-stress")

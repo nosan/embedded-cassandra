@@ -73,6 +73,6 @@ class LogWatchProcessor extends LogWatchStreamProcessor {
 				"Missing required", "Address already in use", "Port already in use",
 				"ConfigurationException", "syntax error near unexpected",
 				"Error occurred during initialization",
-				"Cassandra 3.0 and later require Java"));
+				"Cassandra 3.0 and later require Java", "You must set the CASSANDRA_CONF and CLASSPATH vars"));
 	}
 }
