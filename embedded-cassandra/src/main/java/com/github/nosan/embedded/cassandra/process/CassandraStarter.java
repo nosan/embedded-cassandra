@@ -16,34 +16,51 @@
 
 package com.github.nosan.embedded.cassandra.process;
 
-import java.util.Objects;
+import java.io.IOException;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
-import de.flapdoodle.embed.process.runtime.Starter;
+import de.flapdoodle.embed.process.store.IArtifactStore;
 
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 
 /**
- * A simple implementation of {@link Starter Starter} for start a
- * {@link CassandraExecutable Cassandra Executable}.
+ * Simple class for starting {@link CassandraExecutable}. Note! This class is not a {@code Thread Safe.}
+ * <pre>Warning! Only for internal purposes.</pre>
  *
  * @author Dmytro Nosan
- * @see CassandraExecutable
  * @see CassandraProcess
+ * @see CassandraExecutable
+ * @see com.github.nosan.embedded.cassandra.Cassandra
  */
-public final class CassandraStarter
-		extends Starter<ExecutableConfig, CassandraExecutable, CassandraProcess> {
+public final class CassandraStarter {
 
-	public CassandraStarter(IRuntimeConfig config) {
-		super(Objects.requireNonNull(config, "Runtime Config must not be null"));
+	private final IRuntimeConfig runtimeConfig;
+
+	private final ExecutableConfig executableConfig;
+
+	public CassandraStarter(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
+		this.runtimeConfig = runtimeConfig;
+		this.executableConfig = executableConfig;
 	}
 
-	@Override
-	protected CassandraExecutable newExecutable(ExecutableConfig executableConfig,
-			Distribution distribution, IRuntimeConfig runtime, IExtractedFileSet exe) {
-		return new CassandraExecutable(distribution, executableConfig, runtime, exe);
+	/**
+	 * Creating a new {@link CassandraExecutable Executable}.
+	 *
+	 * @throws IOException if an I/O error occurs.
+	 */
+	public CassandraExecutable newExecutable() throws IOException {
+		IArtifactStore artifactStore = this.runtimeConfig.getArtifactStore();
+		Distribution distribution = Distribution.detectFor(this.executableConfig.version());
+		if (artifactStore.checkDistribution(distribution)) {
+			IExtractedFileSet files = artifactStore.extractFileSet(distribution);
+			return new CassandraExecutable(distribution, this.executableConfig, this.runtimeConfig, files);
+		}
+		throw new IOException(
+				String.format("Could not find a Distribution. Please check Artifact Store: '%s' and " +
+						"Distribution: '%s'", artifactStore, distribution));
+
 	}
 
 }

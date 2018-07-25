@@ -21,35 +21,52 @@ import java.io.IOException;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
-import de.flapdoodle.embed.process.runtime.Executable;
 
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 
 /**
- * A simple implementation of {@link Executable Executable} for starting
- * {@link CassandraProcess Cassandra Process}.
+ * Simple class for executing {@link CassandraProcess}. Note! This class is not a {@code Thread Safe.}
+ * <pre>Warning! Only for internal purposes. </pre>
  *
  * @author Dmytro Nosan
  * @see CassandraProcess
  * @see CassandraStarter
- * @see ExecutableConfig
+ * @see com.github.nosan.embedded.cassandra.Cassandra
  */
-public final class CassandraExecutable
-		extends Executable<ExecutableConfig, CassandraProcess> {
+public final class CassandraExecutable {
+
+	private final CassandraProcess process;
+
+	private final Distribution distribution;
+
+	private final IRuntimeConfig runtime;
+
+	private final IExtractedFileSet files;
+
 
 	CassandraExecutable(Distribution distribution, ExecutableConfig executableConfig,
-			IRuntimeConfig runtimeConfig, IExtractedFileSet executable) {
-		super(distribution, executableConfig, runtimeConfig, executable);
+			IRuntimeConfig runtime, IExtractedFileSet files) {
+		this.process = new CassandraProcess(distribution, executableConfig, runtime, files);
+		this.distribution = distribution;
+		this.runtime = runtime;
+		this.files = files;
 	}
 
-	@Override
-	protected CassandraProcess start(Distribution distribution,
-			ExecutableConfig executableConfig, IRuntimeConfig runtime)
-			throws IOException {
-		CassandraProcess cassandraProcess =
-				new CassandraProcess(new Context(distribution, runtime, executableConfig, getFile()));
-		cassandraProcess.start();
-		return cassandraProcess;
+	/**
+	 * Start a cassandra process using following steps:
+	 *
+	 * @throws IOException Cassandra's process has not been started correctly.
+	 */
+	public void start() throws IOException {
+		this.process.start();
+	}
+
+	/**
+	 * Stop Cassandra's process and cleans resources.
+	 */
+	public void stop() {
+		this.process.stop();
+		this.runtime.getArtifactStore().removeFileSet(this.distribution, this.files);
 	}
 
 }

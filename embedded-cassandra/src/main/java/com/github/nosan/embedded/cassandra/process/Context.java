@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.process;
 
-import java.util.Objects;
-
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
@@ -41,14 +39,10 @@ class Context {
 
 	Context(Distribution distribution, IRuntimeConfig runtimeConfig,
 			ExecutableConfig executableConfig, IExtractedFileSet extractedFileSet) {
-		this.distribution = Objects.requireNonNull(distribution,
-				"Distribution must not be null");
-		this.runtimeConfig = Objects.requireNonNull(runtimeConfig,
-				"Runtime Config must not be null");
-		this.executableConfig = Objects.requireNonNull(executableConfig,
-				"Executable Config must not be null");
-		this.extractedFileSet = Objects.requireNonNull(extractedFileSet,
-				"File Set must not be null");
+		this.distribution = distribution;
+		this.runtimeConfig = runtimeConfig;
+		this.executableConfig = executableConfig;
+		this.extractedFileSet = extractedFileSet;
 	}
 
 	Distribution getDistribution() {

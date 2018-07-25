@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.process;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
@@ -28,10 +27,10 @@ import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.config.process.ProcessConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.Platform;
+import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.io.IStreamProcessor;
 import de.flapdoodle.embed.process.io.Processors;
 import de.flapdoodle.embed.process.io.StreamToLineProcessor;
-import de.flapdoodle.embed.process.runtime.IStopable;
 import de.flapdoodle.embed.process.runtime.ProcessControl;
 import de.flapdoodle.embed.process.runtime.Processes;
 import org.slf4j.Logger;
@@ -40,12 +39,15 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.ExecutableConfig;
 
 /**
- * Basic implementation of Cassandra Process.
+ * Simple class which creates a {@code Cassandra Process}. Note! This class is not a {@code Thread Safe.}
+ * <pre>Warning! Only for internal purposes.</pre>
  *
  * @author Dmytro Nosan
+ * @see CassandraStarter
+ * @see CassandraExecutable
+ * @see com.github.nosan.embedded.cassandra.Cassandra
  */
-public final class CassandraProcess implements IStopable {
-
+class CassandraProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(CassandraProcess.class);
 
@@ -53,10 +55,10 @@ public final class CassandraProcess implements IStopable {
 
 	private final Context context;
 
-	CassandraProcess(Context context) {
-		this.context = Objects.requireNonNull(context, "Context must not be null");
+	CassandraProcess(Distribution distribution, ExecutableConfig executableConfig,
+			IRuntimeConfig runtime, IExtractedFileSet files) {
+		this.context = new Context(distribution, runtime, executableConfig, files);
 	}
-
 
 	/**
 	 * Start a new cassandra process using following steps:
@@ -68,7 +70,7 @@ public final class CassandraProcess implements IStopable {
 	 * <li>Waits for transport connection</li>
 	 * </ol>.
 	 *
-	 * @throws IOException IOCassandra's process has not been started correctly.
+	 * @throws IOException Cassandra's process has not been started correctly.
 	 */
 	void start() throws IOException {
 		ExecutableConfig executableConfig = this.context.getExecutableConfig();
@@ -88,12 +90,19 @@ public final class CassandraProcess implements IStopable {
 		long start = System.nanoTime();
 		Duration timeout = executableConfig.getTimeout();
 		logWatch.waitForResult(timeout.toMillis());
-		if (!logWatch.isInitWithSuccess() && logWatch.getFailureFound() != null) {
+		if (!logWatch.isInitWithSuccess()) {
+			if (logWatch.getFailureFound() != null) {
+				throw new IOException(
+						"Could not start a process '" + getPid(this.process) + "'. " + logWatch.getFailureFound());
+			}
 			throw new IOException(
-					"Could not start a process '" + getPid(this.process) + "'. " + logWatch.getFailureFound());
+					"Could not start a process '" + getPid(this.process) + "'. Please increase startup timeout.");
 		}
+
 		long await = Math.max(timeout.toNanos() - (System.nanoTime() - start), TimeUnit.SECONDS.toNanos(15));
-		TransportUtils.await(executableConfig.getConfig(), Duration.ofNanos(await));
+		if (!TransportUtils.await(executableConfig.getConfig(), Duration.ofNanos(await))) {
+			throw new IOException("Cassandra process transport has not been started correctly.");
+		}
 		log.info("Cassandra process '{}' has been started.", getPid(this.process));
 	}
 
@@ -101,8 +110,7 @@ public final class CassandraProcess implements IStopable {
 	 * Stop Cassandra's process depends on platform.
 	 * Invokes {@code kill -9} for unix like and {@code taskkill /F /T} for windows.
 	 */
-	@Override
-	public void stop() {
+	void stop() {
 		long pid = getPid(this.process);
 		if (isRunning(this.process, this.context)) {
 			tryStop(this.context, pid);
@@ -125,12 +133,6 @@ public final class CassandraProcess implements IStopable {
 			log.info("Cassandra process '{}' has been stopped.", pid);
 		}
 	}
-
-	@Override
-	public boolean isRegisteredJobKiller() {
-		return false;
-	}
-
 
 	private static boolean isRunning(ProcessControl process, Context context) {
 		if (getPid(process) > 0) {

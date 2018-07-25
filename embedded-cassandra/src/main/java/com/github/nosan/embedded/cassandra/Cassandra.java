@@ -178,7 +178,6 @@ public class Cassandra {
 	 *
 	 * @throws UncheckedIOException Cassandra's process has not been started correctly.
 	 * @throws IllegalStateException Cassandra has already been initialized.
-	 * @see CassandraStarter
 	 */
 	public void start() {
 		if (this.executable == null) {
@@ -190,8 +189,8 @@ public class Cassandra {
 						Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
 					}
 					try {
-						CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig);
-						this.executable = cassandraStarter.prepare(executableConfig);
+						CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig, executableConfig);
+						this.executable = cassandraStarter.newExecutable();
 						this.executable.start();
 					}
 					catch (IOException ex) {
@@ -209,9 +208,7 @@ public class Cassandra {
 	}
 
 	/**
-	 * Stops the Cassandra. This method stops not only Cassandra  but calls a close method against {@code
-	 * Cluster},
-	 * {@code Session}.
+	 * Stops the Cassandra and cleans/closes all related resources.
 	 */
 	public void stop() {
 		synchronized (this) {

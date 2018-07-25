@@ -39,17 +39,17 @@ abstract class TransportUtils {
 	 *
 	 * @param config Cassandra's config.
 	 * @param timeout how long to wait between connections.
-	 * @throws IOException Cassandra transport has not been started.
+	 * @return whether cassandra is ready or not.
 	 */
-	static void await(Config config, Duration timeout) throws IOException {
+	static boolean await(Config config, Duration timeout) {
 		if (!isEnabled(config)) {
-			return;
+			return true;
 		}
 		long start = System.nanoTime();
 		long rem = timeout.toNanos();
 		do {
 			if (tryConnect(config)) {
-				return;
+				return true;
 			}
 			if (rem > 0) {
 				try {
@@ -62,7 +62,8 @@ abstract class TransportUtils {
 			rem = timeout.toNanos() - (System.nanoTime() - start);
 		}
 		while (rem > 0);
-		throw new IOException("Cassandra process transport has not been started correctly.");
+
+		return false;
 	}
 
 	private static boolean isEnabled(Config config) {

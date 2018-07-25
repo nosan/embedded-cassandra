@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.Duration;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import com.github.nosan.embedded.cassandra.Config;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link TransportUtils}.
@@ -33,44 +33,31 @@ import com.github.nosan.embedded.cassandra.Config;
  */
 public class TransportUtilsTests {
 
-	@Rule
-	public ExpectedException throwable = ExpectedException.none();
 
 	@Test
-	public void checkConnection() throws IOException {
-		this.throwable.expect(IOException.class);
-		this.throwable.expectMessage("Cassandra process transport has not been started correctly.");
+	public void shouldNotAwait() throws IOException {
 		Config config = new Config();
-		TransportUtils.await(config, Duration.ofSeconds(1));
-	}
-
-
-	@Test
-	public void shouldNotEnabledTransport() throws IOException {
-		Config config = new Config();
-		config.setStartRpc(false);
-		config.setStartNativeTransport(false);
-		TransportUtils.await(config, Duration.ofSeconds(1));
+		assertThat(TransportUtils.await(config, Duration.ofSeconds(1))).isFalse();
 	}
 
 	@Test
-	public void rpcTransport() throws IOException {
+	public void shouldAwaitRpc() throws IOException {
 		try (ServerSocket ss = new ServerSocket(0)) {
 			Config config = new Config();
 			config.setStartRpc(true);
 			config.setStartNativeTransport(false);
 			config.setRpcPort(ss.getLocalPort());
-			TransportUtils.await(config, Duration.ofSeconds(1));
+			assertThat(TransportUtils.await(config, Duration.ofSeconds(1))).isTrue();
 		}
 
 	}
 
 	@Test
-	public void nativeTransport() throws IOException {
+	public void shouldAwaitNativeTransport() throws IOException {
 		try (ServerSocket ss = new ServerSocket(0)) {
 			Config config = new Config();
 			config.setNativeTransportPort(ss.getLocalPort());
-			TransportUtils.await(config, Duration.ofSeconds(1));
+			assertThat(TransportUtils.await(config, Duration.ofSeconds(1))).isTrue();
 		}
 	}
 }
