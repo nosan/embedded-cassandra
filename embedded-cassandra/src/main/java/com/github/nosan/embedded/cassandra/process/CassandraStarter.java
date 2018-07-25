@@ -48,6 +48,7 @@ public final class CassandraStarter {
 	/**
 	 * Creating a new {@link CassandraExecutable Executable}.
 	 *
+	 * @return {@code Executable} to execute a cassandra process.
 	 * @throws IOException if an I/O error occurs.
 	 */
 	public CassandraExecutable newExecutable() throws IOException {

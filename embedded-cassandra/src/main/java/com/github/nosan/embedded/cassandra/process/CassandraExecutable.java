@@ -53,7 +53,7 @@ public final class CassandraExecutable {
 	}
 
 	/**
-	 * Start a cassandra process using following steps:
+	 * Start a cassandra process.
 	 *
 	 * @throws IOException Cassandra's process has not been started correctly.
 	 */

@@ -47,7 +47,7 @@ import com.github.nosan.embedded.cassandra.ExecutableConfig;
  * @see CassandraExecutable
  * @see com.github.nosan.embedded.cassandra.Cassandra
  */
-class CassandraProcess {
+final class CassandraProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(CassandraProcess.class);
 
