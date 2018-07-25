@@ -16,18 +16,21 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import de.flapdoodle.embed.process.distribution.Distribution;
+import de.flapdoodle.embed.process.extract.IExtractedFileSet;
+import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScriptUtils;
-import com.github.nosan.embedded.cassandra.process.CassandraExecutable;
-import com.github.nosan.embedded.cassandra.process.CassandraStarter;
+import com.github.nosan.embedded.cassandra.process.CassandraProcess;
 import com.github.nosan.embedded.cassandra.support.ExecutableConfigBuilder;
 import com.github.nosan.embedded.cassandra.support.RuntimeConfigBuilder;
 
@@ -57,6 +60,7 @@ public class Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
+
 	private final ClusterFactory clusterFactory;
 
 	private final IRuntimeConfig runtimeConfig;
@@ -68,7 +72,6 @@ public class Cassandra {
 	private volatile Cluster cluster;
 
 	private volatile Session session;
-
 
 	public Cassandra(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig,
 			ClusterFactory clusterFactory) {
@@ -212,28 +215,111 @@ public class Cassandra {
 	 */
 	public void stop() {
 		synchronized (this) {
-			if (this.session != null) {
-				close(() -> this.session.close());
-				this.session = null;
-			}
-			if (this.cluster != null) {
-				close(() -> this.cluster.close());
-				this.cluster = null;
-			}
-			if (this.executable != null) {
-				close(() -> this.executable.stop());
-				this.executable = null;
-			}
+			close(this.session);
+			close(this.cluster);
+			close(this.executable);
+			this.session = null;
+			this.cluster = null;
+			this.executable = null;
 		}
 	}
 
-	private static void close(Runnable runnable) {
+	private static void close(Closeable closeable) {
 		try {
-			runnable.run();
+			if (closeable != null) {
+				closeable.close();
+			}
 		}
 		catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
 		}
 	}
 
+
+	/**
+	 * Simple class for executing {@link CassandraProcess}.
+	 *
+	 * @author Dmytro Nosan
+	 * @see CassandraProcess
+	 * @see CassandraStarter
+	 * @see com.github.nosan.embedded.cassandra.Cassandra
+	 */
+	private static final class CassandraExecutable implements Closeable {
+
+		private final CassandraProcess process;
+
+		private final Distribution distribution;
+
+		private final IRuntimeConfig runtime;
+
+		private final IExtractedFileSet files;
+
+
+		CassandraExecutable(Distribution distribution, ExecutableConfig executableConfig,
+				IRuntimeConfig runtime, IExtractedFileSet files) {
+			this.process = new CassandraProcess(distribution, executableConfig, runtime, files);
+			this.distribution = distribution;
+			this.runtime = runtime;
+			this.files = files;
+		}
+
+		/**
+		 * Start a cassandra process.
+		 *
+		 * @throws IOException Cassandra's process has not been started correctly.
+		 */
+		void start() throws IOException {
+			this.process.start();
+		}
+
+		/**
+		 * Stop Cassandra's process and cleans resources.
+		 */
+		@Override
+		public void close() {
+			this.process.stop();
+			this.runtime.getArtifactStore().removeFileSet(this.distribution, this.files);
+		}
+
+	}
+
+	/**
+	 * Simple class for starting {@link CassandraExecutable}.
+	 *
+	 * @author Dmytro Nosan
+	 * @see com.github.nosan.embedded.cassandra.process.CassandraProcess
+	 * @see CassandraExecutable
+	 * @see com.github.nosan.embedded.cassandra.Cassandra
+	 */
+	private static final class CassandraStarter {
+
+		private final IRuntimeConfig runtimeConfig;
+
+		private final ExecutableConfig executableConfig;
+
+		CassandraStarter(IRuntimeConfig runtimeConfig, ExecutableConfig executableConfig) {
+			this.runtimeConfig = runtimeConfig;
+			this.executableConfig = executableConfig;
+		}
+
+		/**
+		 * Creating a new {@link CassandraExecutable Executable}.
+		 *
+		 * @return {@code Executable} to execute a cassandra process.
+		 * @throws IOException if an I/O error occurs.
+		 */
+		CassandraExecutable newExecutable() throws IOException {
+			IArtifactStore artifactStore = this.runtimeConfig.getArtifactStore();
+			Distribution distribution = Distribution.detectFor(this.executableConfig.version());
+			if (artifactStore.checkDistribution(distribution)) {
+				IExtractedFileSet files = artifactStore.extractFileSet(distribution);
+				return new CassandraExecutable(distribution, this.executableConfig, this.runtimeConfig, files);
+			}
+			throw new IOException(
+					String.format("Could not find a Distribution. Please check Artifact Store: '%s' and " +
+							"Distribution: '%s'", artifactStore, distribution));
+
+		}
+
+	}
 }

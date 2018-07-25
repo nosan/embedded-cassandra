@@ -43,11 +43,9 @@ import com.github.nosan.embedded.cassandra.ExecutableConfig;
  * <pre>Warning! Only for internal purposes.</pre>
  *
  * @author Dmytro Nosan
- * @see CassandraStarter
- * @see CassandraExecutable
  * @see com.github.nosan.embedded.cassandra.Cassandra
  */
-final class CassandraProcess {
+public final class CassandraProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(CassandraProcess.class);
 
@@ -55,7 +53,7 @@ final class CassandraProcess {
 
 	private final Context context;
 
-	CassandraProcess(Distribution distribution, ExecutableConfig executableConfig,
+	public CassandraProcess(Distribution distribution, ExecutableConfig executableConfig,
 			IRuntimeConfig runtime, IExtractedFileSet files) {
 		this.context = new Context(distribution, runtime, executableConfig, files);
 	}
@@ -72,7 +70,7 @@ final class CassandraProcess {
 	 *
 	 * @throws IOException Cassandra's process has not been started correctly.
 	 */
-	void start() throws IOException {
+	public void start() throws IOException {
 		ExecutableConfig executableConfig = this.context.getExecutableConfig();
 		IRuntimeConfig runtimeConfig = this.context.getRuntimeConfig();
 		ISupportConfig supportConfig = executableConfig.supportConfig();
@@ -110,7 +108,7 @@ final class CassandraProcess {
 	 * Stop Cassandra's process depends on platform.
 	 * Invokes {@code kill -9} for unix like and {@code taskkill /F /T} for windows.
 	 */
-	void stop() {
+	public void stop() {
 		long pid = getPid(this.process);
 		if (isRunning(this.process, this.context)) {
 			tryStop(this.context, pid);
