@@ -42,7 +42,7 @@ public class PackageResolverFactoryTests {
 
 		FileSet fileSet = this.factory.getFileSet(distribution);
 
-		assertThat(fileSet.entries()).hasSize(186);
+		assertThat(fileSet.entries()).hasSize(171);
 
 	}
 
