@@ -61,6 +61,8 @@ public class Cassandra {
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
 
+	private boolean shutdownHookRegistered = false;
+
 	private final ClusterFactory clusterFactory;
 
 	private final IRuntimeConfig runtimeConfig;
@@ -138,7 +140,7 @@ public class Cassandra {
 
 	/**
 	 * Lazy initialize Cassandra's {@link Cluster Cluster} using {@link ClusterFactory ClusterFactory}.
-	 * Note! This method should be called only after {@link #start()} method.
+	 * Note! This method must be called only after {@link #start()} method.
 	 *
 	 * @return Cassandra's Cluster.
 	 * @see ClusterFactory
@@ -158,7 +160,7 @@ public class Cassandra {
 
 	/**
 	 * Lazy initialize Cassandra's {@link Session Session} using {@link #getCluster() Cluster}.
-	 * Note! This method should be called only after {@link #start()} method.
+	 * Note! This method must be called only after {@link #start()} method.
 	 *
 	 * @return Cassandra's Session
 	 * @see #getCluster()
@@ -188,8 +190,9 @@ public class Cassandra {
 				if (this.executable == null) {
 					IRuntimeConfig runtimeConfig = getRuntimeConfig();
 					ExecutableConfig executableConfig = getExecutableConfig();
-					if (runtimeConfig.isDaemonProcess()) {
+					if (runtimeConfig.isDaemonProcess() && !this.shutdownHookRegistered) {
 						Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+						this.shutdownHookRegistered = true;
 					}
 					try {
 						CassandraStarter cassandraStarter = new CassandraStarter(runtimeConfig, executableConfig);

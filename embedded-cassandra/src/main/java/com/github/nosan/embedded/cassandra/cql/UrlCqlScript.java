@@ -41,7 +41,7 @@ public class UrlCqlScript extends AbstractCqlScript {
 	}
 
 	@Override
-	public String getName() {
+	public String toString() {
 		return String.valueOf(this.location);
 	}
 

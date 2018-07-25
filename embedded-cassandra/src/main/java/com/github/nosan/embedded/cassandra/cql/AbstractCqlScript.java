@@ -55,11 +55,6 @@ public abstract class AbstractCqlScript implements CqlScript {
 		}
 	}
 
-	@Override
-	public String toString() {
-		return String.format("Script: '%s'. Encoding: '%s'", getName(), this.encoding);
-	}
-
 	/**
 	 * Return an {@link InputStream} for the content of an underlying resource.
 	 * <p>It is expected that each call creates a <i>fresh</i> stream.

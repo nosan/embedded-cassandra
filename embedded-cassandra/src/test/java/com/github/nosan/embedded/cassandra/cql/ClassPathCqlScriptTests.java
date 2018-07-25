@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.io.UncheckedIOException;
+
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,4 +42,18 @@ public class ClassPathCqlScriptTests {
 		assertThat(classPathCqlScript.getStatements()).containsExactly("CREATE TABLE IF NOT EXISTS test.users ( id " +
 				"text PRIMARY KEY )");
 	}
+
+	@Test
+	public void contextWithLeadingSlashScript() {
+		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("/test.cql", getClass());
+		assertThat(classPathCqlScript.getStatements())
+				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )");
+	}
+
+	@Test(expected = UncheckedIOException.class)
+	public void resourceContextClassNotFound() {
+		new ClassPathCqlScript("bla-bla", getClass()).getStatements();
+	}
+
+
 }

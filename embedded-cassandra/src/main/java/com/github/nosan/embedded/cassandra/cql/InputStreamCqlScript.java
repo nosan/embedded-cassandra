@@ -46,7 +46,7 @@ public class InputStreamCqlScript extends AbstractCqlScript {
 	}
 
 	@Override
-	public String getName() {
+	public String toString() {
 		return "InputStream CQL Statements";
 	}
 }

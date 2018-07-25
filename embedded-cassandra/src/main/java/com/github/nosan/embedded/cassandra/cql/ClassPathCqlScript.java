@@ -104,7 +104,7 @@ public class ClassPathCqlScript extends AbstractCqlScript {
 	}
 
 	@Override
-	public String getName() {
+	public String toString() {
 		return this.location;
 	}
 
@@ -113,17 +113,13 @@ public class ClassPathCqlScript extends AbstractCqlScript {
 		InputStream stream;
 		if (this.contextClass != null) {
 			stream = this.contextClass.getResourceAsStream(this.location);
-			if (stream != null) {
-				return stream;
-			}
 		}
-		if (this.classLoader != null) {
+		else if (this.classLoader != null) {
 			stream = this.classLoader.getResourceAsStream(this.location);
-			if (stream != null) {
-				return stream;
-			}
 		}
-		stream = ClassLoader.getSystemResourceAsStream(this.location);
+		else {
+			stream = ClassLoader.getSystemResourceAsStream(this.location);
+		}
 		if (stream == null) {
 			throw new FileNotFoundException(String.format("'%s' doesn't exist", this.location));
 		}

@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.spring;
 
-import java.util.Arrays;
-
 /**
  * {@code CqlScriptConfig} encapsulates the
  * attributes declared via {@link EmbeddedCassandra} or {@link Cql}.
@@ -55,13 +53,5 @@ class CqlConfig {
 
 	String getEncoding() {
 		return this.encoding;
-	}
-
-	@Override
-	public String toString() {
-		return "testClass" + "=" + this.testClass + "," +
-				"scripts" + "=" + Arrays.toString(this.scripts) + "," +
-				"statements" + "=" + Arrays.toString(this.statements) + "," +
-				"encoding" + "=" + this.encoding + ",";
 	}
 }

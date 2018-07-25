@@ -31,14 +31,6 @@ import java.util.Collection;
  * @see InputStreamCqlScript
  */
 public interface CqlScript {
-
-	/**
-	 * Return a description for this script.
-	 *
-	 * @return Description of the script.
-	 */
-	String getName();
-
 	/**
 	 * Return a list of CQL statements.
 	 *

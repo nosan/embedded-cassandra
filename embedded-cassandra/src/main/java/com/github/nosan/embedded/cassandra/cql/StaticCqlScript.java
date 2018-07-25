@@ -37,12 +37,12 @@ public class StaticCqlScript implements CqlScript {
 	}
 
 	@Override
-	public String getName() {
-		return "Script: 'Static CQL Statements'";
+	public Collection<String> getStatements() {
+		return Collections.unmodifiableList(this.statements);
 	}
 
 	@Override
-	public Collection<String> getStatements() {
-		return Collections.unmodifiableList(this.statements);
+	public String toString() {
+		return "Script: 'Static CQL Statements'";
 	}
 }
