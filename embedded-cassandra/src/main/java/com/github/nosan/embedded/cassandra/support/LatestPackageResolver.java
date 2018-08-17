@@ -46,7 +46,7 @@ public class LatestPackageResolver implements IPackageResolver {
 						"apache-cassandra-3.11.2/bin/cassandra");
 		}
 		builder.addEntry(FileType.Library,
-						"apache-cassandra-3.11.2/bin/cassandra.in.bat")
+				"apache-cassandra-3.11.2/bin/cassandra.in.bat")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cassandra.bat")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cassandra.in.sh")
 				.addEntry(FileType.Library, "apache-cassandra-3.11.2/bin/cqlsh")

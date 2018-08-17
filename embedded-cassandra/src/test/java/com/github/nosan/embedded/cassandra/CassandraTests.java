@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import java.io.UncheckedIOException;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.time.Duration;
@@ -68,7 +67,7 @@ public class CassandraTests {
 
 	@Test
 	public void shouldFailWithInvalidConfigurationError() {
-		this.throwable.expect(UncheckedIOException.class);
+		this.throwable.expect(RuntimeException.class);
 		this.throwable.expectMessage("Missing required directive CommitLogSync");
 		ExecutableConfig executableConfig = execBuilder().build();
 		executableConfig.getConfig().setCommitlogSync(null);
@@ -77,7 +76,7 @@ public class CassandraTests {
 
 	@Test
 	public void shouldFailWithTimeoutError() {
-		this.throwable.expect(UncheckedIOException.class);
+		this.throwable.expect(RuntimeException.class);
 		this.throwable.expectMessage("Please increase startup timeout");
 		ExecutableConfig executableConfig = new ExecutableConfigBuilder()
 				.timeout(Duration.ofSeconds(1)).build();
@@ -107,13 +106,12 @@ public class CassandraTests {
 
 	}
 
-	private static ExecutableConfigBuilder execBuilder() {
-		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx384m", "-Xms384m"));
-	}
-
-
 	private void executeScripts(Cassandra cassandra) {
 		CqlScriptUtils.executeScripts(cassandra.getSession(), new ClassPathCqlScript("init.cql"));
+	}
+
+	private static ExecutableConfigBuilder execBuilder() {
+		return new ExecutableConfigBuilder().jvmOptions(new JvmOptions("-Xmx384m", "-Xms384m"));
 	}
 
 	private static void run(Cassandra cassandra) {

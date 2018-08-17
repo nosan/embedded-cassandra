@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
@@ -60,14 +59,13 @@ public class Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
-
-	private boolean shutdownHookRegistered = false;
-
 	private final ClusterFactory clusterFactory;
 
 	private final IRuntimeConfig runtimeConfig;
 
 	private final ExecutableConfig executableConfig;
+
+	private boolean shutdownHookRegistered = false;
 
 	private volatile CassandraExecutable executable;
 
@@ -180,9 +178,6 @@ public class Cassandra {
 	/**
 	 * Starts the Cassandra. {@code Session} and {@code Cluster} will not be initialized.
 	 * This method registers a shutdown hook if {@link IRuntimeConfig#isDaemonProcess()} was set as a {@code true}.
-	 *
-	 * @throws UncheckedIOException Cassandra's process has not been started correctly.
-	 * @throws IllegalStateException Cassandra has already been initialized.
 	 */
 	public void start() {
 		if (this.executable == null) {
@@ -199,8 +194,9 @@ public class Cassandra {
 						this.executable = cassandraStarter.newExecutable();
 						this.executable.start();
 					}
-					catch (IOException ex) {
-						throw new UncheckedIOException(ex);
+					catch (Throwable ex) {
+						stop();
+						throw new RuntimeException(ex);
 					}
 				}
 				else {
@@ -233,7 +229,7 @@ public class Cassandra {
 				closeable.close();
 			}
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			log.error(ex.getMessage(), ex);
 		}
 	}

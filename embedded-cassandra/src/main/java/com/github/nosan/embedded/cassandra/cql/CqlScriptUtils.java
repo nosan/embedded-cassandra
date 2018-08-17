@@ -42,10 +42,14 @@ public abstract class CqlScriptUtils {
 	public static void executeScripts(Session session, CqlScript... cqlScripts) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(cqlScripts, "CQL Scripts must not be null");
-		log.debug("Executing CQL Scripts: {}", Arrays.toString(cqlScripts));
+		if (log.isDebugEnabled()) {
+			log.debug("Executing CQL Scripts: {}", Arrays.toString(cqlScripts));
+		}
 		for (CqlScript cqlScript : cqlScripts) {
 			for (String statement : cqlScript.getStatements()) {
-				log.debug("Execute Statement:  {}", statement);
+				if (log.isDebugEnabled()) {
+					log.debug("Execute Statement:  {}", statement);
+				}
 				session.execute(statement);
 			}
 		}
