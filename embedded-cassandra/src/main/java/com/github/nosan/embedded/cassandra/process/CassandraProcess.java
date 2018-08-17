@@ -49,9 +49,9 @@ public final class CassandraProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(CassandraProcess.class);
 
-	private ProcessControl process;
-
 	private final Context context;
+
+	private ProcessControl process;
 
 	public CassandraProcess(Distribution distribution, ExecutableConfig executableConfig,
 			IRuntimeConfig runtime, IExtractedFileSet files) {

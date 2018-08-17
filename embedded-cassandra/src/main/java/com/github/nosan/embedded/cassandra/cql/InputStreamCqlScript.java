@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Objects;
@@ -41,7 +40,7 @@ public class InputStreamCqlScript extends AbstractCqlScript {
 	}
 
 	@Override
-	public InputStream getInputStream() throws IOException {
+	public InputStream getInputStream() {
 		return this.location;
 	}
 
