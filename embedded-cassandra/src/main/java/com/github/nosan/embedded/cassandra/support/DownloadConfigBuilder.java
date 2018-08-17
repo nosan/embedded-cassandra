@@ -37,7 +37,7 @@ public class DownloadConfigBuilder extends de.flapdoodle.embed.process.config.st
 	private static final String USER_AGENT = "Mozilla/5.0 (compatible; Embedded Cassandra; "
 			+ "+https://github.com/nosan/embedded-cassandra)";
 
-	private static final String DOWNLOAD_PATH = "http://www-eu.apache.org/dist";
+	private static final String DOWNLOAD_PATH = "http://archive.apache.org/dist";
 
 	private static final String DOWNLOAD_PREFIX = "embedded-cassandra-download";
 

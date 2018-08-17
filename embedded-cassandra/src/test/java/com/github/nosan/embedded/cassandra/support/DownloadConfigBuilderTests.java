@@ -44,7 +44,7 @@ public class DownloadConfigBuilderTests {
 		assertThat(downloadConfig.getArtifactStorePath().asFile().getAbsolutePath())
 				.contains(".embedded-cassandra");
 		assertThat(downloadConfig.getDownloadPath().getPath(null))
-				.isEqualTo("http://www-eu.apache.org/dist");
+				.isEqualTo("http://archive.apache.org/dist");
 		assertThat(downloadConfig.getFileNaming()).isInstanceOf(UUIDTempNaming.class);
 		assertThat(downloadConfig.getDownloadPrefix())
 				.isEqualTo("embedded-cassandra-download");
@@ -69,7 +69,7 @@ public class DownloadConfigBuilderTests {
 		assertThat(downloadConfig.getArtifactStorePath().asFile().getAbsolutePath())
 				.contains(".embedded-cassandra");
 		assertThat(downloadConfig.getDownloadPath().getPath(null))
-				.isEqualTo("http://www-eu.apache.org/dist");
+				.isEqualTo("http://archive.apache.org/dist");
 		assertThat(downloadConfig.getFileNaming()).isInstanceOf(UUIDTempNaming.class);
 		assertThat(downloadConfig.getDownloadPrefix())
 				.isEqualTo("embedded-cassandra-download");
