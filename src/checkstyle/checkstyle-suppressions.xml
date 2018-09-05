@@ -6,6 +6,6 @@
     <suppress files="[\\/]src[\\/]test[\\/]java[\\/]" checks="Javadoc*"/>
     <suppress files=".*Tests\.java" checks="Javadoc*"/>
     <suppress files="generated-sources" checks="[a-zA-Z0-9]*"/>
-    <suppress files="com.github.nosan.embedded.cassandra.spring.EmbeddedCassandraConfiguration"
+    <suppress files="com.github.nosan.embedded.cassandra.spring.EmbeddedClusterConfiguration"
               checks="HideUtilityClassConstructorCheck"/>
 </suppressions>
