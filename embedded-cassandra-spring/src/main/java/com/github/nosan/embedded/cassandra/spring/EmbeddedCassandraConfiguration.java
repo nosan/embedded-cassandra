@@ -26,7 +26,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -34,6 +33,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -137,24 +137,17 @@ class EmbeddedCassandraConfiguration {
 		}
 	}
 
-	private static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean, DisposableBean {
+	private static class EmbeddedClusterFactoryBean
+			implements FactoryBean<Cluster>, InitializingBean, DisposableBean, ApplicationContextAware {
 
-		private final Cassandra cassandra;
+		private Cassandra cassandra;
 
-		private final ApplicationContext context;
-
-		EmbeddedClusterFactoryBean(
-				ObjectProvider<ClusterFactory> clusterFactory,
-				ObjectProvider<ExecutableConfig> executableConfig,
-				ObjectProvider<IRuntimeConfig> runtimeConfig,
-				ApplicationContext applicationContext) {
-			this.context = applicationContext;
-			this.cassandra = new Cassandra(runtimeConfig.getIfAvailable(), executableConfig.getIfAvailable(),
-					clusterFactory.getIfAvailable());
-		}
+		private ApplicationContext context;
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
+			this.cassandra = new Cassandra(getBean(this.context, IRuntimeConfig.class),
+					getBean(this.context, ExecutableConfig.class), getBean(this.context, ClusterFactory.class));
 			this.cassandra.start();
 			CqlScriptUtils.executeScripts(this.cassandra.getSession(), getCqlScripts(this.context));
 		}
@@ -179,6 +172,19 @@ class EmbeddedCassandraConfiguration {
 			this.cassandra.stop();
 		}
 
+		@Override
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+			this.context = applicationContext;
+		}
+
+		private static <T> T getBean(ApplicationContext context, Class<T> targetClass) {
+			try {
+				return context.getBean(targetClass);
+			}
+			catch (BeansException ex) {
+				return null;
+			}
+		}
 
 		private static CqlScript[] getCqlScripts(ApplicationContext context) throws IOException {
 			Environment env = context.getEnvironment();
