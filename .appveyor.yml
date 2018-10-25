@@ -4,21 +4,17 @@ image: Visual Studio 2017
 build:
   verbosity: detailed
 
-
-
 environment:
   matrix:
-  - platform: x64
-    JAVA_HOME: C:\Program Files\Java\jdk1.8.0
-  - platform: x86
-    JAVA_HOME: C:\Program Files (x86)\Java\jdk1.8.0
+  - JAVA_HOME: C:/Program Files/Java/jdk1.8.0
 
-install:
-  - cmd: echo JAVA_HOME = %JAVA_HOME%
-  - cmd: echo PATH = %PATH%
 
 build_script:
-  - mvnw.cmd -B -e clean test -Djna.nosys=true -DrerunFailingTestsCount=1
+- java -version
+- mvnw.cmd -B clean install -DCASSANDRA.CI.BUILD=true
 
+on_failure:
+- cat **/**/target/surefire-reports/*.txt
 
-
+cache:
+- C:/Users/appveyor/.m2

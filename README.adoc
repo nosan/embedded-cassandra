@@ -1,7 +1,10 @@
-= Embedded Cassandra image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-parent.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-parent"] image:https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?label=linux/osx["Travis: Linux/OSX", link="https://travis-ci.org/nosan/embedded-cassandra"] image:https://img.shields.io/appveyor/ci/nosan/embedded-cassandra/master.svg?label=windows["AppVeyor: Windows", link="https://ci.appveyor.com/project/nosan/embedded-cassandra"]
+= Embedded Cassandra
 
-`Embedded Cassandra` provides an easy way to run `Cassandra` in the unit tests. `Embedded Cassandra` is built
-on top of link:https://github.com/flapdoodle-oss/de.flapdoodle.embed.process[Flapdoodle OSS's embed process]
+image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-parent.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-parent"]
+image:https://travis-ci.org/nosan/embedded-cassandra.svg?branch=master["Build Status", link="https://travis-ci.org/nosan/embedded-cassandra"]
+image:https://ci.appveyor.com/api/projects/status/xwne3e6oeu2hcspu/branch/master?svg=true["Build Status", link="https://ci.appveyor.com/project/nosan/embedded-cassandra"]
+
+`Embedded Cassandra` provides an easy way to run `Cassandra`.
 
 == License
 
@@ -9,20 +12,213 @@ This project uses link:http://www.apache.org/licenses/LICENSE-2.0[Apache License
 
 == Why?
 
- - It is much easier than installing right version by hand;
- - It is possible to use different versions/configuration per project without any local set-up;
- - Supports multiple platforms: `Windows`, `Linux` and `OSX`;
+ - It is much easier than installing right version by hand
+ - It is possible to use different versions/configuration per project without any local set-up
+ - Supports multiple platforms: `Windows`, `Linux` and `OSX`
  - Provides different extensions for popular frameworks.
  - Easy to configure.
- - Experimentally supports `java 9` and `java 10` (only for `unix-like`).
 
-== See More
 
- - link:embedded-cassandra/README.adoc[Embedded Cassandra]
- - link:embedded-cassandra-junit/README.adoc[Embedded Cassandra JUnit4]
- - link:embedded-cassandra-jupiter/README.adoc[Embedded Cassandra JUnit5]
- - link:embedded-cassandra-testng/README.adoc[Embedded Cassandra TestNG]
- - link:embedded-cassandra-spring/README.adoc[Embedded Cassandra Spring]
+
+=== Modules
+
+There are a number of modules in Embedded Cassandra, here is a quick overview:
+
+==== embedded-cassandra
+
+The main module to start/stop `Cassandra`. Here is a quick teaser:
+
+```java
+import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+
+class Scratch {
+	public static void main(String[] args) {
+		LocalCassandraFactory factory = new LocalCassandraFactory();
+		//factory.setVersion(...);
+		//factory.setConfigurationFile(...);
+		Cassandra cassandra = factory.create();
+		try {
+			cassandra.start();
+            Settings settings = cassandra.getSettings();
+
+		}
+		finally {
+			cassandra.stop();
+		}
+	}
+}
+```
+Factory has a lot of different methods to control your `Cassandra` instance (e.g. setVersion, setConfiguration, etc..).
+By default `Cassandra` is running on `random` ports.
+
+TIP: port `0` is regarded as a `random`
+
+====  embedded-cassandra-test
+
+This module contains core items that can be helpful when testing your `Cassandra`.
+
+===== TestNG
+
+To run tests within `TestNG`, `CassandraTestNG` has to be extended.  Here is a quick teaser:
+
+```java
+
+import org.testng.annotations.Test;
+
+import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
+import com.github.nosan.embedded.cassandra.test.testng.CassandraTestNG;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class CassandraTestNGTests extends CassandraTestNG {
+
+	public CassandraTestNGTests() {
+		super(new ClassPathCqlScript("init.cql"));
+	}
+
+	@Test
+	public void selectRoles() {
+		assertThat(getSession().execute("SELECT * FROM  test.roles").all())
+				.isEmpty();
+	}
+
+}
+```
+
+===== JUnit5
+
+To run tests within `JUnit5`, `CassandraExtension` has to be used.  Here is a quick teaser:
+
+```java
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtension;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class CassandraExtensionTests {
+
+	@RegisterExtension
+	public static final CassandraExtension cassandra = new CassandraExtension(CqlScript.classpath("init.cql"));
+
+
+	@Test
+	public void selectRoles() {
+		assertThat(cassandra.getSession().execute("SELECT * FROM  test.roles").all())
+				.isEmpty();
+	}
+
+}
+```
+
+
+===== JUnit4
+
+
+To run tests within `JUnit4`, `CassandraRule` has to be used.  Here is a quick teaser:
+
+```java
+
+
+import org.junit.ClassRule;
+import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.test.junit.CassandraRule;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class CassandraRuleTests {
+
+	@ClassRule
+	public static final CassandraRule cassandra = new CassandraRule(CqlScript.classpath("init.cql"));
+
+
+	@Test
+	public void selectRoles() {
+		assertThat(cassandra.getSession().execute("SELECT * FROM  test.roles").all())
+				.isEmpty();
+	}
+
+}
+```
+
+===== Spring
+
+When writing integration tests against a `Cassandra`, it is often needs to execute `CQL` scripts to modify the `Cassandra` storage.
+The `embedded-cassandra-spring` module provides support for initializing an embedded or existing cassandra by executing
+`CQL` scripts when the `Spring ApplicationContext` is loaded.
+
+====== @EmbeddedCassandra
+
+For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
+Cassandra will be started on the random ports. Also it is possible to initialize `Embedded Cassandra`  with `CQL` scripts using
+`scripts` and `statements` attributes. `EmbeddedCassandraConfiguration` overrides any existing `cluster` beans with an `embedded cluster` bean.
+
+
+
+```java
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = ...)
+@EmbeddedCassandra(scripts = "/cql-scripts/*.cql")
+public class CassandraTests {
+
+	@Autowired
+	private Cluster cluster;
+
+	@Test
+	public void test() {
+	}
+
+}
+```
+TIP: You can declare `CassandraFactory` and `ClusterFactory` beans to take control of the `Cassandra` instance's.
+
+====== @Cql
+
+`@Cql` annotation is used to annotate a test method to configure `CQL` scripts to be executed against
+a given `cluster` during integration tests.  Script execution is performed by the `CqlExecutionListener`, which is enabled by default.
+
+```java
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = ...)
+@EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
+public class CqlScriptTests {
+
+	@Autowired
+	private Cluster cluster;
+
+	@Test
+	@Cql(scripts = {"/users-data.cql"})
+	@Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+	public void shouldHaveUser() {
+		try (Session session = this.cluster.connect()) {
+			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
+			assertThat(rs.one().getLong(0)).isEqualTo(1);
+		}
+	}
+
+	@Test
+	public void shouldNotHaveUser() {
+		try (Session session = this.cluster.connect()) {
+			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
+			assertThat(rs.one().getLong(0)).isZero();
+		}
+	}
+
+}
+```
+
+TIP: Multiple sets of `@Cql` scripts could be configured for
+a given test method with a different syntax configuration or different execution phases per set.
+
+
+
+
 
 
 
