@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.util;
 
 import java.net.ConnectException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
@@ -48,7 +49,7 @@ public abstract class PortUtils {
 	/**
 	 * How many ports to remember.
 	 */
-	private static final int MAX_REMEMBER = 500;
+	private static final int MAX_REMEMBER = 1000;
 
 
 	/**
@@ -76,10 +77,9 @@ public abstract class PortUtils {
 
 
 	private static boolean isFree(int port) {
-		try {
-			ServerSocket serverSocket = new ServerSocket(port, 1, InetAddress.getLoopbackAddress());
-			serverSocket.setReuseAddress(true);
-			serverSocket.close();
+		try (ServerSocket ss = new ServerSocket()) {
+			ss.setReuseAddress(true);
+			ss.bind(new InetSocketAddress(InetAddress.getLocalHost(), port), 1);
 		}
 		catch (Exception ex) {
 			return false;

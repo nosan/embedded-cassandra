@@ -17,6 +17,8 @@
 package com.github.nosan.embedded.cassandra.util;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,7 +43,9 @@ public class PortUtilsTests {
 		for (int i = 0; i < 100; i++) {
 			int port = PortUtils.getPort();
 			ports.add(port);
-			try (ServerSocket ss = new ServerSocket(port, 1)) {
+			try (ServerSocket ss = new ServerSocket()) {
+				ss.setReuseAddress(true);
+				ss.bind(new InetSocketAddress(InetAddress.getLocalHost(), port), 1);
 				ss.getLocalPort();
 			}
 		}
