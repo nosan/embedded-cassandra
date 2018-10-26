@@ -1,6 +1,6 @@
 = Embedded Cassandra
 
-image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-parent.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-parent"]
+image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra"]
 image:https://travis-ci.org/nosan/embedded-cassandra.svg?branch=master["Build Status", link="https://travis-ci.org/nosan/embedded-cassandra"]
 image:https://ci.appveyor.com/api/projects/status/xwne3e6oeu2hcspu/branch/master?svg=true["Build Status", link="https://ci.appveyor.com/project/nosan/embedded-cassandra"]
 
