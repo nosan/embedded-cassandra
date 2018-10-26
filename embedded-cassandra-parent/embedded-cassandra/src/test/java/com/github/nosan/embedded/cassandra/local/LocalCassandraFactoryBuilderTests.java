@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -55,6 +56,7 @@ public class LocalCassandraFactoryBuilderTests {
 				.setRackFile(rack)
 				.setTopologyFile(topology)
 				.setWorkingDirectory(workingDirectory)
+				.setStartupTimeout(Duration.ofMinutes(1))
 				.build();
 
 		assertThat(factory.getJvmOptions()).containsExactly(jvmOptions);
@@ -65,5 +67,6 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getRackFile()).isEqualTo(rack.toUri().toURL());
 		assertThat(factory.getTopologyFile()).isEqualTo(topology.toUri().toURL());
 		assertThat(factory.getWorkingDirectory()).isEqualTo(workingDirectory);
+		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(1));
 	}
 }

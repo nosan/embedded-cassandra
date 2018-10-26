@@ -146,9 +146,9 @@ public class TestCassandra implements Cassandra {
 
 	@Override
 	public void stop() throws CassandraException {
-		if (!this.initialized) {
+		if (this.initialized) {
 			synchronized (this) {
-				if (!this.initialized) {
+				if (this.initialized) {
 					try {
 						Cluster cluster = this.cluster;
 						if (cluster != null) {

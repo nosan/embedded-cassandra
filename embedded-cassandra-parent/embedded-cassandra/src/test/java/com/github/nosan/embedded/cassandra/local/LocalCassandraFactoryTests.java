@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -70,6 +71,7 @@ public class LocalCassandraFactoryTests {
 		factory.setTopologyFile(topologyFile.toUri().toURL());
 		factory.setRackFile(rackFile.toUri().toURL());
 		factory.getJvmOptions().add("arg1");
+		factory.setStartupTimeout(Duration.ofMinutes(1));
 
 
 		Cassandra cassandra = factory.create();
@@ -80,6 +82,8 @@ public class LocalCassandraFactoryTests {
 				"rootDirectory")).isEqualTo(workingDirectory);
 		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "localProcess"), "jvmOptions"))
 				.isEqualTo(factory.getJvmOptions());
+		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "localProcess"), "startupTimeout"))
+				.isEqualTo(factory.getStartupTimeout());
 		List<DirectoryInitializer> initializers = (List<DirectoryInitializer>) ReflectionUtils.getField(cassandra,
 				"initializers");
 		assertThat(initializers).hasSize(5);
