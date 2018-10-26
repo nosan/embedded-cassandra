@@ -54,9 +54,7 @@ public @interface EmbeddedCassandra {
 
 	/**
 	 * The paths to the CQL scripts to execute.
-	 * <p>
 	 * <h3>Path Resource Semantics</h3>
-	 * <p>
 	 * Each path will be interpreted as a Spring
 	 * {@link org.springframework.core.io.Resource Resource}. A plain path &mdash; for
 	 * example, {@code "schema.cql"} &mdash; will be treated as a classpath resource that

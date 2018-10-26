@@ -47,7 +47,6 @@ public @interface Cql {
 
 	/**
 	 * The paths to the CQL scripts to execute.
-	 * <p>
 	 * <h3>Path Resource Semantics</h3>
 	 * <p>
 	 * Each path will be interpreted as a Spring
