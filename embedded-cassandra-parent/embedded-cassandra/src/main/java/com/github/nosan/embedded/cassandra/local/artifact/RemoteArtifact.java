@@ -52,6 +52,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  *
  * @author Dmytro Nosan
  * @since 1.0.0
+ * @see RemoteArtifactFactory
  */
 class RemoteArtifact implements Artifact {
 

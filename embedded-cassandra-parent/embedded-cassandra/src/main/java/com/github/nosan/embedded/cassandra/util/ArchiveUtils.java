@@ -57,9 +57,9 @@ public abstract class ArchiveUtils {
 	static {
 		Map<String, ArchiveFactory> candidates = new LinkedHashMap<>();
 		candidates.put(".tar.gz", ArchiveFactory.create(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
-		candidates.put(".tgz", ArchiveFactory.create(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
 		candidates.put(".tar.bz2", ArchiveFactory.create(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
 		candidates.put(".tbz2", ArchiveFactory.create(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
+		candidates.put(".tgz", ArchiveFactory.create(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
 		candidates.put(".a", ArchiveFactory.create(ArchiveStreamFactory.AR));
 		candidates.put(".ar", ArchiveFactory.create(ArchiveStreamFactory.AR));
 		candidates.put(".cpio", ArchiveFactory.create(ArchiveStreamFactory.CPIO));

@@ -134,7 +134,9 @@ class RunProcess {
 	 */
 	Process run(@Nullable Output... outputs) throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder(this.arguments
-				.stream().map(String::valueOf).collect(Collectors.toList()));
+				.stream()
+				.map(String::valueOf)
+				.collect(Collectors.toList()));
 		if (this.workingDirectory != null) {
 			processBuilder.directory(this.workingDirectory.toFile());
 		}
@@ -142,7 +144,8 @@ class RunProcess {
 			processBuilder.environment().putAll(this.environment);
 		}
 		processBuilder.redirectErrorStream(true);
-		log.debug("Execute ({}) with Env ({}) in a ({})", this.arguments, this.environment, this.workingDirectory);
+		log.debug("Execute ({}) with environment ({}) in a ({})", this.arguments, this.environment,
+				this.workingDirectory);
 		Process process = processBuilder.start();
 		if (outputs != null && outputs.length > 0) {
 			Thread thread = new Thread(new ProcessReader(process, outputs));

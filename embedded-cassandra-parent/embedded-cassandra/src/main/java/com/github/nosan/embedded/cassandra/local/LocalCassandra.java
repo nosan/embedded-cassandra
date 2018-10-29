@@ -43,6 +43,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
  *
  * @author Dmytro Nosan
  * @since 1.0.0
+ * @see LocalCassandraFactory
  */
 class LocalCassandra implements Cassandra {
 
