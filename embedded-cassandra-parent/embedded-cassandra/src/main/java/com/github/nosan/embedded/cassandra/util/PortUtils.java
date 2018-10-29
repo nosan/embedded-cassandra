@@ -16,14 +16,16 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.Nullable;
 
 /**
  * Utility methods for dealing with ports.
@@ -74,6 +76,24 @@ public abstract class PortUtils {
 	}
 
 
+	/**
+	 * Test whether the {@code TCP} port is busy or not.
+	 *
+	 * @param address the address (if not specified, than {@link InetAddress#getLoopbackAddress()} will be used)
+	 * @param port the TCP port
+	 * @return {@code true} if port is busy, otherwise {@code false}
+	 */
+	public static boolean isPortBusy(@Nullable String address, int port) {
+		try {
+			new Socket(getInetAddress(address), port).close();
+			return true;
+		}
+		catch (Exception ex) {
+			return false;
+		}
+	}
+
+
 	private static boolean isFree(int port) {
 		try (ServerSocket ss = new ServerSocket()) {
 			ss.setReuseAddress(true);
@@ -82,17 +102,18 @@ public abstract class PortUtils {
 		catch (Exception ex) {
 			return false;
 		}
-		try {
-			new Socket(InetAddress.getLoopbackAddress(), port).close();
-			return false;
-		}
-		catch (ConnectException ex) {
-			return true;
-		}
-		catch (Exception ex) {
-			return false;
-		}
+		return !isPortBusy(null, port);
 	}
 
+
+	private static InetAddress getInetAddress(String address) {
+		try {
+			return StringUtils.hasText(address) ? InetAddress.getByName(address) :
+					InetAddress.getLoopbackAddress();
+		}
+		catch (UnknownHostException ex) {
+			return InetAddress.getLoopbackAddress();
+		}
+	}
 
 }

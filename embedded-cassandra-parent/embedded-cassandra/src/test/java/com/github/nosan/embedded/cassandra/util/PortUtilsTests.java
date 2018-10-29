@@ -34,9 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class PortUtilsTests {
 
-	/*@Rule
-	public ExpectedException throwable = ExpectedException.none();*/
-
 	@Test
 	public void shouldGetRandomPort() throws IOException {
 		Set<Integer> ports = new HashSet<>();
@@ -52,20 +49,13 @@ public class PortUtilsTests {
 		assertThat(ports.size()).isEqualTo(10);
 	}
 
-	/*
-	* Run me if you change the class! This test is heavy.
 	@Test
-	public void shouldNotGetRandomPort() throws Exception {
-		this.throwable.expectMessage("Could not find an available port in the range [49152, 65535])");
-		List<ServerSocket> sockets = new ArrayList<>();
-		try {
-			for (int i = 0; i < 30000; i++) {
-				sockets.add(new ServerSocket(PortUtils.getPort(), 1));
-			}
+	public void shouldBeBusy() throws IOException {
+		int port = PortUtils.getPort();
+		assertThat(PortUtils.isPortBusy(null, port)).isFalse();
+		try (ServerSocket ss = new ServerSocket(port)) {
+			assertThat(PortUtils.isPortBusy(null, ss.getLocalPort())).isTrue();
 		}
-		finally {
-			sockets.forEach(IOUtils::closeQuietly);
-		}
+
 	}
-	*/
 }

@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -160,8 +158,8 @@ class LocalProcess {
 			else if (settings.isStartRpc()) {
 				port = (settings.getRpcPort() != -1) ? settings.getRpcPort() : 9160;
 			}
-			return isPortReady(settings.getAddress(), storagePort) &&
-					(port == -1 || isPortReady(settings.getAddress(), port));
+			return PortUtils.isPortBusy(settings.getAddress(), storagePort) &&
+					(port == -1 || PortUtils.isPortBusy(settings.getAddress(), port));
 		});
 		if (!result) {
 			throwException(String.format("Cassandra has not be started. Storage port (%s) is not available." +
@@ -267,19 +265,6 @@ class LocalProcess {
 			}
 		}
 		throw new IOException(builder.toString());
-	}
-
-
-	private static boolean isPortReady(String host, int port) {
-		try {
-			InetAddress address = StringUtils.hasText(host) ? InetAddress.getByName(host) :
-					InetAddress.getLoopbackAddress();
-			new Socket(address, port).close();
-			return true;
-		}
-		catch (Exception ex) {
-			return false;
-		}
 	}
 
 
