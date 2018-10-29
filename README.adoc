@@ -5,7 +5,7 @@ image:https://ci.appveyor.com/api/projects/status/xwne3e6oeu2hcspu/branch/master
 
 `Embedded Cassandra` provides an easy way to run `Cassandra`.
 
-`Embedded Cassandra (0.0.x)` is built on top of link:https://github.com/flapdoodle-oss/de.flapdoodle.embed.process[Flapdoodle OSS's embed process]
+`Embedded Cassandra (link:https://github.com/nosan/embedded-cassandra/tree/0.0.x[0.0.x])` is built on top of link:https://github.com/flapdoodle-oss/de.flapdoodle.embed.process[Flapdoodle OSS's embed process]
 
 == License
 
@@ -54,7 +54,7 @@ class Scratch {
 }
 ```
 Factory has a lot of different methods to control your `Cassandra` instance (e.g. setVersion, setConfiguration, etc..).
-By default `Cassandra` is running on `random` ports.
+By default `Cassandra` is running on `random` ports and `3.11.3` version will be used.
 
 TIP: port `0` is regarded as a `random`
 
@@ -163,7 +163,7 @@ The `embedded-cassandra-spring` module provides support for initializing an embe
 ====== @EmbeddedCassandra
 
 For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
-Cassandra will be started on the random ports. Also it is possible to initialize `Embedded Cassandra`  with `CQL` scripts using
+Also it is possible to initialize `Embedded Cassandra`  with `CQL` scripts using
 `scripts` and `statements` attributes. `EmbeddedCassandraConfiguration` overrides any existing `cluster` beans with an `embedded cluster` bean.
 
 
