@@ -42,14 +42,14 @@ public abstract class PortUtils {
 	private static final Random RANDOM = new Random();
 
 	/**
-	 * Remembered ports.
+	 * Used ports.
 	 */
-	private static final Map<Integer, Integer> REMEMBER = new ConcurrentHashMap<>();
+	private static final Map<Integer, Integer> CLOSED = new ConcurrentHashMap<>();
 
 	/**
 	 * How many ports to remember.
 	 */
-	private static final int MAX_REMEMBER = 1000;
+	private static final int MAX_CLOSED = 1000;
 
 
 	/**
@@ -59,15 +59,13 @@ public abstract class PortUtils {
 	 * @throws IllegalStateException if port could not be found
 	 */
 	public static int getPort() {
-		if (REMEMBER.size() > MAX_REMEMBER) {
-			REMEMBER.clear();
+		if (CLOSED.size() > MAX_CLOSED) {
+			CLOSED.clear();
 		}
 		for (int i = 0; i < RANGE; i++) {
 			int port = MIN + RANDOM.nextInt(RANGE);
-			if (isFree(port)) {
-				if (REMEMBER.putIfAbsent(port, port) == null) {
-					return port;
-				}
+			if (!CLOSED.containsKey(port) && isFree(port) && CLOSED.putIfAbsent(port, port) == null) {
+				return port;
 			}
 		}
 		throw new IllegalStateException(String.format("Could not find an available port in the range [%d, %d])",
@@ -79,7 +77,7 @@ public abstract class PortUtils {
 	private static boolean isFree(int port) {
 		try (ServerSocket ss = new ServerSocket()) {
 			ss.setReuseAddress(true);
-			ss.bind(new InetSocketAddress(InetAddress.getLocalHost(), port), 1);
+			ss.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 1);
 		}
 		catch (Exception ex) {
 			return false;

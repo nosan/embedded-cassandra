@@ -40,7 +40,7 @@ public class PortUtilsTests {
 	@Test
 	public void shouldGetRandomPort() throws IOException {
 		Set<Integer> ports = new HashSet<>();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10; i++) {
 			int port = PortUtils.getPort();
 			ports.add(port);
 			try (ServerSocket ss = new ServerSocket()) {
@@ -49,7 +49,7 @@ public class PortUtilsTests {
 				ss.getLocalPort();
 			}
 		}
-		assertThat(ports.size()).isBetween(90, 100);
+		assertThat(ports.size()).isEqualTo(10);
 	}
 
 	/*
