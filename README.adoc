@@ -27,8 +27,6 @@ There are a number of modules in Embedded Cassandra, here is a quick overview:
 
 ==== embedded-cassandra
 
-image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra"]
-
 
 The main module to start/stop `Cassandra`. Here is a quick teaser:
 
@@ -43,9 +41,8 @@ class Scratch {
 		//factory.setConfigurationFile(...);
 		Cassandra cassandra = factory.create();
 		try {
-			cassandra.start();
-            Settings settings = cassandra.getSettings();
-
+                 cassandra.start();
+                 Settings settings = cassandra.getSettings();
 		}
 		finally {
 			cassandra.stop();
@@ -59,8 +56,6 @@ By default `Cassandra` is running on `random` ports and `3.11.3` version will be
 TIP: port `0` is regarded as a `random`
 
 ====  embedded-cassandra-test
-
-image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra"]
 
 
 This module contains core items that can be helpful when testing your `Cassandra`.
@@ -223,9 +218,21 @@ public class CqlScriptTests {
 TIP: Multiple sets of `@Cql` scripts could be configured for
 a given test method with a different syntax configuration or different execution phases per set.
 
+== Maven
+```xml
+<dependency>
+  <groupId>com.github.nosan</groupId>
+  <artifactId>embedded-cassandra</artifactId>
+  <version>1.0.2</version>
+</dependency>
 
-
-
+<dependency>
+  <groupId>com.github.nosan</groupId>
+  <artifactId>embedded-cassandra-test</artifactId>
+  <version>1.0.2</version>
+  <scope>test</scope>
+</dependency>
+```
 
 
 
