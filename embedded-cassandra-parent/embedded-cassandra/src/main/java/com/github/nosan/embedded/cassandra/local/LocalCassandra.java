@@ -42,8 +42,8 @@ import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
  * before/after calling {@link LocalProcess}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
  * @see LocalCassandraFactory
+ * @since 1.0.0
  */
 class LocalCassandra implements Cassandra {
 
