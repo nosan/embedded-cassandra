@@ -149,6 +149,11 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		return this.version;
 	}
 
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getVersion() version} attribute.
+	 *
+	 * @param version The value for version
+	 */
 	public void setVersion(@Nullable Version version) {
 		this.version = version;
 	}
