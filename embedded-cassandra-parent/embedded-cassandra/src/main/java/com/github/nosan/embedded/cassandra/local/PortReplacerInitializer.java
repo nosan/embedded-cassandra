@@ -66,6 +66,13 @@ class PortReplacerInitializer implements DirectoryInitializer {
 	}
 
 	private static int getPort(int port, Iterator<Integer> ports) {
-		return (port != 0) ? port : ports.next();
+		if (port != 0) {
+			return port;
+		}
+		if (ports.hasNext()) {
+			return ports.next();
+		}
+		//edge case, maybe in the future new ports will be added and this method should not fail.
+		return PortUtils.getPort();
 	}
 }
