@@ -85,8 +85,23 @@ class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	private void executeCqlScripts(TestContext testContext, Cql.ExecutionPhase executionPhase) {
-		Set<Cql> cqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+		Set<Cql> methodAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(
 				testContext.getTestMethod(), Cql.class, CqlGroup.class);
+		Set<Cql> classAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(
+				testContext.getTestClass(), Cql.class, CqlGroup.class);
+
+		if (executionPhase == Cql.ExecutionPhase.BEFORE_TEST_METHOD) {
+			executeCqlScripts(classAnnotations, executionPhase, testContext);
+			executeCqlScripts(methodAnnotations, executionPhase, testContext);
+		}
+		else if (executionPhase == Cql.ExecutionPhase.AFTER_TEST_METHOD) {
+			executeCqlScripts(methodAnnotations, executionPhase, testContext);
+			executeCqlScripts(classAnnotations, executionPhase, testContext);
+		}
+	}
+
+	private void executeCqlScripts(Set<Cql> cqlAnnotations, Cql.ExecutionPhase executionPhase,
+			TestContext testContext) {
 		for (Cql cql : cqlAnnotations) {
 			executeCqlScripts(cql, executionPhase, testContext);
 		}

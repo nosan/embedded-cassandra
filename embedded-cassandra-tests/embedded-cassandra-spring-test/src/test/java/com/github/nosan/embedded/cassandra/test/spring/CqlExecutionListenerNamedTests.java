@@ -39,6 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Cql(cluster = "customCluster", scripts = "/init.cql")
+@Cql(cluster = "customCluster", statements = "DROP KEYSPACE test",
+		executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CqlExecutionListenerNamedTests {
 
 
@@ -50,9 +53,7 @@ public class CqlExecutionListenerNamedTests {
 	private Cluster customCluster;
 
 	@Test
-	@Cql(cluster = "customCluster", scripts = {"/init.cql", "/users-data.cql"})
-	@Cql(cluster = "customCluster", statements = "DROP KEYSPACE test",
-			executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+	@Cql(cluster = "customCluster", scripts = "/users-data.cql")
 	public void shouldHaveUser() {
 		try (Session session = this.customCluster.connect()) {
 			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
@@ -61,7 +62,6 @@ public class CqlExecutionListenerNamedTests {
 	}
 
 	@Test
-	@Cql(cluster = "customCluster", scripts = {"/init.cql"})
 	public void shouldNotHaveUser() {
 		try (Session session = this.customCluster.connect()) {
 			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");

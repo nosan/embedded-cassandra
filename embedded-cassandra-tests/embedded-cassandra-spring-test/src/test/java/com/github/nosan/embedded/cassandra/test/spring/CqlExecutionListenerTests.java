@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @EmbeddedCassandra(scripts = {"/init.cql"})
+@Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CqlExecutionListenerTests {
 
 	@Autowired
@@ -42,7 +43,6 @@ public class CqlExecutionListenerTests {
 
 	@Test
 	@Cql(scripts = {"/users-data.cql"})
-	@Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void shouldHaveUser() {
 		try (Session session = this.cluster.connect()) {
 			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");

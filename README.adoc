@@ -189,6 +189,7 @@ a given `cluster` during integration tests.  Script execution is performed by th
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ...)
 @EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
+@Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CqlScriptTests {
 
 	@Autowired
@@ -196,7 +197,6 @@ public class CqlScriptTests {
 
 	@Test
 	@Cql(scripts = {"/users-data.cql"})
-	@Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void shouldHaveUser() {
 		try (Session session = this.cluster.connect()) {
 			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
