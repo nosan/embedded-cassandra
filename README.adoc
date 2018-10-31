@@ -223,13 +223,13 @@ a given test method with a different syntax configuration or different execution
 <dependency>
   <groupId>com.github.nosan</groupId>
   <artifactId>embedded-cassandra</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
 </dependency>
 
 <dependency>
   <groupId>com.github.nosan</groupId>
   <artifactId>embedded-cassandra-test</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <scope>test</scope>
 </dependency>
 ```
