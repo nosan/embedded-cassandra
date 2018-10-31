@@ -21,6 +21,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.junit.Test;
@@ -50,11 +51,17 @@ public class PortUtilsTests {
 	}
 
 	@Test
+	public void shouldGet10Ports() {
+		Set<Integer> ports = new LinkedHashSet<>(PortUtils.getPorts(10));
+		assertThat(ports).hasSize(10);
+	}
+
+	@Test
 	public void shouldBeBusy() throws IOException {
 		int port = PortUtils.getPort();
-		assertThat(PortUtils.isPortBusy(null, port)).isFalse();
+		assertThat(PortUtils.isPortBusy((InetAddress) null, port)).isFalse();
 		try (ServerSocket ss = new ServerSocket(port)) {
-			assertThat(PortUtils.isPortBusy(null, ss.getLocalPort())).isTrue();
+			assertThat(PortUtils.isPortBusy(InetAddress.getLoopbackAddress(), ss.getLocalPort())).isTrue();
 		}
 
 	}

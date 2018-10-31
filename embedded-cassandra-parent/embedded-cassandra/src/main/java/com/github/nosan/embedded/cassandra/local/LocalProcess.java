@@ -140,7 +140,7 @@ class LocalProcess {
 		}
 		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
 
-		OutputCapture outputCapture = new OutputCapture(15);
+		OutputCapture outputCapture = new OutputCapture(20);
 
 		Process process = new RunProcess(directory, environment, arguments)
 				.run(outputCapture, log::info);

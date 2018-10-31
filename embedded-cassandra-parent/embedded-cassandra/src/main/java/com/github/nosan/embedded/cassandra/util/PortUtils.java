@@ -21,10 +21,12 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Map;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -39,20 +41,9 @@ public abstract class PortUtils {
 
 	private final static int MAX = 65535;
 
-	private final static int RANGE = MAX - MIN;
+	private final static int RANGE = (MAX - MIN) + 1;
 
 	private static final Random RANDOM = new Random();
-
-	/**
-	 * Used ports.
-	 */
-	private static final Map<Integer, Integer> CLOSED = new ConcurrentHashMap<>();
-
-	/**
-	 * How many ports to remember.
-	 */
-	private static final int MAX_CLOSED = 1000;
-
 
 	/**
 	 * Find a free {@code TCP} port.
@@ -61,12 +52,9 @@ public abstract class PortUtils {
 	 * @throws IllegalStateException if port could not be found
 	 */
 	public static int getPort() {
-		if (CLOSED.size() > MAX_CLOSED) {
-			CLOSED.clear();
-		}
 		for (int i = 0; i < RANGE; i++) {
 			int port = MIN + RANDOM.nextInt(RANGE);
-			if (!CLOSED.containsKey(port) && isFree(port) && CLOSED.putIfAbsent(port, port) == null) {
+			if (isFree(port)) {
 				return port;
 			}
 		}
@@ -79,13 +67,24 @@ public abstract class PortUtils {
 	/**
 	 * Test whether the {@code TCP} port is busy or not.
 	 *
-	 * @param address the address (if not specified, than {@link InetAddress#getLoopbackAddress()} will be used)
+	 * @param address the address
 	 * @param port the TCP port
 	 * @return {@code true} if port is busy, otherwise {@code false}
 	 */
 	public static boolean isPortBusy(@Nullable String address, int port) {
-		try {
-			new Socket(getInetAddress(address), port).close();
+		return isPortBusy(getInetAddress(address), port);
+	}
+
+	/**
+	 * Test whether the {@code TCP} port is busy or not.
+	 *
+	 * @param address the address
+	 * @param port the TCP port
+	 * @return {@code true} if port is busy, otherwise {@code false}
+	 */
+	public static boolean isPortBusy(@Nullable InetAddress address, int port) {
+		try (Socket socket = new Socket()) {
+			socket.connect(new InetSocketAddress(address, port));
 			return true;
 		}
 		catch (Exception ex) {
@@ -93,27 +92,43 @@ public abstract class PortUtils {
 		}
 	}
 
+	/**
+	 * Find 'N' free {@code TCP} ports.
+	 *
+	 * @param count the number of available ports to find
+	 * @return free ports
+	 * @throws IllegalStateException if port could not be found
+	 */
+	@Nonnull
+	public static Collection<Integer> getPorts(int count) {
+		Set<Integer> ports = new LinkedHashSet<>();
+		while (ports.size() != count) {
+			ports.add(PortUtils.getPort());
+		}
+		return ports;
+	}
+
 
 	private static boolean isFree(int port) {
 		try (ServerSocket ss = new ServerSocket()) {
-			ss.setReuseAddress(true);
-			ss.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 1);
+			ss.bind(new InetSocketAddress((InetAddress) null, port), 1);
 		}
 		catch (Exception ex) {
 			return false;
 		}
-		return !isPortBusy(null, port);
+		return !isPortBusy((InetAddress) null, port);
 	}
 
 
 	private static InetAddress getInetAddress(String address) {
 		try {
-			return StringUtils.hasText(address) ? InetAddress.getByName(address) :
-					InetAddress.getLoopbackAddress();
+			if (StringUtils.hasText(address)) {
+				return InetAddress.getByName(address);
+			}
 		}
-		catch (UnknownHostException ex) {
-			return InetAddress.getLoopbackAddress();
+		catch (UnknownHostException ignore) {
 		}
+		return null;
 	}
 
 }

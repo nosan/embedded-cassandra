@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +46,7 @@ class PortReplacerInitializer implements DirectoryInitializer {
 
 	@Override
 	public void initialize(@Nonnull Path directory, @Nonnull Version version) throws Exception {
+		Iterator<Integer> ports = PortUtils.getPorts(5).iterator();
 		Path target = directory.resolve("conf/cassandra.yaml");
 		String source = StreamUtils.toString(new UnicodeReader(Files.newInputStream(target)));
 		Pattern pattern = Pattern.compile("^([a-z_]+)_port:\\s*([0-9]+)\\s*$", Pattern.MULTILINE);
@@ -54,7 +56,7 @@ class PortReplacerInitializer implements DirectoryInitializer {
 		while (matcher.find()) {
 			String name = matcher.group(1);
 			int port = Integer.parseInt(matcher.group(2));
-			matcher.appendReplacement(sb, String.format("%s_port: %s", name, getPort(port)));
+			matcher.appendReplacement(sb, String.format("%s_port: %s", name, getPort(port, ports)));
 		}
 		matcher.appendTail(sb);
 		try (BufferedWriter writer = Files.newBufferedWriter(target)) {
@@ -63,7 +65,7 @@ class PortReplacerInitializer implements DirectoryInitializer {
 
 	}
 
-	private static int getPort(int port) {
-		return (port != 0) ? port : PortUtils.getPort();
+	private static int getPort(int port, Iterator<Integer> ports) {
+		return (port != 0) ? port : ports.next();
 	}
 }
