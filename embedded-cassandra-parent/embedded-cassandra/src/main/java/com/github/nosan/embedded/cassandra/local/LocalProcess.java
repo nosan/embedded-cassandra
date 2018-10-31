@@ -123,25 +123,28 @@ class LocalProcess {
 		arguments.add("-H");
 		arguments.add(logPath.toAbsolutePath());
 
+		Map<String, String> environment = new LinkedHashMap<>();
+
+		String javaHome = new SystemProperty("java.home").or("");
+		if (StringUtils.hasText(javaHome)) {
+			environment.put("JAVA_HOME", javaHome);
+		}
+
 		List<String> jvmOptions = new ArrayList<>();
 		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", PortUtils.getPort()));
 		jvmOptions.addAll(this.jvmOptions);
-
 		//travis and appveyor.
 		if (Boolean.valueOf(new SystemProperty("CASSANDRA.CI.BUILD").or("false"))) {
 			jvmOptions.add("-Xmx256m");
 			jvmOptions.add("-Xms256m");
 		}
-
-		Map<String, String> environment = new LinkedHashMap<>();
-		String javaHome = new SystemProperty("java.home").or("");
-		if (StringUtils.hasText(javaHome)) {
-			environment.put("JAVA_HOME", javaHome);
-		}
 		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
-		OutputCapture outputCapture = new OutputCapture(10);
+
+		OutputCapture outputCapture = new OutputCapture(15);
+
 		Process process = new RunProcess(directory, environment, arguments)
 				.run(outputCapture, log::info);
+
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
 		log.debug("Cassandra Process ({}) has been started", this.pid);

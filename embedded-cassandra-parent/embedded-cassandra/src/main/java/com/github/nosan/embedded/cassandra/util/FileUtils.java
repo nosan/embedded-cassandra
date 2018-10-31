@@ -100,6 +100,9 @@ public abstract class FileUtils {
 
 			@Override
 			public FileVisitResult postVisitDirectory(Path dir, IOException ex) throws IOException {
+				if (ex != null) {
+					throw ex;
+				}
 				Files.delete(dir);
 				return FileVisitResult.CONTINUE;
 			}
