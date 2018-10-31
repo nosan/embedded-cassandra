@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -87,7 +88,7 @@ public abstract class PortUtils {
 			socket.connect(new InetSocketAddress(address, port));
 			return true;
 		}
-		catch (Exception ex) {
+		catch (IOException ex) {
 			return false;
 		}
 	}
@@ -113,7 +114,7 @@ public abstract class PortUtils {
 		try (ServerSocket ss = new ServerSocket()) {
 			ss.bind(new InetSocketAddress((InetAddress) null, port), 1);
 		}
-		catch (Exception ex) {
+		catch (IOException ex) {
 			return false;
 		}
 		return !isPortBusy((InetAddress) null, port);
