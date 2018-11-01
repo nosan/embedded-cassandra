@@ -163,9 +163,9 @@ class RemoteArtifact implements Artifact {
 		catch (Throwable ex) {
 			log.error(String.format("Shutdown hook is not registered for (%s)", tempFile), ex);
 		}
+		long size = urlConnection.getContentLengthLong();
 		try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel();
 				ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
-			long size = urlConnection.getContentLengthLong();
 			log.info("Downloading Cassandra from ({}). It takes a while...", urlConnection.getURL());
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 			try {
