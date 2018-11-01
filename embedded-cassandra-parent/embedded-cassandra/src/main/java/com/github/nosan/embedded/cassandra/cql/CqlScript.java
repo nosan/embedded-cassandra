@@ -58,12 +58,7 @@ public interface CqlScript {
 	 */
 	@Nonnull
 	static CqlScript classpath(@Nullable String... locations) {
-		if (locations == null || locations.length == 0) {
-			return new CqlScripts();
-		}
-		return new CqlScripts(Arrays.stream(locations)
-				.map(ClassPathCqlScript::new)
-				.toArray(CqlScript[]::new));
+		return classpath(null, locations);
 	}
 
 	/**
