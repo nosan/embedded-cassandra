@@ -41,6 +41,9 @@ import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
  * In addition to the basic functionality includes {@link #getCluster()} and {@link #getSession()} methods.
  *
  * @author Dmytro Nosan
+ * @see CassandraFactory
+ * @see CqlScriptUtils
+ * @see CqlScript
  * @since 1.0.0
  */
 public class TestCassandra implements Cassandra {

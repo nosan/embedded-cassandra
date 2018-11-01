@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
  * stopped}.
  *
  * @author Dmytro Nosan
+ * @see CassandraFactory
  * @since 1.0.0
  */
 public interface Cassandra {
