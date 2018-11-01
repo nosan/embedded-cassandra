@@ -16,8 +16,8 @@ This project uses link:http://www.apache.org/licenses/LICENSE-2.0[Apache License
  - It is much easier than installing right version by hand
  - It is possible to use different versions/configuration per project without any local set-up
  - Supports multiple platforms: `Windows`, `Linux` and `OSX`
- - Provides different extensions for popular frameworks.
- - Easy to configure.
+ - Provides different extensions for popular frameworks
+ - Easy to configure
 
 
 
@@ -165,13 +165,25 @@ Also it is possible to initialize `Embedded Cassandra`  with `CQL` scripts using
 
 
 ```java
+import com.datastax.driver.core.Cluster;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.github.nosan.embedded.cassandra.test.TestCassandra;
+
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ...)
 @EmbeddedCassandra(scripts = "/cql-scripts/*.cql")
 public class CassandraTests {
 
 	@Autowired
-	private Cluster cluster;
+	private TestCassandra cassandra;
+
+    @Autowired /* only if @EmbeddedCassandra(replace = ANY) */
+    private Cluster cluster;
 
 	@Test
 	public void test() {
@@ -187,6 +199,18 @@ TIP: You can declare `CassandraFactory` and `ClusterFactory` beans to take contr
 a given `cluster` during integration tests.  Script execution is performed by the `CqlExecutionListener`, which is enabled by default.
 
 ```java
+
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Session;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ...)
 @EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
