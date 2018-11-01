@@ -163,31 +163,32 @@ class RemoteArtifact implements Artifact {
 		catch (Throwable ex) {
 			log.error(String.format("Shutdown hook is not registered for (%s)", tempFile), ex);
 		}
-		long size = urlConnection.getContentLengthLong();
-		log.info("Downloading Cassandra from ({}). It takes a while...", urlConnection.getURL());
-		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-		if (size > 0) {
-			executorService.scheduleAtFixedRate(() -> {
-				try {
-					long current = Files.size(tempFile);
-					log.info("Downloaded {} / {}  {}%", current, size, (current * 100) / size);
+		try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel();
+				ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
+			long size = urlConnection.getContentLengthLong();
+			log.info("Downloading Cassandra from ({}). It takes a while...", urlConnection.getURL());
+			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+			try {
+				if (size > 0) {
+					executorService.scheduleAtFixedRate(() -> {
+						try {
+							long current = Files.size(tempFile);
+							log.info("Downloaded {} / {}  {}%", current, size, (current * 100) / size);
+						}
+						catch (IOException ignore) {
+						}
+					}, 0, 3, TimeUnit.SECONDS);
 				}
-				catch (IOException ignore) {
-				}
-			}, 0, 3, TimeUnit.SECONDS);
-		}
-		try {
-			try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel();
-					ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
 				fileChannel.transferFrom(urlChannel, 0, Long.MAX_VALUE);
+			}
+			finally {
+				executorService.shutdown();
 			}
 		}
 		catch (IOException ex) {
 			throw new IOException(String.format("Could not download Cassandra from (%s)", urlConnection.getURL()), ex);
 		}
-		finally {
-			executorService.shutdown();
-		}
+
 		log.info("Cassandra has been downloaded");
 		return tempFile;
 	}
