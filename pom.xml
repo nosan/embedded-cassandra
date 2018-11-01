@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.nosan</groupId>
     <artifactId>embedded-cassandra-project</artifactId>
-    <version>1.0.4</version>
+    <version>${version}</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -26,6 +26,7 @@
 
 
     <properties>
+        <version>1.0.5-SNAPSHOT</version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
@@ -70,22 +71,22 @@
             <dependency>
                 <groupId>com.github.nosan</groupId>
                 <artifactId>embedded-cassandra</artifactId>
-                <version>${project.version}</version>
+                <version>${version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.nosan</groupId>
                 <artifactId>embedded-cassandra-test</artifactId>
-                <version>${project.version}</version>
+                <version>${version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.nosan</groupId>
                 <artifactId>embedded-cassandra-junit</artifactId>
-                <version>${project.version}</version>
+                <version>${version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.nosan</groupId>
                 <artifactId>embedded-cassandra-test-support</artifactId>
-                <version>${project.version}</version>
+                <version>${version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
