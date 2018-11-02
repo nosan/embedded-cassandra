@@ -52,13 +52,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public abstract class AbstractLocalCassandraTests {
 
-	protected final LocalCassandraFactory factory;
-
 	@Rule
 	public ExpectedException throwable = ExpectedException.none();
 
 	@Rule
 	public CaptureOutput output = new CaptureOutput();
+
+	protected final LocalCassandraFactory factory;
 
 	AbstractLocalCassandraTests(@Nonnull Version version) {
 		this.factory = new LocalCassandraFactory();

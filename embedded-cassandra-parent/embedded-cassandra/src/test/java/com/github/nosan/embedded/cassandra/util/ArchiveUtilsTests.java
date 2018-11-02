@@ -45,14 +45,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(Parameterized.class)
 public class ArchiveUtilsTests {
 
+	@Rule
+	public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
 	private final String name;
 
 	private final String archiveFormat;
 
 	private final String compression;
-
-	@Rule
-	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	public ArchiveUtilsTests(String name, String archiveFormat, String compression) {
 		this.name = name;

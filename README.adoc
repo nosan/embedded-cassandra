@@ -14,9 +14,9 @@ This project uses link:http://www.apache.org/licenses/LICENSE-2.0[Apache License
 = Why?
 
  - It is much easier than installing right version by hand
- - It is possible to use different versions/configuration per project without any local set-up
+ - It is possible to use different versions/configuration per project/test.
  - Supports multiple platforms: `Windows`, `Linux` and `OSX`
- - Provides different extensions for popular frameworks
+ - Provides different extensions for popular frameworks (e.g. `JUnit`, `TestNG`, `Spring`)
  - Easy to configure
 
 
@@ -52,7 +52,7 @@ class Scratch {
 }
 ```
 Factory has a lot of different methods to control your `Cassandra` instance (e.g. setVersion, setConfiguration, etc..).
-By default `Cassandra` is running on `random` ports and `3.11.3` version will be used.
+By default `Cassandra` is running on `random` ports and uses `3.11.3` version.
 
 TIP: port `0` is regarded as a `random`
 
