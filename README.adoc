@@ -16,7 +16,7 @@ This project uses link:http://www.apache.org/licenses/LICENSE-2.0[Apache License
  - It is much easier than installing right version by hand
  - It is possible to use different versions/configuration per project/test.
  - Supports multiple platforms: `Windows`, `Linux` and `OSX`
- - Provides different extensions for popular frameworks (e.g. `JUnit`, `TestNG`, `Spring`)
+ - Provides different extensions for popular frameworks: `JUnit`, `TestNG`, `Spring`
  - Easy to configure
 
 
