@@ -148,25 +148,28 @@ class LocalProcess {
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
 		log.debug("Cassandra Process ({}) has been started", this.pid);
-		boolean result = WaitUtils.await(this.startupTimeout, () -> {
-			if (!process.isAlive()) {
-				throwException(String.format("Cassandra has not be started. Please see logs (%s) for more details.",
-						logPath), outputCapture);
+		Duration timeout = this.startupTimeout;
+		if (timeout.toNanos() > 0) {
+			boolean result = WaitUtils.await(timeout, () -> {
+				if (!process.isAlive()) {
+					throwException(String.format("Cassandra has not be started. Please see logs (%s) for more details.",
+							logPath), outputCapture);
+				}
+				int storagePort = (settings.getStoragePort() != -1) ? settings.getStoragePort() : 7001;
+				int port = -1;
+				if (settings.isStartNativeTransport()) {
+					port = (settings.getPort() != -1) ? settings.getPort() : 9042;
+				}
+				else if (settings.isStartRpc()) {
+					port = (settings.getRpcPort() != -1) ? settings.getRpcPort() : 9160;
+				}
+				return PortUtils.isPortBusy(settings.getAddress(), storagePort) &&
+						(port == -1 || PortUtils.isPortBusy(settings.getAddress(), port));
+			});
+			if (!result) {
+				throwException(String.format("Cassandra has not be started. Storage port (%s) is not available." +
+						" Please see logs (%s) for more details.", logPath, settings.getStoragePort()), outputCapture);
 			}
-			int storagePort = (settings.getStoragePort() != -1) ? settings.getStoragePort() : 7001;
-			int port = -1;
-			if (settings.isStartNativeTransport()) {
-				port = (settings.getPort() != -1) ? settings.getPort() : 9042;
-			}
-			else if (settings.isStartRpc()) {
-				port = (settings.getRpcPort() != -1) ? settings.getRpcPort() : 9160;
-			}
-			return PortUtils.isPortBusy(settings.getAddress(), storagePort) &&
-					(port == -1 || PortUtils.isPortBusy(settings.getAddress(), port));
-		});
-		if (!result) {
-			throwException(String.format("Cassandra has not be started. Storage port (%s) is not available." +
-					" Please see logs (%s) for more details.", logPath, settings.getStoragePort()), outputCapture);
 		}
 	}
 
@@ -264,7 +267,7 @@ class LocalProcess {
 			Collection<String> lines = outputCapture.lines();
 			builder.append(String.format(" Last (%s) lines:", lines.size()));
 			for (String line : lines) {
-				builder.append(String.format("%n\t")).append(line);
+				builder.append(String.format("%n\t%s", line));
 			}
 		}
 		throw new IOException(builder.toString());
