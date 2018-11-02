@@ -71,8 +71,12 @@ public class ClassPathCqlScriptTests {
 		assertThat(new ClassPathCqlScript("/roles.cql", getClass(), StandardCharsets.UTF_16LE))
 				.isNotEqualTo(new ClassPathCqlScript("/roles.cql", getClass()));
 
+		assertThat(new ClassPathCqlScript("roles.cql", getClass()).toString())
+				.isEqualTo("com/github/nosan/embedded/cassandra/cql/roles.cql");
+		assertThat(new ClassPathCqlScript("/roles.cql", getClass()).toString())
+				.isEqualTo("roles.cql");
 		assertThat(new ClassPathCqlScript("/roles.cql").toString())
-				.contains("roles.cql");
+				.isEqualTo("roles.cql");
 	}
 
 	@Test(expected = UncheckedIOException.class)

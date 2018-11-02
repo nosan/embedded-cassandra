@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -178,19 +179,19 @@ public abstract class AbstractLocalCassandraTests {
 				}
 
 			}
+		}		@Override
+		public void accept(@Nonnull Cassandra cassandra) {
+			executeScript(cassandra, this.script);
 		}
 
 		private static Cluster cluster(Cassandra cassandra) {
 			Settings settings = cassandra.getSettings();
 			return Cluster.builder().withPort(settings.getPort())
-					.addContactPoint(settings.getAddress())
+					.addContactPoint(Objects.requireNonNull(settings.getAddress()))
 					.build();
 		}
 
-		@Override
-		public void accept(@Nonnull Cassandra cassandra) {
-			executeScript(cassandra, this.script);
-		}
+
 
 
 	}

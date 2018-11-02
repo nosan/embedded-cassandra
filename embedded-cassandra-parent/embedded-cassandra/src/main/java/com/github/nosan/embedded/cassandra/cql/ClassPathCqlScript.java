@@ -109,16 +109,12 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 			@Nullable ClassLoader classLoader, @Nullable Charset encoding) {
 		super(encoding);
 		Objects.requireNonNull(location, "Location must not be null");
-		if (contextClass == null) {
-			while (location.startsWith("/")) {
-				location = location.substring(1);
-			}
-		}
-		this.location = location;
+		this.location = normalize(location, contextClass);
 		this.classLoader = (classLoader != null) ? classLoader : Thread.currentThread()
 				.getContextClassLoader();
 		this.contextClass = contextClass;
 	}
+
 
 	@Nonnull
 	@Override
@@ -173,11 +169,14 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	@Override
 	@Nonnull
 	public String toString() {
-		URL url = getURL();
-		if (url != null) {
-			return String.valueOf(url);
+		if (this.contextClass == null) {
+			return this.location;
 		}
-		return this.location;
+		if (this.location.startsWith("/")) {
+			return this.location.substring(1);
+		}
+		String p = this.contextClass.getPackage().getName().replaceAll("\\.", "/");
+		return (p + "/" + this.location);
 	}
 
 
@@ -190,6 +189,17 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 			return this.classLoader.getResource(this.location);
 		}
 		return ClassLoader.getSystemResource(this.location);
+	}
+
+
+	private static String normalize(String location, Class<?> contextClass) {
+		location = location.replaceAll("\\\\", "/").replaceAll("/+", "/");
+		if (contextClass == null) {
+			while (location.startsWith("/")) {
+				location = location.substring(1);
+			}
+		}
+		return location;
 	}
 
 }

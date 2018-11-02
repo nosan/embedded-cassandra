@@ -19,13 +19,13 @@ package com.github.nosan.embedded.cassandra.local;
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
- * Tests for {@link LocalProcess}.
+ * Tests for {@link LocalCassandra}.
  *
  * @author Dmytro Nosan
  */
-public class LocalCassandraV2Tests extends AbstractLocalCassandraTests {
+public class LocalCassandraV2_2Tests extends AbstractLocalCassandraTests {
 
-	public LocalCassandraV2Tests() {
+	public LocalCassandraV2_2Tests() {
 		super(new Version(2, 2, 13));
 	}
 }
