@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EmbeddedCassandraConfigurationOverriderVersionTests {
 
 	@ClassRule
-	public final static CaptureOutput OUTPUT = new CaptureOutput();
+	public static final CaptureOutput OUTPUT = new CaptureOutput();
 
 
 	@Autowired

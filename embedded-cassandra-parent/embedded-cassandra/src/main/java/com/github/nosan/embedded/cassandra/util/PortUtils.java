@@ -38,13 +38,14 @@ import javax.annotation.Nullable;
  */
 public abstract class PortUtils {
 
-	private final static int MIN = 49152;
+	private static final int MIN = 49152;
 
-	private final static int MAX = 65535;
+	private static final int MAX = 65535;
 
-	private final static int RANGE = (MAX - MIN) + 1;
+	private static final int RANGE = (MAX - MIN) + 1;
 
-	private static final Random RANDOM = new Random();
+	private static final Random RANDOM = new Random(System.currentTimeMillis());
+
 
 	/**
 	 * Find a free {@code TCP} port.
@@ -84,8 +85,8 @@ public abstract class PortUtils {
 	 * @return {@code true} if port is busy, otherwise {@code false}
 	 */
 	public static boolean isPortBusy(@Nullable InetAddress address, int port) {
-		try (Socket socket = new Socket()) {
-			socket.connect(new InetSocketAddress(address, port));
+		try (Socket s = new Socket()) {
+			s.connect(new InetSocketAddress(address, port));
 			return true;
 		}
 		catch (IOException ex) {

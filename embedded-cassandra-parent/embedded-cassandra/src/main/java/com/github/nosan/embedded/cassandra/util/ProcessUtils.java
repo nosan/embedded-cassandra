@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 public abstract class ProcessUtils {
 
 	@Nullable
-	private final static Method PID_METHOD;
+	private static final Method PID_METHOD;
 
 	static {
 		Method method = null;

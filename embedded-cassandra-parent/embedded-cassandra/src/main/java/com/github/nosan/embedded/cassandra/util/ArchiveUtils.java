@@ -202,7 +202,7 @@ public abstract class ArchiveUtils {
 
 		private static final Logger log = LoggerFactory.getLogger(FileModeUtils.class);
 
-		private final static int MASK = 511;
+		private static final int MASK = 511;
 
 		/**
 		 * Sets the file mode onto the given file.
