@@ -86,6 +86,7 @@ class LocalProcess {
 	 * @param directory {@code Supplier} of an initialized working directory
 	 * @param startupTimeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
+	 * @param version a version
 	 */
 	LocalProcess(@Nonnull Supplier<Path> directory, @Nonnull Duration startupTimeout,
 			@Nonnull List<String> jvmOptions, @Nonnull Version version) {
@@ -120,7 +121,7 @@ class LocalProcess {
 		arguments.add("-f");
 		Version version = this.version;
 		if (OS.isWindows()) {
-			if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() != 1)) {
+			if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1)) {
 				arguments.add("-a");
 			}
 		}
