@@ -228,6 +228,22 @@ public final class LocalCassandraFactoryBuilder {
 		return this;
 	}
 
+
+	/**
+	 * Add additional {@link LocalCassandraFactory#getJvmOptions() jvmOptions}.
+	 *
+	 * @param jvmOptions The value for jvmOptions
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.0.5
+	 */
+	@Nonnull
+	public LocalCassandraFactoryBuilder addJvmOptions(@Nullable String... jvmOptions) {
+		if (jvmOptions != null) {
+			this.jvmOptions.addAll(Arrays.asList(jvmOptions));
+		}
+		return this;
+	}
+
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getRackFile() rackFile} attribute.
 	 *

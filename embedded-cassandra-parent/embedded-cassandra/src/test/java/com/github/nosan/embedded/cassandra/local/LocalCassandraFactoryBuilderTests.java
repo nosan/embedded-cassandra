@@ -49,6 +49,7 @@ public class LocalCassandraFactoryBuilderTests {
 
 		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder()
 				.setJvmOptions(jvmOptions)
+				.addJvmOptions("3")
 				.setArtifactFactory(artifactFactory)
 				.setConfigurationFile(config)
 				.setLogbackFile(logback)
@@ -59,7 +60,7 @@ public class LocalCassandraFactoryBuilderTests {
 				.setStartupTimeout(Duration.ofMinutes(1))
 				.build();
 
-		assertThat(factory.getJvmOptions()).containsExactly(jvmOptions);
+		assertThat(factory.getJvmOptions()).containsExactly("1", "2", "3");
 		assertThat(factory.getArtifactFactory()).isEqualTo(artifactFactory);
 		assertThat(factory.getConfigurationFile()).isEqualTo(config.toUri().toURL());
 		assertThat(factory.getLogbackFile()).isEqualTo(logback.toUri().toURL());
