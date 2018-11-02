@@ -169,6 +169,13 @@ public abstract class AbstractLocalCassandraTests {
 			this.script = new CqlScripts(scripts);
 		}
 
+
+		@Override
+		public void accept(@Nonnull Cassandra cassandra) {
+			executeScript(cassandra, this.script);
+		}
+
+
 		private static void executeScript(Cassandra cassandra, CqlScript... cqlScript) {
 			try (Cluster cluster = cluster(cassandra)) {
 				Session session = cluster.connect();
@@ -179,9 +186,6 @@ public abstract class AbstractLocalCassandraTests {
 				}
 
 			}
-		}		@Override
-		public void accept(@Nonnull Cassandra cassandra) {
-			executeScript(cassandra, this.script);
 		}
 
 		private static Cluster cluster(Cassandra cassandra) {
@@ -190,8 +194,6 @@ public abstract class AbstractLocalCassandraTests {
 					.addContactPoint(Objects.requireNonNull(settings.getAddress()))
 					.build();
 		}
-
-
 
 
 	}

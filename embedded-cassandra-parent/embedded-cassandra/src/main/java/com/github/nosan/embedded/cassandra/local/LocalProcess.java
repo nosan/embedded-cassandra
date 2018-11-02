@@ -101,7 +101,7 @@ class LocalProcess {
 		Path executable = OS.isWindows() ? directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
 		Path pidFile = directory.resolve(String.format("bin/%s.pid", UUID.randomUUID()));
 		Path logPath = directory.resolve("logs");
-		Path errorFile = logPath.resolve(String.format("error-%s.log", UUID.randomUUID()));
+		Path errorFile = logPath.resolve("hs_err_pid_%p.log");
 
 		this.pidFile = pidFile;
 
