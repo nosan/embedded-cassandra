@@ -40,6 +40,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.OS;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.ProcessUtils;
@@ -65,6 +66,9 @@ class LocalProcess {
 	@Nonnull
 	private final List<String> jvmOptions;
 
+	@Nonnull
+	private final Version version;
+
 	@Nullable
 	private Path pidFile;
 
@@ -84,10 +88,11 @@ class LocalProcess {
 	 * @param jvmOptions additional {@code JVM} options
 	 */
 	LocalProcess(@Nonnull Supplier<Path> directory, @Nonnull Duration startupTimeout,
-			@Nonnull List<String> jvmOptions) {
+			@Nonnull List<String> jvmOptions, @Nonnull Version version) {
 		this.directory = directory;
 		this.startupTimeout = startupTimeout;
 		this.jvmOptions = new ArrayList<>(jvmOptions);
+		this.version = version;
 	}
 
 	/**
@@ -113,8 +118,11 @@ class LocalProcess {
 		}
 		arguments.add(executable.toAbsolutePath());
 		arguments.add("-f");
+		Version version = this.version;
 		if (OS.isWindows()) {
-			arguments.add("-a");
+			if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() != 1)) {
+				arguments.add("-a");
+			}
 		}
 		arguments.add("-p");
 		arguments.add(pidFile.toAbsolutePath());

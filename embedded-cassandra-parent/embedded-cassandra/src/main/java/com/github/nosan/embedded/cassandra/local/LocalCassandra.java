@@ -100,7 +100,7 @@ class LocalCassandra implements Cassandra {
 		this.initializers = Collections.unmodifiableList(initializers);
 		this.localProcess = new LocalProcess(this.directory,
 				Objects.requireNonNull(startupTimeout, "Startup timeout must not be null"),
-				Objects.requireNonNull(jvmOptions, "JVM Options must not be null"));
+				Objects.requireNonNull(jvmOptions, "JVM Options must not be null"), this.version);
 
 		try {
 			Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
