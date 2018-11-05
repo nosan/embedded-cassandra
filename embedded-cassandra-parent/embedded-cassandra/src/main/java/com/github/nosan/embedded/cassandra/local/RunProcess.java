@@ -148,7 +148,7 @@ class RunProcess {
 				this.workingDirectory);
 		Process process = processBuilder.start();
 		if (outputs != null && outputs.length > 0) {
-			Thread thread = new Thread(new ProcessReader(process, outputs));
+			Thread thread = new Thread(new ProcessReader(process, outputs), "Cassandra Process Reader");
 			thread.setDaemon(true);
 			thread.start();
 		}

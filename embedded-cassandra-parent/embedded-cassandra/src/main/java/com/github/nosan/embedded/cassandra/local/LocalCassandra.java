@@ -103,7 +103,7 @@ class LocalCassandra implements Cassandra {
 				Objects.requireNonNull(jvmOptions, "JVM Options must not be null"), this.version);
 
 		try {
-			Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+			Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "Cassandra Shutdown Hook"));
 		}
 		catch (Throwable ex) {
 			log.error(String.format("Shutdown hook is not registered for (%s)", getClass()), ex);
