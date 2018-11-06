@@ -52,7 +52,7 @@ class Scratch {
 Factory has a lot of different methods to control your `Cassandra` instance (e.g. setVersion, setConfiguration, etc..).
 By default `Cassandra` is running on `random` ports and uses `3.11.3` version.
 `Cassandra` interface doesn't include any utility methods to work with it, the main goal of
-this interface to start and stop `Cassandra`, however if you want to test your 'Cassandra' code, you
+this interface to start and stop `Cassandra`, however if you want to test your `Cassandra` code, you
 should use `TestCassandra` from `embedded-cassandra-test` module.
 
 
