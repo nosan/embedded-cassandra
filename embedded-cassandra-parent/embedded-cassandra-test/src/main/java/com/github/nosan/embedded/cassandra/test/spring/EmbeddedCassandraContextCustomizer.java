@@ -60,7 +60,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		config.setStatements(this.annotation.statements());
 		config.setTestClass(mergedConfig.getTestClass());
 
-		CqlScript[] cqlScripts = CqlUtils.getScripts(context, config);
+		CqlScript[] cqlScripts = CqlResourceUtils.getScripts(context, config);
 
 
 		RootBeanDefinition bd = new RootBeanDefinition(EmbeddedCassandraFactoryBean.class);
