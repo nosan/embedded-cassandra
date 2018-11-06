@@ -22,7 +22,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SimpleStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,7 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
+import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
 
 /**
  * Test {@link Cassandra } that allows the Cassandra to be {@link #start() started} and
@@ -43,6 +46,7 @@ import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
  * @author Dmytro Nosan
  * @see CassandraFactory
  * @see CqlScriptUtils
+ * @see CqlUtils
  * @see CqlScript
  * @since 1.0.0
  */
@@ -62,6 +66,9 @@ public class TestCassandra implements Cassandra {
 	@Nullable
 	private volatile Cluster cluster;
 
+	@Nullable
+	private volatile Session session;
+
 	private volatile boolean initialized;
 
 
@@ -80,8 +87,7 @@ public class TestCassandra implements Cassandra {
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public TestCassandra(@Nonnull ClusterFactory clusterFactory,
-			@Nonnull CqlScript... scripts) {
+	public TestCassandra(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
 		this(null, clusterFactory, scripts);
 	}
 
@@ -124,11 +130,8 @@ public class TestCassandra implements Cassandra {
 					try {
 						if (!this.initialized) {
 							this.cassandra.start();
-							CqlScript[] scripts = this.scripts;
-							if (scripts.length > 0) {
-								try (Session session = getSession()) {
-									CqlScriptUtils.executeScripts(session, scripts);
-								}
+							if (this.scripts.length > 0) {
+								executeScripts(this.scripts);
 							}
 						}
 					}
@@ -163,6 +166,7 @@ public class TestCassandra implements Cassandra {
 						if (cluster != null) {
 							try {
 								cluster.close();
+
 							}
 							catch (Throwable ex) {
 								log.error(ex.getMessage(), ex);
@@ -172,6 +176,7 @@ public class TestCassandra implements Cassandra {
 					}
 					finally {
 						this.cluster = null;
+						this.session = null;
 						this.initialized = false;
 					}
 				}
@@ -211,6 +216,80 @@ public class TestCassandra implements Cassandra {
 	 */
 	@Nonnull
 	public Session getSession() {
-		return getCluster().newSession();
+		if (this.session == null) {
+			synchronized (this) {
+				if (this.session == null) {
+					this.session = getCluster().newSession();
+				}
+			}
+		}
+		return Objects.requireNonNull(this.session, "Session is not initialized");
 	}
+
+	/**
+	 * Delete all rows from the specified tables.
+	 *
+	 * @param tableNames the names of the tables to delete from
+	 * @since 1.0.6
+	 */
+	public void deleteFromTables(@Nonnull String... tableNames) {
+		CqlUtils.deleteFromTables(getSession(), tableNames);
+	}
+
+	/**
+	 * Drop the specified tables.
+	 *
+	 * @param tableNames the names of the tables to drop
+	 * @since 1.0.6
+	 */
+	public void dropTables(@Nonnull String... tableNames) {
+		CqlUtils.dropTables(getSession(), tableNames);
+	}
+
+	/**
+	 * Drop the specified keyspaces.
+	 *
+	 * @param keyspaceNames the names of the keyspaces to drop
+	 * @since 1.0.6
+	 */
+	public void dropKeyspaces(@Nonnull String... keyspaceNames) {
+		CqlUtils.dropKeyspaces(getSession(), keyspaceNames);
+	}
+
+	/**
+	 * Count the rows in the given table.
+	 *
+	 * @param tableName name of the table to count rows in
+	 * @return the number of rows in the table
+	 * @since 1.0.6
+	 */
+	public long getRowCount(@Nonnull String tableName) {
+		return CqlUtils.getRowCount(getSession(), tableName);
+	}
+
+	/**
+	 * Executes the given scripts.
+	 *
+	 * @param scripts the CQL scripts to execute.
+	 * @since 1.0.6
+	 */
+	public void executeScripts(@Nonnull CqlScript... scripts) {
+		CqlScriptUtils.executeScripts(getSession(), scripts);
+	}
+
+	/**
+	 * Executes the provided query using the provided values.
+	 *
+	 * @param statement the CQL query to execute.
+	 * @param args values required for the execution of {@code query}. See {@link
+	 * SimpleStatement#SimpleStatement(String, Object...)} for more details.
+	 * @return the result of the query. That result will never be null but can be empty (and will be
+	 * for any non SELECT query).
+	 * @since 1.0.6
+	 */
+	@Nonnull
+	public ResultSet executeStatement(@Nonnull String statement, @Nullable Object... args) {
+		return CqlUtils.executeStatement(getSession(), statement, args);
+	}
+
 }

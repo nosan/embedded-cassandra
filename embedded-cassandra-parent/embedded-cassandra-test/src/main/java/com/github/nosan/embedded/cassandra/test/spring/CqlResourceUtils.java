@@ -41,7 +41,7 @@ import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-abstract class CqlUtils {
+abstract class CqlResourceUtils {
 
 	/**
 	 * Retrieves {@link CqlScript CqlScripts}.

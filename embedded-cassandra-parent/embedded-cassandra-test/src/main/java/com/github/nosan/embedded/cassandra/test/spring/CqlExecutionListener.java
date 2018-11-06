@@ -121,7 +121,7 @@ class CqlExecutionListener extends AbstractTestExecutionListener {
 			config.setScripts(cql.scripts());
 			config.setStatements(cql.statements());
 			config.setTestClass(testContext.getTestClass());
-			CqlScriptUtils.executeScripts(session, CqlUtils.getScripts(applicationContext, config));
+			CqlScriptUtils.executeScripts(session, CqlResourceUtils.getScripts(applicationContext, config));
 		}
 
 	}

@@ -52,10 +52,7 @@ public abstract class CqlScriptUtils {
 		}
 		for (CqlScript cqlScript : cqlScripts) {
 			for (String statement : cqlScript.getStatements()) {
-				if (log.isDebugEnabled()) {
-					log.debug("Execute Statement: ({})", statement);
-				}
-				session.execute(statement);
+				CqlUtils.executeStatement(session, statement);
 			}
 		}
 	}
