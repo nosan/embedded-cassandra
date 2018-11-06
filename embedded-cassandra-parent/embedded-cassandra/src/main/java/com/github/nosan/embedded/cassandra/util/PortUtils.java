@@ -113,6 +113,7 @@ public abstract class PortUtils {
 
 	private static boolean isFree(int port) {
 		try (ServerSocket ss = new ServerSocket()) {
+			ss.setReuseAddress(true);
 			ss.bind(new InetSocketAddress((InetAddress) null, port), 1);
 		}
 		catch (IOException ex) {
