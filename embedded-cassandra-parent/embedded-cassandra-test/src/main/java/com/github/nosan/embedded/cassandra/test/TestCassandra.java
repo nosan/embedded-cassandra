@@ -107,6 +107,12 @@ public class TestCassandra implements Cassandra {
 		this.cassandra = (cassandraFactory != null) ? cassandraFactory.create() : new LocalCassandraFactory().create();
 		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
+		try {
+			Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "Test Cassandra Shutdown Hook"));
+		}
+		catch (Throwable ex) {
+			log.error(String.format("Shutdown hook is not registered for (%s)", getClass()), ex);
+		}
 	}
 
 
@@ -179,7 +185,6 @@ public class TestCassandra implements Cassandra {
 	public Settings getSettings() throws CassandraException {
 		return this.cassandra.getSettings();
 	}
-
 
 	/**
 	 * Lazy initialize {@link Cluster}.
