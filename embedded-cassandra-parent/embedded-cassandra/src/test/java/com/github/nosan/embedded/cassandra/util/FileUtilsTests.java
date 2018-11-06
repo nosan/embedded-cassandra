@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FileUtilsTests {
 
 	@Rule
-	public TemporaryFolder temporaryFolder = new TemporaryFolder();
+	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
 	public void deleteFile() throws IOException {

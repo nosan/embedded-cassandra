@@ -39,7 +39,7 @@ public class PortReplacerInitializerTests {
 
 
 	@Rule
-	public TemporaryFolder temporaryFolder = new TemporaryFolder();
+	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 
 	@Test

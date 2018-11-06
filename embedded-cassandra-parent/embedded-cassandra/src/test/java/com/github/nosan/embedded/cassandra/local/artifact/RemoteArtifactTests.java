@@ -57,16 +57,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RemoteArtifactTests {
 
 	@Rule
-	public WebServer webServer = new WebServer();
+	public final WebServer webServer = new WebServer();
 
 	@Rule
-	public TemporaryFolder temporaryFolder = new TemporaryFolder();
+	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Rule
-	public CaptureOutput output = new CaptureOutput();
+	public final CaptureOutput output = new CaptureOutput();
 
 	@Rule
-	public ExpectedException throwable = ExpectedException.none();
+	public final ExpectedException throwable = ExpectedException.none();
 
 	private RemoteArtifactFactory factory;
 

@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SystemPropertyTests {
 
 	@Rule
-	public ExpectedException throwable = ExpectedException.none();
+	public final ExpectedException throwable = ExpectedException.none();
 
 	@Test
 	public void shouldGet() {

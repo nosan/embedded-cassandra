@@ -37,7 +37,7 @@ public class ConfigurationFileInitializerTests {
 
 
 	@Rule
-	public TemporaryFolder temporaryFolder = new TemporaryFolder();
+	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
 	public void initialize() throws Exception {

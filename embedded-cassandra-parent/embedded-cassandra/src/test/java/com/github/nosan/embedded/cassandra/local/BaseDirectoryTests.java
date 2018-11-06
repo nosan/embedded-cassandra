@@ -39,10 +39,10 @@ public class BaseDirectoryTests {
 
 
 	@Rule
-	public TemporaryFolder temporaryFolder = new TemporaryFolder();
+	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Rule
-	public ExpectedException throwable = ExpectedException.none();
+	public final ExpectedException throwable = ExpectedException.none();
 
 
 	@Test

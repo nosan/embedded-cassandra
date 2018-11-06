@@ -53,10 +53,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public abstract class AbstractLocalCassandraTests {
 
 	@Rule
-	public ExpectedException throwable = ExpectedException.none();
+	public final ExpectedException throwable = ExpectedException.none();
 
 	@Rule
-	public CaptureOutput output = new CaptureOutput();
+	public final CaptureOutput output = new CaptureOutput();
 
 	protected final LocalCassandraFactory factory;
 
@@ -169,13 +169,6 @@ public abstract class AbstractLocalCassandraTests {
 			this.script = new CqlScripts(scripts);
 		}
 
-
-		@Override
-		public void accept(@Nonnull Cassandra cassandra) {
-			executeScript(cassandra, this.script);
-		}
-
-
 		private static void executeScript(Cassandra cassandra, CqlScript... cqlScript) {
 			try (Cluster cluster = cluster(cassandra)) {
 				Session session = cluster.connect();
@@ -186,6 +179,9 @@ public abstract class AbstractLocalCassandraTests {
 				}
 
 			}
+		}		@Override
+		public void accept(@Nonnull Cassandra cassandra) {
+			executeScript(cassandra, this.script);
 		}
 
 		private static Cluster cluster(Cassandra cassandra) {
@@ -194,6 +190,8 @@ public abstract class AbstractLocalCassandraTests {
 					.addContactPoint(Objects.requireNonNull(settings.getAddress()))
 					.build();
 		}
+
+
 
 
 	}

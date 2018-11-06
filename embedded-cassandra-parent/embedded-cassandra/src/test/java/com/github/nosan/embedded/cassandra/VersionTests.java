@@ -31,7 +31,7 @@ public class VersionTests {
 
 
 	@Rule
-	public ExpectedException throwable = ExpectedException.none();
+	public final ExpectedException throwable = ExpectedException.none();
 
 
 	@Test

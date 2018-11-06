@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ArchiveUtilsTests {
 
 	@Rule
-	public TemporaryFolder temporaryFolder = new TemporaryFolder();
+	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	private final String name;
 
