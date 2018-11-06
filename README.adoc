@@ -27,9 +27,7 @@ There are a number of modules in Embedded Cassandra, here is a quick overview:
 
 == embedded-cassandra image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra"]
 
-
-
-The main module to start/stop `Cassandra`. Here is a quick teaser:
+Simple module that allows the Cassandra to be started and stopped.
 
 ```java
 import com.github.nosan.embedded.cassandra.Cassandra;
@@ -53,98 +51,129 @@ class Scratch {
 ```
 Factory has a lot of different methods to control your `Cassandra` instance (e.g. setVersion, setConfiguration, etc..).
 By default `Cassandra` is running on `random` ports and uses `3.11.3` version.
+`Cassandra` interface doesn't include any utility methods to work with it, the main goal of
+this interface to start and stop `Cassandra`, however if you are looking for something useful for testing, you should
+ use `TestCassandra` from `embedded-cassandra-test` module.
 
-TIP: port `0` is regarded as a `random`
 
 ==  embedded-cassandra-test image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-test.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-test"]
 
 
 This module contains core items that can be helpful when testing your `Cassandra`.
 
+
 === TestNG
 
-To run tests within `TestNG`, `CassandraTestNG` has to be extended.  Here is a quick teaser:
+To run tests within `TestNG`, `CassandraTestNG` has to be extended.
 
 ```java
 
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
 import com.github.nosan.embedded.cassandra.test.testng.CassandraTestNG;
 
+import static com.github.nosan.embedded.cassandra.cql.CqlScript.classpath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CassandraTestNGTests extends CassandraTestNG {
 
-	public CassandraTestNGTests() {
-		super(new ClassPathCqlScript("init.cql"));
+	@BeforeMethod
+	public void setUp() {
+		executeScripts(classpath("init.cql"));
+	}
+
+	@AfterMethod
+	public void tearDown() {
+		executeScripts(classpath("destroy.cql"));
 	}
 
 	@Test
-	public void selectRoles() {
-		assertThat(getSession().execute("SELECT * FROM  test.roles").all())
-				.isEmpty();
+	public void testMe() {
 	}
 
 }
+
 ```
 
 === JUnit5
 
-To run tests within `JUnit5`, `CassandraExtension` has to be used.  Here is a quick teaser:
+To run tests within `JUnit5`, `CassandraExtension` has to be used.
 
 ```java
 
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtension;
 
+import static com.github.nosan.embedded.cassandra.cql.CqlScript.classpath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CassandraExtensionTests {
 
 	@RegisterExtension
-	public static final CassandraExtension cassandra = new CassandraExtension(CqlScript.classpath("init.cql"));
+	public static final CassandraExtension cassandra = new CassandraExtension();
 
+
+	@BeforeEach
+	void setUp() {
+		cassandra.executeScripts(classpath("init.cql"));
+	}
+
+	@AfterEach
+	void tearDown() {
+		cassandra.executeScripts(classpath("destroy.cql"));
+	}
 
 	@Test
-	public void selectRoles() {
-		assertThat(cassandra.getSession().execute("SELECT * FROM  test.roles").all())
-				.isEmpty();
+	public void testMe() {
 	}
 
 }
+
 ```
 
 
 === JUnit4
 
 
-To run tests within `JUnit4`, `CassandraRule` has to be used.  Here is a quick teaser:
-
+To run tests within `JUnit4`, `CassandraRule` has to be used.
 ```java
 
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.junit.CassandraRule;
 
+import static com.github.nosan.embedded.cassandra.cql.CqlScript.classpath;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CassandraRuleTests {
 
 	@ClassRule
-	public static final CassandraRule cassandra = new CassandraRule(CqlScript.classpath("init.cql"));
+	public static final CassandraRule cassandra = new CassandraRule();
+
+	@Before
+	public void setUp() {
+		cassandra.executeScripts(classpath("init.cql"));
+	}
+
+	@After
+	public void tearDown() {
+		cassandra.executeScripts(classpath("destroy.cql"));
+	}
 
 
 	@Test
-	public void selectRoles() {
-		assertThat(cassandra.getSession().execute("SELECT * FROM  test.roles").all())
-				.isEmpty();
+	public void testMe() {
 	}
 
 }
@@ -153,16 +182,12 @@ public class CassandraRuleTests {
 === Spring
 
 When writing integration tests against a `Cassandra`, it is often needs to execute `CQL` scripts to modify the `Cassandra` storage.
-The `embedded-cassandra-spring` module provides support for initializing an embedded or existing cassandra by executing
-`CQL` scripts when the `Spring ApplicationContext` is loaded.
+
 
 ==== EmbeddedCassandra
 
 For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
-Also it is possible to initialize `Embedded Cassandra`  with `CQL` scripts using
-`scripts` and `statements` attributes. `EmbeddedCassandraConfiguration` overrides any existing `cluster` beans with an `embedded cluster` bean.
-
-
+Also it is possible to initialize `Embedded Cassandra`  with `CQL` scripts using `scripts` and `statements` attributes.
 
 ```java
 import com.datastax.driver.core.Cluster;
@@ -179,8 +204,8 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 @EmbeddedCassandra(scripts = "/cql-scripts/*.cql")
 public class CassandraTests {
 
-	@Autowired
-	private TestCassandra cassandra;
+    @Autowired
+    private TestCassandra cassandra;
 
     @Autowired /* only if @EmbeddedCassandra(replace = ANY) */
     private Cluster cluster;
