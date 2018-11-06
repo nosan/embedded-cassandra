@@ -162,15 +162,14 @@ public class TestCassandra implements Cassandra {
 			synchronized (this) {
 				if (this.initialized) {
 					try {
-						Cluster cluster = this.cluster;
-						if (cluster != null) {
-							try {
+						try {
+							Cluster cluster = this.cluster;
+							if (cluster != null) {
 								cluster.close();
-
 							}
-							catch (Throwable ex) {
-								log.error(ex.getMessage(), ex);
-							}
+						}
+						catch (Throwable ex) {
+							log.error(ex.getMessage(), ex);
 						}
 						this.cassandra.stop();
 					}
