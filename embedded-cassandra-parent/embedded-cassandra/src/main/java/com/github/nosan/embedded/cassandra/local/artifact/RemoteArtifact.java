@@ -119,7 +119,7 @@ class RemoteArtifact implements Artifact {
 			try {
 				Path target = this.directory.resolve(getName(url));
 				if (!Files.exists(target)) {
-					log.debug("({}) doesn't exist, it will be download from ({})", target, url);
+					log.debug("({}) doesn't exist, it will be downloaded from ({})", target, url);
 					Path source = download(url);
 					try {
 						if (target.getParent() != null) {
