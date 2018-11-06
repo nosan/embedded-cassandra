@@ -142,7 +142,7 @@ class RunProcess {
 			processBuilder.environment().putAll(this.environment);
 		}
 		processBuilder.redirectErrorStream(true);
-		log.debug("Execute ({}) with environment ({}) in a ({})", this.arguments, this.environment,
+		log.debug("Execute ({}) with environment ({}) in a ({}) working directory", this.arguments, this.environment,
 				this.workingDirectory);
 		Process process = processBuilder.start();
 		if (outputs != null && outputs.length > 0) {
