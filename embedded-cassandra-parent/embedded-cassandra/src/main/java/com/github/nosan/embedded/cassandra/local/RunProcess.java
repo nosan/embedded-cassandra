@@ -133,10 +133,8 @@ class RunProcess {
 	 * @throws IOException if an I/O error occurs
 	 */
 	Process run(@Nullable Output... outputs) throws IOException {
-		ProcessBuilder processBuilder = new ProcessBuilder(this.arguments
-				.stream()
-				.map(String::valueOf)
-				.collect(Collectors.toList()));
+		ProcessBuilder processBuilder =
+				new ProcessBuilder(this.arguments.stream().map(String::valueOf).collect(Collectors.toList()));
 		if (this.workingDirectory != null) {
 			processBuilder.directory(this.workingDirectory.toFile());
 		}
@@ -148,7 +146,8 @@ class RunProcess {
 				this.workingDirectory);
 		Process process = processBuilder.start();
 		if (outputs != null && outputs.length > 0) {
-			Thread thread = new Thread(new ProcessReader(process, outputs), "Cassandra Process Reader");
+			String name = Thread.currentThread().getName();
+			Thread thread = new Thread(new ProcessReader(process, outputs), String.format("%s:Cassandra", name));
 			thread.setDaemon(true);
 			thread.start();
 		}

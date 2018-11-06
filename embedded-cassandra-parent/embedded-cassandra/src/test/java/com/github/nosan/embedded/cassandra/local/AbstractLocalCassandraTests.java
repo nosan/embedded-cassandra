@@ -169,17 +169,8 @@ public abstract class AbstractLocalCassandraTests {
 			this.script = new CqlScripts(scripts);
 		}
 
-		private static void executeScript(Cassandra cassandra, CqlScript... cqlScript) {
-			try (Cluster cluster = cluster(cassandra)) {
-				Session session = cluster.connect();
-				CqlScripts cqlScripts = new CqlScripts(cqlScript);
-				for (String statement : cqlScripts.getStatements()) {
-					assertThat(session.execute(statement).wasApplied())
-							.describedAs("Statement (%s) is not applied", statement).isTrue();
-				}
 
-			}
-		}		@Override
+		@Override
 		public void accept(@Nonnull Cassandra cassandra) {
 			executeScript(cassandra, this.script);
 		}
@@ -191,7 +182,17 @@ public abstract class AbstractLocalCassandraTests {
 					.build();
 		}
 
+		private static void executeScript(Cassandra cassandra, CqlScript... cqlScript) {
+			try (Cluster cluster = cluster(cassandra)) {
+				Session session = cluster.connect();
+				CqlScripts cqlScripts = new CqlScripts(cqlScript);
+				for (String statement : cqlScripts.getStatements()) {
+					assertThat(session.execute(statement).wasApplied())
+							.describedAs("Statement (%s) is not applied", statement).isTrue();
+				}
 
+			}
+		}
 
 
 	}
