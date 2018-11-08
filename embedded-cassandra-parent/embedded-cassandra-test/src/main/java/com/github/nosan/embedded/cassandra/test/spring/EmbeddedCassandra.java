@@ -43,6 +43,8 @@ import com.github.nosan.embedded.cassandra.test.ClusterFactory;
  * @author Dmytro Nosan
  * @see LocalCassandra
  * @see EmbeddedCassandraContextCustomizer
+ * @see EmbeddedCassandraFactoryBean
+ * @see EmbeddedClusterFactoryBean
  * @see ClusterFactory
  * @see CassandraFactory
  * @since 1.0.0

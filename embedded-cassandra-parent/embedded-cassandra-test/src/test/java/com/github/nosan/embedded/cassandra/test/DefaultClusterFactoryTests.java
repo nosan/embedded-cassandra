@@ -26,7 +26,10 @@ import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.SocketOptions;
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
@@ -40,11 +43,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DefaultClusterFactoryTests {
 
+	@Rule
+	public final ExpectedException throwable = ExpectedException.none();
+
 	private final DefaultClusterFactory factory = new DefaultClusterFactory();
 
 	@Test
-	public void create() {
-		Cluster cluster = this.factory.create(new TestSettings());
+	public void defaultSettings() {
+		Cluster cluster = this.factory.create(new TestSettings(-1, null, null));
 
 		Configuration configuration = cluster.getConfiguration();
 
@@ -52,6 +58,7 @@ public class DefaultClusterFactoryTests {
 		assertThat(protocolOptions.getPort()).isEqualTo(9042);
 		assertThat(ReflectionUtils.getField(protocolOptions.getAuthProvider(), "username")).isEqualTo("cassandra");
 		assertThat(ReflectionUtils.getField(protocolOptions.getAuthProvider(), "password")).isEqualTo("cassandra");
+		assertThat(cluster.getClusterName()).isEqualTo("cluster1");
 
 
 		SocketOptions socketOptions = configuration.getSocketOptions();
@@ -79,12 +86,41 @@ public class DefaultClusterFactoryTests {
 
 	}
 
+	@Test
+	public void customSettings() {
+		Cluster cluster = this.factory.create(new TestSettings(9000, "google.com", "my name"));
+
+		Configuration configuration = cluster.getConfiguration();
+
+		ProtocolOptions protocolOptions = configuration.getProtocolOptions();
+		assertThat(protocolOptions.getPort()).isEqualTo(9000);
+		assertThat(cluster.getClusterName()).isEqualTo("my name");
+
+		this.throwable.expect(NoHostAvailableException.class);
+		this.throwable.expectMessage("google.com");
+		cluster.connect();
+	}
+
 	private static final class TestSettings implements Settings {
+
+		private final int port;
+
+		@Nullable
+		private final String address;
+
+		@Nullable
+		private final String clusterName;
+
+		private TestSettings(int port, @Nullable String address, @Nullable String clusterName) {
+			this.port = port;
+			this.address = address;
+			this.clusterName = clusterName;
+		}
 
 		@Nullable
 		@Override
 		public String getClusterName() {
-			return null;
+			return this.clusterName;
 		}
 
 		@Override
@@ -118,7 +154,7 @@ public class DefaultClusterFactoryTests {
 		@Nullable
 		@Override
 		public String getAddress() {
-			return null;
+			return this.address;
 		}
 
 		@Nullable
@@ -140,7 +176,7 @@ public class DefaultClusterFactoryTests {
 
 		@Override
 		public int getPort() {
-			return -1;
+			return this.port;
 		}
 
 		@Nullable

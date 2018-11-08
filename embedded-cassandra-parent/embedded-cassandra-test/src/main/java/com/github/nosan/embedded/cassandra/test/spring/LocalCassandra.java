@@ -36,12 +36,15 @@ import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
  * Annotation that can be specified on a test class that runs {@link Cassandra} based tests. This annotation extends
  * {@link EmbeddedCassandra} and allows to customize and register {@link LocalCassandraFactory} bean.
  * <p>
- * <b>Note!</b> It is possible to define you own {@link ArtifactFactory} bean to control {@link LocalCassandraFactory}.
+ * <b>Note!</b> It is possible to define you own {@link ArtifactFactory} bean to control {@link LocalCassandraFactory}
+ * instance.
  *
  * @author Dmytro Nosan
  * @see EmbeddedCassandra
  * @see ArtifactFactory
  * @see LocalCassandraFactory
+ * @see LocalCassandraContextCustomizer
+ * @see LocalCassandraFactoryBean
  * @since 1.0.7
  */
 @Retention(RetentionPolicy.RUNTIME)
