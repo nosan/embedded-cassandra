@@ -58,9 +58,9 @@ public class DefaultClusterFactory implements ClusterFactory {
 		socketOptions.setReadTimeoutMillis(10000);
 
 		Cluster.Builder builder = Cluster.builder()
-				.addContactPoint(Objects.requireNonNull(settings.getAddress(), "Address must not be null"))
+				.addContactPoint(Objects.toString(settings.getAddress(), "localhost"))
 				.withCredentials("cassandra", "cassandra")
-				.withPort(settings.getPort())
+				.withPort((settings.getPort() != -1) ? settings.getPort() : 9042)
 				.withSocketOptions(socketOptions)
 				.withQueryOptions(queryOptions)
 				.withPoolingOptions(poolingOptions)
