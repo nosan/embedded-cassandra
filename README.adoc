@@ -185,7 +185,9 @@ When writing integration tests against a `Cassandra`, it is often needs to execu
 ==== EmbeddedCassandra
 
 For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
-Also it is possible to initialize `Embedded Cassandra`  with `CQL` scripts using `scripts` and `statements` attributes.
+`Embedded Cassandra`  could be initialized with `CQL` scripts using `scripts` and `statements` attributes.
+Also, it is possible to use `@LocalCassandra` annotation that extends `@EmbeddedCassandra` annotation and allows to
+configure and register `CassandraFactory` bean.
 
 ```java
 import com.datastax.driver.core.Cluster;
@@ -214,8 +216,7 @@ public class CassandraTests {
 
 }
 ```
-TIP: You can declare `CassandraFactory` and `ClusterFactory` beans to take control of the `Cassandra` instance's. Also,
-it is possible to use `@LocalCassandra` annotation that allows to configure and register `CassandraFactory` bean.
+TIP: You can declare `CassandraFactory` and `ClusterFactory` beans to take control of the `Cassandra` instance's.
 
 ==== Cql
 
