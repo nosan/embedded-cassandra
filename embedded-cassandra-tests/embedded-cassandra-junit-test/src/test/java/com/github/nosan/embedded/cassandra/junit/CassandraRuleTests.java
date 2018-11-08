@@ -37,7 +37,7 @@ public class CassandraRuleTests {
 
 	@Test
 	public void selectRoles() {
-		assertThat(cassandra.getSession().execute("SELECT * FROM  test.roles").all())
+		assertThat(cassandra.executeStatement("SELECT * FROM  test.roles").all())
 				.isEmpty();
 	}
 
