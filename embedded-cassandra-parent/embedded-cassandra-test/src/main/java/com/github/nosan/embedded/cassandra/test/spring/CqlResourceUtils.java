@@ -58,7 +58,7 @@ abstract class CqlResourceUtils {
 	static CqlScript[] getScripts(@Nonnull ResourcePatternResolver resolver, @Nonnull CqlConfig config)
 			throws IOException {
 		Objects.requireNonNull(resolver, "Resource Pattern Resolver must not be null");
-		Objects.requireNonNull(config, "CqlConfig must not be null");
+		Objects.requireNonNull(config, "Cql Config must not be null");
 		List<CqlScript> cqlScripts = new ArrayList<>();
 
 		String[] scripts = config.getScripts();

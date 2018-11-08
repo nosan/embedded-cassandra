@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -58,34 +59,23 @@ class CqlExecutionListener extends AbstractTestExecutionListener {
 
 	private static final Logger log = LoggerFactory.getLogger(CqlExecutionListener.class);
 
-
-	/**
-	 * Returns {@code 5000}.
-	 */
 	@Override
 	public final int getOrder() {
 		return 5000;
 	}
 
-	/**
-	 * Execute CQL scripts configured via {@link Cql @Cql} for the supplied
-	 * {@link TestContext} <em>before</em> the current test method.
-	 */
 	@Override
 	public void beforeTestMethod(@Nonnull TestContext testContext) throws IOException {
 		executeCqlScripts(testContext, Cql.ExecutionPhase.BEFORE_TEST_METHOD);
 	}
 
-	/**
-	 * Execute CQL scripts configured via {@link Cql @Cql} for the supplied
-	 * {@link TestContext} <em>after</em> the current test method.
-	 */
 	@Override
 	public void afterTestMethod(@Nonnull TestContext testContext) throws IOException {
 		executeCqlScripts(testContext, Cql.ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
 	private void executeCqlScripts(TestContext testContext, Cql.ExecutionPhase executionPhase) throws IOException {
+		Objects.requireNonNull(testContext, "Test Context must not be null");
 		Set<Cql> methodAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(
 				testContext.getTestMethod(), Cql.class, CqlGroup.class);
 		Set<Cql> classAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(
