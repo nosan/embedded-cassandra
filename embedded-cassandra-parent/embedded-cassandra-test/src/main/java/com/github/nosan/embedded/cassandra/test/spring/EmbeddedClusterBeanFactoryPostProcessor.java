@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  */
 class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryPostProcessor, Ordered {
 
-	static final String EMBEDDED_CLUSTER_PROCESSOR_NAME = "embeddedClusterBeanFactoryPostProcessor";
+	static final String BEAN_NAME = "embeddedClusterBeanFactoryPostProcessor";
 
 	private static final Logger log = LoggerFactory.getLogger(EmbeddedClusterBeanFactoryPostProcessor.class);
 
@@ -76,29 +76,23 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 					createEmbeddedBeanDefinition(beanDefinition.isPrimary()),
 					beanName);
 		}
-
 		for (String beanName : beanNames) {
 			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
 			if (beanDefinition.isPrimary()) {
-				log.info(
-						"Replacing primary '{}' Cluster bean with a primary embedded version",
-						beanName);
-				return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
-						beanName);
+				log.info("Replacing primary '{}' Cluster bean with a primary embedded version", beanName);
+				return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true), beanName);
 			}
 		}
-
 		log.info("There is no Cluster beans. Embedded primary '{}' Cluster bean will be registered",
-				EmbeddedClusterFactoryBean.EMBEDDED_CLUSTER_NAME);
-
+				EmbeddedClusterFactoryBean.BEAN_NAME);
 		return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
-				EmbeddedClusterFactoryBean.EMBEDDED_CLUSTER_NAME);
+				EmbeddedClusterFactoryBean.BEAN_NAME);
 	}
 
 	private BeanDefinition createEmbeddedBeanDefinition(boolean primary) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
 		beanDefinition.setPrimary(primary);
-		beanDefinition.setDependsOn(EmbeddedCassandraFactoryBean.EMBEDDED_CASSANDRA_NAME);
+		beanDefinition.setDependsOn(EmbeddedCassandraFactoryBean.BEAN_NAME);
 		return beanDefinition;
 	}
 

@@ -17,15 +17,18 @@
 package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.ObjectUtils;
@@ -36,7 +39,7 @@ import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
 import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 
 /**
- * Utility class to convert Spring {@link Resource} into the {@link CqlScript}.
+ * Utility class to convert Spring {@link Resource}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
@@ -44,42 +47,61 @@ import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 abstract class CqlResourceUtils {
 
 	/**
-	 * Retrieves {@link CqlScript CqlScripts}.
+	 * Convert Spring {@link Resource} as {@link CqlScript}.
 	 *
-	 * @param resolver {@link ResourcePatternResolver Resolver} for Spring resources.
+	 * @param resolver {@link ResourcePatternResolver} for Spring resources.
 	 * @param config CQL config.
 	 * @return CQL scripts.
-	 * @throws UncheckedIOException if an I/O error occurs
+	 * @throws IOException if an I/O error occurs
 	 */
 	@Nonnull
-	static CqlScript[] getScripts(@Nonnull ResourcePatternResolver resolver, @Nonnull CqlConfig config) {
-		try {
-			List<CqlScript> cqlScripts = new ArrayList<>();
+	static CqlScript[] getScripts(@Nonnull ResourcePatternResolver resolver, @Nonnull CqlConfig config)
+			throws IOException {
+		Objects.requireNonNull(resolver, "Resource Pattern Resolver must not be null");
+		Objects.requireNonNull(config, "CqlConfig must not be null");
+		List<CqlScript> cqlScripts = new ArrayList<>();
 
-			String[] scripts = config.getScripts();
-			String encoding = config.getEncoding();
-			String[] statements = config.getStatements();
-			Class<?> testClass = config.getTestClass();
+		String[] scripts = config.getScripts();
+		String encoding = config.getEncoding();
+		String[] statements = config.getStatements();
+		Class<?> testClass = config.getTestClass();
 
-			if (!ObjectUtils.isEmpty(scripts)) {
-				Charset charset = (!StringUtils.hasText(encoding) ? null : Charset.forName(encoding));
-				List<Resource> resources = new ArrayList<>();
-				for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
-					resources.addAll(Arrays.asList(resolver.getResources(script)));
-				}
-				for (Resource resource : resources) {
-					cqlScripts.add(new UrlCqlScript(resource.getURL(), charset));
-				}
+		if (!ObjectUtils.isEmpty(scripts)) {
+			Charset charset = (!StringUtils.hasText(encoding) ? null : Charset.forName(encoding));
+			List<Resource> resources = new ArrayList<>();
+			for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
+				resources.addAll(Arrays.asList(resolver.getResources(script)));
 			}
-			if (!ObjectUtils.isEmpty(statements)) {
-				cqlScripts.add(new StaticCqlScript(statements));
+			for (Resource resource : resources) {
+				cqlScripts.add(new UrlCqlScript(resource.getURL(), charset));
 			}
-			return cqlScripts.toArray(new CqlScript[0]);
 		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
+		if (!ObjectUtils.isEmpty(statements)) {
+			cqlScripts.add(new StaticCqlScript(statements));
 		}
+		return cqlScripts.toArray(new CqlScript[0]);
 	}
 
+
+	/**
+	 * Convert Spring {@link Resource} as {@link URL}.
+	 *
+	 * @param resourceLoader {@link ResourceLoader} to load resource
+	 * @param resource a path to the resource
+	 * @param testClass class to load the resource
+	 * @return URL
+	 * @throws IOException if an I/O error occurs
+	 * @since 1.0.7
+	 */
+	@Nullable
+	static URL getURL(@Nonnull ResourceLoader resourceLoader, @Nullable Class<?> testClass, @Nullable String resource)
+			throws IOException {
+		if (!StringUtils.hasText(resource)) {
+			return null;
+		}
+		Objects.requireNonNull(resourceLoader, "Resource Loader must not be null");
+		String location = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, resource)[0];
+		return resourceLoader.getResource(location).getURL();
+	}
 
 }

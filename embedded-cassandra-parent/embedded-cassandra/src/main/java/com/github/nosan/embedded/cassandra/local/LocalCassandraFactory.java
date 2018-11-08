@@ -72,6 +72,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	/**
 	 * Startup timeout.
+	 * <p>
+	 * Note! Timeout will be ignored if value is not a positive.
 	 *
 	 * @return The value of the {@code startupTimeout} attribute
 	 */
@@ -172,6 +174,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	 * Initializes the value for the {@link LocalCassandraFactory#getArtifactFactory() artifactFactory} attribute.
 	 *
 	 * @param artifactFactory The value for artifactFactory
+	 * @see RemoteArtifactFactory
 	 */
 	public void setArtifactFactory(@Nullable ArtifactFactory artifactFactory) {
 		this.artifactFactory = artifactFactory;

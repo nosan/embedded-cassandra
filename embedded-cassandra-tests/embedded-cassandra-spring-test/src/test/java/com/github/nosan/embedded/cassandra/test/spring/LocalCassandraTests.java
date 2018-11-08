@@ -16,6 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import javax.annotation.Nonnull;
+
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,46 +29,59 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraFactory;
-import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.test.ClusterFactory;
+import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
+import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandraContextCustomizer}.
+ * Tests for {@link LocalCassandraContextCustomizer}.
  *
  * @author Dmytro Nosan
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@EmbeddedCassandra
-public class EmbeddedCassandraConfigurationOverriderVersionTests {
+@LocalCassandra(version = "2.2.12", scripts = "/init.cql", statements =
+		"CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
+				"  KEY );")
+public class LocalCassandraTests {
 
 	@ClassRule
 	public static final CaptureOutput OUTPUT = new CaptureOutput();
 
+	@Autowired
+	private TestCassandra cassandra;
+
 
 	@Autowired
-	private Cassandra cassandra;
-
+	private Cluster cluster;
 
 	@Test
 	public void shouldOverrideVersion() {
-		assertThat(OUTPUT.toString()).contains("Cassandra version: 2.2.13");
+		assertThat(OUTPUT.toString()).contains("Cassandra version: 2.2.12");
+		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
+		try (Session session = this.cluster.connect()) {
+			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
+					.isTrue();
+		}
 	}
 
 
 	@Configuration
-	static class FactoryConfiguration {
+	static class TestConfiguration {
 
 		@Bean
-		public CassandraFactory factory() {
-			LocalCassandraFactory factory = new LocalCassandraFactory();
-			factory.setVersion(new Version(2, 2, 13));
-			return factory;
+		public ClusterFactory clusterFactory() {
+			return new DefaultClusterFactory() {
+				@Nonnull
+				@Override
+				protected Cluster.Builder configure(@Nonnull Cluster.Builder builder, @Nonnull Settings settings) {
+					return builder.withClusterName("My cluster");
+				}
+			};
 		}
 	}
 

@@ -74,7 +74,7 @@ class MapSettings implements Settings {
 	 *
 	 * @param source a source {@code Map}
 	 */
-	MapSettings(@Nonnull Map<?, ?> source) {
+	MapSettings(@Nullable Map<?, ?> source) {
 		this.clusterName = get("cluster_name", source);
 		this.port = getInt("native_transport_port", source);
 		this.address = get("rpc_address", source);
@@ -241,7 +241,7 @@ class MapSettings implements Settings {
 
 	@Nullable
 	private static String get(String name, Map<?, ?> source) {
-		Object val = source.get(name);
+		Object val = (source != null) ? source.get(name) : null;
 		return (val != null) ? val.toString() : null;
 	}
 

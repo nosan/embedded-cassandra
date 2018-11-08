@@ -77,6 +77,7 @@ public final class RemoteArtifactFactoryBuilder {
 	 *
 	 * @param urlFactory The value for urlFactory
 	 * @return {@code this} builder for use in a chained invocation
+	 * @see DefaultUrlFactory
 	 */
 	@Nonnull
 	public RemoteArtifactFactoryBuilder setUrlFactory(@Nullable UrlFactory urlFactory) {

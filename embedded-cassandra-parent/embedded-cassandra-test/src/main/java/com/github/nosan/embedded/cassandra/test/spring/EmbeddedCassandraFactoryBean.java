@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -31,9 +32,7 @@ import org.springframework.context.ApplicationContextAware;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
-import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -45,10 +44,13 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 		DisposableBean, ApplicationContextAware, InitializingBean {
 
-	static final String EMBEDDED_CASSANDRA_NAME = "embeddedCassandra";
+	static final String BEAN_NAME = "embeddedCassandra";
 
 	@Nonnull
-	private final CqlScript[] scripts;
+	private final EmbeddedCassandra annotation;
+
+	@Nullable
+	private final Class<?> testClass;
 
 	@Nullable
 	private TestCassandra cassandra;
@@ -57,10 +59,16 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 	private ApplicationContext context;
 
 
-	EmbeddedCassandraFactoryBean(@Nullable CqlScript[] scripts) {
-		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
+	/**
+	 * Creates {@link EmbeddedCassandraFactoryBean}.
+	 *
+	 * @param testClass test class
+	 * @param annotation annotation
+	 */
+	EmbeddedCassandraFactoryBean(@Nullable Class<?> testClass, @Nonnull EmbeddedCassandra annotation) {
+		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedCassandra must not be null");
+		this.testClass = testClass;
 	}
-
 
 	@Override
 	public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
@@ -79,10 +87,6 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 		return TestCassandra.class;
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
 
 	@Override
 	public void destroy() {
@@ -93,26 +97,24 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 	}
 
 	@Override
-	public void afterPropertiesSet() {
-		CassandraFactory cassandraFactory = getBean(this.context, CassandraFactory.class);
-		if (cassandraFactory == null) {
-			cassandraFactory = new LocalCassandraFactory();
-		}
-		ClusterFactory clusterFactory = getBean(this.context, ClusterFactory.class);
-		if (clusterFactory == null) {
-			clusterFactory = new DefaultClusterFactory();
-		}
-		this.cassandra = new TestCassandra(cassandraFactory, clusterFactory, this.scripts);
+	public void afterPropertiesSet() throws IOException {
+		CqlConfig config = new CqlConfig();
+		config.setEncoding(this.annotation.encoding());
+		config.setScripts(this.annotation.scripts());
+		config.setStatements(this.annotation.statements());
+		config.setTestClass(this.testClass);
+		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
+		CqlScript[] cqlScripts = CqlResourceUtils.getScripts(context, config);
+		this.cassandra = new TestCassandra(getBean(this.context, CassandraFactory.class),
+				getBean(context, ClusterFactory.class), cqlScripts);
 		this.cassandra.start();
 	}
 
 
 	@Nullable
-	private static <T> T getBean(@Nullable ApplicationContext context, @Nonnull Class<T> targetClass) {
-		if (context != null) {
-			if (context.getBeanNamesForType(targetClass).length > 0) {
-				return context.getBean(targetClass);
-			}
+	private static <T> T getBean(@Nonnull ApplicationContext context, @Nonnull Class<T> targetClass) {
+		if (context.getBeanNamesForType(targetClass).length > 0) {
+			return context.getBean(targetClass);
 		}
 		return null;
 	}

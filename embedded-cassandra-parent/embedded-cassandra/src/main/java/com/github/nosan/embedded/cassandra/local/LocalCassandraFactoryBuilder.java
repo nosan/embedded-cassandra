@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 
 /**
  * Builder to create a {@link LocalCassandraFactory}.
@@ -95,6 +96,7 @@ public final class LocalCassandraFactoryBuilder {
 	 *
 	 * @param artifactFactory The value for artifactFactory
 	 * @return {@code this} builder for use in a chained invocation
+	 * @see RemoteArtifactFactory
 	 */
 	@Nonnull
 	public LocalCassandraFactoryBuilder setArtifactFactory(@Nullable ArtifactFactory artifactFactory) {
