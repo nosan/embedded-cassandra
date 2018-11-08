@@ -87,6 +87,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	 * Initializes the value for the {@link RemoteArtifactFactory#getUrlFactory() urlFactory} attribute.
 	 *
 	 * @param urlFactory The value for urlFactory
+	 * @see DefaultUrlFactory
 	 */
 	public void setUrlFactory(@Nullable UrlFactory urlFactory) {
 		this.urlFactory = urlFactory;

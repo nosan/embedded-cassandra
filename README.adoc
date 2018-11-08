@@ -214,7 +214,8 @@ public class CassandraTests {
 
 }
 ```
-TIP: You can declare `CassandraFactory` and `ClusterFactory` beans to take control of the `Cassandra` instance's.
+TIP: You can declare `CassandraFactory` and `ClusterFactory` beans to take control of the `Cassandra` instance's. Also,
+it is possible to use `@LocalCassandra` annotation that allows to configure and register `CassandraFactory` bean.
 
 ==== Cql
 

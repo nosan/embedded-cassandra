@@ -38,7 +38,8 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  */
 class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationContextAware {
 
-	static final String EMBEDDED_CLUSTER_NAME = "embeddedCluster";
+	static final String BEAN_NAME = "embeddedCluster";
+
 
 	@Nullable
 	private ApplicationContext context;
@@ -66,18 +67,10 @@ class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationCon
 		return Cluster.class;
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
-
 	@Nullable
 	private static TestCassandra getBean(@Nullable ApplicationContext context) {
-		if (context != null) {
-			if (context.getBeanNamesForType(TestCassandra.class).length > 0) {
-				return context.getBean(TestCassandra.class);
-			}
+		if (context != null && context.getBeanNamesForType(TestCassandra.class).length > 0) {
+			return context.getBean(TestCassandra.class);
 		}
 		return null;
 	}

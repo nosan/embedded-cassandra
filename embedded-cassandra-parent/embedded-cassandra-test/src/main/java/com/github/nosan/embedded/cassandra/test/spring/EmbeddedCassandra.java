@@ -41,6 +41,7 @@ import com.github.nosan.embedded.cassandra.test.ClusterFactory;
  * <b>Note!</b> It is possible to define you own {@link ClusterFactory} or {@link CassandraFactory} beans.
  *
  * @author Dmytro Nosan
+ * @see LocalCassandra
  * @see EmbeddedCassandraContextCustomizer
  * @see ClusterFactory
  * @see CassandraFactory
@@ -72,7 +73,7 @@ public @interface EmbeddedCassandra {
 	String[] scripts() default {};
 
 	/**
-	 * <em>Inlined CQL statements</em> to execute.
+	 * <em>Inline CQL statements</em> to execute.
 	 * <p>This attribute may be used in conjunction with or instead of
 	 * {@link #scripts}.
 	 * <h3>Ordering</h3>

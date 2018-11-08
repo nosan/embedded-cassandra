@@ -30,47 +30,43 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.Assert;
 
 /**
- * {@link ContextCustomizer} that register {@link EmbeddedCassandraFactoryBean} and {@link
- * EmbeddedClusterBeanFactoryPostProcessor}.
+ * {@link ContextCustomizer} that register {@link LocalCassandraFactoryBean}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 1.0.7
  */
-class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
+class LocalCassandraContextCustomizer implements ContextCustomizer {
+
 
 	@Nullable
 	private final Class<?> testClass;
 
 	@Nonnull
-	private final EmbeddedCassandra annotation;
-
+	private final LocalCassandra annotation;
 
 	/**
-	 * Creates {@link EmbeddedCassandraContextCustomizer}.
+	 * Creates {@link LocalCassandraContextCustomizer}.
 	 *
 	 * @param testClass test class
 	 * @param annotation annotation
 	 */
-	EmbeddedCassandraContextCustomizer(@Nullable Class<?> testClass, @Nonnull EmbeddedCassandra annotation) {
+	LocalCassandraContextCustomizer(@Nullable Class<?> testClass, @Nonnull LocalCassandra annotation) {
 		this.testClass = testClass;
-		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedCassandra must not be null");
+		this.annotation = Objects.requireNonNull(annotation, "@LocalFactory must not be null");
 	}
 
 	@Override
 	public void customizeContext(@Nonnull ConfigurableApplicationContext context,
 			@Nonnull MergedContextConfiguration mergedConfig) {
 		Assert.isInstanceOf(BeanDefinitionRegistry.class, context.getBeanFactory(),
-				"Embedded Cassandra Context Customizer can only be used with a BeanDefinitionRegistry");
+				"Local Factory Context Customizer can only be used with a BeanDefinitionRegistry");
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-		RootBeanDefinition bd = new RootBeanDefinition(EmbeddedCassandraFactoryBean.class);
+		RootBeanDefinition bd = new RootBeanDefinition(LocalCassandraFactoryBean.class);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, this.testClass);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
-		registry.registerBeanDefinition(EmbeddedCassandraFactoryBean.BEAN_NAME, bd);
-		if (this.annotation.replace() == EmbeddedCassandra.Replace.ANY) {
-			registry.registerBeanDefinition(EmbeddedClusterBeanFactoryPostProcessor.BEAN_NAME,
-					new RootBeanDefinition(EmbeddedClusterBeanFactoryPostProcessor.class));
-		}
+		registry.registerBeanDefinition(LocalCassandraFactoryBean.BEAN_NAME, bd);
+
 	}
 
 

@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,7 +72,7 @@ class CqlExecutionListener extends AbstractTestExecutionListener {
 	 * {@link TestContext} <em>before</em> the current test method.
 	 */
 	@Override
-	public void beforeTestMethod(@Nonnull TestContext testContext) {
+	public void beforeTestMethod(@Nonnull TestContext testContext) throws IOException {
 		executeCqlScripts(testContext, Cql.ExecutionPhase.BEFORE_TEST_METHOD);
 	}
 
@@ -80,11 +81,11 @@ class CqlExecutionListener extends AbstractTestExecutionListener {
 	 * {@link TestContext} <em>after</em> the current test method.
 	 */
 	@Override
-	public void afterTestMethod(@Nonnull TestContext testContext) {
+	public void afterTestMethod(@Nonnull TestContext testContext) throws IOException {
 		executeCqlScripts(testContext, Cql.ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
-	private void executeCqlScripts(TestContext testContext, Cql.ExecutionPhase executionPhase) {
+	private void executeCqlScripts(TestContext testContext, Cql.ExecutionPhase executionPhase) throws IOException {
 		Set<Cql> methodAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(
 				testContext.getTestMethod(), Cql.class, CqlGroup.class);
 		Set<Cql> classAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(
@@ -101,13 +102,14 @@ class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	private void executeCqlScripts(Set<Cql> cqlAnnotations, Cql.ExecutionPhase executionPhase,
-			TestContext testContext) {
+			TestContext testContext) throws IOException {
 		for (Cql cql : cqlAnnotations) {
 			executeCqlScripts(cql, executionPhase, testContext);
 		}
 	}
 
-	private void executeCqlScripts(Cql cql, Cql.ExecutionPhase executionPhase, TestContext testContext) {
+	private void executeCqlScripts(Cql cql, Cql.ExecutionPhase executionPhase, TestContext testContext)
+			throws IOException {
 		if (executionPhase != cql.executionPhase()) {
 			return;
 		}
