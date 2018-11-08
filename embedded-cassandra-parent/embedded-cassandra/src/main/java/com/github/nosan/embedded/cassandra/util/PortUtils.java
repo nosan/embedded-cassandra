@@ -23,6 +23,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.Set;
@@ -99,15 +100,22 @@ public abstract class PortUtils {
 	 *
 	 * @param count the number of available ports to find
 	 * @return free ports
-	 * @throws IllegalStateException if port could not be found
+	 * @throws IllegalStateException if ports could not be found
 	 */
 	@Nonnull
 	public static Collection<Integer> getPorts(int count) {
-		Set<Integer> ports = new LinkedHashSet<>();
-		while (ports.size() != count) {
-			ports.add(PortUtils.getPort());
+		if (count <= 0) {
+			return Collections.emptySet();
 		}
-		return ports;
+		Set<Integer> ports = new LinkedHashSet<>();
+		for (int i = 0; i < RANGE; i++) {
+			ports.add(PortUtils.getPort());
+			if (ports.size() == count) {
+				return ports;
+			}
+		}
+		throw new IllegalStateException(String.format("Could not find (%d) ports in the range [%d, %d])",
+				count, MIN, MAX));
 	}
 
 
