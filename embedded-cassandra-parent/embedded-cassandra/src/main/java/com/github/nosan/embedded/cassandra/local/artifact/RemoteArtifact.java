@@ -28,7 +28,6 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -112,8 +111,8 @@ class RemoteArtifact implements Artifact {
 		if (!Files.isWritable(this.directory)) {
 			throw new IllegalArgumentException(String.format("(%s) is not writable", this.directory));
 		}
-		IOException exception = new IOException(String.format("There is no way to download archive from (%s)",
-				Arrays.toString(urls)));
+
+		IOException exception = null;
 
 		for (URL url : urls) {
 			try {
@@ -139,15 +138,15 @@ class RemoteArtifact implements Artifact {
 				return target;
 			}
 			catch (IOException ex) {
-				if (exception.getCause() == null) {
-					exception.initCause(ex);
+				if (exception == null) {
+					exception = ex;
 				}
 				else {
 					exception.addSuppressed(ex);
 				}
 			}
 		}
-		throw exception;
+		throw Objects.requireNonNull(exception, "Exception must not be null.");
 
 	}
 

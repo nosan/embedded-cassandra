@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.local.artifact;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -43,7 +42,6 @@ import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
-import com.github.nosan.embedded.cassandra.test.support.CauseMatcher;
 import com.github.nosan.embedded.cassandra.test.support.WebServer;
 import com.github.nosan.embedded.cassandra.util.OS;
 
@@ -167,9 +165,8 @@ public class RemoteArtifactTests {
 			sleep(1200);
 		});
 
-		this.throwable.expect(IOException.class);
-		this.throwable.expectMessage("There is no way to download archive");
-		this.throwable.expectCause(new CauseMatcher(SocketTimeoutException.class, "Read timed out"));
+		this.throwable.expect(SocketTimeoutException.class);
+		this.throwable.expectMessage("Read timed out");
 
 		this.factory.setReadTimeout(Duration.ofSeconds(1));
 		this.factory.create(new Version(3, 1, 1)).get();
@@ -185,9 +182,8 @@ public class RemoteArtifactTests {
 			}
 		});
 
-		this.throwable.expect(IOException.class);
-		this.throwable.expectMessage("There is no way to download archive");
-		this.throwable.expectCause(new CauseMatcher(SocketTimeoutException.class, "connect timed out"));
+		this.throwable.expect(SocketTimeoutException.class);
+		this.throwable.expectMessage("connect timed out");
 
 		this.factory.setConnectTimeout(Duration.ofSeconds(1));
 		this.factory.create(new Version(3, 1, 1)).get();
@@ -197,9 +193,8 @@ public class RemoteArtifactTests {
 	public void proxyIsInvalid() throws Exception {
 
 
-		this.throwable.expect(IOException.class);
-		this.throwable.expectMessage("There is no way to download archive");
-		this.throwable.expectCause(new CauseMatcher(SocketException.class, "Connection refused"));
+		this.throwable.expect(SocketException.class);
+		this.throwable.expectMessage("Connection refused");
 
 		this.factory.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
 		this.factory.create(new Version(3, 1, 1)).get();
