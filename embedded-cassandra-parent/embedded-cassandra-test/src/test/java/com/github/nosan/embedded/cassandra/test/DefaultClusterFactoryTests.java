@@ -44,86 +44,7 @@ public class DefaultClusterFactoryTests {
 
 	@Test
 	public void create() {
-		Settings settings = new Settings() {
-			@Nullable
-			@Override
-			public String getClusterName() {
-				return null;
-			}
-
-			@Override
-			public int getStoragePort() {
-				return 0;
-			}
-
-			@Override
-			public int getSslStoragePort() {
-				return 0;
-			}
-
-			@Nullable
-			@Override
-			public String getListenAddress() {
-				return null;
-			}
-
-			@Nullable
-			@Override
-			public String getListenInterface() {
-				return null;
-			}
-
-			@Nullable
-			@Override
-			public String getBroadcastAddress() {
-				return null;
-			}
-
-			@Override
-			public String getAddress() {
-				return "localhost";
-			}
-
-			@Nullable
-			@Override
-			public String getRpcInterface() {
-				return null;
-			}
-
-			@Nullable
-			@Override
-			public String getBroadcastRpcAddress() {
-				return null;
-			}
-
-			@Override
-			public boolean isStartNativeTransport() {
-				return false;
-			}
-
-			@Override
-			public int getPort() {
-				return 9042;
-			}
-
-			@Nullable
-			@Override
-			public Integer getSslPort() {
-				return null;
-			}
-
-			@Override
-			public boolean isStartRpc() {
-				return false;
-			}
-
-			@Override
-			public int getRpcPort() {
-				return 0;
-			}
-		};
-
-		Cluster cluster = this.factory.create(settings);
+		Cluster cluster = this.factory.create(new TestSettings());
 
 		Configuration configuration = cluster.getConfiguration();
 
@@ -156,5 +77,86 @@ public class DefaultClusterFactoryTests {
 		assertThat(poolingOptions.getMaxConnectionsPerHost(HostDistance.REMOTE)).isEqualTo(4);
 		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(10000);
 
+	}
+
+	private static final class TestSettings implements Settings {
+
+		@Nullable
+		@Override
+		public String getClusterName() {
+			return null;
+		}
+
+		@Override
+		public int getStoragePort() {
+			return -1;
+		}
+
+		@Override
+		public int getSslStoragePort() {
+			return -1;
+		}
+
+		@Nullable
+		@Override
+		public String getListenAddress() {
+			return null;
+		}
+
+		@Nullable
+		@Override
+		public String getListenInterface() {
+			return null;
+		}
+
+		@Nullable
+		@Override
+		public String getBroadcastAddress() {
+			return null;
+		}
+
+		@Nullable
+		@Override
+		public String getAddress() {
+			return null;
+		}
+
+		@Nullable
+		@Override
+		public String getRpcInterface() {
+			return null;
+		}
+
+		@Nullable
+		@Override
+		public String getBroadcastRpcAddress() {
+			return null;
+		}
+
+		@Override
+		public boolean isStartNativeTransport() {
+			return false;
+		}
+
+		@Override
+		public int getPort() {
+			return -1;
+		}
+
+		@Nullable
+		@Override
+		public Integer getSslPort() {
+			return null;
+		}
+
+		@Override
+		public boolean isStartRpc() {
+			return false;
+		}
+
+		@Override
+		public int getRpcPort() {
+			return -1;
+		}
 	}
 }
