@@ -179,8 +179,7 @@ public class CassandraRuleTests {
 
 === Spring
 
-When writing integration tests against a `Cassandra`, it is often needs to execute `CQL` scripts to modify the `Cassandra` storage.
-
+There are several annotation to help writing integration tests against a `Cassandra`
 
 ==== EmbeddedCassandra
 
