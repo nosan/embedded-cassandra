@@ -43,6 +43,7 @@ import com.github.nosan.embedded.cassandra.util.OS;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Abstract test-class for {@link LocalCassandra}.
@@ -67,7 +68,7 @@ public abstract class AbstractLocalCassandraTests {
 	@Test
 	public void shouldStartedIfTransportDisabled() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
-		new CassandraRunner(this.factory).run(assertPort(Settings::getStoragePort));
+		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getStoragePort));
 	}
 
 	@Test
@@ -78,13 +79,14 @@ public abstract class AbstractLocalCassandraTests {
 		}
 		this.throwable.expect(CassandraException.class);
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
-		new CassandraRunner(this.factory).run();
+		new CassandraRunner(this.factory).run(new NotReachable());
 	}
 
 	@Test
 	public void shouldStartStopOnlyOnce() {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		Cassandra c = runner.run(assertCreateKeyspace().andThen(cassandra -> {
+			assertThat(this.output.toString()).contains("Starts Apache Cassandra");
 			this.output.reset();
 			cassandra.start();
 			assertThat(this.output.toString()).doesNotContain("Starts Apache Cassandra");
@@ -111,7 +113,7 @@ public abstract class AbstractLocalCassandraTests {
 		this.throwable.expect(CassandraException.class);
 		this.throwable.expectCause(new CauseMatcher(IOException.class, "invalid_property"));
 
-		new CassandraRunner(this.factory).run();
+		new CassandraRunner(this.factory).run(new NotReachable());
 
 	}
 
@@ -130,9 +132,9 @@ public abstract class AbstractLocalCassandraTests {
 		this.factory.setConfigurationFile(ClassLoader.getSystemResource("cassandra-static.yaml"));
 		this.factory.getJvmOptions().add("-Dcassandra.jmx.local.port=7199");
 		new CassandraRunner(this.factory)
-				.run(assertCreateKeyspace().andThen(assertPort(7199, 9042)));
+				.run(assertCreateKeyspace().andThen(assertBusyPort(7199, 9042)));
 		new CassandraRunner(this.factory)
-				.run(assertCreateKeyspace().andThen(assertPort(7199, 9042)));
+				.run(assertCreateKeyspace().andThen(assertBusyPort(7199, 9042)));
 
 	}
 
@@ -161,22 +163,19 @@ public abstract class AbstractLocalCassandraTests {
 				" WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
 	}
 
-	private static Consumer<Cassandra> assertPort(Function<Settings, Integer> mapper) {
-		return cassandra -> assertPort(mapper.apply(cassandra.getSettings()));
+	private static Consumer<Cassandra> assertBusyPort(Function<Settings, Integer> mapper) {
+		return cassandra -> assertBusyPort(mapper.apply(cassandra.getSettings()));
 	}
 
-	private static Consumer<Cassandra> assertPort(int... port) {
-		Consumer<Cassandra> assertPort = new PortAssert(port[0]);
+	private static Consumer<Cassandra> assertBusyPort(int... port) {
+		Consumer<Cassandra> assertPort = new PortBusyAssert(port[0]);
 		for (int i = 1; i < port.length; i++) {
-			assertPort = assertPort.andThen(new PortAssert(port[i]));
+			assertPort = assertPort.andThen(new PortBusyAssert(port[i]));
 		}
 		return assertPort;
 	}
 
 
-	/**
-	 * Assert {@code CQL} scripts could be invoked.
-	 */
 	private static final class CqlAssert implements Consumer<Cassandra> {
 
 		@Nonnull
@@ -204,14 +203,11 @@ public abstract class AbstractLocalCassandraTests {
 		}
 	}
 
-	/**
-	 * Assert {@code port} is busy.
-	 */
-	private static final class PortAssert implements Consumer<Cassandra> {
+	private static final class PortBusyAssert implements Consumer<Cassandra> {
 
 		private final int port;
 
-		PortAssert(int port) {
+		PortBusyAssert(int port) {
 			this.port = port;
 		}
 
@@ -221,6 +217,14 @@ public abstract class AbstractLocalCassandraTests {
 			assertThat(PortUtils.isPortBusy(settings.getAddress(), this.port))
 					.describedAs("Port (%s) is not busy", this.port)
 					.isTrue();
+		}
+	}
+
+	private static final class NotReachable implements Consumer<Cassandra> {
+
+		@Override
+		public void accept(Cassandra cassandra) {
+			fail("This consumer must not be called.");
 		}
 	}
 }

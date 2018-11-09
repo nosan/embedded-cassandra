@@ -55,16 +55,4 @@ final class CassandraRunner {
 		}
 		return cassandra;
 	}
-
-
-	/**
-	 * Creates and starts a new {@link Cassandra} based on the factory.
-	 *
-	 * @return stopped Cassandra
-	 */
-	@Nonnull
-	Cassandra run() {
-		return run(cassandra -> {
-		});
-	}
 }
