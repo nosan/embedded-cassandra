@@ -34,16 +34,14 @@ public class RunProcessTests {
 	@Test
 	public void shouldRunAndWait() throws Exception {
 		OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
-		int exit = new RunProcess(Arrays.asList("echo", "Hello World"))
-				.runAndWait(bufferOutput);
+		int exit = new RunProcess(Arrays.asList("echo", "Hello World")).runAndWait(bufferOutput);
 		assertThat(exit).isEqualTo(0);
 		assertThat(bufferOutput.toString()).contains("Hello World");
 	}
 
 	@Test
 	public void shouldRun() throws Exception {
-		Process process = new RunProcess(Arrays.asList("sleep", "2"))
-				.run();
+		Process process = new RunProcess(Arrays.asList("sleep", "2")).run();
 		assertThat(process.waitFor(1, TimeUnit.SECONDS)).isFalse();
 		assertThat(process.waitFor(2, TimeUnit.SECONDS)).isTrue();
 	}
