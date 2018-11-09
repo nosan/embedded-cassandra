@@ -18,16 +18,16 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -99,8 +99,9 @@ class RunProcess {
 			@Nonnull List<?> arguments) {
 		Objects.requireNonNull(arguments, "Arguments must not be null");
 		this.workingDirectory = workingDirectory;
-		this.arguments = new ArrayList<>(arguments);
-		this.environment = (environment != null) ? new LinkedHashMap<>(environment) : Collections.emptyMap();
+		this.arguments = Collections.unmodifiableList(new ArrayList<>(arguments));
+		this.environment = Collections.unmodifiableMap((environment != null) ?
+				new LinkedHashMap<>(environment) : Collections.emptyMap());
 	}
 
 
@@ -133,36 +134,99 @@ class RunProcess {
 	 * @throws IOException if an I/O error occurs
 	 */
 	Process run(@Nullable Output... outputs) throws IOException {
-		ProcessBuilder processBuilder =
-				new ProcessBuilder(this.arguments.stream().map(String::valueOf).collect(Collectors.toList()));
-		if (this.workingDirectory != null) {
-			processBuilder.directory(this.workingDirectory.toFile());
+		List<String> command = this.arguments.stream().map(String::valueOf).collect(Collectors.toList());
+		ProcessBuilder processBuilder = new ProcessBuilder(command);
+		Path workingDirectory = this.workingDirectory;
+		if (workingDirectory != null) {
+			processBuilder.directory(workingDirectory.toAbsolutePath().toFile());
 		}
-		if (!this.environment.isEmpty()) {
-			processBuilder.environment().putAll(this.environment);
+		Map<String, String> environment = this.environment;
+		if (!environment.isEmpty()) {
+			processBuilder.environment().putAll(environment);
 		}
 		processBuilder.redirectErrorStream(true);
-		logCommand();
-		Process process = processBuilder.start();
-		if (outputs != null && outputs.length > 0) {
-			String name = Thread.currentThread().getName();
-			Thread thread = new Thread(new ProcessReader(process, outputs), String.format("%s:cassandra", name));
-			thread.setDaemon(true);
-			thread.start();
-		}
-		return process;
-	}
-
-	private void logCommand() {
 		if (log.isDebugEnabled()) {
-			StringBuilder message = new StringBuilder(String.format("Execute %s", this.arguments));
-			if (!this.environment.isEmpty()) {
-				message.append(String.format(" with environment %s", this.environment));
+			StringBuilder message = new StringBuilder(String.format("Execute %s", command));
+			if (!environment.isEmpty()) {
+				message.append(String.format(" with environment %s", environment));
 			}
-			if (this.workingDirectory != null) {
-				message.append(String.format(" and directory (%s)", this.workingDirectory));
+			if (workingDirectory != null) {
+				message.append(String.format(" and directory (%s)", workingDirectory));
 			}
 			log.debug(message.toString());
+		}
+		return start(processBuilder, outputs);
+	}
+
+	private static Process start(ProcessBuilder builder, Output[] outputs) throws IOException {
+		final class Handler {
+			@Nullable
+			private Process process;
+
+			@Nullable
+			private IOException exception;
+		}
+		Handler handler = new Handler();
+		CountDownLatch latch = new CountDownLatch(1);
+		new Thread(() -> {
+			try {
+				handler.process = builder.start();
+			}
+			catch (IOException ex) {
+				handler.exception = ex;
+			}
+			finally {
+				latch.countDown();
+			}
+			Process process = handler.process;
+			if (process != null && outputs != null && outputs.length > 0) {
+				read(process, outputs);
+			}
+		}, String.format("%s:cassandra", Thread.currentThread().getName())).start();
+
+		try {
+			latch.await();
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+
+		if (handler.process != null) {
+			return handler.process;
+		}
+		if (handler.exception != null) {
+			throw handler.exception;
+		}
+
+		throw new IllegalStateException("Both 'Handler.process' and 'Handler.exception' fields are null");
+	}
+
+
+	private static void read(Process process, Output[] outputs) {
+		try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+			String line;
+			while ((line = readline(reader)) != null) {
+				if (StringUtils.hasText(line)) {
+					for (Output output : outputs) {
+						output.accept(line);
+					}
+				}
+			}
+		}
+		catch (IOException ex) {
+			log.error(String.format("Could not create a stream for (%s)", process), ex);
+		}
+	}
+
+
+	private static String readline(BufferedReader reader) {
+		try {
+			return reader.readLine();
+		}
+		catch (IOException ex) {
+			//stream closed. nothing special
+			return null;
 		}
 	}
 
@@ -180,46 +244,6 @@ class RunProcess {
 		 */
 		@Override
 		void accept(@Nonnull String line);
-	}
-
-
-	private static final class ProcessReader implements Runnable {
-
-		@Nonnull
-		private final List<Output> targets;
-
-		@Nonnull
-		private final Process process;
-
-
-		/**
-		 * Creates a {@link ProcessReader}.
-		 *
-		 * @param process the process
-		 * @param targets the output consumers
-		 */
-		ProcessReader(@Nonnull Process process, @Nonnull Output... targets) {
-			this.process = process;
-			this.targets = Arrays.asList(targets);
-		}
-
-		@Override
-		public void run() {
-			InputStream stream = this.process.getInputStream();
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream), 128)) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					if (StringUtils.hasText(line)) {
-						for (Output output : this.targets) {
-							output.accept(line);
-						}
-					}
-				}
-			}
-			catch (IOException ignore) {
-				//stream closed. nothing special
-			}
-		}
 	}
 
 

@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,9 +97,9 @@ class LocalProcess {
 			@Nonnull List<String> jvmOptions, @Nonnull Version version, @Nullable Path javaHome) {
 		this.directory = directory;
 		this.startupTimeout = startupTimeout;
-		this.jvmOptions = new ArrayList<>(jvmOptions);
 		this.version = version;
 		this.javaHome = javaHome;
+		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 	}
 
 	/**
