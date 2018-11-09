@@ -45,6 +45,7 @@ public class LocalCassandraFactoryBuilderTests {
 		Path rack = Paths.get("rack");
 		Path topology = Paths.get("topology");
 		Path workingDirectory = Paths.get(UUID.randomUUID().toString());
+		Path javaDirectory = Paths.get(UUID.randomUUID().toString());
 		Version version = new Version(3, 11, 0);
 
 		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder()
@@ -55,6 +56,7 @@ public class LocalCassandraFactoryBuilderTests {
 				.setLogbackFile(logback)
 				.setVersion(version)
 				.setRackFile(rack)
+				.setJavaHome(javaDirectory)
 				.setTopologyFile(topology)
 				.setWorkingDirectory(workingDirectory)
 				.setStartupTimeout(Duration.ofMinutes(1))
@@ -68,6 +70,7 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getRackFile()).isEqualTo(rack.toUri().toURL());
 		assertThat(factory.getTopologyFile()).isEqualTo(topology.toUri().toURL());
 		assertThat(factory.getWorkingDirectory()).isEqualTo(workingDirectory);
+		assertThat(factory.getJavaHome()).isEqualTo(javaDirectory);
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(1));
 	}
 }

@@ -50,6 +50,7 @@ public class LocalCassandraFactoryTests {
 
 		Version version = new Version(3, 11, 5);
 		Path workingDirectory = Paths.get(UUID.randomUUID().toString());
+		Path javaDirectory = Paths.get(UUID.randomUUID().toString());
 		Path logbackFile = Paths.get("logback.xml");
 		Path configurationFile = Paths.get("cassandra.yaml");
 		Path rackFile = Paths.get("rack.properties");
@@ -72,10 +73,11 @@ public class LocalCassandraFactoryTests {
 		factory.setRackFile(rackFile.toUri().toURL());
 		factory.getJvmOptions().add("arg1");
 		factory.setStartupTimeout(Duration.ofMinutes(1));
+		factory.setJavaHome(javaDirectory);
 
 
 		Cassandra cassandra = factory.create();
-		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(new Version(3, 11, 5));
+		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(factory.getVersion());
 		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory"))
 				.isEqualTo(artifactFactory);
 		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "directory"),
@@ -84,6 +86,10 @@ public class LocalCassandraFactoryTests {
 				.isEqualTo(factory.getJvmOptions());
 		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "localProcess"), "startupTimeout"))
 				.isEqualTo(factory.getStartupTimeout());
+		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "localProcess"), "javaHome"))
+				.isEqualTo(factory.getJavaHome());
+		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "localProcess"), "version"))
+				.isEqualTo(factory.getVersion());
 		List<DirectoryInitializer> initializers = (List<DirectoryInitializer>) ReflectionUtils.getField(cassandra,
 				"initializers");
 		assertThat(initializers).hasSize(5);

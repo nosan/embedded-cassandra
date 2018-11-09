@@ -117,6 +117,17 @@ public @interface LocalCassandra {
 	String workingDirectory() default "";
 
 	/**
+	 * Sets attribute for {@link LocalCassandraFactory#getJavaHome()}.
+	 * <p>
+	 * Path will be interpreted as a {@link Path}.
+	 *
+	 * @return The value of the {@code javaHome} attribute
+	 * @see Path
+	 * @since 1.0.9
+	 */
+	String javaHome() default "";
+
+	/**
 	 * JVM options that should be associated with Cassandra.
 	 *
 	 * @return The value of the {@code jvmOptions} attribute

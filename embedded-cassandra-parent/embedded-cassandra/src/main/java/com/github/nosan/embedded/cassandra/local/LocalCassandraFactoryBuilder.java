@@ -67,6 +67,32 @@ public final class LocalCassandraFactoryBuilder {
 	@Nullable
 	private URL topologyFile;
 
+	@Nullable
+	private Path javaHome;
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome} attribute.
+	 *
+	 * @param javaHome The value for javaHome
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.0.9
+	 */
+	public LocalCassandraFactoryBuilder setJavaHome(@Nullable Path javaHome) {
+		this.javaHome = javaHome;
+		return this;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome} attribute.
+	 *
+	 * @param javaHome The value for javaHome
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.0.9
+	 */
+	public LocalCassandraFactoryBuilder setJavaHome(@Nullable File javaHome) {
+		return setJavaHome((javaHome != null) ? javaHome.toPath() : null);
+	}
+
 
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getStartupTimeout} attribute.
@@ -353,6 +379,7 @@ public final class LocalCassandraFactoryBuilder {
 		factory.setRackFile(this.rackFile);
 		factory.setStartupTimeout(this.startupTimeout);
 		factory.getJvmOptions().addAll(this.jvmOptions);
+		factory.setJavaHome(this.javaHome);
 		return factory;
 	}
 

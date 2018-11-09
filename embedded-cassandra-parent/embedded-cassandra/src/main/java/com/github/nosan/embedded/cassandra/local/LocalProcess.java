@@ -70,6 +70,9 @@ class LocalProcess {
 	private final Version version;
 
 	@Nullable
+	private final Path javaHome;
+
+	@Nullable
 	private Path pidFile;
 
 	@Nullable
@@ -87,13 +90,15 @@ class LocalProcess {
 	 * @param startupTimeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param version a version
+	 * @param javaHome java home directory
 	 */
 	LocalProcess(@Nonnull Supplier<Path> directory, @Nonnull Duration startupTimeout,
-			@Nonnull List<String> jvmOptions, @Nonnull Version version) {
+			@Nonnull List<String> jvmOptions, @Nonnull Version version, @Nullable Path javaHome) {
 		this.directory = directory;
 		this.startupTimeout = startupTimeout;
 		this.jvmOptions = new ArrayList<>(jvmOptions);
 		this.version = version;
+		this.javaHome = javaHome;
 	}
 
 	/**
@@ -133,12 +138,10 @@ class LocalProcess {
 		arguments.add(logPath.toAbsolutePath());
 
 		Map<String, String> environment = new LinkedHashMap<>();
-
-		String javaHome = new SystemProperty("java.home").or("");
+		String javaHome = getJavaHome(this.javaHome);
 		if (StringUtils.hasText(javaHome)) {
 			environment.put("JAVA_HOME", javaHome);
 		}
-
 		List<String> jvmOptions = new ArrayList<>();
 		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", PortUtils.getPort()));
 		jvmOptions.addAll(this.jvmOptions);
@@ -237,6 +240,14 @@ class LocalProcess {
 			}
 		}
 		return this.settings;
+	}
+
+
+	private static String getJavaHome(Path javaHome) {
+		if (javaHome != null) {
+			return String.valueOf(javaHome.toAbsolutePath());
+		}
+		return new SystemProperty("java.home").or("");
 	}
 
 
