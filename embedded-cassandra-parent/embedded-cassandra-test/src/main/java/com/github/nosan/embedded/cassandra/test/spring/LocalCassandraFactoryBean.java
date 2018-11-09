@@ -86,6 +86,9 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		if (StringUtils.hasText(annotation.workingDirectory())) {
 			builder.setWorkingDirectory(Paths.get(annotation.workingDirectory()));
 		}
+		if (StringUtils.hasText(annotation.javaHome())) {
+			builder.setJavaHome(Paths.get(annotation.javaHome()));
+		}
 		if (StringUtils.hasText(annotation.version())) {
 			builder.setVersion(Version.parse(annotation.version()));
 		}

@@ -70,6 +70,30 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	@Nullable
 	private URL topologyFile;
 
+	@Nullable
+	private Path javaHome;
+
+	/**
+	 * Java home directory.
+	 *
+	 * @return The value of the {@code javaHome} attribute
+	 * @since 1.0.9
+	 */
+	@Nullable
+	public Path getJavaHome() {
+		return this.javaHome;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome} attribute.
+	 *
+	 * @param javaHome The value for javaHome
+	 * @since 1.0.9
+	 */
+	public void setJavaHome(@Nullable Path javaHome) {
+		this.javaHome = javaHome;
+	}
+
 	/**
 	 * Startup timeout.
 	 * <p>
@@ -261,7 +285,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 					resolve(String.format("embedded-cassandra-%s", UUID.randomUUID()));
 		}
 		return new LocalCassandra(version, artifactFactory, workingDirectory, startupTimeout, getConfigurationFile(),
-				getLogbackFile(), getRackFile(), getTopologyFile(), getJvmOptions());
+				getLogbackFile(), getRackFile(), getTopologyFile(), getJvmOptions(), getJavaHome());
 	}
 
 

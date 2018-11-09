@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -68,6 +69,15 @@ public abstract class AbstractLocalCassandraTests {
 	@Test
 	public void shouldStartedIfTransportDisabled() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
+		new CassandraRunner(this.factory).run();
+	}
+
+	@Test
+	public void shouldOverrideJavaHome() {
+		this.throwable.expect(CassandraException.class);
+		this.throwable.expectCause(new CauseMatcher(IOException.class,
+				"Unable to find java executable"));
+		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
 		new CassandraRunner(this.factory).run();
 	}
 
@@ -168,7 +178,6 @@ public abstract class AbstractLocalCassandraTests {
 		CqlAssert(@Nullable CqlScript... scripts) {
 			this.script = new CqlScripts(scripts);
 		}
-
 
 		@Override
 		public void accept(@Nonnull Cassandra cassandra) {

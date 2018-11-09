@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @LocalCassandra(version = "2.2.13", configurationFile = "classpath:/cassandra.yaml",
 		logbackFile = "classpath:/logback-test.xml",
 		rackFile = "classpath:/rack.properties",
-		workingDirectory = "target/cassandra", jvmOptions = {"-Dtest.property=property"},
+		workingDirectory = "target/cassandra", javaHome = "target/java", jvmOptions = {"-Dtest.property=property"},
 		topologyFile = "classpath:/topology.properties", startupTimeout = 0)
 public class LocalCassandraAnnotationTests {
 
@@ -59,6 +59,7 @@ public class LocalCassandraAnnotationTests {
 		assertThat(this.factory.getArtifactFactory()).isEqualTo(this.artifactFactory);
 		assertThat(this.factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
 		assertThat(this.factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
+		assertThat(this.factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
 		assertThat(this.factory.getStartupTimeout()).isEqualTo(Duration.ofMillis(0));
 		assertThat(this.factory.getLogbackFile()).isEqualTo(ClassLoader.getSystemResource("logback-test.xml"));
 		assertThat(this.factory.getTopologyFile()).isEqualTo(ClassLoader.getSystemResource("topology.properties"));

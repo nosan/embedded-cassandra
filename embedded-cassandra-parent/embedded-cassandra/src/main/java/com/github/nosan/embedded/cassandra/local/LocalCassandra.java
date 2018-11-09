@@ -82,15 +82,20 @@ class LocalCassandra implements Cassandra {
 	 * @param rackFile URL to {@code cassandra-rackdc.properties}
 	 * @param topologyFile URL to {@code cassandra-topology.properties}
 	 * @param jvmOptions additional {@code JVM} options
+	 * @param javaHome java home directory
 	 */
 	LocalCassandra(@Nonnull Version version, @Nonnull ArtifactFactory artifactFactory,
 			@Nonnull Path workingDirectory, @Nonnull Duration startupTimeout, @Nullable URL configurationFile,
 			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
-			@Nonnull List<String> jvmOptions) {
-		this.artifactFactory = Objects.requireNonNull(artifactFactory, "Artifact Factory must not be null");
-		this.version = Objects.requireNonNull(version, "Version must not be null");
-		this.directory = new BaseDirectory(Objects.requireNonNull(workingDirectory,
-				"Working Directory must not be null"));
+			@Nonnull List<String> jvmOptions, @Nullable Path javaHome) {
+		Objects.requireNonNull(artifactFactory, "Artifact Factory must not be null");
+		Objects.requireNonNull(version, "Version must not be null");
+		Objects.requireNonNull(startupTimeout, "Startup timeout must not be null");
+		Objects.requireNonNull(jvmOptions, "JVM Options must not be null");
+		Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
+		this.artifactFactory = artifactFactory;
+		this.version = version;
+		this.directory = new BaseDirectory(workingDirectory);
 		List<DirectoryInitializer> initializers = new ArrayList<>();
 		initializers.add(new LogbackFileInitializer(logbackFile));
 		initializers.add(new ConfigurationFileInitializer(configurationFile));
@@ -98,9 +103,7 @@ class LocalCassandra implements Cassandra {
 		initializers.add(new TopologyFileInitializer(topologyFile));
 		initializers.add(new PortReplacerInitializer());
 		this.initializers = Collections.unmodifiableList(initializers);
-		this.localProcess = new LocalProcess(this.directory,
-				Objects.requireNonNull(startupTimeout, "Startup timeout must not be null"),
-				Objects.requireNonNull(jvmOptions, "JVM Options must not be null"), this.version);
+		this.localProcess = new LocalProcess(this.directory, startupTimeout, jvmOptions, version, javaHome);
 		try {
 			Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "Cassandra Shutdown Hook"));
 		}
