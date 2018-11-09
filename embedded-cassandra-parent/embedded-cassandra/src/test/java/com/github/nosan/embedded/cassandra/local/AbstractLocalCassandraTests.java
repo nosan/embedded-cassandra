@@ -39,7 +39,6 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.CauseMatcher;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
-import com.github.nosan.embedded.cassandra.util.OS;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,10 +72,6 @@ public abstract class AbstractLocalCassandraTests {
 
 	@Test
 	public void shouldOverrideJavaHome() {
-		if (!OS.isWindows()) {
-			this.throwable.expectCause(new CauseMatcher(IOException.class,
-					"Unable to find java executable"));
-		}
 		this.throwable.expect(CassandraException.class);
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
 		new CassandraRunner(this.factory).run(new NotReachable());
