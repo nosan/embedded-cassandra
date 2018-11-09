@@ -157,7 +157,7 @@ class RunProcess {
 		return start(processBuilder, outputs);
 	}
 
-	private static Process start(ProcessBuilder builder, @Nullable Output[] outputs) throws IOException {
+	private static Process start(ProcessBuilder builder, Output[] outputs) throws IOException {
 		final class Handler {
 			@Nullable
 			private Process process;
