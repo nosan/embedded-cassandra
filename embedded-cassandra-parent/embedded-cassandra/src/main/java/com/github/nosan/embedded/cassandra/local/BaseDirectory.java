@@ -21,8 +21,11 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -46,6 +49,17 @@ class BaseDirectory implements Directory {
 
 	private static final Logger log = LoggerFactory.getLogger(Directory.class);
 
+	private static final Set<String> SKIP_CANDIDATES;
+
+	static {
+		Set<String> candidates = new LinkedHashSet<>();
+		candidates.add("doc");
+		candidates.add("tools");
+		candidates.add("pylib");
+		candidates.add("javadoc");
+		SKIP_CANDIDATES = Collections.unmodifiableSet(candidates);
+	}
+
 	@Nonnull
 	private final Path rootDirectory;
 
@@ -66,13 +80,14 @@ class BaseDirectory implements Directory {
 	public void initialize(@Nonnull Artifact artifact) throws Exception {
 		Path archive = artifact.get();
 		Path rootDirectory = this.rootDirectory;
-		log.debug("Initialize ({})", rootDirectory);
+		log.debug("Initialize working directory ({})", rootDirectory);
 		try {
 			log.info("Extract ({}) into ({}). It takes a while...", archive, rootDirectory);
 			ArchiveUtils.extract(archive, rootDirectory, path -> {
-				for (int i = path.getNameCount() - 1; i >= rootDirectory.getNameCount(); i--) {
-					String name = String.valueOf(path.getName(i));
-					if ((name.equalsIgnoreCase("doc") || name.equalsIgnoreCase("javadoc"))) {
+				Path sub = path.subpath(rootDirectory.getNameCount(), path.getNameCount());
+				for (int i = 0; i < sub.getNameCount(); i++) {
+					String name = String.valueOf(sub.getName(i));
+					if (SKIP_CANDIDATES.contains(name)) {
 						return false;
 					}
 				}
@@ -89,7 +104,7 @@ class BaseDirectory implements Directory {
 	@Override
 	public void destroy() throws Exception {
 		if (FileUtils.isTemporary(this.rootDirectory)) {
-			log.debug("Delete ({})", this.rootDirectory);
+			log.debug("Delete recursively working directory ({})", this.rootDirectory);
 			this.directory = null;
 			FileUtils.delete(this.rootDirectory);
 		}
@@ -117,7 +132,7 @@ class BaseDirectory implements Directory {
 	}
 
 	private static Path getDirectory(Path rootDirectory) throws IOException {
-		List<Path> candidates = Files.find(rootDirectory, Integer.MAX_VALUE, BaseDirectory::isMatch)
+		List<Path> candidates = Files.find(rootDirectory, 5, BaseDirectory::isMatch)
 				.map(Path::getParent)
 				.filter(Objects::nonNull)
 				.map(Path::getParent)
@@ -145,6 +160,5 @@ class BaseDirectory implements Directory {
 		return String.valueOf(parent.getFileName()).equals("bin") &&
 				String.valueOf(candidate.getFileName()).equals("cassandra");
 	}
-
 
 }
