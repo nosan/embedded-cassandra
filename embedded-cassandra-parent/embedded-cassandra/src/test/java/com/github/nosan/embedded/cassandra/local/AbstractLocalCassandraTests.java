@@ -159,7 +159,7 @@ public abstract class AbstractLocalCassandraTests {
 
 
 	private Consumer<Cassandra> assertDeleteKeyspace() {
-		return new CqlAssert(new StaticCqlScript("DROP KEYSPACE test"));
+		return new CqlAssert("DROP KEYSPACE test");
 	}
 
 	private Consumer<Cassandra> assertCreateKeyspace() {
@@ -232,7 +232,7 @@ public abstract class AbstractLocalCassandraTests {
 
 		private final int port;
 
-		private PortAssert(int port) {
+		PortAssert(int port) {
 			this.port = port;
 		}
 
