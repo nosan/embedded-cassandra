@@ -24,7 +24,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
@@ -37,16 +36,11 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
-import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.cql.CqlScripts;
-import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.CauseMatcher;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
-import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -158,23 +152,20 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 
-	private Consumer<Cassandra> assertDeleteKeyspace() {
+	private static Consumer<Cassandra> assertDeleteKeyspace() {
 		return new CqlAssert("DROP KEYSPACE test");
 	}
 
-	private Consumer<Cassandra> assertCreateKeyspace() {
-		return assertScript(new ClassPathCqlScript("../cql/keyspace.cql", getClass()));
+	private static Consumer<Cassandra> assertCreateKeyspace() {
+		return new CqlAssert("CREATE KEYSPACE test" +
+				" WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
 	}
 
-	private Consumer<Cassandra> assertScript(CqlScript... scripts) {
-		return new CqlAssert(scripts);
-	}
-
-	private Consumer<Cassandra> assertPort(Function<Settings, Integer> mapper) {
+	private static Consumer<Cassandra> assertPort(Function<Settings, Integer> mapper) {
 		return cassandra -> assertPort(mapper.apply(cassandra.getSettings()));
 	}
 
-	private Consumer<Cassandra> assertPort(int... port) {
+	private static Consumer<Cassandra> assertPort(int... port) {
 		Consumer<Cassandra> assertPort = new PortAssert(port[0]);
 		for (int i = 1; i < port.length; i++) {
 			assertPort = assertPort.andThen(new PortAssert(port[i]));
@@ -189,19 +180,20 @@ public abstract class AbstractLocalCassandraTests {
 	private static final class CqlAssert implements Consumer<Cassandra> {
 
 		@Nonnull
-		private final CqlScript script;
+		private final String statement;
 
-		CqlAssert(@Nullable CqlScript... scripts) {
-			this.script = new CqlScripts(scripts);
-		}
 
-		CqlAssert(@Nullable String statement) {
-			this(StringUtils.hasText(statement) ? new CqlScript[]{new StaticCqlScript(statement)} : new CqlScript[0]);
+		CqlAssert(@Nonnull String statement) {
+			this.statement = Objects.requireNonNull(statement);
 		}
 
 		@Override
 		public void accept(@Nonnull Cassandra cassandra) {
-			executeScript(cassandra, this.script);
+			try (Cluster cluster = cluster(cassandra)) {
+				Session session = cluster.connect();
+				assertThat(session.execute(this.statement).wasApplied())
+						.describedAs("Statement (%s) is not applied", this.statement).isTrue();
+			}
 		}
 
 		private static Cluster cluster(Cassandra cassandra) {
@@ -210,19 +202,6 @@ public abstract class AbstractLocalCassandraTests {
 					.addContactPoint(Objects.requireNonNull(settings.getAddress()))
 					.build();
 		}
-
-		private static void executeScript(Cassandra cassandra, CqlScript... cqlScript) {
-			try (Cluster cluster = cluster(cassandra)) {
-				Session session = cluster.connect();
-				CqlScripts cqlScripts = new CqlScripts(cqlScript);
-				for (String statement : cqlScripts.getStatements()) {
-					assertThat(session.execute(statement).wasApplied())
-							.describedAs("Statement (%s) is not applied", statement).isTrue();
-				}
-
-			}
-		}
-
 	}
 
 	/**

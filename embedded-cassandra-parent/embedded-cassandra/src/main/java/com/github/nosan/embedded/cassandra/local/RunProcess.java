@@ -142,16 +142,28 @@ class RunProcess {
 			processBuilder.environment().putAll(this.environment);
 		}
 		processBuilder.redirectErrorStream(true);
-		log.debug("Execute ({}) with environment ({}) in a ({}) working directory", this.arguments, this.environment,
-				this.workingDirectory);
+		logCommand();
 		Process process = processBuilder.start();
 		if (outputs != null && outputs.length > 0) {
 			String name = Thread.currentThread().getName();
-			Thread thread = new Thread(new ProcessReader(process, outputs), String.format("%s:Cassandra", name));
+			Thread thread = new Thread(new ProcessReader(process, outputs), String.format("%s:cassandra", name));
 			thread.setDaemon(true);
 			thread.start();
 		}
 		return process;
+	}
+
+	private void logCommand() {
+		if (log.isDebugEnabled()) {
+			StringBuilder message = new StringBuilder(String.format("Execute %s", this.arguments));
+			if (!this.environment.isEmpty()) {
+				message.append(String.format(" with environment %s", this.environment));
+			}
+			if (this.workingDirectory != null) {
+				message.append(String.format(" and directory (%s)", this.workingDirectory));
+			}
+			log.debug(message.toString());
+		}
 	}
 
 
