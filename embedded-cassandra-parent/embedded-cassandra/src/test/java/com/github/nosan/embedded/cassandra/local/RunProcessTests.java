@@ -36,8 +36,6 @@ public class RunProcessTests {
 		OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
 		int exit = new RunProcess(Arrays.asList("echo", "Hello World"))
 				.runAndWait(bufferOutput);
-		//wait for process output
-		Thread.sleep(1000);
 		assertThat(exit).isEqualTo(0);
 		assertThat(bufferOutput.toString()).contains("Hello World");
 	}

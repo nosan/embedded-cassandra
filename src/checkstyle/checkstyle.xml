@@ -95,6 +95,7 @@
         <!-- Javadoc Comments -->
         <module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck">
             <property name="scope" value="package"/>
+            <property name="excludeScope" value="anoninner"/>
             <property name="authorFormat" value=".+\s.+"/>
         </module>
         <module name="com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck">
