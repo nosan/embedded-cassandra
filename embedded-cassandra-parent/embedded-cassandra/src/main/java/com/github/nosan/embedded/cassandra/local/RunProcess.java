@@ -99,8 +99,9 @@ class RunProcess {
 			@Nonnull List<?> arguments) {
 		Objects.requireNonNull(arguments, "Arguments must not be null");
 		this.workingDirectory = workingDirectory;
-		this.arguments = new ArrayList<>(arguments);
-		this.environment = (environment != null) ? new LinkedHashMap<>(environment) : Collections.emptyMap();
+		this.arguments = Collections.unmodifiableList(new ArrayList<>(arguments));
+		this.environment = Collections.unmodifiableMap((environment != null) ?
+				new LinkedHashMap<>(environment) : Collections.emptyMap());
 	}
 
 
