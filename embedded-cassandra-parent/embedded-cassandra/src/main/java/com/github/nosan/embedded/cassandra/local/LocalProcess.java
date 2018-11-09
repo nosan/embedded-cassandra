@@ -288,7 +288,7 @@ class LocalProcess {
 			Collection<String> lines = outputCapture.lines();
 			builder.append(String.format(" Last (%s) lines:", lines.size()));
 			for (String line : lines) {
-				builder.append(String.format("%n\t%s", line));
+				builder.append(String.format("%n%s", line));
 			}
 		}
 		throw new IOException(builder.toString());
