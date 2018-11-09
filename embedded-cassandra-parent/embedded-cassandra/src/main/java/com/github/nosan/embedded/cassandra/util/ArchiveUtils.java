@@ -74,27 +74,27 @@ public abstract class ArchiveUtils {
 	 * Extracts the source archive file into the given destination directory.
 	 * The destination is expected to be a writable directory.
 	 *
-	 * @param source the archive file to extract
+	 * @param archive the archive file to extract
 	 * @param destination the directory to which to extract the files
 	 * @param include the filter to check whether {@code Path} should be included or not
 	 * @throws IOException in the case of I/O errors
 	 */
-	public static void extract(@Nonnull Path source, @Nonnull Path destination,
+	public static void extract(@Nonnull Path archive, @Nonnull Path destination,
 			@Nullable Predicate<? super Path> include)
 			throws IOException {
-		Objects.requireNonNull(source, "Source must not be null");
+		Objects.requireNonNull(archive, "Archive must not be null");
 		Objects.requireNonNull(destination, "Destination must not be null");
 
-		if (Files.isDirectory(source)) {
+		if (Files.isDirectory(archive)) {
 			throw new IllegalArgumentException(String.format("Can not extract (%s) Source is a directory.",
-					source));
+					archive));
 		}
-		if (!Files.exists(source)) {
-			throw new IllegalArgumentException(String.format("Archive (%s) is not found", source));
+		if (!Files.exists(archive)) {
+			throw new IllegalArgumentException(String.format("Archive (%s) is not found", archive));
 		}
-		if (!Files.isReadable(source)) {
+		if (!Files.isReadable(archive)) {
 			throw new IllegalArgumentException(
-					String.format("Can not extract (%s). Can not read from  source.", source));
+					String.format("Can not extract (%s). Can not read from  source.", archive));
 		}
 		if (!Files.exists(destination)) {
 			Files.createDirectories(destination);
@@ -107,8 +107,8 @@ public abstract class ArchiveUtils {
 			throw new IllegalArgumentException(String.format("(%s) is not writable", destination));
 		}
 
-		ArchiveFactory archiveFactory = getArchiveFactory(source);
-		try (ArchiveInputStream stream = archiveFactory.create(source)) {
+		ArchiveFactory archiveFactory = getArchiveFactory(archive);
+		try (ArchiveInputStream stream = archiveFactory.create(archive)) {
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
 				Path path = destination.resolve(entry.getName());
@@ -130,7 +130,7 @@ public abstract class ArchiveUtils {
 			}
 		}
 		catch (Exception ex) {
-			throw new IOException(String.format("Could not read an archive (%s)", source), ex);
+			throw new IOException(String.format("Could not read an archive (%s)", archive), ex);
 		}
 	}
 
