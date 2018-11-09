@@ -157,7 +157,7 @@ class RunProcess {
 		return start(processBuilder, outputs);
 	}
 
-	private static Process start(ProcessBuilder processBuilder, @Nullable Output[] outputs) throws IOException {
+	private static Process start(ProcessBuilder builder, @Nullable Output[] outputs) throws IOException {
 		final class Handler {
 			@Nullable
 			private Process process;
@@ -169,7 +169,7 @@ class RunProcess {
 		CountDownLatch latch = new CountDownLatch(1);
 		new Thread(() -> {
 			try {
-				handler.process = processBuilder.start();
+				handler.process = builder.start();
 			}
 			catch (IOException ex) {
 				handler.exception = ex;
@@ -182,18 +182,21 @@ class RunProcess {
 				read(process, outputs);
 			}
 		}, String.format("%s:cassandra", Thread.currentThread().getName())).start();
+
 		try {
 			latch.await();
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 		}
+
 		if (handler.process != null) {
 			return handler.process;
 		}
 		if (handler.exception != null) {
 			throw handler.exception;
 		}
+
 		throw new IllegalStateException("Both 'Handler.process' and 'Handler.exception' fields are null");
 	}
 
@@ -211,7 +214,7 @@ class RunProcess {
 			}
 		}
 		catch (IOException ex) {
-			log.error(String.format("Could not create a stream from (%s)", process), ex);
+			log.error(String.format("Could not create a stream for (%s)", process), ex);
 		}
 	}
 
