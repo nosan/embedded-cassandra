@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.nio.file.Path;
-import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
@@ -29,15 +28,16 @@ import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-interface Directory extends Supplier<Path> {
+interface Directory {
 
 	/**
 	 * Creates a directory based on the given artifact.
 	 *
 	 * @param artifact the artifact to initialize a directory
+	 * @return initialized directory
 	 * @throws Exception in the case of any errors
 	 */
-	void initialize(@Nonnull Artifact artifact) throws Exception;
+	Path initialize(@Nonnull Artifact artifact) throws Exception;
 
 	/**
 	 * Disposes the directory.
@@ -46,14 +46,5 @@ interface Directory extends Supplier<Path> {
 	 */
 	void destroy() throws Exception;
 
-	/**
-	 * Returns the directory path.
-	 *
-	 * @return the path
-	 * @throws java.io.UncheckedIOException if directory has not been created.
-	 */
-	@Override
-	@Nonnull
-	Path get();
 
 }

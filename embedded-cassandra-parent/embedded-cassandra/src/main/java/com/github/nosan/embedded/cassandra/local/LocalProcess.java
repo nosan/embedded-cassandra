@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,9 +58,6 @@ class LocalProcess {
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
 	@Nonnull
-	private final Supplier<Path> directory;
-
-	@Nonnull
 	private final Duration startupTimeout;
 
 	@Nonnull
@@ -79,23 +75,18 @@ class LocalProcess {
 	@Nullable
 	private Process process;
 
-	@Nullable
-	private Settings settings;
-
 	private long pid = -1;
 
 	/**
 	 * Creates a {@link LocalProcess}.
 	 *
-	 * @param directory {@code Supplier} of an initialized working directory
 	 * @param startupTimeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param version a version
 	 * @param javaHome java home directory
 	 */
-	LocalProcess(@Nonnull Supplier<Path> directory, @Nonnull Duration startupTimeout,
-			@Nonnull List<String> jvmOptions, @Nonnull Version version, @Nullable Path javaHome) {
-		this.directory = directory;
+	LocalProcess(@Nonnull Duration startupTimeout, @Nonnull List<String> jvmOptions, @Nonnull Version version,
+			@Nullable Path javaHome) {
 		this.startupTimeout = startupTimeout;
 		this.version = version;
 		this.javaHome = javaHome;
@@ -105,11 +96,13 @@ class LocalProcess {
 	/**
 	 * Starts the Cassandra.
 	 *
+	 * @param directory initialized cassandra directory
+	 * @return the settings
 	 * @throws Exception if the Cassandra cannot be started
+	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	void start() throws Exception {
-		Path directory = this.directory.get();
-		Settings settings = getSettings();
+	@Nonnull
+	Settings start(@Nonnull Path directory) throws InterruptedException, Exception {
 		Path executable = OS.isWindows() ? directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
 		Path pidFile = directory.resolve(String.format("bin/%s.pid", UUID.randomUUID()));
 		Path logPath = directory.resolve("logs");
@@ -157,11 +150,11 @@ class LocalProcess {
 
 		Process process = new RunProcess(directory, environment, arguments)
 				.run(outputCapture, log::info);
-
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
 		log.debug("Cassandra Process ({}) has been started", this.pid);
 		Duration timeout = this.startupTimeout;
+		Settings settings = getSettings(directory);
 		if (timeout.toNanos() > 0) {
 			boolean result = WaitUtils.await(timeout, () -> {
 				if (!process.isAlive()) {
@@ -180,10 +173,11 @@ class LocalProcess {
 						(port == -1 || PortUtils.isPortBusy(settings.getAddress(), port));
 			});
 			if (!result) {
-				throwException(String.format("Cassandra has not be started. Storage port (%s) is not available." +
-						" Please see logs (%s) for more details.", logPath, settings.getStoragePort()), outputCapture);
+				throwException(String.format("Cassandra has not be started. Please see logs (%s) for more details.",
+						logPath), outputCapture);
 			}
 		}
+		return settings;
 	}
 
 
@@ -191,56 +185,40 @@ class LocalProcess {
 	 * Stops the Cassandra.
 	 *
 	 * @throws Exception if the Cassandra cannot be stopped
+	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	void stop() throws Exception {
+	void stop() throws InterruptedException, Exception {
 		try {
 			Process process = this.process;
 			if (process != null && process.isAlive()) {
-				try {
-					Path pidFile = this.pidFile;
-					long pid = this.pid;
-					log.debug("Stops Cassandra Process ({})", pid);
-					if (pidFile != null && Files.exists(pidFile)) {
-						stop(pidFile);
-					}
-					if (pid > 0) {
-						stop(pid);
-					}
-					boolean waitFor = process.destroyForcibly().waitFor(15, TimeUnit.SECONDS);
-					if (!waitFor) {
-						throw new IOException("Casandra Process has not been stopped correctly");
-					}
+				Path pidFile = this.pidFile;
+				long pid = this.pid;
+				log.debug("Stops Cassandra Process ({})", pid);
+				if (pidFile != null && Files.exists(pidFile)) {
+					stop(pidFile);
 				}
-				catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
+				if (pid > 0) {
+					stop(pid);
+				}
+				boolean waitFor = process.destroyForcibly().waitFor(15, TimeUnit.SECONDS);
+				if (!waitFor) {
+					throw new IOException("Casandra Process has not been stopped correctly");
 				}
 			}
 		}
 		finally {
 			this.pid = -1;
 			this.pidFile = null;
-			this.settings = null;
 			this.process = null;
 		}
 	}
 
-
-	/**
-	 * Returns the settings this Cassandra is running on.
-	 *
-	 * @return the settings
-	 * @throws Exception if could not get a settings
-	 */
-	@Nonnull
-	Settings getSettings() throws Exception {
-		if (this.settings == null) {
-			Path target = this.directory.get().resolve("conf/cassandra.yaml");
-			try (InputStream is = Files.newInputStream(target)) {
-				Yaml yaml = new Yaml();
-				this.settings = new MapSettings(yaml.loadAs(is, Map.class));
-			}
+	private static Settings getSettings(@Nonnull Path directory) throws IOException {
+		Path target = directory.resolve("conf/cassandra.yaml");
+		try (InputStream is = Files.newInputStream(target)) {
+			Yaml yaml = new Yaml();
+			return new MapSettings(yaml.loadAs(is, Map.class));
 		}
-		return this.settings;
 	}
 
 
@@ -252,7 +230,7 @@ class LocalProcess {
 	}
 
 
-	private static void stop(Path pidFile) throws IOException {
+	private static void stop(Path pidFile) throws IOException, InterruptedException {
 		if (OS.isWindows()) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("powershell");
@@ -271,7 +249,7 @@ class LocalProcess {
 	}
 
 
-	private static void stop(long pid) throws IOException {
+	private static void stop(long pid) throws IOException, InterruptedException {
 		if (OS.isWindows()) {
 			new RunProcess(Arrays.asList("TASKKILL", "/F", "/T", "/pid", pid)).runAndWait(log::info);
 		}
@@ -281,8 +259,7 @@ class LocalProcess {
 	}
 
 
-	private static void throwException(String message, OutputCapture outputCapture)
-			throws IOException {
+	private static void throwException(String message, OutputCapture outputCapture) throws IOException {
 		StringBuilder builder = new StringBuilder(message);
 		if (!outputCapture.isEmpty()) {
 			Collection<String> lines = outputCapture.lines();

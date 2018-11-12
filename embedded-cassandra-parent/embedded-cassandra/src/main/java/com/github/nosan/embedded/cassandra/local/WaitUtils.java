@@ -40,8 +40,10 @@ abstract class WaitUtils {
 	 * @param timeout time to wait
 	 * @return {@code true} if action has returned true, otherwise {@code false}
 	 * @throws Exception if callable throw an exception
+	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	static boolean await(@Nonnull Duration timeout, @Nonnull Callable<Boolean> action) throws Exception {
+	static boolean await(@Nonnull Duration timeout, @Nonnull Callable<Boolean> action)
+			throws InterruptedException, Exception {
 		Objects.requireNonNull(timeout, "Timeout must not be null");
 		Objects.requireNonNull(action, "Action must not be null");
 		long start = System.nanoTime();
@@ -52,12 +54,7 @@ abstract class WaitUtils {
 				return true;
 			}
 			if (rem > 0) {
-				try {
-					Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
-				}
-				catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
-				}
+				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
 			}
 			rem = timeout.toNanos() - (System.nanoTime() - start);
 		}

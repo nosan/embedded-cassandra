@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.SynchronousQueue;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -114,17 +114,11 @@ class RunProcess {
 	 * @return the exit value of the subprocess represented by {@code Process} object. By convention, the value
 	 * {@code 0} indicates normal termination.
 	 * @throws IOException if an I/O error occurs
+	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	int runAndWait(@Nullable Output... outputs) throws IOException {
-		try {
-			return run(outputs).waitFor();
-		}
-		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-			return -1;
-		}
+	int runAndWait(@Nullable Output... outputs) throws InterruptedException, IOException {
+		return run(outputs).waitFor();
 	}
-
 
 	/**
 	 * Starts a new process using the arguments and env variables and delegates output to the {@link Output}.
@@ -132,8 +126,9 @@ class RunProcess {
 	 * @param outputs output consumers.
 	 * @return a new process object for managing the subprocess
 	 * @throws IOException if an I/O error occurs
+	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	Process run(@Nullable Output... outputs) throws IOException {
+	Process run(@Nullable Output... outputs) throws InterruptedException, IOException {
 		List<String> command = this.arguments.stream().map(String::valueOf).collect(Collectors.toList());
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
 		Path workingDirectory = this.workingDirectory;
@@ -158,47 +153,45 @@ class RunProcess {
 		return start(processBuilder, outputs);
 	}
 
-	private static Process start(ProcessBuilder builder, Output[] outputs) throws IOException {
-		final class Handler {
-			@Nullable
+	private static Process start(ProcessBuilder builder, Output[] outputs) throws InterruptedException, IOException {
+
+		final class Value {
+
 			private Process process;
 
-			@Nullable
-			private IOException exception;
+			private Throwable throwable;
+
+			private Value(Process process) {
+				this.process = process;
+			}
+
+			private Value(Throwable throwable) {
+				this.throwable = throwable;
+			}
 		}
-		Handler handler = new Handler();
-		CountDownLatch latch = new CountDownLatch(1);
+		SynchronousQueue<Value> sync = new SynchronousQueue<>();
 		new Thread(() -> {
+			Process process = null;
 			try {
-				handler.process = builder.start();
+				process = builder.start();
+				sync.offer(new Value(process));
 			}
-			catch (IOException ex) {
-				handler.exception = ex;
+			catch (Throwable ex) {
+				sync.offer(new Value(ex));
 			}
-			finally {
-				latch.countDown();
-			}
-			Process process = handler.process;
 			if (process != null && outputs != null && outputs.length > 0) {
 				read(process, outputs);
 			}
-		}, String.format("%s:cassandra", Thread.currentThread().getName())).start();
-
-		try {
-			latch.await();
+		}, String.format("cassandra:%s", Thread.currentThread().getName())).start();
+		Value value = sync.take();
+		if (value.process != null) {
+			return value.process;
 		}
-		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
+		Throwable throwable = value.throwable;
+		if (throwable instanceof IOException) {
+			throw (IOException) throwable;
 		}
-
-		if (handler.process != null) {
-			return handler.process;
-		}
-		if (handler.exception != null) {
-			throw handler.exception;
-		}
-
-		throw new IllegalStateException("Both 'Handler.process' and 'Handler.exception' fields are null");
+		throw new RuntimeException("Process could not start correctly", throwable);
 	}
 
 

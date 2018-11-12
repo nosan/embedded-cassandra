@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -29,7 +28,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +42,7 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-class BaseDirectory implements Directory {
+class WorkingDirectory implements Directory {
 
 
 	private static final Logger log = LoggerFactory.getLogger(Directory.class);
@@ -63,21 +61,18 @@ class BaseDirectory implements Directory {
 	@Nonnull
 	private final Path rootDirectory;
 
-	@Nullable
-	private Path directory;
-
 
 	/**
-	 * Creates a {@link BaseDirectory}.
+	 * Creates a {@link WorkingDirectory}.
 	 *
 	 * @param directory the working directory
 	 */
-	BaseDirectory(@Nonnull Path directory) {
+	WorkingDirectory(@Nonnull Path directory) {
 		this.rootDirectory = directory;
 	}
 
 	@Override
-	public void initialize(@Nonnull Artifact artifact) throws Exception {
+	public Path initialize(@Nonnull Artifact artifact) throws Exception {
 		Path archive = artifact.get();
 		Path rootDirectory = this.rootDirectory;
 		log.debug("Initialize working directory ({})", rootDirectory);
@@ -98,6 +93,7 @@ class BaseDirectory implements Directory {
 			throw new IOException(
 					String.format("Archive : (%s) could not be extracted into (%s)", archive, rootDirectory), ex);
 		}
+		return getDirectory(this.rootDirectory);
 	}
 
 
@@ -105,25 +101,10 @@ class BaseDirectory implements Directory {
 	public void destroy() throws Exception {
 		if (FileUtils.isTemporary(this.rootDirectory)) {
 			log.debug("Delete recursively working directory ({})", this.rootDirectory);
-			this.directory = null;
 			FileUtils.delete(this.rootDirectory);
 		}
 	}
 
-	@Nonnull
-	@Override
-	public Path get() throws UncheckedIOException {
-		try {
-			if (this.directory == null) {
-				this.directory = getDirectory(this.rootDirectory);
-			}
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
-		return Objects.requireNonNull(this.directory, "Directory is not initialized");
-
-	}
 
 	@Override
 	@Nonnull
@@ -132,7 +113,7 @@ class BaseDirectory implements Directory {
 	}
 
 	private static Path getDirectory(Path rootDirectory) throws IOException {
-		List<Path> candidates = Files.find(rootDirectory, 5, BaseDirectory::isMatch)
+		List<Path> candidates = Files.find(rootDirectory, 5, WorkingDirectory::isMatch)
 				.map(Path::getParent)
 				.filter(Objects::nonNull)
 				.map(Path::getParent)

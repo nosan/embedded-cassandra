@@ -95,7 +95,7 @@ class LocalCassandra implements Cassandra {
 		Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
 		this.artifactFactory = artifactFactory;
 		this.version = version;
-		this.directory = new BaseDirectory(workingDirectory);
+		this.directory = new WorkingDirectory(workingDirectory);
 		List<DirectoryInitializer> initializers = new ArrayList<>();
 		initializers.add(new LogbackFileInitializer(logbackFile));
 		initializers.add(new ConfigurationFileInitializer(configurationFile));
@@ -103,7 +103,7 @@ class LocalCassandra implements Cassandra {
 		initializers.add(new TopologyFileInitializer(topologyFile));
 		initializers.add(new PortReplacerInitializer());
 		this.initializers = Collections.unmodifiableList(initializers);
-		this.localProcess = new LocalProcess(this.directory, startupTimeout, jvmOptions, version, javaHome);
+		this.localProcess = new LocalProcess(startupTimeout, jvmOptions, version, javaHome);
 		try {
 			Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "Cassandra Shutdown Hook"));
 		}
@@ -122,9 +122,8 @@ class LocalCassandra implements Cassandra {
 						if (!this.initialized) {
 							long start = System.currentTimeMillis();
 							log.info("Starts Apache Cassandra");
-							initializeWorkingDirectory();
-							this.localProcess.start();
-							this.settings = this.localProcess.getSettings();
+							Path directory = initialize();
+							this.settings = this.localProcess.start(directory);
 							long end = System.currentTimeMillis();
 							log.info("Apache Cassandra has been started ({} ms) ", end - start);
 						}
@@ -132,6 +131,9 @@ class LocalCassandra implements Cassandra {
 					finally {
 						this.initialized = true;
 					}
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
 				}
 				catch (Throwable ex) {
 					try {
@@ -156,6 +158,9 @@ class LocalCassandra implements Cassandra {
 					log.info("Stops Apache Cassandra");
 					try {
 						this.localProcess.stop();
+					}
+					catch (InterruptedException ex) {
+						Thread.currentThread().interrupt();
 					}
 					catch (Throwable ex) {
 						throw new CassandraException("Unable to stop Cassandra", ex);
@@ -187,14 +192,14 @@ class LocalCassandra implements Cassandra {
 		return settings;
 	}
 
-	private void initializeWorkingDirectory() throws Exception {
+	private Path initialize() throws Exception {
 		Artifact artifact = this.artifactFactory.create(this.version);
 		Objects.requireNonNull(artifact, "Artifact must not be null");
-		this.directory.initialize(artifact);
-		Path directory = this.directory.get();
+		Path directory = this.directory.initialize(artifact);
 		for (DirectoryInitializer initializer : this.initializers) {
 			initializer.initialize(directory, this.version);
 		}
+		return directory;
 	}
 
 

@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -31,11 +32,11 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link BaseDirectory}.
+ * Tests for {@link WorkingDirectory}.
  *
  * @author Dmytro Nosan
  */
-public class BaseDirectoryTests {
+public class WorkingDirectoryTests {
 
 
 	@Rule
@@ -44,15 +45,20 @@ public class BaseDirectoryTests {
 	@Rule
 	public final ExpectedException throwable = ExpectedException.none();
 
+	private Path rootDirectory;
+
+	@Before
+	public void setUp() throws Exception {
+		this.rootDirectory = this.temporaryFolder.newFolder().toPath();
+	}
 
 	@Test
 	public void shouldInitializeDirectoryArchiveRootFolder() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
-		Path workingDirectory = this.temporaryFolder.newFolder().toPath();
-		BaseDirectory baseDirectory = new BaseDirectory(workingDirectory);
 
-		baseDirectory.initialize(() -> archive);
-		Path directory = baseDirectory.get();
+		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
+
+		Path directory = workDir.initialize(() -> archive);
 
 		assertThat(directory).exists();
 		assertThat(directory.resolve("doc")).doesNotExist();
@@ -64,13 +70,11 @@ public class BaseDirectoryTests {
 	@Test
 	public void shouldInitializeDirectoryNoRootFolder() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
-		Path workingDirectory = this.temporaryFolder.newFolder().toPath();
 
 
-		BaseDirectory baseDirectory = new BaseDirectory(workingDirectory);
+		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
 
-		baseDirectory.initialize(() -> archive);
-		Path directory = baseDirectory.get();
+		Path directory = workDir.initialize(() -> archive);
 
 		assertThat(directory).exists();
 		assertThat(directory.resolve("doc")).doesNotExist();
@@ -85,40 +89,39 @@ public class BaseDirectoryTests {
 	public void directoryNotValidNoCassandraExecutable() throws Exception {
 		this.throwable.expectMessage("doesn't have a 'bin/cassandra' file");
 		this.throwable.expect(IllegalArgumentException.class);
-		Path workingDirectory = this.temporaryFolder.newFolder().toPath();
-		BaseDirectory baseDirectory = new BaseDirectory(workingDirectory);
-		baseDirectory.get();
+
+		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
+		Path path = Paths.get(getClass().getResource("/empty.zip").toURI());
+		workDir.initialize(() -> path);
 	}
 
 	@Test
 	public void severalDirectoriesCandidate() throws Exception {
 		this.throwable.expectMessage("Impossible to determine a base directory");
 		this.throwable.expect(IllegalStateException.class);
-		Path workingDirectory = this.temporaryFolder.newFolder().toPath();
+
 
 		Path root = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 		Path plain = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
-		ArchiveUtils.extract(root, workingDirectory, ignore -> true);
-		BaseDirectory baseDirectory = new BaseDirectory(workingDirectory);
+		ArchiveUtils.extract(root, this.rootDirectory, ignore -> true);
+		WorkingDirectory baseDirectory = new WorkingDirectory(this.rootDirectory);
 		baseDirectory.initialize(() -> plain);
-		baseDirectory.get();
 	}
 
 
 	@Test
 	public void shouldDestroyTemporaryDirectory() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
-		Path workingDirectory = this.temporaryFolder.newFolder().toPath();
-		BaseDirectory baseDirectory = new BaseDirectory(workingDirectory);
 
-		baseDirectory.initialize(() -> archive);
-		Path directory = baseDirectory.get();
+		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
+
+		Path directory = workDir.initialize(() -> archive);
 
 		assertThat(directory).exists();
-		assertThat(directory).hasParent(workingDirectory);
+		assertThat(directory).hasParent(this.rootDirectory);
 
-		baseDirectory.destroy();
-		assertThat(workingDirectory).doesNotExist();
+		workDir.destroy();
+		assertThat(this.rootDirectory).doesNotExist();
 		assertThat(directory).doesNotExist();
 
 
@@ -128,23 +131,22 @@ public class BaseDirectoryTests {
 	@Test
 	public void shouldNotDestroyDirectory() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
-		Path workingDirectory = FileUtils.getUserDirectory().resolve(String.format("target/%s", UUID.randomUUID()));
-		BaseDirectory baseDirectory = new BaseDirectory(workingDirectory);
+		this.rootDirectory = FileUtils.getUserDirectory().resolve(String.format("target/%s", UUID.randomUUID()));
+		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
 		try {
 
-			baseDirectory.initialize(() -> archive);
-			Path directory = baseDirectory.get();
+			Path directory = workDir.initialize(() -> archive);
 
 			assertThat(directory).exists();
-			assertThat(directory).hasParent(workingDirectory);
+			assertThat(directory).hasParent(this.rootDirectory);
 
-			baseDirectory.destroy();
+			workDir.destroy();
 			assertThat(directory).exists();
-			assertThat(workingDirectory).exists();
+			assertThat(this.rootDirectory).exists();
 
 		}
 		finally {
-			FileUtils.delete(workingDirectory);
+			FileUtils.delete(this.rootDirectory);
 		}
 
 
