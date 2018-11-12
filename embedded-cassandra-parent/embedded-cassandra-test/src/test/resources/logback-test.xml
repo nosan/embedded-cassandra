@@ -8,7 +8,10 @@
         </encoder>
     </appender>
 
-    <root level="DEBUG">
+    <logger name="com.github.nosan" level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
 
