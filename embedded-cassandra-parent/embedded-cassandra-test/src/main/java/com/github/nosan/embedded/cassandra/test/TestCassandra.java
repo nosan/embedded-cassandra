@@ -38,7 +38,7 @@ import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
 import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
 
 /**
- * Test {@link Cassandra } that allows the Cassandra to be {@link #start() started} and
+ * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and
  * {@link #stop() stopped}.
  * <p>
  * In addition to the basic functionality includes {@link #getCluster()} and {@link #getSession()} methods.
@@ -110,15 +110,10 @@ public class TestCassandra implements Cassandra {
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory,
 			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
+		addShutdownHook();
 		this.cassandra = (cassandraFactory != null) ? cassandraFactory.create() : new LocalCassandraFactory().create();
 		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
-		try {
-			Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "Test Cassandra Shutdown Hook"));
-		}
-		catch (Throwable ex) {
-			log.error(String.format("Shutdown hook is not registered for (%s)", getClass()), ex);
-		}
 	}
 
 
@@ -169,7 +164,7 @@ public class TestCassandra implements Cassandra {
 							}
 						}
 						catch (Throwable ex) {
-							log.error(ex.getMessage(), ex);
+							log.error("Cluster has not been closed", ex);
 						}
 						this.cassandra.stop();
 					}
@@ -191,7 +186,7 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Lazy initialize {@link Cluster}.
+	 * Lazy initialize a {@link Cluster}.
 	 *
 	 * @return a cluster
 	 */
@@ -209,7 +204,7 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Lazy initialize {@link Session} using {@link #getCluster() Cluster}.
+	 * Lazy initialize a {@link Session} using a {@link #getCluster() Cluster}.
 	 *
 	 * @return a session
 	 */
@@ -289,6 +284,16 @@ public class TestCassandra implements Cassandra {
 	@Nonnull
 	public ResultSet executeStatement(@Nonnull String statement, @Nullable Object... args) {
 		return CqlUtils.executeStatement(getSession(), statement, args);
+	}
+
+
+	private void addShutdownHook() {
+		try {
+			Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "Test Cassandra Shutdown Hook"));
+		}
+		catch (Throwable ex) {
+			log.error(String.format("Shutdown hook is not registered for (%s)", getClass()), ex);
+		}
 	}
 
 }

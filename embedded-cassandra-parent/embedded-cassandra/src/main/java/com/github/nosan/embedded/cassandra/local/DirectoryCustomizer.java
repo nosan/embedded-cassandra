@@ -21,29 +21,22 @@ import java.nio.file.Path;
 
 import javax.annotation.Nonnull;
 
+
 /**
- * Encapsulates information about a working directory.
+ * Customizer interface used to customize a {@code directory}.
  *
  * @author Dmytro Nosan
  * @since 1.0.9
  */
-interface Directory {
+@FunctionalInterface
+interface DirectoryCustomizer {
 
 	/**
-	 * Initialize a directory.
+	 * Customize a directory.
 	 *
-	 * @return initialized directory
+	 * @param directory the base directory
 	 * @throws IOException in the case of any IO errors
 	 */
-	@Nonnull
-	Path initialize() throws IOException;
-
-	/**
-	 * Destroy the directory.
-	 *
-	 * @throws IOException in the case of any IO errors
-	 */
-	void destroy() throws IOException;
-
+	void customize(@Nonnull Path directory) throws IOException;
 
 }

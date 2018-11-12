@@ -16,34 +16,27 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import javax.annotation.Nonnull;
 
+
 /**
- * Encapsulates information about a working directory.
+ * Factory that creates a {@link CassandraProcess}.
  *
  * @author Dmytro Nosan
+ * @see DefaultCassandraProcess
+ * @see DefaultCassandraProcessFactory
  * @since 1.0.9
  */
-interface Directory {
+interface CassandraProcessFactory {
 
 	/**
-	 * Initialize a directory.
+	 * Creates a new  configured {@link CassandraProcess}.
 	 *
-	 * @return initialized directory
-	 * @throws IOException in the case of any IO errors
+	 * @param directory a configured base directory
+	 * @return {@code process} to use
 	 */
 	@Nonnull
-	Path initialize() throws IOException;
-
-	/**
-	 * Destroy the directory.
-	 *
-	 * @throws IOException in the case of any IO errors
-	 */
-	void destroy() throws IOException;
-
-
+	CassandraProcess create(@Nonnull Path directory);
 }

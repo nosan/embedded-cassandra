@@ -55,7 +55,7 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 
 
 	/**
-	 * Creates {@link LocalCassandraFactoryBean}.
+	 * Creates a {@link LocalCassandraFactoryBean}.
 	 *
 	 * @param testClass test class
 	 * @param annotation annotation

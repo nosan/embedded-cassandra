@@ -24,26 +24,24 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.github.nosan.embedded.cassandra.Version;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link TopologyFileInitializer}.
+ * Tests for {@link TopologyFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
-public class TopologyFileInitializerTests {
+public class TopologyFileCustomizerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
-	public void initialize() throws Exception {
+	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		TopologyFileInitializer initializer =
-				new TopologyFileInitializer(getClass().getResource("/cassandra-topology.properties"));
-		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
+		TopologyFileCustomizer customizer =
+				new TopologyFileCustomizer(getClass().getResource("/cassandra-topology.properties"));
+		customizer.customize(directory.getParent());
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-topology.properties")) {
 			assertThat(directory.resolve("cassandra-topology.properties")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
@@ -52,10 +50,10 @@ public class TopologyFileInitializerTests {
 	}
 
 	@Test
-	public void notInitialize() throws Exception {
+	public void notCustomize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		TopologyFileInitializer initializer = new TopologyFileInitializer(null);
-		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
+		TopologyFileCustomizer customizer = new TopologyFileCustomizer(null);
+		customizer.customize(directory.getParent());
 		assertThat(directory.resolve("cassandra-topology.properties")).doesNotExist();
 
 	}

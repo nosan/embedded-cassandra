@@ -24,39 +24,42 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.github.nosan.embedded.cassandra.Version;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link RackFileInitializer}.
+ * Tests for {@link LogbackFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
-public class RackFileInitializerTests {
+public class LogbackFileCustomizerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
-	public void initialize() throws Exception {
+	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		RackFileInitializer initializer =
-				new RackFileInitializer(getClass().getResource("/cassandra-rackdc.properties"));
-		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
-		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-rackdc.properties")) {
-			assertThat(directory.resolve("cassandra-rackdc.properties")).hasBinaryContent(
+		LogbackFileCustomizer customizer =
+				new LogbackFileCustomizer(getClass().getResource("/logback-test.xml"));
+		customizer.customize(directory.getParent());
+		try (InputStream inputStream = getClass().getResourceAsStream("/logback-test.xml")) {
+			assertThat(directory.resolve("logback.xml")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
 		}
 
 	}
 
 	@Test
-	public void notInitialize() throws Exception {
+	public void defaultCustomize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		RackFileInitializer initializer = new RackFileInitializer(null);
-		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
-		assertThat(directory.resolve("cassandra-rackdc.properties")).doesNotExist();
+		LogbackFileCustomizer customizer = new LogbackFileCustomizer(null);
+		customizer.customize(directory.getParent());
+		try (InputStream inputStream = getClass()
+				.getResourceAsStream("/com/github/nosan/embedded/cassandra/local/logback.xml")) {
+			assertThat(directory.resolve("logback.xml")).hasBinaryContent(IOUtils.toByteArray(
+					inputStream));
+		}
+
 	}
 
 }

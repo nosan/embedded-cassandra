@@ -11,9 +11,9 @@ matrix:
 
 script:
 - java -version
-- ./mvnw -B clean install -DCASSANDRA.CI.BUILD=true
+- ./mvnw -B -e clean install -DCASSANDRA.CI.BUILD=true
 
-after_failure:
+after_script:
 - cat **/**/target/surefire-reports/*.txt
 
 

@@ -48,14 +48,18 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.SystemProperty;
 
 /**
- * Utility class to run Cassandra.
+ * Default implementation of the {@link CassandraProcess}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @see DefaultCassandraProcessFactory
+ * @since 1.0.9
  */
-class LocalProcess {
+class DefaultCassandraProcess implements CassandraProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
+
+	@Nonnull
+	private final Path directory;
 
 	@Nonnull
 	private final Duration startupTimeout;
@@ -78,31 +82,27 @@ class LocalProcess {
 	private long pid = -1;
 
 	/**
-	 * Creates a {@link LocalProcess}.
+	 * Creates a {@link DefaultCassandraProcess}.
 	 *
+	 * @param directory a configured directory
 	 * @param startupTimeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param version a version
 	 * @param javaHome java home directory
 	 */
-	LocalProcess(@Nonnull Duration startupTimeout, @Nonnull List<String> jvmOptions, @Nonnull Version version,
-			@Nullable Path javaHome) {
+	DefaultCassandraProcess(@Nonnull Path directory, @Nonnull Version version, @Nonnull Duration startupTimeout,
+			@Nonnull List<String> jvmOptions, @Nullable Path javaHome) {
+		this.directory = directory;
 		this.startupTimeout = startupTimeout;
 		this.version = version;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 	}
 
-	/**
-	 * Starts the Cassandra.
-	 *
-	 * @param directory initialized cassandra directory
-	 * @return the settings
-	 * @throws Exception if the Cassandra cannot be started
-	 * @throws InterruptedException if any thread has interrupted the current thread.
-	 */
+	@Override
 	@Nonnull
-	Settings start(@Nonnull Path directory) throws InterruptedException, Exception {
+	public Settings start() throws Exception {
+		Path directory = this.directory;
 		Path executable = OS.isWindows() ? directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
 		Path pidFile = directory.resolve(String.format("bin/%s.pid", UUID.randomUUID()));
 		Path logPath = directory.resolve("logs");
@@ -181,13 +181,8 @@ class LocalProcess {
 	}
 
 
-	/**
-	 * Stops the Cassandra.
-	 *
-	 * @throws Exception if the Cassandra cannot be stopped
-	 * @throws InterruptedException if any thread has interrupted the current thread.
-	 */
-	void stop() throws InterruptedException, Exception {
+	@Override
+	public void stop() throws Exception {
 		try {
 			Process process = this.process;
 			if (process != null && process.isAlive()) {
@@ -204,6 +199,8 @@ class LocalProcess {
 				if (!waitFor) {
 					throw new IOException("Casandra Process has not been stopped correctly");
 				}
+				//just to make sure everything is destroyed.
+				Thread.sleep(2000);
 			}
 		}
 		finally {
@@ -240,21 +237,21 @@ class LocalProcess {
 			arguments.add("-f");
 			arguments.add("-p");
 			arguments.add(pidFile.toAbsolutePath());
-			new RunProcess(arguments).runAndWait(log::info);
+			new RunProcess(arguments).runAndWait(log::debug);
 		}
 		else {
 			new RunProcess(Arrays.asList("bash", "-c",
-					String.format("kill -9 `cat %s`", pidFile.toAbsolutePath()))).runAndWait(log::info);
+					String.format("kill -9 `cat %s`", pidFile.toAbsolutePath()))).runAndWait(log::debug);
 		}
 	}
 
 
 	private static void stop(long pid) throws IOException, InterruptedException {
 		if (OS.isWindows()) {
-			new RunProcess(Arrays.asList("TASKKILL", "/F", "/T", "/pid", pid)).runAndWait(log::info);
+			new RunProcess(Arrays.asList("TASKKILL", "/F", "/T", "/pid", pid)).runAndWait(log::debug);
 		}
 		else {
-			new RunProcess(Arrays.asList("kill", -9, pid)).runAndWait(log::info);
+			new RunProcess(Arrays.asList("kill", -9, pid)).runAndWait(log::debug);
 		}
 	}
 

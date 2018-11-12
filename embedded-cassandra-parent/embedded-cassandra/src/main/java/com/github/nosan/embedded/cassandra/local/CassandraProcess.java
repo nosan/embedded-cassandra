@@ -16,34 +16,38 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
 import javax.annotation.Nonnull;
 
+import com.github.nosan.embedded.cassandra.Settings;
+
 /**
- * Encapsulates information about a working directory.
+ * Simple interface that allows the Cassandra process to be {@link #start() started} and {@link #stop()
+ * stopped}.
  *
  * @author Dmytro Nosan
+ * @see CassandraProcessFactory
+ * @see DefaultCassandraProcess
  * @since 1.0.9
  */
-interface Directory {
+interface CassandraProcess {
 
 	/**
-	 * Initialize a directory.
+	 * Starts the Cassandra.
 	 *
-	 * @return initialized directory
-	 * @throws IOException in the case of any IO errors
+	 * @return the settings
+	 * @throws Exception if the Cassandra cannot be started
+	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
 	@Nonnull
-	Path initialize() throws IOException;
+	Settings start() throws InterruptedException, Exception;
 
 	/**
-	 * Destroy the directory.
+	 * Stops the Cassandra.
 	 *
-	 * @throws IOException in the case of any IO errors
+	 * @throws Exception if the Cassandra cannot be stopped
+	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	void destroy() throws IOException;
+	void stop() throws InterruptedException, Exception;
 
 
 }

@@ -70,7 +70,7 @@ class MapSettings implements Settings {
 	private final String broadcastRpcAddress;
 
 	/**
-	 * Creates a new settings.
+	 * Creates a new {@link MapSettings}.
 	 *
 	 * @param source a source {@code Map}
 	 */

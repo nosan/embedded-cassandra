@@ -46,7 +46,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 
 	/**
-	 * Creates {@link EmbeddedCassandraContextCustomizer}.
+	 * Creates a {@link EmbeddedCassandraContextCustomizer}.
 	 *
 	 * @param testClass test class
 	 * @param annotation annotation

@@ -29,33 +29,31 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.Version;
-
 /**
- * {@link DirectoryInitializer} to initialize {@code logback.xml}.
+ * {@link DirectoryCustomizer} to initialize {@code logback.xml}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 1.0.9
  */
-class LogbackFileInitializer implements DirectoryInitializer {
+class LogbackFileCustomizer implements DirectoryCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(LogbackFileInitializer.class);
+	private static final Logger log = LoggerFactory.getLogger(LogbackFileCustomizer.class);
 
 	@Nullable
 	private final URL logbackFile;
 
 
 	/**
-	 * Creates an initializer.
+	 * Creates a {@link LogbackFileCustomizer}.
 	 *
 	 * @param logbackFile URL to {@code logback.xml}
 	 */
-	LogbackFileInitializer(@Nullable URL logbackFile) {
+	LogbackFileCustomizer(@Nullable URL logbackFile) {
 		this.logbackFile = logbackFile;
 	}
 
 	@Override
-	public void initialize(@Nonnull Path directory, @Nonnull Version version) throws Exception {
+	public void customize(@Nonnull Path directory) throws IOException {
 		URL logbackFile = this.logbackFile;
 		if (logbackFile == null) {
 			logbackFile = ClassLoader.getSystemResource("com/github/nosan/embedded/cassandra/local/logback.xml");

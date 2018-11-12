@@ -16,9 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.UUID;
+
+import javax.annotation.Nonnull;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,11 +36,11 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link WorkingDirectory}.
+ * Tests for {@link DefaultDirectory}.
  *
  * @author Dmytro Nosan
  */
-public class WorkingDirectoryTests {
+public class DefaultDirectoryTests {
 
 
 	@Rule
@@ -53,12 +57,12 @@ public class WorkingDirectoryTests {
 	}
 
 	@Test
-	public void shouldInitializeDirectoryArchiveRootFolder() throws Exception {
+	public void shouldInitializeDirectoryFolderArchive() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 
-		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
 
-		Path directory = workDir.initialize(() -> archive);
+		Path directory = workDir.initialize();
 
 		assertThat(directory).exists();
 		assertThat(directory.resolve("doc")).doesNotExist();
@@ -68,13 +72,13 @@ public class WorkingDirectoryTests {
 	}
 
 	@Test
-	public void shouldInitializeDirectoryNoRootFolder() throws Exception {
+	public void shouldInitializeDirectoryFlatArchive() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 
 
-		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
 
-		Path directory = workDir.initialize(() -> archive);
+		Path directory = workDir.initialize();
 
 		assertThat(directory).exists();
 		assertThat(directory.resolve("doc")).doesNotExist();
@@ -89,10 +93,10 @@ public class WorkingDirectoryTests {
 	public void directoryNotValidNoCassandraExecutable() throws Exception {
 		this.throwable.expectMessage("doesn't have a 'bin/cassandra' file");
 		this.throwable.expect(IllegalArgumentException.class);
+		Path archive = Paths.get(getClass().getResource("/empty.zip").toURI());
 
-		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
-		Path path = Paths.get(getClass().getResource("/empty.zip").toURI());
-		workDir.initialize(() -> path);
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
+		workDir.initialize();
 	}
 
 	@Test
@@ -101,11 +105,11 @@ public class WorkingDirectoryTests {
 		this.throwable.expect(IllegalStateException.class);
 
 
-		Path root = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
-		Path plain = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
-		ArchiveUtils.extract(root, this.rootDirectory, ignore -> true);
-		WorkingDirectory baseDirectory = new WorkingDirectory(this.rootDirectory);
-		baseDirectory.initialize(() -> plain);
+		Path archiveFolder = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
+		Path archiveFlat = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
+		ArchiveUtils.extract(archiveFolder, this.rootDirectory, ignore -> true);
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archiveFlat, Collections.emptyList());
+		workDir.initialize();
 	}
 
 
@@ -113,9 +117,9 @@ public class WorkingDirectoryTests {
 	public void shouldDestroyTemporaryDirectory() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 
-		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
 
-		Path directory = workDir.initialize(() -> archive);
+		Path directory = workDir.initialize();
 
 		assertThat(directory).exists();
 		assertThat(directory).hasParent(this.rootDirectory);
@@ -132,10 +136,10 @@ public class WorkingDirectoryTests {
 	public void shouldNotDestroyDirectory() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 		this.rootDirectory = FileUtils.getUserDirectory().resolve(String.format("target/%s", UUID.randomUUID()));
-		WorkingDirectory workDir = new WorkingDirectory(this.rootDirectory);
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
 		try {
 
-			Path directory = workDir.initialize(() -> archive);
+			Path directory = workDir.initialize();
 
 			assertThat(directory).exists();
 			assertThat(directory).hasParent(this.rootDirectory);
@@ -149,7 +153,44 @@ public class WorkingDirectoryTests {
 			FileUtils.delete(this.rootDirectory);
 		}
 
+	}
+
+	@Test
+	public void shouldInvokeCustomizers() throws Exception {
+		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
+		final class Customizer implements DirectoryCustomizer {
+			private Path directory;
+
+			@Override
+			public void customize(@Nonnull Path directory) {
+				this.directory = directory;
+			}
+		}
+		Customizer customizer = new Customizer();
+
+		DefaultDirectory workDir =
+				new DefaultDirectory(this.rootDirectory, () -> archive, Collections.singletonList(customizer));
+
+		Path directory = workDir.initialize();
+		assertThat(directory).exists();
+		assertThat(directory.resolve("doc")).doesNotExist();
+		assertThat(directory.resolve("javadoc")).doesNotExist();
+		assertThat(directory.resolve("conf")).exists();
+		assertThat(directory.resolve("bin")).exists();
+		assertThat(directory).isEqualTo(customizer.directory);
 
 	}
+
+	@Test
+	public void invalidArchive() throws Exception {
+		this.throwable.expectMessage("could not be extracted into ");
+		this.throwable.expect(IOException.class);
+
+		DefaultDirectory workDir =
+				new DefaultDirectory(this.rootDirectory, () -> this.temporaryFolder.newFile().toPath(),
+						Collections.emptyList());
+		workDir.initialize();
+	}
+
 
 }

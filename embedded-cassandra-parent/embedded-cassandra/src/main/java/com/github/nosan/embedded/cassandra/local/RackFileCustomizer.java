@@ -29,32 +29,30 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.Version;
-
 /**
- * {@link DirectoryInitializer} to initialize {@code cassandra-rackdc.properties}.
+ * {@link DirectoryCustomizer} to initialize {@code cassandra-rackdc.properties}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 1.0.9
  */
-class RackFileInitializer implements DirectoryInitializer {
+class RackFileCustomizer implements DirectoryCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(RackFileInitializer.class);
+	private static final Logger log = LoggerFactory.getLogger(RackFileCustomizer.class);
 
 	@Nullable
 	private final URL rackFile;
 
 	/**
-	 * Creates an initializer.
+	 * Creates a {@link RackFileCustomizer}.
 	 *
 	 * @param rackFile URL to {@code cassandra-rackdc.properties}
 	 */
-	RackFileInitializer(@Nullable URL rackFile) {
+	RackFileCustomizer(@Nullable URL rackFile) {
 		this.rackFile = rackFile;
 	}
 
 	@Override
-	public void initialize(@Nonnull Path directory, @Nonnull Version version) throws Exception {
+	public void customize(@Nonnull Path directory) throws IOException {
 		if (this.rackFile != null) {
 			Path target = directory.resolve("conf/cassandra-rackdc.properties");
 			log.debug("Replace ({}) with ({})", target, this.rackFile);
