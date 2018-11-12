@@ -199,8 +199,10 @@ class DefaultCassandraProcess implements CassandraProcess {
 				if (!waitFor) {
 					throw new IOException("Casandra Process has not been stopped correctly");
 				}
-				//just to make sure everything is destroyed.
-				Thread.sleep(2000);
+				if (OS.isWindows()) {
+					//The process cannot access the file because it is being used by another process
+					Thread.sleep(3000);
+				}
 			}
 		}
 		finally {
