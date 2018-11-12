@@ -18,11 +18,11 @@ package com.github.nosan.embedded.cassandra.test;
 
 import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.ResultSet;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
@@ -40,24 +40,23 @@ public class TestCassandraTests {
 	private static final String KEYSPACE_NAME = "test";
 
 	@BeforeClass
-	public void start() {
+	public static void startCassandra() {
 		cassandra.start();
 
 	}
 
 	@AfterClass
-	public void stop() {
+	public static void stopCassandra() {
 		cassandra.stop();
 	}
 
-	@AfterMethod
-	public void clean() {
+	@After
+	public void deleteKeyspace() {
 		cassandra.dropKeyspaces(KEYSPACE_NAME);
-
 	}
 
-	@BeforeMethod
-	public void create() {
+	@Before
+	public void createKeyspace() {
 		cassandra.executeScripts(CqlScript.classpath("init.cql"));
 	}
 
