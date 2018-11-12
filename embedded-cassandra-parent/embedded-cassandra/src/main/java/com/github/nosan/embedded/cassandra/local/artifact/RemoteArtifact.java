@@ -76,7 +76,7 @@ class RemoteArtifact implements Artifact {
 	private final Duration connectTimeout;
 
 	/**
-	 * Creates an artifact.
+	 * Creates a {@link RemoteArtifact}.
 	 *
 	 * @param version a version
 	 * @param directory a directory to store/search an artifact (directory must be writable)

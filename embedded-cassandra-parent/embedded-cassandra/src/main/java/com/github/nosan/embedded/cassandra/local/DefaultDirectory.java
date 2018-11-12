@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -37,51 +39,53 @@ import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 /**
- * Basic implementation of the {@link Directory}.
+ * Default implementation of the {@link Directory}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 1.0.9
  */
-class WorkingDirectory implements Directory {
+class DefaultDirectory implements Directory {
 
+	private static final Logger log = LoggerFactory.getLogger(DefaultDirectory.class);
 
-	private static final Logger log = LoggerFactory.getLogger(Directory.class);
-
-	private static final Set<String> SKIP_CANDIDATES;
-
-	static {
-		Set<String> candidates = new LinkedHashSet<>();
-		candidates.add("doc");
-		candidates.add("tools");
-		candidates.add("pylib");
-		candidates.add("javadoc");
-		SKIP_CANDIDATES = Collections.unmodifiableSet(candidates);
-	}
+	private static final Set<String> SKIP_CANDIDATES =
+			Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("doc", "tools", "pylib", "javadoc")));
 
 	@Nonnull
-	private final Path rootDirectory;
+	private final Path directory;
 
+	@Nonnull
+	private final Artifact artifact;
+
+	@Nonnull
+	private final List<? extends DirectoryCustomizer> customizers;
 
 	/**
-	 * Creates a {@link WorkingDirectory}.
+	 * Creates a {@link DefaultDirectory}.
 	 *
+	 * @param artifact artifact to initialize a directory
 	 * @param directory the working directory
+	 * @param customizers the directory customizers
 	 */
-	WorkingDirectory(@Nonnull Path directory) {
-		this.rootDirectory = directory;
+	DefaultDirectory(@Nonnull Path directory, @Nonnull Artifact artifact,
+			@Nonnull List<? extends DirectoryCustomizer> customizers) {
+		this.directory = directory;
+		this.artifact = artifact;
+		this.customizers = Collections.unmodifiableList(new ArrayList<>(customizers));
 	}
 
-	@Override
-	public Path initialize(@Nonnull Artifact artifact) throws Exception {
-		Path archive = artifact.get();
-		Path rootDirectory = this.rootDirectory;
+
+	@Nonnull
+	public Path initialize() throws IOException {
+		Path archive = this.artifact.get();
+		Path rootDirectory = this.directory;
 		log.debug("Initialize working directory ({})", rootDirectory);
 		try {
 			log.info("Extract ({}) into ({}). It takes a while...", archive, rootDirectory);
 			ArchiveUtils.extract(archive, rootDirectory, path -> {
-				Path sub = path.subpath(rootDirectory.getNameCount(), path.getNameCount());
-				for (int i = 0; i < sub.getNameCount(); i++) {
-					String name = String.valueOf(sub.getName(i));
+				Path subPath = path.subpath(rootDirectory.getNameCount(), path.getNameCount());
+				for (int i = 0; i < subPath.getNameCount(); i++) {
+					String name = String.valueOf(subPath.getName(i));
 					if (SKIP_CANDIDATES.contains(name)) {
 						return false;
 					}
@@ -93,15 +97,20 @@ class WorkingDirectory implements Directory {
 			throw new IOException(
 					String.format("Archive : (%s) could not be extracted into (%s)", archive, rootDirectory), ex);
 		}
-		return getDirectory(this.rootDirectory);
+		Path directory = getDirectory(this.directory);
+		for (DirectoryCustomizer customizer : this.customizers) {
+			customizer.customize(directory);
+		}
+
+		return directory;
 	}
 
 
 	@Override
-	public void destroy() throws Exception {
-		if (FileUtils.isTemporary(this.rootDirectory)) {
-			log.debug("Delete recursively working directory ({})", this.rootDirectory);
-			FileUtils.delete(this.rootDirectory);
+	public void destroy() throws IOException {
+		if (FileUtils.isTemporary(this.directory)) {
+			log.debug("Delete recursively working directory ({})", this.directory);
+			FileUtils.delete(this.directory);
 		}
 	}
 
@@ -109,11 +118,11 @@ class WorkingDirectory implements Directory {
 	@Override
 	@Nonnull
 	public String toString() {
-		return String.valueOf(this.rootDirectory);
+		return String.valueOf(this.directory);
 	}
 
 	private static Path getDirectory(Path rootDirectory) throws IOException {
-		List<Path> candidates = Files.find(rootDirectory, 5, WorkingDirectory::isMatch)
+		List<Path> candidates = Files.find(rootDirectory, 5, DefaultDirectory::isMatch)
 				.map(Path::getParent)
 				.filter(Objects::nonNull)
 				.map(Path::getParent)

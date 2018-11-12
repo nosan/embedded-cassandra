@@ -16,29 +16,23 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.nio.file.Path;
-
 import javax.annotation.Nonnull;
 
-import com.github.nosan.embedded.cassandra.Version;
-
+import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 
 /**
- * Initializer interface used to initialize {@link Directory}.
+ * Factory that creates a {@link Directory}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 1.0.9
  */
-@FunctionalInterface
-interface DirectoryInitializer {
-
+public interface DirectoryFactory {
 	/**
-	 * Initialize a directory.
+	 * Creates a new  configured {@link Directory}.
 	 *
-	 * @param directory the base directory
-	 * @param version the version
-	 * @throws Exception in the case of any errors
+	 * @param artifact the artifact to initialize a directory
+	 * @return {@code Directory} to use
 	 */
-	void initialize(@Nonnull Path directory, @Nonnull Version version) throws Exception;
-
+	@Nonnull
+	Directory create(@Nonnull Artifact artifact);
 }

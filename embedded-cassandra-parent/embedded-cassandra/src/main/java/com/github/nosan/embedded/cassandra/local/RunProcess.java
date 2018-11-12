@@ -60,7 +60,7 @@ class RunProcess {
 
 
 	/**
-	 * Creates new {@link RunProcess} instance.
+	 * Creates a new {@link RunProcess} instance.
 	 *
 	 * @param arguments the program to execute and its arguments
 	 */
@@ -69,7 +69,7 @@ class RunProcess {
 	}
 
 	/**
-	 * Creates new {@link RunProcess} instance.
+	 * Creates a new {@link RunProcess} instance.
 	 *
 	 * @param arguments the program to execute and its arguments
 	 * @param environment the environment variables
@@ -79,7 +79,7 @@ class RunProcess {
 	}
 
 	/**
-	 * Creates new {@link RunProcess} instance.
+	 * Creates a new {@link RunProcess} instance.
 	 *
 	 * @param workingDirectory the working directory of the child process
 	 * @param arguments the program to execute and its arguments
@@ -89,7 +89,7 @@ class RunProcess {
 	}
 
 	/**
-	 * Creates new {@link RunProcess} instance.
+	 * Creates a new {@link RunProcess} instance.
 	 *
 	 * @param workingDirectory the working directory of the child process
 	 * @param arguments the program to execute and its arguments

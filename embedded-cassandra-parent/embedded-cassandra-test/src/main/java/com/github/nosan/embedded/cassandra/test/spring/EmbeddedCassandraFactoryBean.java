@@ -60,7 +60,7 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 
 
 	/**
-	 * Creates {@link EmbeddedCassandraFactoryBean}.
+	 * Creates a {@link EmbeddedCassandraFactoryBean}.
 	 *
 	 * @param testClass test class
 	 * @param annotation annotation

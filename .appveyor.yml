@@ -11,9 +11,9 @@ environment:
 
 build_script:
 - java -version
-- mvnw.cmd -B clean install -DCASSANDRA.CI.BUILD=true
+- mvnw.cmd -B -e clean install -DCASSANDRA.CI.BUILD=true
 
-on_failure:
+on_finish:
 - cat **/**/target/surefire-reports/*.txt
 
 cache:

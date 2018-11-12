@@ -29,33 +29,31 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.Version;
-
 /**
- * {@link DirectoryInitializer} to initialize {@code cassandra-topology.properties}.
+ * {@link DirectoryCustomizer} to initialize {@code cassandra-topology.properties}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 1.0.9
  */
-class TopologyFileInitializer implements DirectoryInitializer {
+class TopologyFileCustomizer implements DirectoryCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(TopologyFileInitializer.class);
+	private static final Logger log = LoggerFactory.getLogger(TopologyFileCustomizer.class);
 
 	@Nullable
 	private final URL topologyFile;
 
 
 	/**
-	 * Creates an initializer.
+	 * Creates a {@link TopologyFileCustomizer}.
 	 *
 	 * @param topologyFile URL to {@code cassandra-topology.properties}
 	 */
-	TopologyFileInitializer(@Nullable URL topologyFile) {
+	TopologyFileCustomizer(@Nullable URL topologyFile) {
 		this.topologyFile = topologyFile;
 	}
 
 	@Override
-	public void initialize(@Nonnull Path directory, @Nonnull Version version) throws Exception {
+	public void customize(@Nonnull Path directory) throws IOException {
 		if (this.topologyFile != null) {
 			Path target = directory.resolve("conf/cassandra-topology.properties");
 			log.debug("Replace ({}) with ({})", target, this.topologyFile);

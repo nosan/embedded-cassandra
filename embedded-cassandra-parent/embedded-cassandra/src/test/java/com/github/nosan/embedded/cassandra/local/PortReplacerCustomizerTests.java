@@ -26,16 +26,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.yaml.snakeyaml.Yaml;
 
-import com.github.nosan.embedded.cassandra.Version;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link PortReplacerInitializer}.
+ * Tests for {@link PortReplacerCustomizer}.
  *
  * @author Dmytro Nosan
  */
-public class PortReplacerInitializerTests {
+public class PortReplacerCustomizerTests {
 
 
 	@Rule
@@ -43,15 +41,15 @@ public class PortReplacerInitializerTests {
 
 
 	@Test
-	public void initialize() throws Exception {
+	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		PortReplacerInitializer initializer = new PortReplacerInitializer();
+		PortReplacerCustomizer customizer = new PortReplacerCustomizer();
 		try (InputStream inputStream = getClass()
 				.getResourceAsStream("/com/github/nosan/embedded/cassandra/local/cassandra.yaml")) {
 			Files.copy(inputStream, directory.resolve("cassandra.yaml"));
 		}
 
-		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
+		customizer.customize(directory.getParent());
 
 		assertThat(directory.resolve("cassandra.yaml")).exists();
 		MapSettings settings;

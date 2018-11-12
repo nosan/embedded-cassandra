@@ -24,44 +24,37 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.github.nosan.embedded.cassandra.Version;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link LogbackFileInitializer}.
+ * Tests for {@link RackFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
-public class LogbackFileInitializerTests {
+public class RackFileCustomizerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
-	public void initialize() throws Exception {
+	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		LogbackFileInitializer initializer =
-				new LogbackFileInitializer(getClass().getResource("/logback-test.xml"));
-		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
-		try (InputStream inputStream = getClass().getResourceAsStream("/logback-test.xml")) {
-			assertThat(directory.resolve("logback.xml")).hasBinaryContent(
+		RackFileCustomizer customizer =
+				new RackFileCustomizer(getClass().getResource("/cassandra-rackdc.properties"));
+		customizer.customize(directory.getParent());
+		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-rackdc.properties")) {
+			assertThat(directory.resolve("cassandra-rackdc.properties")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
 		}
 
 	}
 
 	@Test
-	public void defaultInitialize() throws Exception {
+	public void notCustomize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		LogbackFileInitializer initializer = new LogbackFileInitializer(null);
-		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
-		try (InputStream inputStream = getClass()
-				.getResourceAsStream("/com/github/nosan/embedded/cassandra/local/logback.xml")) {
-			assertThat(directory.resolve("logback.xml")).hasBinaryContent(IOUtils.toByteArray(
-					inputStream));
-		}
-
+		RackFileCustomizer customizer = new RackFileCustomizer(null);
+		customizer.customize(directory.getParent());
+		assertThat(directory.resolve("cassandra-rackdc.properties")).doesNotExist();
 	}
 
 }

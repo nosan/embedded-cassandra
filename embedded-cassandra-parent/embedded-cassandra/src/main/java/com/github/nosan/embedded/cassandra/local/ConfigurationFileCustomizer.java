@@ -32,33 +32,38 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
- * {@link DirectoryInitializer} to initialize {@code cassandra.yaml}.
+ * {@link DirectoryCustomizer} to initialize {@code cassandra.yaml}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 1.0.9
  */
-class ConfigurationFileInitializer implements DirectoryInitializer {
+class ConfigurationFileCustomizer implements DirectoryCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(ConfigurationFileInitializer.class);
+	private static final Logger log = LoggerFactory.getLogger(ConfigurationFileCustomizer.class);
 
 	@Nullable
 	private final URL configurationFile;
 
+	@Nonnull
+	private final Version version;
+
 
 	/**
-	 * Creates an initializer.
+	 * Creates a {@link ConfigurationFileCustomizer}.
 	 *
 	 * @param configurationFile URL to {@code cassandra.yaml}
+	 * @param version a version
 	 */
-	ConfigurationFileInitializer(@Nullable URL configurationFile) {
+	ConfigurationFileCustomizer(@Nullable URL configurationFile, @Nonnull Version version) {
 		this.configurationFile = configurationFile;
+		this.version = version;
 	}
 
 	@Override
-	public void initialize(@Nonnull Path directory, @Nonnull Version version) throws Exception {
+	public void customize(@Nonnull Path directory) throws IOException {
 		URL source = this.configurationFile;
 		if (source == null) {
-			if (version.getMajor() >= 4) {
+			if (this.version.getMajor() >= 4) {
 				source = ClassLoader.getSystemResource("com/github/nosan/embedded" +
 						"/cassandra/local/4.x.x/cassandra.yaml");
 			}

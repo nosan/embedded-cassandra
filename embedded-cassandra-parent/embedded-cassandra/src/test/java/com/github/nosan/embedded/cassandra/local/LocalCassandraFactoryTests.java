@@ -19,12 +19,9 @@ package com.github.nosan.embedded.cassandra.local;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.List;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.junit.Test;
 
@@ -78,30 +75,24 @@ public class LocalCassandraFactoryTests {
 
 		Cassandra cassandra = factory.create();
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(factory.getVersion());
-		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory"))
-				.isEqualTo(artifactFactory);
-		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "directory"),
-				"rootDirectory")).isEqualTo(workingDirectory);
-		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "localProcess"), "jvmOptions"))
-				.isEqualTo(factory.getJvmOptions());
-		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "localProcess"), "startupTimeout"))
-				.isEqualTo(factory.getStartupTimeout());
-		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "localProcess"), "javaHome"))
-				.isEqualTo(factory.getJavaHome());
-		assertThat(ReflectionUtils.getField(ReflectionUtils.getField(cassandra, "localProcess"), "version"))
-				.isEqualTo(factory.getVersion());
-		List<DirectoryInitializer> initializers = (List<DirectoryInitializer>) ReflectionUtils.getField(cassandra,
-				"initializers");
-		assertThat(initializers).hasSize(5);
-		assertThat(initializers).matches(new Matcher("logbackFile", logbackFile.toUri().toURL(),
-				LogbackFileInitializer.class));
-		assertThat(initializers).matches(new Matcher("configurationFile", configurationFile.toUri().toURL(),
-				ConfigurationFileInitializer.class));
-		assertThat(initializers).matches(new Matcher("rackFile", rackFile.toUri().toURL(),
-				RackFileInitializer.class));
-		assertThat(initializers).matches(new Matcher("topologyFile", topologyFile.toUri().toURL(),
-				TopologyFileInitializer.class));
-		assertThat(initializers).last().isInstanceOfAny(PortReplacerInitializer.class);
+		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory")).isEqualTo(artifactFactory);
+
+		Object processFactory = ReflectionUtils.getField(cassandra, "processFactory");
+
+		assertThat(ReflectionUtils.getField(processFactory, "jvmOptions")).isEqualTo(factory.getJvmOptions());
+		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(factory.getStartupTimeout());
+		assertThat(ReflectionUtils.getField(processFactory, "javaHome")).isEqualTo(factory.getJavaHome());
+		assertThat(ReflectionUtils.getField(processFactory, "version")).isEqualTo(factory.getVersion());
+
+		Object directoryFactory = ReflectionUtils.getField(cassandra, "directoryFactory");
+
+		assertThat(ReflectionUtils.getField(directoryFactory, "logbackFile")).isEqualTo(factory.getLogbackFile());
+		assertThat(ReflectionUtils.getField(directoryFactory, "version")).isEqualTo(factory.getVersion());
+		assertThat(ReflectionUtils.getField(directoryFactory, "directory")).isEqualTo(factory.getWorkingDirectory());
+		assertThat(ReflectionUtils.getField(directoryFactory, "configurationFile"))
+				.isEqualTo(factory.getConfigurationFile());
+		assertThat(ReflectionUtils.getField(directoryFactory, "rackFile")).isEqualTo(factory.getRackFile());
+		assertThat(ReflectionUtils.getField(directoryFactory, "topologyFile")).isEqualTo(factory.getTopologyFile());
 
 	}
 
@@ -113,37 +104,6 @@ public class LocalCassandraFactoryTests {
 		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory"))
 				.isInstanceOf(RemoteArtifactFactory.class);
 
-	}
-
-	private static final class Matcher implements Predicate<List<? extends DirectoryInitializer>> {
-
-		@Nonnull
-		private final String name;
-
-		@Nullable
-		private final Object value;
-
-		@Nonnull
-		private final Class<? extends DirectoryInitializer> initializer;
-
-		private Matcher(@Nonnull String name, @Nullable Object value,
-				@Nonnull Class<? extends DirectoryInitializer> initializer) {
-			this.name = name;
-			this.value = value;
-			this.initializer = initializer;
-		}
-
-
-		@Override
-		public boolean test(List<? extends DirectoryInitializer> directoryInitializers) {
-			for (DirectoryInitializer directoryInitializer : directoryInitializers) {
-				if (directoryInitializer.getClass().isAssignableFrom(this.initializer)) {
-					assertThat(ReflectionUtils.getField(directoryInitializer, this.name)).isEqualTo(this.value);
-					return true;
-				}
-			}
-			return false;
-		}
 	}
 
 }

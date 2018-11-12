@@ -29,22 +29,22 @@ import com.github.nosan.embedded.cassandra.Version;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ConfigurationFileInitializer}.
+ * Tests for {@link ConfigurationFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
-public class ConfigurationFileInitializerTests {
+public class ConfigurationFileCustomizerTests {
 
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
-	public void initialize() throws Exception {
+	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		ConfigurationFileInitializer initializer =
-				new ConfigurationFileInitializer(getClass().getResource("/cassandra.yaml"));
-		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
+		ConfigurationFileCustomizer customizer =
+				new ConfigurationFileCustomizer(getClass().getResource("/cassandra.yaml"), new Version(3, 11, 3));
+		customizer.customize(directory.getParent());
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
 			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
@@ -53,10 +53,10 @@ public class ConfigurationFileInitializerTests {
 	}
 
 	@Test
-	public void defaultInitializeV3() throws Exception {
+	public void defaultCustomizeV3() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		ConfigurationFileInitializer initializer = new ConfigurationFileInitializer(null);
-		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
+		ConfigurationFileCustomizer customizer = new ConfigurationFileCustomizer(null, new Version(3, 11, 3));
+		customizer.customize(directory.getParent());
 		assertThat(directory.resolve("cassandra.yaml")).exists();
 		try (InputStream inputStream = getClass()
 				.getResourceAsStream("/com/github/nosan/embedded/cassandra/local/cassandra.yaml")) {
@@ -67,10 +67,10 @@ public class ConfigurationFileInitializerTests {
 	}
 
 	@Test
-	public void defaultInitializeV4() throws Exception {
+	public void defaultCustomizeV4() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		ConfigurationFileInitializer initializer = new ConfigurationFileInitializer(null);
-		initializer.initialize(directory.getParent(), new Version(4, 0, 0));
+		ConfigurationFileCustomizer customizer = new ConfigurationFileCustomizer(null, new Version(4, 0, 0));
+		customizer.customize(directory.getParent());
 		assertThat(directory.resolve("cassandra.yaml")).exists();
 		try (InputStream inputStream = getClass()
 				.getResourceAsStream("/com/github/nosan/embedded/cassandra/local/4.x.x/cassandra.yaml")) {

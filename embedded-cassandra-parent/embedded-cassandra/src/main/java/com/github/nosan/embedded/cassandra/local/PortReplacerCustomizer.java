@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -29,23 +30,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.reader.UnicodeReader;
 
-import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.StreamUtils;
 
 /**
- * {@link DirectoryInitializer} to replace all {@code 0} ports in a {@code cassandra.yaml}.
+ * {@link DirectoryCustomizer} to replace all {@code 0} ports in a {@code cassandra.yaml}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 1.0.9
  */
-class PortReplacerInitializer implements DirectoryInitializer {
+class PortReplacerCustomizer implements DirectoryCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(PortReplacerInitializer.class);
+	private static final Logger log = LoggerFactory.getLogger(PortReplacerCustomizer.class);
 
 
 	@Override
-	public void initialize(@Nonnull Path directory, @Nonnull Version version) throws Exception {
+	public void customize(@Nonnull Path directory) throws IOException {
 		Iterator<Integer> ports = PortUtils.getPorts(5).iterator();
 		Path target = directory.resolve("conf/cassandra.yaml");
 		String source = StreamUtils.toString(new UnicodeReader(Files.newInputStream(target)));
