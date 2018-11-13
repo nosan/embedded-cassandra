@@ -39,17 +39,6 @@ public class TestCassandraTests {
 
 	private static final String KEYSPACE_NAME = "test";
 
-	@BeforeClass
-	public static void startCassandra() {
-		cassandra.start();
-
-	}
-
-	@AfterClass
-	public static void stopCassandra() {
-		cassandra.stop();
-	}
-
 	@After
 	public void deleteKeyspace() {
 		cassandra.dropKeyspaces(KEYSPACE_NAME);
@@ -59,7 +48,6 @@ public class TestCassandraTests {
 	public void createKeyspace() {
 		cassandra.executeScripts(CqlScript.classpath("init.cql"));
 	}
-
 
 	@Test
 	public void dropTables() {
@@ -88,8 +76,18 @@ public class TestCassandraTests {
 		assertThat(resultSet.one().get("first_name", String.class)).isEqualTo("Frodo");
 	}
 
-
 	private KeyspaceMetadata getKeyspace(String name) {
 		return cassandra.getCluster().getMetadata().getKeyspace(name);
+	}
+
+	@BeforeClass
+	public static void startCassandra() {
+		cassandra.start();
+
+	}
+
+	@AfterClass
+	public static void stopCassandra() {
+		cassandra.stop();
 	}
 }
