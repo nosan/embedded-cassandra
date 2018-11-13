@@ -152,7 +152,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 				.run(outputCapture, log::info);
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
-		log.debug("Cassandra Process ({}) has been started", (this.pid > 0) ? this.pid : "???");
+		log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
 		Duration timeout = this.startupTimeout;
 		Settings settings = getSettings(directory);
 		if (timeout.toNanos() > 0) {
@@ -188,7 +188,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			if (process != null && process.isAlive()) {
 				Path pidFile = this.pidFile;
 				long pid = this.pid;
-				log.debug("Stops Cassandra Process ({})", (pid > 0) ? pid : "???");
+				log.debug("Stops Cassandra Process ({})", getPidString(pid));
 				if (pidFile != null && Files.exists(pidFile)) {
 					stop(pidFile);
 				}
@@ -200,8 +200,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 				}
 				boolean waitFor = process.waitFor(15, TimeUnit.SECONDS);
 				if (!waitFor) {
-					throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
-							(pid > 0) ? pid : "???"));
+					throw new IOException(
+							String.format("Casandra Process (%s) has not been stopped correctly", getPidString(pid)));
 				}
 				//The cannot access the file because it is being used by another process
 				Thread.sleep(2000);
@@ -213,6 +213,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			this.process = null;
 		}
 	}
+
 
 	private static Settings getSettings(@Nonnull Path directory) throws IOException {
 		Path target = directory.resolve("conf/cassandra.yaml");
@@ -271,5 +272,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 		throw new IOException(builder.toString());
 	}
 
+	private static String getPidString(long pid) {
+		return (pid > 0) ? String.valueOf(pid) : "???";
+	}
 
 }
