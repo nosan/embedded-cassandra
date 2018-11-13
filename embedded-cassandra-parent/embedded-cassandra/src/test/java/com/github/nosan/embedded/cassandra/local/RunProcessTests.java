@@ -40,6 +40,7 @@ public class RunProcessTests {
 					.runAndWait(bufferOutput);
 			assertThat(bufferOutput.toString()).isEqualTo("Hello World");
 			assertThat(exit).isEqualTo(0);
+			new RunProcess(Arrays.asList("rm", "1.txt")).runAndWait();
 		}
 	}
 
