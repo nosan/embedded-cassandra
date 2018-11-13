@@ -92,6 +92,7 @@ public abstract class AbstractLocalCassandraTests {
 		}));
 		assertThat(this.output.toString()).contains("Stops Apache Cassandra");
 		assertThat(this.output.toString()).contains("Stop listening for CQL clients");
+		assertThat(this.output.toString()).doesNotContain("has not been deleted");
 		this.output.reset();
 		c.stop();
 		assertThat(this.output.toString()).doesNotContain("Stops Apache Cassandra");
@@ -104,6 +105,7 @@ public abstract class AbstractLocalCassandraTests {
 		this.throwable.expectMessage("Please start it before calling this method");
 
 		this.factory.create().getSettings();
+		assertThat(this.output.toString()).doesNotContain("has not been deleted");
 	}
 
 	@Test
@@ -114,6 +116,7 @@ public abstract class AbstractLocalCassandraTests {
 		this.throwable.expectCause(new CauseMatcher(IOException.class, "invalid_property"));
 
 		new CassandraRunner(this.factory).run(new NotReachable());
+		assertThat(this.output.toString()).doesNotContain("has not been deleted");
 
 	}
 
@@ -124,6 +127,7 @@ public abstract class AbstractLocalCassandraTests {
 			assertCreateKeyspace().accept(cassandra);
 			runner.run(assertCreateKeyspace());
 		});
+		assertThat(this.output.toString()).doesNotContain("has not been deleted");
 	}
 
 
@@ -135,6 +139,7 @@ public abstract class AbstractLocalCassandraTests {
 				.run(assertCreateKeyspace().andThen(assertBusyPort(7199, 9042)));
 		new CassandraRunner(this.factory)
 				.run(assertCreateKeyspace().andThen(assertBusyPort(7199, 9042)));
+		assertThat(this.output.toString()).doesNotContain("has not been deleted");
 
 	}
 
@@ -147,6 +152,7 @@ public abstract class AbstractLocalCassandraTests {
 			CassandraRunner runner = new CassandraRunner(this.factory);
 			runner.run(assertCreateKeyspace());
 			runner.run(assertDeleteKeyspace());
+			assertThat(this.output.toString()).doesNotContain("has not been deleted");
 		}
 		finally {
 			IOUtils.closeQuietly(() -> FileUtils.delete(this.factory.getWorkingDirectory()));
