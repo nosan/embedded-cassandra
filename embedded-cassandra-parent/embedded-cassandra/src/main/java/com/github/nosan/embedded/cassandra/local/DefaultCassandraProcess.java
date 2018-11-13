@@ -200,6 +200,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 				if (!waitFor) {
 					throw new IOException("Casandra Process has not been stopped correctly");
 				}
+				//The  cannot access the file because it is being used by another process
+				Thread.sleep(2000);
 			}
 		}
 		finally {
@@ -239,7 +241,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 		else {
 			new RunProcess(Arrays.asList("bash", "-c",
-					String.format("kill -2 `cat %s`", pidFile.toAbsolutePath()))).runAndWait(log::info);
+					String.format("kill -SIGINT `cat %s`", pidFile.toAbsolutePath()))).runAndWait(log::info);
 		}
 	}
 
@@ -249,7 +251,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			new RunProcess(Arrays.asList("TASKKILL", "/T", "/pid", pid)).runAndWait(log::info);
 		}
 		else {
-			new RunProcess(Arrays.asList("kill", -2, pid)).runAndWait(log::info);
+			new RunProcess(Arrays.asList("kill", "-SIGINT", pid)).runAndWait(log::info);
 		}
 	}
 
