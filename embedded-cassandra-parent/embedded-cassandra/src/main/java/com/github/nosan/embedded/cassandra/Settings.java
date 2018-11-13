@@ -16,7 +16,14 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.net.InetAddress;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import com.github.nosan.embedded.cassandra.util.NetworkUtils;
+import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 
 /**
@@ -39,14 +46,14 @@ public interface Settings {
 	/**
 	 * The port for inter-node communication.
 	 *
-	 * @return The value of the {@code storagePort} attribute or {@code -1}
+	 * @return The value of the {@code storagePort} attribute or {@code 7000}
 	 */
 	int getStoragePort();
 
 	/**
 	 * SSL port, for encrypted communication.
 	 *
-	 * @return The value of the {@code sslStoragePort} attribute or {@code -1}
+	 * @return The value of the {@code sslStoragePort} attribute or {@code 7001}
 	 */
 	int getSslStoragePort();
 
@@ -75,12 +82,14 @@ public interface Settings {
 	String getBroadcastAddress();
 
 	/**
-	 * The address to bind the native transport server to.
+	 * The address to bind the native/rpc transport server to.
+	 * Note! use {@link #getRealAddress()} to connect to the cassandra.
 	 *
-	 * @return The value of the {@code address} attribute
+	 * @return The value of the {@code rpcAddress} attribute
+	 * @see #getRealAddress()
 	 */
 	@Nullable
-	String getAddress();
+	String getRpcAddress();
 
 	/**
 	 * The listen RPC interface for client connections.
@@ -108,7 +117,7 @@ public interface Settings {
 	/**
 	 * Port for the CQL native transport to listen for clients on.
 	 *
-	 * @return The value of the {@code nativeTransportPort} attribute or {@code -1}
+	 * @return The value of the {@code nativeTransportPort} attribute or {@code 9042}
 	 */
 	int getPort();
 
@@ -130,8 +139,77 @@ public interface Settings {
 	/**
 	 * Thrift port for client connections.
 	 *
-	 * @return The value of the {@code rpcPort} attribute or {@code -1}
+	 * @return The value of the {@code rpcPort} attribute or {@code 9160}
 	 */
 	int getRpcPort();
+
+	/**
+	 * Cassandra version.
+	 *
+	 * @return The value of the {@code version} attribute
+	 * @since 1.1.0
+	 */
+	@Nonnull
+	Version getVersion();
+
+	/**
+	 * When using multiple physical network interfaces, set this to true to listen on broadcast_address in addition
+	 * to the {@code listen_address}, allowing nodes to communicate in both interfaces.
+	 *
+	 * @return The value of the {@code listenOnBroadcastAddress} attribute
+	 * @since 1.1.0
+	 */
+	boolean isListenOnBroadcastAddress();
+
+	/**
+	 * If you choose to specify the interface by name and the interface has an IPv4 and an IPv6 address you can
+	 * specify which should be chosen using {@code listen_interface_prefer_ipv6}. If {@code false} the first IPv4
+	 * address will be used. If {@code true} the first IPv6 address will be used.
+	 *
+	 * @return The value of the {@code listenInterfacePreferIpv6} attribute
+	 * @since 1.1.0
+	 */
+	boolean isListenInterfacePreferIpv6();
+
+	/**
+	 * If you choose to specify the interface by name and the interface has an IPv4 and an IPv6 address you can
+	 * specify which should be chosen using {@code rpc_interface_prefer_ipv6}. If {@code false} the first IPv4 address
+	 * will be used. If {@code true} the first IPv6 address will be used.
+	 *
+	 * @return The value of the {@code rpcInterfacePreferIpv6} attribute
+	 * @since 1.1.0
+	 */
+	boolean isRpcInterfacePreferIpv6();
+
+	/**
+	 * The {@code real} address to bind the native/rpc transport server to.
+	 *
+	 * @return The value of the {@code rpcAddress} or determine address from {@code rpcInterface} attribute
+	 * @since 1.1.0
+	 */
+	@Nonnull
+	default InetAddress getRealAddress() {
+		String rpcInterface = getRpcInterface();
+		if (StringUtils.hasText(rpcInterface)) {
+			return NetworkUtils.getAddressByInterface(rpcInterface, isRpcInterfacePreferIpv6());
+		}
+		return NetworkUtils.getInetAddress(Objects.toString(getRpcAddress(), "localhost"));
+	}
+
+	/**
+	 * the {@code real} address to bind to and tell other Cassandra nodes to connect to.
+	 *
+	 * @return The value of the {@code listenAddress} or determine address from {@code listenInterface} attribute
+	 * @since 1.1.0
+	 */
+	@Nonnull
+	default InetAddress getRealListenAddress() {
+		String listenInterface = getListenInterface();
+		if (StringUtils.hasText(listenInterface)) {
+			return NetworkUtils.getAddressByInterface(listenInterface, isListenInterfacePreferIpv6());
+		}
+		return NetworkUtils.getInetAddress(Objects.toString(getRpcAddress(), "localhost"));
+
+	}
 
 }

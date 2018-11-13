@@ -95,9 +95,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Startup timeout.
-	 * <p>
-	 * Note! Timeout will be ignored if value is not a positive.
+	 * Startup timeout. Default value is {@code 2 minutes}.
 	 *
 	 * @return The value of the {@code startupTimeout} attribute
 	 */

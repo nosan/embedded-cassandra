@@ -52,7 +52,7 @@ class LocalCassandraContextCustomizer implements ContextCustomizer {
 	 */
 	LocalCassandraContextCustomizer(@Nullable Class<?> testClass, @Nonnull LocalCassandra annotation) {
 		this.testClass = testClass;
-		this.annotation = Objects.requireNonNull(annotation, "@LocalFactory must not be null");
+		this.annotation = Objects.requireNonNull(annotation, "@LocalCassandra must not be null");
 	}
 
 	@Override

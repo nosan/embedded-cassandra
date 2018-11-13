@@ -21,14 +21,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Random;
-import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -39,16 +33,24 @@ import javax.annotation.Nullable;
  */
 public abstract class PortUtils {
 
-	private static final int MIN = 49152;
+	/**
+	 * The default minimum value for port ranges used when finding an available
+	 * socket port.
+	 */
+	public static final int MIN = 49152;
 
-	private static final int MAX = 65535;
+	/**
+	 * The default maximum value for port ranges used when finding an available
+	 * socket port.
+	 */
+	public static final int MAX = 65535;
 
-	private static final int RANGE = (MAX - MIN) + 1;
+	/**
+	 * The range value used when finding an available socket port.
+	 */
+	public static final int RANGE = (MAX - MIN) + 1;
 
 	private static final Random RANDOM = new Random(System.currentTimeMillis());
-
-	private static final InetAddress LOCALHOST = getLocalhost();
-
 
 	/**
 	 * Find a free {@code TCP} port.
@@ -57,50 +59,26 @@ public abstract class PortUtils {
 	 * @throws IllegalStateException if port could not be found
 	 */
 	public static int getPort() {
+		return getPort(NetworkUtils.getLocalhost());
+	}
+
+	/**
+	 * Find a free {@code TCP} port.
+	 *
+	 * @param address the address
+	 * @return a port
+	 * @throws IllegalStateException if port could not be found
+	 * @since 1.1.0
+	 */
+	public static int getPort(@Nullable InetAddress address) {
 		for (int i = 0; i < RANGE; i++) {
 			int port = MIN + RANDOM.nextInt(RANGE);
-			if (isPortAvailable(port)) {
+			if (isPortAvailable(address, port)) {
 				return port;
 			}
 		}
-		throw new IllegalStateException(String.format("Could not find an available port in the range [%d, %d])",
+		throw new IllegalStateException(String.format("Could not find an available port in the range [%d, %d]",
 				MIN, MAX));
-
-	}
-
-	/**
-	 * Find 'N' free {@code TCP} ports.
-	 *
-	 * @param count the number of available ports to find
-	 * @return free ports
-	 * @throws IllegalStateException if ports could not be found
-	 */
-	@Nonnull
-	public static Collection<Integer> getPorts(int count) {
-		if (count <= 0) {
-			return Collections.emptySet();
-		}
-		Set<Integer> ports = new LinkedHashSet<>();
-		for (int i = 0; i < RANGE; i++) {
-			ports.add(getPort());
-			if (ports.size() == count) {
-				return ports;
-			}
-		}
-		throw new IllegalStateException(String.format("Could not find (%d) ports in the range [%d, %d])",
-				count, MIN, MAX));
-	}
-
-	/**
-	 * Test whether the {@code TCP} port is busy or not.
-	 *
-	 * @param address the address
-	 * @param port the TCP port
-	 * @return {@code true} if port is busy, otherwise {@code false}
-	 * @throws IllegalArgumentException if host is unknown
-	 */
-	public static boolean isPortBusy(@Nullable String address, int port) {
-		return isPortBusy(getInetAddress(address), port);
 	}
 
 	/**
@@ -112,7 +90,7 @@ public abstract class PortUtils {
 	 */
 	public static boolean isPortBusy(@Nullable InetAddress address, int port) {
 		try (Socket s = new Socket()) {
-			s.connect(getInetSocketAddress(address, port));
+			s.connect(getInetSocketAddress(address, port), 100);
 			return true;
 		}
 		catch (IOException ex) {
@@ -120,10 +98,9 @@ public abstract class PortUtils {
 		}
 	}
 
-
-	private static boolean isPortAvailable(int port) {
+	private static boolean isPortAvailable(InetAddress address, int port) {
 		try (ServerSocket ss = new ServerSocket()) {
-			ss.bind(getInetSocketAddress(LOCALHOST, port), 1);
+			ss.bind(getInetSocketAddress(address, port), 1);
 			return true;
 		}
 		catch (Exception ex) {
@@ -131,33 +108,11 @@ public abstract class PortUtils {
 		}
 	}
 
-
-	private static InetAddress getInetAddress(String address) {
-		if (StringUtils.hasText(address)) {
-			try {
-				return InetAddress.getByName(address);
-			}
-			catch (UnknownHostException ex) {
-				throw new IllegalArgumentException(ex);
-			}
-		}
-		return LOCALHOST;
-	}
-
 	private static InetSocketAddress getInetSocketAddress(InetAddress address, int port) {
 		if (address != null) {
 			return new InetSocketAddress(address, port);
 		}
-		return new InetSocketAddress(LOCALHOST, port);
-	}
-
-	private static InetAddress getLocalhost() {
-		try {
-			return InetAddress.getByName("localhost");
-		}
-		catch (UnknownHostException ex) {
-			return InetAddress.getLoopbackAddress();
-		}
+		return new InetSocketAddress(NetworkUtils.getLocalhost(), port);
 	}
 
 }

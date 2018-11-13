@@ -19,9 +19,15 @@ package com.github.nosan.embedded.cassandra.test.spring;
 import java.nio.file.Paths;
 import java.time.Duration;
 
+import javax.annotation.Nonnull;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -43,8 +49,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @LocalCassandra(version = "2.2.13", configurationFile = "classpath:/cassandra.yaml",
 		logbackFile = "classpath:/logback-test.xml",
 		rackFile = "classpath:/rack.properties",
-		workingDirectory = "target/cassandra", javaHome = "target/java", jvmOptions = {"-Dtest.property=property"},
-		topologyFile = "classpath:/topology.properties", startupTimeout = 0)
+		workingDirectory = "target/cassandra", javaHome = "target/java",
+		jvmOptions = {"-Dtest.property=property"},
+		topologyFile = "classpath:/topology.properties", startupTimeout = 240000,
+		replace = EmbeddedCassandra.Replace.NONE)
 public class LocalCassandraAnnotationTests {
 
 	@Autowired
@@ -60,7 +68,7 @@ public class LocalCassandraAnnotationTests {
 		assertThat(this.factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
 		assertThat(this.factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
 		assertThat(this.factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
-		assertThat(this.factory.getStartupTimeout()).isEqualTo(Duration.ofMillis(0));
+		assertThat(this.factory.getStartupTimeout()).isEqualTo(Duration.ofMillis(240000));
 		assertThat(this.factory.getLogbackFile()).isEqualTo(ClassLoader.getSystemResource("logback-test.xml"));
 		assertThat(this.factory.getTopologyFile()).isEqualTo(ClassLoader.getSystemResource("topology.properties"));
 		assertThat(this.factory.getRackFile()).isEqualTo(ClassLoader.getSystemResource("rack.properties"));
@@ -70,11 +78,22 @@ public class LocalCassandraAnnotationTests {
 	}
 
 	@Configuration
-	static class TestConfiguration {
+	static class TestConfiguration implements BeanDefinitionRegistryPostProcessor {
 
 		@Bean
 		public RemoteArtifactFactory remoteArtifactFactory() {
 			return new RemoteArtifactFactory();
+		}
+
+
+		@Override
+		public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
+			registry.removeBeanDefinition(EmbeddedCassandraFactoryBean.BEAN_NAME);
+		}
+
+		@Override
+		public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
+
 		}
 	}
 

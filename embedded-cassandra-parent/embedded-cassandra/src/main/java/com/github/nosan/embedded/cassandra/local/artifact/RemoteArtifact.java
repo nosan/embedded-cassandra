@@ -101,6 +101,9 @@ class RemoteArtifact implements Artifact {
 	public Path get() throws IOException {
 		URL[] urls = this.urlFactory.create(this.version);
 		Objects.requireNonNull(urls, "URLs must not be null");
+		if (urls.length == 0) {
+			throw new IOException("URLs must not be empty");
+		}
 		if (!Files.exists(this.directory)) {
 			Files.createDirectories(this.directory);
 		}
@@ -118,7 +121,9 @@ class RemoteArtifact implements Artifact {
 			try {
 				Path target = this.directory.resolve(getName(url));
 				if (!Files.exists(target)) {
-					log.debug("({}) doesn't exist, it will be downloaded from ({})", target, url);
+					if (log.isDebugEnabled()) {
+						log.debug("({}) doesn't exist, it will be downloaded from ({})", target, url);
+					}
 					Path source = download(url);
 					try {
 						if (target.getParent() != null) {
@@ -146,8 +151,7 @@ class RemoteArtifact implements Artifact {
 				}
 			}
 		}
-		throw Objects.requireNonNull(exception, "Exception must not be null.");
-
+		throw exception;
 	}
 
 

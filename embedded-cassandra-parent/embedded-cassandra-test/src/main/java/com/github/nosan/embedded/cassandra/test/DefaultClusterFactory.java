@@ -47,21 +47,21 @@ public class DefaultClusterFactory implements ClusterFactory {
 		queryOptions.setRefreshSchemaIntervalMillis(0);
 
 		PoolingOptions poolingOptions = new PoolingOptions()
-				.setPoolTimeoutMillis(10000)
+				.setPoolTimeoutMillis(15000)
 				.setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
 				.setMaxRequestsPerConnection(HostDistance.REMOTE, 2048)
 				.setConnectionsPerHost(HostDistance.LOCAL, 4, 10)
 				.setConnectionsPerHost(HostDistance.REMOTE, 2, 4);
 
 		SocketOptions socketOptions = new SocketOptions();
-		socketOptions.setConnectTimeoutMillis(10000);
-		socketOptions.setReadTimeoutMillis(10000);
+		socketOptions.setConnectTimeoutMillis(15000);
+		socketOptions.setReadTimeoutMillis(15000);
 
 		Cluster.Builder builder = Cluster.builder()
-				.addContactPoint(Objects.toString(settings.getAddress(), "localhost"))
+				.addContactPoints(settings.getRealAddress())
 				.withClusterName(settings.getClusterName())
 				.withCredentials("cassandra", "cassandra")
-				.withPort((settings.getPort() != -1) ? settings.getPort() : 9042)
+				.withPort(settings.getPort())
 				.withSocketOptions(socketOptions)
 				.withQueryOptions(queryOptions)
 				.withPoolingOptions(poolingOptions)

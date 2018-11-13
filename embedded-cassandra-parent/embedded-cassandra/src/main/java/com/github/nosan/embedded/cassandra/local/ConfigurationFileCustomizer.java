@@ -73,7 +73,9 @@ class ConfigurationFileCustomizer implements DirectoryCustomizer {
 			}
 		}
 		Path target = directory.resolve("conf/cassandra.yaml");
-		log.debug("Replace ({}) with ({})", target, source);
+		if (log.isDebugEnabled()) {
+			log.debug("Replace ({}) with ({})", target, source);
+		}
 		try (InputStream is = source.openStream()) {
 			Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
 		}

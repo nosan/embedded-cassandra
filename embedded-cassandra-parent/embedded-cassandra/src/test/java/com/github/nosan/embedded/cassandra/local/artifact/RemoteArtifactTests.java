@@ -161,9 +161,7 @@ public class RemoteArtifactTests {
 	@Test
 	public void readTimeoutIsExceeded() throws Exception {
 		HttpServer server = this.webServer.get();
-		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
-			sleep(1200);
-		});
+		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(1200));
 
 		this.throwable.expect(SocketTimeoutException.class);
 		this.throwable.expectMessage("Read timed out");

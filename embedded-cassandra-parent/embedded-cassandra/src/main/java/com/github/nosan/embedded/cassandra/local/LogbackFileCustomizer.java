@@ -59,7 +59,9 @@ class LogbackFileCustomizer implements DirectoryCustomizer {
 			logbackFile = ClassLoader.getSystemResource("com/github/nosan/embedded/cassandra/local/logback.xml");
 		}
 		Path target = directory.resolve("conf/logback.xml");
-		log.debug("Replace ({}) with ({})", target, logbackFile);
+		if (log.isDebugEnabled()) {
+			log.debug("Replace ({}) with ({})", target, logbackFile);
+		}
 		try (InputStream is = logbackFile.openStream()) {
 			Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
 		}

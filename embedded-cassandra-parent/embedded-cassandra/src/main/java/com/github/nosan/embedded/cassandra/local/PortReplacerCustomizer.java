@@ -18,20 +18,23 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.reader.UnicodeReader;
+import org.yaml.snakeyaml.Yaml;
 
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
-import com.github.nosan.embedded.cassandra.util.StreamUtils;
 
 /**
  * {@link DirectoryCustomizer} to replace all {@code 0} ports in a {@code cassandra.yaml}.
@@ -43,36 +46,47 @@ class PortReplacerCustomizer implements DirectoryCustomizer {
 
 	private static final Logger log = LoggerFactory.getLogger(PortReplacerCustomizer.class);
 
+	@Nonnull
+	private final Version version;
+
+	PortReplacerCustomizer(@Nonnull Version version) {
+		this.version = version;
+	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void customize(@Nonnull Path directory) throws IOException {
-		Iterator<Integer> ports = PortUtils.getPorts(5).iterator();
+		Yaml yaml = new Yaml();
 		Path target = directory.resolve("conf/cassandra.yaml");
-		String source = StreamUtils.toString(new UnicodeReader(Files.newInputStream(target)));
-		Pattern pattern = Pattern.compile("^([a-z_]+)_port:\\s*([0-9]+)\\s*$", Pattern.MULTILINE);
-		log.debug("Replace any ({}) in a ({})", pattern, target);
-		Matcher matcher = pattern.matcher(source);
-		StringBuffer sb = new StringBuffer();
-		while (matcher.find()) {
-			String name = matcher.group(1);
-			int port = Integer.parseInt(matcher.group(2));
-			matcher.appendReplacement(sb, String.format("%s_port: %s", name, getPort(port, ports)));
+		Version version = this.version;
+		Map<String, Object> source = new LinkedHashMap<>();
+		try (InputStream is = Files.newInputStream(target)) {
+			Optional.ofNullable(yaml.loadAs(is, Map.class)).ifPresent(source::putAll);
 		}
-		matcher.appendTail(sb);
+		MapSettings settings = new MapSettings(source, version);
+		setPort(source, "native_transport_port", settings::getPort, settings::getRealAddress);
+		setPort(source, "native_transport_port_ssl", settings::getSslPort, settings::getRealAddress);
+		setPort(source, "rpc_port", settings::getRpcPort, settings::getRealAddress);
+		setPort(source, "storage_port", settings::getStoragePort, settings::getRealListenAddress);
+		setPort(source, "ssl_storage_port", settings::getSslStoragePort, settings::getRealListenAddress);
 		try (BufferedWriter writer = Files.newBufferedWriter(target)) {
-			writer.write(sb.toString());
+			yaml.dump(source, writer);
 		}
-
 	}
 
-	private static int getPort(int port, Iterator<Integer> ports) {
-		if (port != 0) {
-			return port;
+	private static void setPort(Map<String, Object> source, String property, Supplier<Integer> portSupplier,
+			Supplier<InetAddress> addressSupplier) {
+		if (source.containsKey(property)) {
+			Integer port = portSupplier.get();
+			if (port != null && port == 0) {
+				InetAddress address = addressSupplier.get();
+				port = PortUtils.getPort(address);
+				if (log.isDebugEnabled()) {
+					log.debug("Replace {}: 0 -> {}  ", property, port);
+				}
+				source.put(property, port);
+			}
 		}
-		if (ports.hasNext()) {
-			return ports.next();
-		}
-		//edge case, maybe in the future new ports will be added and this method should not fail.
-		return PortUtils.getPort();
 	}
+
 }

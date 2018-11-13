@@ -142,15 +142,19 @@ class CqlExecutionListener extends AbstractTestExecutionListener {
 					return bf.getBean(Cluster.class);
 				}
 				catch (BeansException ex) {
-					log.debug(String.format("Failed to retrieve Cluster primary bean for a test context %s",
-							testContext), ex);
+					if (log.isDebugEnabled()) {
+						log.debug(String.format("Failed to retrieve Cluster primary bean for a test context %s",
+								testContext), ex);
+					}
 				}
 			}
 			return bf.getBean("cluster", Cluster.class);
 		}
 		catch (BeansException ex) {
-			log.debug(String.format("Failed to retrieve Cluster named 'cluster' bean for a test context %s",
-					testContext), ex);
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Failed to retrieve Cluster named 'cluster' bean for a test context %s",
+						testContext), ex);
+			}
 			return null;
 		}
 	}

@@ -26,6 +26,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.yaml.snakeyaml.Yaml;
 
+import com.github.nosan.embedded.cassandra.Version;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -43,9 +45,9 @@ public class PortReplacerCustomizerTests {
 	@Test
 	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		PortReplacerCustomizer customizer = new PortReplacerCustomizer();
-		try (InputStream inputStream = getClass()
-				.getResourceAsStream("/com/github/nosan/embedded/cassandra/local/cassandra.yaml")) {
+		Version version = new Version(3, 11, 3);
+		PortReplacerCustomizer customizer = new PortReplacerCustomizer(version);
+		try (InputStream inputStream = ClassLoader.getSystemResourceAsStream("cassandra-all-ports.yaml")) {
 			Files.copy(inputStream, directory.resolve("cassandra.yaml"));
 		}
 
@@ -54,12 +56,12 @@ public class PortReplacerCustomizerTests {
 		assertThat(directory.resolve("cassandra.yaml")).exists();
 		MapSettings settings;
 		try (InputStream inputStream = Files.newInputStream(directory.resolve("cassandra.yaml"))) {
-			settings = new MapSettings(new Yaml().loadAs(inputStream, Map.class));
+			settings = new MapSettings(new Yaml().loadAs(inputStream, Map.class), version);
 		}
 		assertThat(settings.getPort()).isNotEqualTo(0);
 		assertThat(settings.getRpcPort()).isNotEqualTo(0);
 		assertThat(settings.getStoragePort()).isNotEqualTo(0);
-		assertThat(settings.getSslPort()).isNull();
+		assertThat(settings.getSslPort()).isNotEqualTo(0);
 		assertThat(settings.getSslStoragePort()).isNotEqualTo(0);
 
 	}

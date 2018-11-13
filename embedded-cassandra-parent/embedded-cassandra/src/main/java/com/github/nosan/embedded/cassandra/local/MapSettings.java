@@ -16,13 +16,18 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -31,10 +36,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-class MapSettings implements Settings {
-
-	@Nullable
-	private final String clusterName;
+final class MapSettings implements Settings {
 
 	private final int port;
 
@@ -48,51 +50,74 @@ class MapSettings implements Settings {
 
 	private final boolean startRpc;
 
+	@Nonnull
+	private final Version version;
+
+	@Nullable
+	private final String clusterName;
+
 	@Nullable
 	private final Integer sslPort;
 
 	@Nullable
-	private final String address;
+	private final String rpcAddress;
 
 	@Nullable
 	private final String listenAddress;
 
 	@Nullable
-	private final String listenInterface;
+	private final String broadcastAddress;
 
 	@Nullable
-	private final String broadcastAddress;
+	private final String broadcastRpcAddress;
+
+	@Nullable
+	private final String listenInterface;
 
 	@Nullable
 	private final String rpcInterface;
 
-	@Nullable
-	private final String broadcastRpcAddress;
+	private boolean rpcInterfacePreferIpv6;
+
+	private boolean listenInterfacePreferIpv6;
+
+	private boolean listenOnBroadcastAddress;
 
 	/**
 	 * Creates a new {@link MapSettings}.
 	 *
 	 * @param source a source {@code Map}
+	 * @param version a version
 	 */
-	MapSettings(@Nullable Map<?, ?> source) {
-		this.clusterName = get("cluster_name", source);
-		this.port = getInt("native_transport_port", source);
-		this.address = get("rpc_address", source);
-		this.rpcPort = getInt("rpc_port", source);
-		this.storagePort = getInt("storage_port", source);
-		this.sslStoragePort = getInt("ssl_storage_port", source);
-		this.startNativeTransport = getBool("start_native_transport", source);
-		this.startRpc = getBool("start_rpc", source);
-		this.sslPort = getInteger("native_transport_port_ssl", source);
-		this.listenAddress = get("listen_address", source);
-		this.listenInterface = get("listen_interface", source);
-		this.broadcastAddress = get("broadcast_address", source);
-		this.rpcInterface = get("rpc_interface", source);
-		this.broadcastRpcAddress = get("broadcast_rpc_address", source);
+	MapSettings(@Nullable Map<?, ?> source, @Nonnull Version version) {
+		Map<?, ?> values = new LinkedHashMap<>((source != null) ? source : Collections.emptyMap());
+
+		this.version = version;
+		this.clusterName = get("cluster_name", values).orElse("Test Cluster");
+
+		this.port = getInt("native_transport_port", values).orElse(9042);
+		this.rpcPort = getInt("rpc_port", values).orElse(9160);
+		this.storagePort = getInt("storage_port", values).orElse(7000);
+		this.sslStoragePort = getInt("ssl_storage_port", values).orElse(7001);
+		this.sslPort = getInt("native_transport_port_ssl", values).orElse(null);
+
+		this.startNativeTransport = getBool("start_native_transport", values).orElse(true);
+		this.startRpc = getBool("start_rpc", values).orElse(version.getMajor() < 4);
+
+		this.rpcAddress = getAddress(values);
+		this.rpcInterface = get("rpc_interface", values).orElse(null);
+		this.rpcInterfacePreferIpv6 = getBool("rpc_interface_prefer_ipv6", values).orElse(false);
+		this.broadcastRpcAddress = get("broadcast_rpc_address", values).orElse(null);
+
+		this.listenInterface = get("listen_interface", values).orElse(null);
+		this.listenAddress = getListenAddress(values);
+		this.broadcastAddress = get("broadcast_address", values).orElse(null);
+		this.listenInterfacePreferIpv6 = getBool("listen_interface_prefer_ipv6", values).orElse(false);
+		this.listenOnBroadcastAddress = getBool("listen_on_broadcast_address", values).orElse(false);
 	}
 
-	@Override
 	@Nullable
+	@Override
 	public String getClusterName() {
 		return this.clusterName;
 	}
@@ -107,38 +132,38 @@ class MapSettings implements Settings {
 		return this.sslStoragePort;
 	}
 
-	@Override
 	@Nullable
+	@Override
 	public String getListenAddress() {
 		return this.listenAddress;
 	}
 
-	@Override
 	@Nullable
+	@Override
 	public String getListenInterface() {
 		return this.listenInterface;
 	}
 
-	@Override
 	@Nullable
+	@Override
 	public String getBroadcastAddress() {
 		return this.broadcastAddress;
 	}
 
-	@Override
 	@Nullable
-	public String getAddress() {
-		return this.address;
+	@Override
+	public String getRpcAddress() {
+		return this.rpcAddress;
 	}
 
-	@Override
 	@Nullable
+	@Override
 	public String getRpcInterface() {
 		return this.rpcInterface;
 	}
 
-	@Override
 	@Nullable
+	@Override
 	public String getBroadcastRpcAddress() {
 		return this.broadcastRpcAddress;
 	}
@@ -169,11 +194,26 @@ class MapSettings implements Settings {
 		return this.rpcPort;
 	}
 
+	@Nonnull
 	@Override
-	public int hashCode() {
-		return Objects.hash(this.clusterName, this.port, this.rpcPort, this.storagePort, this.sslStoragePort,
-				this.startNativeTransport, this.startRpc, this.sslPort, this.address, this.listenAddress,
-				this.listenInterface, this.broadcastAddress, this.rpcInterface, this.broadcastRpcAddress);
+	public Version getVersion() {
+		return this.version;
+	}
+
+	@Override
+	public boolean isListenOnBroadcastAddress() {
+		return this.listenOnBroadcastAddress;
+	}
+
+	@Override
+	public boolean isListenInterfacePreferIpv6() {
+		return this.listenInterfacePreferIpv6;
+	}
+
+	@Override
+	public boolean isRpcInterfacePreferIpv6() {
+		return this.rpcInterfacePreferIpv6;
+
 	}
 
 	@Override
@@ -181,68 +221,98 @@ class MapSettings implements Settings {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof Settings)) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		Settings settings = (Settings) other;
-		return this.port == settings.getPort() &&
-				this.rpcPort == settings.getRpcPort() &&
-				this.storagePort == settings.getStoragePort() &&
-				this.sslStoragePort == settings.getSslStoragePort() &&
-				this.startNativeTransport == settings.isStartNativeTransport() &&
-				this.startRpc == settings.isStartRpc() &&
-				Objects.equals(this.clusterName, settings.getClusterName()) &&
-				Objects.equals(this.sslPort, settings.getSslPort()) &&
-				Objects.equals(this.address, settings.getAddress()) &&
-				Objects.equals(this.listenAddress, settings.getListenAddress()) &&
-				Objects.equals(this.listenInterface, settings.getListenInterface()) &&
-				Objects.equals(this.broadcastAddress, settings.getBroadcastAddress()) &&
-				Objects.equals(this.rpcInterface, settings.getRpcInterface()) &&
-				Objects.equals(this.broadcastRpcAddress, settings.getBroadcastRpcAddress());
+		MapSettings that = (MapSettings) other;
+		return this.port == that.port &&
+				this.rpcPort == that.rpcPort &&
+				this.storagePort == that.storagePort &&
+				this.sslStoragePort == that.sslStoragePort &&
+				this.startNativeTransport == that.startNativeTransport &&
+				this.startRpc == that.startRpc &&
+				this.rpcInterfacePreferIpv6 == that.rpcInterfacePreferIpv6 &&
+				this.listenInterfacePreferIpv6 == that.listenInterfacePreferIpv6 &&
+				this.listenOnBroadcastAddress == that.listenOnBroadcastAddress &&
+				Objects.equals(this.clusterName, that.clusterName) &&
+				Objects.equals(this.sslPort, that.sslPort) &&
+				Objects.equals(this.rpcAddress, that.rpcAddress) &&
+				Objects.equals(this.listenAddress, that.listenAddress) &&
+				Objects.equals(this.broadcastAddress, that.broadcastAddress) &&
+				Objects.equals(this.broadcastRpcAddress, that.broadcastRpcAddress) &&
+				Objects.equals(this.listenInterface, that.listenInterface) &&
+				Objects.equals(this.rpcInterface, that.rpcInterface) &&
+				Objects.equals(this.version, that.version);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.port, this.rpcPort, this.storagePort, this.sslStoragePort, this.startNativeTransport,
+				this.startRpc, this.clusterName, this.sslPort, this.rpcAddress, this.listenAddress,
+				this.broadcastAddress, this.broadcastRpcAddress, this.listenInterface, this.rpcInterface, this.version,
+				this.rpcInterfacePreferIpv6, this.listenInterfacePreferIpv6, this.listenOnBroadcastAddress);
 	}
 
 	@Override
 	@Nonnull
 	public String toString() {
-		return '{' +
-				"clusterName=" + this.clusterName +
-				", port=" + this.port +
-				", rpcPort=" + this.rpcPort +
-				", storagePort=" + this.storagePort +
-				", sslStoragePort=" + this.sslStoragePort +
-				", startNativeTransport=" + this.startNativeTransport +
-				", startRpc=" + this.startRpc +
-				", sslPort=" + this.sslPort +
-				", address=" + this.address +
-				", listenAddress=" + this.listenAddress +
-				", listenInterface=" + this.listenInterface +
-				", broadcastAddress=" + this.broadcastAddress +
-				", rpcInterface=" + this.rpcInterface +
-				", broadcastRpcAddress=" + this.broadcastRpcAddress +
-				'}';
+		return new StringJoiner(", ", MapSettings.class.getSimpleName() + "[", "]")
+				.add("port=" + this.port)
+				.add("rpcPort=" + this.rpcPort)
+				.add("storagePort=" + this.storagePort)
+				.add("sslStoragePort=" + this.sslStoragePort)
+				.add("startNativeTransport=" + this.startNativeTransport)
+				.add("startRpc=" + this.startRpc)
+				.add("clusterName='" + this.clusterName + "'")
+				.add("sslPort=" + this.sslPort)
+				.add("rpcAddress='" + this.rpcAddress + "'")
+				.add("listenAddress='" + this.listenAddress + "'")
+				.add("broadcastAddress='" + this.broadcastAddress + "'")
+				.add("broadcastRpcAddress='" + this.broadcastRpcAddress + "'")
+				.add("listenInterface='" + this.listenInterface + "'")
+				.add("rpcInterface='" + this.rpcInterface + "'")
+				.add("version=" + this.version)
+				.add("rpcInterfacePreferIpv6=" + this.rpcInterfacePreferIpv6)
+				.add("listenInterfacePreferIpv6=" + this.listenInterfacePreferIpv6)
+				.add("listenOnBroadcastAddress=" + this.listenOnBroadcastAddress)
+				.toString();
 	}
 
-
-	@Nullable
-	private static Integer getInteger(String name, Map<?, ?> source) {
-		String value = get(name, source);
-		return StringUtils.hasText(value) ? Integer.parseInt(value) : null;
+	private static Optional<Integer> getInt(String name, Map<?, ?> source) {
+		return get(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
 	}
 
-	private static int getInt(String name, Map<?, ?> source) {
-		String value = get(name, source);
-		return StringUtils.hasText(value) ? Integer.parseInt(value) : -1;
-
+	private static Optional<Boolean> getBool(String name, Map<?, ?> source) {
+		return get(name, source).map(Boolean::valueOf);
 	}
 
-	private static boolean getBool(String name, Map<?, ?> source) {
-		return Boolean.valueOf(get(name, source));
+	private static Optional<String> get(String name, Map<?, ?> source) {
+		Object val = source.get(name);
+		return Optional.ofNullable(val).map(String::valueOf);
 	}
 
-	@Nullable
-	private static String get(String name, Map<?, ?> source) {
-		Object val = (source != null) ? source.get(name) : null;
-		return (val != null) ? val.toString() : null;
+	private static String getListenAddress(Map<?, ?> values) {
+		String listenAddress = get("listen_address", values).orElse(null);
+		if (StringUtils.hasText(listenAddress)) {
+			return listenAddress;
+		}
+		String listenInterface = get("listen_interface", values).orElse(null);
+		if (!StringUtils.hasText(listenInterface)) {
+			return "localhost";
+		}
+		return null;
+	}
+
+	private static String getAddress(Map<?, ?> values) {
+		String rpcAddress = get("rpc_address", values).orElse(null);
+		if (StringUtils.hasText(rpcAddress)) {
+			return rpcAddress;
+		}
+		String rpcInterface = get("rpc_interface", values).orElse(null);
+		if (!StringUtils.hasText(rpcInterface)) {
+			return "localhost";
+		}
+		return null;
 	}
 
 

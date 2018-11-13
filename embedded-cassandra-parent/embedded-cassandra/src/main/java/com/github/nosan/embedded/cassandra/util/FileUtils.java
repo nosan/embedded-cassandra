@@ -94,7 +94,7 @@ public abstract class FileUtils {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Files.delete(file);
+				Files.deleteIfExists(file);
 				return FileVisitResult.CONTINUE;
 			}
 
@@ -103,7 +103,7 @@ public abstract class FileUtils {
 				if (ex != null) {
 					throw ex;
 				}
-				Files.delete(dir);
+				Files.deleteIfExists(dir);
 				return FileVisitResult.CONTINUE;
 			}
 		});

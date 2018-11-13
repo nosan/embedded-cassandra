@@ -55,7 +55,9 @@ class RackFileCustomizer implements DirectoryCustomizer {
 	public void customize(@Nonnull Path directory) throws IOException {
 		if (this.rackFile != null) {
 			Path target = directory.resolve("conf/cassandra-rackdc.properties");
-			log.debug("Replace ({}) with ({})", target, this.rackFile);
+			if (log.isDebugEnabled()) {
+				log.debug("Replace ({}) with ({})", target, this.rackFile);
+			}
 
 			try (InputStream is = this.rackFile.openStream()) {
 				Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);

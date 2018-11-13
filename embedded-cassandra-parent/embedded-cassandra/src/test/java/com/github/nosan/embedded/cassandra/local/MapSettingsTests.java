@@ -23,6 +23,8 @@ import java.util.Map;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
+import com.github.nosan.embedded.cassandra.Version;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -49,6 +51,64 @@ public class MapSettingsTests {
 				.isEqualTo(load("/cassandra.yaml"));
 	}
 
+	@Test
+	public void prettyToString() throws Exception {
+		assertThat(load("/cassandra.yaml").toString())
+				.isEqualTo("MapSettings[port=9042, rpcPort=9160, storagePort=7000, sslStoragePort=7001," +
+						" startNativeTransport=true, startRpc=false, clusterName='Test Cluster', " +
+						"sslPort=9142, rpcAddress='localhost', listenAddress='localhost'," +
+						" broadcastAddress='1.2.3.4', broadcastRpcAddress='1.2.3.4', listenInterface='eth0', " +
+						"rpcInterface='eth1', version=3.11.3, rpcInterfacePreferIpv6=false, " +
+						"listenInterfacePreferIpv6=false, listenOnBroadcastAddress=false]");
+	}
+
+	@Test
+	public void defaultSettingsV3() {
+		MapSettings settings = new MapSettings(null, new Version(3, 11, 3));
+		assertThat(settings.getClusterName()).isEqualTo("Test Cluster");
+		assertThat(settings.getPort()).isEqualTo(9042);
+		assertThat(settings.getRpcPort()).isEqualTo(9160);
+		assertThat(settings.getStoragePort()).isEqualTo(7000);
+		assertThat(settings.getSslStoragePort()).isEqualTo(7001);
+		assertThat(settings.isStartNativeTransport()).isTrue();
+		assertThat(settings.isStartRpc()).isTrue();
+		assertThat(settings.getSslPort()).isNull();
+		assertThat(settings.getRpcAddress()).isEqualTo("localhost");
+		assertThat(settings.getListenAddress()).isEqualTo("localhost");
+		assertThat(settings.getListenInterface()).isNull();
+		assertThat(settings.getBroadcastAddress()).isNull();
+		assertThat(settings.getRpcInterface()).isNull();
+		assertThat(settings.getVersion()).isEqualTo(new Version(3, 11, 3));
+		assertThat(settings.isListenInterfacePreferIpv6()).isEqualTo(false);
+		assertThat(settings.isRpcInterfacePreferIpv6()).isEqualTo(false);
+		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
+		assertThat(settings.getBroadcastRpcAddress()).isNull();
+	}
+
+
+	@Test
+	public void defaultSettingsV4() {
+		MapSettings settings = new MapSettings(null, new Version(4, 0, 0));
+		assertThat(settings.getClusterName()).isEqualTo("Test Cluster");
+		assertThat(settings.getPort()).isEqualTo(9042);
+		assertThat(settings.getRpcPort()).isEqualTo(9160);
+		assertThat(settings.getStoragePort()).isEqualTo(7000);
+		assertThat(settings.getSslStoragePort()).isEqualTo(7001);
+		assertThat(settings.isStartNativeTransport()).isTrue();
+		assertThat(settings.isStartRpc()).isFalse();
+		assertThat(settings.getSslPort()).isNull();
+		assertThat(settings.getRpcAddress()).isEqualTo("localhost");
+		assertThat(settings.getListenAddress()).isEqualTo("localhost");
+		assertThat(settings.getListenInterface()).isNull();
+		assertThat(settings.getBroadcastAddress()).isNull();
+		assertThat(settings.getRpcInterface()).isNull();
+		assertThat(settings.getVersion()).isEqualTo(new Version(4, 0, 0));
+		assertThat(settings.isListenInterfacePreferIpv6()).isEqualTo(false);
+		assertThat(settings.isRpcInterfacePreferIpv6()).isEqualTo(false);
+		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
+		assertThat(settings.getBroadcastRpcAddress()).isNull();
+	}
+
 	private void assertSettings(MapSettings settings) {
 		assertThat(settings.getClusterName()).isEqualTo("Test Cluster");
 		assertThat(settings.getPort()).isEqualTo(9042);
@@ -58,18 +118,21 @@ public class MapSettingsTests {
 		assertThat(settings.isStartNativeTransport()).isTrue();
 		assertThat(settings.isStartRpc()).isFalse();
 		assertThat(settings.getSslPort()).isEqualTo(9142);
-		assertThat(settings.getAddress()).isEqualTo("localhost");
+		assertThat(settings.getRpcAddress()).isEqualTo("localhost");
 		assertThat(settings.getListenAddress()).isEqualTo("localhost");
 		assertThat(settings.getListenInterface()).isEqualTo("eth0");
 		assertThat(settings.getBroadcastAddress()).isEqualTo("1.2.3.4");
 		assertThat(settings.getRpcInterface()).isEqualTo("eth1");
+		assertThat(settings.getVersion()).isEqualTo(new Version(3, 11, 3));
+		assertThat(settings.isListenInterfacePreferIpv6()).isEqualTo(false);
+		assertThat(settings.isRpcInterfacePreferIpv6()).isEqualTo(false);
+		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
 		assertThat(settings.getBroadcastRpcAddress()).isEqualTo("1.2.3.4");
-
 	}
 
 	private MapSettings load(String resource) throws IOException {
 		try (InputStream is = getClass().getResourceAsStream(resource)) {
-			return new MapSettings(new Yaml().loadAs(is, Map.class));
+			return new MapSettings(new Yaml().loadAs(is, Map.class), new Version(3, 11, 3));
 		}
 	}
 }

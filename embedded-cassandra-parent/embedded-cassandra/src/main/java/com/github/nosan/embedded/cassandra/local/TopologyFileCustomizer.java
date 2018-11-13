@@ -56,7 +56,9 @@ class TopologyFileCustomizer implements DirectoryCustomizer {
 	public void customize(@Nonnull Path directory) throws IOException {
 		if (this.topologyFile != null) {
 			Path target = directory.resolve("conf/cassandra-topology.properties");
-			log.debug("Replace ({}) with ({})", target, this.topologyFile);
+			if (log.isDebugEnabled()) {
+				log.debug("Replace ({}) with ({})", target, this.topologyFile);
+			}
 
 			try (InputStream is = this.topologyFile.openStream()) {
 				Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);

@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.datastax.driver.core.Cluster;
@@ -32,6 +33,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,7 +52,7 @@ public class DefaultClusterFactoryTests {
 
 	@Test
 	public void defaultSettings() {
-		Cluster cluster = this.factory.create(new TestSettings(-1, null, null));
+		Cluster cluster = this.factory.create(new TestSettings(9042, null, null));
 
 		Configuration configuration = cluster.getConfiguration();
 
@@ -62,8 +64,8 @@ public class DefaultClusterFactoryTests {
 
 
 		SocketOptions socketOptions = configuration.getSocketOptions();
-		assertThat(socketOptions.getConnectTimeoutMillis()).isEqualTo(10000);
-		assertThat(socketOptions.getReadTimeoutMillis()).isEqualTo(10000);
+		assertThat(socketOptions.getConnectTimeoutMillis()).isEqualTo(15000);
+		assertThat(socketOptions.getReadTimeoutMillis()).isEqualTo(15000);
 
 		MetricsOptions metricsOptions = configuration.getMetricsOptions();
 		assertThat(metricsOptions.isEnabled()).isFalse();
@@ -82,7 +84,7 @@ public class DefaultClusterFactoryTests {
 		assertThat(poolingOptions.getMaxConnectionsPerHost(HostDistance.LOCAL)).isEqualTo(10);
 		assertThat(poolingOptions.getCoreConnectionsPerHost(HostDistance.REMOTE)).isEqualTo(2);
 		assertThat(poolingOptions.getMaxConnectionsPerHost(HostDistance.REMOTE)).isEqualTo(4);
-		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(10000);
+		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(15000);
 
 	}
 
@@ -90,7 +92,12 @@ public class DefaultClusterFactoryTests {
 	public void customSettings() {
 		Cluster cluster = this.factory.create(new TestSettings(9000, "google.com", "my name"));
 
+
 		Configuration configuration = cluster.getConfiguration();
+
+		SocketOptions socketOptions = configuration.getSocketOptions();
+		socketOptions.setConnectTimeoutMillis(200);
+		socketOptions.setReadTimeoutMillis(200);
 
 		ProtocolOptions protocolOptions = configuration.getProtocolOptions();
 		assertThat(protocolOptions.getPort()).isEqualTo(9000);
@@ -133,7 +140,7 @@ public class DefaultClusterFactoryTests {
 			return -1;
 		}
 
-		@Nullable
+		@Nonnull
 		@Override
 		public String getListenAddress() {
 			return null;
@@ -145,15 +152,15 @@ public class DefaultClusterFactoryTests {
 			return null;
 		}
 
-		@Nullable
+		@Nonnull
 		@Override
 		public String getBroadcastAddress() {
 			return null;
 		}
 
-		@Nullable
+		@Nonnull
 		@Override
-		public String getAddress() {
+		public String getRpcAddress() {
 			return this.address;
 		}
 
@@ -163,7 +170,7 @@ public class DefaultClusterFactoryTests {
 			return null;
 		}
 
-		@Nullable
+		@Nonnull
 		@Override
 		public String getBroadcastRpcAddress() {
 			return null;
@@ -193,6 +200,27 @@ public class DefaultClusterFactoryTests {
 		@Override
 		public int getRpcPort() {
 			return -1;
+		}
+
+		@Nonnull
+		@Override
+		public Version getVersion() {
+			return null;
+		}
+
+		@Override
+		public boolean isListenOnBroadcastAddress() {
+			return false;
+		}
+
+		@Override
+		public boolean isListenInterfacePreferIpv6() {
+			return false;
+		}
+
+		@Override
+		public boolean isRpcInterfacePreferIpv6() {
+			return false;
 		}
 	}
 }

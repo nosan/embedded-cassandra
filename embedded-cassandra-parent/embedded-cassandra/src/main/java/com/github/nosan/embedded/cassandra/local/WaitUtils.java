@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.time.Duration;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -44,8 +43,6 @@ abstract class WaitUtils {
 	 */
 	static boolean await(@Nonnull Duration timeout, @Nonnull Callable<Boolean> action)
 			throws InterruptedException, Exception {
-		Objects.requireNonNull(timeout, "Timeout must not be null");
-		Objects.requireNonNull(action, "Action must not be null");
 		long start = System.nanoTime();
 		long rem = timeout.toNanos();
 		do {

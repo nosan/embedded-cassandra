@@ -87,6 +87,6 @@ public final class CqlScripts implements CqlScript {
 	@Override
 	@Nonnull
 	public String toString() {
-		return String.format("CQL Scripts (%s)", this.scripts);
+		return String.format("CQL Scripts %s", this.scripts);
 	}
 }

@@ -79,7 +79,9 @@ class DefaultDirectory implements Directory {
 	public Path initialize() throws IOException {
 		Path archive = this.artifact.get();
 		Path rootDirectory = this.directory;
-		log.debug("Initialize working directory ({})", rootDirectory);
+		if (log.isDebugEnabled()) {
+			log.debug("Initialize working directory ({})", rootDirectory);
+		}
 		try {
 			log.info("Extract ({}) into ({}). It takes a while...", archive, rootDirectory);
 			ArchiveUtils.extract(archive, rootDirectory, path -> {
@@ -109,7 +111,9 @@ class DefaultDirectory implements Directory {
 	@Override
 	public void destroy() throws IOException {
 		if (FileUtils.isTemporary(this.directory)) {
-			log.debug("Delete recursively working directory ({})", this.directory);
+			if (log.isDebugEnabled()) {
+				log.debug("Delete recursively working directory ({})", this.directory);
+			}
 			FileUtils.delete(this.directory);
 		}
 	}

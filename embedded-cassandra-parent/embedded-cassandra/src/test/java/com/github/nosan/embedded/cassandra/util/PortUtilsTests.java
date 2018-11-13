@@ -33,9 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class PortUtilsTests {
 
+
 	@Test
 	public void shouldGet10Ports() {
-		Set<Integer> ports = new LinkedHashSet<>(PortUtils.getPorts(10));
+		Set<Integer> ports = new LinkedHashSet<>();
+		while (ports.size() != 10) {
+			ports.add(PortUtils.getPort());
+		}
 		assertThat(ports).hasSize(10);
 	}
 
@@ -46,6 +50,5 @@ public class PortUtilsTests {
 		try (ServerSocket ss = new ServerSocket(port)) {
 			assertThat(PortUtils.isPortBusy(InetAddress.getLoopbackAddress(), ss.getLocalPort())).isTrue();
 		}
-
 	}
 }

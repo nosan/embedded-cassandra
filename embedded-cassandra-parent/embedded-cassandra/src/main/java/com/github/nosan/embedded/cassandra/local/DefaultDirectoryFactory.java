@@ -65,8 +65,7 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 	 * @param topologyFile URL to {@code cassandra-topology.properties}
 	 */
 	DefaultDirectoryFactory(@Nonnull Version version, @Nonnull Path directory, @Nullable URL configurationFile,
-			@Nullable URL logbackFile,
-			@Nullable URL rackFile, @Nullable URL topologyFile) {
+			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile) {
 		this.version = version;
 		this.directory = directory;
 		this.configurationFile = configurationFile;
@@ -83,7 +82,7 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 		customizers.add(new ConfigurationFileCustomizer(this.configurationFile, this.version));
 		customizers.add(new RackFileCustomizer(this.rackFile));
 		customizers.add(new TopologyFileCustomizer(this.topologyFile));
-		customizers.add(new PortReplacerCustomizer());
+		customizers.add(new PortReplacerCustomizer(this.version));
 		return new DefaultDirectory(this.directory, artifact, customizers);
 	}
 }

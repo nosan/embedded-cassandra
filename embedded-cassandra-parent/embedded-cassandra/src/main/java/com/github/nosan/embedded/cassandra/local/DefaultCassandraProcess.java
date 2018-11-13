@@ -79,6 +79,9 @@ class DefaultCassandraProcess implements CassandraProcess {
 	@Nullable
 	private Process process;
 
+	@Nullable
+	private Settings settings;
+
 	private long pid = -1;
 
 	/**
@@ -103,10 +106,10 @@ class DefaultCassandraProcess implements CassandraProcess {
 	@Nonnull
 	public Settings start() throws Exception {
 		Path directory = this.directory;
+		Settings settings = getSettings(directory, this.version);
+		this.settings = settings;
 		Path executable = OS.isWindows() ? directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
 		Path pidFile = directory.resolve(String.format("bin/%s.pid", UUID.randomUUID()));
-		Path logPath = directory.resolve("logs");
-		Path errorFile = logPath.resolve("hs_err_pid_%p.log");
 
 		this.pidFile = pidFile;
 
@@ -126,10 +129,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 		arguments.add("-p");
 		arguments.add(pidFile.toAbsolutePath());
-		arguments.add("-E");
-		arguments.add(errorFile.toAbsolutePath());
-		arguments.add("-H");
-		arguments.add(logPath.toAbsolutePath());
 
 		Map<String, String> environment = new LinkedHashMap<>();
 		String javaHome = getJavaHome(this.javaHome);
@@ -137,45 +136,34 @@ class DefaultCassandraProcess implements CassandraProcess {
 			environment.put("JAVA_HOME", javaHome);
 		}
 		List<String> jvmOptions = new ArrayList<>();
-		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", PortUtils.getPort()));
+		int jmxPort = PortUtils.getPort();
+		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", jmxPort));
 		jvmOptions.addAll(this.jvmOptions);
-		//travis and appveyor.
-		if (Boolean.valueOf(new SystemProperty("CASSANDRA.CI.BUILD").or("false"))) {
-			jvmOptions.add("-Xmx512m");
-			jvmOptions.add("-Xms512m");
-		}
+
 		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
 
-		OutputCapture outputCapture = new OutputCapture(20);
+		TransportUtils.verifyPorts(settings);
 
+		OutputCapture outputCapture = new OutputCapture(20);
 		Process process = new RunProcess(directory, environment, arguments)
 				.run(outputCapture, log::info);
+
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
-		log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
+
+		if (log.isDebugEnabled()) {
+			log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
+		}
 		Duration timeout = this.startupTimeout;
-		Settings settings = getSettings(directory);
-		if (timeout.toNanos() > 0) {
-			boolean result = WaitUtils.await(timeout, () -> {
-				if (!process.isAlive()) {
-					throwException(String.format("Cassandra has not be started. Please see logs (%s) for more details.",
-							logPath), outputCapture);
-				}
-				int storagePort = (settings.getStoragePort() != -1) ? settings.getStoragePort() : 7001;
-				int port = -1;
-				if (settings.isStartNativeTransport()) {
-					port = (settings.getPort() != -1) ? settings.getPort() : 9042;
-				}
-				else if (settings.isStartRpc()) {
-					port = (settings.getRpcPort() != -1) ? settings.getRpcPort() : 9160;
-				}
-				return PortUtils.isPortBusy(settings.getAddress(), storagePort) &&
-						(port == -1 || PortUtils.isPortBusy(settings.getAddress(), port));
-			});
-			if (!result) {
-				throwException(String.format("Cassandra has not be started. Please see logs (%s) for more details.",
-						logPath), outputCapture);
+		boolean result = WaitUtils.await(timeout, () -> {
+			if (!process.isAlive()) {
+				throwException("Cassandra Process is not alive. Please see logs for more details.", outputCapture);
 			}
+			return TransportUtils.isReady(settings);
+		});
+		if (!result) {
+			throwException(String.format("(%s) milliseconds have past and Cassandra's transport is not ready." +
+					" Please increase a startup timeout.", timeout.toMillis()), outputCapture);
 		}
 		return settings;
 	}
@@ -183,43 +171,50 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	@Override
 	public void stop() throws Exception {
-		try {
-			Process process = this.process;
-			if (process != null && process.isAlive()) {
-				Path pidFile = this.pidFile;
-				long pid = this.pid;
-				log.debug("Stops Cassandra Process ({})", getPidString(pid));
-				if (pidFile != null && Files.exists(pidFile)) {
-					stop(pidFile);
+		Process process = this.process;
+		Path pidFile = this.pidFile;
+		long pid = this.pid;
+		Settings settings = this.settings;
+		if (process != null && process.isAlive()) {
+			try {
+				if (log.isDebugEnabled()) {
+					log.debug("Stops Cassandra process ({})", getPidString(pid));
 				}
-				else if (pid > 0) {
-					stop(pid);
+				try {
+					stop(process, pidFile, pid);
 				}
-				else {
-					process.destroy();
+				catch (Exception ex) {
+					forceStop(process, pidFile, pid);
+					throw ex;
 				}
-				boolean waitFor = process.waitFor(15, TimeUnit.SECONDS);
+				if (settings != null) {
+					boolean result = WaitUtils.await(Duration.ofSeconds(5),
+							() -> TransportUtils.isDisabled(settings) && !process.isAlive());
+					if (!result) {
+						forceStop(process, pidFile, pid);
+					}
+				}
+				boolean waitFor = process.waitFor(3, TimeUnit.SECONDS);
 				if (!waitFor) {
-					throw new IOException(
-							String.format("Casandra Process (%s) has not been stopped correctly", getPidString(pid)));
+					throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
+							getPidString(pid)));
 				}
-				//The cannot access the file because it is being used by another process
-				Thread.sleep(2000);
 			}
-		}
-		finally {
-			this.pid = -1;
-			this.pidFile = null;
-			this.process = null;
+			finally {
+				this.settings = null;
+				this.pid = -1;
+				this.pidFile = null;
+				this.process = null;
+			}
 		}
 	}
 
 
-	private static Settings getSettings(@Nonnull Path directory) throws IOException {
+	private static Settings getSettings(Path directory, Version version) throws IOException {
 		Path target = directory.resolve("conf/cassandra.yaml");
 		try (InputStream is = Files.newInputStream(target)) {
 			Yaml yaml = new Yaml();
-			return new MapSettings(yaml.loadAs(is, Map.class));
+			return new MapSettings(yaml.loadAs(is, Map.class), version);
 		}
 	}
 
@@ -232,30 +227,82 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 
-	private static void stop(Path pidFile) throws IOException, InterruptedException {
+	private static String getPidString(long pid) {
+		return (pid > 0) ? String.valueOf(pid) : "???";
+	}
+
+
+	private static void stop(Process process, Path pidFile, long pid) throws IOException, InterruptedException {
+		if (pidFile != null && Files.exists(pidFile)) {
+			stop(pidFile, false);
+		}
+		else if (pid > 0) {
+			stop(pid, false);
+		}
+		else {
+			process.destroy();
+		}
+	}
+
+	private static void forceStop(Process process, Path pidFile, long pid) {
+		try {
+			if (pidFile != null && Files.exists(pidFile)) {
+				stop(pidFile, true);
+			}
+		}
+		catch (Throwable ignore) {
+		}
+		try {
+			if (pid > 0) {
+				stop(pid, true);
+			}
+		}
+		catch (Throwable ignore) {
+		}
+		try {
+			process.destroyForcibly();
+		}
+		catch (Throwable ignore) {
+		}
+	}
+
+	private static void stop(Path pidFile, boolean force) throws IOException, InterruptedException {
 		if (OS.isWindows()) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("powershell");
 			arguments.add("-ExecutionPolicy");
 			arguments.add("Unrestricted");
 			arguments.add(pidFile.getParent().resolve("stop-server.ps1").toAbsolutePath());
+			if (force) {
+				arguments.add("-f");
+			}
 			arguments.add("-p");
 			arguments.add(pidFile.toAbsolutePath());
 			new RunProcess(arguments).runAndWait(log::info);
 		}
 		else {
+			String signal = force ? "-9" : "-SIGINT";
 			new RunProcess(Arrays.asList("bash", "-c",
-					String.format("kill -SIGINT `cat %s`", pidFile.toAbsolutePath()))).runAndWait(log::info);
+					String.format("kill %s `cat %s`", signal, pidFile.toAbsolutePath()))).runAndWait(log::info);
 		}
 	}
 
 
-	private static void stop(long pid) throws IOException, InterruptedException {
+	private static void stop(long pid, boolean force) throws IOException, InterruptedException {
 		if (OS.isWindows()) {
-			new RunProcess(Arrays.asList("TASKKILL", "/T", "/pid", pid)).runAndWait(log::info);
+			List<Object> arguments = new ArrayList<>();
+			arguments.add("taskkill");
+			if (force) {
+				arguments.add("/F");
+			}
+			arguments.add("/T");
+			arguments.add("/pid");
+			arguments.add(pid);
+			new RunProcess(arguments).runAndWait(log::info);
 		}
 		else {
-			new RunProcess(Arrays.asList("kill", "-SIGINT", pid)).runAndWait(log::info);
+			String signal = force ? "-9" : "-SIGINT";
+			new RunProcess(Arrays.asList("kill", signal, pid)).runAndWait(log::info);
 		}
 	}
 
@@ -271,9 +318,4 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 		throw new IOException(builder.toString());
 	}
-
-	private static String getPidString(long pid) {
-		return (pid > 0) ? String.valueOf(pid) : "???";
-	}
-
 }

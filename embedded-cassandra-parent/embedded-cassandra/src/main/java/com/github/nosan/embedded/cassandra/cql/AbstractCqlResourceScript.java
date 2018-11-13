@@ -24,8 +24,7 @@ import java.nio.charset.Charset;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.nosan.embedded.cassandra.util.StreamUtils;
-
+import org.apache.commons.compress.utils.IOUtils;
 
 /**
  * Base class for {@link AbstractCqlScript} implementations,
@@ -58,7 +57,9 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 	@Override
 	protected final String getScript() {
 		try {
-			return StreamUtils.toString(getInputStream(), getEncoding());
+			try (InputStream is = getInputStream()) {
+				return new String(IOUtils.toByteArray(is), getEncoding());
+			}
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(String.format("Could not open a stream for CQL Script (%s)", toString()),

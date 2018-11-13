@@ -16,12 +16,26 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 
@@ -31,6 +45,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
@@ -39,7 +54,7 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.CauseMatcher;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
-import com.github.nosan.embedded.cassandra.util.OS;
+import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,6 +73,9 @@ public abstract class AbstractLocalCassandraTests {
 	@Rule
 	public final CaptureOutput output = new CaptureOutput();
 
+	@Rule
+	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+
 	protected final LocalCassandraFactory factory;
 
 	AbstractLocalCassandraTests(@Nonnull Version version) {
@@ -66,19 +84,48 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
+	public void shouldFailIfAnotherCassandraUseSamePorts() {
+		this.factory.setConfigurationFile(ClassLoader.getSystemResource("cassandra-defaults.yaml"));
+
+		CassandraRunner runner = new CassandraRunner(this.factory);
+		runner.run(cassandra -> {
+			this.throwable.expect(CassandraException.class);
+			this.throwable.expectCause(new CauseMatcher(IllegalArgumentException.class, "storage_port (7000)"));
+			runner.run(new NotReachable());
+		});
+	}
+
+	@Test
 	public void shouldStartedIfTransportDisabled() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
-		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getStoragePort));
+		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort));
+	}
+
+	@Test
+	public void shouldRunOnInterfaceIPV4() throws Exception {
+		runAndAssertCassandraListenInterface("/cassandra-interface.yaml", false);
+	}
+
+	@Test
+	public void shouldRunOnInterfaceIPV6() throws Exception {
+		runAndAssertCassandraListenInterface("/cassandra-interface-ipv6.yaml", true);
+	}
+
+	@Test
+	public void notEnoughTime() {
+		this.throwable.expect(CassandraException.class);
+		this.throwable.expectCause(new CauseMatcher(IOException.class, "(2000) milliseconds have past"));
+		this.factory.setStartupTimeout(Duration.ofSeconds(2L));
+		new CassandraRunner(this.factory).run(new NotReachable());
+		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
 	public void shouldOverrideJavaHome() {
-		if (!OS.isWindows()) {
-			this.throwable.expectCause(new CauseMatcher(IOException.class, "Unable to find java executable"));
-		}
 		this.throwable.expect(CassandraException.class);
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
 		new CassandraRunner(this.factory).run(new NotReachable());
+		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
@@ -92,7 +139,7 @@ public abstract class AbstractLocalCassandraTests {
 		}));
 		assertThat(this.output.toString()).contains("Stops Apache Cassandra");
 		assertThat(this.output.toString()).contains("Stop listening for CQL clients");
-		assertThat(this.output.toString()).doesNotContain("has not been deleted");
+		assertDirectoryHasBeenDeletedCorrectly();
 		this.output.reset();
 		c.stop();
 		assertThat(this.output.toString()).doesNotContain("Stops Apache Cassandra");
@@ -105,7 +152,7 @@ public abstract class AbstractLocalCassandraTests {
 		this.throwable.expectMessage("Please start it before calling this method");
 
 		this.factory.create().getSettings();
-		assertThat(this.output.toString()).doesNotContain("has not been deleted");
+		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
@@ -116,8 +163,7 @@ public abstract class AbstractLocalCassandraTests {
 		this.throwable.expectCause(new CauseMatcher(IOException.class, "invalid_property"));
 
 		new CassandraRunner(this.factory).run(new NotReachable());
-		assertThat(this.output.toString()).doesNotContain("has not been deleted");
-
+		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
@@ -127,19 +173,17 @@ public abstract class AbstractLocalCassandraTests {
 			assertCreateKeyspace().accept(cassandra);
 			runner.run(assertCreateKeyspace());
 		});
-		assertThat(this.output.toString()).doesNotContain("has not been deleted");
+		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 
 	@Test
-	public void shouldBeRestarted() {
-		this.factory.setConfigurationFile(ClassLoader.getSystemResource("cassandra-static.yaml"));
+	public void shouldStartOnDefaultSettingsAndBeRestarted() {
+		this.factory.setConfigurationFile(ClassLoader.getSystemResource("cassandra-defaults.yaml"));
 		this.factory.getJvmOptions().add("-Dcassandra.jmx.local.port=7199");
-		new CassandraRunner(this.factory)
-				.run(assertCreateKeyspace().andThen(assertBusyPort(7199, 9042)));
-		new CassandraRunner(this.factory)
-				.run(assertCreateKeyspace().andThen(assertBusyPort(7199, 9042)));
-		assertThat(this.output.toString()).doesNotContain("has not been deleted");
+		new CassandraRunner(this.factory).run(assertCreateKeyspace());
+		new CassandraRunner(this.factory).run(assertCreateKeyspace());
+		assertDirectoryHasBeenDeletedCorrectly();
 
 	}
 
@@ -152,7 +196,6 @@ public abstract class AbstractLocalCassandraTests {
 			CassandraRunner runner = new CassandraRunner(this.factory);
 			runner.run(assertCreateKeyspace());
 			runner.run(assertDeleteKeyspace());
-			assertThat(this.output.toString()).doesNotContain("has not been deleted");
 		}
 		finally {
 			IOUtils.closeQuietly(() -> FileUtils.delete(this.factory.getWorkingDirectory()));
@@ -160,27 +203,60 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 
-	private static Consumer<Cassandra> assertDeleteKeyspace() {
+	private void runAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
+		Path configurationFile = this.temporaryFolder.newFile("cassandra.yaml").toPath();
+		String interfaceName = getInterface(ipv6);
+		InetAddress address = NetworkUtils.getAddressByInterface(interfaceName, ipv6);
+		String yaml;
+		try (InputStream stream = getClass().getResourceAsStream(location)) {
+			yaml = new String(IOUtils.toByteArray(stream), StandardCharsets.UTF_8)
+					.replaceAll("#seed", address.getHostAddress())
+					.replaceAll("#interface", interfaceName);
+		}
+		Files.copy(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)), configurationFile,
+				StandardCopyOption.REPLACE_EXISTING);
+
+		this.factory.getJvmOptions().add("-Djava.net.preferIPv4Stack=" + !ipv6);
+		this.factory.setConfigurationFile(configurationFile.toUri().toURL());
+
+		CassandraRunner runner = new CassandraRunner(this.factory);
+		runner.run(assertCreateKeyspace()
+				.andThen(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort)));
+		assertDirectoryHasBeenDeletedCorrectly();
+	}
+
+	private void assertDirectoryHasBeenDeletedCorrectly() {
+		assertThat(this.output.toString()).contains("Delete recursively working");
+		assertThat(this.output.toString()).doesNotContain("has not been deleted");
+	}
+
+
+	private Consumer<Cassandra> assertDeleteKeyspace() {
 		return new CqlAssert("DROP KEYSPACE test");
 	}
 
-	private static Consumer<Cassandra> assertCreateKeyspace() {
+	private Consumer<Cassandra> assertCreateKeyspace() {
 		return new CqlAssert("CREATE KEYSPACE test" +
 				" WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
 	}
 
-	private static Consumer<Cassandra> assertBusyPort(Function<Settings, Integer> mapper) {
-		return cassandra -> assertBusyPort(mapper.apply(cassandra.getSettings()));
+	private Consumer<Cassandra> assertBusyPort(Function<Settings, InetAddress> addressMapper,
+			Function<Settings, Integer> portMapper) {
+		return new PortBusyAssert(addressMapper, portMapper);
 	}
 
-	private static Consumer<Cassandra> assertBusyPort(int... port) {
-		Consumer<Cassandra> assertPort = new PortBusyAssert(port[0]);
-		for (int i = 1; i < port.length; i++) {
-			assertPort = assertPort.andThen(new PortBusyAssert(port[i]));
-		}
-		return assertPort;
+	private String getInterface(boolean ipv6) throws SocketException {
+		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
+		return Collections.list(NetworkInterface.getNetworkInterfaces())
+				.stream()
+				.filter(it -> Collections.list(it.getInetAddresses())
+						.stream()
+						.filter(InetAddress::isLoopbackAddress)
+						.anyMatch(test))
+				.map(NetworkInterface::getName)
+				.findFirst()
+				.orElseThrow(IllegalStateException::new);
 	}
-
 
 	private static final class CqlAssert implements Consumer<Cassandra> {
 
@@ -204,24 +280,33 @@ public abstract class AbstractLocalCassandraTests {
 		private static Cluster cluster(Cassandra cassandra) {
 			Settings settings = cassandra.getSettings();
 			return Cluster.builder().withPort(settings.getPort())
-					.addContactPoint(Objects.requireNonNull(settings.getAddress()))
+					.addContactPoints(settings.getRealAddress())
 					.build();
 		}
 	}
 
 	private static final class PortBusyAssert implements Consumer<Cassandra> {
 
-		private final int port;
+		@Nonnull
+		private final Function<Settings, InetAddress> addressMapper;
 
-		PortBusyAssert(int port) {
-			this.port = port;
+		@Nonnull
+		private final Function<Settings, Integer> portMapper;
+
+		PortBusyAssert(@Nonnull Function<Settings, InetAddress> addressMapper,
+				@Nonnull Function<Settings, Integer> portMapper) {
+			this.addressMapper = addressMapper;
+			this.portMapper = portMapper;
 		}
+
 
 		@Override
 		public void accept(@Nonnull Cassandra cassandra) {
 			Settings settings = cassandra.getSettings();
-			assertThat(PortUtils.isPortBusy(settings.getAddress(), this.port))
-					.describedAs("Port (%s) is not busy", this.port)
+			InetAddress address = this.addressMapper.apply(settings);
+			Integer port = this.portMapper.apply(settings);
+			assertThat(PortUtils.isPortBusy(address, port))
+					.describedAs("Port (%s) is not busy", port)
 					.isTrue();
 		}
 	}
