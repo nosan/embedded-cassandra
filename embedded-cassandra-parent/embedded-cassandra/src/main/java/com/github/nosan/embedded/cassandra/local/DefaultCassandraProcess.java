@@ -152,7 +152,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 				.run(outputCapture, log::info);
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
-		log.debug("Cassandra Process ({}) has been started", this.pid);
+		log.debug("Cassandra Process ({}) has been started", (this.pid > 0) ? this.pid : "???");
 		Duration timeout = this.startupTimeout;
 		Settings settings = getSettings(directory);
 		if (timeout.toNanos() > 0) {
@@ -188,20 +188,17 @@ class DefaultCassandraProcess implements CassandraProcess {
 			if (process != null && process.isAlive()) {
 				Path pidFile = this.pidFile;
 				long pid = this.pid;
-				log.debug("Stops Cassandra Process ({})", pid);
+				log.debug("Stops Cassandra Process ({})", (pid > 0) ? pid : "???");
 				if (pidFile != null && Files.exists(pidFile)) {
 					stop(pidFile);
 				}
 				if (pid > 0) {
 					stop(pid);
 				}
-				boolean waitFor = process.destroyForcibly().waitFor(15, TimeUnit.SECONDS);
+				process.destroy();
+				boolean waitFor = process.waitFor(15, TimeUnit.SECONDS);
 				if (!waitFor) {
 					throw new IOException("Casandra Process has not been stopped correctly");
-				}
-				if (OS.isWindows()) {
-					//The process cannot access the file because it is being used by another process
-					Thread.sleep(3000);
 				}
 			}
 		}
@@ -236,24 +233,23 @@ class DefaultCassandraProcess implements CassandraProcess {
 			arguments.add("-ExecutionPolicy");
 			arguments.add("Unrestricted");
 			arguments.add(pidFile.getParent().resolve("stop-server.ps1").toAbsolutePath());
-			arguments.add("-f");
 			arguments.add("-p");
 			arguments.add(pidFile.toAbsolutePath());
-			new RunProcess(arguments).runAndWait(log::debug);
+			new RunProcess(arguments).runAndWait(log::info);
 		}
 		else {
 			new RunProcess(Arrays.asList("bash", "-c",
-					String.format("kill -9 `cat %s`", pidFile.toAbsolutePath()))).runAndWait(log::debug);
+					String.format("kill -2 `cat %s`", pidFile.toAbsolutePath()))).runAndWait(log::info);
 		}
 	}
 
 
 	private static void stop(long pid) throws IOException, InterruptedException {
 		if (OS.isWindows()) {
-			new RunProcess(Arrays.asList("TASKKILL", "/F", "/T", "/pid", pid)).runAndWait(log::debug);
+			new RunProcess(Arrays.asList("TASKKILL", "/T", "/pid", pid)).runAndWait(log::info);
 		}
 		else {
-			new RunProcess(Arrays.asList("kill", -9, pid)).runAndWait(log::debug);
+			new RunProcess(Arrays.asList("kill", -2, pid)).runAndWait(log::info);
 		}
 	}
 
