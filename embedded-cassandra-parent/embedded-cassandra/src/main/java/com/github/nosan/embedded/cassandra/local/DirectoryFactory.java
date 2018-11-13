@@ -26,7 +26,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
  * @author Dmytro Nosan
  * @since 1.0.9
  */
-public interface DirectoryFactory {
+interface DirectoryFactory {
 	/**
 	 * Creates a new  configured {@link Directory}.
 	 *
