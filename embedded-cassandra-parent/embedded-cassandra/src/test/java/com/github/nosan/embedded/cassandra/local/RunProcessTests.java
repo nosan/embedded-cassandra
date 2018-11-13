@@ -34,9 +34,10 @@ public class RunProcessTests {
 	@Test
 	public void shouldRunAndWait() throws Exception {
 		OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
-		int exit = new RunProcess(Arrays.asList("echo", "Hello World")).runAndWait(bufferOutput);
+		int exit = new RunProcess(Arrays.asList("bash", "-c", "echo 'Hello World' > 1.txt; cat 1.txt"))
+				.runAndWait(bufferOutput);
+		assertThat(bufferOutput.toString()).isEqualTo("Hello World");
 		assertThat(exit).isEqualTo(0);
-		assertThat(bufferOutput.toString()).contains("Hello World");
 	}
 
 	@Test
