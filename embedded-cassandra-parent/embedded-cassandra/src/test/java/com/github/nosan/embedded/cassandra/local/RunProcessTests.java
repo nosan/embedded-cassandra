@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
+import com.github.nosan.embedded.cassandra.util.OS;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -30,14 +32,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RunProcessTests {
 
+	@Test
+	public void shouldRunAndWaitUnix() throws Exception {
+		if (!OS.isWindows()) {
+			OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
+			int exit = new RunProcess(Arrays.asList("bash", "-c", "echo 'Hello World' > 1.txt; cat 1.txt"))
+					.runAndWait(bufferOutput);
+			assertThat(bufferOutput.toString()).isEqualTo("Hello World");
+			assertThat(exit).isEqualTo(0);
+		}
+	}
 
 	@Test
-	public void shouldRunAndWait() throws Exception {
-		OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
-		int exit = new RunProcess(Arrays.asList("bash", "-c", "echo 'Hello World' > 1.txt; cat 1.txt"))
-				.runAndWait(bufferOutput);
-		assertThat(bufferOutput.toString()).isEqualTo("Hello World");
-		assertThat(exit).isEqualTo(0);
+	public void shouldRunAndWaitWindows() throws Exception {
+		if (OS.isWindows()) {
+			OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
+			int exit = new RunProcess(Arrays.asList("echo", "Hello World")).runAndWait(bufferOutput);
+			assertThat(bufferOutput.toString()).isEqualTo("Hello World");
+			assertThat(exit).isEqualTo(0);
+		}
 	}
 
 	@Test
