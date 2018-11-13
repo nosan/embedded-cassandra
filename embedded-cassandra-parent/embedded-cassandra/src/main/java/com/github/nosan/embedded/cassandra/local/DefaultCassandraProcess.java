@@ -200,7 +200,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 				}
 				boolean waitFor = process.waitFor(15, TimeUnit.SECONDS);
 				if (!waitFor) {
-					throw new IOException("Casandra Process has not been stopped correctly");
+					throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
+							(pid > 0) ? pid : "???"));
 				}
 				//The cannot access the file because it is being used by another process
 				Thread.sleep(2000);
