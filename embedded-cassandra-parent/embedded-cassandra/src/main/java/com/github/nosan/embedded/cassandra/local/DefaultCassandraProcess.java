@@ -192,15 +192,17 @@ class DefaultCassandraProcess implements CassandraProcess {
 				if (pidFile != null && Files.exists(pidFile)) {
 					stop(pidFile);
 				}
-				if (pid > 0) {
+				else if (pid > 0) {
 					stop(pid);
 				}
-				process.destroy();
+				else {
+					process.destroy();
+				}
 				boolean waitFor = process.waitFor(15, TimeUnit.SECONDS);
 				if (!waitFor) {
 					throw new IOException("Casandra Process has not been stopped correctly");
 				}
-				//The  cannot access the file because it is being used by another process
+				//The cannot access the file because it is being used by another process
 				Thread.sleep(2000);
 			}
 		}

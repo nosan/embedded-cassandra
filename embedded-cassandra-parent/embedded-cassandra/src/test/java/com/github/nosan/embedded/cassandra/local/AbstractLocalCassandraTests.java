@@ -91,6 +91,7 @@ public abstract class AbstractLocalCassandraTests {
 			assertThat(this.output.toString()).doesNotContain("Starts Apache Cassandra");
 		}));
 		assertThat(this.output.toString()).contains("Stops Apache Cassandra");
+		assertThat(this.output.toString()).contains("Stop listening for CQL clients");
 		this.output.reset();
 		c.stop();
 		assertThat(this.output.toString()).doesNotContain("Stops Apache Cassandra");
