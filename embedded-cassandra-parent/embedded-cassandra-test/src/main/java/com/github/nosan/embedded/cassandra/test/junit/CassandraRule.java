@@ -66,8 +66,7 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraRule(@Nonnull ClusterFactory clusterFactory,
-			@Nonnull CqlScript... scripts) {
+	public CassandraRule(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
 		this(null, clusterFactory, scripts);
 	}
 
@@ -88,8 +87,8 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraRule(@Nullable CassandraFactory cassandraFactory,
-			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
+	public CassandraRule(@Nullable CassandraFactory cassandraFactory, @Nullable ClusterFactory clusterFactory,
+			@Nullable CqlScript... scripts) {
 		super(cassandraFactory, clusterFactory, scripts);
 	}
 

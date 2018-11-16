@@ -68,8 +68,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraExtension(@Nonnull ClusterFactory clusterFactory,
-			@Nonnull CqlScript... scripts) {
+	public CassandraExtension(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
 		this(null, clusterFactory, scripts);
 	}
 
@@ -90,8 +89,8 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraExtension(@Nullable CassandraFactory cassandraFactory,
-			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
+	public CassandraExtension(@Nullable CassandraFactory cassandraFactory, @Nullable ClusterFactory clusterFactory,
+			@Nullable CqlScript... scripts) {
 		super(cassandraFactory, clusterFactory, scripts);
 	}
 
