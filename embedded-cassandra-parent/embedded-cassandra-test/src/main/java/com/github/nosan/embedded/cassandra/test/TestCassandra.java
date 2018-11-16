@@ -213,7 +213,7 @@ public class TestCassandra implements Cassandra {
 		if (this.session == null) {
 			synchronized (this) {
 				if (this.session == null) {
-					this.session = getCluster().newSession();
+					this.session = getCluster().connect();
 				}
 			}
 		}
