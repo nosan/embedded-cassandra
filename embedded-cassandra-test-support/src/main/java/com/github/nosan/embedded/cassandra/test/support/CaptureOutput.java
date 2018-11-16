@@ -79,30 +79,10 @@ public final class CaptureOutput implements TestRule {
 	 * Reset the current output.
 	 */
 	public void reset() {
+		flush();
 		ByteArrayOutputStream output = this.output;
 		if (output != null) {
-			flush();
 			output.reset();
-		}
-	}
-
-
-	/**
-	 * Flushes this output stream and forces any buffered output bytes to be written out.
-	 */
-	public void flush() {
-		try {
-
-			TeeOutputStream out = this.out;
-			if (out != null) {
-				out.flush();
-			}
-			TeeOutputStream err = this.err;
-			if (err != null) {
-				err.flush();
-			}
-		}
-		catch (IOException ignore) {
 		}
 	}
 
@@ -118,9 +98,10 @@ public final class CaptureOutput implements TestRule {
 	}
 
 	/**
-	 * Release and flush {@code System.out} and {@code System.err}.
+	 * Release {@code System.out} and {@code System.err}.
 	 */
 	public void release() {
+		flush();
 		TeeOutputStream out = this.out;
 		if (out != null) {
 			System.setOut(out.getOriginal());
@@ -130,6 +111,22 @@ public final class CaptureOutput implements TestRule {
 			System.setErr(err.getOriginal());
 		}
 		this.output = null;
+	}
+
+	private void flush() {
+		try {
+
+			TeeOutputStream out = this.out;
+			if (out != null) {
+				out.flush();
+			}
+			TeeOutputStream err = this.err;
+			if (err != null) {
+				err.flush();
+			}
+		}
+		catch (IOException ignore) {
+		}
 	}
 
 
