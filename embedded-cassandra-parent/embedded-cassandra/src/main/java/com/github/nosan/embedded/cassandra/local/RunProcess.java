@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,8 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 class RunProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
+
+	private static final AtomicInteger COUNTER = new AtomicInteger();
 
 	@Nullable
 	private final Path workingDirectory;
@@ -182,7 +185,7 @@ class RunProcess {
 			if (process != null && outputs != null && outputs.length > 0) {
 				read(process, outputs);
 			}
-		}, String.format("cassandra:%s", Thread.currentThread().getName())).start();
+		}, String.format("process-%d:%s", COUNTER.getAndIncrement(), Thread.currentThread().getName())).start();
 		Value value = sync.take();
 		if (value.process != null) {
 			return value.process;
