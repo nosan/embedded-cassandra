@@ -17,32 +17,18 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
+
 
 /**
  * Tests for {@link LocalCassandra}.
  *
  * @author Dmytro Nosan
  */
-public class LocalCassandraV2_1Tests extends AbstractLocalCassandraTests {
+public class LocalCassandra_V_3_11_X_Tests extends AbstractLocalCassandraTests {
 
-	public LocalCassandraV2_1Tests() {
-		super(new Version(2, 1, 20));
+	public LocalCassandra_V_3_11_X_Tests() {
+		super(new Version(3, 11, 3));
 	}
 
-	@Override
-	public void shouldRunOnInterfaceIPV4() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV4();
-		}
-	}
 
-	@Override
-	public void shouldRunOnInterfaceIPV6() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV6();
-		}
-	}
 }

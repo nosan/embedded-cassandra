@@ -24,10 +24,10 @@ import com.github.nosan.embedded.cassandra.Version;
  *
  * @author Dmytro Nosan
  */
-public class LocalCassandraV3Tests extends AbstractLocalCassandraTests {
+public class LocalCassandra_V_3_0_X_Tests extends AbstractLocalCassandraTests {
 
-	public LocalCassandraV3Tests() {
-		super(new Version(3, 11, 3));
+	public LocalCassandra_V_3_0_X_Tests() {
+		super(new Version(3, 0, 17));
 	}
 
 
