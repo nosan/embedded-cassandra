@@ -47,15 +47,14 @@ public class DefaultClusterFactory implements ClusterFactory {
 		queryOptions.setRefreshSchemaIntervalMillis(0);
 
 		PoolingOptions poolingOptions = new PoolingOptions()
-				.setPoolTimeoutMillis(15000)
 				.setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
 				.setMaxRequestsPerConnection(HostDistance.REMOTE, 2048)
 				.setConnectionsPerHost(HostDistance.LOCAL, 4, 10)
 				.setConnectionsPerHost(HostDistance.REMOTE, 2, 4);
 
 		SocketOptions socketOptions = new SocketOptions();
-		socketOptions.setConnectTimeoutMillis(15000);
-		socketOptions.setReadTimeoutMillis(15000);
+		socketOptions.setConnectTimeoutMillis(30000);
+		socketOptions.setReadTimeoutMillis(30000);
 
 		Cluster.Builder builder = Cluster.builder()
 				.addContactPoints(settings.getRealAddress())
@@ -64,18 +63,22 @@ public class DefaultClusterFactory implements ClusterFactory {
 				.withPort(settings.getPort())
 				.withSocketOptions(socketOptions)
 				.withQueryOptions(queryOptions)
-				.withPoolingOptions(poolingOptions)
-				.withoutJMXReporting()
-				.withoutMetrics();
+				.withPoolingOptions(poolingOptions);
 		builder = configure(builder, settings);
 		Objects.requireNonNull(builder, "Cluster.Builder must not be null");
-
 		return builder.build();
 
 	}
 
+	/**
+	 * Configure a {@link Cluster#builder()}.
+	 *
+	 * @param builder almost configured builder
+	 * @param settings a cassandra settings
+	 * @return a builder
+	 */
 	@Nonnull
 	protected Cluster.Builder configure(@Nonnull Cluster.Builder builder, @Nonnull Settings settings) {
-		return builder;
+		return builder.withoutJMXReporting().withoutMetrics();
 	}
 }

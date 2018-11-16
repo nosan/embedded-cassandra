@@ -64,8 +64,8 @@ public class DefaultClusterFactoryTests {
 
 
 		SocketOptions socketOptions = configuration.getSocketOptions();
-		assertThat(socketOptions.getConnectTimeoutMillis()).isEqualTo(15000);
-		assertThat(socketOptions.getReadTimeoutMillis()).isEqualTo(15000);
+		assertThat(socketOptions.getConnectTimeoutMillis()).isEqualTo(30000);
+		assertThat(socketOptions.getReadTimeoutMillis()).isEqualTo(30000);
 
 		MetricsOptions metricsOptions = configuration.getMetricsOptions();
 		assertThat(metricsOptions.isEnabled()).isFalse();
@@ -84,7 +84,7 @@ public class DefaultClusterFactoryTests {
 		assertThat(poolingOptions.getMaxConnectionsPerHost(HostDistance.LOCAL)).isEqualTo(10);
 		assertThat(poolingOptions.getCoreConnectionsPerHost(HostDistance.REMOTE)).isEqualTo(2);
 		assertThat(poolingOptions.getMaxConnectionsPerHost(HostDistance.REMOTE)).isEqualTo(4);
-		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(15000);
+		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(5000);
 
 	}
 
