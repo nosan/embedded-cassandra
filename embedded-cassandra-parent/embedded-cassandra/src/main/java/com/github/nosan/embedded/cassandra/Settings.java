@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.net.InetAddress;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -189,11 +188,15 @@ public interface Settings {
 	 */
 	@Nonnull
 	default InetAddress getRealAddress() {
+		String rpcAddress = getRpcAddress();
+		if (StringUtils.hasText(rpcAddress)) {
+			return NetworkUtils.getInetAddress(rpcAddress);
+		}
 		String rpcInterface = getRpcInterface();
 		if (StringUtils.hasText(rpcInterface)) {
 			return NetworkUtils.getAddressByInterface(rpcInterface, isRpcInterfacePreferIpv6());
 		}
-		return NetworkUtils.getInetAddress(Objects.toString(getRpcAddress(), "localhost"));
+		return NetworkUtils.getLocalhost();
 	}
 
 	/**
@@ -204,12 +207,15 @@ public interface Settings {
 	 */
 	@Nonnull
 	default InetAddress getRealListenAddress() {
+		String listenAddress = getListenAddress();
+		if (StringUtils.hasText(listenAddress)) {
+			return NetworkUtils.getInetAddress(listenAddress);
+		}
 		String listenInterface = getListenInterface();
 		if (StringUtils.hasText(listenInterface)) {
 			return NetworkUtils.getAddressByInterface(listenInterface, isListenInterfacePreferIpv6());
 		}
-		return NetworkUtils.getInetAddress(Objects.toString(getRpcAddress(), "localhost"));
-
+		return NetworkUtils.getLocalhost();
 	}
 
 }

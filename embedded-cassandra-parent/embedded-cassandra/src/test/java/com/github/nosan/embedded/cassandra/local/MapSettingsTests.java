@@ -73,8 +73,8 @@ public class MapSettingsTests {
 		assertThat(settings.isStartNativeTransport()).isTrue();
 		assertThat(settings.isStartRpc()).isTrue();
 		assertThat(settings.getSslPort()).isNull();
-		assertThat(settings.getRpcAddress()).isEqualTo("localhost");
-		assertThat(settings.getListenAddress()).isEqualTo("localhost");
+		assertThat(settings.getRpcAddress()).isNull();
+		assertThat(settings.getListenAddress()).isNull();
 		assertThat(settings.getListenInterface()).isNull();
 		assertThat(settings.getBroadcastAddress()).isNull();
 		assertThat(settings.getRpcInterface()).isNull();
@@ -97,8 +97,8 @@ public class MapSettingsTests {
 		assertThat(settings.isStartNativeTransport()).isTrue();
 		assertThat(settings.isStartRpc()).isFalse();
 		assertThat(settings.getSslPort()).isNull();
-		assertThat(settings.getRpcAddress()).isEqualTo("localhost");
-		assertThat(settings.getListenAddress()).isEqualTo("localhost");
+		assertThat(settings.getRpcAddress()).isNull();
+		assertThat(settings.getListenAddress()).isNull();
 		assertThat(settings.getListenInterface()).isNull();
 		assertThat(settings.getBroadcastAddress()).isNull();
 		assertThat(settings.getRpcInterface()).isNull();

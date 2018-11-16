@@ -104,13 +104,13 @@ final class MapSettings implements Settings {
 		this.startNativeTransport = getBool("start_native_transport", values).orElse(true);
 		this.startRpc = getBool("start_rpc", values).orElse(version.getMajor() < 4);
 
-		this.rpcAddress = getAddress(values);
+		this.rpcAddress = get("rpc_address", values).orElse(null);
 		this.rpcInterface = get("rpc_interface", values).orElse(null);
 		this.rpcInterfacePreferIpv6 = getBool("rpc_interface_prefer_ipv6", values).orElse(false);
 		this.broadcastRpcAddress = get("broadcast_rpc_address", values).orElse(null);
 
 		this.listenInterface = get("listen_interface", values).orElse(null);
-		this.listenAddress = getListenAddress(values);
+		this.listenAddress = get("listen_address", values).orElse(null);
 		this.broadcastAddress = get("broadcast_address", values).orElse(null);
 		this.listenInterfacePreferIpv6 = getBool("listen_interface_prefer_ipv6", values).orElse(false);
 		this.listenOnBroadcastAddress = getBool("listen_on_broadcast_address", values).orElse(false);
@@ -290,30 +290,5 @@ final class MapSettings implements Settings {
 		Object val = source.get(name);
 		return Optional.ofNullable(val).map(String::valueOf);
 	}
-
-	private static String getListenAddress(Map<?, ?> values) {
-		String listenAddress = get("listen_address", values).orElse(null);
-		if (StringUtils.hasText(listenAddress)) {
-			return listenAddress;
-		}
-		String listenInterface = get("listen_interface", values).orElse(null);
-		if (!StringUtils.hasText(listenInterface)) {
-			return "localhost";
-		}
-		return null;
-	}
-
-	private static String getAddress(Map<?, ?> values) {
-		String rpcAddress = get("rpc_address", values).orElse(null);
-		if (StringUtils.hasText(rpcAddress)) {
-			return rpcAddress;
-		}
-		String rpcInterface = get("rpc_interface", values).orElse(null);
-		if (!StringUtils.hasText(rpcInterface)) {
-			return "localhost";
-		}
-		return null;
-	}
-
 
 }
