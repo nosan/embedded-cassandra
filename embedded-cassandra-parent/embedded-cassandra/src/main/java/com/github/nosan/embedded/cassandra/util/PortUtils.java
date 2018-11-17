@@ -36,12 +36,16 @@ public abstract class PortUtils {
 	/**
 	 * The default minimum value for port ranges used when finding an available
 	 * socket port.
+	 *
+	 * @since 1.1.0
 	 */
-	public static final int MIN = 49152;
+	public static final int MIN = 1024;
 
 	/**
 	 * The default maximum value for port ranges used when finding an available
 	 * socket port.
+	 *
+	 * @since 1.1.0
 	 */
 	public static final int MAX = 65535;
 
@@ -95,11 +99,11 @@ public abstract class PortUtils {
 	private static boolean isPortAvailable(InetAddress address, int port) {
 		try (ServerSocket ss = new ServerSocket()) {
 			ss.bind(getInetSocketAddress(address, port), 1);
-			return true;
 		}
-		catch (Exception ex) {
+		catch (IOException ex) {
 			return false;
 		}
+		return !isPortBusy(address, port);
 	}
 
 	private static InetSocketAddress getInetSocketAddress(InetAddress address, int port) {
