@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -62,24 +63,24 @@ public class ArchiveUtilsTests {
 
 	@Test
 	public void extract() throws Exception {
-		File archive = this.temporaryFolder.newFile(this.name);
-		File cassandra = new File(getClass().getResource("/cassandra.yaml").toURI());
-		archive(this.archiveFormat, archive, cassandra);
+		File archive = this.temporaryFolder.newFile(String.format("%s.%s",
+				UUID.randomUUID(), this.name));
+		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
+		archive(this.archiveFormat, archive, file);
 		compress(this.compression, archive);
 		File destination = this.temporaryFolder.newFolder();
 		ArchiveUtils.extract(archive.toPath(), destination.toPath(), null);
-		assertThat(destination.toPath().resolve("dir/cass.yaml").toFile())
-				.hasSameContentAs(cassandra);
+		assertThat(destination.toPath().resolve("dir/cass.yaml").toFile()).hasSameContentAs(file);
 
 	}
 
-	private static void archive(String archiveFormat, File archive, File cassandra) throws Exception {
-		ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
-		try (ArchiveOutputStream os = archiveStreamFactory
-				.createArchiveOutputStream(archiveFormat, Files.newOutputStream(archive.toPath()))) {
-			ArchiveEntry archiveEntry = os.createArchiveEntry(cassandra, "dir/cass.yaml");
+	private static void archive(String archiveFormat, File archive, File file) throws Exception {
+		ArchiveStreamFactory af = new ArchiveStreamFactory();
+		try (ArchiveOutputStream os = af.createArchiveOutputStream(archiveFormat,
+				Files.newOutputStream(archive.toPath()))) {
+			ArchiveEntry archiveEntry = os.createArchiveEntry(file, "dir/cass.yaml");
 			os.putArchiveEntry(archiveEntry);
-			try (InputStream is = Files.newInputStream(cassandra.toPath())) {
+			try (InputStream is = Files.newInputStream(file.toPath())) {
 				os.write(IOUtils.toByteArray(is));
 			}
 			os.closeArchiveEntry();
@@ -93,9 +94,9 @@ public class ArchiveUtilsTests {
 			try (InputStream is = Files.newInputStream(archive.toPath())) {
 				content = IOUtils.toByteArray(is);
 			}
-			CompressorStreamFactory factory = new CompressorStreamFactory();
-			try (OutputStream os = factory
-					.createCompressorOutputStream(compression, Files.newOutputStream(archive.toPath()))) {
+			CompressorStreamFactory cf = new CompressorStreamFactory();
+			try (OutputStream os = cf.createCompressorOutputStream(compression,
+					Files.newOutputStream(archive.toPath()))) {
 				IOUtils.copy(new ByteArrayInputStream(content), os);
 			}
 		}
@@ -104,17 +105,17 @@ public class ArchiveUtilsTests {
 	@Parameterized.Parameters(name = "{0}")
 	public static Iterable<Object[]> archives() {
 		List<Object[]> parameters = new ArrayList<>();
-		parameters.add(new Object[]{".tar.gz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
-		parameters.add(new Object[]{".tgz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
-		parameters.add(new Object[]{".tar.bz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
-		parameters.add(new Object[]{".tbz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
-		parameters.add(new Object[]{".a", ArchiveStreamFactory.AR, null});
-		parameters.add(new Object[]{".ar", ArchiveStreamFactory.AR, null});
-		parameters.add(new Object[]{".cpio", ArchiveStreamFactory.CPIO, null});
-		parameters.add(new Object[]{".jar", ArchiveStreamFactory.JAR, null});
-		parameters.add(new Object[]{".tar", ArchiveStreamFactory.TAR, null});
-		parameters.add(new Object[]{".zip", ArchiveStreamFactory.ZIP, null});
-		parameters.add(new Object[]{".zipx", ArchiveStreamFactory.ZIP, null});
+		parameters.add(new Object[]{"tar.gz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
+		parameters.add(new Object[]{"tgz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
+		parameters.add(new Object[]{"tar.bz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
+		parameters.add(new Object[]{"tbz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
+		parameters.add(new Object[]{"a", ArchiveStreamFactory.AR, null});
+		parameters.add(new Object[]{"ar", ArchiveStreamFactory.AR, null});
+		parameters.add(new Object[]{"cpio", ArchiveStreamFactory.CPIO, null});
+		parameters.add(new Object[]{"jar", ArchiveStreamFactory.JAR, null});
+		parameters.add(new Object[]{"tar", ArchiveStreamFactory.TAR, null});
+		parameters.add(new Object[]{"zip", ArchiveStreamFactory.ZIP, null});
+		parameters.add(new Object[]{"zipx", ArchiveStreamFactory.ZIP, null});
 		return parameters;
 	}
 

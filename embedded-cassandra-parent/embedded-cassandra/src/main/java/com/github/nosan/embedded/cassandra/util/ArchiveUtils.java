@@ -39,6 +39,7 @@ import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
@@ -107,7 +108,7 @@ public abstract class ArchiveUtils {
 			throw new IllegalArgumentException(String.format("(%s) is not writable", destination));
 		}
 
-		ArchiveFactory archiveFactory = getArchiveFactory(archive);
+		ArchiveFactory archiveFactory = createArchiveFactory(archive);
 		try (ArchiveInputStream stream = archiveFactory.create(archive)) {
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
@@ -134,7 +135,7 @@ public abstract class ArchiveUtils {
 		}
 	}
 
-	private static ArchiveFactory getArchiveFactory(Path source) {
+	private static ArchiveFactory createArchiveFactory(Path source) {
 		for (Map.Entry<String, ArchiveFactory> candidate : ARCHIVES.entrySet()) {
 			if (String.valueOf(source.getFileName()).endsWith(candidate.getKey())) {
 				return candidate.getValue();
@@ -152,12 +153,12 @@ public abstract class ArchiveUtils {
 		 * Reads the given archive file as an {@link ArchiveInputStream} which is used to access individual
 		 * {@link ArchiveEntry} objects within the archive without extracting the archive onto the file system.
 		 *
-		 * @param source the archive file to stream
+		 * @param archive the archive file to stream
 		 * @return a new archive stream for the given archive
 		 * @throws IOException IOException in the case of I/O errors
 		 */
 		@Nonnull
-		ArchiveInputStream create(@Nonnull Path source) throws IOException;
+		ArchiveInputStream create(@Nonnull Path archive) throws IOException;
 
 		/**
 		 * Creates a factory for the given archive format.
@@ -174,22 +175,30 @@ public abstract class ArchiveUtils {
 		 * Creates a factory for the given archive format that uses compression.
 		 *
 		 * @param archiveFormat the archiveFormat format e.g. "tar" or "zip"
-		 * @param compression the compression algorithm name e.g. "gz"
+		 * @param compressionFormat the compression algorithm name e.g. "gz"
 		 * @return a new Factory instance that also handles compression
 		 */
 		@Nonnull
-		static ArchiveFactory create(@Nonnull String archiveFormat, @Nullable String compression) {
-			return source -> {
-				InputStream is = Files.newInputStream(source);
+		static ArchiveFactory create(@Nonnull String archiveFormat, @Nullable String compressionFormat) {
+			return archive -> {
+				CompressorStreamFactory cf = new CompressorStreamFactory();
+				ArchiveStreamFactory af = new ArchiveStreamFactory();
+
+				InputStream stream = null;
+				CompressorInputStream cstream = null;
+
 				try {
-					if (StringUtils.hasText(compression)) {
-						is = new CompressorStreamFactory().createCompressorInputStream(compression, is);
+					stream = Files.newInputStream(archive);
+					if (StringUtils.hasText(compressionFormat)) {
+						cstream = cf.createCompressorInputStream(compressionFormat, stream);
 					}
-					return new ArchiveStreamFactory().createArchiveInputStream(archiveFormat, is);
+					return (cstream != null) ? af.createArchiveInputStream(archiveFormat, cstream)
+							: af.createArchiveInputStream(archiveFormat, stream);
 				}
 				catch (Exception ex) {
-					IOUtils.closeQuietly(is);
-					throw new IOException(ex);
+					IOUtils.closeQuietly(cstream);
+					IOUtils.closeQuietly(stream);
+					throw new IOException("Could not create a stream", ex);
 				}
 			};
 		}
@@ -211,15 +220,15 @@ public abstract class ArchiveUtils {
 		 * @param file the file to apply the mode onto
 		 */
 		static void set(@Nonnull ArchiveEntry entry, @Nonnull Path file) {
-			long perm = getMode(entry) & MASK;
-			if (perm > 0) {
+			long mode = getMode(entry) & MASK;
+			if (mode > 0) {
 				try {
 					List<String> cmd = Arrays.asList("chmod",
-							Long.toOctalString(perm), String.valueOf(file.toAbsolutePath()));
+							Long.toOctalString(mode), String.valueOf(file.toAbsolutePath()));
 					new ProcessBuilder(cmd).start();
 				}
 				catch (IOException ex) {
-					log.error(String.format("Could not set a permission (%s) to (%s)", perm, file), ex);
+					log.error(String.format("Could not set a permission (%s) to (%s)", mode, file), ex);
 				}
 			}
 		}
