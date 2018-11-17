@@ -74,7 +74,7 @@ public final class LocalCassandraFactoryBuilder {
 
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getJmxPort} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getJmxPort() jmxPort} attribute.
 	 *
 	 * @param jmxPort The value for jmxPort
 	 * @return {@code this} builder for use in a chained invocation
@@ -86,7 +86,7 @@ public final class LocalCassandraFactoryBuilder {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome() javaHome} attribute.
 	 *
 	 * @param javaHome The value for javaHome
 	 * @return {@code this} builder for use in a chained invocation
@@ -98,7 +98,7 @@ public final class LocalCassandraFactoryBuilder {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome() javaHome} attribute.
 	 *
 	 * @param javaHome The value for javaHome
 	 * @return {@code this} builder for use in a chained invocation
@@ -110,7 +110,7 @@ public final class LocalCassandraFactoryBuilder {
 
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getStartupTimeout} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getStartupTimeout() timeout} attribute.
 	 *
 	 * @param startupTimeout The value for startupTimeout
 	 * @return {@code this} builder for use in a chained invocation
