@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.util;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -35,20 +34,20 @@ public class PortUtilsTests {
 
 
 	@Test
-	public void shouldGet10Ports() {
+	public void shouldGet100Ports() {
 		Set<Integer> ports = new LinkedHashSet<>();
-		while (ports.size() != 10) {
+		for (int i = 0; i < 100; i++) {
 			ports.add(PortUtils.getPort());
 		}
-		assertThat(ports).hasSize(10);
+		assertThat(ports.size()).isBetween(95, 100);
 	}
 
 	@Test
 	public void shouldBeBusy() throws IOException {
 		int port = PortUtils.getPort();
-		assertThat(PortUtils.isPortBusy((InetAddress) null, port)).isFalse();
+		assertThat(PortUtils.isPortBusy(null, port)).isFalse();
 		try (ServerSocket ss = new ServerSocket(port)) {
-			assertThat(PortUtils.isPortBusy(InetAddress.getLoopbackAddress(), ss.getLocalPort())).isTrue();
+			assertThat(PortUtils.isPortBusy(NetworkUtils.getLocalhost(), ss.getLocalPort())).isTrue();
 		}
 	}
 }

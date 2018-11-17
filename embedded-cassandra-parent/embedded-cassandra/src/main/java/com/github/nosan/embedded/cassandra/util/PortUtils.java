@@ -21,7 +21,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Nullable;
 
@@ -45,12 +45,6 @@ public abstract class PortUtils {
 	 */
 	public static final int MAX = 65535;
 
-	/**
-	 * The range value used when finding an available socket port.
-	 */
-	public static final int RANGE = (MAX - MIN) + 1;
-
-	private static final Random RANDOM = new Random(System.currentTimeMillis());
 
 	/**
 	 * Find a free {@code TCP} port.
@@ -71,8 +65,8 @@ public abstract class PortUtils {
 	 * @since 1.1.0
 	 */
 	public static int getPort(@Nullable InetAddress address) {
-		for (int i = 0; i < RANGE; i++) {
-			int port = MIN + RANDOM.nextInt(RANGE);
+		for (int i = 0; i <= MAX - MIN; i++) {
+			int port = MIN + ThreadLocalRandom.current().nextInt(MAX - MIN + 1);
 			if (isPortAvailable(address, port)) {
 				return port;
 			}
