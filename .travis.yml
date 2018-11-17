@@ -16,7 +16,7 @@ script:
 - java -version
 - ./mvnw -B -e clean install
 
-after_script:
+after_failure:
 - cat **/**/target/surefire-reports/*.txt
 
 

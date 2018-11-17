@@ -13,7 +13,7 @@ build_script:
 - java -version
 - mvnw.cmd -B -e clean install
 
-on_finish:
+on_failure:
 - cat **/**/target/surefire-reports/*.txt
 
 cache:
