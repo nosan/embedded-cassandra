@@ -48,6 +48,8 @@ class DefaultCassandraProcessFactory implements CassandraProcessFactory {
 	@Nullable
 	private final Path javaHome;
 
+	private final int jmxPort;
+
 	/**
 	 * Creates a {@link DefaultCassandraProcessFactory}.
 	 *
@@ -55,19 +57,21 @@ class DefaultCassandraProcessFactory implements CassandraProcessFactory {
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param version a version
 	 * @param javaHome java home directory
+	 * @param jmxPort JMX port
 	 */
 	DefaultCassandraProcessFactory(@Nonnull Duration startupTimeout, @Nonnull List<String> jvmOptions,
-			@Nonnull Version version, @Nullable Path javaHome) {
+			@Nonnull Version version, @Nullable Path javaHome, int jmxPort) {
 		this.startupTimeout = startupTimeout;
 		this.version = version;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
+		this.jmxPort = jmxPort;
 	}
 
 	@Nonnull
 	@Override
 	public CassandraProcess create(@Nonnull Path directory) {
 		return new DefaultCassandraProcess(directory, this.version, this.startupTimeout, this.jvmOptions,
-				this.javaHome);
+				this.javaHome, this.jmxPort);
 	}
 }

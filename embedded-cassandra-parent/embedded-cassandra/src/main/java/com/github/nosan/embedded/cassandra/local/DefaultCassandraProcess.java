@@ -73,6 +73,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 	@Nullable
 	private final Path javaHome;
 
+	private final int jmxPort;
+
 	@Nullable
 	private Path pidFile;
 
@@ -88,18 +90,20 @@ class DefaultCassandraProcess implements CassandraProcess {
 	 * Creates a {@link DefaultCassandraProcess}.
 	 *
 	 * @param directory a configured directory
+	 * @param version a version
 	 * @param startupTimeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
-	 * @param version a version
 	 * @param javaHome java home directory
+	 * @param jmxPort JMX port
 	 */
 	DefaultCassandraProcess(@Nonnull Path directory, @Nonnull Version version, @Nonnull Duration startupTimeout,
-			@Nonnull List<String> jvmOptions, @Nullable Path javaHome) {
+			@Nonnull List<String> jvmOptions, @Nullable Path javaHome, int jmxPort) {
 		this.directory = directory;
 		this.startupTimeout = startupTimeout;
 		this.version = version;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
+		this.jmxPort = jmxPort;
 	}
 
 	@Override
@@ -136,7 +140,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			environment.put("JAVA_HOME", javaHome);
 		}
 		List<String> jvmOptions = new ArrayList<>();
-		int jmxPort = PortUtils.getPort();
+		int jmxPort = (this.jmxPort != 0) ? this.jmxPort : PortUtils.getPort();
 		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", jmxPort));
 		jvmOptions.addAll(this.jvmOptions);
 

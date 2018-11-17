@@ -73,6 +73,28 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	@Nullable
 	private Path javaHome;
 
+	private int jmxPort = 0;
+
+	/**
+	 * JMX port.
+	 *
+	 * @return The value of the {@code jmxPort} attribute
+	 * @since 1.1.1
+	 */
+	public int getJmxPort() {
+		return this.jmxPort;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getJmxPort} attribute.
+	 *
+	 * @param jmxPort The value for jmxPort
+	 * @since 1.1.1
+	 */
+	public void setJmxPort(int jmxPort) {
+		this.jmxPort = jmxPort;
+	}
+
 	/**
 	 * Java home directory.
 	 *
@@ -283,7 +305,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 					resolve(String.format("embedded-cassandra-%s", UUID.randomUUID()));
 		}
 		return new LocalCassandra(version, artifactFactory, workingDirectory, startupTimeout, getConfigurationFile(),
-				getLogbackFile(), getRackFile(), getTopologyFile(), getJvmOptions(), getJavaHome());
+				getLogbackFile(), getRackFile(), getTopologyFile(), getJvmOptions(), getJavaHome(), getJmxPort());
 	}
 
 

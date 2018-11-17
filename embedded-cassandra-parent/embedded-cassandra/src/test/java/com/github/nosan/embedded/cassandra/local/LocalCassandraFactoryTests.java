@@ -52,6 +52,7 @@ public class LocalCassandraFactoryTests {
 		Path configurationFile = Paths.get("cassandra.yaml");
 		Path rackFile = Paths.get("rack.properties");
 		Path topologyFile = Paths.get("topology.properties");
+		int jmxPort = 8000;
 		ArtifactFactory artifactFactory = new ArtifactFactory() {
 			@Nonnull
 			@Override
@@ -71,6 +72,7 @@ public class LocalCassandraFactoryTests {
 		factory.getJvmOptions().add("arg1");
 		factory.setStartupTimeout(Duration.ofMinutes(1));
 		factory.setJavaHome(javaDirectory);
+		factory.setJmxPort(jmxPort);
 
 
 		Cassandra cassandra = factory.create();
@@ -83,6 +85,7 @@ public class LocalCassandraFactoryTests {
 		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(factory.getStartupTimeout());
 		assertThat(ReflectionUtils.getField(processFactory, "javaHome")).isEqualTo(factory.getJavaHome());
 		assertThat(ReflectionUtils.getField(processFactory, "version")).isEqualTo(factory.getVersion());
+		assertThat(ReflectionUtils.getField(processFactory, "jmxPort")).isEqualTo(factory.getJmxPort());
 
 		Object directoryFactory = ReflectionUtils.getField(cassandra, "directoryFactory");
 

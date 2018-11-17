@@ -128,6 +128,14 @@ public @interface LocalCassandra {
 	String javaHome() default "";
 
 	/**
+	 * Sets attribute for {@link LocalCassandraFactory#getJmxPort()}.
+	 *
+	 * @return The value of the {@code jmxPort} attribute
+	 * @since 1.1.1
+	 */
+	int jmxPort() default 0;
+
+	/**
 	 * JVM options that should be associated with Cassandra.
 	 *
 	 * @return The value of the {@code jvmOptions} attribute
@@ -140,6 +148,7 @@ public @interface LocalCassandra {
 	 * @return The value of the {@code startupTimeout} attribute
 	 */
 	long startupTimeout() default 120000;
+
 
 	/**
 	 * Alias for {@link EmbeddedCassandra#scripts()}.

@@ -183,7 +183,7 @@ public abstract class AbstractLocalCassandraTests {
 	@Test
 	public void shouldStartOnDefaultSettingsAndBeRestarted() {
 		this.factory.setConfigurationFile(ClassLoader.getSystemResource("cassandra-defaults.yaml"));
-		this.factory.getJvmOptions().add("-Dcassandra.jmx.local.port=7199");
+		this.factory.setJmxPort(7199);
 		new CassandraRunner(this.factory).run(assertCreateKeyspace());
 		assertCassandraHasBeenStopped();
 		assertDirectoryHasBeenDeletedCorrectly();

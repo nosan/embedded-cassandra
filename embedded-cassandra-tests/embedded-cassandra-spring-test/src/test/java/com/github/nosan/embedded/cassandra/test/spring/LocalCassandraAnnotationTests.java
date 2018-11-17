@@ -52,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		workingDirectory = "target/cassandra", javaHome = "target/java",
 		jvmOptions = {"-Dtest.property=property"},
 		topologyFile = "classpath:/topology.properties", startupTimeout = 240000,
+		jmxPort = 8000,
 		replace = EmbeddedCassandra.Replace.NONE)
 public class LocalCassandraAnnotationTests {
 
@@ -64,16 +65,18 @@ public class LocalCassandraAnnotationTests {
 
 	@Test
 	public void shouldRegisterLocalFactoryBean() {
-		assertThat(this.factory.getArtifactFactory()).isEqualTo(this.artifactFactory);
-		assertThat(this.factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
-		assertThat(this.factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
-		assertThat(this.factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
-		assertThat(this.factory.getStartupTimeout()).isEqualTo(Duration.ofMillis(240000));
-		assertThat(this.factory.getLogbackFile()).isEqualTo(ClassLoader.getSystemResource("logback-test.xml"));
-		assertThat(this.factory.getTopologyFile()).isEqualTo(ClassLoader.getSystemResource("topology.properties"));
-		assertThat(this.factory.getRackFile()).isEqualTo(ClassLoader.getSystemResource("rack.properties"));
-		assertThat(this.factory.getConfigurationFile()).isEqualTo(ClassLoader.getSystemResource("cassandra.yaml"));
-		assertThat(this.factory.getJvmOptions()).containsExactly("-Dtest.property=property");
+		LocalCassandraFactory factory = this.factory;
+		assertThat(factory.getArtifactFactory()).isEqualTo(this.artifactFactory);
+		assertThat(factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
+		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
+		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
+		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(4));
+		assertThat(factory.getLogbackFile()).isEqualTo(ClassLoader.getSystemResource("logback-test.xml"));
+		assertThat(factory.getTopologyFile()).isEqualTo(ClassLoader.getSystemResource("topology.properties"));
+		assertThat(factory.getRackFile()).isEqualTo(ClassLoader.getSystemResource("rack.properties"));
+		assertThat(factory.getConfigurationFile()).isEqualTo(ClassLoader.getSystemResource("cassandra.yaml"));
+		assertThat(factory.getJvmOptions()).containsExactly("-Dtest.property=property");
+		assertThat(factory.getJmxPort()).isEqualTo(8000);
 
 	}
 

@@ -85,11 +85,13 @@ class LocalCassandra implements Cassandra {
 	 * @param topologyFile URL to {@code cassandra-topology.properties}
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param javaHome java home directory
+	 * @param jmxPort JMX port
 	 */
 	LocalCassandra(@Nonnull Version version, @Nonnull ArtifactFactory artifactFactory,
 			@Nonnull Path workingDirectory, @Nonnull Duration startupTimeout, @Nullable URL configurationFile,
 			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
-			@Nonnull List<String> jvmOptions, @Nullable Path javaHome) {
+			@Nonnull List<String> jvmOptions, @Nullable Path javaHome,
+			int jmxPort) {
 		Objects.requireNonNull(artifactFactory, "Artifact Factory must not be null");
 		Objects.requireNonNull(version, "Version must not be null");
 		Objects.requireNonNull(startupTimeout, "Startup timeout must not be null");
@@ -100,7 +102,8 @@ class LocalCassandra implements Cassandra {
 		this.version = version;
 		this.directoryFactory = new DefaultDirectoryFactory(version, workingDirectory,
 				configurationFile, logbackFile, rackFile, topologyFile);
-		this.processFactory = new DefaultCassandraProcessFactory(startupTimeout, jvmOptions, version, javaHome);
+		this.processFactory = new DefaultCassandraProcessFactory(startupTimeout, jvmOptions, version,
+				javaHome, jmxPort);
 	}
 
 

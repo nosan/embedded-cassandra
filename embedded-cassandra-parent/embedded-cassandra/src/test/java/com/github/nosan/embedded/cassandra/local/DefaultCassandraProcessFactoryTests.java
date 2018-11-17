@@ -44,14 +44,16 @@ public class DefaultCassandraProcessFactoryTests {
 		Version version = Version.parse("3.11.3");
 		Path javaHome = Paths.get("java.home");
 		Path directory = Paths.get("directory");
+		int jmxPort = 7199;
 		DefaultCassandraProcessFactory factory = new DefaultCassandraProcessFactory(startupTimeout,
-				jvmOptions, version, javaHome);
+				jvmOptions, version, javaHome, jmxPort);
 		CassandraProcess cassandraProcess = factory.create(directory);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "jvmOptions")).isEqualTo(jvmOptions);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "javaHome")).isEqualTo(javaHome);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "version")).isEqualTo(version);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "startupTimeout")).isEqualTo(startupTimeout);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "directory")).isEqualTo(directory);
+		assertThat(ReflectionUtils.getField(cassandraProcess, "jmxPort")).isEqualTo(jmxPort);
 
 	}
 }

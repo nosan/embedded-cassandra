@@ -95,6 +95,7 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		builder.setStartupTimeout(Duration.ofMillis(annotation.startupTimeout()));
 		builder.setJvmOptions(annotation.jvmOptions());
 		builder.setArtifactFactory(getArtifactFactory(context));
+		builder.setJmxPort(annotation.jmxPort());
 		return builder.build();
 	}
 

@@ -70,6 +70,21 @@ public final class LocalCassandraFactoryBuilder {
 	@Nullable
 	private Path javaHome;
 
+	private int jmxPort;
+
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getJmxPort} attribute.
+	 *
+	 * @param jmxPort The value for jmxPort
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.1.1
+	 */
+	public LocalCassandraFactoryBuilder setJmxPort(int jmxPort) {
+		this.jmxPort = jmxPort;
+		return this;
+	}
+
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome} attribute.
 	 *
@@ -380,6 +395,7 @@ public final class LocalCassandraFactoryBuilder {
 		factory.setStartupTimeout(this.startupTimeout);
 		factory.getJvmOptions().addAll(this.jvmOptions);
 		factory.setJavaHome(this.javaHome);
+		factory.setJmxPort(this.jmxPort);
 		return factory;
 	}
 
