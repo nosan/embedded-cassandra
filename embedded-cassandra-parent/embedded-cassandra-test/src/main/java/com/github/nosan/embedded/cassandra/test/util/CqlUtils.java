@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.util;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -120,10 +121,14 @@ public abstract class CqlUtils {
 			@Nullable Object... args) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(statement, "Statement must not be null");
-		SimpleStatement simpleStatement = new SimpleStatement(statement, args);
 		if (log.isDebugEnabled()) {
-			log.debug("Execute Statement: ({})", simpleStatement);
+			if (args != null && args.length > 0) {
+				log.debug("Execute Statement: ({}) Values: {}", statement, Arrays.toString(args));
+			}
+			else {
+				log.debug("Execute Statement: ({})", statement);
+			}
 		}
-		return session.execute(simpleStatement);
+		return session.execute(new SimpleStatement(statement, args));
 	}
 }
