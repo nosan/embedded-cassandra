@@ -21,11 +21,8 @@ import javax.annotation.Nullable;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Configuration;
-import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.MetricsOptions;
-import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.ProtocolOptions;
-import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import org.junit.Rule;
@@ -62,7 +59,6 @@ public class DefaultClusterFactoryTests {
 		assertThat(ReflectionUtils.getField(protocolOptions.getAuthProvider(), "password")).isEqualTo("cassandra");
 		assertThat(cluster.getClusterName()).isEqualTo("cluster1");
 
-
 		SocketOptions socketOptions = configuration.getSocketOptions();
 		assertThat(socketOptions.getConnectTimeoutMillis()).isEqualTo(30000);
 		assertThat(socketOptions.getReadTimeoutMillis()).isEqualTo(30000);
@@ -70,21 +66,6 @@ public class DefaultClusterFactoryTests {
 		MetricsOptions metricsOptions = configuration.getMetricsOptions();
 		assertThat(metricsOptions.isEnabled()).isFalse();
 		assertThat(metricsOptions.isJMXReportingEnabled()).isFalse();
-
-		QueryOptions queryOptions = configuration.getQueryOptions();
-		assertThat(queryOptions.getRefreshNodeIntervalMillis()).isZero();
-		assertThat(queryOptions.getRefreshSchemaIntervalMillis()).isZero();
-		assertThat(queryOptions.getRefreshNodeListIntervalMillis()).isZero();
-
-
-		PoolingOptions poolingOptions = configuration.getPoolingOptions();
-		assertThat(poolingOptions.getMaxRequestsPerConnection(HostDistance.LOCAL)).isEqualTo(32768);
-		assertThat(poolingOptions.getMaxRequestsPerConnection(HostDistance.REMOTE)).isEqualTo(2048);
-		assertThat(poolingOptions.getCoreConnectionsPerHost(HostDistance.LOCAL)).isEqualTo(4);
-		assertThat(poolingOptions.getMaxConnectionsPerHost(HostDistance.LOCAL)).isEqualTo(10);
-		assertThat(poolingOptions.getCoreConnectionsPerHost(HostDistance.REMOTE)).isEqualTo(2);
-		assertThat(poolingOptions.getMaxConnectionsPerHost(HostDistance.REMOTE)).isEqualTo(4);
-		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(5000);
 
 	}
 

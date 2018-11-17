@@ -192,7 +192,7 @@ class RemoteArtifact implements Artifact {
 			throw new IOException(String.format("Could not download Cassandra from (%s)", urlConnection.getURL()), ex);
 		}
 
-		log.info("Cassandra has been downloaded");
+		log.info("Cassandra ({}) has been downloaded", this.version);
 		return tempFile;
 	}
 
@@ -206,18 +206,21 @@ class RemoteArtifact implements Artifact {
 			if (this.readTimeout != null) {
 				connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
 			}
-			connection.setInstanceFollowRedirects(true);
+			connection.setInstanceFollowRedirects(false);
 			switch (connection.getResponseCode()) {
-				case HttpURLConnection.HTTP_MOVED_PERM:
-				case HttpURLConnection.HTTP_MOVED_TEMP:
+				case 301:
+				case 302:
+				case 303:
+				case 307:
+				case 308:
 					String location = connection.getHeaderField("Location");
 					if (StringUtils.hasText(location)) {
+						connection.disconnect();
 						return getUrlConnection(new URL(url, location));
 					}
 			}
 		}
 		return urlConnection;
-
 	}
 
 

@@ -112,14 +112,14 @@ class LocalCassandra implements Cassandra {
 					try {
 						if (!this.initialized) {
 							long start = System.currentTimeMillis();
-							log.info("Starts Apache Cassandra");
+							log.info("Starts Apache Cassandra ({})", this.version);
 							Artifact artifact = this.artifactFactory.create(this.version);
 							Objects.requireNonNull(artifact, "Artifact must not be null");
 							this.directory = this.directoryFactory.create(artifact);
 							this.process = this.processFactory.create(this.directory.initialize());
 							this.settings = this.process.start();
 							long end = System.currentTimeMillis();
-							log.info("Apache Cassandra has been started ({} ms) ", end - start);
+							log.info("Apache Cassandra ({}) has been started ({} ms) ", this.version, end - start);
 						}
 					}
 					finally {
@@ -149,7 +149,7 @@ class LocalCassandra implements Cassandra {
 			synchronized (this) {
 				if (this.initialized) {
 					long start = System.currentTimeMillis();
-					log.info("Stops Apache Cassandra");
+					log.info("Stops Apache Cassandra ({})", this.version);
 					CassandraProcess process = this.process;
 					try {
 						if (process != null) {
@@ -176,7 +176,7 @@ class LocalCassandra implements Cassandra {
 						this.initialized = false;
 					}
 					long end = System.currentTimeMillis();
-					log.info("Apache Cassandra has been stopped ({} ms) ", end - start);
+					log.info("Apache Cassandra ({}) has been stopped ({} ms) ", this.version, end - start);
 				}
 			}
 		}

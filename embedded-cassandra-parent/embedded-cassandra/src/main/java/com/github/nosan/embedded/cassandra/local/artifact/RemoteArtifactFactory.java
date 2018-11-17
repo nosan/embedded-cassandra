@@ -163,8 +163,15 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 		if (urlFactory == null) {
 			urlFactory = new DefaultUrlFactory();
 		}
-		return new RemoteArtifact(version, directory, urlFactory,
-				getProxy(), getReadTimeout(), getConnectTimeout());
+		Duration readTimeout = getReadTimeout();
+		if (readTimeout == null) {
+			readTimeout = Duration.ofSeconds(30);
+		}
+		Duration connectTimeout = getConnectTimeout();
+		if (connectTimeout == null) {
+			connectTimeout = Duration.ofSeconds(30);
+		}
+		return new RemoteArtifact(version, directory, urlFactory, getProxy(), readTimeout, connectTimeout);
 	}
 
 }

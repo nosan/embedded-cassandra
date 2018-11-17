@@ -41,6 +41,7 @@ import javax.annotation.Nonnull;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SocketOptions;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -292,7 +293,11 @@ public abstract class AbstractLocalCassandraTests {
 
 		private static Cluster cluster(Cassandra cassandra) {
 			Settings settings = cassandra.getSettings();
+			SocketOptions socketOptions = new SocketOptions();
+			socketOptions.setReadTimeoutMillis(30000);
+			socketOptions.setConnectTimeoutMillis(30000);
 			return Cluster.builder().withPort(settings.getPort())
+					.withSocketOptions(socketOptions)
 					.addContactPoints(settings.getRealAddress())
 					.build();
 		}

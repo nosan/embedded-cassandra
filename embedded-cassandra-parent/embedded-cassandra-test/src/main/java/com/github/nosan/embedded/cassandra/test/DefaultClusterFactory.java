@@ -21,9 +21,6 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.HostDistance;
-import com.datastax.driver.core.PoolingOptions;
-import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.SocketOptions;
 
 import com.github.nosan.embedded.cassandra.Settings;
@@ -40,30 +37,15 @@ public class DefaultClusterFactory implements ClusterFactory {
 	@Override
 	public Cluster create(@Nonnull Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
-
-		QueryOptions queryOptions = new QueryOptions();
-		queryOptions.setRefreshNodeIntervalMillis(0);
-		queryOptions.setRefreshNodeListIntervalMillis(0);
-		queryOptions.setRefreshSchemaIntervalMillis(0);
-
-		PoolingOptions poolingOptions = new PoolingOptions()
-				.setMaxRequestsPerConnection(HostDistance.LOCAL, 32768)
-				.setMaxRequestsPerConnection(HostDistance.REMOTE, 2048)
-				.setConnectionsPerHost(HostDistance.LOCAL, 4, 10)
-				.setConnectionsPerHost(HostDistance.REMOTE, 2, 4);
-
 		SocketOptions socketOptions = new SocketOptions();
 		socketOptions.setConnectTimeoutMillis(30000);
 		socketOptions.setReadTimeoutMillis(30000);
-
 		Cluster.Builder builder = Cluster.builder()
 				.addContactPoints(settings.getRealAddress())
 				.withClusterName(settings.getClusterName())
 				.withCredentials("cassandra", "cassandra")
 				.withPort(settings.getPort())
-				.withSocketOptions(socketOptions)
-				.withQueryOptions(queryOptions)
-				.withPoolingOptions(poolingOptions);
+				.withSocketOptions(socketOptions);
 		builder = configure(builder, settings);
 		Objects.requireNonNull(builder, "Cluster.Builder must not be null");
 		return builder.build();

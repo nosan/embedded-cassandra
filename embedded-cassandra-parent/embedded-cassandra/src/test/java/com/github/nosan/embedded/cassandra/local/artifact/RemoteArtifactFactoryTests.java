@@ -46,7 +46,7 @@ public class RemoteArtifactFactoryTests {
 			@Nonnull
 			@Override
 			public URL[] create(@Nonnull Version version) {
-				return null;
+				return new URL[0];
 			}
 		};
 
@@ -75,8 +75,8 @@ public class RemoteArtifactFactoryTests {
 		assertThat(ReflectionUtils.getField(artifact, "directory")).isEqualTo(FileUtils.getUserHomeDirectory());
 		assertThat(ReflectionUtils.getField(artifact, "urlFactory")).isInstanceOf(DefaultUrlFactory.class);
 		assertThat(ReflectionUtils.getField(artifact, "proxy")).isNull();
-		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isNull();
-		assertThat(ReflectionUtils.getField(artifact, "connectTimeout")).isNull();
+		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isEqualTo(Duration.ofSeconds(30));
+		assertThat(ReflectionUtils.getField(artifact, "connectTimeout")).isEqualTo(Duration.ofSeconds(30));
 
 	}
 }
