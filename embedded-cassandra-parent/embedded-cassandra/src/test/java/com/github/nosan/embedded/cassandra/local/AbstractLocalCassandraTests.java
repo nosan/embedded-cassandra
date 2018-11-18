@@ -94,7 +94,7 @@ public abstract class AbstractLocalCassandraTests {
 				this.throwable.expectCause(new CauseMatcher(IOException.class, "Change listen_address:storage_port"));
 			}
 			else {
-				this.throwable.expectCause(new CauseMatcher(IOException.class, "Address already in use"));
+				this.throwable.expectCause(new CauseMatcher(IOException.class, "already in use"));
 			}
 			runner.run(new NotReachable());
 		});
