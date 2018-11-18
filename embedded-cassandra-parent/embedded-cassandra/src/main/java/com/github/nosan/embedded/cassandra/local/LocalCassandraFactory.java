@@ -73,10 +73,10 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	@Nullable
 	private Path javaHome;
 
-	private int jmxPort = 0;
+	private int jmxPort = 7199;
 
 	/**
-	 * JMX port.
+	 * JMX port. This property will be passed to the Cassandra as {@code -Dcassandra.jmx.local.port={jmxPort}}
 	 *
 	 * @return The value of the {@code jmxPort} attribute
 	 * @since 1.1.1

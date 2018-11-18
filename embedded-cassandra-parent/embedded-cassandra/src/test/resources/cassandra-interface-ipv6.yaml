@@ -6,16 +6,11 @@ seed_provider:
 - class_name: org.apache.cassandra.locator.SimpleSeedProvider
   parameters:
   - seeds: "#seed"
-storage_port: 0
-ssl_storage_port: 0
-start_native_transport: true
-native_transport_port: 0
 listen_interface: "#interface"
 rpc_interface: "#interface"
-start_rpc: true
-rpc_port: 0
 rpc_keepalive: true
 listen_interface_prefer_ipv6: true
 rpc_interface_prefer_ipv6: true
 endpoint_snitch: SimpleSnitch
 partitioner: org.apache.cassandra.dht.Murmur3Partitioner
+start_native_transport: true

@@ -45,7 +45,7 @@ public class RemoteArtifactFactoryBuilderTests {
 			@Nonnull
 			@Override
 			public URL[] create(@Nonnull Version version) {
-				return null;
+				return new URL[0];
 			}
 		};
 
@@ -63,5 +63,17 @@ public class RemoteArtifactFactoryBuilderTests {
 		assertThat(factory.getProxy()).isEqualTo(proxy);
 		assertThat(factory.getReadTimeout()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(factory.getConnectTimeout()).isEqualTo(Duration.ofMinutes(100));
+	}
+
+	@Test
+	public void defaultBuildFactory() {
+		RemoteArtifactFactory factory = new RemoteArtifactFactoryBuilder()
+				.build();
+
+		assertThat(factory.getDirectory()).isNull();
+		assertThat(factory.getUrlFactory()).isNull();
+		assertThat(factory.getProxy()).isNull();
+		assertThat(factory.getReadTimeout()).isNull();
+		assertThat(factory.getConnectTimeout()).isNull();
 	}
 }

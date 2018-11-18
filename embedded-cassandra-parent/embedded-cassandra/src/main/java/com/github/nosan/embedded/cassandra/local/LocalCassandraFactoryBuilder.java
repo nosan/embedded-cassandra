@@ -70,7 +70,7 @@ public final class LocalCassandraFactoryBuilder {
 	@Nullable
 	private Path javaHome;
 
-	private int jmxPort;
+	private int jmxPort = 7199;
 
 
 	/**

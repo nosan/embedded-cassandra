@@ -76,4 +76,23 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getJmxPort()).isEqualTo(jmxPort);
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(1));
 	}
+
+	@Test
+	public void defaultBuild() {
+		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder()
+				.build();
+
+		assertThat(factory.getJvmOptions()).isEmpty();
+		assertThat(factory.getArtifactFactory()).isNull();
+		assertThat(factory.getConfigurationFile()).isNull();
+		assertThat(factory.getLogbackFile()).isNull();
+		assertThat(factory.getVersion()).isNull();
+		assertThat(factory.getRackFile()).isNull();
+		assertThat(factory.getTopologyFile()).isNull();
+		assertThat(factory.getWorkingDirectory()).isNull();
+		assertThat(factory.getJavaHome()).isNull();
+		assertThat(factory.getJmxPort()).isEqualTo(7199);
+		assertThat(factory.getStartupTimeout()).isNull();
+
+	}
 }

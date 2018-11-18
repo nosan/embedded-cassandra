@@ -85,9 +85,7 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldFailIfAnotherCassandraUseSamePorts() {
-		this.factory.setConfigurationFile(ClassLoader.getSystemResource("cassandra-defaults.yaml"));
-
+	public void shouldFailCassandraUseSamePorts() {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(cassandra -> {
 			this.throwable.expect(CassandraException.class);
@@ -99,7 +97,7 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldStartedIfTransportDisabled() {
+	public void shouldStartIfTransportDisabled() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
 		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort));
 		assertCassandraHasBeenStopped();
@@ -172,6 +170,8 @@ public abstract class AbstractLocalCassandraTests {
 
 	@Test
 	public void shouldRunMoreThanOneCassandra() {
+		this.factory.setJmxPort(0);
+		this.factory.setConfigurationFile(getClass().getResource("/cassandra-random.yaml"));
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(cassandra -> {
 			assertCreateKeyspace().accept(cassandra);
@@ -182,8 +182,6 @@ public abstract class AbstractLocalCassandraTests {
 
 	@Test
 	public void shouldStartOnDefaultSettingsAndBeRestarted() {
-		this.factory.setConfigurationFile(ClassLoader.getSystemResource("cassandra-defaults.yaml"));
-		this.factory.setJmxPort(7199);
 		new CassandraRunner(this.factory).run(assertCreateKeyspace());
 		assertCassandraHasBeenStopped();
 		assertDirectoryHasBeenDeletedCorrectly();

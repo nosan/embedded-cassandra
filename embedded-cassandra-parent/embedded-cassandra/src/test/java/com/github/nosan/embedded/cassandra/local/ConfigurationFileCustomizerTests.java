@@ -24,8 +24,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.github.nosan.embedded.cassandra.Version;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -43,7 +41,7 @@ public class ConfigurationFileCustomizerTests {
 	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		ConfigurationFileCustomizer customizer =
-				new ConfigurationFileCustomizer(getClass().getResource("/cassandra.yaml"), new Version(3, 11, 3));
+				new ConfigurationFileCustomizer(getClass().getResource("/cassandra.yaml"));
 		customizer.customize(directory.getParent());
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
 			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(
@@ -53,9 +51,9 @@ public class ConfigurationFileCustomizerTests {
 	}
 
 	@Test
-	public void defaultCustomizeV3() throws Exception {
+	public void defaultCustomize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		ConfigurationFileCustomizer customizer = new ConfigurationFileCustomizer(null, new Version(3, 11, 3));
+		ConfigurationFileCustomizer customizer = new ConfigurationFileCustomizer(null);
 		customizer.customize(directory.getParent());
 		assertThat(directory.resolve("cassandra.yaml")).exists();
 		try (InputStream inputStream = getClass()
@@ -66,17 +64,5 @@ public class ConfigurationFileCustomizerTests {
 
 	}
 
-	@Test
-	public void defaultCustomizeV4() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		ConfigurationFileCustomizer customizer = new ConfigurationFileCustomizer(null, new Version(4, 0, 0));
-		customizer.customize(directory.getParent());
-		assertThat(directory.resolve("cassandra.yaml")).exists();
-		try (InputStream inputStream = getClass()
-				.getResourceAsStream("/com/github/nosan/embedded/cassandra/local/4.x.x/cassandra.yaml")) {
-			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(
-					IOUtils.toByteArray(inputStream));
-		}
 
-	}
 }

@@ -101,7 +101,7 @@ final class MapSettings implements Settings {
 		this.sslStoragePort = getInt("ssl_storage_port", values).orElse(7001);
 		this.sslPort = getInt("native_transport_port_ssl", values).orElse(null);
 
-		this.startNativeTransport = getBool("start_native_transport", values).orElse(true);
+		this.startNativeTransport = getBool("start_native_transport", values).orElse(version.getMajor() > 2);
 		this.startRpc = getBool("start_rpc", values).orElse(version.getMajor() < 4);
 
 		this.rpcAddress = get("rpc_address", values).orElse(null);

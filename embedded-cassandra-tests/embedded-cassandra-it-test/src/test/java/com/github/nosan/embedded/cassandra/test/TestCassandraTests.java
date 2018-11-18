@@ -25,6 +25,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +36,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TestCassandraTests {
 
-	private static final TestCassandra cassandra = new TestCassandra();
+	private static final TestCassandra cassandra = new TestCassandra(
+			new LocalCassandraFactoryBuilder()
+					.setConfigurationFile(ClassLoader.getSystemResource("cassandra.yaml"))
+					.setJvmOptions("-Dcassandra.superuser_setup_delay_ms=0")
+					.build());
 
 	private static final String KEYSPACE_NAME = "test";
 

@@ -29,8 +29,6 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.Version;
-
 /**
  * {@link DirectoryCustomizer} to initialize {@code cassandra.yaml}.
  *
@@ -44,33 +42,20 @@ class ConfigurationFileCustomizer implements DirectoryCustomizer {
 	@Nullable
 	private final URL configurationFile;
 
-	@Nonnull
-	private final Version version;
-
-
 	/**
 	 * Creates a {@link ConfigurationFileCustomizer}.
 	 *
 	 * @param configurationFile URL to {@code cassandra.yaml}
-	 * @param version a version
 	 */
-	ConfigurationFileCustomizer(@Nullable URL configurationFile, @Nonnull Version version) {
+	ConfigurationFileCustomizer(@Nullable URL configurationFile) {
 		this.configurationFile = configurationFile;
-		this.version = version;
 	}
 
 	@Override
 	public void customize(@Nonnull Path directory) throws IOException {
 		URL source = this.configurationFile;
 		if (source == null) {
-			if (this.version.getMajor() >= 4) {
-				source = ClassLoader.getSystemResource("com/github/nosan/embedded" +
-						"/cassandra/local/4.x.x/cassandra.yaml");
-			}
-			else {
-				source = ClassLoader.getSystemResource("com/github/nosan/embedded" +
-						"/cassandra/local/cassandra.yaml");
-			}
+			source = ClassLoader.getSystemResource("com/github/nosan/embedded/cassandra/local/cassandra.yaml");
 		}
 		Path target = directory.resolve("conf/cassandra.yaml");
 		if (log.isDebugEnabled()) {

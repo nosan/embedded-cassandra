@@ -79,7 +79,7 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 	public Directory create(@Nonnull Artifact artifact) {
 		List<DirectoryCustomizer> customizers = new ArrayList<>();
 		customizers.add(new LogbackFileCustomizer(this.logbackFile));
-		customizers.add(new ConfigurationFileCustomizer(this.configurationFile, this.version));
+		customizers.add(new ConfigurationFileCustomizer(this.configurationFile));
 		customizers.add(new RackFileCustomizer(this.rackFile));
 		customizers.add(new TopologyFileCustomizer(this.topologyFile));
 		customizers.add(new PortReplacerCustomizer(this.version));

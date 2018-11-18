@@ -133,7 +133,7 @@ public @interface LocalCassandra {
 	 * @return The value of the {@code jmxPort} attribute
 	 * @since 1.1.1
 	 */
-	int jmxPort() default 0;
+	int jmxPort() default 7199;
 
 	/**
 	 * JVM options that should be associated with Cassandra.

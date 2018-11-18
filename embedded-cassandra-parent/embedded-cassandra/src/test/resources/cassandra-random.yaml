@@ -10,6 +10,10 @@ listen_address: localhost
 start_native_transport: true
 start_rpc: true
 rpc_address: localhost
-rpc_keepalive: true
 endpoint_snitch: SimpleSnitch
 partitioner: org.apache.cassandra.dht.Murmur3Partitioner
+storage_port: 0
+ssl_storage_port: 0
+native_transport_port: 0
+rpc_port: 0
+

@@ -103,7 +103,9 @@ public class LocalCassandraFactoryTests {
 	public void createDefaultLocalCassandra() {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		Cassandra cassandra = factory.create();
+		Object processFactory = ReflectionUtils.getField(cassandra, "processFactory");
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(new Version(3, 11, 3));
+		assertThat(ReflectionUtils.getField(processFactory, "jmxPort")).isEqualTo(7199);
 		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory"))
 				.isInstanceOf(RemoteArtifactFactory.class);
 
