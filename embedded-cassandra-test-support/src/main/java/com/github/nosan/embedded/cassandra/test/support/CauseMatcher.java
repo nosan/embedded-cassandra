@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.support;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -35,30 +36,40 @@ public final class CauseMatcher extends TypeSafeMatcher<Throwable> {
 	private final Class<? extends Throwable> type;
 
 	@Nonnull
-	private final String expectedMessage;
+	private final String[] expectedMessages;
 
 	/**
 	 * Creates a new {@link CauseMatcher}.
 	 *
 	 * @param cause caused exception
-	 * @param expectedMessage expected message
+	 * @param expectedMessages expected message
 	 */
-	public CauseMatcher(@Nonnull Class<? extends Throwable> cause, @Nonnull String expectedMessage) {
+	public CauseMatcher(@Nonnull Class<? extends Throwable> cause, @Nonnull String... expectedMessages) {
 		this.type = Objects.requireNonNull(cause, "Cause must not be null");
-		this.expectedMessage = Objects.requireNonNull(expectedMessage, "Message must not be null");
+		this.expectedMessages = Objects.requireNonNull(expectedMessages, "Messages must not be null");
 	}
 
 	@Override
 	protected boolean matchesSafely(@Nonnull Throwable item) {
 		return item.getClass().isAssignableFrom(this.type)
-				&& item.getMessage().contains(this.expectedMessage);
+				&& containsMessage(item.getMessage(), this.expectedMessages);
 	}
 
 	@Override
 	public void describeTo(@Nonnull Description description) {
 		description.appendText("expects type ")
 				.appendValue(this.type)
-				.appendText(" and a message ")
-				.appendValue(this.expectedMessage);
+				.appendText(" and one of the messages ")
+				.appendValue(Arrays.toString(this.expectedMessages));
+	}
+
+
+	private boolean containsMessage(String message, String[] messages) {
+		for (String expected : messages) {
+			if (message.contains(expected)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

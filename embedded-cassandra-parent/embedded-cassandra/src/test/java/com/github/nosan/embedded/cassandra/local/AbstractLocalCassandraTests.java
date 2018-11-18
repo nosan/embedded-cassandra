@@ -89,13 +89,8 @@ public abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(cassandra -> {
 			this.throwable.expect(CassandraException.class);
-			Version version = Objects.requireNonNull(this.factory.getVersion());
-			if (version.getMajor() == 2 && version.getMinor() == 1) {
-				this.throwable.expectCause(new CauseMatcher(IOException.class, "Change listen_address:storage_port"));
-			}
-			else {
-				this.throwable.expectCause(new CauseMatcher(IOException.class, "already in use"));
-			}
+			this.throwable.expectCause(new CauseMatcher(IOException.class,
+					"already in use", "is in use by another process"));
 			runner.run(new NotReachable());
 		});
 		assertCassandraHasBeenStopped();
@@ -105,7 +100,6 @@ public abstract class AbstractLocalCassandraTests {
 	@Test
 	public void shouldFailCassandraUseSamePortsNoOutput() {
 		this.factory.setLogbackFile(getClass().getResource("/logback-empty.xml"));
-		this.factory.setJmxPort(0);
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(cassandra -> {
 			this.throwable.expect(CassandraException.class);
