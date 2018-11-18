@@ -16,37 +16,33 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.Test;
+import java.util.function.Predicate;
 
-import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
+import javax.annotation.Nonnull;
 
 /**
- * Tests for {@link LocalCassandra}.
+ * {@link RunProcess.Output} to filter lines.
  *
  * @author Dmytro Nosan
+ * @since 1.2.0
  */
-public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
+class FilteredOutput implements RunProcess.Output {
 
-	public LocalCassandra_V_2_1_X_Tests() {
-		super(new Version(2, 1, 20));
+	@Nonnull
+	private final RunProcess.Output delegate;
+
+	@Nonnull
+	private final Predicate<String> filter;
+
+	FilteredOutput(@Nonnull RunProcess.Output delegate, @Nonnull Predicate<String> filter) {
+		this.delegate = delegate;
+		this.filter = filter;
 	}
 
 	@Override
-	@Test
-	public void shouldRunOnInterfaceIPV4() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV4();
-		}
-	}
-
-	@Override
-	@Test
-	public void shouldRunOnInterfaceIPV6() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV6();
+	public void accept(@Nonnull String line) {
+		if (this.filter.test(line)) {
+			this.delegate.accept(line);
 		}
 	}
 }

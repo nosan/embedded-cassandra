@@ -67,28 +67,6 @@ abstract class TransportUtils {
 	}
 
 
-	/**
-	 * Verify whether {@code cassandra} transport is busy or not.
-	 *
-	 * @param settings a settings
-	 * @throws IllegalArgumentException if one of the ports is busy
-	 */
-	static void verifyPorts(@Nonnull Settings settings) {
-		if (isStorageReady(settings)) {
-			throw new IllegalArgumentException(String.format("storage_port (%s) or ssl_storage_port (%s) is busy",
-					settings.getStoragePort(), settings.getSslStoragePort()));
-		}
-		if (settings.isStartNativeTransport() && isNativeTransportReady(settings)) {
-			throw new IllegalArgumentException(
-					String.format("native_transport_port (%s) or native_transport_port_ssl (%s) is busy",
-							settings.getPort(), settings.getSslPort()));
-		}
-		if (settings.isStartRpc() && isRpcTransportReady(settings)) {
-			throw new IllegalArgumentException(String.format("rpc_port (%s)  is busy", settings.getRpcPort()));
-		}
-
-	}
-
 	private static boolean isStorageReady(Settings settings) {
 		InetAddress address = settings.getRealListenAddress();
 		int storagePort = settings.getStoragePort();

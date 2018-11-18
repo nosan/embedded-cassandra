@@ -8,6 +8,7 @@ seed_provider:
   - seeds: "127.0.0.1"
 listen_address: localhost
 start_native_transport: false
+start_rpc: false
 rpc_address: localhost
 endpoint_snitch: SimpleSnitch
 partitioner: org.apache.cassandra.dht.Murmur3Partitioner

@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -146,29 +148,19 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
 
-		TransportUtils.verifyPorts(settings);
-
-		OutputCapture outputCapture = new OutputCapture(20);
+		OutputCapture output = new OutputCapture(20);
+		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		Process process = new RunProcess(directory, environment, arguments)
-				.run(outputCapture, log::info);
+				.run(new FilteredOutput(output, outputFilter), new FilteredOutput(new Slf4jOutput(log), outputFilter));
 
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
-
 		if (log.isDebugEnabled()) {
 			log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
 		}
-		Duration timeout = this.startupTimeout;
-		boolean result = WaitUtils.await(timeout, () -> {
-			if (!process.isAlive()) {
-				throwException("Cassandra Process is not alive. Please see logs for more details.", outputCapture);
-			}
-			return TransportUtils.isReady(settings);
-		});
-		if (!result) {
-			throwException(String.format("(%s) milliseconds have past and Cassandra's transport is not ready." +
-					" Please increase a startup timeout.", timeout.toMillis()), outputCapture);
-		}
+
+		await(settings, this.startupTimeout, output, process);
+
 		return settings;
 	}
 
@@ -233,6 +225,31 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	private static String getPidString(long pid) {
 		return (pid > 0) ? String.valueOf(pid) : "???";
+	}
+
+
+	private static void await(Settings settings, Duration timeout, OutputCapture output, Process process)
+			throws Exception {
+		long start = System.currentTimeMillis();
+		Version version = settings.getVersion();
+		AtomicBoolean hasOutput = new AtomicBoolean();
+		boolean result = WaitUtils.await(timeout, () -> {
+			if (!process.isAlive()) {
+				throwException("Cassandra Process is not alive. Please see logs for more details.", output);
+			}
+			if (!TransportUtils.isReady(settings)) {
+				return false;
+			}
+			if (!hasOutput.get()) {
+				hasOutput.set(output.contains("listening for cql") || output.contains("not starting native"));
+			}
+			long elapsed = System.currentTimeMillis() - start;
+			return hasOutput.get() || (version.getMajor() >= 3 ? elapsed > 15000 : elapsed > 10000);
+		});
+		if (!result) {
+			throwException(String.format("Cassandra has not been started, seems like (%d) milliseconds is not enough." +
+					" Please increase a startup timeout.", timeout.toMillis()), output);
+		}
 	}
 
 
@@ -317,7 +334,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			Collection<String> lines = outputCapture.lines();
 			builder.append(String.format(" Last (%s) lines:", lines.size()));
 			for (String line : lines) {
-				builder.append(String.format("%n%s", line));
+				builder.append(String.format("%n\t%s", line));
 			}
 		}
 		throw new IOException(builder.toString());

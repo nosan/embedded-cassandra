@@ -89,10 +89,29 @@ public abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(cassandra -> {
 			this.throwable.expect(CassandraException.class);
-			this.throwable.expectCause(new CauseMatcher(IllegalArgumentException.class, "storage_port (7000)"));
+			Version version = Objects.requireNonNull(this.factory.getVersion());
+			if (version.getMajor() == 2 && version.getMinor() == 1) {
+				this.throwable.expectCause(new CauseMatcher(IOException.class, "Change listen_address:storage_port"));
+			}
+			else {
+				this.throwable.expectCause(new CauseMatcher(IOException.class, "Address already in use"));
+			}
 			runner.run(new NotReachable());
 		});
 		assertCassandraHasBeenStopped();
+		assertDirectoryHasBeenDeletedCorrectly();
+	}
+
+	@Test
+	public void shouldFailCassandraUseSamePortsNoOutput() {
+		this.factory.setLogbackFile(getClass().getResource("/logback-empty.xml"));
+		this.factory.setJmxPort(0);
+		CassandraRunner runner = new CassandraRunner(this.factory);
+		runner.run(cassandra -> {
+			this.throwable.expect(CassandraException.class);
+			this.throwable.expectCause(new CauseMatcher(IOException.class, "Cassandra Process is not alive"));
+			runner.run(new NotReachable());
+		});
 		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
@@ -117,7 +136,7 @@ public abstract class AbstractLocalCassandraTests {
 	@Test
 	public void notEnoughTime() {
 		this.throwable.expect(CassandraException.class);
-		this.throwable.expectCause(new CauseMatcher(IOException.class, "(2000) milliseconds have past"));
+		this.throwable.expectCause(new CauseMatcher(IOException.class, "seems like (2000) milliseconds is not enough"));
 		this.factory.setStartupTimeout(Duration.ofSeconds(2L));
 		new CassandraRunner(this.factory).run(new NotReachable());
 		assertDirectoryHasBeenDeletedCorrectly();
@@ -240,7 +259,7 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	private void assertCassandraHasBeenStopped() {
-		assertThat(this.output.toString()).contains("MessagingService has terminated");
+		assertThat(this.output.toString()).contains("Announcing shutdown");
 	}
 
 	private Consumer<Cassandra> assertDeleteKeyspace() {

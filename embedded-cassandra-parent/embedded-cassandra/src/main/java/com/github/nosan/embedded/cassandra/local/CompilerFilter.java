@@ -16,37 +16,18 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.Test;
-
-import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
+import java.util.function.Predicate;
 
 /**
- * Tests for {@link LocalCassandra}.
+ * Filter to avoid 'compiler inline'.
  *
  * @author Dmytro Nosan
+ * @since 1.2.0
  */
-public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
-
-	public LocalCassandra_V_2_1_X_Tests() {
-		super(new Version(2, 1, 20));
-	}
+class CompilerFilter implements Predicate<String> {
 
 	@Override
-	@Test
-	public void shouldRunOnInterfaceIPV4() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV4();
-		}
-	}
-
-	@Override
-	@Test
-	public void shouldRunOnInterfaceIPV6() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV6();
-		}
+	public boolean test(String line) {
+		return !line.startsWith("CompilerOracle");
 	}
 }

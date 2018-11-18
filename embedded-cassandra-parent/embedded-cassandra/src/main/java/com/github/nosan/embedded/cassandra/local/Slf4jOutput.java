@@ -16,37 +16,37 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.Test;
+import java.util.Locale;
 
-import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
 
 /**
- * Tests for {@link LocalCassandra}.
+ * {@link RunProcess.Output} to log message through {@code slf4j}.
  *
  * @author Dmytro Nosan
+ * @since 1.2.0
  */
-public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
+class Slf4jOutput implements RunProcess.Output {
 
-	public LocalCassandra_V_2_1_X_Tests() {
-		super(new Version(2, 1, 20));
+
+	@Nonnull
+	private final Logger logger;
+
+	Slf4jOutput(@Nonnull Logger logger) {
+		this.logger = logger;
 	}
 
 	@Override
-	@Test
-	public void shouldRunOnInterfaceIPV4() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV4();
+	public void accept(@Nonnull String line) {
+		String source = line.toLowerCase(Locale.ENGLISH);
+		if (source.contains("exception") || source.contains("error ") || source.contains(" error")) {
+			this.logger.error(line);
 		}
-	}
+		else {
+			this.logger.info(line);
+		}
 
-	@Override
-	@Test
-	public void shouldRunOnInterfaceIPV6() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV6();
-		}
 	}
 }

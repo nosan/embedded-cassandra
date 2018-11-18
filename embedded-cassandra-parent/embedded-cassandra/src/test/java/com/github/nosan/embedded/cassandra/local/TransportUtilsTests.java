@@ -34,7 +34,6 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for {@link TransportUtils}.
@@ -44,7 +43,7 @@ import static org.assertj.core.api.Assertions.fail;
 public class TransportUtilsTests {
 
 	@Test
-	public void testEverything() throws Exception {
+	public void testPorts() throws Exception {
 		Set<Integer> ports = new LinkedHashSet<>();
 		while (ports.size() != 5) {
 			ports.add(PortUtils.getPort());
@@ -57,22 +56,12 @@ public class TransportUtilsTests {
 				sockets.add(new ServerSocket(port));
 			}
 			assertThat(TransportUtils.isReady(settings)).describedAs("Transport is not ready").isTrue();
-			for (ServerSocket socket : sockets) {
-				try {
-					TransportUtils.verifyPorts(settings);
-					fail("should not be here");
-				}
-				catch (IllegalArgumentException ignore) {
-				}
-				socket.close();
-			}
 		}
 		finally {
 			sockets.forEach(IOUtils::closeQuietly);
 		}
 		assertThat(TransportUtils.isDisabled(settings)).describedAs("Transport is not disabled").isTrue();
 
-		TransportUtils.verifyPorts(settings);
 	}
 
 

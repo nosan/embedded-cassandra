@@ -18,35 +18,21 @@ package com.github.nosan.embedded.cassandra.local;
 
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link LocalCassandra}.
+ * Tests for {@link FilteredOutput}.
  *
  * @author Dmytro Nosan
  */
-public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
+public class FilteredOutputTests {
 
-	public LocalCassandra_V_2_1_X_Tests() {
-		super(new Version(2, 1, 20));
-	}
-
-	@Override
 	@Test
-	public void shouldRunOnInterfaceIPV4() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV4();
-		}
-	}
-
-	@Override
-	@Test
-	public void shouldRunOnInterfaceIPV6() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV6();
-		}
+	public void shouldFilter() {
+		OutputCapture delegate = new OutputCapture(500);
+		FilteredOutput filteredOutput = new FilteredOutput(delegate, line -> line.equals("text"));
+		filteredOutput.accept("Hello world");
+		filteredOutput.accept("text");
+		assertThat(delegate.lines()).containsExactly("text");
 	}
 }

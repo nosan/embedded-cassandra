@@ -18,35 +18,22 @@ package com.github.nosan.embedded.cassandra.local;
 
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link LocalCassandra}.
+ * Tests for {@link StackTraceFilter}.
  *
  * @author Dmytro Nosan
  */
-public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
+public class StackTraceFilterTests {
 
-	public LocalCassandra_V_2_1_X_Tests() {
-		super(new Version(2, 1, 20));
-	}
-
-	@Override
 	@Test
-	public void shouldRunOnInterfaceIPV4() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV4();
-		}
-	}
+	public void shouldFilter() {
+		StackTraceFilter filter = new StackTraceFilter();
+		assertThat(filter.test("\tat")).isFalse();
+		assertThat(filter.test("\t...")).isFalse();
+		assertThat(filter.test("text")).isTrue();
 
-	@Override
-	@Test
-	public void shouldRunOnInterfaceIPV6() throws Exception {
-		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
-			super.shouldRunOnInterfaceIPV6();
-		}
+
 	}
 }
