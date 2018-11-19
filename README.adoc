@@ -201,7 +201,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ...)
 @EmbeddedCassandra(scripts = "/cql-scripts/*.cql")
-@DirtiesContext // to invalidate spring cache and stop the cassandra
+@DirtiesContext // to invalidate spring cache and stop `Cassandra`
 public class CassandraTests {
 
     @Autowired
@@ -240,6 +240,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = ...)
 @EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+@DirtiesContext // to invalidate spring cache and stop `Cassandra`
 public class CqlScriptTests {
 
 	@Autowired
