@@ -49,7 +49,7 @@ public interface Cassandra {
 	 * Returns the settings this Cassandra is running on.
 	 *
 	 * @return the settings
-	 * @throws CassandraException if Cassandra has not been started
+	 * @throws CassandraException if Cassandra is not started.
 	 */
 	@Nonnull
 	Settings getSettings() throws CassandraException;
