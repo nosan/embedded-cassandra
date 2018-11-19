@@ -238,8 +238,6 @@
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <useFile>true</useFile>
                         <disableXmlReport>true</disableXmlReport>
-                        <reuseForks>false</reuseForks>
-                        <forkCount>1</forkCount>
                         <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
                         <failIfNoTests>false</failIfNoTests>
                         <trimStackTrace>false</trimStackTrace>

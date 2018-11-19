@@ -201,6 +201,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ...)
 @EmbeddedCassandra(scripts = "/cql-scripts/*.cql")
+@DirtiesContext // to invalidate spring cache and stop the cassandra
 public class CassandraTests {
 
     @Autowired

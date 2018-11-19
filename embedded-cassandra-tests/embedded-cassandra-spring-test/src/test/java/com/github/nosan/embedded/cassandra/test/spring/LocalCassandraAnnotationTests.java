@@ -30,6 +30,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -54,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		topologyFile = "classpath:/topology.properties", startupTimeout = 240000,
 		jmxPort = 8000,
 		replace = EmbeddedCassandra.Replace.NONE)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class LocalCassandraAnnotationTests {
 
 	@Autowired
