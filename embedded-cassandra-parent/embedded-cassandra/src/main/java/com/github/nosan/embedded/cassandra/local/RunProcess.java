@@ -50,7 +50,7 @@ class RunProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
 
-	private static final AtomicInteger COUNTER = new AtomicInteger();
+	private static final AtomicInteger COUNTER = new AtomicInteger(1);
 
 	@Nullable
 	private final Path workingDirectory;
@@ -185,7 +185,7 @@ class RunProcess {
 			if (process != null && outputs != null && outputs.length > 0) {
 				read(process, outputs);
 			}
-		}, String.format("process-%d:%s", COUNTER.getAndIncrement(), Thread.currentThread().getName())).start();
+		}, String.format("process-%d-%s", COUNTER.getAndIncrement(), Thread.currentThread().getName())).start();
 		Value value = sync.take();
 		if (value.process != null) {
 			return value.process;

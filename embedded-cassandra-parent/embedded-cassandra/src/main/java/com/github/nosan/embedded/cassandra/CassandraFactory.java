@@ -34,7 +34,7 @@ public interface CassandraFactory {
 	/**
 	 * Creates a new configured {@link Cassandra}.
 	 *
-	 * @return a {@code Cassandra}
+	 * @return a configured {@code Cassandra}
 	 */
 	@Nonnull
 	Cassandra create();

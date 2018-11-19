@@ -93,6 +93,7 @@ public abstract class AbstractLocalCassandraTests {
 					"already in use", "is in use by another process"));
 			runner.run(new NotReachable());
 		});
+		assertThat(this.output.toString()).contains("Cassandra version");
 		assertCassandraHasBeenStopped();
 		assertDirectoryHasBeenDeletedCorrectly();
 	}
@@ -107,6 +108,7 @@ public abstract class AbstractLocalCassandraTests {
 			runner.run(new NotReachable());
 		});
 		assertDirectoryHasBeenDeletedCorrectly();
+		assertThat(this.output.toString()).doesNotContain("Cassandra version");
 	}
 
 	@Test
