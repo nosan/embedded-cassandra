@@ -231,7 +231,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 	private static void await(Settings settings, Duration timeout, OutputCapture output, Process process)
 			throws Exception {
 		long start = System.currentTimeMillis();
-		Version version = settings.getVersion();
 		AtomicBoolean hasOutput = new AtomicBoolean();
 		boolean result = WaitUtils.await(timeout, () -> {
 			if (!process.isAlive()) {
@@ -244,7 +243,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 				hasOutput.set(output.contains("listening for cql") || output.contains("not starting native"));
 			}
 			long elapsed = System.currentTimeMillis() - start;
-			return hasOutput.get() || (elapsed > (version.getMajor() >= 3 ? 15000 : 10000));
+			return hasOutput.get() || elapsed > 15000;
 		});
 		if (!result) {
 			throwException(String.format("Cassandra has not been started, seems like (%d) milliseconds is not enough." +
