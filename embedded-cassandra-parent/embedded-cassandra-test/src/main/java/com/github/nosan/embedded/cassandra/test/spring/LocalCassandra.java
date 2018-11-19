@@ -26,6 +26,7 @@ import java.nio.file.Path;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.Resource;
+import org.springframework.test.annotation.DirtiesContext;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Version;
@@ -41,6 +42,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
  *
  * @author Dmytro Nosan
  * @see EmbeddedCassandra
+ * @see DirtiesContext
  * @see ArtifactFactory
  * @see LocalCassandraFactory
  * @see LocalCassandraContextCustomizer

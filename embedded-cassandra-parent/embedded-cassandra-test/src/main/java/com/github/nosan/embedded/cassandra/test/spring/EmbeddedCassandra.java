@@ -32,7 +32,7 @@ import com.github.nosan.embedded.cassandra.test.ClusterFactory;
  * <pre class="code">
  * &#064;RunWith(SpringRunner.class)
  * &#064;EmbeddedCassandra
- * &#064DirtiesContext
+ * &#064;DirtiesContext
  * public class CassandraTests {
  * &#064;Autowired
  * private TestCassandra cassandra;
