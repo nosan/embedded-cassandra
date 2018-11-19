@@ -34,6 +34,12 @@ class FilteredOutput implements RunProcess.Output {
 	@Nonnull
 	private final Predicate<String> filter;
 
+	/**
+	 * Creates {@link FilteredOutput}.
+	 *
+	 * @param delegate the destination output
+	 * @param filter the include filter
+	 */
 	FilteredOutput(@Nonnull RunProcess.Output delegate, @Nonnull Predicate<String> filter) {
 		this.delegate = delegate;
 		this.filter = filter;
