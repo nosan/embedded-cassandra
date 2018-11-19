@@ -212,17 +212,14 @@ public abstract class AbstractLocalCassandraTests {
 		this.factory.setWorkingDirectory(FileUtils.getUserDirectory()
 				.resolve("target")
 				.resolve(UUID.randomUUID().toString()));
-		try {
-			CassandraRunner runner = new CassandraRunner(this.factory);
-			runner.run(assertCreateKeyspace());
-			assertCassandraHasBeenStopped();
-			this.output.reset();
-			runner.run(assertDeleteKeyspace());
-			assertCassandraHasBeenStopped();
-		}
-		finally {
-			IOUtils.closeQuietly(() -> FileUtils.delete(this.factory.getWorkingDirectory()));
-		}
+		Runtime.getRuntime().addShutdownHook(new Thread(() ->
+				IOUtils.closeQuietly(() -> FileUtils.delete(this.factory.getWorkingDirectory()))));
+		CassandraRunner runner = new CassandraRunner(this.factory);
+		runner.run(assertCreateKeyspace());
+		assertCassandraHasBeenStopped();
+		this.output.reset();
+		runner.run(assertDeleteKeyspace());
+		assertCassandraHasBeenStopped();
 	}
 
 

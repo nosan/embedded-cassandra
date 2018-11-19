@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -136,22 +137,17 @@ public class DefaultDirectoryTests {
 	public void shouldNotDestroyDirectory() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 		this.rootDirectory = FileUtils.getUserDirectory().resolve(String.format("target/%s", UUID.randomUUID()));
+		Runtime.getRuntime().addShutdownHook(new Thread(() ->
+				IOUtils.closeQuietly(() -> FileUtils.delete(this.rootDirectory))));
 		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
-		try {
+		Path directory = workDir.initialize();
 
-			Path directory = workDir.initialize();
+		assertThat(directory).exists();
+		assertThat(directory).hasParent(this.rootDirectory);
 
-			assertThat(directory).exists();
-			assertThat(directory).hasParent(this.rootDirectory);
-
-			workDir.destroy();
-			assertThat(directory).exists();
-			assertThat(this.rootDirectory).exists();
-
-		}
-		finally {
-			FileUtils.delete(this.rootDirectory);
-		}
+		workDir.destroy();
+		assertThat(directory).exists();
+		assertThat(this.rootDirectory).exists();
 
 	}
 
