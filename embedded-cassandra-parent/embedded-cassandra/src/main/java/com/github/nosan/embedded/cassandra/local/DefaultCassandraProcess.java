@@ -151,7 +151,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		OutputCapture output = new OutputCapture(20);
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		Process process = new RunProcess(directory, environment, arguments)
-				.run(new FilteredOutput(output, outputFilter), new FilteredOutput(new Slf4jOutput(log), outputFilter));
+				.run(new FilteredOutput(output, outputFilter), new FilteredOutput(log::info, outputFilter));
 
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
@@ -244,7 +244,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 				hasOutput.set(output.contains("listening for cql") || output.contains("not starting native"));
 			}
 			long elapsed = System.currentTimeMillis() - start;
-			return hasOutput.get() || (version.getMajor() >= 3 ? elapsed > 15000 : elapsed > 10000);
+			return hasOutput.get() || (elapsed > (version.getMajor() >= 3 ? 15000 : 10000));
 		});
 		if (!result) {
 			throwException(String.format("Cassandra has not been started, seems like (%d) milliseconds is not enough." +

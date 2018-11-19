@@ -117,7 +117,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Startup timeout. Default value is {@code 2 minutes}.
+	 * Startup timeout.
 	 *
 	 * @return The value of the {@code startupTimeout} attribute
 	 */
@@ -296,8 +296,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 			version = new Version(3, 11, 3);
 		}
 		Duration startupTimeout = getStartupTimeout();
-		if (startupTimeout == null) {
-			startupTimeout = Duration.ofMinutes(2);
+		if (startupTimeout == null || startupTimeout.toMillis() <= 0) {
+			startupTimeout = Duration.ofMinutes(1);
 		}
 		Path workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null) {

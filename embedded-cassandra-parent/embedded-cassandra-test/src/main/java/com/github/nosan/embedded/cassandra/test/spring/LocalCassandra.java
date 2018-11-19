@@ -147,7 +147,7 @@ public @interface LocalCassandra {
 	 *
 	 * @return The value of the {@code startupTimeout} attribute
 	 */
-	long startupTimeout() default 120000;
+	long startupTimeout() default 60000;
 
 
 	/**
