@@ -241,17 +241,10 @@ class DefaultCassandraProcess implements CassandraProcess {
 			return outputReady.get() && TransportUtils.isReady(settings);
 		});
 		if (!result) {
-			if (!TransportUtils.isReady(settings)) {
-				String message = String.format("Cassandra has not been started, seems like (%d) milliseconds" +
-						" is not enough. Cassandra transport is not ready.", timeout.toMillis());
-				throwException(message, output);
-			}
-			if (!outputReady.get()) {
-				String message = String.format("Cassandra has not been started, seems like (%d) milliseconds" +
-						" is not enough. Note! There is no way to determine whether Cassandra" +
-						" is started or not if <console> output is disabled.", timeout.toMillis());
-				throwException(message, output);
-			}
+			throwException(String.format("Cassandra has not been started, seems like (%d) milliseconds " +
+					"is not enough. This could happen either Cassandra transport is not ready" +
+					" or there is no way to determine  whether Cassandra is started" +
+					" or not if <console> output is disabled.", timeout.toMillis()), output);
 		}
 	}
 

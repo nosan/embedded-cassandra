@@ -101,7 +101,7 @@ public abstract class AbstractLocalCassandraTests {
 	public void shouldFailCassandraNoOutput() {
 		this.factory.setLogbackFile(getClass().getResource("/logback-empty.xml"));
 		this.throwable.expect(CassandraException.class);
-		this.throwable.expectCause(new CauseMatcher(IOException.class, "<console> output is disabled."));
+		this.throwable.expectCause(new CauseMatcher(IOException.class, "<console> output is disabled"));
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(new NotReachable());
 		assertDirectoryHasBeenDeletedCorrectly();
