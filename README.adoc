@@ -48,11 +48,10 @@ class Scratch {
 }
 ```
 Factory has a lot of different methods to control your `Cassandra` instance (e.g. setVersion, setConfiguration, etc..).
-By default `Cassandra` is running on `random` ports and uses `3.11.3` version.
+By default `Cassandra` is running on `default` ports and uses `3.11.3` version.
 `Cassandra` interface doesn't include any utility methods to work with it, the main goal of
-this interface to start and stop `Cassandra`, thus if you want to test your `Cassandra` code, you
+this interface to start and stop `Cassandra`, hence if you want to test your `Cassandra` code, you
 should use `TestCassandra` from `embedded-cassandra-test` module.
-
 
 ==  embedded-cassandra-test image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-test.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-test"]
 
@@ -268,7 +267,3 @@ public class CqlScriptTests {
 
 TIP: Multiple sets of `@Cql` scripts could be configured for
 a given test method with a different syntax configuration or different execution phases per set.
-
-
-
-
