@@ -89,8 +89,7 @@ public abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(cassandra -> {
 			this.throwable.expect(CassandraException.class);
-			this.throwable.expectCause(new CauseMatcher(IOException.class,
-					"already in use", "is in use by another process"));
+			this.throwable.expectCause(new CauseMatcher(IOException.class));
 			runner.run(new NotReachable());
 		});
 		assertThat(this.output.toString()).contains("Cassandra version");
@@ -99,16 +98,13 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldFailCassandraUseSamePortsNoOutput() {
+	public void shouldFailCassandraNoOutput() {
 		this.factory.setLogbackFile(getClass().getResource("/logback-empty.xml"));
+		this.throwable.expect(CassandraException.class);
+		this.throwable.expectCause(new CauseMatcher(IOException.class, "<console> output is disabled."));
 		CassandraRunner runner = new CassandraRunner(this.factory);
-		runner.run(cassandra -> {
-			this.throwable.expect(CassandraException.class);
-			this.throwable.expectCause(new CauseMatcher(IOException.class, "Cassandra Process is not alive"));
-			runner.run(new NotReachable());
-		});
+		runner.run(new NotReachable());
 		assertDirectoryHasBeenDeletedCorrectly();
-		assertThat(this.output.toString()).doesNotContain("Cassandra version");
 	}
 
 	@Test
@@ -132,7 +128,7 @@ public abstract class AbstractLocalCassandraTests {
 	@Test
 	public void notEnoughTime() {
 		this.throwable.expect(CassandraException.class);
-		this.throwable.expectCause(new CauseMatcher(IOException.class, "seems like (2000) milliseconds is not enough"));
+		this.throwable.expectCause(new CauseMatcher(IOException.class, "Cassandra transport is not ready"));
 		this.factory.setStartupTimeout(Duration.ofSeconds(2L));
 		new CassandraRunner(this.factory).run(new NotReachable());
 		assertDirectoryHasBeenDeletedCorrectly();
@@ -192,6 +188,7 @@ public abstract class AbstractLocalCassandraTests {
 			assertCreateKeyspace().accept(cassandra);
 			runner.run(assertCreateKeyspace());
 		});
+		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 

@@ -16,10 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.test.support;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -35,41 +35,49 @@ public final class CauseMatcher extends TypeSafeMatcher<Throwable> {
 	@Nonnull
 	private final Class<? extends Throwable> type;
 
-	@Nonnull
-	private final String[] expectedMessages;
+	@Nullable
+	private final String expectedMessage;
 
 	/**
 	 * Creates a new {@link CauseMatcher}.
 	 *
 	 * @param cause caused exception
-	 * @param expectedMessages expected message
+	 * @param expectedMessage expected message
 	 */
-	public CauseMatcher(@Nonnull Class<? extends Throwable> cause, @Nonnull String... expectedMessages) {
+	public CauseMatcher(@Nonnull Class<? extends Throwable> cause, @Nonnull String expectedMessage) {
 		this.type = Objects.requireNonNull(cause, "Cause must not be null");
-		this.expectedMessages = Objects.requireNonNull(expectedMessages, "Messages must not be null");
+		this.expectedMessage = Objects.requireNonNull(expectedMessage, "Message must not be null");
+	}
+
+	/**
+	 * Creates a new {@link CauseMatcher}.
+	 *
+	 * @param cause caused exception
+	 * @since 1.2.0
+	 */
+	public CauseMatcher(@Nonnull Class<? extends Throwable> cause) {
+		this.type = Objects.requireNonNull(cause, "Cause must not be null");
+		this.expectedMessage = null;
 	}
 
 	@Override
 	protected boolean matchesSafely(@Nonnull Throwable item) {
-		return item.getClass().isAssignableFrom(this.type)
-				&& containsMessage(item.getMessage(), this.expectedMessages);
+		String message = item.getMessage();
+		if (this.expectedMessage != null) {
+			return item.getClass().isAssignableFrom(this.type) && message != null &&
+					message.contains(this.expectedMessage);
+		}
+		return item.getClass().isAssignableFrom(this.type);
 	}
 
 	@Override
 	public void describeTo(@Nonnull Description description) {
 		description.appendText("expects type ")
-				.appendValue(this.type)
-				.appendText(" and one of the messages ")
-				.appendValue(Arrays.toString(this.expectedMessages));
-	}
-
-
-	private boolean containsMessage(String message, String[] messages) {
-		for (String expected : messages) {
-			if (message.contains(expected)) {
-				return true;
-			}
+				.appendValue(this.type);
+		if (this.expectedMessage != null) {
+			description.appendText(" and message ")
+					.appendValue(this.expectedMessage);
 		}
-		return false;
 	}
+
 }

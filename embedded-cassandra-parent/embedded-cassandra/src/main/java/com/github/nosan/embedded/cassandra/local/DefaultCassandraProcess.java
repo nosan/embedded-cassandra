@@ -230,25 +230,28 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	private static void await(Settings settings, Duration timeout, OutputCapture output, Process process)
 			throws Exception {
-		long start = System.currentTimeMillis();
-		int defaultStartupTimeout = 15000;
-		AtomicBoolean hasOutput = new AtomicBoolean();
+		AtomicBoolean outputReady = new AtomicBoolean(false);
 		boolean result = WaitUtils.await(timeout, () -> {
 			if (!process.isAlive()) {
 				throwException("Cassandra Process is not alive. Please see logs for more details.", output);
 			}
-			if (!TransportUtils.isReady(settings)) {
-				return false;
+			if (!outputReady.get()) {
+				outputReady.set(output.contains("listening for cql") || output.contains("not starting native"));
 			}
-			if (!hasOutput.get()) {
-				hasOutput.set(output.contains("listening for cql") || output.contains("not starting native"));
-			}
-			long elapsed = System.currentTimeMillis() - start;
-			return hasOutput.get() || elapsed > defaultStartupTimeout;
+			return outputReady.get() && TransportUtils.isReady(settings);
 		});
 		if (!result) {
-			throwException(String.format("Cassandra has not been started, seems like (%d) milliseconds is not enough." +
-					" Please increase a startup timeout.", timeout.toMillis()), output);
+			if (!TransportUtils.isReady(settings)) {
+				String message = String.format("Cassandra has not been started, seems like (%d) milliseconds" +
+						" is not enough. Cassandra transport is not ready.", timeout.toMillis());
+				throwException(message, output);
+			}
+			if (!outputReady.get()) {
+				String message = String.format("Cassandra has not been started, seems like (%d) milliseconds" +
+						" is not enough. Note! There is no way to determine whether Cassandra" +
+						" is started or not if <console> output is disabled.", timeout.toMillis());
+				throwException(message, output);
+			}
 		}
 	}
 
