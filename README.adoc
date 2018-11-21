@@ -37,9 +37,10 @@ class Scratch {
 		//factory.setVersion(...);
 		//factory.setConfigurationFile(...);
 		Cassandra cassandra = factory.create();
+		
 		try {
-                 cassandra.start();
-                 Settings settings = cassandra.getSettings();
+                 	cassandra.start();
+                 	Settings settings = cassandra.getSettings();
 		}
 		finally {
 			cassandra.stop();
@@ -209,9 +210,9 @@ public class CassandraTests {
     @Autowired /* only if @EmbeddedCassandra(replace = ANY) */
     private Cluster cluster;
 
-	@Test
-	public void test() {
-	}
+   @Test
+   public void test() {
+   }
 
 }
 ```
