@@ -110,7 +110,7 @@ public class LocalCassandraFactoryTests {
 		Object processFactory = ReflectionUtils.getField(cassandra, "processFactory");
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(new Version(3, 11, 3));
 		assertThat(ReflectionUtils.getField(processFactory, "version")).isEqualTo(new Version(3, 11, 3));
-		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(Duration.ofSeconds(30));
+		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(Duration.ofSeconds(45));
 		assertThat(ReflectionUtils.getField(processFactory, "jmxPort")).isEqualTo(7199);
 		assertThat(ReflectionUtils.getField(processFactory, "allowRoot")).isEqualTo(false);
 		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory"))
