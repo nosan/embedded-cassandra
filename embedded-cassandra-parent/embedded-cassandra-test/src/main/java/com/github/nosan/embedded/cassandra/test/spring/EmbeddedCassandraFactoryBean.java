@@ -105,9 +105,10 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 		config.setTestClass(this.testClass);
 		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
 		CqlScript[] cqlScripts = CqlResourceUtils.getScripts(context, config);
-		this.cassandra = new TestCassandra(getBean(this.context, CassandraFactory.class),
+		TestCassandra cassandra = new TestCassandra(getBean(this.context, CassandraFactory.class),
 				getBean(context, ClusterFactory.class), cqlScripts);
-		this.cassandra.start();
+		this.cassandra = cassandra;
+		cassandra.start();
 	}
 
 
