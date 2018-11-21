@@ -48,6 +48,7 @@ public class LocalCassandraFactoryBuilderTests {
 		Path javaDirectory = Paths.get(UUID.randomUUID().toString());
 		Version version = new Version(3, 11, 0);
 		int jmxPort = 8000;
+		boolean allowRoot = true;
 
 		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder()
 				.setJvmOptions(jvmOptions)
@@ -62,6 +63,7 @@ public class LocalCassandraFactoryBuilderTests {
 				.setWorkingDirectory(workingDirectory)
 				.setStartupTimeout(Duration.ofMinutes(1))
 				.setJmxPort(jmxPort)
+				.setAllowRoot(allowRoot)
 				.build();
 
 		assertThat(factory.getJvmOptions()).containsExactly("1", "2", "3");
@@ -74,6 +76,7 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getWorkingDirectory()).isEqualTo(workingDirectory);
 		assertThat(factory.getJavaHome()).isEqualTo(javaDirectory);
 		assertThat(factory.getJmxPort()).isEqualTo(jmxPort);
+		assertThat(factory.isAllowRoot()).isEqualTo(allowRoot);
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(1));
 	}
 
@@ -92,6 +95,7 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getWorkingDirectory()).isNull();
 		assertThat(factory.getJavaHome()).isNull();
 		assertThat(factory.getJmxPort()).isEqualTo(7199);
+		assertThat(factory.isAllowRoot()).isFalse();
 		assertThat(factory.getStartupTimeout()).isNull();
 
 	}

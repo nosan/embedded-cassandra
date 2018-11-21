@@ -75,6 +75,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 	@Nullable
 	private final Path javaHome;
 
+	private final boolean allowRoot;
+
 	private final int jmxPort;
 
 	@Nullable
@@ -96,16 +98,18 @@ class DefaultCassandraProcess implements CassandraProcess {
 	 * @param startupTimeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param javaHome java home directory
+	 * @param allowRoot force running as root
 	 * @param jmxPort JMX port
 	 */
 	DefaultCassandraProcess(@Nonnull Path directory, @Nonnull Version version, @Nonnull Duration startupTimeout,
-			@Nonnull List<String> jvmOptions, @Nullable Path javaHome, int jmxPort) {
+			@Nonnull List<String> jvmOptions, @Nullable Path javaHome, int jmxPort, boolean allowRoot) {
 		this.directory = directory;
 		this.startupTimeout = startupTimeout;
 		this.version = version;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 		this.jmxPort = jmxPort;
+		this.allowRoot = allowRoot;
 	}
 
 	@Override
@@ -131,6 +135,11 @@ class DefaultCassandraProcess implements CassandraProcess {
 		if (OS.isWindows()) {
 			if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1)) {
 				arguments.add("-a");
+			}
+		}
+		if (!OS.isWindows() && this.allowRoot) {
+			if (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 0)) {
+				arguments.add("-R");
 			}
 		}
 		arguments.add("-p");

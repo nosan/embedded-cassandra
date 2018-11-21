@@ -86,12 +86,13 @@ class LocalCassandra implements Cassandra {
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param javaHome java home directory
 	 * @param jmxPort JMX port
+	 * @param allowRoot force running as root
 	 */
 	LocalCassandra(@Nonnull Version version, @Nonnull ArtifactFactory artifactFactory,
 			@Nonnull Path workingDirectory, @Nonnull Duration startupTimeout, @Nullable URL configurationFile,
 			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
 			@Nonnull List<String> jvmOptions, @Nullable Path javaHome,
-			int jmxPort) {
+			int jmxPort, boolean allowRoot) {
 		Objects.requireNonNull(artifactFactory, "Artifact Factory must not be null");
 		Objects.requireNonNull(version, "Version must not be null");
 		Objects.requireNonNull(startupTimeout, "Startup timeout must not be null");
@@ -103,7 +104,7 @@ class LocalCassandra implements Cassandra {
 		this.directoryFactory = new DefaultDirectoryFactory(version, workingDirectory,
 				configurationFile, logbackFile, rackFile, topologyFile);
 		this.processFactory = new DefaultCassandraProcessFactory(startupTimeout, jvmOptions, version,
-				javaHome, jmxPort);
+				javaHome, jmxPort, allowRoot);
 	}
 
 

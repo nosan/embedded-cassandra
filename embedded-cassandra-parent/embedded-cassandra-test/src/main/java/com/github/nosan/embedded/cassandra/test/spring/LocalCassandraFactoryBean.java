@@ -96,6 +96,7 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		builder.setJvmOptions(annotation.jvmOptions());
 		builder.setArtifactFactory(getArtifactFactory(context));
 		builder.setJmxPort(annotation.jmxPort());
+		builder.setAllowRoot(annotation.allowRoot());
 		return builder.build();
 	}
 

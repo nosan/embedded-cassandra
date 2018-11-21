@@ -243,25 +243,25 @@ public abstract class AbstractLocalCassandraTests {
 		assertCassandraHasBeenStopped();
 	}
 
-	private void assertDirectoryHasBeenDeletedCorrectly() {
+	void assertDirectoryHasBeenDeletedCorrectly() {
 		assertThat(this.output.toString()).contains("Delete recursively working");
 		assertThat(this.output.toString()).doesNotContain("has not been deleted");
 	}
 
-	private void assertCassandraHasBeenStopped() {
+	void assertCassandraHasBeenStopped() {
 		assertThat(this.output.toString()).contains("Announcing shutdown");
 	}
 
-	private Consumer<Cassandra> assertDeleteKeyspace() {
+	Consumer<Cassandra> assertDeleteKeyspace() {
 		return new CqlAssert("DROP KEYSPACE test");
 	}
 
-	private Consumer<Cassandra> assertCreateKeyspace() {
+	Consumer<Cassandra> assertCreateKeyspace() {
 		return new CqlAssert("CREATE KEYSPACE test" +
 				" WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
 	}
 
-	private Consumer<Cassandra> assertBusyPort(Function<Settings, InetAddress> addressMapper,
+	Consumer<Cassandra> assertBusyPort(Function<Settings, InetAddress> addressMapper,
 			Function<Settings, Integer> portMapper) {
 		return new PortBusyAssert(addressMapper, portMapper);
 	}
