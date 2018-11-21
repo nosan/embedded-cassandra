@@ -116,7 +116,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 	@Nonnull
 	public Settings start() throws Exception {
 		Path directory = this.directory;
-		Settings settings = getSettings(directory, this.version);
+		Version version = this.version;
+		Settings settings = getSettings(directory, version);
 		this.settings = settings;
 		Path executable = OS.isWindows() ? directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
 		Path pidFile = directory.resolve(String.format("bin/%s.pid", UUID.randomUUID()));
@@ -131,7 +132,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 		arguments.add(executable.toAbsolutePath());
 		arguments.add("-f");
-		Version version = this.version;
 		if (OS.isWindows()) {
 			if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1)) {
 				arguments.add("-a");
