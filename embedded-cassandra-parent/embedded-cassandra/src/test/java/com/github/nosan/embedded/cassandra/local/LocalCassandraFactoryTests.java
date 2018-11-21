@@ -54,6 +54,7 @@ public class LocalCassandraFactoryTests {
 		Path rackFile = Paths.get("rack.properties");
 		Path topologyFile = Paths.get("topology.properties");
 		int jmxPort = 8000;
+		boolean allowRoot = true;
 		ArtifactFactory artifactFactory = new ArtifactFactory() {
 			@Nonnull
 			@Override
@@ -74,6 +75,7 @@ public class LocalCassandraFactoryTests {
 		factory.setStartupTimeout(Duration.ofMinutes(1));
 		factory.setJavaHome(javaDirectory);
 		factory.setJmxPort(jmxPort);
+		factory.setAllowRoot(allowRoot);
 
 
 		Cassandra cassandra = factory.create();
@@ -87,6 +89,7 @@ public class LocalCassandraFactoryTests {
 		assertThat(ReflectionUtils.getField(processFactory, "javaHome")).isEqualTo(javaDirectory);
 		assertThat(ReflectionUtils.getField(processFactory, "version")).isEqualTo(version);
 		assertThat(ReflectionUtils.getField(processFactory, "jmxPort")).isEqualTo(jmxPort);
+		assertThat(ReflectionUtils.getField(processFactory, "allowRoot")).isEqualTo(allowRoot);
 
 		Object directoryFactory = ReflectionUtils.getField(cassandra, "directoryFactory");
 
@@ -109,6 +112,7 @@ public class LocalCassandraFactoryTests {
 		assertThat(ReflectionUtils.getField(processFactory, "version")).isEqualTo(new Version(3, 11, 3));
 		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(Duration.ofSeconds(30));
 		assertThat(ReflectionUtils.getField(processFactory, "jmxPort")).isEqualTo(7199);
+		assertThat(ReflectionUtils.getField(processFactory, "allowRoot")).isEqualTo(false);
 		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory"))
 				.isInstanceOf(RemoteArtifactFactory.class);
 

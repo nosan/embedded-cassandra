@@ -72,6 +72,19 @@ public final class LocalCassandraFactoryBuilder {
 
 	private int jmxPort = 7199;
 
+	private boolean allowRoot = false;
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#isAllowRoot() allowRoot} attribute.
+	 *
+	 * @param allowRoot The value for allowRoot
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.2.1
+	 */
+	public LocalCassandraFactoryBuilder setAllowRoot(boolean allowRoot) {
+		this.allowRoot = allowRoot;
+		return this;
+	}
 
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getJmxPort() jmxPort} attribute.
@@ -396,6 +409,7 @@ public final class LocalCassandraFactoryBuilder {
 		factory.getJvmOptions().addAll(this.jvmOptions);
 		factory.setJavaHome(this.javaHome);
 		factory.setJmxPort(this.jmxPort);
+		factory.setAllowRoot(this.allowRoot);
 		return factory;
 	}
 

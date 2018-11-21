@@ -55,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		jvmOptions = {"-Dtest.property=property"},
 		topologyFile = "classpath:/topology.properties", startupTimeout = 240000,
 		jmxPort = 8000,
+		allowRoot = true,
 		replace = EmbeddedCassandra.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class LocalCassandraAnnotationTests {
@@ -80,6 +81,7 @@ public class LocalCassandraAnnotationTests {
 		assertThat(factory.getConfigurationFile()).isEqualTo(ClassUtils.getClassLoader().getResource("cassandra.yaml"));
 		assertThat(factory.getJvmOptions()).containsExactly("-Dtest.property=property");
 		assertThat(factory.getJmxPort()).isEqualTo(8000);
+		assertThat(factory.isAllowRoot()).isTrue();
 
 	}
 

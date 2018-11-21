@@ -45,8 +45,9 @@ public class DefaultCassandraProcessFactoryTests {
 		Path javaHome = Paths.get("java.home");
 		Path directory = Paths.get("directory");
 		int jmxPort = 7199;
+		boolean allowRoot = true;
 		DefaultCassandraProcessFactory factory = new DefaultCassandraProcessFactory(startupTimeout,
-				jvmOptions, version, javaHome, jmxPort);
+				jvmOptions, version, javaHome, jmxPort, allowRoot);
 		CassandraProcess cassandraProcess = factory.create(directory);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "jvmOptions")).isEqualTo(jvmOptions);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "javaHome")).isEqualTo(javaHome);
@@ -54,6 +55,7 @@ public class DefaultCassandraProcessFactoryTests {
 		assertThat(ReflectionUtils.getField(cassandraProcess, "startupTimeout")).isEqualTo(startupTimeout);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "directory")).isEqualTo(directory);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "jmxPort")).isEqualTo(jmxPort);
+		assertThat(ReflectionUtils.getField(cassandraProcess, "allowRoot")).isEqualTo(allowRoot);
 
 	}
 }

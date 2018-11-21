@@ -151,6 +151,13 @@ public @interface LocalCassandra {
 	 */
 	long startupTimeout() default 30000;
 
+	/**
+	 * Sets attribute for {@link LocalCassandraFactory#isAllowRoot()}.
+	 *
+	 * @return The value of the {@code allowRoot} attribute
+	 * @since 1.2.1
+	 */
+	boolean allowRoot() default false;
 
 	/**
 	 * Alias for {@link EmbeddedCassandra#scripts()}.

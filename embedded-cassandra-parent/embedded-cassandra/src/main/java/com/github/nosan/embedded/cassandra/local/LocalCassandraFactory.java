@@ -75,6 +75,28 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	private int jmxPort = 7199;
 
+	private boolean allowRoot = false;
+
+	/**
+	 * Whether to force running Cassandra as root or not.
+	 *
+	 * @return The value of the {@code allowRoot} attribute
+	 * @since 1.2.1
+	 */
+	public boolean isAllowRoot() {
+		return this.allowRoot;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#isAllowRoot} attribute.
+	 *
+	 * @param allowRoot The value for allowRoot
+	 * @since 1.2.1
+	 */
+	public void setAllowRoot(boolean allowRoot) {
+		this.allowRoot = allowRoot;
+	}
+
 	/**
 	 * JMX port. This property will be passed to the Cassandra as {@code -Dcassandra.jmx.local.port={jmxPort}}
 	 *
@@ -305,7 +327,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 					resolve(String.format("embedded-cassandra-%s", UUID.randomUUID()));
 		}
 		return new LocalCassandra(version, artifactFactory, workingDirectory, startupTimeout, getConfigurationFile(),
-				getLogbackFile(), getRackFile(), getTopologyFile(), getJvmOptions(), getJavaHome(), getJmxPort());
+				getLogbackFile(), getRackFile(), getTopologyFile(), getJvmOptions(), getJavaHome(), getJmxPort(),
+				isAllowRoot());
 	}
 
 
