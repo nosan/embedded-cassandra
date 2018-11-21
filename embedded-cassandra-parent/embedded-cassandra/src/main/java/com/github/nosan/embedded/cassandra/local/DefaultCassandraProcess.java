@@ -193,7 +193,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 					throw ex;
 				}
 				if (settings != null) {
-					boolean result = WaitUtils.await(Duration.ofSeconds(5),
+					boolean result = WaitUtils.await(Duration.ofSeconds(10),
 							() -> TransportUtils.isDisabled(settings) && !process.isAlive());
 					if (!result) {
 						forceStop(process, pidFile, pid);
