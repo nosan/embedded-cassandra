@@ -45,7 +45,6 @@ public class LocalCassandra_V_3_11_X_Tests extends AbstractLocalCassandraTests {
 			assertThat(this.output.toString()).contains(" -R, -p,");
 			assertCassandraHasBeenStopped();
 			assertDirectoryHasBeenDeletedCorrectly();
-			this.output.reset();
 		}
 	}
 
