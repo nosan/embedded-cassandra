@@ -81,6 +81,7 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.2.1
 	 */
+	@Nonnull
 	public LocalCassandraFactoryBuilder setAllowRoot(boolean allowRoot) {
 		this.allowRoot = allowRoot;
 		return this;
@@ -93,6 +94,7 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.1.1
 	 */
+	@Nonnull
 	public LocalCassandraFactoryBuilder setJmxPort(int jmxPort) {
 		this.jmxPort = jmxPort;
 		return this;
@@ -105,6 +107,7 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.0.9
 	 */
+	@Nonnull
 	public LocalCassandraFactoryBuilder setJavaHome(@Nullable Path javaHome) {
 		this.javaHome = javaHome;
 		return this;
@@ -117,6 +120,7 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.0.9
 	 */
+	@Nonnull
 	public LocalCassandraFactoryBuilder setJavaHome(@Nullable File javaHome) {
 		return setJavaHome((javaHome != null) ? javaHome.toPath() : null);
 	}
@@ -128,6 +132,7 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param startupTimeout The value for startupTimeout
 	 * @return {@code this} builder for use in a chained invocation
 	 */
+	@Nonnull
 	public LocalCassandraFactoryBuilder setStartupTimeout(@Nullable Duration startupTimeout) {
 		this.startupTimeout = startupTimeout;
 		return this;
