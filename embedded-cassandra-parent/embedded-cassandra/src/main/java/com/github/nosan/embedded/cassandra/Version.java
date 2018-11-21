@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.nosan.embedded.cassandra.util.StringUtils;
+
 /**
  * Simple class to represent {@link Cassandra} version.
  *
@@ -32,7 +34,7 @@ import javax.annotation.Nullable;
 public final class Version implements Comparable<Version> {
 
 	private static final Pattern VERSION =
-			Pattern.compile("^\\s*([0-9]+)\\.([0-9]+)\\.([0-9]+)\\s*$");
+			Pattern.compile("^\\s*([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?\\s*$");
 
 	private final int major;
 
@@ -48,9 +50,32 @@ public final class Version implements Comparable<Version> {
 	 * @param patch a patch value
 	 */
 	public Version(int major, int minor, int patch) {
+		if (major < 0) {
+			throw new IllegalArgumentException("major must not be less than 0");
+		}
 		this.major = major;
-		this.minor = minor;
-		this.patch = patch;
+		this.minor = Math.max(minor, -1);
+		this.patch = Math.max(patch, -1);
+	}
+
+	/**
+	 * Creates a {@link Version}.
+	 *
+	 * @param major a major value
+	 * @param minor a minor value
+	 */
+	public Version(int major, int minor) {
+		this(major, minor, -1);
+	}
+
+
+	/**
+	 * Creates a {@link Version}.
+	 *
+	 * @param major a major value
+	 */
+	public Version(int major) {
+		this(major, -1, -1);
 	}
 
 
@@ -66,7 +91,7 @@ public final class Version implements Comparable<Version> {
 	/**
 	 * Returns a minor value.
 	 *
-	 * @return The value of the {@code minor} attribute
+	 * @return The value of the {@code minor} attribute, or {@code -1}.
 	 */
 	public int getMinor() {
 		return this.minor;
@@ -75,7 +100,7 @@ public final class Version implements Comparable<Version> {
 	/**
 	 * Returns a patch value.
 	 *
-	 * @return The value of the {@code patch} attribute
+	 * @return The value of the {@code patch} attribute, or {@code -1}.
 	 */
 	public int getPatch() {
 		return this.patch;
@@ -103,7 +128,14 @@ public final class Version implements Comparable<Version> {
 	@Override
 	@Nonnull
 	public String toString() {
-		return String.format("%s.%s.%s", this.major, this.minor, this.patch);
+		StringBuilder text = new StringBuilder().append(this.major);
+		if (this.minor >= 0) {
+			text.append(".").append(this.minor);
+		}
+		if (this.patch >= 0) {
+			text.append(".").append(this.patch);
+		}
+		return text.toString();
 	}
 
 	@Override
@@ -122,7 +154,7 @@ public final class Version implements Comparable<Version> {
 	/**
 	 * Parses a {@code version}.
 	 *
-	 * @param version a version (expected format ({@code int.int.int}))
+	 * @param version a version (expected format ({@code int(.int)?(.int)?}))
 	 * @return a parsed {@link Version}
 	 */
 	@Nonnull
@@ -131,12 +163,21 @@ public final class Version implements Comparable<Version> {
 		Matcher matcher = VERSION.matcher(version);
 		if (matcher.find()) {
 			int major = Integer.parseInt(matcher.group(1));
-			int minor = Integer.parseInt(matcher.group(2));
-			int patch = Integer.parseInt(matcher.group(3));
+			int minor = -1;
+			int patch = -1;
+			String minorGroup = matcher.group(3);
+			if (StringUtils.hasText(minorGroup)) {
+				minor = Integer.parseInt(minorGroup);
+			}
+			String patchGroup = matcher.group(5);
+			if (StringUtils.hasText(patchGroup)) {
+				patch = Integer.parseInt(patchGroup);
+			}
 			return new Version(major, minor, patch);
 		}
-		throw new IllegalArgumentException(String.format("Version (%s) is invalid. Expected format is (int.int.int)",
-				version));
+		throw new IllegalArgumentException(
+				String.format("Version (%s) is invalid. Expected format is <int(.int)?(.int)?>",
+						version));
 	}
 
 }

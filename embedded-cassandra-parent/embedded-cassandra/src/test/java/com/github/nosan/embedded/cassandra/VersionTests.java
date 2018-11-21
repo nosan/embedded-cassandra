@@ -35,7 +35,7 @@ public class VersionTests {
 
 
 	@Test
-	public void shouldParse() {
+	public void shouldParseMajorMinorPatch() {
 		Version version = Version.parse("3.11.3");
 		assertThat(version)
 				.isEqualTo(new Version(3, 11, 3));
@@ -46,6 +46,33 @@ public class VersionTests {
 		assertThat(version.getPatch()).isEqualTo(3);
 		assertThat(version.toString()).isEqualTo("3.11.3");
 	}
+
+
+	@Test
+	public void shouldParseMajorMinor() {
+		Version version = Version.parse("3.11");
+		assertThat(version).isEqualTo(new Version(3, 11));
+		assertThat(version).isEqualByComparingTo(new Version(3, 11));
+		assertThat(version).isNotEqualByComparingTo(new Version(3, 11, 2));
+		assertThat(version.getMajor()).isEqualTo(3);
+		assertThat(version.getMinor()).isEqualTo(11);
+		assertThat(version.getPatch()).isEqualTo(-1);
+		assertThat(version.toString()).isEqualTo("3.11");
+	}
+
+	@Test
+	public void shouldParseMajor() {
+		Version version = Version.parse("3");
+		assertThat(version)
+				.isEqualTo(new Version(3));
+		assertThat(version).isEqualByComparingTo(new Version(3));
+		assertThat(version).isNotEqualByComparingTo(new Version(3, 11, 2));
+		assertThat(version.getMajor()).isEqualTo(3);
+		assertThat(version.getMinor()).isEqualTo(-1);
+		assertThat(version.getPatch()).isEqualTo(-1);
+		assertThat(version.toString()).isEqualTo("3");
+	}
+
 
 	@Test
 	public void shouldNotParse() {
