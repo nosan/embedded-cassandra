@@ -25,6 +25,8 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
+
 
 /**
  * {@link CqlScript} implementation for class path resources. Uses a
@@ -110,8 +112,7 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 		super(encoding);
 		Objects.requireNonNull(location, "Location must not be null");
 		this.location = normalize(location, contextClass);
-		this.classLoader = (classLoader != null) ? classLoader : Thread.currentThread()
-				.getContextClassLoader();
+		this.classLoader = (classLoader != null) ? classLoader : ClassUtils.getClassLoader();
 		this.contextClass = contextClass;
 	}
 

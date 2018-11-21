@@ -27,6 +27,7 @@ import org.junit.rules.TemporaryFolder;
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,7 +48,7 @@ public class PortReplacerCustomizerTests {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		Version version = new Version(3, 11, 3);
 		PortReplacerCustomizer customizer = new PortReplacerCustomizer(version);
-		try (InputStream inputStream = ClassLoader.getSystemResourceAsStream("cassandra-all-ports.yaml")) {
+		try (InputStream inputStream = ClassUtils.getClassLoader().getResourceAsStream("cassandra-all-ports.yaml")) {
 			Files.copy(inputStream, directory.resolve("cassandra.yaml"));
 		}
 

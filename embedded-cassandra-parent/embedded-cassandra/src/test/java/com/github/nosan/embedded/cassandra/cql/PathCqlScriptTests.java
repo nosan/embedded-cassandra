@@ -22,6 +22,8 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -33,7 +35,8 @@ public class PathCqlScriptTests {
 
 	@Test
 	public void getStatements() throws URISyntaxException {
-		PathCqlScript pathCqlScript = new PathCqlScript(Paths.get(ClassLoader.getSystemResource("roles.cql").toURI()));
+		PathCqlScript pathCqlScript = new PathCqlScript(Paths.get(
+				ClassUtils.getClassLoader().getResource("roles.cql").toURI()));
 		assertThat(pathCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
@@ -41,9 +44,10 @@ public class PathCqlScriptTests {
 
 	@Test
 	public void helpers() throws Exception {
-		assertThat(new PathCqlScript(Paths.get(ClassLoader.getSystemResource("roles.cql").toURI())))
-				.isEqualTo(new PathCqlScript(Paths.get(ClassLoader.getSystemResource("roles.cql").toURI())));
-		assertThat(new PathCqlScript(Paths.get(ClassLoader.getSystemResource("roles.cql").toURI())).toString())
+		assertThat(new PathCqlScript(Paths.get(ClassUtils.getClassLoader().getResource("roles.cql").toURI())))
+				.isEqualTo(new PathCqlScript(Paths.get(ClassUtils.getClassLoader().getResource("roles.cql").toURI())));
+		assertThat(
+				new PathCqlScript(Paths.get(ClassUtils.getClassLoader().getResource("roles.cql").toURI())).toString())
 				.contains("roles.cql");
 	}
 

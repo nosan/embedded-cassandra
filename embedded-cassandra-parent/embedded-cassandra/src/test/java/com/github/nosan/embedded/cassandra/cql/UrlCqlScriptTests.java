@@ -22,6 +22,8 @@ import java.net.URL;
 
 import org.junit.Test;
 
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -34,16 +36,16 @@ public class UrlCqlScriptTests {
 
 	@Test
 	public void getStatements() {
-		UrlCqlScript urlCqlScript = new UrlCqlScript(ClassLoader.getSystemResource("roles.cql"));
+		UrlCqlScript urlCqlScript = new UrlCqlScript(ClassUtils.getClassLoader().getResource("roles.cql"));
 		assertThat(urlCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
 	public void helpers() {
-		assertThat(new UrlCqlScript(ClassLoader.getSystemResource("roles.cql")))
-				.isEqualTo(new UrlCqlScript(ClassLoader.getSystemResource("roles.cql")));
-		assertThat(new UrlCqlScript(ClassLoader.getSystemResource("roles.cql")).toString())
+		assertThat(new UrlCqlScript(ClassUtils.getClassLoader().getResource("roles.cql")))
+				.isEqualTo(new UrlCqlScript(ClassUtils.getClassLoader().getResource("roles.cql")));
+		assertThat(new UrlCqlScript(ClassUtils.getClassLoader().getResource("roles.cql")).toString())
 				.contains("roles.cql");
 	}
 

@@ -22,6 +22,8 @@ import java.io.UncheckedIOException;
 
 import org.junit.Test;
 
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -35,14 +37,15 @@ public class InputStreamCqlScriptTests {
 	@Test
 	public void getStatements() {
 		InputStreamCqlScript inputStreamCqlScript =
-				new InputStreamCqlScript(ClassLoader.getSystemResourceAsStream("roles.cql"));
+				new InputStreamCqlScript(ClassUtils.getClassLoader().getResourceAsStream("roles.cql"));
 		assertThat(inputStreamCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
 	public void helpers() {
-		InputStreamCqlScript actual = new InputStreamCqlScript(ClassLoader.getSystemResourceAsStream("roles.cql"));
+		InputStreamCqlScript actual =
+				new InputStreamCqlScript(ClassUtils.getClassLoader().getResourceAsStream("roles.cql"));
 		assertThat(actual).isEqualTo(actual);
 		assertThat(actual.toString())
 				.contains("InputStream CQL Statements");
@@ -50,7 +53,7 @@ public class InputStreamCqlScriptTests {
 
 	@Test(expected = UncheckedIOException.class)
 	public void invalidResource() throws IOException {
-		InputStream systemResourceAsStream = ClassLoader.getSystemResourceAsStream("roles.cql");
+		InputStream systemResourceAsStream = ClassUtils.getClassLoader().getResourceAsStream("roles.cql");
 		systemResourceAsStream.close();
 		new InputStreamCqlScript(systemResourceAsStream).getStatements();
 	}
