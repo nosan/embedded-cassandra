@@ -138,7 +138,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			}
 		}
 		if (!OS.isWindows() && this.allowRoot) {
-			if (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 0)) {
+			if (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1)) {
 				arguments.add("-R");
 			}
 		}
