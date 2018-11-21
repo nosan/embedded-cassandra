@@ -92,7 +92,6 @@ public abstract class AbstractLocalCassandraTests {
 			this.throwable.expectCause(new CauseMatcher(IOException.class));
 			runner.run(new NotReachable());
 		});
-		assertThat(this.output.toString()).contains("Cassandra version");
 		assertCassandraHasBeenStopped();
 		assertDirectoryHasBeenDeletedCorrectly();
 	}
