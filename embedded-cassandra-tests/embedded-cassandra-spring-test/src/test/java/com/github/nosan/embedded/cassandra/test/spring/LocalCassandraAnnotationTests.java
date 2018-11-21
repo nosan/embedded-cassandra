@@ -37,6 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,10 +74,10 @@ public class LocalCassandraAnnotationTests {
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
 		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(4));
-		assertThat(factory.getLogbackFile()).isEqualTo(ClassLoader.getSystemResource("logback-test.xml"));
-		assertThat(factory.getTopologyFile()).isEqualTo(ClassLoader.getSystemResource("topology.properties"));
-		assertThat(factory.getRackFile()).isEqualTo(ClassLoader.getSystemResource("rack.properties"));
-		assertThat(factory.getConfigurationFile()).isEqualTo(ClassLoader.getSystemResource("cassandra.yaml"));
+		assertThat(factory.getLogbackFile()).isEqualTo(ClassUtils.getClassLoader().getResource("logback-test.xml"));
+		assertThat(factory.getTopologyFile()).isEqualTo(ClassUtils.getClassLoader().getResource("topology.properties"));
+		assertThat(factory.getRackFile()).isEqualTo(ClassUtils.getClassLoader().getResource("rack.properties"));
+		assertThat(factory.getConfigurationFile()).isEqualTo(ClassUtils.getClassLoader().getResource("cassandra.yaml"));
 		assertThat(factory.getJvmOptions()).containsExactly("-Dtest.property=property");
 		assertThat(factory.getJmxPort()).isEqualTo(8000);
 

@@ -22,12 +22,15 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 /**
  * {@link DirectoryCustomizer} to initialize {@code cassandra.yaml}.
@@ -53,19 +56,24 @@ class ConfigurationFileCustomizer implements DirectoryCustomizer {
 
 	@Override
 	public void customize(@Nonnull Path directory) throws IOException {
-		URL source = this.configurationFile;
-		if (source == null) {
-			source = ClassLoader.getSystemResource("com/github/nosan/embedded/cassandra/local/cassandra.yaml");
+		URL configurationFile = this.configurationFile;
+		String location = "com/github/nosan/embedded/cassandra/local/cassandra.yaml";
+		if (configurationFile == null) {
+			ClassLoader classLoader = ClassUtils.getClassLoader();
+			configurationFile = (classLoader != null) ? classLoader.getResource(location) :
+					ClassLoader.getSystemResource(location);
 		}
+		Objects.requireNonNull(configurationFile, String.format("Configuration File must not be null." +
+				" There is no resource for location (%s)", location));
 		Path target = directory.resolve("conf/cassandra.yaml");
 		if (log.isDebugEnabled()) {
-			log.debug("Replace ({}) with ({})", target, source);
+			log.debug("Replace ({}) with ({})", target, configurationFile);
 		}
-		try (InputStream is = source.openStream()) {
+		try (InputStream is = configurationFile.openStream()) {
 			Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Configuration file : (%s) could not be saved", source), ex);
+			throw new IOException(String.format("Configuration file : (%s) could not be saved", configurationFile), ex);
 		}
 	}
 

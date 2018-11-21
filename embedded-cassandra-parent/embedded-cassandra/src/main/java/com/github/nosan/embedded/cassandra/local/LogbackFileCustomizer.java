@@ -22,12 +22,15 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 /**
  * {@link DirectoryCustomizer} to initialize {@code logback.xml}.
@@ -55,9 +58,14 @@ class LogbackFileCustomizer implements DirectoryCustomizer {
 	@Override
 	public void customize(@Nonnull Path directory) throws IOException {
 		URL logbackFile = this.logbackFile;
+		String location = "com/github/nosan/embedded/cassandra/local/logback.xml";
 		if (logbackFile == null) {
-			logbackFile = ClassLoader.getSystemResource("com/github/nosan/embedded/cassandra/local/logback.xml");
+			ClassLoader classLoader = ClassUtils.getClassLoader();
+			logbackFile = (classLoader != null) ? classLoader.getResource(location) :
+					ClassLoader.getSystemResource(location);
 		}
+		Objects.requireNonNull(logbackFile, String.format("Logback File must not be null." +
+				" There is no resource for location (%s)", location));
 		Path target = directory.resolve("conf/logback.xml");
 		if (log.isDebugEnabled()) {
 			log.debug("Replace ({}) with ({})", target, logbackFile);

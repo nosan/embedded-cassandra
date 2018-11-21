@@ -43,6 +43,7 @@ import org.junit.rules.TemporaryFolder;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.WebServer;
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -149,7 +150,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldNotDownloadArtifactIfExists() throws Exception {
-		this.factory.setDirectory(Paths.get(ClassLoader.getSystemResource("").toURI()));
+		this.factory.setDirectory(Paths.get(ClassUtils.getClassLoader().getResource("").toURI()));
 		Artifact artifact = this.factory.create(new Version(3, 11, 3));
 		Path archive = artifact.get();
 		assertThat(this.output.toString()).doesNotContain("Downloaded");

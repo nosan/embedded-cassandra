@@ -24,6 +24,8 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -45,20 +47,20 @@ public class CqlScriptTests {
 	@Test
 	public void urls() {
 		assertThat(CqlScript.urls((URL[]) null)).isNotNull();
-		assertStatements(CqlScript.urls(ClassLoader.getSystemResource("roles.cql")));
+		assertStatements(CqlScript.urls(ClassUtils.getClassLoader().getResource("roles.cql")));
 	}
 
 
 	@Test
 	public void files() throws URISyntaxException {
 		assertThat(CqlScript.files((File[]) null)).isNotNull();
-		assertStatements(CqlScript.files(new File(ClassLoader.getSystemResource("roles.cql").toURI())));
+		assertStatements(CqlScript.files(new File(ClassUtils.getClassLoader().getResource("roles.cql").toURI())));
 	}
 
 	@Test
 	public void paths() throws URISyntaxException {
 		assertThat(CqlScript.paths((Path[]) null)).isNotNull();
-		assertStatements(CqlScript.paths(Paths.get(ClassLoader.getSystemResource("roles.cql").toURI())));
+		assertStatements(CqlScript.paths(Paths.get(ClassUtils.getClassLoader().getResource("roles.cql").toURI())));
 
 	}
 
