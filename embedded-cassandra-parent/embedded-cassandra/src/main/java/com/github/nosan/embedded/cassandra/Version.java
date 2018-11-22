@@ -33,7 +33,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 public final class Version implements Comparable<Version> {
 
-	private static final Pattern VERSION =
+	private static final Pattern VERSION_PATTERN =
 			Pattern.compile("^\\s*([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?\\s*$");
 
 	private final int major;
@@ -154,13 +154,13 @@ public final class Version implements Comparable<Version> {
 	/**
 	 * Parses a {@code version}.
 	 *
-	 * @param version a version (expected format ({@code int(.int)?(.int)?}))
+	 * @param version a version (expected format ({@link #VERSION_PATTERN}))
 	 * @return a parsed {@link Version}
 	 */
 	@Nonnull
 	public static Version parse(@Nonnull String version) {
 		Objects.requireNonNull(version, "Version must not be null");
-		Matcher matcher = VERSION.matcher(version);
+		Matcher matcher = VERSION_PATTERN.matcher(version);
 		if (matcher.find()) {
 			int major = Integer.parseInt(matcher.group(1));
 			int minor = -1;
@@ -176,8 +176,7 @@ public final class Version implements Comparable<Version> {
 			return new Version(major, minor, patch);
 		}
 		throw new IllegalArgumentException(
-				String.format("Version (%s) is invalid. Expected format is <int(.int)?(.int)?>",
-						version));
+				String.format("Version (%s) is invalid. Expected format is (%s)", version, VERSION_PATTERN));
 	}
 
 }

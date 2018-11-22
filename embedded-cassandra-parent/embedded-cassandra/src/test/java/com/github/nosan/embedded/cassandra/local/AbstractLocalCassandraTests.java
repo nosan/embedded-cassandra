@@ -230,6 +230,9 @@ public abstract class AbstractLocalCassandraTests {
 		if (!OS.isWindows() && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
 			assertThat(this.output.toString()).contains(" -R, -p,");
 		}
+		else {
+			assertThat(this.output.toString()).doesNotContain(" -R, -p,");
+		}
 		assertCassandraHasBeenStopped();
 		assertDirectoryHasBeenDeletedCorrectly();
 	}
