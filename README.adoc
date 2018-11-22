@@ -37,7 +37,7 @@ class Scratch {
 		//factory.setVersion(...);
 		//factory.setConfigurationFile(...);
 		Cassandra cassandra = factory.create();
-		
+
 		try {
                  	cassandra.start();
                  	Settings settings = cassandra.getSettings();
@@ -183,7 +183,7 @@ public class CassandraRuleTests {
 
 There are several annotations to help writing integration tests against a `Cassandra`
 
-==== EmbeddedCassandra
+==== @EmbeddedCassandra
 
 For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
 `Embedded Cassandra`  could be initialized with `CQL` scripts using `scripts` and `statements` attributes.
@@ -220,7 +220,7 @@ public class CassandraTests {
 ```
 TIP: You can declare `CassandraFactory` and `ClusterFactory` beans to take control of the `Cassandra` instance's.
 
-==== Cql
+==== @Cql
 
 `@Cql` annotation is used to annotate a test method to configure `CQL` scripts to be executed against
 a given `cluster` during integration tests.  Script execution is performed by the `CqlExecutionListener`, which is enabled by default.
@@ -270,3 +270,21 @@ public class CqlScriptTests {
 
 TIP: Multiple sets of `@Cql` scripts could be configured for
 a given test method with a different syntax configuration or different execution phases per set.
+
+==== Spring Boot
+
+It is possible to run `Cassandra` within `Spring Boot` context, here is a quick teaser:
+```java
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@LocalCassandra(scripts = "classpath:init.cql", replace = Replace.NONE /* doesn't replace auto-configured cluster */)
+@DirtiesContext // https://jira.spring.io/browse/SPR-7377
+public class CassandraSpringBootTests {
+
+	@Test
+	public void testMe() {
+	}
+
+}
+
+```
