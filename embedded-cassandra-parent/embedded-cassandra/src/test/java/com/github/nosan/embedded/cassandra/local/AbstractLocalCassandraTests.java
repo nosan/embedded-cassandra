@@ -56,6 +56,7 @@ import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.CauseMatcher;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
+import com.github.nosan.embedded.cassandra.util.OS;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -219,6 +220,21 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 
+	@Test
+	public void shouldPassAllowRootIfNecessary() {
+		LocalCassandraFactory factory = this.factory;
+		Version version = factory.getVersion();
+		CassandraRunner runner = new CassandraRunner(factory);
+		factory.setAllowRoot(true);
+		runner.run(assertCreateKeyspace());
+		if (!OS.isWindows() && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
+			assertThat(this.output.toString()).contains(" -R, -p,");
+		}
+		assertCassandraHasBeenStopped();
+		assertDirectoryHasBeenDeletedCorrectly();
+	}
+
+
 	private void runAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
 		Path configurationFile = this.temporaryFolder.newFile("cassandra.yaml").toPath();
 		String interfaceName = getInterface(ipv6);
@@ -242,25 +258,25 @@ public abstract class AbstractLocalCassandraTests {
 		assertCassandraHasBeenStopped();
 	}
 
-	void assertDirectoryHasBeenDeletedCorrectly() {
+	private void assertDirectoryHasBeenDeletedCorrectly() {
 		assertThat(this.output.toString()).contains("Delete recursively working");
 		assertThat(this.output.toString()).doesNotContain("has not been deleted");
 	}
 
-	void assertCassandraHasBeenStopped() {
+	private void assertCassandraHasBeenStopped() {
 		assertThat(this.output.toString()).contains("Announcing shutdown");
 	}
 
-	Consumer<Cassandra> assertDeleteKeyspace() {
+	private Consumer<Cassandra> assertDeleteKeyspace() {
 		return new CqlAssert("DROP KEYSPACE test");
 	}
 
-	Consumer<Cassandra> assertCreateKeyspace() {
+	private Consumer<Cassandra> assertCreateKeyspace() {
 		return new CqlAssert("CREATE KEYSPACE test" +
 				" WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
 	}
 
-	Consumer<Cassandra> assertBusyPort(Function<Settings, InetAddress> addressMapper,
+	private Consumer<Cassandra> assertBusyPort(Function<Settings, InetAddress> addressMapper,
 			Function<Settings, Integer> portMapper) {
 		return new PortBusyAssert(addressMapper, portMapper);
 	}

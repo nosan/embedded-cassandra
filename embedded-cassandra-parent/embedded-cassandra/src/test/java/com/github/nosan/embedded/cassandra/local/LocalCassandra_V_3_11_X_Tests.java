@@ -35,18 +35,4 @@ public class LocalCassandra_V_3_11_X_Tests extends AbstractLocalCassandraTests {
 		super(new Version(3, 11, 3));
 	}
 
-
-	@Test
-	public void shouldPassAllowRoot() {
-		if (!OS.isWindows()) {
-			CassandraRunner runner = new CassandraRunner(this.factory);
-			this.factory.setAllowRoot(true);
-			runner.run(assertCreateKeyspace());
-			assertThat(this.output.toString()).contains(" -R, -p,");
-			assertCassandraHasBeenStopped();
-			assertDirectoryHasBeenDeletedCorrectly();
-		}
-	}
-
-
 }
