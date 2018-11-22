@@ -1,7 +1,4 @@
-= Embedded Cassandra
-
-image:https://travis-ci.org/nosan/embedded-cassandra.svg?branch=master["Build Status", link="https://travis-ci.org/nosan/embedded-cassandra"]
-image:https://ci.appveyor.com/api/projects/status/xwne3e6oeu2hcspu/branch/master?svg=true["Build Status", link="https://ci.appveyor.com/project/nosan/embedded-cassandra"]
+= Embedded Cassandra image:https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?logo=travis&logoColor=white&style=flat["Build Status", link="https://travis-ci.org/nosan/embedded-cassandra"] image:https://img.shields.io/appveyor/ci/nosan/embedded-cassandra/master.svg?logo=appveyor&logoColor=white&style=flat["Build Status", link="https://ci.appveyor.com/project/nosan/embedded-cassandra"]
 
 `Embedded Cassandra` provides an easy way to run `Cassandra`.
 
