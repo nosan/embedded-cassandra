@@ -54,6 +54,8 @@ By default `Cassandra` is running on `default` ports and uses `3.11.3` version.
 this interface to start and stop `Cassandra`, hence if you want to test your `Cassandra` code, you
 should use `TestCassandra` from `embedded-cassandra-test` module.
 
+TIP: It is possible to run `Cassandra` on the random ports, just use `0` for port values.
+
 ==  embedded-cassandra-test image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-test.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-test"]
 
 
@@ -179,7 +181,7 @@ public class CassandraRuleTests {
 
 === Spring
 
-There are several annotation to help writing integration tests against a `Cassandra`
+There are several annotations to help writing integration tests against a `Cassandra`
 
 ==== EmbeddedCassandra
 
@@ -200,8 +202,8 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ...)
-@EmbeddedCassandra(scripts = "/cql-scripts/*.cql")
-@DirtiesContext // to invalidate spring cache and stop `Cassandra`
+@LocalCassandra(scripts = "/cql-scripts/*.cql"/*, version = , ... */ )
+@DirtiesContext // https://jira.spring.io/browse/SPR-7377
 public class CassandraTests {
 
     @Autowired
@@ -240,7 +242,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = ...)
 @EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-@DirtiesContext // to invalidate spring cache and stop `Cassandra`
+@DirtiesContext // https://jira.spring.io/browse/SPR-7377
 public class CqlScriptTests {
 
 	@Autowired
