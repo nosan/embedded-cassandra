@@ -77,11 +77,11 @@ final class MapSettings implements Settings {
 	@Nullable
 	private final String rpcInterface;
 
-	private boolean rpcInterfacePreferIpv6;
+	private final boolean rpcInterfacePreferIpv6;
 
-	private boolean listenInterfacePreferIpv6;
+	private final boolean listenInterfacePreferIpv6;
 
-	private boolean listenOnBroadcastAddress;
+	private final boolean listenOnBroadcastAddress;
 
 	/**
 	 * Creates a new {@link MapSettings}.
