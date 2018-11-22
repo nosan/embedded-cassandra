@@ -16,12 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.Test;
-
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
