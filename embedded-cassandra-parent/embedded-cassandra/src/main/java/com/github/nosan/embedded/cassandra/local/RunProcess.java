@@ -194,7 +194,7 @@ class RunProcess {
 		if (throwable instanceof IOException) {
 			throw (IOException) throwable;
 		}
-		throw new IOException("Process could not start correctly", throwable);
+		throw new IOException("Process has not been started correctly", throwable);
 	}
 
 
