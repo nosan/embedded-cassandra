@@ -192,14 +192,18 @@ class DefaultCassandraProcess implements CassandraProcess {
 					forceStop(process, pidFile, pid);
 					throw ex;
 				}
+				boolean result;
 				if (settings != null) {
-					boolean result = WaitUtils.await(Duration.ofSeconds(10),
+					result = WaitUtils.await(Duration.ofSeconds(10),
 							() -> TransportUtils.isDisabled(settings) && !process.isAlive());
-					if (!result) {
-						forceStop(process, pidFile, pid);
-					}
 				}
-				boolean waitFor = process.waitFor(3, TimeUnit.SECONDS);
+				else {
+					result = process.waitFor(10, TimeUnit.SECONDS);
+				}
+				if (!result) {
+					forceStop(process, pidFile, pid);
+				}
+				boolean waitFor = process.waitFor(5, TimeUnit.SECONDS);
 				if (!waitFor) {
 					throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
 							getPidString(pid)));

@@ -78,7 +78,9 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	private boolean allowRoot = false;
 
 	/**
-	 * Whether to force running Cassandra as root or not.
+	 * Whether to force running Cassandra as {@code root} or not.
+	 * <p>
+	 * This property will add {@code -R} to the Cassandra command line
 	 *
 	 * @return The value of the {@code allowRoot} attribute
 	 * @since 1.2.1
@@ -98,7 +100,9 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * JMX port. This property will be passed to the Cassandra as {@code -Dcassandra.jmx.local.port={jmxPort}}
+	 * JMX port.
+	 * <p>
+	 * This value will be added as {@code -Dcassandra.jmx.local.port=...} system property.
 	 *
 	 * @return The value of the {@code jmxPort} attribute
 	 * @since 1.1.1
