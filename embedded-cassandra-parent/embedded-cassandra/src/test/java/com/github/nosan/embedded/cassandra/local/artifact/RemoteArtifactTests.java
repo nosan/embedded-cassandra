@@ -221,7 +221,7 @@ public class RemoteArtifactTests {
 			Thread.sleep(timeout);
 		}
 		catch (InterruptedException ex) {
-			throw new IllegalStateException(ex);
+			Thread.currentThread().interrupt();
 		}
 
 	}

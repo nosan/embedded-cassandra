@@ -131,6 +131,9 @@ class LocalCassandra implements Cassandra {
 					}
 				}
 				catch (InterruptedException ex) {
+					if (log.isDebugEnabled()) {
+						log.error("Unable to start Cassandra --- Interrupted", ex);
+					}
 					Thread.currentThread().interrupt();
 				}
 				catch (Throwable ex) {
@@ -161,6 +164,9 @@ class LocalCassandra implements Cassandra {
 						}
 					}
 					catch (InterruptedException ex) {
+						if (log.isDebugEnabled()) {
+							log.error("Unable to stop Cassandra --- Interrupted", ex);
+						}
 						Thread.currentThread().interrupt();
 					}
 					catch (Throwable ex) {
@@ -176,6 +182,8 @@ class LocalCassandra implements Cassandra {
 								log.error(String.format("(%s) has not been deleted", directory), ex);
 							}
 						}
+						this.process = null;
+						this.directory = null;
 						this.settings = null;
 						this.initialized = false;
 					}
