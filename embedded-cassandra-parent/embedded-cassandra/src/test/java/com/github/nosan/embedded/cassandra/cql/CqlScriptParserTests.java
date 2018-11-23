@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CqlScriptsParserTests {
+public class CqlScriptParserTests {
 
 	@Test
 	public void skipSpaces() {
