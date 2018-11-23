@@ -274,7 +274,7 @@ It is possible to run `Cassandra` within `Spring Boot` context, here is a quick 
 ```java
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@LocalCassandra(scripts = "classpath:init.cql", replace = Replace.NONE /* doesn't replace auto-configured cluster */)
+@LocalCassandra(scripts = "classpath:init.cql", replace = Replace.NONE /* don't replace auto-configured cluster */)
 @DirtiesContext // https://jira.spring.io/browse/SPR-7377
 public class CassandraSpringBootTests {
 
