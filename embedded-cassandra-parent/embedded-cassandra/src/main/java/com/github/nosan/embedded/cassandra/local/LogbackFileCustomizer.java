@@ -30,8 +30,6 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.util.ClassUtils;
-
 /**
  * {@link DirectoryCustomizer} to initialize {@code logback.xml}.
  *
@@ -58,14 +56,10 @@ class LogbackFileCustomizer implements DirectoryCustomizer {
 	@Override
 	public void customize(@Nonnull Path directory) throws IOException {
 		URL logbackFile = this.logbackFile;
-		String location = "com/github/nosan/embedded/cassandra/local/logback.xml";
 		if (logbackFile == null) {
-			ClassLoader classLoader = ClassUtils.getClassLoader();
-			logbackFile = (classLoader != null) ? classLoader.getResource(location) :
-					ClassLoader.getSystemResource(location);
+			logbackFile = getClass().getResource("logback.xml");
 		}
-		Objects.requireNonNull(logbackFile, String.format("Logback File must not be null." +
-				" There is no resource for location (%s)", location));
+		Objects.requireNonNull(logbackFile, "Logback File must not be null.");
 		Path target = directory.resolve("conf/logback.xml");
 		if (log.isDebugEnabled()) {
 			log.debug("Replace ({}) with ({})", target, logbackFile);

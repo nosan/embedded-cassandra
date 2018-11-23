@@ -30,8 +30,6 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.util.ClassUtils;
-
 /**
  * {@link DirectoryCustomizer} to initialize {@code cassandra.yaml}.
  *
@@ -57,14 +55,10 @@ class ConfigurationFileCustomizer implements DirectoryCustomizer {
 	@Override
 	public void customize(@Nonnull Path directory) throws IOException {
 		URL configurationFile = this.configurationFile;
-		String location = "com/github/nosan/embedded/cassandra/local/cassandra.yaml";
 		if (configurationFile == null) {
-			ClassLoader classLoader = ClassUtils.getClassLoader();
-			configurationFile = (classLoader != null) ? classLoader.getResource(location) :
-					ClassLoader.getSystemResource(location);
+			configurationFile = getClass().getResource("cassandra.yaml");
 		}
-		Objects.requireNonNull(configurationFile, String.format("Configuration File must not be null." +
-				" There is no resource for location (%s)", location));
+		Objects.requireNonNull(configurationFile, "Configuration File must not be null.");
 		Path target = directory.resolve("conf/cassandra.yaml");
 		if (log.isDebugEnabled()) {
 			log.debug("Replace ({}) with ({})", target, configurationFile);
