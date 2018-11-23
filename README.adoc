@@ -24,7 +24,8 @@ There are a number of modules in Embedded Cassandra, here is a quick overview:
 
 Simple module that allows the Cassandra to be started and stopped.
 
-```java
+[source,java]
+----
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 
@@ -44,7 +45,8 @@ class Scratch {
 		}
 	}
 }
-```
+----
+
 Factory has a lot of different methods to control your `Cassandra` instance (e.g. setVersion, setConfiguration, etc..).
 By default `Cassandra` is running on `default` ports and uses `3.11.3` version.
 `Cassandra` interface doesn't include any utility methods to work with it, the main goal of
@@ -63,7 +65,8 @@ This module contains core items that can be helpful when testing your `Cassandra
 
 To run tests within `TestNG`, `CassandraTestNG` has to be extended.
 
-```java
+[source,java]
+----
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -92,13 +95,14 @@ public class CassandraTestNGTests extends CassandraTestNG {
 
 }
 
-```
+----
 
 === JUnit5
 
 To run tests within `JUnit5`, `CassandraExtension` has to be used.
 
-```java
+[source,java]
+----
 
 
 import org.junit.jupiter.api.AfterEach;
@@ -133,14 +137,16 @@ public class CassandraExtensionTests {
 
 }
 
-```
+----
 
 
 === JUnit4
 
 
 To run tests within `JUnit4`, `CassandraRule` has to be used.
-```java
+
+[source,java]
+----
 
 
 import org.junit.After;
@@ -174,7 +180,8 @@ public class CassandraRuleTests {
 	}
 
 }
-```
+
+----
 
 === Spring
 
@@ -187,7 +194,9 @@ For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` a
 Also, it is possible to use `@LocalCassandra` annotation that extends `@EmbeddedCassandra` annotation and allows to
 configure and register `CassandraFactory` bean.
 
-```java
+[source,java]
+----
+
 import com.datastax.driver.core.Cluster;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -214,7 +223,9 @@ public class CassandraTests {
    }
 
 }
-```
+
+----
+
 TIP: You can declare `CassandraFactory` and `ClusterFactory` beans to take control of the `Cassandra` instance's.
 
 ==== @Cql
@@ -222,7 +233,8 @@ TIP: You can declare `CassandraFactory` and `ClusterFactory` beans to take contr
 `@Cql` annotation is used to annotate a test method to configure `CQL` scripts to be executed against
 a given `cluster` during integration tests.  Script execution is performed by the `CqlExecutionListener`, which is enabled by default.
 
-```java
+[source,java]
+----
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
@@ -263,7 +275,8 @@ public class CqlScriptTests {
 	}
 
 }
-```
+
+----
 
 TIP: Multiple sets of `@Cql` scripts could be configured for
 a given test method with a different syntax configuration or different execution phases per set.
@@ -271,7 +284,10 @@ a given test method with a different syntax configuration or different execution
 ==== Spring Boot
 
 It is possible to run `Cassandra` within `Spring Boot` context, here is a quick teaser:
-```java
+
+[source,java]
+----
+
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @LocalCassandra(scripts = "classpath:init.cql", replace = Replace.NONE /* don't replace auto-configured cluster */)
@@ -284,4 +300,4 @@ public class CassandraSpringBootTests {
 
 }
 
-```
+----
