@@ -36,7 +36,7 @@ public class FileCqlScriptTests {
 	@Test
 	public void getStatements() throws URISyntaxException {
 		FileCqlScript fileCqlScript =
-				new FileCqlScript(new File(ClassUtils.getClassLoader().getResource("roles.cql").toURI()));
+				new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI()));
 		assertThat(fileCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
@@ -44,9 +44,9 @@ public class FileCqlScriptTests {
 
 	@Test
 	public void helpers() throws Exception {
-		assertThat(new FileCqlScript(new File(ClassUtils.getClassLoader().getResource("roles.cql").toURI())))
-				.isEqualTo(new FileCqlScript(new File(ClassUtils.getClassLoader().getResource("roles.cql").toURI())));
-		assertThat(new FileCqlScript(new File(ClassUtils.getClassLoader().getResource("roles.cql").toURI())).toString())
+		assertThat(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())))
+				.isEqualTo(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())));
+		assertThat(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())).toString())
 				.contains("roles.cql");
 	}
 

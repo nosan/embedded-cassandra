@@ -150,7 +150,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldNotDownloadArtifactIfExists() throws Exception {
-		this.factory.setDirectory(Paths.get(ClassUtils.getClassLoader().getResource("").toURI()));
+		this.factory.setDirectory(Paths.get(getClass().getResource("/").toURI()));
 		Artifact artifact = this.factory.create(new Version(3, 11, 3));
 		Path archive = artifact.get();
 		assertThat(this.output.toString()).doesNotContain("Downloaded");

@@ -36,7 +36,7 @@ public class PathCqlScriptTests {
 	@Test
 	public void getStatements() throws URISyntaxException {
 		PathCqlScript pathCqlScript = new PathCqlScript(Paths.get(
-				ClassUtils.getClassLoader().getResource("roles.cql").toURI()));
+				getClass().getResource("/roles.cql").toURI()));
 		assertThat(pathCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
@@ -44,10 +44,10 @@ public class PathCqlScriptTests {
 
 	@Test
 	public void helpers() throws Exception {
-		assertThat(new PathCqlScript(Paths.get(ClassUtils.getClassLoader().getResource("roles.cql").toURI())))
-				.isEqualTo(new PathCqlScript(Paths.get(ClassUtils.getClassLoader().getResource("roles.cql").toURI())));
+		assertThat(new PathCqlScript(Paths.get(getClass().getResource("/roles.cql").toURI())))
+				.isEqualTo(new PathCqlScript(Paths.get(getClass().getResource("/roles.cql").toURI())));
 		assertThat(
-				new PathCqlScript(Paths.get(ClassUtils.getClassLoader().getResource("roles.cql").toURI())).toString())
+				new PathCqlScript(Paths.get(getClass().getResource("/roles.cql").toURI())).toString())
 				.contains("roles.cql");
 	}
 

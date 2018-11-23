@@ -37,7 +37,7 @@ public class InputStreamCqlScriptTests {
 	@Test
 	public void getStatements() {
 		InputStreamCqlScript inputStreamCqlScript =
-				new InputStreamCqlScript(ClassUtils.getClassLoader().getResourceAsStream("roles.cql"));
+				new InputStreamCqlScript(getClass().getResourceAsStream("/roles.cql"));
 		assertThat(inputStreamCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
@@ -45,7 +45,7 @@ public class InputStreamCqlScriptTests {
 	@Test
 	public void helpers() {
 		InputStreamCqlScript actual =
-				new InputStreamCqlScript(ClassUtils.getClassLoader().getResourceAsStream("roles.cql"));
+				new InputStreamCqlScript(getClass().getResourceAsStream("/roles.cql"));
 		assertThat(actual).isEqualTo(actual);
 		assertThat(actual.toString())
 				.contains("InputStream CQL Statements");
@@ -53,7 +53,7 @@ public class InputStreamCqlScriptTests {
 
 	@Test(expected = UncheckedIOException.class)
 	public void invalidResource() throws IOException {
-		InputStream systemResourceAsStream = ClassUtils.getClassLoader().getResourceAsStream("roles.cql");
+		InputStream systemResourceAsStream = getClass().getResourceAsStream("/roles.cql");
 		systemResourceAsStream.close();
 		new InputStreamCqlScript(systemResourceAsStream).getStatements();
 	}

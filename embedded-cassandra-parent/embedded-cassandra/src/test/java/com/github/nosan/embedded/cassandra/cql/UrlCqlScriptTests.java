@@ -36,16 +36,16 @@ public class UrlCqlScriptTests {
 
 	@Test
 	public void getStatements() {
-		UrlCqlScript urlCqlScript = new UrlCqlScript(ClassUtils.getClassLoader().getResource("roles.cql"));
+		UrlCqlScript urlCqlScript = new UrlCqlScript(getClass().getResource("/roles.cql"));
 		assertThat(urlCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
 	public void helpers() {
-		assertThat(new UrlCqlScript(ClassUtils.getClassLoader().getResource("roles.cql")))
-				.isEqualTo(new UrlCqlScript(ClassUtils.getClassLoader().getResource("roles.cql")));
-		assertThat(new UrlCqlScript(ClassUtils.getClassLoader().getResource("roles.cql")).toString())
+		assertThat(new UrlCqlScript(getClass().getResource("/roles.cql")))
+				.isEqualTo(new UrlCqlScript(getClass().getResource("/roles.cql")));
+		assertThat(new UrlCqlScript(getClass().getResource("/roles.cql")).toString())
 				.contains("roles.cql");
 	}
 

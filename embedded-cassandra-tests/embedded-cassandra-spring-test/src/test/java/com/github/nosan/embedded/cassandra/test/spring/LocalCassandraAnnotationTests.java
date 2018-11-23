@@ -75,10 +75,10 @@ public class LocalCassandraAnnotationTests {
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
 		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(4));
-		assertThat(factory.getLogbackFile()).isEqualTo(ClassUtils.getClassLoader().getResource("logback-test.xml"));
-		assertThat(factory.getTopologyFile()).isEqualTo(ClassUtils.getClassLoader().getResource("topology.properties"));
-		assertThat(factory.getRackFile()).isEqualTo(ClassUtils.getClassLoader().getResource("rack.properties"));
-		assertThat(factory.getConfigurationFile()).isEqualTo(ClassUtils.getClassLoader().getResource("cassandra.yaml"));
+		assertThat(factory.getLogbackFile()).isEqualTo(getClass().getResource("/logback-test.xml"));
+		assertThat(factory.getTopologyFile()).isEqualTo(getClass().getResource("/topology.properties"));
+		assertThat(factory.getRackFile()).isEqualTo(getClass().getResource("/rack.properties"));
+		assertThat(factory.getConfigurationFile()).isEqualTo(getClass().getResource("/cassandra.yaml"));
 		assertThat(factory.getJvmOptions()).containsExactly("-Dtest.property=property");
 		assertThat(factory.getJmxPort()).isEqualTo(8000);
 		assertThat(factory.isAllowRoot()).isTrue();
