@@ -54,18 +54,18 @@ class TopologyFileCustomizer implements DirectoryCustomizer {
 
 	@Override
 	public void customize(@Nonnull Path directory) throws IOException {
-		if (this.topologyFile != null) {
+		URL topologyFile = this.topologyFile;
+		if (topologyFile != null) {
 			Path target = directory.resolve("conf/cassandra-topology.properties");
 			if (log.isDebugEnabled()) {
-				log.debug("Replace ({}) with ({})", target, this.topologyFile);
+				log.debug("Replace ({}) with ({})", target, topologyFile);
 			}
 
-			try (InputStream is = this.topologyFile.openStream()) {
+			try (InputStream is = topologyFile.openStream()) {
 				Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
 			}
 			catch (IOException ex) {
-				throw new IOException(String.format("Topology Properties : (%s) could not be saved",
-						this.topologyFile), ex);
+				throw new IOException(String.format("Topology Properties (%s) could not be saved", topologyFile), ex);
 			}
 		}
 	}
