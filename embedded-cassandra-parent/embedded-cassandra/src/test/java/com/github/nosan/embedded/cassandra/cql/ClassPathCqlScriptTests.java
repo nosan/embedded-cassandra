@@ -62,7 +62,7 @@ public class ClassPathCqlScriptTests {
 
 	@Test
 	public void helpers() {
-		assertThat(new ClassPathCqlScript("/roles.cql", getClass()))
+		assertThat(new ClassPathCqlScript("\\roles.cql", getClass()))
 				.isEqualTo(new ClassPathCqlScript("/roles.cql"));
 
 		assertThat(new ClassPathCqlScript("/hz.cql", getClass()))
