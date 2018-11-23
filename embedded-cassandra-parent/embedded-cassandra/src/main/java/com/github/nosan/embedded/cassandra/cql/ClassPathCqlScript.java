@@ -26,6 +26,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
+import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 
 /**
@@ -36,6 +37,9 @@ import com.github.nosan.embedded.cassandra.util.ClassUtils;
  * @since 1.0.0
  */
 public final class ClassPathCqlScript extends AbstractCqlResourceScript {
+
+	private static final String WINDOWS = "\\\\";
+
 
 	@Nonnull
 	private final String location;
@@ -121,18 +125,19 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	@Override
 	protected InputStream getInputStream() throws FileNotFoundException {
 		InputStream stream;
+		String location = this.location;
 		if (this.contextClass != null) {
-			stream = this.contextClass.getResourceAsStream(this.location);
+			stream = this.contextClass.getResourceAsStream(location);
 		}
 		else if (this.classLoader != null) {
-			stream = this.classLoader.getResourceAsStream(this.location);
+			stream = this.classLoader.getResourceAsStream(location);
 		}
 		else {
-			stream = ClassLoader.getSystemResourceAsStream(this.location);
+			stream = ClassLoader.getSystemResourceAsStream(location);
 		}
 		if (stream == null) {
 			throw new FileNotFoundException(
-					String.format("(%s) doesn't exist", this.location));
+					String.format("(%s) doesn't exist", location));
 		}
 		return stream;
 	}
@@ -170,31 +175,37 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	@Override
 	@Nonnull
 	public String toString() {
+		String location = this.location;
 		if (this.contextClass == null) {
-			return this.location;
+			return location;
 		}
-		if (this.location.startsWith("/")) {
-			return this.location.substring(1);
+		if (location.startsWith("/")) {
+			return location.substring(1);
 		}
-		String p = this.contextClass.getPackage().getName().replaceAll("\\.", "/");
-		return (p + "/" + this.location);
+		String packageName = ClassUtils.getPackageName(this.contextClass);
+		if (StringUtils.hasText(packageName)) {
+			packageName = packageName.replaceAll("\\.", "/");
+			return packageName + "/" + location;
+		}
+		return location;
 	}
 
 
 	@Nullable
 	private URL getURL() {
+		String location = this.location;
 		if (this.contextClass != null) {
-			return this.contextClass.getResource(this.location);
+			return this.contextClass.getResource(location);
 		}
 		if (this.classLoader != null) {
-			return this.classLoader.getResource(this.location);
+			return this.classLoader.getResource(location);
 		}
-		return ClassLoader.getSystemResource(this.location);
+		return ClassLoader.getSystemResource(location);
 	}
 
 
 	private static String normalize(String location, Class<?> contextClass) {
-		location = location.replaceAll("\\\\", "/").replaceAll("/+", "/");
+		location = location.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
 		if (contextClass == null) {
 			while (location.startsWith("/")) {
 				location = location.substring(1);

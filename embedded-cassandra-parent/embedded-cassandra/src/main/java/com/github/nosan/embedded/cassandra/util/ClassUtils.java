@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -62,5 +63,23 @@ public abstract class ClassUtils {
 			}
 		}
 		return cl;
+	}
+
+
+	/**
+	 * Determines the package name for the given class.
+	 *
+	 * @param source a class
+	 * @return package name or empty string
+	 * @since 1.2.2
+	 */
+	@Nonnull
+	public static String getPackageName(@Nullable Class<?> source) {
+		if (source == null) {
+			return "";
+		}
+		String name = source.getName();
+		int i = name.lastIndexOf('.');
+		return (i > 0) ? name.substring(0, i) : "";
 	}
 }
