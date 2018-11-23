@@ -59,7 +59,7 @@ class LogbackFileCustomizer implements DirectoryCustomizer {
 		if (logbackFile == null) {
 			logbackFile = getClass().getResource("logback.xml");
 		}
-		Objects.requireNonNull(logbackFile, "Logback File must not be null.");
+		Objects.requireNonNull(logbackFile, "Logback File must not be null");
 		Path target = directory.resolve("conf/logback.xml");
 		if (log.isDebugEnabled()) {
 			log.debug("Replace ({}) with ({})", target, logbackFile);
@@ -68,7 +68,7 @@ class LogbackFileCustomizer implements DirectoryCustomizer {
 			Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Logback file : (%s) could not be saved", logbackFile), ex);
+			throw new IOException(String.format("Logback file (%s) could not be saved", logbackFile), ex);
 		}
 
 	}

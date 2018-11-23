@@ -58,7 +58,7 @@ class ConfigurationFileCustomizer implements DirectoryCustomizer {
 		if (configurationFile == null) {
 			configurationFile = getClass().getResource("cassandra.yaml");
 		}
-		Objects.requireNonNull(configurationFile, "Configuration File must not be null.");
+		Objects.requireNonNull(configurationFile, "Configuration File must not be null");
 		Path target = directory.resolve("conf/cassandra.yaml");
 		if (log.isDebugEnabled()) {
 			log.debug("Replace ({}) with ({})", target, configurationFile);
@@ -67,7 +67,7 @@ class ConfigurationFileCustomizer implements DirectoryCustomizer {
 			Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Configuration file : (%s) could not be saved", configurationFile), ex);
+			throw new IOException(String.format("Configuration file (%s) could not be saved", configurationFile), ex);
 		}
 	}
 
