@@ -37,7 +37,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
-import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

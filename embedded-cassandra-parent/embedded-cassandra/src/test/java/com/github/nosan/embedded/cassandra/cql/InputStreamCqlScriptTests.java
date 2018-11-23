@@ -22,8 +22,6 @@ import java.io.UncheckedIOException;
 
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.util.ClassUtils;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

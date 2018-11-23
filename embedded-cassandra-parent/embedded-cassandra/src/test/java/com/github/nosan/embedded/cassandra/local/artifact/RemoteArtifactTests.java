@@ -43,7 +43,6 @@ import org.junit.rules.TemporaryFolder;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.WebServer;
-import com.github.nosan.embedded.cassandra.util.ClassUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
 
 import static org.assertj.core.api.Assertions.assertThat;

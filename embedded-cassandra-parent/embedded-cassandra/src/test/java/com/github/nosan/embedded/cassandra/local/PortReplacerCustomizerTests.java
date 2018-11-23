@@ -27,7 +27,6 @@ import org.junit.rules.TemporaryFolder;
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
