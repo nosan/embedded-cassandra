@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 @EmbeddedCassandra(scripts = "/init.cql", statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
 		"  KEY );")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 public class EmbeddedCassandraConfigurationTests {
 
 

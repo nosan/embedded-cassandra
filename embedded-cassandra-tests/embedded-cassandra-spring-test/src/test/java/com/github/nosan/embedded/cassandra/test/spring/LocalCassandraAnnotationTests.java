@@ -57,7 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		jmxPort = 8000,
 		allowRoot = true,
 		replace = EmbeddedCassandra.Replace.NONE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 public class LocalCassandraAnnotationTests {
 
 	@Autowired

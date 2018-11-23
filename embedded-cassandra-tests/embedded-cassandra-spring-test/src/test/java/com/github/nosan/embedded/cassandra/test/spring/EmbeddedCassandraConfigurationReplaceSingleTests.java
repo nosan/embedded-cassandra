@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @EmbeddedCassandra
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 public class EmbeddedCassandraConfigurationReplaceSingleTests {
 
 	@Autowired

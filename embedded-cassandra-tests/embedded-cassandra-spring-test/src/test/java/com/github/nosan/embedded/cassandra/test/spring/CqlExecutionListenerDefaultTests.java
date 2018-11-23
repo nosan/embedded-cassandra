@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 @Cql(scripts = "/init.cql")
 @Cql(statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 public class CqlExecutionListenerDefaultTests {
 
 

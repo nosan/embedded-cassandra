@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 @EmbeddedCassandra(scripts = {"/init.cql"})
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 public class CqlExecutionListenerTests {
 
 	@Autowired

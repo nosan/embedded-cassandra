@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @LocalCassandra(version = "2.2.12", scripts = "/init.cql", statements =
 		"CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
 				"  KEY );")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 public class LocalCassandraTests {
 
 	@ClassRule

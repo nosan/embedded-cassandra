@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Cql(cluster = "customCluster", scripts = "/init.cql")
 @Cql(cluster = "customCluster", statements = "DROP KEYSPACE test",
 		executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@DirtiesContext
 public class CqlExecutionListenerNamedTests {
 
 
