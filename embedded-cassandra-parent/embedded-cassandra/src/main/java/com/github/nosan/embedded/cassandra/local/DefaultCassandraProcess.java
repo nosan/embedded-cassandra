@@ -117,11 +117,12 @@ class DefaultCassandraProcess implements CassandraProcess {
 	public Settings start() throws Exception {
 		Path directory = this.directory;
 		Version version = this.version;
+		int major = version.getMajor();
+		int minor = version.getMinor();
 		Settings settings = getSettings(directory, version);
 		this.settings = settings;
 		Path executable = OS.isWindows() ? directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
 		Path pidFile = directory.resolve(String.format("bin/%s.pid", UUID.randomUUID()));
-
 		this.pidFile = pidFile;
 
 		List<Object> arguments = new ArrayList<>();
@@ -132,15 +133,12 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 		arguments.add(executable.toAbsolutePath());
 		arguments.add("-f");
-		if (OS.isWindows()) {
-			if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1)) {
-				arguments.add("-a");
-			}
+
+		if (OS.isWindows() && (major > 2 || (major == 2 && minor > 1))) {
+			arguments.add("-a");
 		}
-		if (!OS.isWindows() && this.allowRoot) {
-			if (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1)) {
-				arguments.add("-R");
-			}
+		if (this.allowRoot && !OS.isWindows() && (major > 3 || (major == 3 && minor > 1))) {
+			arguments.add("-R");
 		}
 		arguments.add("-p");
 		arguments.add(pidFile.toAbsolutePath());
@@ -154,8 +152,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 		int jmxPort = (this.jmxPort != 0) ? this.jmxPort : PortUtils.getPort();
 		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", jmxPort));
 		jvmOptions.addAll(this.jvmOptions);
-
 		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
+
 
 		OutputCapture output = new OutputCapture(20);
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
