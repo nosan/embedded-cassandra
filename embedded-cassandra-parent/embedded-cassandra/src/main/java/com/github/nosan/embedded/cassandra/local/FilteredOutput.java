@@ -35,7 +35,7 @@ class FilteredOutput implements RunProcess.Output {
 	private final Predicate<String> filter;
 
 	/**
-	 * Creates {@link FilteredOutput}.
+	 * Creates a new {@link FilteredOutput}.
 	 *
 	 * @param delegate the destination output
 	 * @param filter the include filter

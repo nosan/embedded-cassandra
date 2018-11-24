@@ -155,8 +155,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		if (StringUtils.hasText(javaHome)) {
 			environment.put("JAVA_HOME", javaHome);
 		}
-
-		OutputCapture output = new OutputCapture(10);
+		SmartOutputCapture output = new SmartOutputCapture();
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		Process process = new RunProcess(directory, environment, arguments)
 				.run(new FilteredOutput(output, outputFilter), new FilteredOutput(log::info, outputFilter));
@@ -268,17 +267,13 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 
-	private static void await(Settings settings, Duration timeout, OutputCapture output, Process process)
+	private static void await(Settings settings, Duration timeout, SmartOutputCapture output, Process process)
 			throws Exception {
-		AtomicBoolean outputReady = new AtomicBoolean(false);
 		boolean result = WaitUtils.await(timeout, () -> {
 			if (!process.isAlive()) {
 				throwException("Cassandra Process is not alive. Please see logs for more details.", output);
 			}
-			if (!outputReady.get()) {
-				outputReady.set(output.contains("listening for cql") || output.contains("not starting native"));
-			}
-			return outputReady.get() && TransportUtils.isReady(settings);
+			return output.isReady() && TransportUtils.isReady(settings);
 		});
 		if (!result) {
 			throwException(String.format("Cassandra has not been started, seems like (%d) milliseconds " +
@@ -374,5 +369,39 @@ class DefaultCassandraProcess implements CassandraProcess {
 			}
 		}
 		throw new IOException(builder.toString());
+	}
+
+	/**
+	 * Utility class to check whether 'Cassandra' output is ready or not and keep the 10 last lines.
+	 */
+	private static final class SmartOutputCapture extends OutputCapture {
+
+		@Nonnull
+		private final AtomicBoolean ready = new AtomicBoolean(false);
+
+		/**
+		 * Creates a new {@link SmartOutputCapture}.
+		 */
+		SmartOutputCapture() {
+			super(10);
+		}
+
+		@Override
+		public void accept(@Nonnull String line) {
+			super.accept(line);
+			AtomicBoolean ready = this.ready;
+			if (!ready.get()) {
+				ready.set(contains("listening for cql") || contains("not starting native"));
+			}
+		}
+
+		/**
+		 * Whether `Cassandra` output is ready or not.
+		 *
+		 * @return {@code true} if ready, otherwise {@code false}
+		 */
+		boolean isReady() {
+			return this.ready.get();
+		}
 	}
 }
