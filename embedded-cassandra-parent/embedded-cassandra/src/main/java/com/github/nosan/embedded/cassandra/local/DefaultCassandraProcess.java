@@ -373,7 +373,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 	/**
-	 * Utility class to check whether 'Cassandra' output is ready or not and keep the 10 last lines.
+	 * A simple implementation of {@link OutputCapture} class to check whether {@code cassandra} output is ready or not.
 	 */
 	private static final class OutputReadiness extends OutputCapture {
 
@@ -398,7 +398,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 
 		/**
-		 * Whether `Cassandra` output is ready or not.
+		 * Tests whether {@code cassandra} output is ready or not.
 		 *
 		 * @return {@code true} if ready, otherwise {@code false}
 		 */
