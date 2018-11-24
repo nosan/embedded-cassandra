@@ -154,16 +154,11 @@ class LocalCassandra implements Cassandra {
 					Version version = this.version;
 					log.info("Stops Apache Cassandra ({})", version);
 					CassandraProcess process = this.process;
+					Directory directory = this.directory;
 					try {
 						if (process != null) {
 							process.stop();
 						}
-					}
-					catch (Throwable ex) {
-						throw new CassandraException("Unable to stop Cassandra", ex);
-					}
-					finally {
-						Directory directory = this.directory;
 						if (directory != null) {
 							try {
 								directory.destroy();
@@ -172,6 +167,11 @@ class LocalCassandra implements Cassandra {
 								log.error(String.format("(%s) has not been deleted", directory), ex);
 							}
 						}
+					}
+					catch (Throwable ex) {
+						throw new CassandraException("Unable to stop Cassandra", ex);
+					}
+					finally {
 						this.process = null;
 						this.directory = null;
 						this.settings = null;
