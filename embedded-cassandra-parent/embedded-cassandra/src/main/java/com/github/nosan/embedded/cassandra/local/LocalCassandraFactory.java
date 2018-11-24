@@ -323,7 +323,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 		Duration startupTimeout = getStartupTimeout();
 		if (startupTimeout == null || startupTimeout.toMillis() <= 0) {
-			startupTimeout = Duration.ofSeconds(45);
+			startupTimeout = Duration.ofSeconds(30);
 		}
 		Path workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null) {
