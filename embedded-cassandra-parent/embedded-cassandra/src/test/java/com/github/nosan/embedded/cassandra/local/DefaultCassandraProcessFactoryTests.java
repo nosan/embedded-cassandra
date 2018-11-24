@@ -52,7 +52,7 @@ public class DefaultCassandraProcessFactoryTests {
 		assertThat(ReflectionUtils.getField(cassandraProcess, "jvmOptions")).isEqualTo(jvmOptions);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "javaHome")).isEqualTo(javaHome);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "version")).isEqualTo(version);
-		assertThat(ReflectionUtils.getField(cassandraProcess, "startupTimeout")).isEqualTo(startupTimeout);
+		assertThat(ReflectionUtils.getField(cassandraProcess, "timeout")).isEqualTo(startupTimeout);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "directory")).isEqualTo(directory);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "jmxPort")).isEqualTo(jmxPort);
 		assertThat(ReflectionUtils.getField(cassandraProcess, "allowRoot")).isEqualTo(allowRoot);
