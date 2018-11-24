@@ -45,7 +45,5 @@ public class OutputCaptureTests {
 		this.output.accept("linE3");
 		assertThat(this.output.lines()).hasSize(2)
 				.containsExactly("line", "linE3");
-		assertThat(this.output.contains("line3")).isTrue();
-		assertThat(this.output.contains("line4")).isFalse();
 	}
 }

@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -388,11 +389,12 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 		@Override
 		public void accept(@Nonnull String line) {
-			super.accept(line);
 			AtomicBoolean ready = this.ready;
 			if (!ready.get()) {
-				ready.set(contains("listening for cql") || contains("not starting native"));
+				String lowerCase = line.toLowerCase(Locale.ENGLISH);
+				ready.set(lowerCase.contains("listening for cql") || lowerCase.contains("not starting native"));
 			}
+			super.accept(line);
 		}
 
 		/**

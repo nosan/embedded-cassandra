@@ -18,12 +18,10 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * {@link RunProcess.Output} to keep N lines.
@@ -69,25 +67,6 @@ class OutputCapture implements RunProcess.Output {
 	public String toString() {
 		return this.lines.stream()
 				.collect(Collectors.joining(System.lineSeparator()));
-	}
-
-	/**
-	 * Whether the {@code source} contains in the buffer. (Note! ignoring case)
-	 *
-	 * @param source the source to search
-	 * @return {@code true} if contains.
-	 */
-	boolean contains(@Nullable String source) {
-		if (source == null) {
-			return false;
-		}
-		for (String line : this.lines) {
-			String toLowerCase = line.toLowerCase(Locale.ENGLISH);
-			if (toLowerCase.contains(source.toLowerCase(Locale.ENGLISH))) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
