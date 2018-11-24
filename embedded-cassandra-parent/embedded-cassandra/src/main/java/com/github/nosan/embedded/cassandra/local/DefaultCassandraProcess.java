@@ -144,24 +144,26 @@ class DefaultCassandraProcess implements CassandraProcess {
 		arguments.add(pidFile.toAbsolutePath());
 
 		Map<String, String> environment = new LinkedHashMap<>();
-		String javaHome = getJavaHome(this.javaHome);
-		if (StringUtils.hasText(javaHome)) {
-			environment.put("JAVA_HOME", javaHome);
-		}
+
 		List<String> jvmOptions = new ArrayList<>();
 		int jmxPort = (this.jmxPort != 0) ? this.jmxPort : PortUtils.getPort();
 		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", jmxPort));
 		jvmOptions.addAll(this.jvmOptions);
 		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
 
+		String javaHome = getJavaHome(this.javaHome);
+		if (StringUtils.hasText(javaHome)) {
+			environment.put("JAVA_HOME", javaHome);
+		}
+
 
 		OutputCapture output = new OutputCapture(20);
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		Process process = new RunProcess(directory, environment, arguments)
 				.run(new FilteredOutput(output, outputFilter), new FilteredOutput(log::info, outputFilter));
-
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
+
 		if (log.isDebugEnabled()) {
 			log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
 		}
