@@ -64,7 +64,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	private final Path directory;
 
 	@Nonnull
-	private final Duration startupTimeout;
+	private final Duration timeout;
 
 	@Nonnull
 	private final List<String> jvmOptions;
@@ -95,16 +95,16 @@ class DefaultCassandraProcess implements CassandraProcess {
 	 *
 	 * @param directory a configured directory
 	 * @param version a version
-	 * @param startupTimeout a startup timeout
+	 * @param timeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param javaHome java home directory
 	 * @param allowRoot force running as root
 	 * @param jmxPort JMX port
 	 */
-	DefaultCassandraProcess(@Nonnull Path directory, @Nonnull Version version, @Nonnull Duration startupTimeout,
+	DefaultCassandraProcess(@Nonnull Path directory, @Nonnull Version version, @Nonnull Duration timeout,
 			@Nonnull List<String> jvmOptions, @Nullable Path javaHome, int jmxPort, boolean allowRoot) {
 		this.directory = directory;
-		this.startupTimeout = startupTimeout;
+		this.timeout = timeout;
 		this.version = version;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
@@ -168,7 +168,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 
 		try {
-			await(settings, this.startupTimeout, output, process);
+			await(settings, this.timeout, output, process);
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
