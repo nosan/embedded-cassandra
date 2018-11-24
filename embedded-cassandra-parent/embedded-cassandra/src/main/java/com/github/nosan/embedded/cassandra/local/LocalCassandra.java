@@ -131,9 +131,6 @@ class LocalCassandra implements Cassandra {
 						this.initialized = true;
 					}
 				}
-				catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
-				}
 				catch (Throwable ex) {
 					try {
 						stop();
@@ -161,9 +158,6 @@ class LocalCassandra implements Cassandra {
 						if (process != null) {
 							process.stop();
 						}
-					}
-					catch (InterruptedException ex) {
-						Thread.currentThread().interrupt();
 					}
 					catch (Throwable ex) {
 						throw new CassandraException("Unable to stop Cassandra", ex);

@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.IOException;
+
 import javax.annotation.Nonnull;
 
 import com.github.nosan.embedded.cassandra.Settings;
@@ -35,19 +37,17 @@ interface CassandraProcess {
 	 * Starts the Cassandra.
 	 *
 	 * @return the settings
-	 * @throws Exception if the Cassandra cannot be started
-	 * @throws InterruptedException if any thread has interrupted the current thread.
+	 * @throws IOException if the Cassandra cannot be started
 	 */
 	@Nonnull
-	Settings start() throws InterruptedException, Exception;
+	Settings start() throws IOException;
 
 	/**
 	 * Stops the Cassandra.
 	 *
-	 * @throws Exception if the Cassandra cannot be stopped
-	 * @throws InterruptedException if any thread has interrupted the current thread.
+	 * @throws IOException if the Cassandra cannot be stopped
 	 */
-	void stop() throws InterruptedException, Exception;
+	void stop() throws IOException;
 
 
 }

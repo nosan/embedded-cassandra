@@ -114,7 +114,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	@Override
 	@Nonnull
-	public Settings start() throws Exception {
+	public Settings start() throws IOException {
 		Path directory = this.directory;
 		Version version = this.version;
 		int major = version.getMajor();
@@ -156,7 +156,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 			environment.put("JAVA_HOME", javaHome);
 		}
 
-
 		OutputCapture output = new OutputCapture(20);
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		Process process = new RunProcess(directory, environment, arguments)
@@ -168,14 +167,24 @@ class DefaultCassandraProcess implements CassandraProcess {
 			log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
 		}
 
-		await(settings, this.startupTimeout, output, process);
-
+		try {
+			await(settings, this.startupTimeout, output, process);
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+		catch (Exception ex) {
+			if (ex instanceof IOException) {
+				throw (IOException) ex;
+			}
+			throw new IOException(ex);
+		}
 		return settings;
 	}
 
 
 	@Override
-	public void stop() throws Exception {
+	public void stop() throws IOException {
 		Process process = this.process;
 		Path pidFile = this.pidFile;
 		long pid = this.pid;
@@ -189,22 +198,40 @@ class DefaultCassandraProcess implements CassandraProcess {
 					stop(process, pidFile, pid);
 				}
 				catch (Exception ex) {
-					forceStop(process, pidFile, pid);
-					throw ex;
-				}
-				boolean result;
-				if (settings != null) {
-					result = WaitUtils.await(Duration.ofSeconds(10),
-							() -> TransportUtils.isDisabled(settings) && !process.isAlive());
-				}
-				else {
-					result = process.waitFor(10, TimeUnit.SECONDS);
-				}
-				if (!result) {
+					log.error(String.format("Process (%s) has not been stopped correctly", getPidString(pid)), ex);
 					forceStop(process, pidFile, pid);
 				}
-				boolean waitFor = process.waitFor(5, TimeUnit.SECONDS);
-				if (!waitFor) {
+
+
+				try {
+					if (settings != null) {
+						WaitUtils.await(Duration.ofSeconds(5), () -> TransportUtils.isDisabled(settings)
+								&& !process.isAlive());
+					}
+					else {
+						process.waitFor(5, TimeUnit.SECONDS);
+					}
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
+				catch (Exception ex) {
+					log.error(String.format("Could not check whether process (%s) is stopped or not",
+							getPidString(pid)), ex);
+				}
+
+				if (!process.isAlive()) {
+					forceStop(process, pidFile, pid);
+				}
+
+				try {
+					process.waitFor(5, TimeUnit.SECONDS);
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
+
+				if (process.isAlive()) {
 					throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
 							getPidString(pid)));
 				}
@@ -262,7 +289,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 
-	private static void stop(Process process, Path pidFile, long pid) throws IOException, InterruptedException {
+	private static void stop(Process process, Path pidFile, long pid) throws IOException {
 		if (pidFile != null && Files.exists(pidFile)) {
 			stop(pidFile, false);
 		}
@@ -296,7 +323,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-	private static void stop(Path pidFile, boolean force) throws IOException, InterruptedException {
+	private static void stop(Path pidFile, boolean force) throws IOException {
 		if (OS.isWindows()) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("powershell");
@@ -318,7 +345,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 
-	private static void stop(long pid, boolean force) throws IOException, InterruptedException {
+	private static void stop(long pid, boolean force) throws IOException {
 		if (OS.isWindows()) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("taskkill");
