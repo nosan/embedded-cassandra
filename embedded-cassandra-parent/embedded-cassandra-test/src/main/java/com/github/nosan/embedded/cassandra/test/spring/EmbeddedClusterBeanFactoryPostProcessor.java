@@ -92,7 +92,6 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 	private BeanDefinition createEmbeddedBeanDefinition(boolean primary) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
 		beanDefinition.setPrimary(primary);
-		beanDefinition.setDependsOn(EmbeddedCassandraFactoryBean.BEAN_NAME);
 		return beanDefinition;
 	}
 

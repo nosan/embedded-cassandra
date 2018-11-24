@@ -215,7 +215,6 @@ class RemoteArtifact implements Artifact {
 				case 308:
 					String location = connection.getHeaderField("Location");
 					if (StringUtils.hasText(location)) {
-						connection.disconnect();
 						return getUrlConnection(new URL(url, location));
 					}
 			}
