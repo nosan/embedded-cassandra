@@ -27,7 +27,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -117,10 +118,15 @@ class RunProcess {
 	 * @return the exit value of the subprocess represented by {@code Process} object. By convention, the value
 	 * {@code 0} indicates normal termination.
 	 * @throws IOException if an I/O error occurs
-	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	int runAndWait(@Nullable Output... outputs) throws InterruptedException, IOException {
-		return run(outputs).waitFor();
+	int runAndWait(@Nullable Output... outputs) throws IOException {
+		try {
+			return run(outputs).waitFor();
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+		return -1;
 	}
 
 	/**
@@ -129,9 +135,8 @@ class RunProcess {
 	 * @param outputs output consumers.
 	 * @return a new process object for managing the subprocess
 	 * @throws IOException if an I/O error occurs
-	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	Process run(@Nullable Output... outputs) throws InterruptedException, IOException {
+	Process run(@Nullable Output... outputs) throws IOException {
 		List<String> command = this.arguments.stream().map(String::valueOf).collect(Collectors.toList());
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
 		Path workingDirectory = this.workingDirectory;
@@ -156,45 +161,23 @@ class RunProcess {
 		return start(processBuilder, outputs);
 	}
 
-	private static Process start(ProcessBuilder builder, Output[] outputs) throws InterruptedException, IOException {
-
-		final class Value {
-
-			private Process process;
-
-			private Throwable throwable;
-
-			private Value(Process process) {
-				this.process = process;
-			}
-
-			private Value(Throwable throwable) {
-				this.throwable = throwable;
-			}
-		}
-		SynchronousQueue<Value> sync = new SynchronousQueue<>();
-		new Thread(() -> {
-			Process process = null;
-			try {
-				process = builder.start();
-				sync.offer(new Value(process));
-			}
-			catch (Throwable ex) {
-				sync.offer(new Value(ex));
-			}
-			if (process != null && outputs != null && outputs.length > 0) {
+	private static Process start(ProcessBuilder builder, Output[] outputs) throws IOException {
+		Process process = builder.start();
+		if (outputs != null && outputs.length > 0) {
+			CountDownLatch latch = new CountDownLatch(1);
+			Thread thread = new Thread(() -> {
+				latch.countDown();
 				read(process, outputs);
+			}, String.format("process-%d-%s", COUNTER.getAndIncrement(), Thread.currentThread().getName()));
+			thread.start();
+			try {
+				latch.await(3, TimeUnit.SECONDS);
 			}
-		}, String.format("process-%d-%s", COUNTER.getAndIncrement(), Thread.currentThread().getName())).start();
-		Value value = sync.take();
-		if (value.process != null) {
-			return value.process;
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 		}
-		Throwable throwable = value.throwable;
-		if (throwable instanceof IOException) {
-			throw (IOException) throwable;
-		}
-		throw new IOException("Process has not been started correctly", throwable);
+		return process;
 	}
 
 
