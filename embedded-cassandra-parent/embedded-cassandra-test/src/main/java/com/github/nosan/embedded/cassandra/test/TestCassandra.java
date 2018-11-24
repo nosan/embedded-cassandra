@@ -121,30 +121,27 @@ public class TestCassandra implements Cassandra {
 	public void start() throws CassandraException {
 		if (!this.initialized) {
 			synchronized (this) {
-				try {
+				if (!this.initialized) {
+					this.initialized = true;
 					try {
-						if (!this.initialized) {
-							this.cassandra.start();
-							if (this.scripts.length > 0) {
-								executeScripts(this.scripts);
-							}
+						this.cassandra.start();
+						CqlScript[] scripts = this.scripts;
+						if (scripts.length > 0) {
+							executeScripts(scripts);
 						}
 					}
-					finally {
-						this.initialized = true;
+					catch (Throwable ex) {
+						try {
+							stop();
+						}
+						catch (Throwable suppress) {
+							ex.addSuppressed(suppress);
+						}
+						if (ex instanceof CassandraException) {
+							throw ex;
+						}
+						throw new CassandraException("Unable to Start Cassandra", ex);
 					}
-				}
-				catch (Throwable ex) {
-					try {
-						stop();
-					}
-					catch (Throwable suppress) {
-						ex.addSuppressed(suppress);
-					}
-					if (ex instanceof CassandraException) {
-						throw ex;
-					}
-					throw new CassandraException("Unable to Start Cassandra", ex);
 				}
 			}
 		}
@@ -156,26 +153,31 @@ public class TestCassandra implements Cassandra {
 		if (this.initialized) {
 			synchronized (this) {
 				if (this.initialized) {
+					this.initialized = false;
 					try {
-						try {
-							Cluster cluster = this.cluster;
-							if (cluster != null) {
-								cluster.close();
-							}
+						Cluster cluster = this.cluster;
+						this.session = null;
+						this.cluster = null;
+						if (cluster != null) {
+							cluster.close();
 						}
-						catch (Throwable ex) {
-							log.error("Cluster has not been closed", ex);
-						}
+					}
+					catch (Throwable ex) {
+						log.error("Cluster has not been closed", ex);
+					}
+					try {
 						this.cassandra.stop();
 					}
-					finally {
-						this.cluster = null;
-						this.session = null;
-						this.initialized = false;
+					catch (Throwable ex) {
+						if (ex instanceof CassandraException) {
+							throw ex;
+						}
+						throw new CassandraException("Unable to Start Cassandra", ex);
 					}
 				}
 			}
 		}
+
 	}
 
 

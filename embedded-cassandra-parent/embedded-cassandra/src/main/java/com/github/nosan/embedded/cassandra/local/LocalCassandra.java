@@ -112,33 +112,29 @@ class LocalCassandra implements Cassandra {
 	public void start() throws CassandraException {
 		if (!this.initialized) {
 			synchronized (this) {
-				try {
+				if (!this.initialized) {
+					this.initialized = true;
+					long start = System.currentTimeMillis();
+					Version version = this.version;
+					log.info("Starts Apache Cassandra ({})", version);
 					try {
-						if (!this.initialized) {
-							long start = System.currentTimeMillis();
-							Version version = this.version;
-							log.info("Starts Apache Cassandra ({})", version);
-							Artifact artifact = this.artifactFactory.create(version);
-							Objects.requireNonNull(artifact, "Artifact must not be null");
-							this.directory = this.directoryFactory.create(artifact);
-							this.process = this.processFactory.create(this.directory.initialize());
-							this.settings = this.process.start();
-							long end = System.currentTimeMillis();
-							log.info("Apache Cassandra ({}) has been started ({} ms) ", version, end - start);
+						Artifact artifact = this.artifactFactory.create(version);
+						Objects.requireNonNull(artifact, "Artifact must not be null");
+						this.directory = this.directoryFactory.create(artifact);
+						this.process = this.processFactory.create(this.directory.initialize());
+						this.settings = this.process.start();
+					}
+					catch (Throwable ex) {
+						try {
+							stop();
 						}
+						catch (Throwable suppress) {
+							ex.addSuppressed(suppress);
+						}
+						throw new CassandraException("Unable to start Cassandra", ex);
 					}
-					finally {
-						this.initialized = true;
-					}
-				}
-				catch (Throwable ex) {
-					try {
-						stop();
-					}
-					catch (Throwable suppress) {
-						ex.addSuppressed(suppress);
-					}
-					throw new CassandraException("Unable to start Cassandra", ex);
+					long end = System.currentTimeMillis();
+					log.info("Apache Cassandra ({}) has been started ({} ms) ", version, end - start);
 				}
 			}
 		}
@@ -150,11 +146,15 @@ class LocalCassandra implements Cassandra {
 		if (this.initialized) {
 			synchronized (this) {
 				if (this.initialized) {
+					this.initialized = false;
 					long start = System.currentTimeMillis();
 					Version version = this.version;
 					log.info("Stops Apache Cassandra ({})", version);
 					CassandraProcess process = this.process;
 					Directory directory = this.directory;
+					this.process = null;
+					this.directory = null;
+					this.settings = null;
 					try {
 						if (process != null) {
 							process.stop();
@@ -170,12 +170,6 @@ class LocalCassandra implements Cassandra {
 					}
 					catch (Throwable ex) {
 						throw new CassandraException("Unable to stop Cassandra", ex);
-					}
-					finally {
-						this.process = null;
-						this.directory = null;
-						this.settings = null;
-						this.initialized = false;
 					}
 					long end = System.currentTimeMillis();
 					log.info("Apache Cassandra ({}) has been stopped ({} ms) ", version, end - start);
@@ -193,6 +187,7 @@ class LocalCassandra implements Cassandra {
 						"Cassandra is not initialized. Please start it before calling this method."));
 	}
 
+
 	private void addShutdownHook() {
 		try {
 			Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "Cassandra Shutdown Hook"));
@@ -201,6 +196,4 @@ class LocalCassandra implements Cassandra {
 			log.error(String.format("Shutdown hook is not registered for (%s)", getClass()), ex);
 		}
 	}
-
-
 }

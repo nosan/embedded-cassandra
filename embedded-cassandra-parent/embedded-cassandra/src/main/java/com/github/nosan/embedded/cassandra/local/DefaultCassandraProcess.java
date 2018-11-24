@@ -185,63 +185,61 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	@Override
 	public void stop() throws IOException {
-		try {
-			Process process = this.process;
-			Path pidFile = this.pidFile;
-			long pid = this.pid;
-			Settings settings = this.settings;
-			if (process != null && process.isAlive()) {
-				if (log.isDebugEnabled()) {
-					log.debug("Stops Cassandra process ({})", getPidString(pid));
-				}
+		Process process = this.process;
+		Path pidFile = this.pidFile;
+		long pid = this.pid;
+		Settings settings = this.settings;
 
-				try {
-					stop(process, pidFile, pid);
-				}
-				catch (Exception ex) {
-					log.error(String.format("Process (%s) has not been stopped correctly", getPidString(pid)), ex);
-					forceStop(process, pidFile, pid);
-				}
+		this.settings = null;
+		this.pid = -1;
+		this.pidFile = null;
+		this.process = null;
 
-				try {
-					if (settings != null) {
-						WaitUtils.await(Duration.ofSeconds(5), () -> TransportUtils.isDisabled(settings)
-								&& !process.isAlive());
-					}
-					else {
-						process.waitFor(5, TimeUnit.SECONDS);
-					}
-				}
-				catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
-				}
-				catch (Exception ex) {
-					log.error(String.format("Could not check whether process (%s) is stopped or not",
-							getPidString(pid)), ex);
-				}
+		if (process != null && process.isAlive()) {
+			if (log.isDebugEnabled()) {
+				log.debug("Stops Cassandra process ({})", getPidString(pid));
+			}
 
-				if (process.isAlive()) {
-					forceStop(process, pidFile, pid);
-				}
+			try {
+				stop(process, pidFile, pid);
+			}
+			catch (Exception ex) {
+				log.error(String.format("Process (%s) has not been stopped correctly", getPidString(pid)), ex);
+				forceStop(process, pidFile, pid);
+			}
 
-				try {
+			try {
+				if (settings != null) {
+					WaitUtils.await(Duration.ofSeconds(5), () -> TransportUtils.isDisabled(settings)
+							&& !process.isAlive());
+				}
+				else {
 					process.waitFor(5, TimeUnit.SECONDS);
 				}
-				catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
-				}
-
-				if (process.isAlive()) {
-					throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
-							getPidString(pid)));
-				}
 			}
-		}
-		finally {
-			this.settings = null;
-			this.pid = -1;
-			this.pidFile = null;
-			this.process = null;
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+			catch (Exception ex) {
+				log.error(String.format("Could not check whether process (%s) is stopped or not",
+						getPidString(pid)), ex);
+			}
+
+			if (process.isAlive()) {
+				forceStop(process, pidFile, pid);
+			}
+
+			try {
+				process.waitFor(5, TimeUnit.SECONDS);
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+
+			if (process.isAlive()) {
+				throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
+						getPidString(pid)));
+			}
 		}
 	}
 
