@@ -220,7 +220,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 							getPidString(pid)), ex);
 				}
 
-				if (!process.isAlive()) {
+				if (process.isAlive()) {
 					forceStop(process, pidFile, pid);
 				}
 
