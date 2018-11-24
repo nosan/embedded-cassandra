@@ -156,7 +156,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			environment.put("JAVA_HOME", javaHome);
 		}
 
-		OutputCapture output = new OutputCapture(20);
+		OutputCapture output = new OutputCapture(10);
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		Process process = new RunProcess(directory, environment, arguments)
 				.run(new FilteredOutput(output, outputFilter), new FilteredOutput(log::info, outputFilter));
@@ -185,15 +185,16 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	@Override
 	public void stop() throws IOException {
-		Process process = this.process;
-		Path pidFile = this.pidFile;
-		long pid = this.pid;
-		Settings settings = this.settings;
-		if (process != null && process.isAlive()) {
-			try {
+		try {
+			Process process = this.process;
+			Path pidFile = this.pidFile;
+			long pid = this.pid;
+			Settings settings = this.settings;
+			if (process != null && process.isAlive()) {
 				if (log.isDebugEnabled()) {
 					log.debug("Stops Cassandra process ({})", getPidString(pid));
 				}
+
 				try {
 					stop(process, pidFile, pid);
 				}
@@ -201,7 +202,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 					log.error(String.format("Process (%s) has not been stopped correctly", getPidString(pid)), ex);
 					forceStop(process, pidFile, pid);
 				}
-
 
 				try {
 					if (settings != null) {
@@ -236,12 +236,12 @@ class DefaultCassandraProcess implements CassandraProcess {
 							getPidString(pid)));
 				}
 			}
-			finally {
-				this.settings = null;
-				this.pid = -1;
-				this.pidFile = null;
-				this.process = null;
-			}
+		}
+		finally {
+			this.settings = null;
+			this.pid = -1;
+			this.pidFile = null;
+			this.process = null;
 		}
 	}
 
