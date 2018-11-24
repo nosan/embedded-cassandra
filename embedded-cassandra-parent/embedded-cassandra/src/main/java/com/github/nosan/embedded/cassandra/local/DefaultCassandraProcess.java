@@ -156,7 +156,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		if (StringUtils.hasText(javaHome)) {
 			environment.put("JAVA_HOME", javaHome);
 		}
-		SmartOutputCapture output = new SmartOutputCapture();
+		OutputReadiness output = new OutputReadiness();
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		Process process = new RunProcess(directory, environment, arguments)
 				.run(new FilteredOutput(output, outputFilter), new FilteredOutput(log::info, outputFilter));
@@ -268,7 +268,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 
-	private static void await(Settings settings, Duration timeout, SmartOutputCapture output, Process process)
+	private static void await(Settings settings, Duration timeout, OutputReadiness output, Process process)
 			throws Exception {
 		boolean result = WaitUtils.await(timeout, () -> {
 			if (!process.isAlive()) {
@@ -375,15 +375,15 @@ class DefaultCassandraProcess implements CassandraProcess {
 	/**
 	 * Utility class to check whether 'Cassandra' output is ready or not and keep the 10 last lines.
 	 */
-	private static final class SmartOutputCapture extends OutputCapture {
+	private static final class OutputReadiness extends OutputCapture {
 
 		@Nonnull
 		private final AtomicBoolean ready = new AtomicBoolean(false);
 
 		/**
-		 * Creates a new {@link SmartOutputCapture}.
+		 * Creates a new {@link OutputReadiness}.
 		 */
-		SmartOutputCapture() {
+		OutputReadiness() {
 			super(10);
 		}
 
