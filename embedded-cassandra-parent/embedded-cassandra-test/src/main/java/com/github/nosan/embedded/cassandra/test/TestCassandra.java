@@ -140,7 +140,7 @@ public class TestCassandra implements Cassandra {
 						if (ex instanceof CassandraException) {
 							throw ex;
 						}
-						throw new CassandraException("Unable to Start Cassandra", ex);
+						throw new CassandraException("Unable to start Cassandra", ex);
 					}
 				}
 			}
@@ -172,7 +172,7 @@ public class TestCassandra implements Cassandra {
 						if (ex instanceof CassandraException) {
 							throw ex;
 						}
-						throw new CassandraException("Unable to Start Cassandra", ex);
+						throw new CassandraException("Unable to stop Cassandra", ex);
 					}
 				}
 			}
