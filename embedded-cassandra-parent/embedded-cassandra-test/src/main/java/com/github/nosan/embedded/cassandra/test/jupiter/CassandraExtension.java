@@ -95,12 +95,12 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	}
 
 	@Override
-	public void beforeAll(ExtensionContext context) {
+	public void beforeAll(@Nonnull ExtensionContext context) {
 		start();
 	}
 
 	@Override
-	public void afterAll(ExtensionContext context) {
+	public void afterAll(@Nonnull ExtensionContext context) {
 		stop();
 	}
 

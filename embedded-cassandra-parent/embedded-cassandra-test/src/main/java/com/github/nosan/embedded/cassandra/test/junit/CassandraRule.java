@@ -94,7 +94,8 @@ public class CassandraRule extends TestCassandra implements TestRule {
 
 
 	@Override
-	public Statement apply(Statement base, Description description) {
+	@Nonnull
+	public Statement apply(@Nonnull Statement base, @Nonnull Description description) {
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
