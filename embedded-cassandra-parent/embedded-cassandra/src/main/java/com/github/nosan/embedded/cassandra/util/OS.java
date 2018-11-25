@@ -55,7 +55,6 @@ public enum OS {
 	OTHER;
 
 
-	@Nonnull
 	private static final OS CURRENT = detect();
 
 	/**

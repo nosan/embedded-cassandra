@@ -35,13 +35,10 @@ import javax.annotation.Nullable;
  */
 public abstract class FileUtils {
 
-	@Nonnull
 	private static final Path TMP_DIR = Paths.get(new SystemProperty("java.io.tmpdir").get());
 
-	@Nonnull
 	private static final Path USER_HOME_DIR = Paths.get(new SystemProperty("user.home").get());
 
-	@Nonnull
 	private static final Path USER_DIR = Paths.get(new SystemProperty("user.dir").get());
 
 	/**

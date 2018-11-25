@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 
@@ -28,12 +29,11 @@ import javax.annotation.Nonnull;
  */
 class StackTraceFilter implements Predicate<String> {
 
+	private static final Pattern STACKTRACE_PATTERN = Pattern.compile("\\s+(at|\\.{3}) .*");
+
 	@Override
 	public boolean test(@Nonnull String line) {
-		return !(line.startsWith("\t") && isStackTrace(line.trim()));
+		return !STACKTRACE_PATTERN.matcher(line).matches();
 	}
 
-	private boolean isStackTrace(String line) {
-		return line.startsWith("at ") || line.startsWith("... ");
-	}
 }
