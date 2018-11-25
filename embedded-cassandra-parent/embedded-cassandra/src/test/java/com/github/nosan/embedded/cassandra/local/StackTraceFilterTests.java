@@ -30,8 +30,10 @@ public class StackTraceFilterTests {
 	@Test
 	public void shouldFilter() {
 		StackTraceFilter filter = new StackTraceFilter();
-		assertThat(filter.test("\tat")).isFalse();
-		assertThat(filter.test("\t...")).isFalse();
+		assertThat(filter.test("\tat 55")).isFalse();
+		assertThat(filter.test("at 55")).isTrue();
+		assertThat(filter.test("\t... twxt")).isFalse();
+		assertThat(filter.test("... twxt")).isTrue();
 		assertThat(filter.test("text")).isTrue();
 
 

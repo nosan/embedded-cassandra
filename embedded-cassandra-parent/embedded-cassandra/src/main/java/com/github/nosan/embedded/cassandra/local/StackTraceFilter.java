@@ -30,6 +30,10 @@ class StackTraceFilter implements Predicate<String> {
 
 	@Override
 	public boolean test(@Nonnull String line) {
-		return !(line.startsWith("\tat") || line.startsWith("\t..."));
+		return !(line.startsWith("\t") && isStackTrace(line.trim()));
+	}
+
+	private boolean isStackTrace(String line) {
+		return line.startsWith("at ") || line.startsWith("... ");
 	}
 }

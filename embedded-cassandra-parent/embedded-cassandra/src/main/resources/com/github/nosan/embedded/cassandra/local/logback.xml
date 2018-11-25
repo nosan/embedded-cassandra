@@ -42,7 +42,7 @@
             <level>INFO</level>
         </filter>
         <encoder>
-            <pattern>%msg%n</pattern>
+            <pattern>%msg%xEx{5}%n</pattern>
         </encoder>
     </appender>
     <root level="INFO">
