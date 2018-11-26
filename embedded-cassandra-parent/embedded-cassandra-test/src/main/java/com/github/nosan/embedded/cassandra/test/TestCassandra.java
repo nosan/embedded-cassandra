@@ -165,6 +165,7 @@ public class TestCassandra implements Cassandra {
 						this.session = null;
 						this.cluster = null;
 						if (cluster != null) {
+							log.debug("Closes a cluster ({})", cluster);
 							cluster.close();
 						}
 					}
