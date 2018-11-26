@@ -59,7 +59,7 @@ class LocalCassandraContextCustomizer implements ContextCustomizer {
 	public void customizeContext(@Nonnull ConfigurableApplicationContext context,
 			@Nonnull MergedContextConfiguration mergedConfig) {
 		Assert.isInstanceOf(BeanDefinitionRegistry.class, context.getBeanFactory(),
-				"Local Factory Context Customizer can only be used with a BeanDefinitionRegistry");
+				String.format("(%s) can only be used with a BeanDefinitionRegistry", getClass()));
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 		RootBeanDefinition bd = new RootBeanDefinition(LocalCassandraFactoryBean.class);

@@ -47,7 +47,7 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 	public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry)
 			throws BeansException {
 		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, registry,
-				"EmbeddedClusterBeanFactoryPostProcessor can only be used with a ConfigurableListableBeanFactory");
+				String.format("(%s) can only be used with a ConfigurableListableBeanFactory", getClass()));
 		process(registry, (ConfigurableListableBeanFactory) registry);
 	}
 
@@ -85,8 +85,7 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 		}
 		log.info("There is no Cluster beans. Embedded primary '{}' Cluster bean will be registered",
 				EmbeddedClusterFactoryBean.BEAN_NAME);
-		return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true),
-				EmbeddedClusterFactoryBean.BEAN_NAME);
+		return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true), EmbeddedClusterFactoryBean.BEAN_NAME);
 	}
 
 	private BeanDefinition createEmbeddedBeanDefinition(boolean primary) {
