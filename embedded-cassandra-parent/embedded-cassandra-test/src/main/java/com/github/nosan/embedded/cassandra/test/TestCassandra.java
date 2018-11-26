@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,6 +54,8 @@ import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
 public class TestCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);
+
+	private final AtomicBoolean shutdownHook = new AtomicBoolean(false);
 
 	@Nonnull
 	private final CqlScript[] scripts;
@@ -110,7 +113,6 @@ public class TestCassandra implements Cassandra {
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory,
 			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
-		addShutdownHook();
 		this.cassandra = (cassandraFactory != null) ? cassandraFactory.create() : new LocalCassandraFactory().create();
 		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
@@ -123,6 +125,10 @@ public class TestCassandra implements Cassandra {
 			synchronized (this) {
 				if (!this.initialized) {
 					this.initialized = true;
+					if (this.shutdownHook.compareAndSet(false, true)) {
+						Runtime runtime = Runtime.getRuntime();
+						runtime.addShutdownHook(new Thread(this::stop, "Test Cassandra Shutdown Hook"));
+					}
 					try {
 						this.cassandra.start();
 						CqlScript[] scripts = this.scripts;
@@ -288,14 +294,5 @@ public class TestCassandra implements Cassandra {
 		return CqlUtils.executeStatement(getSession(), statement, args);
 	}
 
-
-	private void addShutdownHook() {
-		try {
-			Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "Test Cassandra Shutdown Hook"));
-		}
-		catch (Throwable ex) {
-			log.error(String.format("Shutdown hook is not registered for (%s)", getClass()), ex);
-		}
-	}
 
 }

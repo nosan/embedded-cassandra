@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -47,6 +48,8 @@ import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 class LocalCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
+
+	private final AtomicBoolean shutdownHook = new AtomicBoolean(false);
 
 	@Nonnull
 	private final Version version;
@@ -98,7 +101,6 @@ class LocalCassandra implements Cassandra {
 		Objects.requireNonNull(startupTimeout, "Startup timeout must not be null");
 		Objects.requireNonNull(jvmOptions, "JVM Options must not be null");
 		Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
-		addShutdownHook();
 		this.artifactFactory = artifactFactory;
 		this.version = version;
 		this.directoryFactory = new DefaultDirectoryFactory(version, workingDirectory,
@@ -114,6 +116,10 @@ class LocalCassandra implements Cassandra {
 			synchronized (this) {
 				if (!this.initialized) {
 					this.initialized = true;
+					if (this.shutdownHook.compareAndSet(false, true)) {
+						Runtime runtime = Runtime.getRuntime();
+						runtime.addShutdownHook(new Thread(this::stop, "Cassandra Shutdown Hook"));
+					}
 					long start = System.currentTimeMillis();
 					Version version = this.version;
 					log.info("Starts Apache Cassandra ({})", version);
@@ -187,13 +193,4 @@ class LocalCassandra implements Cassandra {
 						"Cassandra is not initialized. Please start it before calling this method."));
 	}
 
-
-	private void addShutdownHook() {
-		try {
-			Runtime.getRuntime().addShutdownHook(new Thread(this::stop, "Cassandra Shutdown Hook"));
-		}
-		catch (Throwable ex) {
-			log.error(String.format("Shutdown hook is not registered for (%s)", getClass()), ex);
-		}
-	}
 }
