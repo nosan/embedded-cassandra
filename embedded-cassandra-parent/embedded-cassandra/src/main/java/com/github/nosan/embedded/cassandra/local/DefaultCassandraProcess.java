@@ -190,11 +190,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 		long pid = this.pid;
 		Settings settings = this.settings;
 
-		this.settings = null;
-		this.pid = -1;
-		this.pidFile = null;
-		this.process = null;
-
 		if (process != null && process.isAlive()) {
 			if (log.isDebugEnabled()) {
 				log.debug("Stops Cassandra process ({})", getPidString(pid));
@@ -240,6 +235,10 @@ class DefaultCassandraProcess implements CassandraProcess {
 				throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
 						getPidString(pid)));
 			}
+			this.settings = null;
+			this.pid = -1;
+			this.pidFile = null;
+			this.process = null;
 		}
 	}
 

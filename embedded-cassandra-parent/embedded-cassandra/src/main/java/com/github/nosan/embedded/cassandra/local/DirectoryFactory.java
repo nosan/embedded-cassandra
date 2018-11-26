@@ -16,9 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import javax.annotation.Nonnull;
+import java.nio.file.Path;
 
-import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
+import javax.annotation.Nonnull;
 
 /**
  * Factory that creates a {@link Directory}.
@@ -30,9 +30,9 @@ interface DirectoryFactory {
 	/**
 	 * Creates a new  configured {@link Directory}.
 	 *
-	 * @param artifact the artifact to initialize a directory
-	 * @return {@code Directory} to use
+	 * @param archive the archive to initialize a directory
+	 * @return {@code directory} to use
 	 */
 	@Nonnull
-	Directory create(@Nonnull Artifact artifact);
+	Directory create(@Nonnull Path archive);
 }

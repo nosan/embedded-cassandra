@@ -25,7 +25,6 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,11 +48,11 @@ public class DefaultDirectoryFactoryTests {
 		DefaultDirectoryFactory factory = new DefaultDirectoryFactory(version, workingDirectory, configurationFile,
 				logbackFile, rackFile, topologyFile);
 
-		Artifact artifact = () -> Paths.get("artifact");
+		Path archive = Paths.get("artifact");
 
-		Directory directory = factory.create(artifact);
+		Directory directory = factory.create(archive);
 		assertThat(ReflectionUtils.getField(directory, "directory")).isEqualTo(workingDirectory);
-		assertThat(ReflectionUtils.getField(directory, "artifact")).isEqualTo(artifact);
+		assertThat(ReflectionUtils.getField(directory, "archive")).isEqualTo(archive);
 		List<? extends DirectoryCustomizer> customizers =
 				(List<? extends DirectoryCustomizer>) ReflectionUtils.getField(directory, "customizers");
 

@@ -74,6 +74,8 @@ public final class LocalCassandraFactoryBuilder {
 
 	private boolean allowRoot = false;
 
+	private boolean registerShutdownHook = true;
+
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#isAllowRoot() allowRoot} attribute.
 	 *
@@ -394,6 +396,18 @@ public final class LocalCassandraFactoryBuilder {
 		return this;
 	}
 
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#isRegisterShutdownHook} attribute.
+	 *
+	 * @param registerShutdownHook The value for registerShutdownHook
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.2.3
+	 */
+	@Nonnull
+	public LocalCassandraFactoryBuilder setRegisterShutdownHook(boolean registerShutdownHook) {
+		this.registerShutdownHook = registerShutdownHook;
+		return this;
+	}
 
 	/**
 	 * Builds a new {@link LocalCassandraFactory}.
@@ -415,6 +429,7 @@ public final class LocalCassandraFactoryBuilder {
 		factory.setJavaHome(this.javaHome);
 		factory.setJmxPort(this.jmxPort);
 		factory.setAllowRoot(this.allowRoot);
+		factory.setRegisterShutdownHook(this.registerShutdownHook);
 		return factory;
 	}
 

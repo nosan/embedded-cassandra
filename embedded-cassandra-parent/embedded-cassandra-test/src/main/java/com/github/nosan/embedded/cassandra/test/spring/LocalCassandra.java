@@ -160,6 +160,14 @@ public @interface LocalCassandra {
 	boolean allowRoot() default false;
 
 	/**
+	 * Sets attribute for {@link LocalCassandraFactory#isRegisterShutdownHook()}.
+	 *
+	 * @return The value of the {@code registerShutdownHook} attribute
+	 * @since 1.2.3
+	 */
+	boolean registerShutdownHook() default true;
+
+	/**
 	 * Alias for {@link EmbeddedCassandra#scripts()}.
 	 *
 	 * @return CQL Scripts

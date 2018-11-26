@@ -185,7 +185,7 @@ class RemoteArtifact implements Artifact {
 				fileChannel.transferFrom(urlChannel, 0, Long.MAX_VALUE);
 			}
 			finally {
-				executorService.shutdown();
+				executorService.shutdownNow();
 			}
 		}
 		catch (IOException ex) {

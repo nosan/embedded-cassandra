@@ -61,7 +61,7 @@ public class DefaultDirectoryTests {
 	public void shouldInitializeDirectoryFolderArchive() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 
-		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, archive, Collections.emptyList());
 
 		Path directory = workDir.initialize();
 
@@ -77,7 +77,7 @@ public class DefaultDirectoryTests {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 
 
-		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, archive, Collections.emptyList());
 
 		Path directory = workDir.initialize();
 
@@ -96,7 +96,7 @@ public class DefaultDirectoryTests {
 		this.throwable.expect(IllegalArgumentException.class);
 		Path archive = Paths.get(getClass().getResource("/empty.zip").toURI());
 
-		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, archive, Collections.emptyList());
 		workDir.initialize();
 	}
 
@@ -109,7 +109,7 @@ public class DefaultDirectoryTests {
 		Path archiveFolder = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 		Path archiveFlat = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 		ArchiveUtils.extract(archiveFolder, this.rootDirectory, ignore -> true);
-		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archiveFlat, Collections.emptyList());
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, archiveFlat, Collections.emptyList());
 		workDir.initialize();
 	}
 
@@ -118,7 +118,7 @@ public class DefaultDirectoryTests {
 	public void shouldDestroyTemporaryDirectory() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 
-		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, archive, Collections.emptyList());
 
 		Path directory = workDir.initialize();
 
@@ -139,7 +139,7 @@ public class DefaultDirectoryTests {
 		this.rootDirectory = FileUtils.getUserDirectory().resolve(String.format("target/%s", UUID.randomUUID()));
 		Runtime.getRuntime().addShutdownHook(new Thread(() ->
 				IOUtils.closeQuietly(() -> FileUtils.delete(this.rootDirectory))));
-		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, () -> archive, Collections.emptyList());
+		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, archive, Collections.emptyList());
 		Path directory = workDir.initialize();
 
 		assertThat(directory).exists();
@@ -165,7 +165,7 @@ public class DefaultDirectoryTests {
 		Customizer customizer = new Customizer();
 
 		DefaultDirectory workDir =
-				new DefaultDirectory(this.rootDirectory, () -> archive, Collections.singletonList(customizer));
+				new DefaultDirectory(this.rootDirectory, archive, Collections.singletonList(customizer));
 
 		Path directory = workDir.initialize();
 		assertThat(directory).exists();
@@ -183,7 +183,7 @@ public class DefaultDirectoryTests {
 		this.throwable.expect(IOException.class);
 
 		DefaultDirectory workDir =
-				new DefaultDirectory(this.rootDirectory, () -> this.temporaryFolder.newFile().toPath(),
+				new DefaultDirectory(this.rootDirectory, this.temporaryFolder.newFile().toPath(),
 						Collections.emptyList());
 		workDir.initialize();
 	}

@@ -77,6 +77,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	private boolean allowRoot = false;
 
+	private boolean registerShutdownHook = true;
+
 	/**
 	 * Whether to force running Cassandra as {@code root} or not.
 	 * <p>
@@ -309,6 +311,26 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		this.logbackFile = logbackFile;
 	}
 
+	/**
+	 * Register a shutdown hook with the JVM runtime, stops this cassandra on JVM shutdown unless it has already been
+	 * stopped at that time.
+	 *
+	 * @return The value of the {@code registerShutdownHook} attribute
+	 * @since 1.2.3
+	 */
+	public boolean isRegisterShutdownHook() {
+		return this.registerShutdownHook;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#isRegisterShutdownHook} attribute.
+	 *
+	 * @param registerShutdownHook The value for registerShutdownHook
+	 * @since 1.2.3
+	 */
+	public void setRegisterShutdownHook(boolean registerShutdownHook) {
+		this.registerShutdownHook = registerShutdownHook;
+	}
 
 	@Nonnull
 	@Override
@@ -330,9 +352,15 @@ public final class LocalCassandraFactory implements CassandraFactory {
 			workingDirectory = FileUtils.getTmpDirectory().
 					resolve(String.format("embedded-cassandra-%s", UUID.randomUUID()));
 		}
-		return new LocalCassandra(version, artifactFactory, workingDirectory, startupTimeout, getConfigurationFile(),
-				getLogbackFile(), getRackFile(), getTopologyFile(), getJvmOptions(), getJavaHome(), getJmxPort(),
-				isAllowRoot());
+		LocalCassandra cassandra = new LocalCassandra(version, artifactFactory, workingDirectory,
+				startupTimeout, getConfigurationFile(), getLogbackFile(), getRackFile(), getTopologyFile(),
+				getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot());
+
+		if (isRegisterShutdownHook()) {
+			Runtime.getRuntime().addShutdownHook(new Thread(cassandra::stop));
+		}
+
+		return cassandra;
 	}
 
 

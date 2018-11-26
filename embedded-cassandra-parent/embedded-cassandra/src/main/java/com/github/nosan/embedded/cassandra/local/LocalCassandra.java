@@ -16,13 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -49,13 +49,11 @@ class LocalCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
-	private final AtomicBoolean shutdownHook = new AtomicBoolean(false);
-
 	@Nonnull
 	private final Version version;
 
 	@Nonnull
-	private final ArtifactFactory artifactFactory;
+	private final MemoizedArtifact artifact;
 
 	@Nonnull
 	private final DirectoryFactory directoryFactory;
@@ -64,15 +62,15 @@ class LocalCassandra implements Cassandra {
 	private final CassandraProcessFactory processFactory;
 
 	@Nullable
-	private CassandraProcess process;
+	private volatile CassandraProcess process;
 
 	@Nullable
-	private Directory directory;
+	private volatile Directory directory;
 
 	@Nullable
-	private Settings settings;
+	private volatile Settings settings;
 
-	private volatile boolean initialized = false;
+	private volatile boolean started = false;
 
 
 	/**
@@ -101,8 +99,8 @@ class LocalCassandra implements Cassandra {
 		Objects.requireNonNull(startupTimeout, "Startup timeout must not be null");
 		Objects.requireNonNull(jvmOptions, "JVM Options must not be null");
 		Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
-		this.artifactFactory = artifactFactory;
 		this.version = version;
+		this.artifact = new MemoizedArtifact(artifactFactory, version);
 		this.directoryFactory = new DefaultDirectoryFactory(version, workingDirectory,
 				configurationFile, logbackFile, rackFile, topologyFile);
 		this.processFactory = new DefaultCassandraProcessFactory(startupTimeout, jvmOptions, version,
@@ -112,75 +110,77 @@ class LocalCassandra implements Cassandra {
 
 	@Override
 	public void start() throws CassandraException {
-		if (!this.initialized) {
-			synchronized (this) {
-				if (!this.initialized) {
-					this.initialized = true;
-					if (this.shutdownHook.compareAndSet(false, true)) {
-						Runtime runtime = Runtime.getRuntime();
-						runtime.addShutdownHook(new Thread(this::stop, "Cassandra Shutdown Hook"));
-					}
-					long start = System.currentTimeMillis();
-					Version version = this.version;
-					log.info("Starts Apache Cassandra ({})", version);
-					try {
-						Artifact artifact = this.artifactFactory.create(version);
-						Objects.requireNonNull(artifact, "Artifact must not be null");
-						this.directory = this.directoryFactory.create(artifact);
-						this.process = this.processFactory.create(this.directory.initialize());
-						this.settings = this.process.start();
-					}
-					catch (Throwable ex) {
-						try {
-							stop();
-						}
-						catch (Throwable suppress) {
-							ex.addSuppressed(suppress);
-						}
-						throw new CassandraException("Unable to start Cassandra", ex);
-					}
-					long end = System.currentTimeMillis();
-					log.info("Apache Cassandra ({}) has been started ({} ms) ", version, end - start);
-				}
-			}
+		Path archive;
+		try {
+			archive = this.artifact.get();
 		}
+		catch (Throwable ex) {
+			throw new CassandraException(ex);
+		}
+		synchronized (this) {
+			if (this.started) {
+				return;
+			}
+			this.started = true;
+			Version version = this.version;
+			long start = System.currentTimeMillis();
+			try {
+				log.info("Starts Apache Cassandra ({})", version);
+				Directory directory = this.directoryFactory.create(archive);
+				this.directory = directory;
+				CassandraProcess process = this.processFactory.create(directory.initialize());
+				this.process = process;
+				this.settings = process.start();
+			}
+			catch (Throwable ex) {
+				try {
+					stop();
+				}
+				catch (Throwable suppress) {
+					ex.addSuppressed(suppress);
+				}
+				throw new CassandraException("Unable to start Cassandra", ex);
+			}
+			long end = System.currentTimeMillis();
+			log.info("Apache Cassandra ({}) has been started ({} ms) ", version, end - start);
+		}
+
 	}
 
 
 	@Override
 	public void stop() throws CassandraException {
-		if (this.initialized) {
-			synchronized (this) {
-				if (this.initialized) {
-					this.initialized = false;
-					long start = System.currentTimeMillis();
-					Version version = this.version;
-					log.info("Stops Apache Cassandra ({})", version);
-					CassandraProcess process = this.process;
-					Directory directory = this.directory;
-					this.process = null;
-					this.directory = null;
-					this.settings = null;
+		synchronized (this) {
+			if (!this.started) {
+				return;
+			}
+			long start = System.currentTimeMillis();
+			Version version = this.version;
+			log.info("Stops Apache Cassandra ({})", version);
+			CassandraProcess process = this.process;
+			Directory directory = this.directory;
+			try {
+				if (process != null) {
+					process.stop();
+				}
+				if (directory != null) {
 					try {
-						if (process != null) {
-							process.stop();
-						}
-						if (directory != null) {
-							try {
-								directory.destroy();
-							}
-							catch (Throwable ex) {
-								log.error(String.format("(%s) has not been deleted", directory), ex);
-							}
-						}
+						directory.destroy();
 					}
 					catch (Throwable ex) {
-						throw new CassandraException("Unable to stop Cassandra", ex);
+						log.error(String.format("(%s) has not been deleted", directory), ex);
 					}
-					long end = System.currentTimeMillis();
-					log.info("Apache Cassandra ({}) has been stopped ({} ms) ", version, end - start);
 				}
 			}
+			catch (Throwable ex) {
+				throw new CassandraException("Unable to stop Cassandra", ex);
+			}
+			long end = System.currentTimeMillis();
+			log.info("Apache Cassandra ({}) has been stopped ({} ms) ", version, end - start);
+			this.process = null;
+			this.directory = null;
+			this.settings = null;
+			this.started = false;
 		}
 	}
 
@@ -191,6 +191,49 @@ class LocalCassandra implements Cassandra {
 		return Optional.ofNullable(settings)
 				.orElseThrow(() -> new CassandraException(
 						"Cassandra is not initialized. Please start it before calling this method."));
+	}
+
+
+	/**
+	 * {@link Artifact} implementations to get an archive only once.
+	 */
+	private static final class MemoizedArtifact implements Artifact {
+
+		@Nonnull
+		private final ArtifactFactory artifactFactory;
+
+		@Nonnull
+		private final Version version;
+
+		@Nullable
+		private volatile Path archive;
+
+		/**
+		 * Creates a new {@link MemoizedArtifact}.
+		 *
+		 * @param version a version
+		 * @param artifactFactory a factory to create {@link Artifact}
+		 */
+		MemoizedArtifact(@Nonnull ArtifactFactory artifactFactory, @Nonnull Version version) {
+			this.artifactFactory = artifactFactory;
+			this.version = version;
+		}
+
+		@Nonnull
+		public Path get() throws IOException {
+			if (this.archive == null) {
+				synchronized (this) {
+					if (this.archive == null) {
+						Artifact artifact = this.artifactFactory.create(this.version);
+						Objects.requireNonNull(artifact, "Artifact must not be null");
+						Path archive = artifact.get();
+						Objects.requireNonNull(archive, "Archive must not be null");
+						this.archive = archive;
+					}
+				}
+			}
+			return Objects.requireNonNull(this.archive, "Archive must not be null");
+		}
 	}
 
 }

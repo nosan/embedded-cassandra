@@ -80,7 +80,8 @@ public class LocalCassandraFactoryTests {
 
 		Cassandra cassandra = factory.create();
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(version);
-		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory")).isEqualTo(artifactFactory);
+		Object lazyArtifact = ReflectionUtils.getField(cassandra, "artifact");
+		assertThat(ReflectionUtils.getField(lazyArtifact, "artifactFactory")).isEqualTo(artifactFactory);
 
 		Object processFactory = ReflectionUtils.getField(cassandra, "processFactory");
 
@@ -113,8 +114,9 @@ public class LocalCassandraFactoryTests {
 		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(Duration.ofSeconds(30));
 		assertThat(ReflectionUtils.getField(processFactory, "jmxPort")).isEqualTo(7199);
 		assertThat(ReflectionUtils.getField(processFactory, "allowRoot")).isEqualTo(false);
-		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory"))
-				.isInstanceOf(RemoteArtifactFactory.class);
+
+		Object lazyArtifact = ReflectionUtils.getField(cassandra, "artifact");
+		assertThat(ReflectionUtils.getField(lazyArtifact, "artifactFactory")).isInstanceOf(RemoteArtifactFactory.class);
 
 	}
 

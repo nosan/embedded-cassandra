@@ -34,7 +34,6 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 
@@ -55,7 +54,7 @@ class DefaultDirectory implements Directory {
 	private final Path directory;
 
 	@Nonnull
-	private final Artifact artifact;
+	private final Path archive;
 
 	@Nonnull
 	private final List<? extends DirectoryCustomizer> customizers;
@@ -63,21 +62,21 @@ class DefaultDirectory implements Directory {
 	/**
 	 * Creates a {@link DefaultDirectory}.
 	 *
-	 * @param artifact artifact to initialize a directory
+	 * @param archive archive to initialize a directory
 	 * @param directory the working directory
 	 * @param customizers the directory customizers
 	 */
-	DefaultDirectory(@Nonnull Path directory, @Nonnull Artifact artifact,
+	DefaultDirectory(@Nonnull Path directory, @Nonnull Path archive,
 			@Nonnull List<? extends DirectoryCustomizer> customizers) {
 		this.directory = directory;
-		this.artifact = artifact;
+		this.archive = archive;
 		this.customizers = Collections.unmodifiableList(new ArrayList<>(customizers));
 	}
 
 
 	@Nonnull
 	public Path initialize() throws IOException {
-		Path archive = this.artifact.get();
+		Path archive = this.archive;
 		Path rootDirectory = this.directory;
 		if (log.isDebugEnabled()) {
 			log.debug("Initialize working directory ({})", rootDirectory);
@@ -97,7 +96,7 @@ class DefaultDirectory implements Directory {
 		}
 		catch (Exception ex) {
 			throw new IOException(
-					String.format("Archive : (%s) could not be extracted into (%s)", archive, rootDirectory), ex);
+					String.format("Archive (%s) could not be extracted into (%s)", archive, rootDirectory), ex);
 		}
 		Path directory = getDirectory(this.directory);
 		for (DirectoryCustomizer customizer : this.customizers) {

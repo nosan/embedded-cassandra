@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 
 /**
  * Default factory to create a {@link Directory}.
@@ -76,13 +75,13 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 
 	@Nonnull
 	@Override
-	public Directory create(@Nonnull Artifact artifact) {
+	public Directory create(@Nonnull Path archive) {
 		List<DirectoryCustomizer> customizers = new ArrayList<>();
 		customizers.add(new LogbackFileCustomizer(this.logbackFile));
 		customizers.add(new ConfigurationFileCustomizer(this.configurationFile));
 		customizers.add(new RackFileCustomizer(this.rackFile));
 		customizers.add(new TopologyFileCustomizer(this.topologyFile));
 		customizers.add(new PortReplacerCustomizer(this.version));
-		return new DefaultDirectory(this.directory, artifact, customizers);
+		return new DefaultDirectory(this.directory, archive, customizers);
 	}
 }

@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,8 +54,6 @@ public class TestCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);
 
-	private final AtomicBoolean shutdownHook = new AtomicBoolean(false);
-
 	@Nonnull
 	private final CqlScript[] scripts;
 
@@ -72,7 +69,7 @@ public class TestCassandra implements Cassandra {
 	@Nullable
 	private volatile Session session;
 
-	private volatile boolean initialized;
+	private volatile boolean started;
 
 
 	/**
@@ -121,70 +118,66 @@ public class TestCassandra implements Cassandra {
 
 	@Override
 	public void start() throws CassandraException {
-		if (!this.initialized) {
-			synchronized (this) {
-				if (!this.initialized) {
-					this.initialized = true;
-					if (this.shutdownHook.compareAndSet(false, true)) {
-						Runtime runtime = Runtime.getRuntime();
-						runtime.addShutdownHook(new Thread(this::stop, "Test Cassandra Shutdown Hook"));
-					}
-					try {
-						this.cassandra.start();
-						CqlScript[] scripts = this.scripts;
-						if (scripts.length > 0) {
-							executeScripts(scripts);
-						}
-					}
-					catch (Throwable ex) {
-						try {
-							stop();
-						}
-						catch (Throwable suppress) {
-							ex.addSuppressed(suppress);
-						}
-						if (ex instanceof CassandraException) {
-							throw ex;
-						}
-						throw new CassandraException("Unable to start Cassandra", ex);
-					}
+		synchronized (this) {
+			if (this.started) {
+				return;
+			}
+			this.started = true;
+
+			try {
+				this.cassandra.start();
+				CqlScript[] scripts = this.scripts;
+				if (scripts.length > 0) {
+					executeScripts(scripts);
 				}
 			}
+			catch (Throwable ex) {
+				try {
+					stop();
+				}
+				catch (Throwable suppress) {
+					ex.addSuppressed(suppress);
+				}
+				if (ex instanceof CassandraException) {
+					throw ex;
+				}
+				throw new CassandraException("Unable to start Test Cassandra", ex);
+			}
+
 		}
+
 
 	}
 
 	@Override
 	public void stop() throws CassandraException {
-		if (this.initialized) {
-			synchronized (this) {
-				if (this.initialized) {
-					this.initialized = false;
-					try {
-						Cluster cluster = this.cluster;
-						this.session = null;
-						this.cluster = null;
-						if (cluster != null) {
-							log.debug("Closes a cluster ({})", cluster);
-							cluster.close();
-						}
-					}
-					catch (Throwable ex) {
-						log.error("Cluster has not been closed", ex);
-					}
-					try {
-						this.cassandra.stop();
-					}
-					catch (Throwable ex) {
-						if (ex instanceof CassandraException) {
-							throw ex;
-						}
-						throw new CassandraException("Unable to stop Cassandra", ex);
-					}
+		synchronized (this) {
+			if (!this.started) {
+				return;
+			}
+			this.started = false;
+			try {
+				Cluster cluster = this.cluster;
+				this.session = null;
+				this.cluster = null;
+				if (cluster != null) {
+					log.debug("Closes a cluster ({})", cluster);
+					cluster.close();
 				}
 			}
+			catch (Throwable ex) {
+				log.error("Cluster has not been closed", ex);
+			}
+			try {
+				this.cassandra.stop();
+			}
+			catch (Throwable ex) {
+				if (ex instanceof CassandraException) {
+					throw ex;
+				}
+				throw new CassandraException("Unable to stop Test Cassandra", ex);
+			}
 		}
-
 	}
 
 
