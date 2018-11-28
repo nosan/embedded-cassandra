@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
  * {@link CqlScript} implementation for a given CQL {@code statements}.
  *
  * @author Dmytro Nosan
+ * @see CqlScript#statements(String...)
  * @since 1.0.0
  */
 public final class StaticCqlScript implements CqlScript {

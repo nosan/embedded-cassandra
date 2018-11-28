@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
  * {@link CqlScript} implementation for {@link File}.
  *
  * @author Dmytro Nosan
+ * @see CqlScript#files(File...)
  * @since 1.0.0
  */
 public final class FileCqlScript extends AbstractCqlResourceScript {

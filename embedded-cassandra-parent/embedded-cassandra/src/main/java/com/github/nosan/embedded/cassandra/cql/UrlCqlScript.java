@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
  * {@link CqlScript} implementation for {@link URL}.
  *
  * @author Dmytro Nosan
+ * @see CqlScript#urls(URL...)
  * @since 1.0.0
  */
 public final class UrlCqlScript extends AbstractCqlResourceScript {

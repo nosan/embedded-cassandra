@@ -34,6 +34,8 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * given {@link ClassLoader} or a given {@link Class} for loading resources.
  *
  * @author Dmytro Nosan
+ * @see CqlScript#classpath(String...)
+ * @see CqlScript#classpath(Class, String...)
  * @since 1.0.0
  */
 public final class ClassPathCqlScript extends AbstractCqlResourceScript {

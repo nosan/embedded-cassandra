@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
  * {@link CqlScript} implementation for {@link Path}.
  *
  * @author Dmytro Nosan
+ * @see CqlScript#paths(Path...)
  * @since 1.0.0
  */
 public final class PathCqlScript extends AbstractCqlResourceScript {

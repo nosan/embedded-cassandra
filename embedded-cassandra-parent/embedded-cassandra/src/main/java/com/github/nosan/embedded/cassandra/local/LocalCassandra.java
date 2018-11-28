@@ -74,7 +74,7 @@ class LocalCassandra implements Cassandra {
 
 
 	/**
-	 * Creates {@link LocalCassandra}.
+	 * Creates a new {@link LocalCassandra}.
 	 *
 	 * @param version a version
 	 * @param artifactFactory a factory to create {@link Artifact}
