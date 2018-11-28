@@ -121,9 +121,9 @@ class LocalCassandra implements Cassandra {
 			if (this.started) {
 				return;
 			}
+			long start = System.currentTimeMillis();
 			this.started = true;
 			Version version = this.version;
-			long start = System.currentTimeMillis();
 			try {
 				log.info("Starts Apache Cassandra ({})", version);
 				Directory directory = this.directoryFactory.create(archive);
@@ -175,12 +175,12 @@ class LocalCassandra implements Cassandra {
 			catch (Throwable ex) {
 				throw new CassandraException("Unable to stop Cassandra", ex);
 			}
-			long end = System.currentTimeMillis();
-			log.info("Apache Cassandra ({}) has been stopped ({} ms) ", version, end - start);
 			this.process = null;
 			this.directory = null;
 			this.settings = null;
 			this.started = false;
+			long end = System.currentTimeMillis();
+			log.info("Apache Cassandra ({}) has been stopped ({} ms) ", version, end - start);
 		}
 	}
 
