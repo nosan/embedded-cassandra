@@ -31,7 +31,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
@@ -374,8 +373,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	 */
 	private static final class OutputReadiness extends OutputCapture {
 
-		@Nonnull
-		private final AtomicBoolean ready = new AtomicBoolean(false);
+		private volatile boolean ready = false;
 
 		/**
 		 * Creates a new {@link OutputReadiness}.
@@ -386,10 +384,9 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 		@Override
 		public void accept(@Nonnull String line) {
-			AtomicBoolean ready = this.ready;
-			if (!ready.get()) {
+			if (!this.ready) {
 				String lowerCase = line.toLowerCase(Locale.ENGLISH);
-				ready.set(lowerCase.contains("listening for cql") || lowerCase.contains("not starting native"));
+				this.ready = lowerCase.contains("listening for cql") || lowerCase.contains("not starting native");
 			}
 			super.accept(line);
 		}
@@ -400,7 +397,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		 * @return {@code true} if ready, otherwise {@code false}
 		 */
 		boolean isReady() {
-			return this.ready.get();
+			return this.ready;
 		}
 	}
 }
