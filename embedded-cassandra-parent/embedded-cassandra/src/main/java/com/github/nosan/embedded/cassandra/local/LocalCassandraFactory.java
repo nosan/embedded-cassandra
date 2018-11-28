@@ -312,8 +312,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Register a shutdown hook with the JVM runtime, stops this cassandra on JVM shutdown unless it has already been
-	 * stopped at that time.
+	 * Register a shutdown hook with the JVM runtime, stops this {@code cassandra} on JVM shutdown unless it has already
+	 * been stopped at that time.
 	 *
 	 * @return The value of the {@code registerShutdownHook} attribute
 	 * @since 1.2.3
