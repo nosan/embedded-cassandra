@@ -159,11 +159,14 @@ public class TestCassandra implements Cassandra {
 				if (cluster != null) {
 					log.debug("Closes a cluster ({})", cluster);
 					cluster.close();
+					this.session = null;
+					this.cluster = null;
 				}
 			}
 			catch (Throwable ex) {
 				log.error("Cluster has not been closed", ex);
 			}
+
 			try {
 				this.cassandra.stop();
 			}
@@ -173,8 +176,7 @@ public class TestCassandra implements Cassandra {
 				}
 				throw new CassandraException("Unable to stop Test Cassandra", ex);
 			}
-			this.session = null;
-			this.cluster = null;
+
 			this.started = false;
 		}
 	}
