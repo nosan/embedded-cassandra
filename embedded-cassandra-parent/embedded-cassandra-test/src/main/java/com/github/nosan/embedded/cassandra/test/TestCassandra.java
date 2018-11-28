@@ -123,7 +123,6 @@ public class TestCassandra implements Cassandra {
 				return;
 			}
 			this.started = true;
-
 			try {
 				this.cassandra.start();
 				CqlScript[] scripts = this.scripts;
@@ -155,11 +154,8 @@ public class TestCassandra implements Cassandra {
 			if (!this.started) {
 				return;
 			}
-			this.started = false;
 			try {
 				Cluster cluster = this.cluster;
-				this.session = null;
-				this.cluster = null;
 				if (cluster != null) {
 					log.debug("Closes a cluster ({})", cluster);
 					cluster.close();
@@ -177,6 +173,9 @@ public class TestCassandra implements Cassandra {
 				}
 				throw new CassandraException("Unable to stop Test Cassandra", ex);
 			}
+			this.session = null;
+			this.cluster = null;
+			this.started = false;
 		}
 	}
 
