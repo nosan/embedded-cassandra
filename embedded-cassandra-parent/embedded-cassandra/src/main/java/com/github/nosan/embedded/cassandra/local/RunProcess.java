@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -50,8 +49,6 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 class RunProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
-
-	private static final AtomicInteger COUNTER = new AtomicInteger(1);
 
 	@Nullable
 	private final Path workingDirectory;
@@ -168,10 +165,10 @@ class RunProcess {
 			Thread thread = new Thread(() -> {
 				latch.countDown();
 				read(process, outputs);
-			}, String.format("process-%d-%s", COUNTER.getAndIncrement(), Thread.currentThread().getName()));
+			}, Thread.currentThread().getName());
 			thread.start();
 			try {
-				latch.await(3, TimeUnit.SECONDS);
+				latch.await(1, TimeUnit.SECONDS);
 			}
 			catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();

@@ -14,7 +14,7 @@ matrix:
 
 script:
 - java -version
-- ./mvnw -B -e clean install
+- ./mvnw -Dsurefire.rerunFailingTestsCount=1 -B -e clean install
 
 after_failure:
 - cat **/**/target/surefire-reports/*.txt

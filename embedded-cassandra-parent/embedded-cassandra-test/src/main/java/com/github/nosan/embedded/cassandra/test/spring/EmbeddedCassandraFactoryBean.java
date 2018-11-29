@@ -99,9 +99,10 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 	@Override
 	public void afterPropertiesSet() throws IOException {
 		CqlConfig config = new CqlConfig();
-		config.setEncoding(this.annotation.encoding());
-		config.setScripts(this.annotation.scripts());
-		config.setStatements(this.annotation.statements());
+		EmbeddedCassandra annotation = this.annotation;
+		config.setEncoding(annotation.encoding());
+		config.setScripts(annotation.scripts());
+		config.setStatements(annotation.statements());
 		config.setTestClass(this.testClass);
 		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
 		CqlScript[] cqlScripts = CqlResourceUtils.getScripts(context, config);

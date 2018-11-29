@@ -241,7 +241,6 @@
                         <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
                         <failIfNoTests>false</failIfNoTests>
                         <trimStackTrace>false</trimStackTrace>
-                        <rerunFailingTestsCount>1</rerunFailingTestsCount>
                     </configuration>
                 </plugin>
                 <plugin>

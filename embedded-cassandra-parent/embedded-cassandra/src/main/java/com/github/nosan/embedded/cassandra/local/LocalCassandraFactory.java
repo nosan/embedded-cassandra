@@ -352,15 +352,9 @@ public final class LocalCassandraFactory implements CassandraFactory {
 			workingDirectory = FileUtils.getTmpDirectory().
 					resolve(String.format("embedded-cassandra-%s", UUID.randomUUID()));
 		}
-		LocalCassandra cassandra = new LocalCassandra(version, artifactFactory, workingDirectory,
+		return new LocalCassandra(version, artifactFactory, workingDirectory,
 				startupTimeout, getConfigurationFile(), getLogbackFile(), getRackFile(), getTopologyFile(),
-				getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot());
-
-		if (isRegisterShutdownHook()) {
-			Runtime.getRuntime().addShutdownHook(new Thread(cassandra::stop));
-		}
-
-		return cassandra;
+				getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot(), isRegisterShutdownHook());
 	}
 
 

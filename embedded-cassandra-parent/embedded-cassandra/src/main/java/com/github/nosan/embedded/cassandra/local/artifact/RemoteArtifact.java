@@ -129,7 +129,7 @@ class RemoteArtifact implements Artifact {
 						if (target.getParent() != null) {
 							Files.createDirectories(target.getParent());
 						}
-						if (!Files.exists(target)) {
+						if (!(Files.exists(target) || Thread.currentThread().isInterrupted())) {
 							return Files.move(source, target);
 						}
 						return source;
@@ -170,7 +170,11 @@ class RemoteArtifact implements Artifact {
 		try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel();
 				ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
 			log.info("Downloading Cassandra from ({}). It takes a while...", urlConnection.getURL());
-			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(runnable -> {
+				Thread thread = new Thread(runnable);
+				thread.setName(String.format("%s-artifact", Thread.currentThread().getName()));
+				return thread;
+			});
 			try {
 				if (size > 0) {
 					executorService.scheduleAtFixedRate(() -> {
