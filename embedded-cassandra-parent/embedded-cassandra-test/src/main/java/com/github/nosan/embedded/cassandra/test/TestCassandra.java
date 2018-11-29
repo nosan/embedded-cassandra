@@ -218,7 +218,7 @@ public class TestCassandra implements Cassandra {
 				if (this.cluster == null) {
 					Settings settings = getSettings();
 					this.cluster = this.clusterFactory.create(settings);
-					log.info("Initialize a cluster ({})", this.cluster);
+					log.debug("Initialize a cluster ({})", this.cluster);
 				}
 			}
 		}
@@ -236,7 +236,7 @@ public class TestCassandra implements Cassandra {
 			synchronized (this.lock) {
 				if (this.session == null) {
 					this.session = getCluster().connect();
-					log.info("Initialize a session ({})", this.session);
+					log.debug("Initialize a session ({})", this.session);
 				}
 			}
 		}
@@ -330,7 +330,7 @@ public class TestCassandra implements Cassandra {
 		try {
 			Session session = this.session;
 			if (session != null) {
-				log.info("Closes a session ({})", session);
+				log.debug("Closes a session ({})", session);
 				session.close();
 			}
 		}
@@ -342,7 +342,7 @@ public class TestCassandra implements Cassandra {
 		try {
 			Cluster cluster = this.cluster;
 			if (cluster != null) {
-				log.info("Closes a cluster ({})", cluster);
+				log.debug("Closes a cluster ({})", cluster);
 				cluster.close();
 			}
 		}
