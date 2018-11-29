@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nonnull;
@@ -55,7 +56,9 @@ public class TestCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);
 
-	private static long counter = 0;
+	private static final AtomicLong counter = new AtomicLong();
+
+	private final long instance;
 
 	@Nonnull
 	private final Object lock = new Object();
@@ -122,6 +125,7 @@ public class TestCassandra implements Cassandra {
 		this.cassandra = (cassandraFactory != null) ? cassandraFactory.create() : new LocalCassandraFactory().create();
 		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
+		this.instance = counter.incrementAndGet();
 	}
 
 
@@ -134,7 +138,6 @@ public class TestCassandra implements Cassandra {
 
 			this.started = true;
 
-			counter++;
 
 			AtomicReference<Throwable> throwable = new AtomicReference<>();
 			Thread thread = new Thread(() -> {
@@ -144,7 +147,7 @@ public class TestCassandra implements Cassandra {
 				catch (Throwable ex) {
 					throwable.set(ex);
 				}
-			}, String.format("test-cassandra-%d", counter));
+			}, String.format("test-cassandra-%d", this.instance));
 			this.thread = thread;
 
 			log.debug("Thread ({}) is going to start Test Cassandra", thread.getName());
@@ -163,7 +166,7 @@ public class TestCassandra implements Cassandra {
 				throw new CassandraException("Unable to start Test Cassandra", ex);
 			}
 
-			log.debug("Test Cassandra has been started by thread ({})", thread);
+			log.debug("Test Cassandra has been started by thread ({})", thread.getName());
 		}
 	}
 
@@ -182,7 +185,7 @@ public class TestCassandra implements Cassandra {
 				catch (Throwable ex) {
 					throwable.set(ex);
 				}
-			}, String.format("test-cassandra-%d", counter));
+			}, String.format("test-cassandra-%d", this.instance));
 
 			log.debug("Thread ({}) is going to stop Test Cassandra", thread.getName());
 
@@ -194,7 +197,7 @@ public class TestCassandra implements Cassandra {
 				throw new CassandraException("Unable to stop Test Cassandra", ex);
 			}
 
-			log.debug("Test Cassandra has been stopped by thread ({})", thread);
+			log.debug("Test Cassandra has been stopped by thread ({})", thread.getName());
 			this.started = false;
 		}
 	}

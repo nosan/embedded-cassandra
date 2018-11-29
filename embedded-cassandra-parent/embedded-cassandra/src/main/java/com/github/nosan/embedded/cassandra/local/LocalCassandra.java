@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nonnull;
@@ -50,7 +51,9 @@ class LocalCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
-	private static long counter = 0;
+	private static final AtomicLong counter = new AtomicLong();
+
+	private final long instance;
 
 	@Nonnull
 	private final Object lock = new Object();
@@ -109,6 +112,7 @@ class LocalCassandra implements Cassandra {
 		Objects.requireNonNull(startupTimeout, "Startup timeout must not be null");
 		Objects.requireNonNull(jvmOptions, "JVM Options must not be null");
 		Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
+		this.instance = counter.incrementAndGet();
 		this.version = version;
 		this.artifactFactory = artifactFactory;
 		this.directoryFactory = new DefaultDirectoryFactory(version, workingDirectory,
@@ -122,7 +126,7 @@ class LocalCassandra implements Cassandra {
 					interrupt(thread);
 				}
 				stop();
-			}, "cassandra-hook"));
+			}, String.format("cassandra-%d-hook", this.instance)));
 		}
 	}
 
@@ -135,7 +139,6 @@ class LocalCassandra implements Cassandra {
 			}
 			this.started = true;
 
-			counter++;
 			AtomicReference<Throwable> throwable = new AtomicReference<>();
 			Thread thread = new Thread(() -> {
 				try {
@@ -144,7 +147,7 @@ class LocalCassandra implements Cassandra {
 				catch (Throwable ex) {
 					throwable.set(ex);
 				}
-			}, String.format("cassandra-%d", counter));
+			}, String.format("cassandra-%d", this.instance));
 			this.thread = thread;
 
 			Version version = this.version;
@@ -186,7 +189,7 @@ class LocalCassandra implements Cassandra {
 				catch (Throwable ex) {
 					throwable.set(ex);
 				}
-			}, String.format("cassandra-%d", counter));
+			}, String.format("cassandra-%d", this.instance));
 
 			long start = System.currentTimeMillis();
 			Version version = this.version;
