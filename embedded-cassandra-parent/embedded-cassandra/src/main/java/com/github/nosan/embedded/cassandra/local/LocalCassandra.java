@@ -118,11 +118,11 @@ class LocalCassandra implements Cassandra {
 		if (registerShutdownHook) {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				Thread thread = this.thread;
-				if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
-					thread.interrupt();
-					stop();
+				if (thread != null) {
+					interrupt(thread);
 				}
-			}));
+				stop();
+			}, "cassandra-hook"));
 		}
 	}
 
@@ -133,7 +133,6 @@ class LocalCassandra implements Cassandra {
 			if (this.started) {
 				return;
 			}
-
 			this.started = true;
 
 			counter++;
@@ -148,6 +147,10 @@ class LocalCassandra implements Cassandra {
 			}, String.format("cassandra-%d", counter));
 			this.thread = thread;
 
+			Version version = this.version;
+			long start = System.currentTimeMillis();
+			log.info("Thread ({}) is going to start Apache Cassandra ({}) ", thread.getName(), version);
+
 			thread.start();
 			join(thread);
 
@@ -161,6 +164,10 @@ class LocalCassandra implements Cassandra {
 				}
 				throw new CassandraException("Unable to start Cassandra", ex);
 			}
+
+			long end = System.currentTimeMillis();
+			log.info("Apache Cassandra ({}) has been started ({} ms) by thread ({})", version, end - start,
+					thread.getName());
 		}
 	}
 
@@ -181,6 +188,10 @@ class LocalCassandra implements Cassandra {
 				}
 			}, String.format("cassandra-%d", counter));
 
+			long start = System.currentTimeMillis();
+			Version version = this.version;
+			log.info("Thread ({}) is going to stop Apache Cassandra ({}) ", thread.getName(), version);
+
 			thread.start();
 			join(thread);
 
@@ -188,6 +199,10 @@ class LocalCassandra implements Cassandra {
 			if (ex != null) {
 				throw new CassandraException("Unable to stop Cassandra", ex);
 			}
+
+			long end = System.currentTimeMillis();
+			log.info("Apache Cassandra ({}) has been stopped ({} ms) by thread ({})", version, end - start,
+					thread.getName());
 
 			this.started = false;
 
@@ -207,8 +222,6 @@ class LocalCassandra implements Cassandra {
 
 	private void startInternal() throws IOException {
 		Version version = this.version;
-		long start = System.currentTimeMillis();
-		log.info("Starts Apache Cassandra ({})", version);
 
 		Artifact artifact = this.artifactFactory.create(version);
 		Path archive = artifact.get();
@@ -219,20 +232,13 @@ class LocalCassandra implements Cassandra {
 		CassandraProcess process = this.processFactory.create(directory.initialize());
 		this.process = process;
 		this.settings = process.start();
-
-		long end = System.currentTimeMillis();
-		log.info("Apache Cassandra ({}) has been started ({} ms) ", version, end - start);
 	}
 
 
 	private void stopInternal() throws IOException {
-		long start = System.currentTimeMillis();
-		Version version = this.version;
-		log.info("Stops Apache Cassandra ({})", version);
-
 		Thread thread = this.thread;
-		if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
-			thread.interrupt();
+		if (thread != null) {
+			interrupt(thread);
 			join(thread);
 			this.thread = null;
 		}
@@ -255,15 +261,12 @@ class LocalCassandra implements Cassandra {
 			}
 		}
 		this.directory = null;
-
-		long end = System.currentTimeMillis();
-		log.info("Apache Cassandra ({}) has been stopped ({} ms) ", version, end - start);
-
 	}
 
 
 	private void join(Thread thread) {
 		try {
+			log.debug("{} <join to> {}", Thread.currentThread(), thread);
 			thread.join();
 		}
 		catch (InterruptedException ex) {
@@ -271,5 +274,11 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
+	private void interrupt(Thread thread) {
+		if (thread.isAlive() && !thread.isInterrupted()) {
+			log.debug("{} <interrupt> {}", Thread.currentThread(), thread);
+			thread.interrupt();
+		}
+	}
 
 }

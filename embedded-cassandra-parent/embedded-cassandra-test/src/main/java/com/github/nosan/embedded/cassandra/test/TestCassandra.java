@@ -147,6 +147,8 @@ public class TestCassandra implements Cassandra {
 			}, String.format("test-cassandra-%d", counter));
 			this.thread = thread;
 
+			log.debug("Thread ({}) is going to start Test Cassandra", thread.getName());
+
 			thread.start();
 			join(thread);
 
@@ -160,6 +162,8 @@ public class TestCassandra implements Cassandra {
 				}
 				throw new CassandraException("Unable to start Test Cassandra", ex);
 			}
+
+			log.debug("Test Cassandra has been started by thread ({})", thread);
 		}
 	}
 
@@ -180,6 +184,8 @@ public class TestCassandra implements Cassandra {
 				}
 			}, String.format("test-cassandra-%d", counter));
 
+			log.debug("Thread ({}) is going to stop Test Cassandra", thread.getName());
+
 			thread.start();
 			join(thread);
 
@@ -187,6 +193,8 @@ public class TestCassandra implements Cassandra {
 			if (ex != null) {
 				throw new CassandraException("Unable to stop Test Cassandra", ex);
 			}
+
+			log.debug("Test Cassandra has been stopped by thread ({})", thread);
 			this.started = false;
 		}
 	}
@@ -303,7 +311,6 @@ public class TestCassandra implements Cassandra {
 
 
 	private void startInternal() {
-		log.info("Starts Test Cassandra");
 		this.cassandra.start();
 
 		CqlScript[] scripts = this.scripts;
@@ -313,11 +320,9 @@ public class TestCassandra implements Cassandra {
 	}
 
 	private void stopInternal() {
-		log.info("Stops Test Cassandra");
-
 		Thread thread = this.thread;
-		if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
-			thread.interrupt();
+		if (thread != null) {
+			interrupt(thread);
 			join(thread);
 			this.thread = null;
 		}
@@ -353,10 +358,18 @@ public class TestCassandra implements Cassandra {
 
 	private void join(Thread thread) {
 		try {
+			log.debug("{} <join to> {}", Thread.currentThread(), thread);
 			thread.join();
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
+		}
+	}
+
+	private void interrupt(Thread thread) {
+		if (thread.isAlive() && !thread.isInterrupted()) {
+			log.debug("{} <interrupt> {}", Thread.currentThread(), thread);
+			thread.interrupt();
 		}
 	}
 
