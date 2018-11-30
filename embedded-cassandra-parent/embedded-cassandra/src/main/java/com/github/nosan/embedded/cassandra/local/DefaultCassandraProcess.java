@@ -117,6 +117,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	public Settings start() throws IOException {
 		Path directory = this.directory;
 		Version version = this.version;
+		Duration timeout = this.timeout;
 		int major = version.getMajor();
 		int minor = version.getMinor();
 		Settings settings = getSettings(directory, version);
@@ -166,16 +167,17 @@ class DefaultCassandraProcess implements CassandraProcess {
 			log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
 		}
 
+		log.debug("Wait ({}) for Cassandra", timeout);
 		try {
-			await(settings, this.timeout, output, process);
+			await(settings, timeout, output, process);
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 		}
+		catch (IOException ex) {
+			throw ex;
+		}
 		catch (Exception ex) {
-			if (ex instanceof IOException) {
-				throw (IOException) ex;
-			}
 			throw new IOException(ex);
 		}
 		return settings;
