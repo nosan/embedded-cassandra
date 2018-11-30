@@ -306,7 +306,7 @@ class LocalCassandra implements Cassandra {
 		@Override
 		@Nonnull
 		public String get() {
-			return String.format("cassandra-%d-t-%d", this.id, this.threadCounter.incrementAndGet());
+			return String.format("cassandra-%d-thread-%d", this.id, this.threadCounter.incrementAndGet());
 		}
 	}
 
