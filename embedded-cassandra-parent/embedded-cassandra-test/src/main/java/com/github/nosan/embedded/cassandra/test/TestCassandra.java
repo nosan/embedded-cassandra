@@ -17,8 +17,6 @@
 package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -56,10 +54,6 @@ public class TestCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);
 
-	private static final AtomicLong counter = new AtomicLong();
-
-	private final long instance;
-
 	@Nonnull
 	private final Object lock = new Object();
 
@@ -77,9 +71,6 @@ public class TestCassandra implements Cassandra {
 
 	@Nullable
 	private volatile Session session;
-
-	@Nullable
-	private volatile Thread thread;
 
 	private volatile boolean started;
 
@@ -125,9 +116,7 @@ public class TestCassandra implements Cassandra {
 		this.cassandra = (cassandraFactory != null) ? cassandraFactory.create() : new LocalCassandraFactory().create();
 		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
-		this.instance = counter.incrementAndGet();
 	}
-
 
 	@Override
 	public void start() throws CassandraException {
@@ -135,28 +124,15 @@ public class TestCassandra implements Cassandra {
 			if (this.started) {
 				return;
 			}
-
 			this.started = true;
-
-
-			AtomicReference<Throwable> throwable = new AtomicReference<>();
-			Thread thread = new Thread(() -> {
-				try {
-					startInternal();
+			try {
+				this.cassandra.start();
+				CqlScript[] scripts = this.scripts;
+				if (scripts.length > 0) {
+					executeScripts(scripts);
 				}
-				catch (Throwable ex) {
-					throwable.set(ex);
-				}
-			}, String.format("test-cassandra-%d", this.instance));
-			this.thread = thread;
-
-			log.debug("Thread ({}) is going to start Test Cassandra", thread.getName());
-
-			thread.start();
-			join(thread);
-
-			Throwable ex = throwable.get();
-			if (ex != null) {
+			}
+			catch (Throwable ex) {
 				try {
 					stop();
 				}
@@ -165,11 +141,8 @@ public class TestCassandra implements Cassandra {
 				}
 				throw new CassandraException("Unable to start Test Cassandra", ex);
 			}
-
-			log.debug("Test Cassandra has been started by thread ({})", thread.getName());
 		}
 	}
-
 
 	@Override
 	public void stop() throws CassandraException {
@@ -177,27 +150,33 @@ public class TestCassandra implements Cassandra {
 			if (!this.started) {
 				return;
 			}
-			AtomicReference<Throwable> throwable = new AtomicReference<>();
-			Thread thread = new Thread(() -> {
-				try {
-					stopInternal();
+			try {
+				Session session = this.session;
+				if (session != null) {
+					log.debug("Closes a session ({})", session);
+					session.close();
 				}
-				catch (Throwable ex) {
-					throwable.set(ex);
+			}
+			catch (Throwable ex) {
+				log.error(String.format("Session (%s) has not been closed", this.session), ex);
+			}
+			this.session = null;
+
+			try {
+				Cluster cluster = this.cluster;
+				if (cluster != null) {
+					log.debug("Closes a cluster ({})", cluster);
+					cluster.close();
 				}
-			}, String.format("test-cassandra-%d", this.instance));
-
-			log.debug("Thread ({}) is going to stop Test Cassandra", thread.getName());
-
-			thread.start();
-			join(thread);
-
-			Throwable ex = throwable.get();
-			if (ex != null) {
-				throw new CassandraException("Unable to stop Test Cassandra", ex);
+			}
+			catch (Throwable ex) {
+				log.error(String.format("Cluster (%s) has not been closed", this.cluster), ex);
 			}
 
-			log.debug("Test Cassandra has been stopped by thread ({})", thread.getName());
+			this.cluster = null;
+
+			this.cassandra.stop();
+
 			this.started = false;
 		}
 	}
@@ -311,70 +290,5 @@ public class TestCassandra implements Cassandra {
 	public ResultSet executeStatement(@Nonnull String statement, @Nullable Object... args) {
 		return CqlUtils.executeStatement(getSession(), statement, args);
 	}
-
-
-	private void startInternal() {
-		this.cassandra.start();
-
-		CqlScript[] scripts = this.scripts;
-		if (scripts.length > 0) {
-			executeScripts(scripts);
-		}
-	}
-
-	private void stopInternal() {
-		Thread thread = this.thread;
-		if (thread != null) {
-			interrupt(thread);
-			join(thread);
-			this.thread = null;
-		}
-
-		try {
-			Session session = this.session;
-			if (session != null) {
-				log.debug("Closes a session ({})", session);
-				session.close();
-			}
-		}
-		catch (Throwable ex) {
-			log.error(String.format("Session (%s) has not been closed", this.session), ex);
-		}
-		this.session = null;
-
-		try {
-			Cluster cluster = this.cluster;
-			if (cluster != null) {
-				log.debug("Closes a cluster ({})", cluster);
-				cluster.close();
-			}
-		}
-		catch (Throwable ex) {
-			log.error(String.format("Cluster (%s) has not been closed", this.cluster), ex);
-		}
-		this.cluster = null;
-
-		this.cassandra.stop();
-
-	}
-
-
-	private void join(Thread thread) {
-		try {
-			log.debug("{} <join to> {}", Thread.currentThread(), thread);
-			thread.join();
-		}
-		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
-	}
-
-	private void interrupt(Thread thread) {
-		if (thread.isAlive() && !thread.isInterrupted()) {
-			log.debug("{} <interrupt> {}", Thread.currentThread(), thread);
-			thread.interrupt();
-		}
-	}
-
 
 }

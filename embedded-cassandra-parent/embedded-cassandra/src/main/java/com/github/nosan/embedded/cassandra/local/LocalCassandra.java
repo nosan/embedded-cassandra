@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,9 +52,8 @@ class LocalCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
-	private static final AtomicLong counter = new AtomicLong();
-
-	private final long instance;
+	@Nonnull
+	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier();
 
 	@Nonnull
 	private final Object lock = new Object();
@@ -112,7 +112,6 @@ class LocalCassandra implements Cassandra {
 		Objects.requireNonNull(startupTimeout, "Startup timeout must not be null");
 		Objects.requireNonNull(jvmOptions, "JVM Options must not be null");
 		Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
-		this.instance = counter.incrementAndGet();
 		this.version = version;
 		this.artifactFactory = artifactFactory;
 		this.directoryFactory = new DefaultDirectoryFactory(version, workingDirectory,
@@ -120,13 +119,7 @@ class LocalCassandra implements Cassandra {
 		this.processFactory = new DefaultCassandraProcessFactory(startupTimeout, jvmOptions, version,
 				javaHome, jmxPort, allowRoot);
 		if (registerShutdownHook) {
-			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				Thread thread = this.thread;
-				if (thread != null) {
-					interrupt(thread);
-				}
-				stop();
-			}, String.format("cassandra-%d-hook", this.instance)));
+			addShutdownHook();
 		}
 	}
 
@@ -147,7 +140,7 @@ class LocalCassandra implements Cassandra {
 				catch (Throwable ex) {
 					throwable.set(ex);
 				}
-			}, String.format("cassandra-%d", this.instance));
+			}, this.threadNameSupplier.get());
 			this.thread = thread;
 
 			Version version = this.version;
@@ -189,7 +182,7 @@ class LocalCassandra implements Cassandra {
 				catch (Throwable ex) {
 					throwable.set(ex);
 				}
-			}, String.format("cassandra-%d", this.instance));
+			}, this.threadNameSupplier.get());
 
 			long start = System.currentTimeMillis();
 			Version version = this.version;
@@ -281,6 +274,39 @@ class LocalCassandra implements Cassandra {
 		if (thread.isAlive() && !thread.isInterrupted()) {
 			log.debug("{} <interrupt> {}", Thread.currentThread(), thread);
 			thread.interrupt();
+		}
+	}
+
+
+	private void addShutdownHook() {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			Thread thread = this.thread;
+			if (thread != null) {
+				interrupt(thread);
+			}
+			stop();
+		}, this.threadNameSupplier.get()));
+	}
+
+	/**
+	 * {@link Supplier} to generate a thread name.
+	 */
+	private static final class ThreadNameSupplier implements Supplier<String> {
+
+		private static final AtomicLong instanceCounter = new AtomicLong(1);
+
+		private final AtomicLong threadCounter = new AtomicLong(1);
+
+		private final long id;
+
+		ThreadNameSupplier() {
+			this.id = instanceCounter.getAndIncrement();
+		}
+
+		@Override
+		@Nonnull
+		public String get() {
+			return String.format("cassandra-%d-thread-%d", this.id, this.threadCounter.getAndIncrement());
 		}
 	}
 
