@@ -99,8 +99,8 @@ public class CassandraRule extends TestCassandra implements TestRule {
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
+				start();
 				try {
-					start();
 					base.evaluate();
 				}
 				finally {
