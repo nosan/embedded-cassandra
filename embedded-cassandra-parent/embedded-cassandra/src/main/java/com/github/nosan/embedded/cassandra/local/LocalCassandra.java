@@ -262,7 +262,9 @@ class LocalCassandra implements Cassandra {
 
 	private void join(Thread thread) {
 		try {
-			log.debug("{} <join to> {}", Thread.currentThread(), thread);
+			if (log.isDebugEnabled()) {
+				log.debug("{} <join to> {}", Thread.currentThread(), thread);
+			}
 			thread.join();
 		}
 		catch (InterruptedException ex) {
@@ -272,7 +274,9 @@ class LocalCassandra implements Cassandra {
 
 	private void interrupt(Thread thread) {
 		if (thread.isAlive() && !thread.isInterrupted()) {
-			log.debug("{} <interrupt> {}", Thread.currentThread(), thread);
+			if (log.isDebugEnabled()) {
+				log.debug("{} <interrupt> {}", Thread.currentThread(), thread);
+			}
 			thread.interrupt();
 		}
 	}
@@ -293,20 +297,16 @@ class LocalCassandra implements Cassandra {
 	 */
 	private static final class ThreadNameSupplier implements Supplier<String> {
 
-		private static final AtomicLong instanceCounter = new AtomicLong(1);
+		private static final AtomicLong instanceCounter = new AtomicLong();
 
-		private final AtomicLong threadCounter = new AtomicLong(1);
+		private final AtomicLong threadCounter = new AtomicLong();
 
-		private final long id;
-
-		ThreadNameSupplier() {
-			this.id = instanceCounter.getAndIncrement();
-		}
+		private final long id = instanceCounter.incrementAndGet();
 
 		@Override
 		@Nonnull
 		public String get() {
-			return String.format("cassandra-%d-thd-%d", this.id, this.threadCounter.getAndIncrement());
+			return String.format("cassandra-%d-t-%d", this.id, this.threadCounter.incrementAndGet());
 		}
 	}
 

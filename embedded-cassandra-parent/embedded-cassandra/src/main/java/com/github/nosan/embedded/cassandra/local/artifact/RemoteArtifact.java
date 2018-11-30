@@ -170,11 +170,7 @@ class RemoteArtifact implements Artifact {
 		try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel();
 				ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
 			log.info("Downloading Cassandra from ({}). It takes a while...", urlConnection.getURL());
-			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(runnable -> {
-				Thread thread = new Thread(runnable);
-				thread.setName(String.format("%s-aft", Thread.currentThread().getName()));
-				return thread;
-			});
+			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 			try {
 				if (size > 0) {
 					executorService.scheduleAtFixedRate(() -> {

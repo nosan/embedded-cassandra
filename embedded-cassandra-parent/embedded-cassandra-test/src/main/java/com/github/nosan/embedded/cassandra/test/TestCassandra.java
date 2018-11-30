@@ -153,7 +153,9 @@ public class TestCassandra implements Cassandra {
 			try {
 				Session session = this.session;
 				if (session != null) {
-					log.debug("Closes a session ({})", session);
+					if (log.isDebugEnabled()) {
+						log.debug("Closes a session ({})", session);
+					}
 					session.close();
 				}
 			}
@@ -165,7 +167,9 @@ public class TestCassandra implements Cassandra {
 			try {
 				Cluster cluster = this.cluster;
 				if (cluster != null) {
-					log.debug("Closes a cluster ({})", cluster);
+					if (log.isDebugEnabled()) {
+						log.debug("Closes a cluster ({})", cluster);
+					}
 					cluster.close();
 				}
 			}
@@ -200,7 +204,9 @@ public class TestCassandra implements Cassandra {
 				if (this.cluster == null) {
 					Settings settings = getSettings();
 					this.cluster = this.clusterFactory.create(settings);
-					log.debug("Initialize a cluster ({})", this.cluster);
+					if (log.isDebugEnabled()) {
+						log.debug("Initialize a cluster ({})", this.cluster);
+					}
 				}
 			}
 		}
@@ -218,7 +224,9 @@ public class TestCassandra implements Cassandra {
 			synchronized (this.lock) {
 				if (this.session == null) {
 					this.session = getCluster().connect();
-					log.debug("Initialize a session ({})", this.session);
+					if (log.isDebugEnabled()) {
+						log.debug("Initialize a session ({})", this.session);
+					}
 				}
 			}
 		}

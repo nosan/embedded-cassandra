@@ -165,9 +165,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 		if (log.isDebugEnabled()) {
 			log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
+			log.debug("Waits ({}) for Cassandra transport and output", timeout);
 		}
-
-		log.debug("Wait ({}) for Cassandra", timeout);
 		try {
 			await(settings, timeout, output, process);
 		}
