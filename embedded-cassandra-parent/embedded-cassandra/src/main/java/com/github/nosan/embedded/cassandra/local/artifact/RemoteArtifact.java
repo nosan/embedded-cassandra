@@ -172,7 +172,7 @@ class RemoteArtifact implements Artifact {
 			log.info("Downloading Cassandra from ({}). It takes a while...", urlConnection.getURL());
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(runnable -> {
 				Thread thread = new Thread(runnable);
-				thread.setName(String.format("%s-artifact", Thread.currentThread().getName()));
+				thread.setName(String.format("%s-aft", Thread.currentThread().getName()));
 				return thread;
 			});
 			try {

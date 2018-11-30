@@ -165,7 +165,7 @@ class RunProcess {
 			Thread thread = new Thread(() -> {
 				latch.countDown();
 				read(process, outputs);
-			}, Thread.currentThread().getName());
+			}, String.format("%s-pcs", Thread.currentThread().getName()));
 			thread.start();
 			try {
 				latch.await(1, TimeUnit.SECONDS);
