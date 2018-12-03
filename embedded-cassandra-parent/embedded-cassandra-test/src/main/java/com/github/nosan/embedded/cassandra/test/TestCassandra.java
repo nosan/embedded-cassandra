@@ -189,7 +189,9 @@ public class TestCassandra implements Cassandra {
 	@Nonnull
 	@Override
 	public Settings getSettings() throws CassandraException {
-		return this.cassandra.getSettings();
+		synchronized (this.lock) {
+			return this.cassandra.getSettings();
+		}
 	}
 
 	/**

@@ -145,7 +145,7 @@ class LocalCassandra implements Cassandra {
 
 			Version version = this.version;
 			long start = System.currentTimeMillis();
-			log.info("Thread ({}) is going to start Apache Cassandra ({}) ", thread.getName(), version);
+			log.info("Starts Apache Cassandra ({}) ", version);
 
 			thread.start();
 			join(thread);
@@ -162,8 +162,7 @@ class LocalCassandra implements Cassandra {
 			}
 
 			long end = System.currentTimeMillis();
-			log.info("Apache Cassandra ({}) has been started ({} ms) by thread ({})", version, end - start,
-					thread.getName());
+			log.info("Apache Cassandra ({}) has been started ({} ms)", version, end - start);
 		}
 	}
 
@@ -186,7 +185,7 @@ class LocalCassandra implements Cassandra {
 
 			long start = System.currentTimeMillis();
 			Version version = this.version;
-			log.info("Thread ({}) is going to stop Apache Cassandra ({}) ", thread.getName(), version);
+			log.info("Stops Apache Cassandra ({}) ", version);
 
 			thread.start();
 			join(thread);
@@ -197,8 +196,7 @@ class LocalCassandra implements Cassandra {
 			}
 
 			long end = System.currentTimeMillis();
-			log.info("Apache Cassandra ({}) has been stopped ({} ms) by thread ({})", version, end - start,
-					thread.getName());
+			log.info("Apache Cassandra ({}) has been stopped ({} ms)", version, end - start);
 
 			this.started = false;
 
@@ -209,10 +207,12 @@ class LocalCassandra implements Cassandra {
 	@Nonnull
 	@Override
 	public Settings getSettings() throws CassandraException {
-		Settings settings = this.settings;
-		return Optional.ofNullable(settings)
-				.orElseThrow(() -> new CassandraException(
-						"Cassandra is not initialized. Please start it before calling this method."));
+		synchronized (this.lock) {
+			Settings settings = this.settings;
+			return Optional.ofNullable(settings)
+					.orElseThrow(() -> new CassandraException(
+							"Cassandra is not initialized. Please start it before calling this method."));
+		}
 	}
 
 
@@ -289,7 +289,7 @@ class LocalCassandra implements Cassandra {
 				interrupt(thread);
 			}
 			stop();
-		}, this.threadNameSupplier.get()));
+		}, String.format("%s-hook", this.threadNameSupplier.get())));
 	}
 
 	/**

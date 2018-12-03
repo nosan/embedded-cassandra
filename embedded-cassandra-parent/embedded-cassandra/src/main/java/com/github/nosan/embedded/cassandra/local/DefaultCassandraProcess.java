@@ -165,7 +165,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 		if (log.isDebugEnabled()) {
 			log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
-			log.debug("Waits ({}) for Cassandra transport and output", timeout);
 		}
 		try {
 			await(settings, timeout, output, process);
@@ -216,8 +215,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 				Thread.currentThread().interrupt();
 			}
 			catch (Exception ex) {
-				log.error(String.format("Could not check whether process (%s) is stopped or not",
-						getPidString(pid)), ex);
+				log.error(String.format("Could not check whether process (%s) is stopped or not", getPidString(pid)),
+						ex);
 			}
 
 			if (process.isAlive()) {
@@ -267,6 +266,9 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	private static void await(Settings settings, Duration timeout, OutputReadiness output, Process process)
 			throws Exception {
+		if (log.isDebugEnabled()) {
+			log.debug("Waits ({}) for Cassandra transport and output", timeout);
+		}
 		boolean result = WaitUtils.await(timeout, () -> {
 			if (!process.isAlive()) {
 				throwException("Cassandra Process is not alive. Please see logs for more details.", output);

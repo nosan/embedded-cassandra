@@ -146,17 +146,17 @@ public abstract class AbstractLocalCassandraTests {
 	public void shouldStartStopOnlyOnce() {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		Cassandra c = runner.run(assertCreateKeyspace().andThen(cassandra -> {
-			assertThat(this.output.toString()).contains("to start Apache Cassandra");
+			assertThat(this.output.toString()).contains("Starts Apache Cassandra");
 			this.output.reset();
 			cassandra.start();
-			assertThat(this.output.toString()).doesNotContain("to start Apache Cassandra");
+			assertThat(this.output.toString()).doesNotContain("Starts Apache Cassandra");
 		}));
-		assertThat(this.output.toString()).contains("to stop Apache Cassandra");
+		assertThat(this.output.toString()).contains("Stops Apache Cassandra");
 		assertCassandraHasBeenStopped();
 		assertDirectoryHasBeenDeletedCorrectly();
 		this.output.reset();
 		c.stop();
-		assertThat(this.output.toString()).doesNotContain("to stop Apache Cassandra");
+		assertThat(this.output.toString()).doesNotContain("Stops Apache Cassandra");
 	}
 
 
