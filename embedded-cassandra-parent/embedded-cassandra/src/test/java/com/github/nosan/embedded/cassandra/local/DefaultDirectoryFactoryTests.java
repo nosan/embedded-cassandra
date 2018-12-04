@@ -56,11 +56,12 @@ public class DefaultDirectoryFactoryTests {
 		List<? extends DirectoryCustomizer> customizers =
 				(List<? extends DirectoryCustomizer>) ReflectionUtils.getField(directory, "customizers");
 
-		assertThat(customizers).hasSize(5);
-		assertThat(ReflectionUtils.getField(customizers.get(0), "logbackFile")).isEqualTo(logbackFile);
-		assertThat(ReflectionUtils.getField(customizers.get(1), "configurationFile")).isEqualTo(configurationFile);
-		assertThat(ReflectionUtils.getField(customizers.get(2), "rackFile")).isEqualTo(rackFile);
-		assertThat(ReflectionUtils.getField(customizers.get(3), "topologyFile")).isEqualTo(topologyFile);
+		assertThat(customizers).hasSize(6);
+		assertThat(customizers).first().isInstanceOf(ExecutableCustomizer.class);
+		assertThat(ReflectionUtils.getField(customizers.get(1), "logbackFile")).isEqualTo(logbackFile);
+		assertThat(ReflectionUtils.getField(customizers.get(2), "configurationFile")).isEqualTo(configurationFile);
+		assertThat(ReflectionUtils.getField(customizers.get(3), "rackFile")).isEqualTo(rackFile);
+		assertThat(ReflectionUtils.getField(customizers.get(4), "topologyFile")).isEqualTo(topologyFile);
 		assertThat(customizers).last().isInstanceOf(PortReplacerCustomizer.class);
 
 	}
