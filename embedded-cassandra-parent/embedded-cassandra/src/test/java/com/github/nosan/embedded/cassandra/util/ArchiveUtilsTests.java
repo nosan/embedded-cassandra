@@ -108,6 +108,8 @@ public class ArchiveUtilsTests {
 		parameters.add(new Object[]{"tar.gz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
 		parameters.add(new Object[]{"tgz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
 		parameters.add(new Object[]{"tar.bz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
+		parameters.add(new Object[]{"tar.xz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ});
+		parameters.add(new Object[]{"txz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ});
 		parameters.add(new Object[]{"tbz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
 		parameters.add(new Object[]{"a", ArchiveStreamFactory.AR, null});
 		parameters.add(new Object[]{"ar", ArchiveStreamFactory.AR, null});
