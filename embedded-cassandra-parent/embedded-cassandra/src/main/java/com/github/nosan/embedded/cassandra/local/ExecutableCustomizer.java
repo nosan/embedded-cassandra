@@ -44,17 +44,17 @@ class ExecutableCustomizer implements DirectoryCustomizer {
 	}
 
 	private static boolean setExecutable(Path path) {
-		if (!Files.exists(path)) {
-			return false;
-		}
-		if (Files.isExecutable(path)) {
-			return true;
-		}
-		File file = path.toFile();
 		try {
+			if (!Files.exists(path)) {
+				return false;
+			}
+			if (Files.isExecutable(path)) {
+				return true;
+			}
+			File file = path.toFile();
 			return file.setExecutable(true) || file.setExecutable(true, false);
 		}
-		catch (SecurityException ex) {
+		catch (Exception ex) {
 			return false;
 		}
 	}
