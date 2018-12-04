@@ -77,6 +77,7 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 	@Override
 	public Directory create(@Nonnull Path archive) {
 		List<DirectoryCustomizer> customizers = new ArrayList<>();
+		customizers.add(new ExecutableCustomizer());
 		customizers.add(new LogbackFileCustomizer(this.logbackFile));
 		customizers.add(new ConfigurationFileCustomizer(this.configurationFile));
 		customizers.add(new RackFileCustomizer(this.rackFile));
