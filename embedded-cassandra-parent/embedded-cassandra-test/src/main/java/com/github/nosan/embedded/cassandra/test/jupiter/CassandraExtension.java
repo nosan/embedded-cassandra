@@ -59,7 +59,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraExtension(@Nullable CqlScript... scripts) {
-		this(null, null, scripts);
+		super(scripts);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraExtension(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
-		this(null, clusterFactory, scripts);
+		super(clusterFactory, scripts);
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraExtension(@Nullable CassandraFactory cassandraFactory, @Nullable CqlScript... scripts) {
-		this(cassandraFactory, null, scripts);
+		super(cassandraFactory, scripts);
 	}
 
 	/**

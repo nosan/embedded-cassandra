@@ -57,7 +57,7 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraRule(@Nullable CqlScript... scripts) {
-		this(null, null, scripts);
+		super(scripts);
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraRule(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
-		this(null, clusterFactory, scripts);
+		super(clusterFactory, scripts);
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraRule(@Nullable CassandraFactory cassandraFactory, @Nullable CqlScript... scripts) {
-		this(cassandraFactory, null, scripts);
+		super(cassandraFactory, scripts);
 	}
 
 	/**

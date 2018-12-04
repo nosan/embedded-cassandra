@@ -55,7 +55,7 @@ public class CassandraTestNG extends TestCassandra {
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraTestNG(@Nullable CqlScript... scripts) {
-		this(null, null, scripts);
+		super(scripts);
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class CassandraTestNG extends TestCassandra {
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraTestNG(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
-		this(null, clusterFactory, scripts);
+		super(clusterFactory, scripts);
 	}
 
 	/**
@@ -75,7 +75,7 @@ public class CassandraTestNG extends TestCassandra {
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraTestNG(@Nullable CassandraFactory cassandraFactory, @Nullable CqlScript... scripts) {
-		this(cassandraFactory, null, scripts);
+		super(cassandraFactory, scripts);
 	}
 
 	/**
