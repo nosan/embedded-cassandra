@@ -32,10 +32,14 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.DefaultUrlFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
 
 /**
  * Annotation that can be specified on a test class that runs {@link Cassandra} based tests. This annotation extends
- * {@link EmbeddedCassandra} and allows to customize and register {@link LocalCassandraFactory} bean.
+ * {@link EmbeddedCassandra} and allows to customize and register a <b>primary</b> {@link LocalCassandraFactory} bean
+ * and also customize a default {@link RemoteArtifactFactory}.
  * <p>
  * <b>Note!</b> It is possible to define you own {@link ArtifactFactory} bean to control {@link LocalCassandraFactory}
  * instance.
@@ -45,6 +49,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
  * @see DirtiesContext
  * @see ArtifactFactory
  * @see LocalCassandraFactory
+ * @see RemoteArtifactFactory
  * @see LocalCassandraContextCustomizer
  * @see LocalCassandraFactoryBean
  * @since 1.0.7
@@ -168,6 +173,14 @@ public @interface LocalCassandra {
 	boolean registerShutdownHook() default true;
 
 	/**
+	 * Sets attribute for {@link LocalCassandraFactory#getArtifactFactory()}.
+	 *
+	 * @return The value of the {@code artifactFactory} attribute
+	 * @since 1.2.6
+	 */
+	Artifact artifact() default @Artifact;
+
+	/**
 	 * Alias for {@link EmbeddedCassandra#scripts()}.
 	 *
 	 * @return CQL Scripts
@@ -199,5 +212,57 @@ public @interface LocalCassandra {
 	@AliasFor(annotation = EmbeddedCassandra.class)
 	EmbeddedCassandra.Replace replace() default EmbeddedCassandra.Replace.ANY;
 
+	/**
+	 * Annotation that describes {@link RemoteArtifactFactory} attributes.
+	 *
+	 * @since 1.2.6
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({})
+	@interface Artifact {
+
+		/**
+		 * Sets attribute for {@link RemoteArtifactFactory#getDirectory()}.
+		 *
+		 * @return The value of the {@code directory} attribute
+		 */
+		String directory() default "";
+
+		/**
+		 * Sets attribute for {@link RemoteArtifactFactory#getUrlFactory()}.
+		 *
+		 * @return The value of the {@code urlFactory} attribute
+		 */
+		Class<? extends UrlFactory> urlFactory() default DefaultUrlFactory.class;
+
+		/**
+		 * Sets host attribute for {@link RemoteArtifactFactory#getProxy()}}.
+		 *
+		 * @return The value of the {@code proxyHost} attribute
+		 */
+		String proxyHost() default "";
+
+		/**
+		 * Sets port attribute for {@link RemoteArtifactFactory#getProxy()}}.
+		 *
+		 * @return The value of the {@code proxyPort} attribute
+		 */
+		int proxyPort() default 0;
+
+		/**
+		 * Sets attribute for {@link RemoteArtifactFactory#getReadTimeout()} in milliseconds.
+		 *
+		 * @return The value of the {@code readTimeout} attribute
+		 */
+		long readTimeout() default 30000;
+
+		/**
+		 * Sets attribute for {@link RemoteArtifactFactory#getConnectTimeout()} in milliseconds.
+		 *
+		 * @return The value of the {@code connectTimeout} attribute
+		 */
+		long connectTimeout() default 30000;
+
+	}
 
 }

@@ -31,6 +31,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
@@ -57,6 +59,12 @@ public class LocalCassandraTests {
 	@Autowired
 	private TestCassandra cassandra;
 
+	@Autowired
+	private RemoteArtifactFactory remoteArtifactFactory;
+
+	@Autowired
+	private LocalCassandraFactory localCassandraFactory;
+
 
 	@Autowired
 	private Cluster cluster;
@@ -69,11 +77,17 @@ public class LocalCassandraTests {
 			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
 					.isTrue();
 		}
+		assertThat(this.localCassandraFactory.getArtifactFactory()).isSameAs(this.remoteArtifactFactory);
 	}
 
 
 	@Configuration
 	static class TestConfiguration {
+
+		@Bean
+		public RemoteArtifactFactory remoteArtifactFactory() {
+			return new RemoteArtifactFactory();
+		}
 
 		@Bean
 		public ClusterFactory clusterFactory() {

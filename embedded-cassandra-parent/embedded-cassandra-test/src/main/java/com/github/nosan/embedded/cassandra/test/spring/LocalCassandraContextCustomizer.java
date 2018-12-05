@@ -65,6 +65,7 @@ class LocalCassandraContextCustomizer implements ContextCustomizer {
 		RootBeanDefinition bd = new RootBeanDefinition(LocalCassandraFactoryBean.class);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, this.testClass);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
+		bd.setPrimary(true);
 		registry.registerBeanDefinition(LocalCassandraFactoryBean.BEAN_NAME, bd);
 
 	}
