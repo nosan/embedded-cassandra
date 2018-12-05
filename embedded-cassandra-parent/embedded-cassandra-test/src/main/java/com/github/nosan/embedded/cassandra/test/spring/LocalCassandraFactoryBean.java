@@ -51,7 +51,7 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 	private final Class<?> testClass;
 
 	@Nonnull
-	private final LocalCassandra annotation;
+	private final EmbeddedLocalCassandra annotation;
 
 	@Nullable
 	private ApplicationContext context;
@@ -63,9 +63,9 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 	 * @param testClass test class
 	 * @param annotation annotation
 	 */
-	LocalCassandraFactoryBean(@Nullable Class<?> testClass, @Nonnull LocalCassandra annotation) {
+	LocalCassandraFactoryBean(@Nullable Class<?> testClass, @Nonnull EmbeddedLocalCassandra annotation) {
 		this.testClass = testClass;
-		this.annotation = Objects.requireNonNull(annotation, "@LocalCassandra must not be null");
+		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedLocalCassandra must not be null");
 	}
 
 
@@ -79,7 +79,7 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 	@Nonnull
 	public LocalCassandraFactory getObject() throws Exception {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
-		LocalCassandra annotation = this.annotation;
+		EmbeddedLocalCassandra annotation = this.annotation;
 		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
 		Class<?> testClass = this.testClass;
 		factory.setConfigurationFile(CqlResourceUtils.getURL(context, testClass, annotation.configurationFile()));
@@ -103,7 +103,7 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 
 		RemoteArtifactFactory artifactFactory = BeanFactoryUtils.getBean(context, RemoteArtifactFactory.class);
 		if (artifactFactory == null) {
-			LocalCassandra.Artifact artifact = annotation.artifact();
+			EmbeddedLocalCassandra.Artifact artifact = annotation.artifact();
 			artifactFactory = new RemoteArtifactFactory();
 			if (StringUtils.hasText(artifact.directory())) {
 				artifactFactory.setDirectory(Paths.get(artifact.directory()));

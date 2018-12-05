@@ -30,7 +30,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -58,10 +57,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 		jmxPort = 8000,
 		allowRoot = true,
 		registerShutdownHook = false,
-		artifact = @LocalCassandra.Artifact(directory = "target/artifact", proxyHost = "localhost",
+		artifact = @EmbeddedLocalCassandra.Artifact(directory = "target/artifact", proxyHost = "localhost",
 				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000),
 		replace = EmbeddedCassandra.Replace.NONE)
-@DirtiesContext
 public class LocalCassandraAnnotationTests {
 
 	@Autowired

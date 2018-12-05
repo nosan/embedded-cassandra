@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
 
 /**
- * {@link ContextCustomizerFactory} to support {@link LocalCassandra}.
+ * {@link ContextCustomizerFactory} to support {@link EmbeddedLocalCassandra}.
  *
  * @author Dmytro Nosan
  * @since 1.0.7
@@ -38,7 +38,8 @@ class LocalCassandraContextCustomizerFactory implements ContextCustomizerFactory
 	@Nullable
 	public ContextCustomizer createContextCustomizer(@Nonnull Class<?> testClass,
 			@Nonnull List<ContextConfigurationAttributes> configAttributes) {
-		LocalCassandra annotation = AnnotatedElementUtils.findMergedAnnotation(testClass, LocalCassandra.class);
+		EmbeddedLocalCassandra annotation =
+				AnnotatedElementUtils.findMergedAnnotation(testClass, EmbeddedLocalCassandra.class);
 		if (annotation != null) {
 			return new LocalCassandraContextCustomizer(testClass, annotation);
 		}

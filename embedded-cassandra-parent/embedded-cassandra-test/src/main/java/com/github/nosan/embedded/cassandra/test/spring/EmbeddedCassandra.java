@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.test.annotation.DirtiesContext;
+
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 
@@ -42,7 +44,7 @@ import com.github.nosan.embedded.cassandra.test.ClusterFactory;
  * <b>Note!</b> It is possible to define you own {@link ClusterFactory} or {@link CassandraFactory} beans.
  *
  * @author Dmytro Nosan
- * @see LocalCassandra
+ * @see EmbeddedLocalCassandra
  * @see EmbeddedCassandraContextCustomizer
  * @see EmbeddedCassandraFactoryBean
  * @see EmbeddedClusterFactoryBean
@@ -54,6 +56,7 @@ import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 @Target(ElementType.TYPE)
 @Documented
 @Inherited
+@DirtiesContext
 public @interface EmbeddedCassandra {
 
 	/**
