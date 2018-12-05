@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.net.InetSocketAddress;
 import java.nio.file.Paths;
 import java.time.Duration;
 
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -36,6 +36,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.DefaultUrlFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,6 +58,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 		jmxPort = 8000,
 		allowRoot = true,
 		registerShutdownHook = false,
+		artifact = @LocalCassandra.Artifact(directory = "target/artifact", proxyHost = "localhost",
+				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000),
 		replace = EmbeddedCassandra.Replace.NONE)
 @DirtiesContext
 public class LocalCassandraAnnotationTests {
@@ -63,14 +67,18 @@ public class LocalCassandraAnnotationTests {
 	@Autowired
 	private LocalCassandraFactory factory;
 
-	@Autowired
-	private RemoteArtifactFactory artifactFactory;
-
 
 	@Test
 	public void shouldRegisterLocalFactoryBean() {
 		LocalCassandraFactory factory = this.factory;
-		assertThat(factory.getArtifactFactory()).isEqualTo(this.artifactFactory);
+		ArtifactFactory artifactFactory = factory.getArtifactFactory();
+		assertThat(artifactFactory).isInstanceOf(RemoteArtifactFactory.class);
+		RemoteArtifactFactory af = (RemoteArtifactFactory) artifactFactory;
+		assertThat(af.getDirectory()).isEqualTo(Paths.get("target/artifact"));
+		assertThat(af.getReadTimeout()).isEqualTo(Duration.ofSeconds(15));
+		assertThat(af.getConnectTimeout()).isEqualTo(Duration.ofSeconds(20));
+		assertThat(af.getUrlFactory()).isInstanceOf(DefaultUrlFactory.class);
+		assertThat(af.getProxy().address()).isEqualTo(new InetSocketAddress("localhost", 8080));
 		assertThat(factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
 		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
@@ -88,11 +96,6 @@ public class LocalCassandraAnnotationTests {
 
 	@Configuration
 	static class TestConfiguration implements BeanDefinitionRegistryPostProcessor {
-
-		@Bean
-		public RemoteArtifactFactory remoteArtifactFactory() {
-			return new RemoteArtifactFactory();
-		}
 
 
 		@Override

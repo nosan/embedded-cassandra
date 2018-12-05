@@ -16,13 +16,17 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationContext;
@@ -30,8 +34,7 @@ import org.springframework.context.ApplicationContextAware;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
-import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
-import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -75,30 +78,46 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 	@Override
 	@Nonnull
 	public LocalCassandraFactory getObject() throws Exception {
-		LocalCassandraFactoryBuilder builder = new LocalCassandraFactoryBuilder();
+		LocalCassandraFactory factory = new LocalCassandraFactory();
 		LocalCassandra annotation = this.annotation;
 		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
 		Class<?> testClass = this.testClass;
-		builder.setConfigurationFile(CqlResourceUtils.getURL(context, testClass, annotation.configurationFile()));
-		builder.setLogbackFile(CqlResourceUtils.getURL(context, testClass, annotation.logbackFile()));
-		builder.setTopologyFile(CqlResourceUtils.getURL(context, testClass, annotation.topologyFile()));
-		builder.setRackFile(CqlResourceUtils.getURL(context, testClass, annotation.rackFile()));
+		factory.setConfigurationFile(CqlResourceUtils.getURL(context, testClass, annotation.configurationFile()));
+		factory.setLogbackFile(CqlResourceUtils.getURL(context, testClass, annotation.logbackFile()));
+		factory.setTopologyFile(CqlResourceUtils.getURL(context, testClass, annotation.topologyFile()));
+		factory.setRackFile(CqlResourceUtils.getURL(context, testClass, annotation.rackFile()));
 		if (StringUtils.hasText(annotation.workingDirectory())) {
-			builder.setWorkingDirectory(Paths.get(annotation.workingDirectory()));
+			factory.setWorkingDirectory(Paths.get(annotation.workingDirectory()));
 		}
 		if (StringUtils.hasText(annotation.javaHome())) {
-			builder.setJavaHome(Paths.get(annotation.javaHome()));
+			factory.setJavaHome(Paths.get(annotation.javaHome()));
 		}
 		if (StringUtils.hasText(annotation.version())) {
-			builder.setVersion(Version.parse(annotation.version()));
+			factory.setVersion(Version.parse(annotation.version()));
 		}
-		builder.setStartupTimeout(Duration.ofMillis(annotation.startupTimeout()));
-		builder.setJvmOptions(annotation.jvmOptions());
-		builder.setArtifactFactory(getArtifactFactory(context));
-		builder.setJmxPort(annotation.jmxPort());
-		builder.setAllowRoot(annotation.allowRoot());
-		builder.setRegisterShutdownHook(annotation.registerShutdownHook());
-		return builder.build();
+		factory.setStartupTimeout(Duration.ofMillis(annotation.startupTimeout()));
+		factory.getJvmOptions().addAll(Arrays.asList(annotation.jvmOptions()));
+		factory.setJmxPort(annotation.jmxPort());
+		factory.setAllowRoot(annotation.allowRoot());
+		factory.setRegisterShutdownHook(annotation.registerShutdownHook());
+
+		RemoteArtifactFactory artifactFactory = BeanFactoryUtils.getBean(context, RemoteArtifactFactory.class);
+		if (artifactFactory == null) {
+			LocalCassandra.Artifact artifact = annotation.artifact();
+			artifactFactory = new RemoteArtifactFactory();
+			if (StringUtils.hasText(artifact.directory())) {
+				artifactFactory.setDirectory(Paths.get(artifact.directory()));
+			}
+			if (StringUtils.hasText(artifact.proxyHost()) && artifact.proxyPort() > 0) {
+				artifactFactory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(artifact.proxyHost(),
+						artifact.proxyPort())));
+			}
+			artifactFactory.setUrlFactory(BeanUtils.instantiateClass(artifact.urlFactory()));
+			artifactFactory.setReadTimeout(Duration.ofMillis(artifact.readTimeout()));
+			artifactFactory.setConnectTimeout(Duration.ofMillis(artifact.connectTimeout()));
+		}
+		factory.setArtifactFactory(artifactFactory);
+		return factory;
 	}
 
 	@Override
@@ -107,12 +126,4 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		return LocalCassandraFactory.class;
 	}
 
-
-	@Nullable
-	private static ArtifactFactory getArtifactFactory(@Nullable ApplicationContext context) {
-		if (context != null && context.getBeanNamesForType(ArtifactFactory.class).length > 0) {
-			return context.getBean(ArtifactFactory.class);
-		}
-		return null;
-	}
 }
