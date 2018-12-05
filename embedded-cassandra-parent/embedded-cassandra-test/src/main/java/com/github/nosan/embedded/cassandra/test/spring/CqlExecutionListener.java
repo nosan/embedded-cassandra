@@ -60,7 +60,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	private static final Logger log = LoggerFactory.getLogger(CqlExecutionListener.class);
 
 	@Override
-	public final int getOrder() {
+	public int getOrder() {
 		return 5000;
 	}
 
