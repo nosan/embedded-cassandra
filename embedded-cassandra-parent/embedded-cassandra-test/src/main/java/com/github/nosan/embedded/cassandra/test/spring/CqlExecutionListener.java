@@ -55,7 +55,7 @@ import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
  * @see CqlGroup
  * @since 1.0.0
  */
-class CqlExecutionListener extends AbstractTestExecutionListener {
+public final class CqlExecutionListener extends AbstractTestExecutionListener {
 
 	private static final Logger log = LoggerFactory.getLogger(CqlExecutionListener.class);
 

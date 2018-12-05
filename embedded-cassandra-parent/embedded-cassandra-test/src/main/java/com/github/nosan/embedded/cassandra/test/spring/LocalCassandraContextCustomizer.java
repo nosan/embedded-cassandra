@@ -42,7 +42,7 @@ class LocalCassandraContextCustomizer implements ContextCustomizer {
 	private final Class<?> testClass;
 
 	@Nonnull
-	private final LocalCassandra annotation;
+	private final EmbeddedLocalCassandra annotation;
 
 	/**
 	 * Creates {@link LocalCassandraContextCustomizer}.
@@ -50,9 +50,9 @@ class LocalCassandraContextCustomizer implements ContextCustomizer {
 	 * @param testClass test class
 	 * @param annotation annotation
 	 */
-	LocalCassandraContextCustomizer(@Nullable Class<?> testClass, @Nonnull LocalCassandra annotation) {
+	LocalCassandraContextCustomizer(@Nullable Class<?> testClass, @Nonnull EmbeddedLocalCassandra annotation) {
 		this.testClass = testClass;
-		this.annotation = Objects.requireNonNull(annotation, "@LocalCassandra must not be null");
+		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedLocalCassandra must not be null");
 	}
 
 	@Override

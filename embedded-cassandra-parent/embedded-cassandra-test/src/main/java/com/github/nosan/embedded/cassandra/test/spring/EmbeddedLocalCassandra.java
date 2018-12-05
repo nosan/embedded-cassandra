@@ -32,7 +32,9 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.DefaultUrlFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
 
 /**
  * Annotation that can be specified on a test class that runs {@link Cassandra} based tests. This annotation extends
@@ -44,169 +46,216 @@ import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
  *
  * @author Dmytro Nosan
  * @see EmbeddedCassandra
- * @see EmbeddedLocalCassandra
  * @see DirtiesContext
  * @see ArtifactFactory
  * @see LocalCassandraFactory
  * @see RemoteArtifactFactory
  * @see LocalCassandraContextCustomizer
  * @see LocalCassandraFactoryBean
- * @since 1.0.7
- * @deprecated in favor of {@link EmbeddedLocalCassandra}
+ * @since 1.2.6
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
 @Inherited
-@EmbeddedLocalCassandra
-@Deprecated
-public @interface LocalCassandra {
+@EmbeddedCassandra
+public @interface EmbeddedLocalCassandra {
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#version()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getVersion()}.
 	 *
 	 * @return The value of the {@code version} attribute
 	 * @see Version
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	String version() default "";
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#configurationFile()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getConfigurationFile()}.
+	 * <p>
+	 * Path will be interpreted as a Spring
+	 * {@link Resource}.
 	 *
 	 * @return The value of the {@code configurationFile} attribute
 	 * @see Resource
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	String configurationFile() default "";
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#logbackFile()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getLogbackFile()}.
+	 * <p>
+	 * Path will be interpreted as a Spring
+	 * {@link Resource}.
 	 *
 	 * @return The value of the {@code logbackFile} attribute
 	 * @see Resource
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	String logbackFile() default "";
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#rackFile()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getRackFile()}.
+	 * <p>
+	 * Path will be interpreted as a Spring
+	 * {@link Resource}.
 	 *
 	 * @return the value of {@code rackFile} attribute
 	 * @see Resource
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	String rackFile() default "";
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#topologyFile()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getTopologyFile()}.
+	 * <p>
+	 * Path will be interpreted as a Spring
+	 * {@link Resource}.
 	 *
 	 * @return the value of {@code topologyFile} attribute
 	 * @see Resource
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	String topologyFile() default "";
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#workingDirectory()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getWorkingDirectory()}.
+	 * <p>
+	 * Path will be interpreted as a {@link Path}.
 	 *
 	 * @return The value of the {@code workingDirectory} attribute
 	 * @see Path
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	String workingDirectory() default "";
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#javaHome()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getJavaHome()}.
+	 * <p>
+	 * Path will be interpreted as a {@link Path}.
 	 *
 	 * @return The value of the {@code javaHome} attribute
 	 * @see Path
-	 * @since 1.0.9
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	String javaHome() default "";
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#jmxPort()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getJmxPort()}.
 	 *
 	 * @return The value of the {@code jmxPort} attribute
-	 * @since 1.1.1
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	int jmxPort() default 7199;
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#jvmOptions()}.
+	 * JVM options that should be associated with Cassandra.
 	 *
 	 * @return The value of the {@code jvmOptions} attribute
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	String[] jvmOptions() default {};
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#startupTimeout()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getStartupTimeout()} in milliseconds.
 	 *
 	 * @return The value of the {@code startupTimeout} attribute
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	long startupTimeout() default 30000;
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#allowRoot()}.
+	 * Sets attribute for {@link LocalCassandraFactory#isAllowRoot()}.
 	 *
 	 * @return The value of the {@code allowRoot} attribute
-	 * @since 1.2.1
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	boolean allowRoot() default false;
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#registerShutdownHook()}.
+	 * Sets attribute for {@link LocalCassandraFactory#isRegisterShutdownHook()}.
 	 *
 	 * @return The value of the {@code registerShutdownHook} attribute
-	 * @since 1.2.3
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	boolean registerShutdownHook() default true;
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#artifact()}.
+	 * Sets attribute for {@link LocalCassandraFactory#getArtifactFactory()}.
 	 *
 	 * @return The value of the {@code artifactFactory} attribute
-	 * @since 1.2.6
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
-	EmbeddedLocalCassandra.Artifact artifact() default @EmbeddedLocalCassandra.Artifact;
+	Artifact artifact() default @Artifact;
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#scripts()}.
+	 * Alias for {@link EmbeddedCassandra#scripts()}.
 	 *
 	 * @return CQL Scripts
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
+	@AliasFor(annotation = EmbeddedCassandra.class)
 	String[] scripts() default {};
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#statements()}.
+	 * Alias for {@link EmbeddedCassandra#statements()}.
 	 *
 	 * @return CQL statements
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
+	@AliasFor(annotation = EmbeddedCassandra.class)
 	String[] statements() default {};
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#encoding()}.
+	 * Alias for {@link EmbeddedCassandra#encoding()}.
 	 *
 	 * @return CQL scripts encoding.
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
+	@AliasFor(annotation = EmbeddedCassandra.class)
 	String encoding() default "";
 
 	/**
-	 * Alias for {@link EmbeddedLocalCassandra#replace()}.
+	 * Alias for {@link EmbeddedCassandra#replace()}.
 	 *
 	 * @return the type of existing {@code Cluster} to replace
 	 */
-	@AliasFor(annotation = EmbeddedLocalCassandra.class)
+	@AliasFor(annotation = EmbeddedCassandra.class)
 	EmbeddedCassandra.Replace replace() default EmbeddedCassandra.Replace.ANY;
+
+	/**
+	 * Annotation that describes {@link RemoteArtifactFactory} attributes.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({})
+	@interface Artifact {
+
+		/**
+		 * Sets attribute for {@link RemoteArtifactFactory#getDirectory()}.
+		 *
+		 * @return The value of the {@code directory} attribute
+		 */
+		String directory() default "";
+
+		/**
+		 * Sets attribute for {@link RemoteArtifactFactory#getUrlFactory()}.
+		 *
+		 * @return The value of the {@code urlFactory} attribute
+		 */
+		Class<? extends UrlFactory> urlFactory() default DefaultUrlFactory.class;
+
+		/**
+		 * Sets host attribute for {@link RemoteArtifactFactory#getProxy()}}.
+		 *
+		 * @return The value of the {@code proxyHost} attribute
+		 */
+		String proxyHost() default "";
+
+		/**
+		 * Sets port attribute for {@link RemoteArtifactFactory#getProxy()}}.
+		 *
+		 * @return The value of the {@code proxyPort} attribute
+		 */
+		int proxyPort() default 0;
+
+		/**
+		 * Sets attribute for {@link RemoteArtifactFactory#getReadTimeout()} in milliseconds.
+		 *
+		 * @return The value of the {@code readTimeout} attribute
+		 */
+		long readTimeout() default 30000;
+
+		/**
+		 * Sets attribute for {@link RemoteArtifactFactory#getConnectTimeout()} in milliseconds.
+		 *
+		 * @return The value of the {@code connectTimeout} attribute
+		 */
+		long connectTimeout() default 30000;
+
+	}
+
 }
