@@ -38,8 +38,6 @@ import org.springframework.util.Assert;
  */
 class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
-	@Nullable
-	private final Class<?> testClass;
 
 	@Nonnull
 	private final EmbeddedCassandra annotation;
@@ -48,11 +46,9 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	/**
 	 * Creates a {@link EmbeddedCassandraContextCustomizer}.
 	 *
-	 * @param testClass test class
 	 * @param annotation annotation
 	 */
-	EmbeddedCassandraContextCustomizer(@Nullable Class<?> testClass, @Nonnull EmbeddedCassandra annotation) {
-		this.testClass = testClass;
+	EmbeddedCassandraContextCustomizer(@Nonnull EmbeddedCassandra annotation) {
 		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedCassandra must not be null");
 	}
 
@@ -64,7 +60,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 		RootBeanDefinition bd = new RootBeanDefinition(EmbeddedCassandraFactoryBean.class);
-		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, this.testClass);
+		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, mergedConfig.getTestClass());
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
 		registry.registerBeanDefinition(EmbeddedCassandraFactoryBean.BEAN_NAME, bd);
 		if (this.annotation.replace() == EmbeddedCassandra.Replace.ANY) {
@@ -73,5 +69,14 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		}
 	}
 
+	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other != null && getClass() == other.getClass()));
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 
 }

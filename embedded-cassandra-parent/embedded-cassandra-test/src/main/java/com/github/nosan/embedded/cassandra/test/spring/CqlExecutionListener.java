@@ -106,7 +106,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		ApplicationContext context = testContext.getApplicationContext();
 		Cluster cluster = getCluster(cql.cluster(), testContext);
 		Assert.state(cluster != null, () -> String.format("Failed to execute CQL scripts for a test context %s: " +
-				"supply a Cluster bean", testContext));
+				"supply a '%s' bean", Cluster.class, testContext));
 		try (Session session = cluster.connect()) {
 			CqlConfig config = new CqlConfig();
 			config.setEncoding(cql.encoding());
@@ -126,9 +126,9 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			}
 		}
 		catch (BeansException ex) {
-			log.error(String.format("Failed to retrieve Cluster named '%s' bean for a test context %s", name,
-					testContext), ex);
-			throw ex;
+			log.error(String.format("Failed to retrieve '%s' named '%s' bean for a test context %s", name,
+					Cluster.class, testContext), ex);
+			return null;
 		}
 		try {
 			if (bf instanceof ListableBeanFactory) {
@@ -143,16 +143,16 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			}
 			catch (BeansException ex) {
 				if (log.isDebugEnabled()) {
-					log.debug(String.format("Failed to retrieve Cluster primary bean for a test context %s",
-							testContext), ex);
+					log.debug(String.format("Failed to retrieve '%s' primary bean for a test context %s",
+							Cluster.class, testContext), ex);
 				}
 			}
 			return bf.getBean("cluster", Cluster.class);
 		}
 		catch (BeansException ex) {
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("Failed to retrieve Cluster named 'cluster' bean for a test context %s",
-						testContext), ex);
+				log.debug(String.format("Failed to retrieve '%s' named 'cluster' bean for a test context %s",
+						Cluster.class, testContext), ex);
 			}
 			return null;
 		}

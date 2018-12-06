@@ -1,3 +1,5 @@
-org.springframework.test.context.ContextCustomizerFactory=com.github.nosan.embedded.cassandra.test.spring.LocalCassandraContextCustomizerFactory,\
+org.springframework.test.context.ContextCustomizerFactory=\
+com.github.nosan.embedded.cassandra.test.spring.LocalCassandraContextCustomizerFactory,\
 com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandraContextCustomizerFactory
-org.springframework.test.context.TestExecutionListener=com.github.nosan.embedded.cassandra.test.spring.CqlExecutionListener
+org.springframework.test.context.TestExecutionListener=\
+com.github.nosan.embedded.cassandra.test.spring.CqlExecutionListener

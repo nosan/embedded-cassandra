@@ -38,20 +38,15 @@ import org.springframework.util.Assert;
 class LocalCassandraContextCustomizer implements ContextCustomizer {
 
 
-	@Nullable
-	private final Class<?> testClass;
-
 	@Nonnull
 	private final EmbeddedLocalCassandra annotation;
 
 	/**
 	 * Creates {@link LocalCassandraContextCustomizer}.
 	 *
-	 * @param testClass test class
 	 * @param annotation annotation
 	 */
-	LocalCassandraContextCustomizer(@Nullable Class<?> testClass, @Nonnull EmbeddedLocalCassandra annotation) {
-		this.testClass = testClass;
+	LocalCassandraContextCustomizer(@Nonnull EmbeddedLocalCassandra annotation) {
 		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedLocalCassandra must not be null");
 	}
 
@@ -63,11 +58,21 @@ class LocalCassandraContextCustomizer implements ContextCustomizer {
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 		RootBeanDefinition bd = new RootBeanDefinition(LocalCassandraFactoryBean.class);
-		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, this.testClass);
+		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, mergedConfig.getTestClass());
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
 		bd.setPrimary(true);
 		registry.registerBeanDefinition(LocalCassandraFactoryBean.BEAN_NAME, bd);
 
+	}
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other != null && getClass() == other.getClass()));
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
 	}
 
 
