@@ -29,7 +29,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
@@ -90,7 +89,7 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 
 	@Override
 	public void destroy() {
-		Cassandra cassandra = this.cassandra;
+		TestCassandra cassandra = this.cassandra;
 		if (cassandra != null) {
 			cassandra.stop();
 		}
