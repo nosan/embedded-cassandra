@@ -22,6 +22,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.net.Proxy;
 import java.nio.file.Path;
 
 import org.springframework.core.annotation.AliasFor;
@@ -62,7 +63,6 @@ import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
  * @author Dmytro Nosan
  * @see EmbeddedCassandra
  * @see DirtiesContext
- * @see ArtifactFactory
  * @see LocalCassandraFactory
  * @see RemoteArtifactFactory
  * @see LocalCassandraContextCustomizer
@@ -246,18 +246,25 @@ public @interface EmbeddedLocalCassandra {
 		Class<? extends UrlFactory> urlFactory() default UrlFactory.class;
 
 		/**
-		 * Sets host attribute for {@link RemoteArtifactFactory#getProxy()}}.
+		 * Sets proxy host attribute for {@link RemoteArtifactFactory#getProxy()}}.
 		 *
 		 * @return The value of the {@code proxyHost} attribute
 		 */
 		String proxyHost() default "";
 
 		/**
-		 * Sets port attribute for {@link RemoteArtifactFactory#getProxy()}}.
+		 * Sets proxy port attribute for {@link RemoteArtifactFactory#getProxy()}}.
 		 *
 		 * @return The value of the {@code proxyPort} attribute
 		 */
-		int proxyPort() default 0;
+		int proxyPort() default -1;
+
+		/**
+		 * Sets proxy type attribute for {@link RemoteArtifactFactory#getProxy()}}.
+		 *
+		 * @return The value of the {@code proxyType} attribute
+		 */
+		Proxy.Type proxyType() default Proxy.Type.HTTP;
 
 		/**
 		 * Sets attribute for {@link RemoteArtifactFactory#getReadTimeout()} in milliseconds.

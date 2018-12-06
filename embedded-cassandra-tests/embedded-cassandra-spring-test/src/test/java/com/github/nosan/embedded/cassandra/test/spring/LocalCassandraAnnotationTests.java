@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.nio.file.Paths;
 import java.time.Duration;
 
@@ -58,7 +59,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 		allowRoot = true,
 		registerShutdownHook = false,
 		artifact = @EmbeddedLocalCassandra.Artifact(directory = "target/artifact", proxyHost = "localhost",
-				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000, urlFactory = DefaultUrlFactory.class),
+				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000,
+				proxyType = Proxy.Type.SOCKS,
+				urlFactory = DefaultUrlFactory.class),
 		replace = EmbeddedCassandra.Replace.NONE)
 public class LocalCassandraAnnotationTests {
 
@@ -77,6 +80,7 @@ public class LocalCassandraAnnotationTests {
 		assertThat(af.getConnectTimeout()).isEqualTo(Duration.ofSeconds(20));
 		assertThat(af.getUrlFactory()).isInstanceOf(DefaultUrlFactory.class);
 		assertThat(af.getProxy().address()).isEqualTo(new InetSocketAddress("localhost", 8080));
+		assertThat(af.getProxy().type()).isEqualTo(Proxy.Type.SOCKS);
 		assertThat(factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
 		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));

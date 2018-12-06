@@ -116,7 +116,7 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 
 	private static ArtifactFactory getArtifactFactory(EmbeddedLocalCassandra.Artifact annotation,
 			ApplicationContext context) {
-		RemoteArtifactFactory artifactFactory = BeanFactoryUtils.getBean(context, RemoteArtifactFactory.class);
+		ArtifactFactory artifactFactory = BeanFactoryUtils.getBean(context, ArtifactFactory.class);
 		if (artifactFactory != null) {
 			return artifactFactory;
 		}
@@ -124,8 +124,9 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		if (StringUtils.hasText(annotation.directory())) {
 			factory.setDirectory(Paths.get(annotation.directory()));
 		}
-		if (StringUtils.hasText(annotation.proxyHost()) && annotation.proxyPort() > 0) {
-			factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(annotation.proxyHost(),
+		if (annotation.proxyType() != Proxy.Type.DIRECT && StringUtils.hasText(annotation.proxyHost()) &&
+				annotation.proxyPort() != -1) {
+			factory.setProxy(new Proxy(annotation.proxyType(), new InetSocketAddress(annotation.proxyHost(),
 					annotation.proxyPort())));
 		}
 		if (!UrlFactory.class.equals(annotation.urlFactory())) {

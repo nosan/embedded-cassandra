@@ -62,7 +62,6 @@ import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
  * @see EmbeddedCassandra
  * @see EmbeddedLocalCassandra
  * @see DirtiesContext
- * @see ArtifactFactory
  * @see LocalCassandraFactory
  * @see RemoteArtifactFactory
  * @see LocalCassandraContextCustomizer
