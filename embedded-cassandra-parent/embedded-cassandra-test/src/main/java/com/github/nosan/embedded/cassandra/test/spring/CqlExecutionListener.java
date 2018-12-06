@@ -103,7 +103,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		if (executionPhase != cql.executionPhase()) {
 			return;
 		}
-		ApplicationContext applicationContext = testContext.getApplicationContext();
+		ApplicationContext context = testContext.getApplicationContext();
 		Cluster cluster = getCluster(cql.cluster(), testContext);
 		Assert.state(cluster != null, () -> String.format("Failed to execute CQL scripts for a test context %s: " +
 				"supply a Cluster bean", testContext));
@@ -113,7 +113,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			config.setScripts(cql.scripts());
 			config.setStatements(cql.statements());
 			config.setTestClass(testContext.getTestClass());
-			CqlScriptUtils.executeScripts(session, CqlResourceUtils.getScripts(applicationContext, config));
+			CqlScriptUtils.executeScripts(session, CqlResourceUtils.getScripts(context, config));
 		}
 
 	}

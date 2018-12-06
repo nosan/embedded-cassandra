@@ -22,7 +22,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,6 +30,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.test.context.util.TestContextResourceUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -47,7 +47,7 @@ import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 abstract class CqlResourceUtils {
 
 	/**
-	 * Convert Spring {@link Resource} as {@link CqlScript}.
+	 * Converts Spring {@link Resource} as {@link CqlScript}.
 	 *
 	 * @param resolver {@link ResourcePatternResolver} for Spring resources.
 	 * @param config CQL config.
@@ -57,8 +57,6 @@ abstract class CqlResourceUtils {
 	@Nonnull
 	static CqlScript[] getScripts(@Nonnull ResourcePatternResolver resolver, @Nonnull CqlConfig config)
 			throws IOException {
-		Objects.requireNonNull(resolver, "Resource Pattern Resolver must not be null");
-		Objects.requireNonNull(config, "Cql Config must not be null");
 		List<CqlScript> cqlScripts = new ArrayList<>();
 
 		String[] scripts = config.getScripts();
@@ -84,7 +82,7 @@ abstract class CqlResourceUtils {
 
 
 	/**
-	 * Convert Spring {@link Resource} as {@link URL}.
+	 * Converts Spring {@link Resource} as {@link URL}.
 	 *
 	 * @param resourceLoader {@link ResourceLoader} to load resource
 	 * @param resource a path to the resource
@@ -99,9 +97,9 @@ abstract class CqlResourceUtils {
 		if (!StringUtils.hasText(resource)) {
 			return null;
 		}
-		Objects.requireNonNull(resourceLoader, "Resource Loader must not be null");
-		String location = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, resource)[0];
-		return resourceLoader.getResource(location).getURL();
+		String[] locations = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, resource);
+		Assert.isTrue(locations.length == 1, "Invalid location length");
+		return resourceLoader.getResource(locations[0]).getURL();
 	}
 
 }
