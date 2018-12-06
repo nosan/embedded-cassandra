@@ -39,11 +39,11 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * <pre>
  * public class CassandraExtensionTests {
  * &#64;RegisterExtension
- * public static CassandraExtension cassandra = new CassandraExtension();
+ * public static CassandraExtension cassandra = new CassandraExtension(cassandraFactory, clusterFactory, scripts[]);
  * &#64;Test
- *      public void test() {
- *              //
- *      }
+ * public void test() {
+ *  //
+ * }
  * }
  * </pre>
  *

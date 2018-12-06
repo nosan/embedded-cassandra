@@ -37,6 +37,9 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * The typical usage is:
  * <pre>
  * public class CassandraTests extends CassandraTestNG {
+ * public CassandraTests(){
+ *     super(cassandraFactory, clusterFactory, scripts[]);
+ * }
  * &#64;Test
  * public void test() {
  * //
