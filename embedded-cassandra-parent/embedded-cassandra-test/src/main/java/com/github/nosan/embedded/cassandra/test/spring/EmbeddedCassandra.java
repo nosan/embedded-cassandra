@@ -27,6 +27,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
+import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
  * Annotation that can be specified on a test class that runs Apache Cassandra based tests.
@@ -34,23 +35,25 @@ import com.github.nosan.embedded.cassandra.test.ClusterFactory;
  * <pre class="code">
  * &#064;RunWith(SpringRunner.class)
  * &#064;EmbeddedCassandra
- * &#064;DirtiesContext
  * public class CassandraTests {
  * &#064;Autowired
  * private TestCassandra cassandra;
+ * &#064;Autowired
+ * private Cluster cluster;
  * }
  * </pre>
  * <p>
- * <b>Note!</b> It is possible to define you own {@link ClusterFactory} or {@link CassandraFactory} beans.
+ * <b>Note!</b> It is possible to define you own {@link ClusterFactory} or {@link CassandraFactory} bean(s) to control
+ * {@link TestCassandra} instance.
  *
  * @author Dmytro Nosan
  * @see EmbeddedLocalCassandra
- * @see DirtiesContext
  * @see EmbeddedCassandraContextCustomizer
  * @see EmbeddedCassandraFactoryBean
  * @see EmbeddedClusterFactoryBean
  * @see ClusterFactory
  * @see CassandraFactory
+ * @see TestCassandra
  * @since 1.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)
