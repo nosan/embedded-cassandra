@@ -39,7 +39,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
 /**
  * Annotation that can be specified on a test class that runs {@link Cassandra} based tests. This annotation extends
  * {@link EmbeddedCassandra} and allows to customize and register a <b>primary</b> {@link LocalCassandraFactory} bean
- * and also customize a default {@link RemoteArtifactFactory}.
+ * and also customize a {@link RemoteArtifactFactory}.
  * <p>
  * <b>Note!</b> It is possible to define you own {@link ArtifactFactory} bean to control {@link LocalCassandraFactory}
  * instance.
@@ -216,6 +216,8 @@ public @interface EmbeddedLocalCassandra {
 
 		/**
 		 * Sets attribute for {@link RemoteArtifactFactory#getDirectory()}.
+		 * <p>
+		 * Path will be interpreted as a {@link Path}.
 		 *
 		 * @return The value of the {@code directory} attribute
 		 */
