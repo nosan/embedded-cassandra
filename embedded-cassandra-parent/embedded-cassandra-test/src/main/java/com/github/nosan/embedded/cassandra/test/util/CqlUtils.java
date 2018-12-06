@@ -48,7 +48,7 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableNames, "Tables must not be null");
 		for (String tableName : tableNames) {
-			executeStatement(session, "TRUNCATE TABLE " + tableName);
+			executeStatement(session, String.format("TRUNCATE TABLE %s", tableName));
 		}
 	}
 
@@ -62,7 +62,7 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableNames, "Tables must not be null");
 		for (String tableName : tableNames) {
-			executeStatement(session, "DROP TABLE IF EXISTS " + tableName);
+			executeStatement(session, String.format("DROP TABLE IF EXISTS %s", tableName));
 		}
 	}
 
@@ -76,7 +76,7 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(keyspaceNames, "Keyspaces must not be null");
 		for (String keyspace : keyspaceNames) {
-			executeStatement(session, "DROP KEYSPACE IF EXISTS " + keyspace);
+			executeStatement(session, String.format("DROP KEYSPACE IF EXISTS %s", keyspace));
 		}
 	}
 
@@ -90,7 +90,7 @@ public abstract class CqlUtils {
 	public static long getRowCount(@Nonnull Session session, @Nonnull String tableName) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableName, "Table must not be null");
-		return executeStatement(session, "SELECT COUNT(0) FROM " + tableName).one().getLong(0);
+		return executeStatement(session, String.format("SELECT COUNT(0) FROM %s", tableName)).one().getLong(0);
 	}
 
 	/**
