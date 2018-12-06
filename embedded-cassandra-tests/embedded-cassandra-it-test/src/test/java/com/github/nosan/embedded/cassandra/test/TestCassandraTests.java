@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.test;
 
 import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -78,7 +79,9 @@ public class TestCassandraTests {
 	@Test
 	public void executeStatement() {
 		ResultSet resultSet = cassandra.executeStatement("SELECT * FROM test.users WHERE user_id = ?", "frodo");
-		assertThat(resultSet.one().get("first_name", String.class)).isEqualTo("Frodo");
+		Row row = resultSet.one();
+		assertThat(row.get("first_name", String.class)).isEqualTo("$'Frodo;'");
+		assertThat(row.get("last_name", String.class)).isEqualTo("'$$Baggins");
 	}
 
 	private KeyspaceMetadata getKeyspace(String name) {

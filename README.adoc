@@ -191,8 +191,8 @@ There are several annotations to help writing integration tests against a `Cassa
 
 For running `Embedded Cassandra` within `Spring Context`, `@EmbeddedCassandra` annotation has to be used.
 `Embedded Cassandra`  could be initialized with `CQL` scripts using `scripts` and `statements` attributes.
-Also, it is possible to use `@LocalCassandra` annotation that extends `@EmbeddedCassandra` annotation and allows to
-configure and register `CassandraFactory` bean.
+Also, it is possible to use `@EmbeddedLocalCassandra` annotation that extends `@EmbeddedCassandra` annotation and allows to
+customize `LocalCassandraFactory` and `RemoteArtifactFactory`.
 
 [source,java]
 ----
@@ -205,11 +205,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
+import com.github.nosan.embedded.cassandra.test.spring.EmbeddedLocalCassandra;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ...)
-@LocalCassandra(scripts = "/cql-scripts/*.cql"/*, version = , ... */ )
-@DirtiesContext // https://jira.spring.io/browse/SPR-7377
+@EmbeddedLocalCassandra(scripts = "/cql-scripts/*.cql"/*, version = , ... */ )
 public class CassandraTests {
 
     @Autowired
@@ -245,13 +245,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.github.nosan.embedded.cassandra.test.spring.Cql;
+import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = ...)
 @EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-@DirtiesContext // https://jira.spring.io/browse/SPR-7377
 public class CqlScriptTests {
 
 	@Autowired
@@ -288,20 +290,17 @@ It is possible to run `Cassandra` within `Spring Boot` context, here is a quick 
 [source,java]
 ----
 
-import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
-import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra.Replace;
-import com.github.nosan.embedded.cassandra.test.spring.LocalCassandra;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
+import com.github.nosan.embedded.cassandra.test.spring.EmbeddedLocalCassandra;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@LocalCassandra(scripts = "classpath:init.cql", replace = Replace.NONE /* use auto-configured cluster. */)
-@DirtiesContext // https://jira.spring.io/browse/SPR-7377
+@EmbeddedLocalCassandra(scripts = "classpath:init.cql", replace = EmbeddedCassandra.Replace.NONE /* use auto-configured cluster. */)
 public class CassandraSpringBootTests {
 
 	@Test

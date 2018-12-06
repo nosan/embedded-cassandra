@@ -122,6 +122,37 @@ public class CqlScriptParserTests {
 	}
 
 	@Test
+	public void ignoreStatementDoubleDollars() {
+		List<String> statements = CqlScriptParser
+				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES " +
+						"  (201, '2015-02-18', '2015-02-22', $$Women's Tour of New Zealand; New England$$);");
+		assertThat(statements)
+				.containsExactly("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) " +
+						"VALUES (201, '2015-02-18', '2015-02-22', $$Women's Tour of New Zealand; New England$$)");
+	}
+
+
+	@Test
+	public void ignoreDollarsInSingleQuote() {
+		List<String> statements = CqlScriptParser
+				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES " +
+						"  (201, '2015-02-18', '2015-02-22', '$$Womens Tour of New Zealand$$');");
+		assertThat(statements)
+				.containsExactly("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) " +
+						"VALUES (201, '2015-02-18', '2015-02-22', '$$Womens Tour of New Zealand$$')");
+	}
+
+	@Test
+	public void ignoreDollarsInDoubleQuote() {
+		List<String> statements = CqlScriptParser
+				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES " +
+						"  (201, '2015-02-18', '2015-02-22', \"$$Womens Tour of New Zealand$$\");");
+		assertThat(statements)
+				.containsExactly("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) " +
+						"VALUES (201, '2015-02-18', '2015-02-22', \"$$Womens Tour of New Zealand$$\")");
+	}
+
+	@Test
 	public void blockCommentEmpty() {
 		List<String> statements = CqlScriptParser.parse("/**/");
 		assertThat(statements).isEmpty();
@@ -129,7 +160,7 @@ public class CqlScriptParserTests {
 
 	@Test
 	public void singleDashCommentEmpty() {
-		List<String> statements = CqlScriptParser.parse("//");
+		List<String> statements = CqlScriptParser.parse("--");
 		assertThat(statements).isEmpty();
 	}
 

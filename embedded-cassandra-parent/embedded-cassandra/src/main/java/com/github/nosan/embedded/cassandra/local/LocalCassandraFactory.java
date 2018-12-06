@@ -80,9 +80,9 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	private boolean registerShutdownHook = true;
 
 	/**
-	 * Whether to force running Cassandra as {@code root} or not.
+	 * Whether to allow running Cassandra as a {@code root} or not.
 	 * <p>
-	 * This property will add {@code -R} to the Cassandra command line
+	 * This property will be added as {@code -R} to the command line
 	 *
 	 * @return The value of the {@code allowRoot} attribute
 	 * @since 1.2.1
@@ -102,9 +102,9 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * JMX port.
+	 * JMX port to listen on.
 	 * <p>
-	 * This value will be added as {@code -Dcassandra.jmx.local.port=...} system property.
+	 * This value will be added as {@code -Dcassandra.jmx.local.port={jmxPort}} system property.
 	 *
 	 * @return The value of the {@code jmxPort} attribute
 	 * @since 1.1.1
@@ -125,6 +125,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	/**
 	 * Java home directory.
+	 * <p>
+	 * This value will be added as {@code $JAVA_HOME} environment variable.
 	 *
 	 * @return The value of the {@code javaHome} attribute
 	 * @since 1.0.9
@@ -165,6 +167,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	/**
 	 * JVM options that should be associated with Cassandra.
+	 * <p>
+	 * These values will be added as {@code $JVM_EXTRA_OPTS} environment variable.
 	 *
 	 * @return The value of the {@code jvmOptions} attribute
 	 */
@@ -214,7 +218,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Version of the Cassandra.
+	 * {@link Version} of the Cassandra.
 	 *
 	 * @return The value of the {@code version} attribute
 	 */
@@ -233,7 +237,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * {@link ArtifactFactory}  that creates a {@link Artifact}.
+	 * {@link ArtifactFactory} that creates a {@link Artifact}.
 	 *
 	 * @return The value of the {@code artifactFactory} attribute
 	 */
@@ -253,9 +257,11 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Cassandra directory. This directory keeps data/logs, and other Cassandra's files. <p>
-	 * By default {@link FileUtils#getTmpDirectory() tmp.dir} is used. <p>Note! Temporary directory will be deleted
-	 * at the end. If you want to keep the data/logs between launches, you should specify the {@code real} directory.
+	 * Cassandra directory. This directory keeps data/logs and other files. By default {@link
+	 * FileUtils#getTmpDirectory() tmp.dir} is used.
+	 * <p>
+	 * <b>Note!</b> Temporary directory will be removed at the end, if you don't want to follow this behaviour, you must
+	 * specify a {@code real} directory instead of {@code temporary}.
 	 *
 	 * @return The value of the {@code workingDirectory} attribute
 	 */
