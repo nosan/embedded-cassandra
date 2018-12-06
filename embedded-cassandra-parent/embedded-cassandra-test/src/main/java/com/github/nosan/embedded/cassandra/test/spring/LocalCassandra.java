@@ -42,7 +42,6 @@ import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
  * Customized {@link LocalCassandraFactory} will be registered as a <b>primary</b> bean with a name
  * <b><i>localCassandraFactory</i></b>.
  * <p> {@link RemoteArtifactFactory} <b>will not</b> be registered, but will be used by {@link LocalCassandraFactory}.
- * <p>
  * <p>The typical usage of this annotation is like:
  * <pre class="code">
  * &#064;RunWith(SpringRunner.class)

@@ -17,11 +17,13 @@
 package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -34,9 +36,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import com.github.nosan.embedded.cassandra.cql.AbstractCqlResourceScript;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
-import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 
 /**
  * Utility class to convert Spring {@link Resource}.
@@ -71,7 +73,7 @@ abstract class CqlResourceUtils {
 				resources.addAll(Arrays.asList(resolver.getResources(script)));
 			}
 			for (Resource resource : resources) {
-				cqlScripts.add(new UrlCqlScript(resource.getURL(), charset));
+				cqlScripts.add(new SpringCqlScript(resource, charset));
 			}
 		}
 		if (!ObjectUtils.isEmpty(statements)) {
@@ -102,4 +104,35 @@ abstract class CqlResourceUtils {
 		return resourceLoader.getResource(locations[0]).getURL();
 	}
 
+	/**
+	 * {@link CqlScript} implementation for {@link Resource}.
+	 */
+	private static final class SpringCqlScript extends AbstractCqlResourceScript {
+
+		@Nonnull
+		private final Resource resource;
+
+		/**
+		 * Creates a {@link SpringCqlScript}.
+		 *
+		 * @param resource the spring resource
+		 * @param encoding the encoding to use for reading from the resource
+		 */
+		SpringCqlScript(@Nonnull Resource resource, @Nullable Charset encoding) {
+			super(encoding);
+			this.resource = Objects.requireNonNull(resource, "Resource must not be null");
+		}
+
+		@Nonnull
+		@Override
+		protected InputStream getInputStream() throws IOException {
+			return this.resource.getInputStream();
+		}
+
+		@Override
+		@Nonnull
+		public String toString() {
+			return this.resource.toString();
+		}
+	}
 }
