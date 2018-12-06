@@ -49,7 +49,9 @@ abstract class BeanFactoryUtils {
 			return context.getBean(targetClass);
 		}
 		catch (NoUniqueBeanDefinitionException ex) {
-			log.debug("Context doesn't have an unique bean of type ({}). {}", targetClass, ex.getMessage());
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("'%s' doesn't have an unique bean of type '%s'.", context, targetClass), ex);
+			}
 		}
 		catch (NoSuchBeanDefinitionException ignore) {
 		}
