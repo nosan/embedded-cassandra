@@ -130,7 +130,6 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 					testContext), ex);
 			throw ex;
 		}
-
 		try {
 			if (bf instanceof ListableBeanFactory) {
 				ListableBeanFactory lbf = (ListableBeanFactory) bf;
@@ -138,14 +137,14 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 				if (clusters.size() == 1) {
 					return clusters.values().iterator().next();
 				}
-				try {
-					return bf.getBean(Cluster.class);
-				}
-				catch (BeansException ex) {
-					if (log.isDebugEnabled()) {
-						log.debug(String.format("Failed to retrieve Cluster primary bean for a test context %s",
-								testContext), ex);
-					}
+			}
+			try {
+				return bf.getBean(Cluster.class);
+			}
+			catch (BeansException ex) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Failed to retrieve Cluster primary bean for a test context %s",
+							testContext), ex);
 				}
 			}
 			return bf.getBean("cluster", Cluster.class);
