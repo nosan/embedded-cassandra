@@ -228,7 +228,7 @@ public @interface EmbeddedLocalCassandra {
 		 *
 		 * @return The value of the {@code urlFactory} attribute
 		 */
-		Class<? extends UrlFactory> urlFactory() default DefaultUrlFactory.class;
+		Class<? extends UrlFactory> urlFactory() default UrlFactory.class;
 
 		/**
 		 * Sets host attribute for {@link RemoteArtifactFactory#getProxy()}}.

@@ -34,7 +34,9 @@ import org.springframework.context.ApplicationContextAware;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
+import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -100,30 +102,38 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		factory.setJmxPort(annotation.jmxPort());
 		factory.setAllowRoot(annotation.allowRoot());
 		factory.setRegisterShutdownHook(annotation.registerShutdownHook());
-
-		RemoteArtifactFactory artifactFactory = BeanFactoryUtils.getBean(context, RemoteArtifactFactory.class);
-		if (artifactFactory == null) {
-			EmbeddedLocalCassandra.Artifact artifact = annotation.artifact();
-			artifactFactory = new RemoteArtifactFactory();
-			if (StringUtils.hasText(artifact.directory())) {
-				artifactFactory.setDirectory(Paths.get(artifact.directory()));
-			}
-			if (StringUtils.hasText(artifact.proxyHost()) && artifact.proxyPort() > 0) {
-				artifactFactory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(artifact.proxyHost(),
-						artifact.proxyPort())));
-			}
-			artifactFactory.setUrlFactory(BeanUtils.instantiateClass(artifact.urlFactory()));
-			artifactFactory.setReadTimeout(Duration.ofMillis(artifact.readTimeout()));
-			artifactFactory.setConnectTimeout(Duration.ofMillis(artifact.connectTimeout()));
-		}
-		factory.setArtifactFactory(artifactFactory);
+		factory.setArtifactFactory(getArtifactFactory(annotation.artifact(), context));
 		return factory;
 	}
+
 
 	@Override
 	@Nonnull
 	public Class<?> getObjectType() {
 		return LocalCassandraFactory.class;
+	}
+
+
+	private static ArtifactFactory getArtifactFactory(EmbeddedLocalCassandra.Artifact annotation,
+			ApplicationContext context) {
+		RemoteArtifactFactory artifactFactory = BeanFactoryUtils.getBean(context, RemoteArtifactFactory.class);
+		if (artifactFactory != null) {
+			return artifactFactory;
+		}
+		RemoteArtifactFactory factory = new RemoteArtifactFactory();
+		if (StringUtils.hasText(annotation.directory())) {
+			factory.setDirectory(Paths.get(annotation.directory()));
+		}
+		if (StringUtils.hasText(annotation.proxyHost()) && annotation.proxyPort() > 0) {
+			factory.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(annotation.proxyHost(),
+					annotation.proxyPort())));
+		}
+		if (!UrlFactory.class.equals(annotation.urlFactory())) {
+			factory.setUrlFactory(BeanUtils.instantiateClass(annotation.urlFactory()));
+		}
+		factory.setReadTimeout(Duration.ofMillis(annotation.readTimeout()));
+		factory.setConnectTimeout(Duration.ofMillis(annotation.connectTimeout()));
+		return factory;
 	}
 
 }
