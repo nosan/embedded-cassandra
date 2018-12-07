@@ -35,6 +35,14 @@ public class CqlScriptTests {
 
 
 	@Test
+	public void classpathsGlobs() {
+		assertThat(CqlScript.classpathGlobs((String[]) null)).isNotNull();
+		assertStatements(CqlScript.classpathGlobs("roles.cql"));
+		assertStatements(CqlScript.classpathGlobs("*.cql"));
+	}
+
+
+	@Test
 	public void classpaths() {
 		assertThat(CqlScript.classpath((String[]) null)).isNotNull();
 		assertStatements(CqlScript.classpath("roles.cql"));
