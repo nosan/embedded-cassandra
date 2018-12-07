@@ -66,7 +66,7 @@ import com.github.nosan.embedded.cassandra.util.OS;
  * </tr>
  * <tr>
  * <td><tt>&#47;home&#47;**&#47;roles.cql</tt>
- * <td>Matches <tt>&#47;home&#47;any&#47;any&#47;...&#47roles.cql</tt></td>
+ * <td>Matches <tt>&#47;home&#47;...&#47;roles.cql</tt></td>
  * </tr>
  * </table>
  * </blockquote>
