@@ -72,6 +72,15 @@ abstract class CqlResourceUtils {
 			for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
 				resources.addAll(Arrays.asList(resolver.getResources(script)));
 			}
+			resources.sort((r1, r2) -> {
+				try {
+					return r1.getURL().toString().compareTo(r2.getURL().toString());
+				}
+				catch (Exception ex) {
+					return 0;
+				}
+			});
+
 			for (Resource resource : resources) {
 				cqlScripts.add(new SpringCqlScript(resource, charset));
 			}
