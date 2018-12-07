@@ -38,6 +38,7 @@ import javax.annotation.Nullable;
  * @see FileCqlScript
  * @see PathCqlScript
  * @see InputStreamCqlScript
+ * @see ClassPathGlobCqlScript
  * @since 1.0.0
  */
 @FunctionalInterface
@@ -51,10 +52,29 @@ public interface CqlScript {
 	Collection<String> getStatements();
 
 	/**
+	 * Factory method to create {@link CqlScripts} based on classpath {@code glob} patterns.
+	 *
+	 * @param patterns classpath glob patterns
+	 * @return CQL script
+	 * @see ClassPathGlobCqlScript
+	 * @since 1.2.6
+	 */
+	@Nonnull
+	static CqlScript classpathGlobs(@Nullable String... patterns) {
+		if (patterns == null || patterns.length == 0) {
+			return new CqlScripts();
+		}
+		return new CqlScripts(Arrays.stream(patterns)
+				.map(ClassPathGlobCqlScript::new)
+				.toArray(CqlScript[]::new));
+	}
+
+	/**
 	 * Factory method to create {@link CqlScripts} based on classpath locations.
 	 *
 	 * @param locations classpath locations
 	 * @return CQL script
+	 * @see ClassPathCqlScript
 	 */
 	@Nonnull
 	static CqlScript classpath(@Nullable String... locations) {
@@ -67,6 +87,7 @@ public interface CqlScript {
 	 * @param locations classpath locations
 	 * @param contextClass the class to load the resource with.
 	 * @return CQL script
+	 * @see ClassPathCqlScript
 	 */
 	@Nonnull
 	static CqlScript classpath(@Nullable Class<?> contextClass, @Nullable String... locations) {
@@ -83,6 +104,7 @@ public interface CqlScript {
 	 *
 	 * @param locations URL locations
 	 * @return CQL script
+	 * @see UrlCqlScript
 	 */
 	@Nonnull
 	static CqlScript urls(@Nullable URL... locations) {
@@ -99,6 +121,7 @@ public interface CqlScript {
 	 *
 	 * @param locations File locations
 	 * @return CQL script
+	 * @see FileCqlScript
 	 */
 	@Nonnull
 	static CqlScript files(@Nullable File... locations) {
@@ -115,6 +138,7 @@ public interface CqlScript {
 	 *
 	 * @param locations Path locations
 	 * @return CQL script
+	 * @see PathCqlScript
 	 */
 	@Nonnull
 	static CqlScript paths(@Nullable Path... locations) {
@@ -131,6 +155,7 @@ public interface CqlScript {
 	 *
 	 * @param statements CQL statements
 	 * @return CQL script
+	 * @see StaticCqlScript
 	 */
 	@Nonnull
 	static CqlScript statements(@Nullable String... statements) {
