@@ -75,7 +75,7 @@ import com.github.nosan.embedded.cassandra.util.OS;
  * @see CqlScript#classpathGlobs(String...)
  * @since 1.2.6
  */
-public class ClassPathGlobCqlScript implements CqlScript {
+public final class ClassPathGlobCqlScript implements CqlScript {
 
 
 	private static final String WINDOWS = "\\\\";
