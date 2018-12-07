@@ -134,6 +134,11 @@ public class ClassPathGlobCqlScript implements CqlScript {
 	}
 
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @throws UncheckedIOException if an I/O error occurs
+	 */
 	@Nonnull
 	@Override
 	public Collection<String> getStatements() {
