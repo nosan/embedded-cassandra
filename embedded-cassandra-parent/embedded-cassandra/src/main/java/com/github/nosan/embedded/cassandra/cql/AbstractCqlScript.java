@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,22 +31,11 @@ import javax.annotation.Nullable;
  */
 public abstract class AbstractCqlScript implements CqlScript {
 
-	@Nullable
-	private volatile Collection<String> statements;
-
 	@Nonnull
 	@Override
 	public final Collection<String> getStatements() {
-		if (this.statements == null) {
-			synchronized (this) {
-				if (this.statements == null) {
-					String script = getScript();
-					List<String> statements = CqlScriptParser.parse(script);
-					this.statements = Collections.unmodifiableCollection(statements);
-				}
-			}
-		}
-		return Objects.requireNonNull(this.statements, "Statements must not be null");
+		String script = getScript();
+		return Collections.unmodifiableList(CqlScriptParser.parse(script));
 	}
 
 	/**
