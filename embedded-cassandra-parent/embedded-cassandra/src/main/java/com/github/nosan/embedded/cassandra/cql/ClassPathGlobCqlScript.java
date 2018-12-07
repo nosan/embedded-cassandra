@@ -160,6 +160,14 @@ public class ClassPathGlobCqlScript implements CqlScript {
 				}
 			});
 			List<PathCqlScript> scripts = candidates.stream()
+					.sorted((p1, p2) -> {
+						try {
+							return p1.toUri().toURL().toString().compareTo(p2.toUri().toURL().toString());
+						}
+						catch (Exception ex) {
+							return 0;
+						}
+					})
 					.map(path -> new PathCqlScript(path, this.encoding))
 					.collect(Collectors.toList());
 			return new CqlScripts(scripts).getStatements();
@@ -201,6 +209,7 @@ public class ClassPathGlobCqlScript implements CqlScript {
 	}
 
 	@Override
+	@Nonnull
 	public String toString() {
 		return this.glob;
 	}

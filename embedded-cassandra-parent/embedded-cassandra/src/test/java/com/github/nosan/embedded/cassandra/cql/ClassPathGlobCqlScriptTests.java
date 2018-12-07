@@ -63,6 +63,7 @@ public class ClassPathGlobCqlScriptTests {
 	public void assertEquals() {
 		ClassPathGlobCqlScript script = new ClassPathGlobCqlScript(this.glob);
 		assertThat(script).isEqualTo(script);
+		assertThat(script).isNotEqualTo(new ClassPathGlobCqlScript("sometext"));
 		assertThat(script.hashCode()).isEqualTo(script.hashCode());
 		assertThat(script.toString()).isEqualTo(this.glob);
 	}
@@ -72,7 +73,7 @@ public class ClassPathGlobCqlScriptTests {
 		List<Object[]> parameters = new ArrayList<>();
 		parameters.add(new Object[]{"**/**.cql", new Array(TEST)});
 		parameters.add(new Object[]{"**/*.cql", new Array(TEST)});
-		parameters.add(new Object[]{"**.cql", new Array(ROLE, TEST)});
+		parameters.add(new Object[]{"**.cql", new Array(TEST, ROLE)});
 		parameters.add(new Object[]{"*/*.cql", new Array()});
 		parameters.add(new Object[]{"**/key*.cql", new Array(TEST)});
 		parameters.add(new Object[]{"com/*/*/embe*ed/**/keyspa?e.cql", new Array(TEST)});
