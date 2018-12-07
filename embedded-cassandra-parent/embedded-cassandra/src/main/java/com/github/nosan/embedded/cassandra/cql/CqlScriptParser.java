@@ -16,8 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -78,7 +78,7 @@ public abstract class CqlScriptParser {
 		if (!StringUtils.hasText(script)) {
 			return Collections.emptyList();
 		}
-		List<String> statements = new LinkedList<>();
+		List<String> statements = new ArrayList<>();
 		StringBuilder result = new StringBuilder();
 
 		boolean singleQuote = false;
