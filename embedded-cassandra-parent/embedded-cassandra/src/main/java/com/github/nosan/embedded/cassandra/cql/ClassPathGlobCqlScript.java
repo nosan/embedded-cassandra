@@ -32,6 +32,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -165,14 +166,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 				}
 			});
 			List<PathCqlScript> scripts = candidates.stream()
-					.sorted((p1, p2) -> {
-						try {
-							return p1.toUri().toURL().toString().compareTo(p2.toUri().toURL().toString());
-						}
-						catch (Exception ex) {
-							return 0;
-						}
-					})
+					.sorted(Comparator.comparing(Path::toUri))
 					.map(path -> new PathCqlScript(path, this.encoding))
 					.collect(Collectors.toList());
 			return new CqlScripts(scripts).getStatements();

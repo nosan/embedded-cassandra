@@ -72,15 +72,7 @@ abstract class CqlResourceUtils {
 			for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
 				resources.addAll(Arrays.asList(resolver.getResources(script)));
 			}
-			resources.sort((r1, r2) -> {
-				try {
-					return r1.getURL().toString().compareTo(r2.getURL().toString());
-				}
-				catch (Exception ex) {
-					return 0;
-				}
-			});
-
+			resources.sort(CqlResourceUtils::compare);
 			for (Resource resource : resources) {
 				cqlScripts.add(new SpringCqlScript(resource, charset));
 			}
@@ -111,6 +103,16 @@ abstract class CqlResourceUtils {
 		String[] locations = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, resource);
 		Assert.isTrue(locations.length == 1, "Invalid location length");
 		return resourceLoader.getResource(locations[0]).getURL();
+	}
+
+
+	private static int compare(Resource r, Resource r1) {
+		try {
+			return r.getURI().compareTo(r1.getURI());
+		}
+		catch (IOException ex) {
+			return 0;
+		}
 	}
 
 	/**
