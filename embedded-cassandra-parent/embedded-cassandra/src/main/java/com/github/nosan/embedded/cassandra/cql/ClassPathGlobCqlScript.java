@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
@@ -39,6 +38,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
@@ -77,6 +79,7 @@ import com.github.nosan.embedded.cassandra.util.OS;
  * @since 1.2.6
  */
 public final class ClassPathGlobCqlScript implements CqlScript {
+	private static final Logger log = LoggerFactory.getLogger(ClassPathGlobCqlScript.class);
 
 
 	private static final String WINDOWS = "\\\\";
@@ -143,37 +146,38 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	@Nonnull
 	@Override
 	public Collection<String> getStatements() {
-		URL url = getUrl();
-		if (url == null) {
-			return Collections.emptyList();
-		}
-		Path directory = getDirectory(url);
-		try {
-			List<Path> candidates = new ArrayList<>();
-			PathMatcher pathMatcher = getPathMatcher(this.glob);
-			Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-					if (match(file, directory, pathMatcher)) {
-						candidates.add(file);
+		PathMatcher pathMatcher = getPathMatcher(this.glob);
+		List<Path> candidates = new ArrayList<>();
+		URL[] urls = getUrls();
+		for (URL url : urls) {
+			try {
+				Path directory = Paths.get(url.toURI());
+				Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+						if (match(file, directory, pathMatcher)) {
+							candidates.add(file);
+						}
+						return FileVisitResult.CONTINUE;
 					}
-					return FileVisitResult.CONTINUE;
-				}
 
-				@Override
-				public FileVisitResult visitFileFailed(Path file, IOException ex) {
-					return FileVisitResult.CONTINUE;
+					@Override
+					public FileVisitResult visitFileFailed(Path file, IOException ex) {
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			}
+			catch (Exception ex) {
+				if (log.isDebugEnabled()) {
+					log.debug(ex.getMessage(), ex);
 				}
-			});
-			List<PathCqlScript> scripts = candidates.stream()
-					.sorted(Comparator.comparing(Path::toUri))
-					.map(path -> new PathCqlScript(path, this.encoding))
-					.collect(Collectors.toList());
-			return new CqlScripts(scripts).getStatements();
+			}
 		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
+		List<PathCqlScript> scripts = candidates.stream()
+				.sorted(Comparator.comparing(Path::toUri))
+				.map(path -> new PathCqlScript(path, this.encoding))
+				.collect(Collectors.toList());
+		return new CqlScripts(scripts).getStatements();
 	}
 
 
@@ -186,13 +190,6 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 			return false;
 		}
 		ClassPathGlobCqlScript that = (ClassPathGlobCqlScript) other;
-
-		URL url = getUrl();
-		if (url != null) {
-			return Objects.equals(this.glob, that.glob) &&
-					Objects.equals(this.encoding, that.encoding) &&
-					Objects.equals(url, that.getUrl());
-		}
 		return Objects.equals(this.glob, that.glob) &&
 				Objects.equals(this.encoding, that.encoding) &&
 				Objects.equals(this.classLoader, that.classLoader);
@@ -200,10 +197,6 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	@Override
 	public int hashCode() {
-		URL url = getUrl();
-		if (url != null) {
-			return Objects.hash(url, this.glob, this.encoding);
-		}
 		return Objects.hash(this.glob, this.encoding, this.classLoader);
 	}
 
@@ -227,18 +220,15 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		return FileSystems.getDefault().getPathMatcher(g);
 	}
 
-	private URL getUrl() {
-		return (this.classLoader != null) ? this.classLoader.getResource("") : ClassLoader.getSystemResource("");
-	}
-
-	private Path getDirectory(URL url) {
+	private URL[] getUrls() {
 		try {
-			return Paths.get(url.toURI());
+			return Collections.list((this.classLoader != null) ? this.classLoader.getResources(".") :
+					ClassLoader.getSystemResources("."))
+					.toArray(new URL[0]);
 		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException(ex);
+		catch (IOException ex) {
+			return new URL[0];
 		}
 	}
-
 
 }
