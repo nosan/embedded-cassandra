@@ -50,10 +50,7 @@ public final class Version implements Comparable<Version> {
 	 * @param patch a patch value
 	 */
 	public Version(int major, int minor, int patch) {
-		if (major < 0) {
-			throw new IllegalArgumentException("major must not be less than 0");
-		}
-		this.major = major;
+		this.major = Math.max(major, 0);
 		this.minor = Math.max(minor, -1);
 		this.patch = Math.max(patch, -1);
 	}
@@ -140,15 +137,15 @@ public final class Version implements Comparable<Version> {
 
 	@Override
 	public int compareTo(@Nonnull Version other) {
-		int major = Integer.compare(this.major, other.major);
-		if (major == 0) {
-			int minor = Integer.compare(this.minor, other.minor);
-			if (minor == 0) {
+		int majorCmp = Integer.compare(this.major, other.major);
+		if (majorCmp == 0) {
+			int minCmp = Integer.compare(this.minor, other.minor);
+			if (minCmp == 0) {
 				return Integer.compare(this.patch, other.patch);
 			}
-			return minor;
+			return minCmp;
 		}
-		return major;
+		return majorCmp;
 	}
 
 	/**
@@ -176,7 +173,7 @@ public final class Version implements Comparable<Version> {
 			return new Version(major, minor, patch);
 		}
 		throw new IllegalArgumentException(
-				String.format("Version (%s) is invalid. Expected format is (%s)", version, VERSION_PATTERN));
+				String.format("Version (%s) is invalid. Expected format is %s", version, VERSION_PATTERN));
 	}
 
 }
