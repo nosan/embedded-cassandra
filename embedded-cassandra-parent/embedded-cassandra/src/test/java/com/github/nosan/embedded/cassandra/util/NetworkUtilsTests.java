@@ -22,6 +22,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.junit.Test;
@@ -50,13 +51,12 @@ public class NetworkUtilsTests {
 	}
 
 
-	private static InetAddress getAddress(NetworkInterface networkInterface, boolean ipv6) {
+	private static Optional<InetAddress> getAddress(NetworkInterface networkInterface, boolean ipv6) {
 		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
 		return Collections.list(networkInterface.getInetAddresses())
 				.stream()
 				.filter(test)
-				.findFirst()
-				.orElseThrow(IllegalStateException::new);
+				.findFirst();
 	}
 
 	private static NetworkInterface getInterface(boolean ipv6) throws SocketException {
