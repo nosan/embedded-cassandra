@@ -30,7 +30,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -166,7 +165,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 			}
 		}
 		List<PathCqlScript> scripts = candidates.stream()
-				.sorted(Comparator.comparing(Path::toUri))
+				.sorted(this::compare)
 				.map(path -> new PathCqlScript(path, this.encoding))
 				.collect(Collectors.toList());
 		return new CqlScripts(scripts).getStatements();
@@ -206,6 +205,16 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(ex);
+		}
+	}
+
+	private int compare(Path p1, Path p2) {
+		try {
+
+			return p1.toUri().toURL().toString().compareTo(p2.toUri().toURL().toString());
+		}
+		catch (Exception ex) {
+			return 0;
 		}
 	}
 

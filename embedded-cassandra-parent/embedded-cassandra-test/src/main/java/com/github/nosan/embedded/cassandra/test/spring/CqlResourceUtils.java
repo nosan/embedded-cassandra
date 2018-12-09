@@ -111,7 +111,7 @@ abstract class CqlResourceUtils {
 
 	private static int compare(Resource r, Resource r1) {
 		try {
-			return r.getURI().compareTo(r1.getURI());
+			return r.getURL().toString().compareTo(r1.getURL().toString());
 		}
 		catch (IOException ex) {
 			return 0;
