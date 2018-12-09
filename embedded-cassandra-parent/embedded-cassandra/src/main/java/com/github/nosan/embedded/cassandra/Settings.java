@@ -194,7 +194,11 @@ public interface Settings {
 		}
 		String rpcInterface = getRpcInterface();
 		if (StringUtils.hasText(rpcInterface)) {
-			return NetworkUtils.getAddressByInterface(rpcInterface, isRpcInterfacePreferIpv6());
+			return NetworkUtils.getAddressByInterface(rpcInterface, isRpcInterfacePreferIpv6())
+					.orElseGet(() -> NetworkUtils.getAddressesByInterface(rpcInterface)
+							.stream()
+							.findFirst()
+							.orElseThrow(IllegalStateException::new));
 		}
 		return NetworkUtils.getLocalhost();
 	}
@@ -213,7 +217,11 @@ public interface Settings {
 		}
 		String listenInterface = getListenInterface();
 		if (StringUtils.hasText(listenInterface)) {
-			return NetworkUtils.getAddressByInterface(listenInterface, isListenInterfacePreferIpv6());
+			return NetworkUtils.getAddressByInterface(listenInterface, isListenInterfacePreferIpv6())
+					.orElseGet(() -> NetworkUtils.getAddressesByInterface(listenInterface)
+							.stream()
+							.findFirst()
+							.orElseThrow(IllegalStateException::new));
 		}
 		return NetworkUtils.getLocalhost();
 	}

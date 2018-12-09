@@ -22,8 +22,10 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,13 +69,14 @@ abstract class CqlResourceUtils {
 		Class<?> testClass = config.getTestClass();
 
 		if (!ObjectUtils.isEmpty(scripts)) {
-			Charset charset = (!StringUtils.hasText(encoding) ? null : Charset.forName(encoding));
-			List<Resource> resources = new ArrayList<>();
+			Charset charset = StringUtils.hasText(encoding) ? Charset.forName(encoding) : null;
+			Set<Resource> resources = new LinkedHashSet<>();
 			for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
 				resources.addAll(Arrays.asList(resolver.getResources(script)));
 			}
-			resources.sort(CqlResourceUtils::compare);
-			for (Resource resource : resources) {
+			ArrayList<Resource> list = new ArrayList<>(resources);
+			list.sort(CqlResourceUtils::compare);
+			for (Resource resource : list) {
 				cqlScripts.add(new SpringCqlScript(resource, charset));
 			}
 		}

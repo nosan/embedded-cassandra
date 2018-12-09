@@ -28,19 +28,17 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
@@ -79,7 +77,6 @@ import com.github.nosan.embedded.cassandra.util.OS;
  * @since 1.2.6
  */
 public final class ClassPathGlobCqlScript implements CqlScript {
-	private static final Logger log = LoggerFactory.getLogger(ClassPathGlobCqlScript.class);
 
 
 	private static final String WINDOWS = "\\\\";
@@ -147,30 +144,25 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	@Override
 	public Collection<String> getStatements() {
 		PathMatcher pathMatcher = getPathMatcher(this.glob);
-		List<Path> candidates = new ArrayList<>();
+		Set<Path> candidates = new LinkedHashSet<>();
 		URL[] urls = getUrls();
 		for (URL url : urls) {
 			try {
 				Path directory = Paths.get(url.toURI());
-				Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-						if (match(file, directory, pathMatcher)) {
-							candidates.add(file);
+				if (Files.isDirectory(directory)) {
+					Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+						@Override
+						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+							if (match(file, directory, pathMatcher)) {
+								candidates.add(file);
+							}
+							return FileVisitResult.CONTINUE;
 						}
-						return FileVisitResult.CONTINUE;
-					}
-
-					@Override
-					public FileVisitResult visitFileFailed(Path file, IOException ex) {
-						return FileVisitResult.CONTINUE;
-					}
-				});
+					});
+				}
 			}
 			catch (Exception ex) {
-				if (log.isDebugEnabled()) {
-					log.debug(ex.getMessage(), ex);
-				}
+				throw new UncheckedIOException(new IOException(ex));
 			}
 		}
 		List<PathCqlScript> scripts = candidates.stream()
@@ -206,29 +198,29 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		return this.glob;
 	}
 
-	private String toGlob(String glob) {
+	private URL[] getUrls() {
+		try {
+			ClassLoader classLoader = this.classLoader;
+			return Collections.list((classLoader != null) ? classLoader.getResources(".") :
+					ClassLoader.getSystemResources(".")).toArray(new URL[0]);
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
+	}
+
+	private static String toGlob(String glob) {
 		return glob.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
 	}
 
-	private boolean match(Path file, Path directory, PathMatcher pathMatcher) {
-		Path normalize = file.subpath(directory.getNameCount(), file.getNameCount());
-		return pathMatcher.matches(normalize);
+	private static boolean match(Path file, Path directory, PathMatcher pathMatcher) {
+		Path name = file.subpath(directory.getNameCount(), file.getNameCount());
+		return pathMatcher.matches(name);
 	}
 
-	private PathMatcher getPathMatcher(String glob) {
-		String g = String.format("glob:%s", OS.isWindows() ? glob.replaceAll("/", WINDOWS + WINDOWS) : glob);
-		return FileSystems.getDefault().getPathMatcher(g);
-	}
-
-	private URL[] getUrls() {
-		try {
-			return Collections.list((this.classLoader != null) ? this.classLoader.getResources(".") :
-					ClassLoader.getSystemResources("."))
-					.toArray(new URL[0]);
-		}
-		catch (IOException ex) {
-			return new URL[0];
-		}
+	private static PathMatcher getPathMatcher(String glob) {
+		String globSyntax = String.format("glob:%s", OS.isWindows() ? glob.replaceAll("/", WINDOWS + WINDOWS) : glob);
+		return FileSystems.getDefault().getPathMatcher(globSyntax);
 	}
 
 }

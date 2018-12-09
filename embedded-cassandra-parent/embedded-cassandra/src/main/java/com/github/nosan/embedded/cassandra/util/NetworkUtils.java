@@ -22,10 +22,11 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
@@ -57,34 +58,42 @@ public abstract class NetworkUtils {
 
 
 	/**
-	 * Return the first IPv4 or IPv6 address by the interface name, if could not find IPv4 or IPv6, then first will be
-	 * used.
+	 * Return the first IPv4 or IPv6 address by the interface name.
 	 *
 	 * @param interfaceName the interface name (e.g. en0)
 	 * @param useIpv6 whether to use IPv6 or not
 	 * @return an IP address for the given interface name.
-	 * @throws IllegalArgumentException if interface is unknown or could not find IPv6 or IPv4 address.
+	 * @throws IllegalArgumentException if interface is unknown.
 	 */
 	@Nonnull
-	public static InetAddress getAddressByInterface(@Nonnull String interfaceName, boolean useIpv6) {
+	public static Optional<InetAddress> getAddressByInterface(@Nonnull String interfaceName, boolean useIpv6) {
 		Objects.requireNonNull(interfaceName, "Interface name must not be null");
-		Predicate<InetAddress> predicate = useIpv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
+		Predicate<InetAddress> condition = useIpv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
+		for (InetAddress address : getAddressesByInterface(interfaceName)) {
+			if (condition.test(address)) {
+				return Optional.ofNullable(address);
+			}
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * Return the list of addresses by the interface name.
+	 *
+	 * @param interfaceName the interface name (e.g. en0)
+	 * @return an IP address for the given interface name.
+	 * @throws IllegalArgumentException if interface is unknown.
+	 */
+	@Nonnull
+	public static List<InetAddress> getAddressesByInterface(@Nonnull String interfaceName) {
+		Objects.requireNonNull(interfaceName, "Interface name must not be null");
 		try {
 			NetworkInterface networkInterface = NetworkInterface.getByName(interfaceName);
 			if (networkInterface == null) {
 				throw new IllegalArgumentException(String.format("(%s) interface is not valid", interfaceName));
 			}
-			List<InetAddress> addresses = new ArrayList<>(Collections.list(networkInterface.getInetAddresses()));
-			if (addresses.isEmpty()) {
-				throw new IllegalArgumentException(
-						String.format("Could not find IPv4 Or IPv6 address for (%s) interface", interfaceName));
-			}
-			for (InetAddress address : addresses) {
-				if (predicate.test(address)) {
-					return address;
-				}
-			}
-			return addresses.get(0);
+			Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+			return Collections.unmodifiableList(Collections.list(addresses));
 		}
 		catch (SocketException ex) {
 			throw new IllegalArgumentException(ex);

@@ -241,7 +241,8 @@ public abstract class AbstractLocalCassandraTests {
 	private void runAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
 		Path configurationFile = this.temporaryFolder.newFile("cassandra.yaml").toPath();
 		String interfaceName = getInterface(ipv6);
-		InetAddress address = NetworkUtils.getAddressByInterface(interfaceName, ipv6);
+		InetAddress address = NetworkUtils.getAddressByInterface(interfaceName, ipv6)
+				.orElseThrow(IllegalStateException::new);
 		String yaml;
 		try (InputStream stream = getClass().getResourceAsStream(location)) {
 			yaml = new String(IOUtils.toByteArray(stream), StandardCharsets.UTF_8)

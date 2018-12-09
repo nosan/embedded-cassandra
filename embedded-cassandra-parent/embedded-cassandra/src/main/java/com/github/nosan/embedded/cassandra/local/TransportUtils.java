@@ -39,14 +39,14 @@ abstract class TransportUtils {
 	 * @return {@code true} if ready otherwise {@code false}
 	 */
 	static boolean isReady(@Nonnull Settings settings) {
-		Predicate<Settings> predicate = TransportUtils::isStorageReady;
+		Predicate<Settings> condition = TransportUtils::isStorageReady;
 		if (settings.isStartNativeTransport()) {
-			predicate = predicate.and(TransportUtils::isNativeTransportReady);
+			condition = condition.and(TransportUtils::isNativeTransportReady);
 		}
 		if (settings.isStartRpc()) {
-			predicate = predicate.and(TransportUtils::isRpcTransportReady);
+			condition = condition.and(TransportUtils::isRpcTransportReady);
 		}
-		return predicate.test(settings);
+		return condition.test(settings);
 	}
 
 	/**
@@ -56,14 +56,14 @@ abstract class TransportUtils {
 	 * @return {@code true} if disabled otherwise {@code false}
 	 */
 	static boolean isDisabled(@Nonnull Settings settings) {
-		Predicate<Settings> predicate = TransportUtils::isStorageReady;
+		Predicate<Settings> condition = TransportUtils::isStorageReady;
 		if (settings.isStartNativeTransport()) {
-			predicate = predicate.or(TransportUtils::isNativeTransportReady);
+			condition = condition.or(TransportUtils::isNativeTransportReady);
 		}
 		if (settings.isStartRpc()) {
-			predicate = predicate.or(TransportUtils::isRpcTransportReady);
+			condition = condition.or(TransportUtils::isRpcTransportReady);
 		}
-		return !predicate.test(settings);
+		return !condition.test(settings);
 	}
 
 
