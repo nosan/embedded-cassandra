@@ -51,7 +51,7 @@ abstract class WaitUtils {
 				return true;
 			}
 			if (rem > 0) {
-				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
+				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 50));
 			}
 			rem = timeout.toNanos() - (System.nanoTime() - start);
 		}
