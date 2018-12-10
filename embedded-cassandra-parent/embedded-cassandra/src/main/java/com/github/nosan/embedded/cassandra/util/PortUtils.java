@@ -88,7 +88,7 @@ public abstract class PortUtils {
 	 */
 	public static boolean isPortBusy(@Nullable InetAddress address, int port) {
 		try (Socket s = new Socket()) {
-			s.connect(getInetSocketAddress(address, port), 100);
+			s.connect(getInetSocketAddress(address, port), 10);
 			return true;
 		}
 		catch (IOException ex) {
