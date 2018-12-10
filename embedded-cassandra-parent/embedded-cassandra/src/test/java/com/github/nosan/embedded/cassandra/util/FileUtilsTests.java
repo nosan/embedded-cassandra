@@ -100,31 +100,4 @@ public class FileUtilsTests {
 				.isEqualTo(Paths.get(new SystemProperty("java.io.tmpdir").get()));
 	}
 
-	@Test
-	public void visitFiles() throws IOException {
-		File newFolder = this.temporaryFolder.newFolder();
-		File dir = new File(newFolder, "dir");
-		File file = new File(dir, "file.txt");
-		File file1 = new File(dir, "file1.txt");
-
-		assertThat(dir.mkdir()).isTrue();
-		assertThat(file.createNewFile()).isTrue();
-		assertThat(file1.createNewFile()).isTrue();
-
-
-		assertThat(FileUtils.visitFiles(dir.toPath(), null))
-				.contains(file.toPath(), file1.toPath());
-
-		assertThat(FileUtils.visitFiles(dir.toPath(), p -> false))
-				.hasSize(0);
-
-		assertThat(FileUtils.visitFiles(dir.toPath(), p -> String.valueOf(p.getFileName()).equals("file.txt")))
-				.containsExactly(file.toPath());
-
-		assertThat(FileUtils.visitFiles(null, null))
-				.hasSize(0);
-
-		assertThat(FileUtils.visitFiles(file.toPath(), null)).containsExactly(file.toPath());
-
-	}
 }

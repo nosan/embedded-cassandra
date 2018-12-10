@@ -20,13 +20,9 @@ import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -112,33 +108,6 @@ public abstract class FileUtils {
 		return true;
 	}
 
-	/**
-	 * Walks a file tree.
-	 *
-	 * @param path the starting file/directory
-	 * @param matcher a file matcher (if {@code null} all path will be included)
-	 * @return the matched files
-	 * @throws IOException if an I/O error is thrown by a visitor method
-	 * @since 1.2.7
-	 */
-	@Nonnull
-	public static Set<Path> visitFiles(@Nullable Path path, @Nullable PathMatcher matcher) throws IOException {
-		if (path == null) {
-			return Collections.emptySet();
-		}
-		PathMatcher pathMatcher = (matcher != null) ? matcher : (p) -> true;
-		Set<Path> candidates = new LinkedHashSet<>();
-		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-				if (pathMatcher.matches(file)) {
-					candidates.add(file);
-				}
-				return FileVisitResult.CONTINUE;
-			}
-		});
-		return Collections.unmodifiableSet(candidates);
-	}
 
 	/**
 	 * Tests whether a {@code Path} is a temporary.

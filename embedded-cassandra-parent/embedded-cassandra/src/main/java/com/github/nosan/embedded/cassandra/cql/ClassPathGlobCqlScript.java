@@ -21,9 +21,13 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -36,7 +40,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
-import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
 
 /**
@@ -146,12 +149,17 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 			URL[] urls = getUrls();
 			for (URL url : urls) {
 				Path directory = Paths.get(url.toURI());
-				candidates.addAll(FileUtils.visitFiles(directory,
-						file -> {
-							int beginIndex = Math.max(Math.min(directory.getNameCount(), file.getNameCount() - 1), 0);
-							int endIndex = file.getNameCount();
-							return pathMatcher.matches(file.subpath(beginIndex, endIndex));
-						}));
+				Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+						int beginIndex = Math.max(Math.min(directory.getNameCount(), file.getNameCount() - 1), 0);
+						int endIndex = file.getNameCount();
+						if (pathMatcher.matches(file.subpath(beginIndex, endIndex))) {
+							candidates.add(file);
+						}
+						return FileVisitResult.CONTINUE;
+					}
+				});
 			}
 		}
 		catch (IOException ex) {
