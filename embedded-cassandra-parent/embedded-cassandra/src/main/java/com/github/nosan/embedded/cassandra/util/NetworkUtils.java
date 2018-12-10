@@ -64,6 +64,7 @@ public abstract class NetworkUtils {
 	 * @param useIpv6 whether to use IPv6 or not
 	 * @return an IP address for the given interface name.
 	 * @throws IllegalArgumentException if interface is unknown.
+	 * @since 1.2.7
 	 */
 	@Nonnull
 	public static Optional<InetAddress> getAddressByInterface(@Nonnull String interfaceName, boolean useIpv6) {
@@ -81,6 +82,7 @@ public abstract class NetworkUtils {
 	 * @param interfaceName the interface name (e.g. en0)
 	 * @return an IP address for the given interface name.
 	 * @throws IllegalArgumentException if interface is unknown.
+	 * @since 1.2.7
 	 */
 	@Nonnull
 	public static List<InetAddress> getAddressesByInterface(@Nonnull String interfaceName) {
