@@ -136,6 +136,8 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	/**
 	 * {@inheritDoc}
+	 * <p>
+	 * All resources will be interpreted as a {@link Path} and sorted by {@code URL.toString()}
 	 *
 	 * @throws UncheckedIOException if an I/O error occurs
 	 * @throws RuntimeException if any other error occurs
@@ -204,8 +206,8 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	private URL[] getUrls() throws IOException {
 		ClassLoader classLoader = this.classLoader;
-		return Collections.list((classLoader != null) ? classLoader.getResources(".") :
-				ClassLoader.getSystemResources(".")).toArray(new URL[0]);
+		return Collections.list((classLoader != null) ? classLoader.getResources("") :
+				ClassLoader.getSystemResources("")).toArray(new URL[0]);
 	}
 
 	private int compare(Path p1, Path p2) {

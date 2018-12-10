@@ -38,6 +38,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
 
 
@@ -113,7 +114,8 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			config.setScripts(cql.scripts());
 			config.setStatements(cql.statements());
 			config.setTestClass(testContext.getTestClass());
-			CqlScriptUtils.executeScripts(session, CqlResourceUtils.getScripts(context, config));
+			CqlScript[] scripts = CqlResourceUtils.getScripts(context, config);
+			CqlScriptUtils.executeScripts(session, scripts);
 		}
 
 	}
