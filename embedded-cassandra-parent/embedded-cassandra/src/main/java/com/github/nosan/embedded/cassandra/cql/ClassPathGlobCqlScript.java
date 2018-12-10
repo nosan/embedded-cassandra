@@ -21,13 +21,9 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -40,6 +36,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
+import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
 
 /**
@@ -138,36 +135,36 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	 * {@inheritDoc}
 	 *
 	 * @throws UncheckedIOException if an I/O error occurs
+	 * @throws RuntimeException if any other error occurs
 	 */
 	@Nonnull
 	@Override
 	public Collection<String> getStatements() {
+		Set<Path> candidates = new LinkedHashSet<>(0);
 		PathMatcher pathMatcher = getPathMatcher(this.glob);
-		Set<Path> candidates = new LinkedHashSet<>();
-		URL[] urls = getUrls();
-		for (URL url : urls) {
-			try {
+		try {
+			URL[] urls = getUrls();
+			for (URL url : urls) {
 				Path directory = Paths.get(url.toURI());
-				if (Files.isDirectory(directory)) {
-					Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-						@Override
-						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-							if (match(file, directory, pathMatcher)) {
-								candidates.add(file);
-							}
-							return FileVisitResult.CONTINUE;
-						}
-					});
-				}
+				candidates.addAll(FileUtils.visitFiles(directory,
+						file -> {
+							int beginIndex = Math.max(Math.min(directory.getNameCount(), file.getNameCount() - 1), 0);
+							int endIndex = file.getNameCount();
+							return pathMatcher.matches(file.subpath(beginIndex, endIndex));
+						}));
 			}
-			catch (Exception ex) {
-				throw new UncheckedIOException(new IOException(ex));
-			}
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
+		catch (Exception ex) {
+			throw new RuntimeException(ex);
 		}
 		List<PathCqlScript> scripts = candidates.stream()
 				.sorted(this::compare)
 				.map(path -> new PathCqlScript(path, this.encoding))
 				.collect(Collectors.toList());
+
 		return new CqlScripts(scripts).getStatements();
 	}
 
@@ -197,15 +194,10 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		return this.glob;
 	}
 
-	private URL[] getUrls() {
-		try {
-			ClassLoader classLoader = this.classLoader;
-			return Collections.list((classLoader != null) ? classLoader.getResources(".") :
-					ClassLoader.getSystemResources(".")).toArray(new URL[0]);
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
+	private URL[] getUrls() throws IOException {
+		ClassLoader classLoader = this.classLoader;
+		return Collections.list((classLoader != null) ? classLoader.getResources(".") :
+				ClassLoader.getSystemResources(".")).toArray(new URL[0]);
 	}
 
 	private int compare(Path p1, Path p2) {
@@ -220,11 +212,6 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	private static String toGlob(String glob) {
 		return glob.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
-	}
-
-	private static boolean match(Path file, Path directory, PathMatcher pathMatcher) {
-		Path name = file.subpath(directory.getNameCount(), file.getNameCount());
-		return pathMatcher.matches(name);
 	}
 
 	private static PathMatcher getPathMatcher(String glob) {
