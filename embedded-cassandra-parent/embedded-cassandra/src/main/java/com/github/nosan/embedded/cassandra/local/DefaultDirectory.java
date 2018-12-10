@@ -48,7 +48,7 @@ class DefaultDirectory implements Directory {
 	private static final Logger log = LoggerFactory.getLogger(DefaultDirectory.class);
 
 	private static final Set<String> SKIP_CANDIDATES =
-			Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("doc", "tools", "pylib", "javadoc")));
+			Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("doc", "javadoc")));
 
 	@Nonnull
 	private final Path directory;
