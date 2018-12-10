@@ -296,11 +296,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
-import com.github.nosan.embedded.cassandra.test.spring.EmbeddedLocalCassandra;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@EmbeddedLocalCassandra(scripts = "classpath:init.cql", replace = EmbeddedCassandra.Replace.NONE /* use auto-configured cluster. */)
+@EmbeddedCassandra(scripts = "classpath:init.cql", replace = EmbeddedCassandra.Replace.NONE /* use auto-configured cluster. */)
 public class CassandraSpringBootTests {
 
 	@Test
