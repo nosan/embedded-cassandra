@@ -60,6 +60,7 @@ public interface Settings {
 	 * Address to bind to and tell other Cassandra nodes to connect to.
 	 *
 	 * @return The value of the {@code listenAddress} attribute
+	 * @see #getRealListenAddress()
 	 */
 	@Nullable
 	String getListenAddress();
@@ -82,7 +83,7 @@ public interface Settings {
 
 	/**
 	 * The address to bind the native/rpc transport server to.
-	 * Note! use {@link #getRealAddress()} to connect to the cassandra.
+	 * <p><b>Note!</b> use {@link #getRealAddress()} to connect to the cassandra.
 	 *
 	 * @return The value of the {@code rpcAddress} attribute
 	 * @see #getRealAddress()
@@ -198,7 +199,8 @@ public interface Settings {
 					.orElseGet(() -> NetworkUtils.getAddressesByInterface(rpcInterface)
 							.stream()
 							.findFirst()
-							.orElseThrow(IllegalStateException::new));
+							.orElseThrow(() -> new IllegalStateException(
+									String.format("There is no address for interface (%s)", rpcInterface))));
 		}
 		return NetworkUtils.getLocalhost();
 	}
@@ -221,7 +223,8 @@ public interface Settings {
 					.orElseGet(() -> NetworkUtils.getAddressesByInterface(listenInterface)
 							.stream()
 							.findFirst()
-							.orElseThrow(IllegalStateException::new));
+							.orElseThrow(() -> new IllegalStateException(
+									String.format("There is no address for interface (%s)", listenInterface))));
 		}
 		return NetworkUtils.getLocalhost();
 	}
