@@ -37,7 +37,7 @@ public class ClassPathGlobCqlScriptTests {
 
 	private static final String ROLE = "CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)";
 
-	private static final String TEST =
+	private static final String KEYSPACE =
 			"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}";
 
 	@Nonnull
@@ -71,12 +71,15 @@ public class ClassPathGlobCqlScriptTests {
 	@Parameterized.Parameters(name = "{0} {1}")
 	public static Iterable<Object[]> globs() {
 		List<Object[]> parameters = new ArrayList<>();
-		parameters.add(new Object[]{"**/**.cql", new Array(TEST)});
-		parameters.add(new Object[]{"**/*.cql", new Array(TEST)});
-		parameters.add(new Object[]{"**.cql", new Array(TEST, ROLE)});
+		parameters.add(new Object[]{"**/**.cql", new Array(KEYSPACE)});
+		parameters.add(new Object[]{"**/*.cql", new Array(KEYSPACE)});
+		parameters.add(new Object[]{"**.cql", new Array(KEYSPACE, ROLE)});
+		parameters.add(new Object[]{"**.cql", new Array(KEYSPACE, ROLE)});
+		parameters.add(new Object[]{"**{roles,keyspace}.cql", new Array(KEYSPACE, ROLE)});
+		parameters.add(new Object[]{"**{keyspace}.cql", new Array(KEYSPACE)});
 		parameters.add(new Object[]{"*/*.cql", new Array()});
-		parameters.add(new Object[]{"**/key*.cql", new Array(TEST)});
-		parameters.add(new Object[]{"com/*/*/embe*ed/**/keyspa?e.cql", new Array(TEST)});
+		parameters.add(new Object[]{"**/key*.cql", new Array(KEYSPACE)});
+		parameters.add(new Object[]{"com/*/*/embe*ed/**/keyspa?e.cql", new Array(KEYSPACE)});
 		parameters.add(new Object[]{"roles.cql", new Array(ROLE)});
 		parameters.add(new Object[]{"/roles.cql", new Array()});
 		parameters.add(new Object[]{"*.cql", new Array(ROLE)});
