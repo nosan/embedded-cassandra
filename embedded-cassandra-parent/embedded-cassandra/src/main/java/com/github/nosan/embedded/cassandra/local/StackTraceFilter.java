@@ -29,7 +29,7 @@ import javax.annotation.Nonnull;
  */
 class StackTraceFilter implements Predicate<String> {
 
-	private static final Pattern STACKTRACE_PATTERN = Pattern.compile("\\s+(at|\\.{3}) .*");
+	private static final Pattern STACKTRACE_PATTERN = Pattern.compile("\\s+(at|\\.{3})\\s+.*");
 
 	@Override
 	public boolean test(@Nonnull String line) {
