@@ -186,8 +186,7 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 		}
 		String packageName = ClassUtils.getPackageName(this.contextClass);
 		if (StringUtils.hasText(packageName)) {
-			packageName = packageName.replaceAll("\\.", "/");
-			return packageName + "/" + location;
+			return String.format("%s/%s", packageName.replaceAll("[.]", "/"), location);
 		}
 		return location;
 	}
