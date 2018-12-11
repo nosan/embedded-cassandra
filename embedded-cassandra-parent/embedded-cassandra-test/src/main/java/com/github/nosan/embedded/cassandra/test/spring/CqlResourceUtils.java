@@ -75,7 +75,7 @@ abstract class CqlResourceUtils {
 				resources.addAll(Arrays.asList(resolver.getResources(script)));
 			}
 			ArrayList<Resource> list = new ArrayList<>(resources);
-			list.sort(CqlResourceUtils::compare);
+			list.sort(CqlResourceUtils::compareByURL);
 			for (Resource resource : list) {
 				cqlScripts.add(new SpringCqlScript(resource, charset));
 			}
@@ -109,7 +109,7 @@ abstract class CqlResourceUtils {
 	}
 
 
-	private static int compare(Resource r, Resource r1) {
+	private static int compareByURL(Resource r, Resource r1) {
 		try {
 			return r.getURL().toString().compareTo(r1.getURL().toString());
 		}

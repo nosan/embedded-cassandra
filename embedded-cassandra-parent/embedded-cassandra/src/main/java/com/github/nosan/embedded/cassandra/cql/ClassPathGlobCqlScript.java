@@ -171,7 +171,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 			throw new RuntimeException(ex);
 		}
 		List<PathCqlScript> scripts = candidates.stream()
-				.sorted(this::compare)
+				.sorted(ClassPathGlobCqlScript::compareByURL)
 				.map(path -> new PathCqlScript(path, this.encoding))
 				.collect(Collectors.toList());
 
@@ -210,9 +210,8 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 				ClassLoader.getSystemResources("")).toArray(new URL[0]);
 	}
 
-	private int compare(Path p1, Path p2) {
+	private static int compareByURL(Path p1, Path p2) {
 		try {
-
 			return p1.toUri().toURL().toString().compareTo(p2.toUri().toURL().toString());
 		}
 		catch (Exception ex) {
