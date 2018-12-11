@@ -46,7 +46,7 @@ import com.github.nosan.embedded.cassandra.util.OS;
 /**
  * {@link CqlScript} implementation for class path {@code glob matching} resources.
  * <p>
- * {@code glob} examples:
+ * All resources will be interpreted as a {@link Path} and sorted by {@code Path.toUri().toURL().toString()}
  * <blockquote>
  * <table border="0" summary="Pattern Language">
  * <tr>
@@ -137,8 +137,6 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * All resources will be interpreted as a {@link Path} and sorted by {@code Path.toUri().toURL().toString()}
 	 *
 	 * @throws UncheckedIOException if an I/O error occurs
 	 * @throws RuntimeException if any other error occurs

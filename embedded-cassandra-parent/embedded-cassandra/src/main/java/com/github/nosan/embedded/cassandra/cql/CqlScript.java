@@ -52,7 +52,7 @@ public interface CqlScript {
 	Collection<String> getStatements();
 
 	/**
-	 * Factory method to create {@link CqlScripts} based on classpath {@code glob} patterns.
+	 * Factory method to create {@link CqlScripts} based on classpath {@code 'glob'} patterns.
 	 *
 	 * @param patterns classpath glob patterns
 	 * @return CQL script
