@@ -137,7 +137,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * All resources will be interpreted as a {@link Path} and sorted by {@code URL.toString()}
+	 * All resources will be interpreted as a {@link Path} and sorted by {@code Path.toUri().toURL().toString()}
 	 *
 	 * @throws UncheckedIOException if an I/O error occurs
 	 * @throws RuntimeException if any other error occurs

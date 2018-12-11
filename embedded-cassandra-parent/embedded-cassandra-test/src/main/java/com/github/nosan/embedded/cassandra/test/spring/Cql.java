@@ -59,7 +59,7 @@ public @interface Cql {
 	 * for example: {@code "/org/example/schema.cql"}. A path which references a URL
 	 * (e.g., a path prefixed with
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol. <p>All resources will be loaded
-	 * by {@link ResourcePatternResolver} and sorted by {@code URL.toString()}
+	 * by {@link ResourcePatternResolver} and sorted by {@code Resource.getURL().toString()}
 	 *
 	 * @return CQL Scripts
 	 */

@@ -23,6 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.test.annotation.DirtiesContext;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
@@ -73,10 +74,8 @@ public @interface EmbeddedCassandra {
 	 * starting with a slash will be treated as an <em>absolute</em> classpath resource,
 	 * for example: {@code "/org/example/schema.cql"}. A path which references a URL
 	 * (e.g., a path prefixed with
-	 * {@code http:}, etc.) will be loaded using the specified resource protocol. A path which contains
-	 * <em>"&frasl;**&frasl;**.cql"</em>
-	 * will be handled by
-	 * {@link org.springframework.core.io.support.ResourcePatternResolver ResourcePatternResolver}.
+	 * {@code http:}, etc.) will be loaded using the specified resource protocol.  <p>All resources will be loaded
+	 * by {@link ResourcePatternResolver} and sorted by {@code Resource.getURL().toString()}
 	 *
 	 * @return CQL Scripts
 	 */
