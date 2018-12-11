@@ -76,6 +76,8 @@ public class ClassPathGlobCqlScriptTests {
 		parameters.add(new Object[]{"**.cql", new Array(KEYSPACE, ROLE)});
 		parameters.add(new Object[]{"**.cql", new Array(KEYSPACE, ROLE)});
 		parameters.add(new Object[]{"**{roles,keyspace}.cql", new Array(KEYSPACE, ROLE)});
+		parameters.add(new Object[]{"{roles,keyspace}.cql", new Array(ROLE)});
+		parameters.add(new Object[]{"**/{roles,keyspace}.cql", new Array(KEYSPACE)});
 		parameters.add(new Object[]{"**{keyspace}.cql", new Array(KEYSPACE)});
 		parameters.add(new Object[]{"*/*.cql", new Array()});
 		parameters.add(new Object[]{"**/key*.cql", new Array(KEYSPACE)});

@@ -62,12 +62,16 @@ import com.github.nosan.embedded.cassandra.util.OS;
  * <td>Matches file names starting with {@code rol<any>s.cql}</td>
  * </tr>
  * <tr>
- * <td><tt>&#47;home&#47;*&#47;*&#47;roles.cql</tt>
- * <td>Matches <tt>&#47;home&#47;any&#47;any&#47;roles.cql</tt></td>
+ * <td>{@code {roles,keyspace}.cql}</td>
+ * <td>Matches file names starting with {@code roles.cql or keyspace.cql}</td>
  * </tr>
  * <tr>
- * <td><tt>&#47;home&#47;**&#47;roles.cql</tt>
- * <td>Matches <tt>&#47;home&#47;...&#47;roles.cql</tt></td>
+ * <td><tt>home&#47;*&#47;*&#47;roles.cql</tt>
+ * <td>Matches <tt>home&#47;any&#47;any&#47;roles.cql</tt></td>
+ * </tr>
+ * <tr>
+ * <td><tt>home&#47;**&#47;roles.cql</tt>
+ * <td>Matches <tt>home&#47;...&#47;roles.cql</tt></td>
  * </tr>
  * </table>
  * </blockquote>
