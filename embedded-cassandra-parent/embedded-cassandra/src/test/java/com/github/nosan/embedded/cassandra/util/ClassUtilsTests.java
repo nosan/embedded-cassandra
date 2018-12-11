@@ -31,6 +31,8 @@ public class ClassUtilsTests {
 	@Test
 	public void getPackageName() {
 		assertThat(ClassUtils.getPackageName(null)).isEmpty();
+		assertThat(ClassUtils.getPackageName(Object[].class))
+				.isEqualTo("java.lang");
 		assertThat(ClassUtils.getPackageName(ClassUtils.class))
 				.isEqualTo("com.github.nosan.embedded.cassandra.util");
 	}

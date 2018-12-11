@@ -75,10 +75,10 @@ public abstract class ClassUtils {
 	 */
 	@Nonnull
 	public static String getPackageName(@Nullable Class<?> source) {
-		if (source == null) {
-			return "";
+		while (source != null && source.isArray()) {
+			source = source.getComponentType();
 		}
-		String name = source.getName();
+		String name = (source != null) ? source.getName() : "";
 		int i = name.lastIndexOf('.');
 		return (i > 0) ? name.substring(0, i) : "";
 	}
