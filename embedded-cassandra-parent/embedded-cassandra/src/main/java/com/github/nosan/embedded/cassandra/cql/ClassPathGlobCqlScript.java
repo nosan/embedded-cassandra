@@ -129,7 +129,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 			@Nullable Charset encoding) {
 		Objects.requireNonNull(glob, "glob must not be null");
 		this.encoding = encoding;
-		this.glob = toGlob(glob);
+		this.glob = normalize(glob);
 		this.classLoader = (classLoader != null) ? classLoader : ClassUtils.getClassLoader();
 	}
 
@@ -219,7 +219,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 	}
 
-	private static String toGlob(String glob) {
+	private static String normalize(String glob) {
 		return glob.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
 	}
 
