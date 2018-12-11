@@ -54,12 +54,11 @@ class PortReplacerCustomizer implements DirectoryCustomizer {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void customize(@Nonnull Path directory) throws IOException {
 		Yaml yaml = new Yaml();
 		Path target = directory.resolve("conf/cassandra.yaml");
 		Version version = this.version;
-		Map<String, Object> source = new LinkedHashMap<>();
+		Map<Object, Object> source = new LinkedHashMap<>();
 		try (InputStream is = Files.newInputStream(target)) {
 			Optional.ofNullable(yaml.loadAs(is, Map.class)).ifPresent(source::putAll);
 		}
@@ -74,7 +73,7 @@ class PortReplacerCustomizer implements DirectoryCustomizer {
 		}
 	}
 
-	private static void setPort(Map<String, Object> source, String property, Supplier<Integer> portSupplier,
+	private static void setPort(Map<Object, Object> source, String property, Supplier<Integer> portSupplier,
 			Supplier<InetAddress> addressSupplier) {
 		if (source.containsKey(property)) {
 			Integer port = portSupplier.get();
