@@ -55,6 +55,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @see ClusterFactory
  * @see CassandraFactory
  * @see TestCassandra
+ * @see DirtiesContext
  * @since 1.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)
