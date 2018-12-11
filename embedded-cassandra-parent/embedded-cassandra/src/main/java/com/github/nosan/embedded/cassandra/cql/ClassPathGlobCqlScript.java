@@ -30,6 +30,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -206,8 +207,12 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	private URL[] getUrls() throws IOException {
 		ClassLoader classLoader = this.classLoader;
-		return Collections.list((classLoader != null) ? classLoader.getResources("") :
-				ClassLoader.getSystemResources("")).toArray(new URL[0]);
+		Enumeration<URL> enumeration = (classLoader != null) ?
+				classLoader.getResources("") : ClassLoader.getSystemResources("");
+		if (enumeration == null) {
+			return new URL[0];
+		}
+		return Collections.list(enumeration).toArray(new URL[0]);
 	}
 
 	private static int compareByURL(Path p1, Path p2) {
