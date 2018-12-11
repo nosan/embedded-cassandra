@@ -99,7 +99,7 @@ class LocalCassandra implements Cassandra {
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param javaHome java home directory
 	 * @param jmxPort JMX port
-	 * @param allowRoot force running as root
+	 * @param allowRoot allow running as a root
 	 * @param registerShutdownHook whether shutdown hook should be registered or not
 	 */
 	LocalCassandra(@Nonnull Version version, @Nonnull ArtifactFactory artifactFactory,

@@ -98,7 +98,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	 * @param timeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param javaHome java home directory
-	 * @param allowRoot force running as root
+	 * @param allowRoot allow running as a root
 	 * @param jmxPort JMX port
 	 */
 	DefaultCassandraProcess(@Nonnull Path directory, @Nonnull Version version, @Nonnull Duration timeout,

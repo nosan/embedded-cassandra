@@ -60,7 +60,7 @@ class DefaultCassandraProcessFactory implements CassandraProcessFactory {
 	 * @param version a version
 	 * @param javaHome java home directory
 	 * @param jmxPort JMX port
-	 * @param allowRoot force running as root
+	 * @param allowRoot allow running as a root
 	 */
 	DefaultCassandraProcessFactory(@Nonnull Duration startupTimeout, @Nonnull List<String> jvmOptions,
 			@Nonnull Version version, @Nullable Path javaHome, int jmxPort, boolean allowRoot) {
