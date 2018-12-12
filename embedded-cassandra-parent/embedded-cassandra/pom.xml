@@ -11,10 +11,13 @@
     </parent>
 
     <description>
-        Embedded Cassandra provides an easy way to run `Cassandra`
+        This module contains core items that allows the Cassandra to be started and stopped.
     </description>
+
     <name>Embedded Cassandra</name>
+
     <url>https://github.com/nosan/embedded-cassandra</url>
+
     <scm>
         <url>https://github.com/nosan/embedded-cassandra.git</url>
     </scm>

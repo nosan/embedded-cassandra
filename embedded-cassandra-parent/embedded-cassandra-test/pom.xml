@@ -13,8 +13,11 @@
     <description>
         This module contains core items that can be helpful when testing your `Cassandra`
     </description>
+
     <name>Embedded Cassandra Test</name>
+
     <url>https://github.com/nosan/embedded-cassandra</url>
+
     <scm>
         <url>https://github.com/nosan/embedded-cassandra.git</url>
     </scm>
