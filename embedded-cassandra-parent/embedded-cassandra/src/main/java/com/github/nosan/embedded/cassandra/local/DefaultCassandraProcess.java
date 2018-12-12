@@ -122,12 +122,13 @@ class DefaultCassandraProcess implements CassandraProcess {
 		int minor = version.getMinor();
 		Settings settings = getSettings(directory, version);
 		this.settings = settings;
-		Path executable = OS.isWindows() ? directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
+		Path executable = (OS.get() == OS.WINDOWS) ?
+				directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
 		Path pidFile = directory.resolve(String.format("bin/%s.pid", UUID.randomUUID()));
 		this.pidFile = pidFile;
 
 		List<Object> arguments = new ArrayList<>();
-		if (OS.isWindows()) {
+		if (OS.get() == OS.WINDOWS) {
 			arguments.add("powershell");
 			arguments.add("-ExecutionPolicy");
 			arguments.add("Unrestricted");
@@ -135,10 +136,10 @@ class DefaultCassandraProcess implements CassandraProcess {
 		arguments.add(executable.toAbsolutePath());
 		arguments.add("-f");
 
-		if (OS.isWindows() && (major > 2 || (major == 2 && minor > 1))) {
+		if (OS.get() == OS.WINDOWS && (major > 2 || (major == 2 && minor > 1))) {
 			arguments.add("-a");
 		}
-		if (this.allowRoot && !OS.isWindows() && (major > 3 || (major == 3 && minor > 1))) {
+		if (this.allowRoot && OS.get() != OS.WINDOWS && (major > 3 || (major == 3 && minor > 1))) {
 			arguments.add("-R");
 		}
 		arguments.add("-p");
@@ -319,7 +320,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 	private static void stop(Path pidFile, boolean force) throws IOException {
-		if (OS.isWindows()) {
+		if (OS.get() == OS.WINDOWS) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("powershell");
 			arguments.add("-ExecutionPolicy");
@@ -341,7 +342,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 
 	private static void stop(long pid, boolean force) throws IOException {
-		if (OS.isWindows()) {
+		if (OS.get() == OS.WINDOWS) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("taskkill");
 			if (force) {

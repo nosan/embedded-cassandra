@@ -25,6 +25,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
+import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +51,7 @@ import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
  * @see CqlScript
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public class TestCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);

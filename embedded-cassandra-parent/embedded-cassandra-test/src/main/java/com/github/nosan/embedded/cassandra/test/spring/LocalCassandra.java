@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.nio.file.Path;
 
+import org.apiguardian.api.API;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.Resource;
 
@@ -72,6 +73,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 @Inherited
 @EmbeddedLocalCassandra
 @Deprecated
+@API(since = "1.0.7", status = API.Status.DEPRECATED)
 public @interface LocalCassandra {
 
 	/**

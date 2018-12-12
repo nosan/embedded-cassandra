@@ -227,7 +227,7 @@ public abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(factory);
 		factory.setAllowRoot(true);
 		runner.run(assertCreateKeyspace());
-		if (!OS.isWindows() && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
+		if (OS.get() != OS.WINDOWS && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
 			assertThat(this.output.toString()).contains(" -R, -p,");
 		}
 		else {

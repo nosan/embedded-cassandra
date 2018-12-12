@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
+import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Nosan
  * @since 1.0.6
  */
+@API(since = "1.0.6", status = API.Status.MAINTAINED)
 public abstract class CqlUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(CqlUtils.class);

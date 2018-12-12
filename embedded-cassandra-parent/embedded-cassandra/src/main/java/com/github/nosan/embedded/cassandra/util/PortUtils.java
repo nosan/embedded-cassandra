@@ -25,12 +25,15 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * Utility methods for dealing with ports.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class PortUtils {
 
 	/**

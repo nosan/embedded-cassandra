@@ -34,7 +34,7 @@ class ExecutableCustomizer implements DirectoryCustomizer {
 
 	@Override
 	public void customize(@Nonnull Path directory) {
-		if (OS.isWindows()) {
+		if (OS.get() == OS.WINDOWS) {
 			setExecutable(directory.resolve("bin/cassandra.ps1"));
 			setExecutable(directory.resolve("bin/stop-server.ps1"));
 		}

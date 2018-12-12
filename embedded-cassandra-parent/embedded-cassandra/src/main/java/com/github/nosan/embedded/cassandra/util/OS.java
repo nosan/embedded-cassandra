@@ -20,12 +20,15 @@ import java.util.Locale;
 
 import javax.annotation.Nonnull;
 
+import org.apiguardian.api.API;
+
 /**
  * Enumeration of operating systems.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.INTERNAL)
 public enum OS {
 
 	/**
@@ -57,49 +60,15 @@ public enum OS {
 
 	private static final OS CURRENT = detect();
 
-	/**
-	 * Whether current {@link OS} is Windows or not.
-	 *
-	 * @return {@code true} if {@link OS} is Windows
-	 */
-	public static boolean isWindows() {
-		return CURRENT == OS.WINDOWS;
-	}
 
 	/**
-	 * Whether current {@link OS} is Linux or not.
+	 * Determines the current OS based on {@code System.getProperty(os.name)}.
 	 *
-	 * @return {@code true} if {@link OS} is Linux
+	 * @return the current OS.
 	 */
-	public static boolean isLinux() {
-		return CURRENT == OS.LINUX;
-	}
-
-	/**
-	 * Whether current {@link OS} is Mac or not.
-	 *
-	 * @return {@code true} if {@link OS} is Mac
-	 */
-	public static boolean isMac() {
-		return CURRENT == OS.MAC;
-	}
-
-	/**
-	 * Whether current {@link OS} is Solaris or not.
-	 *
-	 * @return {@code true} if {@link OS} is Solaris
-	 */
-	public static boolean isSolaris() {
-		return CURRENT == OS.SOLARIS;
-	}
-
-	/**
-	 * Whether current {@link OS} is unknown or not.
-	 *
-	 * @return {@code true} if {@link OS} is unknown
-	 */
-	public static boolean isOther() {
-		return CURRENT == OS.OTHER;
+	@Nonnull
+	public static OS get() {
+		return CURRENT;
 	}
 
 	@Nonnull

@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -56,6 +57,7 @@ import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
  * @see CqlGroup
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public final class CqlExecutionListener extends AbstractTestExecutionListener {
 
 	private static final Logger log = LoggerFactory.getLogger(CqlExecutionListener.class);

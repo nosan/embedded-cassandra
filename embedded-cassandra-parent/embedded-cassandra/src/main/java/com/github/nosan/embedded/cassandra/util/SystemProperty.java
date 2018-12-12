@@ -23,12 +23,15 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
+import org.apiguardian.api.API;
+
 /**
  * Utility class for dealing with {@code System#Properties}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.INTERNAL)
 public final class SystemProperty implements Supplier<String> {
 
 	private final String key;

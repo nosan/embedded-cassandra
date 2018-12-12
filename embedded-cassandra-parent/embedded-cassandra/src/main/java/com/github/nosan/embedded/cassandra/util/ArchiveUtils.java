@@ -42,6 +42,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class ArchiveUtils {
 
 	private static final Map<String, ArchiveFactory> ARCHIVES;
@@ -127,7 +129,7 @@ public abstract class ArchiveUtils {
 					}
 					Files.copy(stream, path, StandardCopyOption.REPLACE_EXISTING);
 				}
-				if (!OS.isWindows()) {
+				if (OS.get() != OS.WINDOWS) {
 					FileModeUtils.set(entry, path);
 				}
 			}

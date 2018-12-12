@@ -31,12 +31,15 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 
+import org.apiguardian.api.API;
+
 /**
  * Utility methods for dealing with network.
  *
  * @author Dmytro Nosan
  * @since 1.1.0
  */
+@API(since = "1.1.0", status = API.Status.INTERNAL)
 public abstract class NetworkUtils {
 	/**
 	 * Determines the IP address of a host, given the host's name.

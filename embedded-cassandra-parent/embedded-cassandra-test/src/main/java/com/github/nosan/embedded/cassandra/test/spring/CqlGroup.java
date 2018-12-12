@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apiguardian.api.API;
+
 /**
  * Container annotation that aggregates several {@link Cql} annotations.
  *
@@ -34,6 +36,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
+@API(since = "1.0.0", status = API.Status.STABLE)
 public @interface CqlGroup {
 
 	/**

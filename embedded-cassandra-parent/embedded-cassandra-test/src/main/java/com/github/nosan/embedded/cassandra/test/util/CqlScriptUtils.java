@@ -22,6 +22,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import com.datastax.driver.core.Session;
+import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,7 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.MAINTAINED)
 public abstract class CqlScriptUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(CqlScriptUtils.class);

@@ -23,6 +23,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -31,6 +33,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.MAINTAINED)
 public abstract class CqlScriptParser {
 
 	private static final char SINGLE_QUOTE = '\'';

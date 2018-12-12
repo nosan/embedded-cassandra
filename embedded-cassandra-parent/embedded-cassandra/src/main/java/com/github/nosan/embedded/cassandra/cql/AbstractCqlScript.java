@@ -22,6 +22,8 @@ import java.util.Collections;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * Convenience base class for {@link CqlScript} implementations,
  * pre-implementing CQL script parsing.
@@ -29,6 +31,7 @@ import javax.annotation.Nullable;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public abstract class AbstractCqlScript implements CqlScript {
 
 	@Nonnull

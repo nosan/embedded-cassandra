@@ -25,6 +25,8 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * {@link CqlScript} implementation for {@link URL}.
  *
@@ -32,6 +34,7 @@ import javax.annotation.Nullable;
  * @see CqlScript#urls(URL...)
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public final class UrlCqlScript extends AbstractCqlResourceScript {
 
 	@Nonnull

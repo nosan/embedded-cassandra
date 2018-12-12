@@ -23,12 +23,15 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * {@link CqlScript} implementation for {@link InputStream}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public final class InputStreamCqlScript extends AbstractCqlResourceScript {
 
 	@Nonnull

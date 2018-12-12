@@ -92,7 +92,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldNotWorkDirectoryNotWritable() throws Exception {
-		if (!OS.isWindows()) {
+		if (OS.get() != OS.WINDOWS) {
 			this.throwable.expect(IllegalArgumentException.class);
 			this.throwable.expectMessage("is not writable");
 			File file = this.temporaryFolder.newFolder();

@@ -21,12 +21,15 @@ import java.nio.file.Path;
 
 import javax.annotation.Nonnull;
 
+import org.apiguardian.api.API;
+
 /**
  * The artifact is hidden the underlying {@code archive} file.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 @FunctionalInterface
 public interface Artifact {
 

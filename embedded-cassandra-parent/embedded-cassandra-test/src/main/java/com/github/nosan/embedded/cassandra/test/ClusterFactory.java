@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.test;
 import javax.annotation.Nonnull;
 
 import com.datastax.driver.core.Cluster;
+import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Settings;
 
@@ -29,6 +30,7 @@ import com.github.nosan.embedded.cassandra.Settings;
  * @see Cluster
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public interface ClusterFactory {
 
 	/**

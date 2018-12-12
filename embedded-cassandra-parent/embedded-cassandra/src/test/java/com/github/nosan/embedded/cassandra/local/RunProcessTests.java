@@ -34,7 +34,7 @@ public class RunProcessTests {
 
 	@Test
 	public void shouldRunAndWaitUnix() throws Exception {
-		if (!OS.isWindows()) {
+		if (OS.get() != OS.WINDOWS) {
 			OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
 			int exit = new RunProcess(Arrays.asList("bash", "-c", "echo 'Hello World' > 1.txt; cat 1.txt"))
 					.runAndWait(bufferOutput);
@@ -46,7 +46,7 @@ public class RunProcessTests {
 
 	@Test
 	public void shouldRunAndWaitWindows() throws Exception {
-		if (OS.isWindows()) {
+		if (OS.get() == OS.WINDOWS) {
 			OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
 			int exit = new RunProcess(Arrays.asList("echo", "Hello World")).runAndWait(bufferOutput);
 			assertThat(bufferOutput.toString()).isEqualTo("Hello World");

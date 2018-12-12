@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.compress.utils.IOUtils;
+import org.apiguardian.api.API;
 
 /**
  * Base class for {@link AbstractCqlScript} implementations,
@@ -33,6 +34,7 @@ import org.apache.commons.compress.utils.IOUtils;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 
 	@Nonnull

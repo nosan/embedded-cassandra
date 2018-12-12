@@ -25,6 +25,8 @@ import java.util.Collection;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * CQL Script that abstracts from the actual type of underlying source.
  *
@@ -42,6 +44,7 @@ import javax.annotation.Nullable;
  * @since 1.0.0
  */
 @FunctionalInterface
+@API(since = "1.0.0", status = API.Status.STABLE)
 public interface CqlScript {
 	/**
 	 * Return CQL Statements.

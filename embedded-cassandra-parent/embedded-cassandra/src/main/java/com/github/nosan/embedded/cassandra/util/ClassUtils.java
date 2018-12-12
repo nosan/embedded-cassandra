@@ -19,12 +19,15 @@ package com.github.nosan.embedded.cassandra.util;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * Utility methods for dealing with classes.
  *
  * @author Dmytro Nosan
  * @since 1.2.1
  */
+@API(since = "1.2.1", status = API.Status.INTERNAL)
 public abstract class ClassUtils {
 
 	/**

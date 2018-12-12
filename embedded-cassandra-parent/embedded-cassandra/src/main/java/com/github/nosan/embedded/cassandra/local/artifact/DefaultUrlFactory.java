@@ -22,6 +22,8 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import org.apiguardian.api.API;
+
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
@@ -30,6 +32,7 @@ import com.github.nosan.embedded.cassandra.Version;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.MAINTAINED)
 public class DefaultUrlFactory implements UrlFactory {
 
 	@Nonnull

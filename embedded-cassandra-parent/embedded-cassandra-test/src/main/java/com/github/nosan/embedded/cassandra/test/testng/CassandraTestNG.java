@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.datastax.driver.core.Cluster;
+import org.apiguardian.api.API;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
@@ -53,6 +54,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @see CassandraFactory
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public class CassandraTestNG extends TestCassandra {
 
 	/**

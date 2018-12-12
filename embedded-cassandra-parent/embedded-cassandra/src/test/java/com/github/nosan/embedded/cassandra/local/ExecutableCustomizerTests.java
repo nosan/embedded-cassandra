@@ -41,7 +41,7 @@ public class ExecutableCustomizerTests {
 
 	@Test
 	public void setExecutableUnixFile() throws IOException {
-		if (!OS.isWindows()) {
+		if (OS.get() != OS.WINDOWS) {
 			File file = createFile("cassandra");
 			this.customizer.customize(this.temporaryFolder.getRoot().toPath());
 			assertThat(file.canExecute()).isTrue();

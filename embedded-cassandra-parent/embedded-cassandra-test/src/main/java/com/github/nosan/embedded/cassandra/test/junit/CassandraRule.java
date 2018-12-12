@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.datastax.driver.core.Cluster;
+import org.apiguardian.api.API;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -52,6 +53,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @see CassandraFactory
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public class CassandraRule extends TestCassandra implements TestRule {
 
 	/**

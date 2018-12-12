@@ -27,12 +27,15 @@ import java.nio.file.attribute.BasicFileAttributes;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * Utility methods for dealing with files.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class FileUtils {
 
 	private static final Path TMP_DIR = Paths.get(new SystemProperty("java.io.tmpdir").get());

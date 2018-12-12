@@ -23,6 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apiguardian.api.API;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -63,6 +64,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 @Documented
 @Inherited
 @DirtiesContext
+@API(since = "1.0.0", status = API.Status.STABLE)
 public @interface EmbeddedCassandra {
 
 	/**

@@ -24,6 +24,8 @@ import java.time.Duration;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * Builder to create a {@link RemoteArtifactFactory}.
  *
@@ -31,6 +33,7 @@ import javax.annotation.Nullable;
  * @see RemoteArtifactFactory
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public final class RemoteArtifactFactoryBuilder {
 
 	@Nullable

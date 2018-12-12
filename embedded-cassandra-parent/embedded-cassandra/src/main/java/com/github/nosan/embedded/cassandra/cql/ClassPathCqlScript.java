@@ -25,6 +25,8 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
@@ -38,6 +40,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * @see CqlScript#classpath(Class, String...)
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 
 	private static final String WINDOWS = "\\\\";

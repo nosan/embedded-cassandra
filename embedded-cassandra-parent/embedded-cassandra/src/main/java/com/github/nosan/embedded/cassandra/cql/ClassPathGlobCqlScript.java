@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
 
@@ -80,6 +82,7 @@ import com.github.nosan.embedded.cassandra.util.OS;
  * @see CqlScript#classpathGlobs(String...)
  * @since 1.2.6
  */
+@API(since = "1.2.6", status = API.Status.STABLE)
 public final class ClassPathGlobCqlScript implements CqlScript {
 
 
@@ -231,7 +234,8 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	}
 
 	private static PathMatcher getPathMatcher(String glob) {
-		String globSyntax = String.format("glob:%s", OS.isWindows() ? glob.replaceAll("/", WINDOWS + WINDOWS) : glob);
+		String globSyntax = String.format("glob:%s",
+				(OS.get() == OS.WINDOWS) ? glob.replaceAll("/", WINDOWS + WINDOWS) : glob);
 		return FileSystems.getDefault().getPathMatcher(globSyntax);
 	}
 

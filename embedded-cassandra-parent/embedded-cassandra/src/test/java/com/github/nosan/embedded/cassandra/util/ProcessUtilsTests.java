@@ -33,7 +33,7 @@ public class ProcessUtilsTests {
 	@Test
 	public void getPid() throws IOException {
 		Process process = new ProcessBuilder("echo", "Hello world").start();
-		if (OS.isWindows()) {
+		if (OS.get() == OS.WINDOWS) {
 			assertThat(ProcessUtils.getPid(process)).isEqualTo(-1);
 		}
 		else {

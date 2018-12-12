@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
 import java.net.Proxy;
 import java.nio.file.Path;
 
+import org.apiguardian.api.API;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.Resource;
 
@@ -71,6 +72,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
 @Documented
 @Inherited
 @EmbeddedCassandra
+@API(since = "1.2.6", status = API.Status.STABLE)
 public @interface EmbeddedLocalCassandra {
 
 	/**

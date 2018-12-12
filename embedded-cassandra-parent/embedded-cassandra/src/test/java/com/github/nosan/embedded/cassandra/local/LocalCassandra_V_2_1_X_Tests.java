@@ -36,7 +36,7 @@ public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
 	@Test
 	public void shouldRunOnInterfaceIPV4() throws Exception {
 		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
+		if (OS.get() != OS.WINDOWS) {
 			super.shouldRunOnInterfaceIPV4();
 		}
 	}
@@ -45,7 +45,7 @@ public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
 	@Test
 	public void shouldRunOnInterfaceIPV6() throws Exception {
 		//cassandra.ps1 has a bug
-		if (!OS.isWindows()) {
+		if (OS.get() != OS.WINDOWS) {
 			super.shouldRunOnInterfaceIPV6();
 		}
 	}

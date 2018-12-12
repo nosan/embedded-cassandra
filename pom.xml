@@ -42,6 +42,7 @@
         <snakeyaml.version>1.23</snakeyaml.version>
         <commons-compress.version>1.18</commons-compress.version>
         <xz.version>1.8</xz.version>
+        <apiguardian-api.version>1.0.0</apiguardian-api.version>
     </properties>
 
 
@@ -86,6 +87,11 @@
                 <groupId>com.github.nosan</groupId>
                 <artifactId>embedded-cassandra-test-support</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apiguardian</groupId>
+                <artifactId>apiguardian-api</artifactId>
+                <version>${apiguardian-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -160,6 +166,11 @@
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apiguardian</groupId>
+            <artifactId>apiguardian-api</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>

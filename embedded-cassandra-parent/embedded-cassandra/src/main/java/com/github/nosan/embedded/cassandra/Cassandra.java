@@ -18,6 +18,8 @@ package com.github.nosan.embedded.cassandra;
 
 import javax.annotation.Nonnull;
 
+import org.apiguardian.api.API;
+
 
 /**
  * Simple interface that allows the Cassandra to be {@link #start() started} and {@link #stop()
@@ -27,6 +29,7 @@ import javax.annotation.Nonnull;
  * @see CassandraFactory
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public interface Cassandra {
 
 	/**

@@ -18,12 +18,15 @@ package com.github.nosan.embedded.cassandra.util;
 
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * Utility methods for dealing with strings.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class StringUtils {
 
 

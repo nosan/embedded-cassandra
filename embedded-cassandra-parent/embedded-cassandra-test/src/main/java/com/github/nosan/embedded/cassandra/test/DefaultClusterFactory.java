@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.SocketOptions;
+import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Settings;
 
@@ -31,6 +32,7 @@ import com.github.nosan.embedded.cassandra.Settings;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.MAINTAINED)
 public class DefaultClusterFactory implements ClusterFactory {
 
 	@Nonnull

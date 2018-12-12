@@ -21,6 +21,8 @@ import java.net.InetAddress;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
@@ -31,6 +33,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public interface Settings {
 
 	/**

@@ -26,6 +26,8 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apiguardian.api.API;
+
 /**
  * {@link CqlScript} implementation for a given CQL {@code statements}.
  *
@@ -33,6 +35,7 @@ import javax.annotation.Nullable;
  * @see CqlScript#statements(String...)
  * @since 1.0.0
  */
+@API(since = "1.0.0", status = API.Status.STABLE)
 public final class StaticCqlScript implements CqlScript {
 
 	@Nonnull

@@ -24,6 +24,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.apiguardian.api.API;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
@@ -45,6 +46,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 @Documented
 @Inherited
 @Repeatable(CqlGroup.class)
+@API(since = "1.0.0", status = API.Status.STABLE)
 public @interface Cql {
 
 	/**
