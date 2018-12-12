@@ -151,7 +151,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	@Nonnull
 	@Override
 	public Collection<String> getStatements() {
-		Set<Path> candidates = new LinkedHashSet<>(0);
+		Set<Path> candidates = new LinkedHashSet<>();
 		PathMatcher pathMatcher = getPathMatcher(this.glob);
 		try {
 			URL[] urls = getUrls();
