@@ -32,7 +32,7 @@ import com.github.nosan.embedded.cassandra.Settings;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.MAINTAINED)
+@API(since = "1.0.0", status = API.Status.STABLE)
 public class DefaultClusterFactory implements ClusterFactory {
 
 	@Nonnull

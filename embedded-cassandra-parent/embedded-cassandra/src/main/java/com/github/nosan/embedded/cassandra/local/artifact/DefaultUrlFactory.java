@@ -32,7 +32,7 @@ import com.github.nosan.embedded.cassandra.Version;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.MAINTAINED)
+@API(since = "1.0.0", status = API.Status.STABLE)
 public class DefaultUrlFactory implements UrlFactory {
 
 	@Nonnull
