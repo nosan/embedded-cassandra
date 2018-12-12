@@ -43,8 +43,8 @@ import org.apiguardian.api.API;
  * @see ClassPathGlobCqlScript
  * @since 1.0.0
  */
-@FunctionalInterface
 @API(since = "1.0.0", status = API.Status.STABLE)
+@FunctionalInterface
 public interface CqlScript {
 	/**
 	 * Return CQL Statements.
