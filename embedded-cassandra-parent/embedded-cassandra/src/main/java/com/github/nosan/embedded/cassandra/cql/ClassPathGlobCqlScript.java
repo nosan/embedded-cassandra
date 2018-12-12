@@ -224,7 +224,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		try {
 			return p1.toUri().toURL().toString().compareTo(p2.toUri().toURL().toString());
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			return 0;
 		}
 	}
