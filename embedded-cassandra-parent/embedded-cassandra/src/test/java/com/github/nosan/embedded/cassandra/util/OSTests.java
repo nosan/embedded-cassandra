@@ -73,7 +73,7 @@ public class OSTests {
 		return parameters;
 	}
 
-	private class OSProperty implements MethodRule {
+	private static final class OSProperty implements MethodRule {
 
 		private final String property;
 
