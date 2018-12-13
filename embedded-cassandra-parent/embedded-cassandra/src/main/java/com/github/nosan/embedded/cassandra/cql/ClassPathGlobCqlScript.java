@@ -48,7 +48,7 @@ import com.github.nosan.embedded.cassandra.util.OS;
 /**
  * {@link CqlScript} implementation for class path {@code glob matching} resources.
  * <p>
- * All resources will be interpreted as a {@link Path} and sorted by {@code Path.toUri().toURL().toString()}
+ * All resources will be interpreted as a {@link Path} and <b>sorted</b> by {@code Path.toUri().toURL().toString()}
  * <blockquote>
  * <table border="0" summary="Pattern Language">
  * <tr>

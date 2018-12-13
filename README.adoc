@@ -208,7 +208,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = ...)
+@ContextConfiguration
 @EmbeddedCassandra(scripts = "/cql-scripts/*.cql")
 public class CassandraTests {
 
@@ -251,7 +251,7 @@ import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = ...)
+@ContextConfiguration
 @EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CqlScriptTests {
