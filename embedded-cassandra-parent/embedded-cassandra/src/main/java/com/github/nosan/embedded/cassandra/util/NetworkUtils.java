@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
+import java.io.UncheckedIOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -46,7 +47,7 @@ public abstract class NetworkUtils {
 	 *
 	 * @param address the specified host
 	 * @return an IP address for the given host name.
-	 * @throws IllegalArgumentException if no IP address for the host could be found
+	 * @throws UncheckedIOException if no IP address for the host could be found
 	 */
 	@Nonnull
 	public static InetAddress getInetAddress(@Nonnull String address) {
@@ -55,7 +56,7 @@ public abstract class NetworkUtils {
 			return InetAddress.getByName(address);
 		}
 		catch (UnknownHostException ex) {
-			throw new IllegalArgumentException(ex);
+			throw new UncheckedIOException(ex);
 		}
 	}
 
@@ -67,6 +68,7 @@ public abstract class NetworkUtils {
 	 * @param useIpv6 whether to use IPv6 or not
 	 * @return an IP address for the given interface name.
 	 * @throws IllegalArgumentException if interface is unknown.
+	 * @throws UncheckedIOException if an I/O error occurs.
 	 * @since 1.2.7
 	 */
 	@Nonnull
@@ -85,6 +87,7 @@ public abstract class NetworkUtils {
 	 * @param interfaceName the interface name (e.g. en0)
 	 * @return an IP address for the given interface name.
 	 * @throws IllegalArgumentException if interface is unknown.
+	 * @throws UncheckedIOException if an I/O error occurs.
 	 * @since 1.2.7
 	 */
 	@Nonnull
@@ -99,7 +102,7 @@ public abstract class NetworkUtils {
 			return Collections.unmodifiableList(Collections.list(addresses));
 		}
 		catch (SocketException ex) {
-			throw new IllegalArgumentException(ex);
+			throw new UncheckedIOException(ex);
 		}
 	}
 
