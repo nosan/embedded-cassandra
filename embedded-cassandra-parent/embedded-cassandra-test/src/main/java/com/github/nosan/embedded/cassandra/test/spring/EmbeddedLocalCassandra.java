@@ -155,7 +155,7 @@ public @interface EmbeddedLocalCassandra {
 	int jmxPort() default 7199;
 
 	/**
-	 * JVM options that should be associated with Cassandra.
+	 * Sets attribute for {@link LocalCassandraFactory#getJvmOptions()}.
 	 *
 	 * @return The value of the {@code jvmOptions} attribute
 	 */
