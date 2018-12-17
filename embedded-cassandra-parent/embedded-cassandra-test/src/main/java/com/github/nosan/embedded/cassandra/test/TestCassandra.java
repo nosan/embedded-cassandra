@@ -25,6 +25,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
+import com.datastax.driver.core.Statement;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -301,6 +302,19 @@ public class TestCassandra implements Cassandra {
 	@Nonnull
 	public ResultSet executeStatement(@Nonnull String statement, @Nullable Object... args) {
 		return CqlUtils.executeStatement(getSession(), statement, args);
+	}
+
+	/**
+	 * Executes the provided query.
+	 *
+	 * @param statement the CQL query to execute
+	 * @return the result of the query. That result will never be null
+	 * but can be empty (and will be for any non SELECT query).
+	 * @since 1.2.8
+	 */
+	@Nonnull
+	public ResultSet executeStatement(@Nonnull Statement statement) {
+		return CqlUtils.executeStatement(getSession(), statement);
 	}
 
 }

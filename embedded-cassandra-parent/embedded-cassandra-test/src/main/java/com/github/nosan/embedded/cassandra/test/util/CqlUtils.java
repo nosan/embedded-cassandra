@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
+import com.datastax.driver.core.Statement;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,12 +126,31 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(statement, "Statement must not be null");
 		if (log.isDebugEnabled()) {
 			if (args != null && args.length > 0) {
-				log.debug("Execute Statement: ({}) Values: {}", statement, Arrays.toString(args));
+				log.debug("Execute Statement: {} Values: {}", statement, Arrays.toString(args));
 			}
 			else {
-				log.debug("Execute Statement: ({})", statement);
+				log.debug("Execute Statement: {}", statement);
 			}
 		}
 		return session.execute(new SimpleStatement(statement, args));
+	}
+
+	/**
+	 * Executes the provided statement.
+	 *
+	 * @param session a session
+	 * @param statement the CQL statement to execute
+	 * @return the result of the statement. That result will never be null
+	 * but can be empty (and will be for any non SELECT query).
+	 * @since 1.2.8
+	 */
+	@Nonnull
+	public static ResultSet executeStatement(@Nonnull Session session, @Nonnull Statement statement) {
+		Objects.requireNonNull(session, "Session must not be null");
+		Objects.requireNonNull(statement, "Statement must not be null");
+		if (log.isDebugEnabled()) {
+			log.debug("Execute Statement: {}", statement);
+		}
+		return session.execute(statement);
 	}
 }

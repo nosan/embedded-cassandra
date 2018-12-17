@@ -17,8 +17,8 @@
 package com.github.nosan.embedded.cassandra.test;
 
 import com.datastax.driver.core.KeyspaceMetadata;
-import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -78,20 +78,26 @@ public class TestCassandraTests {
 
 	@Test
 	public void executeStatement() {
-		ResultSet resultSet = cassandra.executeStatement("SELECT * FROM test.users WHERE user_id = ?", "frodo");
-		Row row = resultSet.one();
-		assertThat(row.get("first_name", String.class)).isEqualTo("$'Frodo;'");
-		assertThat(row.get("last_name", String.class)).isEqualTo("'$$Baggins");
+		Row row = cassandra.executeStatement("SELECT * FROM test.users WHERE user_id = ?", "frodo").one();
+		assertString(row, "first_name", "$'Frodo;'");
+		assertString(row, "last_name", "'$$Baggins");
+
+		Row row1 = cassandra.executeStatement(QueryBuilder.select("first_name").from("test", "users").limit(1))
+				.one();
+		assertString(row1, "first_name", "$'Frodo;'");
 	}
 
-	private KeyspaceMetadata getKeyspace(String name) {
+	private static KeyspaceMetadata getKeyspace(String name) {
 		return cassandra.getCluster().getMetadata().getKeyspace(name);
+	}
+
+	private static void assertString(Row row, String column, String value) {
+		assertThat(row.get(column, String.class)).isEqualTo(value);
 	}
 
 	@BeforeClass
 	public static void startCassandra() {
 		cassandra.start();
-
 	}
 
 	@AfterClass
