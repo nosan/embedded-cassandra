@@ -60,7 +60,8 @@ class PortReplacerCustomizer implements DirectoryCustomizer {
 		Version version = this.version;
 		Map<Object, Object> source = new LinkedHashMap<>();
 		try (InputStream is = Files.newInputStream(target)) {
-			Optional.ofNullable(yaml.loadAs(is, Map.class)).ifPresent(source::putAll);
+			Map<?, ?> value = yaml.loadAs(is, Map.class);
+			Optional.ofNullable(value).ifPresent(source::putAll);
 		}
 		MapSettings settings = new MapSettings(source, version);
 		setPort(source, "native_transport_port", settings::getPort, settings::getRealAddress);
