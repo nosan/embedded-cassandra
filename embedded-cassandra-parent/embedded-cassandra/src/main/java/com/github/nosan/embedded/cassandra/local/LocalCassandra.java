@@ -287,17 +287,20 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
-
 	private void addShutdownHook() {
-		Map<String, String> context = MDCUtils.getContext();
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			MDCUtils.setContext(context);
-			Thread thread = this.thread;
-			if (thread != null) {
-				interrupt(thread);
-			}
-			stop();
-		}, String.format("%s-hook", this.threadNameSupplier.get())));
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			runtime.addShutdownHook(new Thread(() -> {
+				Thread thread = this.thread;
+				if (thread != null) {
+					interrupt(thread);
+				}
+				stop();
+			}, String.format("%s-hook", this.threadNameSupplier.get())));
+		}
+		catch (Throwable ex) {
+			throw new CassandraException("Cassandra shutdown hook could not be registered", ex);
+		}
 	}
 
 	/**
