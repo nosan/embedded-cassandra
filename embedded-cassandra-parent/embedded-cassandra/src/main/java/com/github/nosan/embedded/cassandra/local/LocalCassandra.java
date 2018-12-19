@@ -132,6 +132,9 @@ class LocalCassandra implements Cassandra {
 			if (this.started) {
 				return;
 			}
+			long start = System.currentTimeMillis();
+			Version version = this.version;
+			log.info("Starts Apache Cassandra ({}) ", version);
 			this.started = true;
 
 			AtomicReference<Throwable> throwable = new AtomicReference<>();
@@ -147,9 +150,6 @@ class LocalCassandra implements Cassandra {
 			}, this.threadNameSupplier.get());
 			this.thread = thread;
 
-			Version version = this.version;
-			long start = System.currentTimeMillis();
-			log.info("Starts Apache Cassandra ({}) ", version);
 
 			thread.start();
 			join(thread);
@@ -177,6 +177,10 @@ class LocalCassandra implements Cassandra {
 			if (!this.started) {
 				return;
 			}
+			long start = System.currentTimeMillis();
+			Version version = this.version;
+			log.info("Stops Apache Cassandra ({}) ", version);
+
 			AtomicReference<Throwable> throwable = new AtomicReference<>();
 			Map<String, String> context = MDCUtils.getContext();
 			Thread thread = new Thread(() -> {
@@ -189,9 +193,6 @@ class LocalCassandra implements Cassandra {
 				}
 			}, this.threadNameSupplier.get());
 
-			long start = System.currentTimeMillis();
-			Version version = this.version;
-			log.info("Stops Apache Cassandra ({}) ", version);
 
 			thread.start();
 			join(thread);
@@ -201,10 +202,10 @@ class LocalCassandra implements Cassandra {
 				throw new CassandraException("Unable to stop Cassandra", ex);
 			}
 
-			long end = System.currentTimeMillis();
-			log.info("Apache Cassandra ({}) has been stopped ({} ms)", version, end - start);
 
 			this.started = false;
+			long end = System.currentTimeMillis();
+			log.info("Apache Cassandra ({}) has been stopped ({} ms)", version, end - start);
 
 		}
 	}

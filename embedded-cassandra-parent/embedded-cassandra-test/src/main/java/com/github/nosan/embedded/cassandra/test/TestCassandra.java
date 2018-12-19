@@ -305,9 +305,9 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Executes the provided query.
+	 * Executes the provided statement.
 	 *
-	 * @param statement the CQL query to execute
+	 * @param statement the CQL statement to execute
 	 * @return the result of the query. That result will never be null
 	 * but can be empty (and will be for any non SELECT query).
 	 * @since 1.2.8
