@@ -28,6 +28,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
+import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -173,7 +175,9 @@ class RemoteArtifact implements Artifact {
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 			try {
 				if (size > 0) {
+					Map<String, String> context = MDCUtils.getContext();
 					executorService.scheduleAtFixedRate(() -> {
+						MDCUtils.setContext(context);
 						try {
 							long current = Files.size(tempFile);
 							log.info("Downloaded {} / {}  {}%", current, size, (current * 100) / size);

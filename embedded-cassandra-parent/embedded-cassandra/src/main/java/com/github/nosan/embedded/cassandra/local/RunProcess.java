@@ -38,6 +38,7 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -162,7 +163,9 @@ class RunProcess {
 		Process process = builder.start();
 		if (outputs != null && outputs.length > 0) {
 			CountDownLatch latch = new CountDownLatch(1);
+			Map<String, String> context = MDCUtils.getContext();
 			Thread thread = new Thread(() -> {
+				MDCUtils.setContext(context);
 				latch.countDown();
 				read(process, outputs);
 			}, Thread.currentThread().getName());
