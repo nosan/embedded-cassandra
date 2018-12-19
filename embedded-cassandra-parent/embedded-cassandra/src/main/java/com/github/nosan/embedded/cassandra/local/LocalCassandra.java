@@ -21,6 +21,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -39,6 +40,7 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
+import com.github.nosan.embedded.cassandra.util.MDCUtils;
 
 /**
  * This class just a wrapper on {@link CassandraProcess}. The main purpose is initialize/destroy all resources
@@ -133,7 +135,9 @@ class LocalCassandra implements Cassandra {
 			this.started = true;
 
 			AtomicReference<Throwable> throwable = new AtomicReference<>();
+			Map<String, String> context = MDCUtils.getContext();
 			Thread thread = new Thread(() -> {
+				MDCUtils.setContext(context);
 				try {
 					startInternal();
 				}
@@ -174,7 +178,9 @@ class LocalCassandra implements Cassandra {
 				return;
 			}
 			AtomicReference<Throwable> throwable = new AtomicReference<>();
+			Map<String, String> context = MDCUtils.getContext();
 			Thread thread = new Thread(() -> {
+				MDCUtils.setContext(context);
 				try {
 					stopInternal();
 				}
@@ -283,7 +289,9 @@ class LocalCassandra implements Cassandra {
 
 
 	private void addShutdownHook() {
+		Map<String, String> context = MDCUtils.getContext();
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			MDCUtils.setContext(context);
 			Thread thread = this.thread;
 			if (thread != null) {
 				interrupt(thread);
