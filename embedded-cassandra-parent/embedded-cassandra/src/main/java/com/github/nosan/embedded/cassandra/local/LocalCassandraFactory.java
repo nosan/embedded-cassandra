@@ -380,7 +380,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 		Duration startupTimeout = getStartupTimeout();
 		if (startupTimeout == null || startupTimeout.toMillis() <= 0) {
-			startupTimeout = Duration.ofSeconds(30);
+			startupTimeout = Duration.ofMinutes(1);
 		}
 		Path workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null) {

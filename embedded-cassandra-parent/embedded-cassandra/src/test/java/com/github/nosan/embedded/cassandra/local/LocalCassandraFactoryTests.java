@@ -74,7 +74,7 @@ public class LocalCassandraFactoryTests {
 		factory.setTopologyFile(topologyFile.toUri().toURL());
 		factory.setRackFile(rackFile.toUri().toURL());
 		factory.getJvmOptions().add("arg1");
-		factory.setStartupTimeout(Duration.ofMinutes(1));
+		factory.setStartupTimeout(Duration.ofSeconds(30));
 		factory.setJavaHome(javaDirectory);
 		factory.setJmxPort(jmxPort);
 		factory.setAllowRoot(allowRoot);
@@ -88,7 +88,7 @@ public class LocalCassandraFactoryTests {
 		Object processFactory = ReflectionUtils.getField(cassandra, "processFactory");
 
 		assertThat(ReflectionUtils.getField(processFactory, "jvmOptions")).isEqualTo(Collections.singletonList("arg1"));
-		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(Duration.ofMinutes(1));
+		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(Duration.ofSeconds(30));
 		assertThat(ReflectionUtils.getField(processFactory, "javaHome")).isEqualTo(javaDirectory);
 		assertThat(ReflectionUtils.getField(processFactory, "version")).isEqualTo(version);
 		assertThat(ReflectionUtils.getField(processFactory, "jmxPort")).isEqualTo(jmxPort);
@@ -115,7 +115,7 @@ public class LocalCassandraFactoryTests {
 		Object processFactory = ReflectionUtils.getField(cassandra, "processFactory");
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(new Version(3, 11, 3));
 		assertThat(ReflectionUtils.getField(processFactory, "version")).isEqualTo(new Version(3, 11, 3));
-		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(Duration.ofSeconds(30));
+		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(Duration.ofMinutes(1));
 		assertThat(ReflectionUtils.getField(processFactory, "jmxPort")).isEqualTo(7199);
 		assertThat(ReflectionUtils.getField(processFactory, "allowRoot")).isEqualTo(false);
 

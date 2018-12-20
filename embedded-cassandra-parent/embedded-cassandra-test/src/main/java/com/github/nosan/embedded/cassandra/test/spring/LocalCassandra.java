@@ -173,7 +173,7 @@ public @interface LocalCassandra {
 	 * @return The value of the {@code startupTimeout} attribute
 	 */
 	@AliasFor(annotation = EmbeddedLocalCassandra.class)
-	long startupTimeout() default 30000;
+	long startupTimeout() default 60000;
 
 	/**
 	 * Alias for {@link EmbeddedLocalCassandra#allowRoot()}.

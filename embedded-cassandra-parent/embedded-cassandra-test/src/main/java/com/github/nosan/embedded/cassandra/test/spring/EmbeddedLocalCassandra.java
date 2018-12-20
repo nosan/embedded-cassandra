@@ -178,7 +178,7 @@ public @interface EmbeddedLocalCassandra {
 	 *
 	 * @return The value of the {@code startupTimeout} attribute
 	 */
-	long startupTimeout() default 30000;
+	long startupTimeout() default 60000;
 
 	/**
 	 * Sets attribute for {@link LocalCassandraFactory#isAllowRoot()}.
