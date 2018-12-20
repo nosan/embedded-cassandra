@@ -88,6 +88,8 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		factory.setLogbackFile(CqlResourceUtils.getURL(context, testClass, annotation.logbackFile()));
 		factory.setTopologyFile(CqlResourceUtils.getURL(context, testClass, annotation.topologyFile()));
 		factory.setRackFile(CqlResourceUtils.getURL(context, testClass, annotation.rackFile()));
+		factory.setCommitLogArchivingFile(
+				CqlResourceUtils.getURL(context, testClass, annotation.commitLogArchivingFile()));
 		if (StringUtils.hasText(annotation.workingDirectory())) {
 			factory.setWorkingDirectory(Paths.get(annotation.workingDirectory()));
 		}
