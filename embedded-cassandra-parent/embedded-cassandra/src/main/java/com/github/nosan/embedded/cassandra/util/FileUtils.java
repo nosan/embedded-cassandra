@@ -64,7 +64,6 @@ public abstract class FileUtils {
 		return USER_HOME_DIR;
 	}
 
-
 	/**
 	 * Return the user directory.
 	 *

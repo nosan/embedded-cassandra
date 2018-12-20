@@ -60,7 +60,6 @@ class RunProcess {
 	@Nonnull
 	private final Map<String, String> environment;
 
-
 	/**
 	 * Creates a new {@link RunProcess} instance.
 	 *
@@ -105,7 +104,6 @@ class RunProcess {
 		this.environment = Collections.unmodifiableMap((environment != null) ?
 				new LinkedHashMap<>(environment) : Collections.emptyMap());
 	}
-
 
 	/**
 	 * Starts a new process using the arguments and env variables and delegates output to the {@link Output}.
@@ -180,7 +178,6 @@ class RunProcess {
 		return process;
 	}
 
-
 	private static void read(Process process, Output[] outputs) {
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
@@ -198,7 +195,6 @@ class RunProcess {
 		}
 	}
 
-
 	private static String readline(BufferedReader reader) {
 		try {
 			return reader.readLine();
@@ -208,7 +204,6 @@ class RunProcess {
 			return null;
 		}
 	}
-
 
 	/**
 	 * Output consumer.
@@ -224,6 +219,5 @@ class RunProcess {
 		@Override
 		void accept(@Nonnull String line);
 	}
-
 
 }

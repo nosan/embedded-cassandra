@@ -33,7 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ConfigurationFileCustomizerTests {
 
-
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 

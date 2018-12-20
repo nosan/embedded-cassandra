@@ -24,7 +24,6 @@
         </developer>
     </developers>
 
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -44,7 +43,6 @@
         <xz.version>1.8</xz.version>
         <apiguardian-api.version>1.0.0</apiguardian-api.version>
     </properties>
-
 
     <dependencyManagement>
         <dependencies>
@@ -173,7 +171,6 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-
 
     <build>
 
@@ -423,6 +420,5 @@
         <module>embedded-cassandra-parent</module>
         <module>embedded-cassandra-tests</module>
     </modules>
-
 
 </project>

@@ -34,7 +34,6 @@ public class CassandraRuleTests {
 	@ClassRule
 	public static final CassandraRule cassandra = new CassandraRule(CqlScript.classpath("init.cql"));
 
-
 	@Test
 	public void selectRoles() {
 		assertThat(cassandra.executeStatement("SELECT * FROM  test.roles").all())

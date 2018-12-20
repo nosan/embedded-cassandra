@@ -51,6 +51,5 @@ public class CqlScriptsTests {
 		assertThat(new CqlScripts(new ClassPathCqlScript("keyspace.cql", getClass()), new ClassPathCqlScript(
 				"roles.cql")).toString()).contains("keyspace.cql").contains("roles.cql");
 
-
 	}
 }

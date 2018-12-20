@@ -46,12 +46,10 @@ public class ClassPathGlobCqlScriptTests {
 	@Nonnull
 	private final String[] statements;
 
-
 	public ClassPathGlobCqlScriptTests(@Nonnull String glob, @Nonnull Array statements) {
 		this.glob = glob;
 		this.statements = statements.statements;
 	}
-
 
 	@Test
 	public void assertStatements() {
@@ -88,7 +86,6 @@ public class ClassPathGlobCqlScriptTests {
 		parameters.add(new Object[]{"rol?s.cql", new Array(ROLE)});
 		return parameters;
 	}
-
 
 	private static final class Array {
 

@@ -86,7 +86,6 @@ class LocalCassandra implements Cassandra {
 
 	private volatile boolean started;
 
-
 	/**
 	 * Creates a new {@link LocalCassandra}.
 	 *
@@ -126,7 +125,6 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
-
 	@Override
 	public void start() throws CassandraException {
 		synchronized (this.lock) {
@@ -151,7 +149,6 @@ class LocalCassandra implements Cassandra {
 			}, this.threadNameSupplier.get());
 			this.thread = thread;
 
-
 			thread.start();
 			join(thread);
 
@@ -165,12 +162,10 @@ class LocalCassandra implements Cassandra {
 				}
 				throw new CassandraException("Unable to start Cassandra", ex);
 			}
-
 			long end = System.currentTimeMillis();
 			log.info("Apache Cassandra ({}) has been started ({} ms)", version, end - start);
 		}
 	}
-
 
 	@Override
 	public void stop() throws CassandraException {
@@ -194,7 +189,6 @@ class LocalCassandra implements Cassandra {
 				}
 			}, this.threadNameSupplier.get());
 
-
 			thread.start();
 			join(thread);
 
@@ -202,15 +196,12 @@ class LocalCassandra implements Cassandra {
 			if (ex != null) {
 				throw new CassandraException("Unable to stop Cassandra", ex);
 			}
-
-
 			this.started = false;
 			long end = System.currentTimeMillis();
 			log.info("Apache Cassandra ({}) has been stopped ({} ms)", version, end - start);
 
 		}
 	}
-
 
 	@Nonnull
 	@Override
@@ -222,7 +213,6 @@ class LocalCassandra implements Cassandra {
 							"Cassandra is not initialized. Please start it before calling this method."));
 		}
 	}
-
 
 	private void startInternal() throws IOException {
 		Version version = this.version;
@@ -237,7 +227,6 @@ class LocalCassandra implements Cassandra {
 		this.process = process;
 		this.settings = process.start();
 	}
-
 
 	private void stopInternal() throws IOException {
 		Thread thread = this.thread;
@@ -266,7 +255,6 @@ class LocalCassandra implements Cassandra {
 		}
 		this.directory = null;
 	}
-
 
 	private void join(Thread thread) {
 		try {

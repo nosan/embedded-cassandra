@@ -49,5 +49,4 @@ interface CassandraProcess {
 	 */
 	void stop() throws IOException;
 
-
 }

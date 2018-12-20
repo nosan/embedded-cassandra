@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class InputStreamCqlScriptTests {
 
-
 	@Test
 	public void getStatements() {
 		InputStreamCqlScript inputStreamCqlScript =

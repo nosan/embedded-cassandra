@@ -42,7 +42,6 @@ class TopologyFileCustomizer implements DirectoryCustomizer {
 	@Nullable
 	private final URL topologyFile;
 
-
 	/**
 	 * Creates a {@link TopologyFileCustomizer}.
 	 *

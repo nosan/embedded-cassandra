@@ -19,7 +19,6 @@ script:
 after_failure:
 - cat **/**/target/surefire-reports/*.txt | less -S
 
-
 cache:
   directories:
   - $HOME/.m2

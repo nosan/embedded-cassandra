@@ -131,7 +131,6 @@ public class CqlScriptParserTests {
 						"VALUES (201, '2015-02-18', '2015-02-22', $$Women's Tour of New Zealand; New England$$)");
 	}
 
-
 	@Test
 	public void ignoreDollarsInSingleQuote() {
 		List<String> statements = CqlScriptParser

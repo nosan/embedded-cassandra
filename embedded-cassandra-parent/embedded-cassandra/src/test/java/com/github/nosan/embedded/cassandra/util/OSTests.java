@@ -50,7 +50,6 @@ public class OSTests {
 		this.osProperty = new OSProperty(name);
 	}
 
-
 	@Test
 	public void detect() {
 		assertThat(ReflectionUtils.getStaticMethod(OS.class, "detect", new Object[0]))

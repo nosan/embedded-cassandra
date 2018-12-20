@@ -20,7 +20,6 @@ import java.nio.file.Path;
 
 import javax.annotation.Nonnull;
 
-
 /**
  * Factory that creates a {@link CassandraProcess}.
  *

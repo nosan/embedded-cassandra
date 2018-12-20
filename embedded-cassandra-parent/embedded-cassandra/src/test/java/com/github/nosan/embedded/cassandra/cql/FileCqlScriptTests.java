@@ -39,7 +39,6 @@ public class FileCqlScriptTests {
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
-
 	@Test
 	public void helpers() throws Exception {
 		assertThat(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())))
@@ -47,7 +46,6 @@ public class FileCqlScriptTests {
 		assertThat(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())).toString())
 				.contains("roles.cql");
 	}
-
 
 	@Test(expected = UncheckedIOException.class)
 	public void invalidResource() {

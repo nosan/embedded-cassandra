@@ -93,7 +93,6 @@ public class FileUtilsTests {
 				.isEqualTo(Paths.get(new SystemProperty("user.home").get()));
 	}
 
-
 	@Test
 	public void tmpDirectory() {
 		assertThat(FileUtils.getTmpDirectory())

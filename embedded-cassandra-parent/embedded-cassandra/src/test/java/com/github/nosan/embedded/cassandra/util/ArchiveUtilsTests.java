@@ -87,7 +87,6 @@ public class ArchiveUtilsTests {
 		}
 	}
 
-
 	private static void compress(String compression, File archive) throws Exception {
 		if (StringUtils.hasText(compression)) {
 			byte[] content;
@@ -120,6 +119,5 @@ public class ArchiveUtilsTests {
 		parameters.add(new Object[]{"zipx", ArchiveStreamFactory.ZIP, null});
 		return parameters;
 	}
-
 
 }

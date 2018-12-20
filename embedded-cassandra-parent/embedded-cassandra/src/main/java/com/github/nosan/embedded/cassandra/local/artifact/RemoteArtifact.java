@@ -156,7 +156,6 @@ class RemoteArtifact implements Artifact {
 		throw exception;
 	}
 
-
 	private Path download(URL url) throws IOException {
 		URLConnection urlConnection = getUrlConnection(url);
 		Path tempFile = FileUtils.getTmpDirectory()
@@ -225,7 +224,6 @@ class RemoteArtifact implements Artifact {
 		}
 		return urlConnection;
 	}
-
 
 	private String getName(URL url) {
 		String file = url.getFile();

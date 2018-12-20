@@ -30,7 +30,6 @@ import javax.annotation.Nonnull;
  */
 abstract class WaitUtils {
 
-
 	/**
 	 * Wait a given action. {@code true} result or {@code exception} breaks a waiting.
 	 * <p> Blocks the current {@code thread}.

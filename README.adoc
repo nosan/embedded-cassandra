@@ -14,8 +14,6 @@ This project uses link:http://www.apache.org/licenses/LICENSE-2.0[Apache License
  - Provides different extensions for popular frameworks: `JUnit`, `TestNG`, `Spring`
  - Easy to configure
 
-
-
 = Modules
 
 There are a number of modules in Embedded Cassandra, here is a quick overview:
@@ -57,9 +55,7 @@ TIP: It is possible to run `Cassandra` on the random ports, just use `0` for por
 
 ==  embedded-cassandra-test image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-test.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-test"]
 
-
 This module contains core items that can be helpful when testing your `Cassandra`.
-
 
 === TestNG
 
@@ -104,7 +100,6 @@ To run tests within `JUnit5`, `CassandraExtension` has to be used.
 [source,java]
 ----
 
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,7 +114,6 @@ public class CassandraExtensionTests {
 
 	@RegisterExtension
 	public static final CassandraExtension cassandra = new CassandraExtension();
-
 
 	@BeforeEach
 	void setUp() {
@@ -139,15 +133,12 @@ public class CassandraExtensionTests {
 
 ----
 
-
 === JUnit4
-
 
 To run tests within `JUnit4`, `CassandraRule` has to be used.
 
 [source,java]
 ----
-
 
 import org.junit.After;
 import org.junit.Before;
@@ -173,7 +164,6 @@ public class CassandraRuleTests {
 	public void tearDown() {
 		cassandra.executeScripts(classpath("destroy.cql"));
 	}
-
 
 	@Test
 	public void testMe() {

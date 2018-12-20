@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ProcessUtilsTests {
 
-
 	@Test
 	public void getPid() throws IOException {
 		Process process = new ProcessBuilder("echo", "Hello world").start();
@@ -41,6 +40,5 @@ public class ProcessUtilsTests {
 		}
 
 	}
-
 
 }

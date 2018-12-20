@@ -70,7 +70,6 @@ public class LocalCassandraAnnotationTests {
 	@Autowired
 	private LocalCassandraFactory factory;
 
-
 	@Test
 	public void shouldRegisterLocalFactoryBean() {
 		LocalCassandraFactory factory = this.factory;
@@ -102,7 +101,6 @@ public class LocalCassandraAnnotationTests {
 
 	@Configuration
 	static class TestConfiguration implements BeanDefinitionRegistryPostProcessor {
-
 
 		@Override
 		public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {

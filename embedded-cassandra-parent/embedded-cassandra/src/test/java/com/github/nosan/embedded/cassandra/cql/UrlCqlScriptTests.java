@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class UrlCqlScriptTests {
 
-
 	@Test
 	public void getStatements() {
 		UrlCqlScript urlCqlScript = new UrlCqlScript(getClass().getResource("/roles.cql"));

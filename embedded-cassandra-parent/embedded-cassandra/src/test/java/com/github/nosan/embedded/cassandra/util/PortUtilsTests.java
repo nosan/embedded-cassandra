@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class PortUtilsTests {
 
-
 	@Test
 	public void shouldGet100Ports() {
 		Set<Integer> ports = new LinkedHashSet<>();

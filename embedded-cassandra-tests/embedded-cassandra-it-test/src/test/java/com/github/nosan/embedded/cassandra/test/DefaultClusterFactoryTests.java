@@ -73,7 +73,6 @@ public class DefaultClusterFactoryTests {
 	public void customSettings() {
 		Cluster cluster = this.factory.create(new TestSettings(9000, "google.com", "my name"));
 
-
 		Configuration configuration = cluster.getConfiguration();
 
 		SocketOptions socketOptions = configuration.getSocketOptions();

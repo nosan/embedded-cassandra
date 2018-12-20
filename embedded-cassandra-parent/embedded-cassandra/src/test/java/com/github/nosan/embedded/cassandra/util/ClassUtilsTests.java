@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ClassUtilsTests {
 
-
 	@Test
 	public void getPackageName() {
 		assertThat(ClassUtils.getPackageName(null)).isEmpty();

@@ -29,10 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class VersionTests {
 
-
 	@Rule
 	public final ExpectedException throwable = ExpectedException.none();
-
 
 	@Test
 	public void shouldParseMajorMinorPatch() {
@@ -46,7 +44,6 @@ public class VersionTests {
 		assertThat(version.getPatch()).isEqualTo(3);
 		assertThat(version.toString()).isEqualTo("3.11.3");
 	}
-
 
 	@Test
 	public void shouldParseMajorMinor() {
@@ -72,7 +69,6 @@ public class VersionTests {
 		assertThat(version.getPatch()).isEqualTo(-1);
 		assertThat(version.toString()).isEqualTo("3");
 	}
-
 
 	@Test
 	public void shouldNotParse() {

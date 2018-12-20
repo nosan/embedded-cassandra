@@ -7,4 +7,3 @@ CREATE TABLE IF NOT EXISTS test.users  (
   emails set<text>
 );
 
-

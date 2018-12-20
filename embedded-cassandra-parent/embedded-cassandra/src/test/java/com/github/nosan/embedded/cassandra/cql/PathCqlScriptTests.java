@@ -39,7 +39,6 @@ public class PathCqlScriptTests {
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
-
 	@Test
 	public void helpers() throws Exception {
 		assertThat(new PathCqlScript(Paths.get(getClass().getResource("/roles.cql").toURI())))

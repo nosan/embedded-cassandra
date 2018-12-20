@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class StringUtilsTests {
 
-
 	@Test
 	public void hasText() {
 		assertThat(StringUtils.hasText(" ")).isFalse();

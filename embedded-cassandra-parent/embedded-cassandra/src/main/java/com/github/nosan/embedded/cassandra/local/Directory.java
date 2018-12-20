@@ -45,5 +45,4 @@ interface Directory {
 	 */
 	void destroy() throws IOException;
 
-
 }

@@ -85,7 +85,6 @@ import com.github.nosan.embedded.cassandra.util.OS;
 @API(since = "1.2.6", status = API.Status.STABLE)
 public final class ClassPathGlobCqlScript implements CqlScript {
 
-
 	private static final String WINDOWS = "\\\\";
 
 	@Nonnull
@@ -141,7 +140,6 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		this.classLoader = (classLoader != null) ? classLoader : ClassUtils.getClassLoader();
 	}
 
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -183,7 +181,6 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 		return new CqlScripts(scripts).getStatements();
 	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {

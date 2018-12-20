@@ -33,14 +33,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class CqlScriptTests {
 
-
 	@Test
 	public void classpathsGlobs() {
 		assertThat(CqlScript.classpathGlobs((String[]) null)).isNotNull();
 		assertStatements(CqlScript.classpathGlobs("roles.cql"));
 		assertStatements(CqlScript.classpathGlobs("*.cql"));
 	}
-
 
 	@Test
 	public void classpaths() {
@@ -49,13 +47,11 @@ public class CqlScriptTests {
 		assertStatements(CqlScript.classpath(getClass(), "/roles.cql"));
 	}
 
-
 	@Test
 	public void urls() {
 		assertThat(CqlScript.urls((URL[]) null)).isNotNull();
 		assertStatements(CqlScript.urls(getClass().getResource("/roles.cql")));
 	}
-
 
 	@Test
 	public void files() throws URISyntaxException {
@@ -75,7 +71,6 @@ public class CqlScriptTests {
 		assertThat(CqlScript.statements((String[]) null)).isNotNull();
 		assertStatements(CqlScript.statements("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)"));
 	}
-
 
 	private static void assertStatements(CqlScript script) {
 		assertThat(script.getStatements())

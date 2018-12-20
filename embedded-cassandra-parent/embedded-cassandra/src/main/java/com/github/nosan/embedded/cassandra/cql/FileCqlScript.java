@@ -41,7 +41,6 @@ public final class FileCqlScript extends AbstractCqlResourceScript {
 	@Nonnull
 	private final File location;
 
-
 	/**
 	 * Create a new {@link FileCqlScript} based on a File.
 	 *

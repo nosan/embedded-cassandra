@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ClassPathCqlScriptTests {
 
-
 	@Test
 	public void getStatementsWithClassloader() {
 		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("roles.cql");

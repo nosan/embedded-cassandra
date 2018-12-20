@@ -393,5 +393,4 @@ public final class LocalCassandraFactory implements CassandraFactory {
 				isRegisterShutdownHook());
 	}
 
-
 }

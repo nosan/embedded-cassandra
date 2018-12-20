@@ -51,7 +51,6 @@ public final class RemoteArtifactFactoryBuilder {
 	@Nullable
 	private Duration connectTimeout;
 
-
 	/**
 	 * Initializes the value for the {@link RemoteArtifactFactory#getDirectory() directory} attribute.
 	 *
@@ -123,7 +122,6 @@ public final class RemoteArtifactFactoryBuilder {
 		this.connectTimeout = connectTimeout;
 		return this;
 	}
-
 
 	/**
 	 * Builds a new {@link RemoteArtifactFactory}.

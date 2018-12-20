@@ -50,7 +50,6 @@ public class NetworkUtilsTests {
 				.isEqualTo(getAddress(iface, false));
 	}
 
-
 	private static Optional<InetAddress> getAddress(NetworkInterface networkInterface, boolean ipv6) {
 		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
 		return Collections.list(networkInterface.getInetAddresses())
@@ -69,6 +68,5 @@ public class NetworkUtilsTests {
 				.findFirst()
 				.orElseThrow(IllegalStateException::new);
 	}
-
 
 }

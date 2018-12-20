@@ -97,7 +97,6 @@ public @interface Cql {
 	 */
 	ExecutionPhase executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
 
-
 	/**
 	 * The bean name of the {@link com.datastax.driver.core.Cluster} against which the
 	 * scripts should be executed.

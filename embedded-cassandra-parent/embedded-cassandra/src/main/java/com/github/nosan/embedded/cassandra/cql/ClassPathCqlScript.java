@@ -30,7 +30,6 @@ import org.apiguardian.api.API;
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
-
 /**
  * {@link CqlScript} implementation for class path resources. Uses a
  * given {@link ClassLoader} or a given {@link Class} for loading resources.
@@ -44,7 +43,6 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 
 	private static final String WINDOWS = "\\\\";
-
 
 	@Nonnull
 	private final String location;
@@ -125,7 +123,6 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 		this.contextClass = contextClass;
 	}
 
-
 	@Nonnull
 	@Override
 	protected InputStream getInputStream() throws FileNotFoundException {
@@ -176,7 +173,6 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 				Objects.equals(getEncoding(), that.getEncoding());
 	}
 
-
 	@Override
 	@Nonnull
 	public String toString() {
@@ -194,7 +190,6 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 		return location;
 	}
 
-
 	@Nullable
 	private URL getURL() {
 		String location = this.location;
@@ -206,7 +201,6 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 		}
 		return ClassLoader.getSystemResource(location);
 	}
-
 
 	private static String normalize(String location, Class<?> contextClass) {
 		location = location.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
