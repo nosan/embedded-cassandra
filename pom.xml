@@ -78,11 +78,6 @@
             </dependency>
             <dependency>
                 <groupId>com.github.nosan</groupId>
-                <artifactId>embedded-cassandra-junit</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.nosan</groupId>
                 <artifactId>embedded-cassandra-test-support</artifactId>
                 <version>${project.version}</version>
             </dependency>
