@@ -98,7 +98,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#isAllowRoot} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#isAllowRoot() allowRoot} attribute.
 	 *
 	 * @param allowRoot The value for allowRoot
 	 * @since 1.2.1
@@ -120,7 +120,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getJmxPort} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getJmxPort() jmxPort} attribute.
 	 *
 	 * @param jmxPort The value for jmxPort
 	 * @since 1.1.1
@@ -143,7 +143,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome() javaHome} attribute.
 	 *
 	 * @param javaHome The value for javaHome
 	 * @since 1.0.9
@@ -163,7 +163,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getStartupTimeout} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getStartupTimeout() timeout} attribute.
 	 *
 	 * @param startupTimeout The value for startupTimeout
 	 */
@@ -195,7 +195,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getRackFile} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getRackFile() rackFile} attribute.
 	 *
 	 * @param rackFile The value for rackFile
 	 */
@@ -215,7 +215,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getTopologyFile} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getTopologyFile() topologyFile} attribute.
 	 *
 	 * @param topologyFile The value for topologyFile
 	 */
@@ -335,7 +335,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#isRegisterShutdownHook} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#isRegisterShutdownHook() registerShutdownHook}
+	 * attribute.
 	 *
 	 * @param registerShutdownHook The value for registerShutdownHook
 	 * @since 1.2.3
@@ -345,7 +346,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Commit log archiving configuration file {@code commitlog_archiving.properties}.
+	 * Commit log archiving configuration file ({@code commitlog_archiving.properties}).
 	 *
 	 * @return The value of the {@code commitLogArchivingFile} attribute
 	 * @since 1.2.8
@@ -356,7 +357,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile() commitLogArchivingFile}
+	 * attribute.
 	 *
 	 * @param commitLogArchivingFile The value for commitLogArchivingFile
 	 * @since 1.2.8
