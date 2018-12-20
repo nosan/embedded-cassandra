@@ -128,6 +128,18 @@ public @interface EmbeddedLocalCassandra {
 	String topologyFile() default "";
 
 	/**
+	 * Sets attribute for {@link LocalCassandraFactory#getCommitLogArchivingFile()}.
+	 * <p>
+	 * Path will be interpreted as a Spring
+	 * {@link Resource}.
+	 *
+	 * @return the value of {@code commitLogArchivingFile} attribute
+	 * @see Resource
+	 * @since 1.2.8
+	 */
+	String commitLogArchivingFile() default "";
+
+	/**
 	 * Sets attribute for {@link LocalCassandraFactory#getWorkingDirectory()}.
 	 * <p>
 	 * Path will be interpreted as a {@link Path}.

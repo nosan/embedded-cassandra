@@ -76,6 +76,9 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	@Nullable
 	private Path javaHome;
 
+	@Nullable
+	private URL commitLogArchivingFile;
+
 	private int jmxPort = 7199;
 
 	private boolean allowRoot = false;
@@ -341,6 +344,27 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		this.registerShutdownHook = registerShutdownHook;
 	}
 
+	/**
+	 * Commit log archiving configuration file {@code commitlog_archiving.properties}.
+	 *
+	 * @return The value of the {@code commitLogArchivingFile} attribute
+	 * @since 1.2.8
+	 */
+	@Nullable
+	public URL getCommitLogArchivingFile() {
+		return this.commitLogArchivingFile;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile} attribute.
+	 *
+	 * @param commitLogArchivingFile The value for commitLogArchivingFile
+	 * @since 1.2.8
+	 */
+	public void setCommitLogArchivingFile(@Nullable URL commitLogArchivingFile) {
+		this.commitLogArchivingFile = commitLogArchivingFile;
+	}
+
 	@Nonnull
 	@Override
 	public Cassandra create() {
@@ -363,7 +387,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 		return new LocalCassandra(version, artifactFactory, workingDirectory,
 				startupTimeout, getConfigurationFile(), getLogbackFile(), getRackFile(), getTopologyFile(),
-				getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot(), isRegisterShutdownHook());
+				getCommitLogArchivingFile(), getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot(),
+				isRegisterShutdownHook());
 	}
 
 

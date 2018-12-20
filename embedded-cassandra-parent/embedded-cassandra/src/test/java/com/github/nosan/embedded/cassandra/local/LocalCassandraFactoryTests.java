@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -53,6 +54,7 @@ public class LocalCassandraFactoryTests {
 		Path configurationFile = Paths.get("cassandra.yaml");
 		Path rackFile = Paths.get("rack.properties");
 		Path topologyFile = Paths.get("topology.properties");
+		URL commitLogArchivingFile = Paths.get("commit_log_archiving.properties").toUri().toURL();
 		int jmxPort = 8000;
 		boolean allowRoot = true;
 		ArtifactFactory artifactFactory = new ArtifactFactory() {
@@ -76,6 +78,7 @@ public class LocalCassandraFactoryTests {
 		factory.setJavaHome(javaDirectory);
 		factory.setJmxPort(jmxPort);
 		factory.setAllowRoot(allowRoot);
+		factory.setCommitLogArchivingFile(commitLogArchivingFile);
 
 
 		Cassandra cassandra = factory.create();
@@ -100,6 +103,8 @@ public class LocalCassandraFactoryTests {
 				.isEqualTo(configurationFile.toUri().toURL());
 		assertThat(ReflectionUtils.getField(directoryFactory, "rackFile")).isEqualTo(rackFile.toUri().toURL());
 		assertThat(ReflectionUtils.getField(directoryFactory, "topologyFile")).isEqualTo(topologyFile.toUri().toURL());
+		assertThat(ReflectionUtils.getField(directoryFactory, "commitLogArchivingFile"))
+				.isEqualTo(commitLogArchivingFile);
 
 	}
 

@@ -73,6 +73,9 @@ public final class LocalCassandraFactoryBuilder {
 	@Nullable
 	private Path javaHome;
 
+	@Nullable
+	private URL commitLogArchivingFile;
+
 	private int jmxPort = 7199;
 
 	private boolean allowRoot = false;
@@ -400,7 +403,8 @@ public final class LocalCassandraFactoryBuilder {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#isRegisterShutdownHook} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#isRegisterShutdownHook() registerShutdownHook}
+	 * attribute.
 	 *
 	 * @param registerShutdownHook The value for registerShutdownHook
 	 * @return {@code this} builder for use in a chained invocation
@@ -410,6 +414,61 @@ public final class LocalCassandraFactoryBuilder {
 	public LocalCassandraFactoryBuilder setRegisterShutdownHook(boolean registerShutdownHook) {
 		this.registerShutdownHook = registerShutdownHook;
 		return this;
+	}
+
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile() commitLogArchivingFile}
+	 * attribute.
+	 *
+	 * @param commitLogArchivingFile The value for commitLogArchivingFile
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.2.8
+	 */
+	@Nonnull
+	public LocalCassandraFactoryBuilder setCommitLogArchivingFile(@Nullable URL commitLogArchivingFile) {
+		this.commitLogArchivingFile = commitLogArchivingFile;
+		return this;
+	}
+
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile() commitLogArchivingFile}
+	 * attribute.
+	 *
+	 * @param commitLogArchivingFile The value for commitLogArchivingFile
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.2.8
+	 */
+	@Nonnull
+	public LocalCassandraFactoryBuilder setCommitLogArchivingFile(@Nullable Path commitLogArchivingFile) {
+		try {
+			return setCommitLogArchivingFile(
+					(commitLogArchivingFile != null) ? commitLogArchivingFile.toUri().toURL() : null);
+		}
+		catch (MalformedURLException ex) {
+			throw new IllegalArgumentException(ex);
+		}
+	}
+
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile() commitLogArchivingFile}
+	 * attribute.
+	 *
+	 * @param commitLogArchivingFile The value for commitLogArchivingFile
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.2.8
+	 */
+	@Nonnull
+	public LocalCassandraFactoryBuilder setCommitLogArchivingFile(@Nullable File commitLogArchivingFile) {
+		try {
+			return setCommitLogArchivingFile(
+					(commitLogArchivingFile != null) ? commitLogArchivingFile.toURI().toURL() : null);
+		}
+		catch (MalformedURLException ex) {
+			throw new IllegalArgumentException(ex);
+		}
 	}
 
 	/**
@@ -433,6 +492,7 @@ public final class LocalCassandraFactoryBuilder {
 		factory.setJmxPort(this.jmxPort);
 		factory.setAllowRoot(this.allowRoot);
 		factory.setRegisterShutdownHook(this.registerShutdownHook);
+		factory.setCommitLogArchivingFile(this.commitLogArchivingFile);
 		return factory;
 	}
 

@@ -98,6 +98,7 @@ class LocalCassandra implements Cassandra {
 	 * @param logbackFile URL to {@code logback.xml}
 	 * @param rackFile URL to {@code cassandra-rackdc.properties}
 	 * @param topologyFile URL to {@code cassandra-topology.properties}
+	 * @param commitLogArchivingFile URL to {@code commitlog_archiving.properties}
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param javaHome java home directory
 	 * @param jmxPort JMX port
@@ -107,7 +108,7 @@ class LocalCassandra implements Cassandra {
 	LocalCassandra(@Nonnull Version version, @Nonnull ArtifactFactory artifactFactory,
 			@Nonnull Path workingDirectory, @Nonnull Duration startupTimeout, @Nullable URL configurationFile,
 			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
-			@Nonnull List<String> jvmOptions, @Nullable Path javaHome,
+			@Nullable URL commitLogArchivingFile, @Nonnull List<String> jvmOptions, @Nullable Path javaHome,
 			int jmxPort, boolean allowRoot, boolean registerShutdownHook) {
 		Objects.requireNonNull(artifactFactory, "Artifact Factory must not be null");
 		Objects.requireNonNull(version, "Version must not be null");
@@ -117,7 +118,7 @@ class LocalCassandra implements Cassandra {
 		this.version = version;
 		this.artifactFactory = artifactFactory;
 		this.directoryFactory = new DefaultDirectoryFactory(version, workingDirectory,
-				configurationFile, logbackFile, rackFile, topologyFile);
+				configurationFile, logbackFile, rackFile, topologyFile, commitLogArchivingFile);
 		this.processFactory = new DefaultCassandraProcessFactory(startupTimeout, jvmOptions, version,
 				javaHome, jmxPort, allowRoot);
 		if (registerShutdownHook) {
