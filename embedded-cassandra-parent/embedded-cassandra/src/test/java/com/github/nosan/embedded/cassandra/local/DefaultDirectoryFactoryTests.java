@@ -45,8 +45,9 @@ public class DefaultDirectoryFactoryTests {
 		URL configurationFile = Paths.get("cassandra.yaml").toUri().toURL();
 		URL rackFile = Paths.get("rack.properties").toUri().toURL();
 		URL topologyFile = Paths.get("topology.properties").toUri().toURL();
+		URL commitLogArchivingFile = Paths.get("commit_log_archiving.properties").toUri().toURL();
 		DefaultDirectoryFactory factory = new DefaultDirectoryFactory(version, workingDirectory, configurationFile,
-				logbackFile, rackFile, topologyFile);
+				logbackFile, rackFile, topologyFile, commitLogArchivingFile);
 
 		Path archive = Paths.get("artifact");
 
@@ -56,12 +57,14 @@ public class DefaultDirectoryFactoryTests {
 		List<? extends DirectoryCustomizer> customizers =
 				(List<? extends DirectoryCustomizer>) ReflectionUtils.getField(directory, "customizers");
 
-		assertThat(customizers).hasSize(6);
+		assertThat(customizers).hasSize(7);
 		assertThat(customizers).first().isInstanceOf(ExecutableCustomizer.class);
 		assertThat(ReflectionUtils.getField(customizers.get(1), "logbackFile")).isEqualTo(logbackFile);
 		assertThat(ReflectionUtils.getField(customizers.get(2), "configurationFile")).isEqualTo(configurationFile);
 		assertThat(ReflectionUtils.getField(customizers.get(3), "rackFile")).isEqualTo(rackFile);
 		assertThat(ReflectionUtils.getField(customizers.get(4), "topologyFile")).isEqualTo(topologyFile);
+		assertThat(ReflectionUtils.getField(customizers.get(5), "commitLogArchivingFile"))
+				.isEqualTo(commitLogArchivingFile);
 		assertThat(customizers).last().isInstanceOf(PortReplacerCustomizer.class);
 
 	}

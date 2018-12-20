@@ -113,6 +113,16 @@ public @interface LocalCassandra {
 	String rackFile() default "";
 
 	/**
+	 * Alias for {@link EmbeddedLocalCassandra#commitLogArchivingFile()}.
+	 *
+	 * @return the value of {@code commitLogArchivingFile} attribute
+	 * @see Resource
+	 * @since 1.2.8
+	 */
+	@AliasFor(annotation = EmbeddedLocalCassandra.class)
+	String commitLogArchivingFile() default "";
+
+	/**
 	 * Alias for {@link EmbeddedLocalCassandra#topologyFile()}.
 	 *
 	 * @return the value of {@code topologyFile} attribute

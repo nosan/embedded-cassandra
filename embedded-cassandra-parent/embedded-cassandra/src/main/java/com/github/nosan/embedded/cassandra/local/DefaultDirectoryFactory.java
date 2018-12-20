@@ -52,25 +52,31 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 	@Nullable
 	private final URL topologyFile;
 
+	@Nullable
+	private final URL commitLogArchivingFile;
+
 
 	/**
 	 * Creates a {@link DefaultDirectoryFactory}.
 	 *
-	 * @param directory a working directory
 	 * @param version a version
+	 * @param directory a working directory
 	 * @param configurationFile URL to {@code cassandra.yaml}
 	 * @param logbackFile URL to {@code logback.xml}
 	 * @param rackFile URL to {@code cassandra-rackdc.properties}
 	 * @param topologyFile URL to {@code cassandra-topology.properties}
+	 * @param commitLogArchivingFile URL to {@code commitlog_archiving.properties}
 	 */
 	DefaultDirectoryFactory(@Nonnull Version version, @Nonnull Path directory, @Nullable URL configurationFile,
-			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile) {
+			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
+			@Nullable URL commitLogArchivingFile) {
 		this.version = version;
 		this.directory = directory;
 		this.configurationFile = configurationFile;
 		this.logbackFile = logbackFile;
 		this.rackFile = rackFile;
 		this.topologyFile = topologyFile;
+		this.commitLogArchivingFile = commitLogArchivingFile;
 	}
 
 	@Nonnull
@@ -82,6 +88,7 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 		customizers.add(new ConfigurationFileCustomizer(this.configurationFile));
 		customizers.add(new RackFileCustomizer(this.rackFile));
 		customizers.add(new TopologyFileCustomizer(this.topologyFile));
+		customizers.add(new CommitLogArchivingFileCustomizer(this.commitLogArchivingFile));
 		customizers.add(new PortReplacerCustomizer(this.version));
 		return new DefaultDirectory(this.directory, archive, customizers);
 	}

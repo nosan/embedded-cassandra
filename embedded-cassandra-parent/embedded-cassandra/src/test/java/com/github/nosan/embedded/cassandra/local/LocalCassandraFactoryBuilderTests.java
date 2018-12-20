@@ -44,6 +44,7 @@ public class LocalCassandraFactoryBuilderTests {
 		Path logback = Paths.get("logback");
 		Path rack = Paths.get("rack");
 		Path topology = Paths.get("topology");
+		Path commitLogArchiving = Paths.get("commitLog");
 		Path workingDirectory = Paths.get(UUID.randomUUID().toString());
 		Path javaDirectory = Paths.get(UUID.randomUUID().toString());
 		Version version = new Version(3, 11, 0);
@@ -57,6 +58,7 @@ public class LocalCassandraFactoryBuilderTests {
 				.setArtifactFactory(artifactFactory)
 				.setConfigurationFile(config)
 				.setLogbackFile(logback)
+				.setCommitLogArchivingFile(commitLogArchiving)
 				.setVersion(version)
 				.setRackFile(rack)
 				.setJavaHome(javaDirectory)
@@ -72,6 +74,7 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getArtifactFactory()).isEqualTo(artifactFactory);
 		assertThat(factory.getConfigurationFile()).isEqualTo(config.toUri().toURL());
 		assertThat(factory.getLogbackFile()).isEqualTo(logback.toUri().toURL());
+		assertThat(factory.getCommitLogArchivingFile()).isEqualTo(commitLogArchiving.toUri().toURL());
 		assertThat(factory.getVersion()).isEqualTo(version);
 		assertThat(factory.getRackFile()).isEqualTo(rack.toUri().toURL());
 		assertThat(factory.getTopologyFile()).isEqualTo(topology.toUri().toURL());
@@ -94,6 +97,7 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getLogbackFile()).isNull();
 		assertThat(factory.getVersion()).isNull();
 		assertThat(factory.getRackFile()).isNull();
+		assertThat(factory.getCommitLogArchivingFile()).isNull();
 		assertThat(factory.getTopologyFile()).isNull();
 		assertThat(factory.getWorkingDirectory()).isNull();
 		assertThat(factory.getJavaHome()).isNull();
