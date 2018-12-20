@@ -34,7 +34,6 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
-
 ### Eclipse ###
 .metadata
 bin/
@@ -61,4 +60,3 @@ local.properties
 .cache-main
 .scala_dependencies
 .worksheet
-
