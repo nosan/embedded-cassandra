@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -126,10 +125,6 @@ class DefaultDirectory implements Directory {
 
 	private static Path getDirectory(Path rootDirectory) throws IOException {
 		List<Path> candidates = Files.find(rootDirectory, 5, DefaultDirectory::isMatch)
-				.map(Path::getParent)
-				.filter(Objects::nonNull)
-				.map(Path::getParent)
-				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
 
 		if (candidates.isEmpty()) {
@@ -145,13 +140,14 @@ class DefaultDirectory implements Directory {
 		return candidates.get(0);
 	}
 
-	private static boolean isMatch(Path candidate, BasicFileAttributes attributes) {
-		Path parent = candidate.getParent();
-		if (parent == null) {
-			return false;
-		}
-		return String.valueOf(parent.getFileName()).equals("bin") &&
-				String.valueOf(candidate.getFileName()).equals("cassandra");
+	private static boolean isMatch(Path source, BasicFileAttributes attributes) {
+		Path bin = source.resolve("bin");
+		Path conf = source.resolve("conf");
+		return Files.exists(bin) &&
+				Files.exists(bin.resolve("cassandra")) &&
+				Files.exists(bin.resolve("cassandra.ps1")) &&
+				Files.exists(conf) &&
+				Files.exists(conf.resolve("cassandra.yaml"));
 	}
 
 }
