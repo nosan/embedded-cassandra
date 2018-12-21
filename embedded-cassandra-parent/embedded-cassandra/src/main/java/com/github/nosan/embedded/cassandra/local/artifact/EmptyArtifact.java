@@ -36,7 +36,7 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
  * @author Dmytro Nosan
  * @since 1.2.8
  */
-final class EmptyArtifact implements Artifact {
+class EmptyArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(EmptyArtifact.class);
 
