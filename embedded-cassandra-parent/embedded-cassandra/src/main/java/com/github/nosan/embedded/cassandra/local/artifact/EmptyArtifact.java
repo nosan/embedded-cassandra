@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
-import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Nonnull;
 
@@ -59,9 +58,7 @@ class EmptyArtifact implements Artifact {
 		catch (Throwable ex) {
 			log.error(String.format("Shutdown hook is not registered for (%s)", tempFile), ex);
 		}
-		try (ZipOutputStream ignore = new ZipOutputStream(Files.newOutputStream(tempFile))) {
-			return tempFile;
-		}
+		return Files.createFile(tempFile);
 	}
 
 }
