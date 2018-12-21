@@ -8,8 +8,18 @@
         </encoder>
     </appender>
 
+    <appender name="CASSANDRA" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %logger{36} %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <logger name="com.github.nosan" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="com.github.nosan.embedded.cassandra.Cassandra" level="INFO" additivity="false">
+        <appender-ref ref="CASSANDRA"/>
     </logger>
 
     <root level="INFO">
