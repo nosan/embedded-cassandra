@@ -28,6 +28,7 @@ import com.github.nosan.embedded.cassandra.Version;
  * @author Dmytro Nosan
  * @see Artifact
  * @see RemoteArtifactFactory
+ * @see EmptyArtifactFactory
  * @since 1.0.0
  */
 @API(since = "1.0.0", status = API.Status.STABLE)
