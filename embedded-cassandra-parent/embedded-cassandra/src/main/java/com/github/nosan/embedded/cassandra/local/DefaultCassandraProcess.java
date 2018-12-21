@@ -93,7 +93,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	/**
 	 * Creates a {@link DefaultCassandraProcess}.
 	 *
-	 * @param directory a configured directory
+	 * @param directory a configured base directory
 	 * @param version a version
 	 * @param timeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
@@ -188,6 +188,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	public void stop() throws IOException {
 		Process process = this.process;
 		Path pidFile = this.pidFile;
+		Path directory = this.directory;
 		long pid = this.pid;
 		Settings settings = this.settings;
 
@@ -197,11 +198,11 @@ class DefaultCassandraProcess implements CassandraProcess {
 			}
 
 			try {
-				stop(process, pidFile, pid);
+				stop(process, pidFile, directory, pid);
 			}
 			catch (Exception ex) {
 				log.error(String.format("Process (%s) has not been stopped correctly", getPidString(pid)), ex);
-				forceStop(process, pidFile, pid);
+				forceStop(process, pidFile, directory, pid);
 			}
 
 			try {
@@ -222,7 +223,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			}
 
 			if (process.isAlive()) {
-				forceStop(process, pidFile, pid);
+				forceStop(process, pidFile, directory, pid);
 			}
 
 			try {
@@ -286,9 +287,9 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 
-	private static void stop(Process process, Path pidFile, long pid) throws IOException {
+	private static void stop(Process process, Path pidFile, Path directory, long pid) throws IOException {
 		if (pidFile != null && Files.exists(pidFile)) {
-			stop(pidFile, false);
+			stop(pidFile, directory, false);
 		}
 		else if (pid > 0) {
 			stop(pid, false);
@@ -298,10 +299,10 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-	private static void forceStop(Process process, Path pidFile, long pid) {
+	private static void forceStop(Process process, Path pidFile, Path directory, long pid) {
 		try {
 			if (pidFile != null && Files.exists(pidFile)) {
-				stop(pidFile, true);
+				stop(pidFile, directory, true);
 			}
 		}
 		catch (Throwable ignore) {
@@ -320,13 +321,13 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-	private static void stop(Path pidFile, boolean force) throws IOException {
+	private static void stop(Path pidFile, Path directory, boolean force) throws IOException {
 		if (OS.get() == OS.WINDOWS) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("powershell");
 			arguments.add("-ExecutionPolicy");
 			arguments.add("Unrestricted");
-			arguments.add(pidFile.getParent().resolve("stop-server.ps1").toAbsolutePath());
+			arguments.add(directory.resolve("bin/stop-server.ps1").toAbsolutePath());
 			if (force) {
 				arguments.add("-f");
 			}
