@@ -143,10 +143,8 @@ class DefaultDirectory implements Directory {
 	private static boolean isMatch(Path source, BasicFileAttributes attributes) {
 		Path bin = source.resolve("bin");
 		Path conf = source.resolve("conf");
-		return Files.exists(bin) &&
-				Files.exists(bin.resolve("cassandra")) &&
+		return Files.exists(bin.resolve("cassandra")) &&
 				Files.exists(bin.resolve("cassandra.ps1")) &&
-				Files.exists(conf) &&
 				Files.exists(conf.resolve("cassandra.yaml"));
 	}
 
