@@ -58,7 +58,7 @@ import com.github.nosan.embedded.cassandra.util.SystemProperty;
  */
 class DefaultCassandraProcess implements CassandraProcess {
 
-	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
+	private static final Logger log = LoggerFactory.getLogger(DefaultCassandraProcess.class);
 
 	@Nonnull
 	private final Path directory;
@@ -160,7 +160,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 		OutputReadiness output = new OutputReadiness();
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		Process process = new RunProcess(directory, environment, arguments)
-				.run(new FilteredOutput(output, outputFilter), new FilteredOutput(log::info, outputFilter));
+				.run(new FilteredOutput(output, outputFilter),
+						new FilteredOutput(LoggerFactory.getLogger(Cassandra.class)::info, outputFilter));
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
 

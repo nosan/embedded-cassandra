@@ -52,7 +52,7 @@ import com.github.nosan.embedded.cassandra.util.MDCUtils;
  */
 class LocalCassandra implements Cassandra {
 
-	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
+	private static final Logger log = LoggerFactory.getLogger(LocalCassandra.class);
 
 	@Nonnull
 	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier();
