@@ -49,19 +49,5 @@ public class ConfigurationFileCustomizerTests {
 
 	}
 
-	@Test
-	public void defaultCustomize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		ConfigurationFileCustomizer customizer = new ConfigurationFileCustomizer(null);
-		customizer.customize(directory.getParent());
-		assertThat(directory.resolve("cassandra.yaml")).exists();
-		try (InputStream inputStream = getClass()
-				.getResourceAsStream("/com/github/nosan/embedded/cassandra/local/cassandra.yaml")) {
-			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(
-					IOUtils.toByteArray(inputStream));
-		}
-
-	}
-
 
 }

@@ -49,17 +49,5 @@ public class LogbackFileCustomizerTests {
 
 	}
 
-	@Test
-	public void defaultCustomize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		LogbackFileCustomizer customizer = new LogbackFileCustomizer(null);
-		customizer.customize(directory.getParent());
-		try (InputStream inputStream = getClass()
-				.getResourceAsStream("/com/github/nosan/embedded/cassandra/local/logback.xml")) {
-			assertThat(directory.resolve("logback.xml")).hasBinaryContent(IOUtils.toByteArray(
-					inputStream));
-		}
-
-	}
 
 }

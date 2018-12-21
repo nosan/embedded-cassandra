@@ -22,7 +22,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -55,19 +54,18 @@ class ConfigurationFileCustomizer implements DirectoryCustomizer {
 	@Override
 	public void customize(@Nonnull Path directory) throws IOException {
 		URL configurationFile = this.configurationFile;
-		if (configurationFile == null) {
-			configurationFile = getClass().getResource("cassandra.yaml");
-		}
-		Objects.requireNonNull(configurationFile, "Configuration File must not be null");
-		Path target = directory.resolve("conf/cassandra.yaml");
-		if (log.isDebugEnabled()) {
-			log.debug("Replace ({}) with ({})", target, configurationFile);
-		}
-		try (InputStream is = configurationFile.openStream()) {
-			Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
-		}
-		catch (IOException ex) {
-			throw new IOException(String.format("Configuration file (%s) could not be saved", configurationFile), ex);
+		if (configurationFile != null) {
+			Path target = directory.resolve("conf/cassandra.yaml");
+			if (log.isDebugEnabled()) {
+				log.debug("Replace ({}) with ({})", target, configurationFile);
+			}
+			try (InputStream is = configurationFile.openStream()) {
+				Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
+			}
+			catch (IOException ex) {
+				throw new IOException(String.format("Configuration file (%s) could not be saved", configurationFile),
+						ex);
+			}
 		}
 	}
 

@@ -22,7 +22,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -56,20 +55,17 @@ class LogbackFileCustomizer implements DirectoryCustomizer {
 	@Override
 	public void customize(@Nonnull Path directory) throws IOException {
 		URL logbackFile = this.logbackFile;
-		if (logbackFile == null) {
-			logbackFile = getClass().getResource("logback.xml");
+		if (logbackFile != null) {
+			Path target = directory.resolve("conf/logback.xml");
+			if (log.isDebugEnabled()) {
+				log.debug("Replace ({}) with ({})", target, logbackFile);
+			}
+			try (InputStream is = logbackFile.openStream()) {
+				Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
+			}
+			catch (IOException ex) {
+				throw new IOException(String.format("Logback file (%s) could not be saved", logbackFile), ex);
+			}
 		}
-		Objects.requireNonNull(logbackFile, "Logback File must not be null");
-		Path target = directory.resolve("conf/logback.xml");
-		if (log.isDebugEnabled()) {
-			log.debug("Replace ({}) with ({})", target, logbackFile);
-		}
-		try (InputStream is = logbackFile.openStream()) {
-			Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
-		}
-		catch (IOException ex) {
-			throw new IOException(String.format("Logback file (%s) could not be saved", logbackFile), ex);
-		}
-
 	}
 }
