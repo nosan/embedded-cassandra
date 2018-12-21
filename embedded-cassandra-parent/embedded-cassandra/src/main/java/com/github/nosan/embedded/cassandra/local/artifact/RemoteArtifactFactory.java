@@ -31,7 +31,7 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 /**
- * {@link ArtifactFactory} to create a remote {@link Artifact}.
+ * {@link ArtifactFactory} to create a {@link RemoteArtifact}.
  *
  * @author Dmytro Nosan
  * @see RemoteArtifactFactoryBuilder
