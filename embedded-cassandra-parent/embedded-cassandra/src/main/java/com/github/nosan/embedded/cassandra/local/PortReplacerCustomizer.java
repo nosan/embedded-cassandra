@@ -22,9 +22,9 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
@@ -56,36 +56,65 @@ class PortReplacerCustomizer implements DirectoryCustomizer {
 	@Override
 	public void customize(@Nonnull Path directory) throws IOException {
 		Yaml yaml = new Yaml();
-		Path target = directory.resolve("conf/cassandra.yaml");
-		Version version = this.version;
-		Map<Object, Object> source = new LinkedHashMap<>();
-		try (InputStream is = Files.newInputStream(target)) {
-			Map<?, ?> value = yaml.loadAs(is, Map.class);
-			Optional.ofNullable(value).ifPresent(source::putAll);
+		Path configurationFile = directory.resolve("conf/cassandra.yaml");
+
+		Map<Object, Object> originalSource = new LinkedHashMap<>(load(yaml, configurationFile));
+		Map<Object, Object> newSource = new LinkedHashMap<>(originalSource);
+
+		replace(newSource, this.version);
+
+		if (newSource.equals(originalSource)) {
+			return;
 		}
-		MapSettings settings = new MapSettings(source, version);
-		setPort(source, "native_transport_port", settings::getPort, settings::getRealAddress);
-		setPort(source, "native_transport_port_ssl", settings::getSslPort, settings::getRealAddress);
-		setPort(source, "rpc_port", settings::getRpcPort, settings::getRealAddress);
-		setPort(source, "storage_port", settings::getStoragePort, settings::getRealListenAddress);
-		setPort(source, "ssl_storage_port", settings::getSslStoragePort, settings::getRealListenAddress);
-		try (BufferedWriter writer = Files.newBufferedWriter(target)) {
-			yaml.dump(source, writer);
+
+		try (BufferedWriter writer = Files.newBufferedWriter(configurationFile)) {
+			yaml.dump(newSource, writer);
 		}
 	}
 
+
 	private static void setPort(Map<Object, Object> source, String property, Supplier<Integer> portSupplier,
 			Supplier<InetAddress> addressSupplier) {
-		if (source.containsKey(property)) {
-			Integer port = portSupplier.get();
-			if (port != null && port == 0) {
-				InetAddress address = addressSupplier.get();
-				port = PortUtils.getPort(address);
-				if (log.isDebugEnabled()) {
-					log.debug("Replace {}: 0 -> {}  ", property, port);
-				}
-				source.put(property, port);
+
+		if (!source.containsKey(property)) {
+			return;
+		}
+
+		Integer originalPort = portSupplier.get();
+		if (originalPort == null || originalPort != 0) {
+			return;
+		}
+
+		InetAddress address = addressSupplier.get();
+		int newPort = PortUtils.getPort(address);
+
+		if (log.isDebugEnabled()) {
+			log.debug("Replace {}: {} as {}: {}", property, originalPort, property, newPort);
+		}
+
+		source.put(property, newPort);
+	}
+
+	private static void replace(Map<Object, Object> newSource, Version version) {
+		MapSettings settings = new MapSettings(newSource, version);
+		setPort(newSource, "native_transport_port", settings::getPort, settings::getRealAddress);
+		setPort(newSource, "native_transport_port_ssl", settings::getSslPort, settings::getRealAddress);
+		setPort(newSource, "rpc_port", settings::getRpcPort, settings::getRealAddress);
+		setPort(newSource, "storage_port", settings::getStoragePort, settings::getRealListenAddress);
+		setPort(newSource, "ssl_storage_port", settings::getSslStoragePort, settings::getRealListenAddress);
+	}
+
+
+	private static Map<?, ?> load(Yaml yaml, Path source) {
+		try (InputStream is = Files.newInputStream(source)) {
+			Map<?, ?> value = yaml.loadAs(is, Map.class);
+			return (value != null) ? value : Collections.emptyMap();
+		}
+		catch (IOException ex) {
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Could not read properties from (%s)", source), ex);
 			}
+			return Collections.emptyMap();
 		}
 	}
 

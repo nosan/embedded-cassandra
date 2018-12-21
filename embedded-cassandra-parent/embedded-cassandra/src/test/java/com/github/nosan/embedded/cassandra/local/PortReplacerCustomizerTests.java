@@ -16,9 +16,11 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.Map;
 
 import org.junit.Rule;
@@ -43,7 +45,7 @@ public class PortReplacerCustomizerTests {
 
 
 	@Test
-	public void customize() throws Exception {
+	public void shouldReplaceWithRandomPorts() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		Version version = new Version(3, 11, 3);
 		PortReplacerCustomizer customizer = new PortReplacerCustomizer(version);
@@ -66,4 +68,35 @@ public class PortReplacerCustomizerTests {
 
 	}
 
+
+	@Test
+	public void shouldNotReplaceAndShouldNotModify() throws IOException {
+		Path directory = this.temporaryFolder.newFolder("conf").toPath();
+		Version version = new Version(3, 11, 3);
+		PortReplacerCustomizer customizer = new PortReplacerCustomizer(version);
+		Path configurationFile = directory.resolve("cassandra.yaml");
+
+		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
+			Files.copy(inputStream, configurationFile);
+		}
+
+		FileTime lastModifiedTime = Files.getLastModifiedTime(configurationFile);
+
+		customizer.customize(directory.getParent());
+
+		assertThat(configurationFile).exists();
+		assertThat(Files.getLastModifiedTime(configurationFile))
+				.isEqualTo(lastModifiedTime);
+
+		MapSettings settings;
+		try (InputStream inputStream = Files.newInputStream(configurationFile)) {
+			settings = new MapSettings(new Yaml().loadAs(inputStream, Map.class), version);
+		}
+		assertThat(settings.getPort()).isEqualTo(9042);
+		assertThat(settings.getRpcPort()).isEqualTo(9160);
+		assertThat(settings.getStoragePort()).isEqualTo(7000);
+		assertThat(settings.getSslPort()).isEqualTo(9142);
+		assertThat(settings.getSslStoragePort()).isEqualTo(7001);
+
+	}
 }
