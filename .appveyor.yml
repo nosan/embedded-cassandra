@@ -10,7 +10,7 @@ environment:
 
 build_script:
 - java -version
-- mvnw.cmd -Dsurefire.rerunFailingTestsCount=1 -B -e clean install
+- mvnw.cmd -Dsurefire.rerunFailingTestsCount=1 -B clean install
 
 on_failure:
 - cat **/**/target/surefire-reports/*.txt | grep -A 5 -B 5 'ERROR'
