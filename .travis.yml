@@ -17,7 +17,7 @@ script:
 - ./mvnw -Dsurefire.rerunFailingTestsCount=1 -B clean install
 
 after_failure:
-- cat **/**/target/surefire-reports/*.txt | grep -A 5 -B 5 'error|exception'
+- cat **/**/target/surefire-reports/*.txt | grep -A 15 -B 5 'error|exception'
 
 cache:
   directories:
