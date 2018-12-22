@@ -150,7 +150,7 @@ class RunProcess {
 				message.append(String.format(" with environment %s", environment));
 			}
 			if (workingDirectory != null) {
-				message.append(String.format(" and directory (%s)", workingDirectory));
+				message.append(String.format(" and use a directory (%s)", workingDirectory));
 			}
 			log.debug(message.toString());
 		}
