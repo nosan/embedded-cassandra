@@ -292,7 +292,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			stop(pidFile, directory, false);
 		}
 		else if (pid > 0) {
-			stop(pid, false);
+			stop(pid, directory, false);
 		}
 		else {
 			process.destroy();
@@ -309,7 +309,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 		try {
 			if (pid > 0) {
-				stop(pid, true);
+				stop(pid, directory, true);
 			}
 		}
 		catch (Throwable ignore) {
@@ -333,17 +333,17 @@ class DefaultCassandraProcess implements CassandraProcess {
 			}
 			arguments.add("-p");
 			arguments.add(pidFile.toAbsolutePath());
-			new RunProcess(arguments).runAndWait(log::info);
+			new RunProcess(directory, arguments).runAndWait(log::info);
 		}
 		else {
 			String signal = force ? "-9" : "-SIGINT";
-			new RunProcess(Arrays.asList("bash", "-c",
+			new RunProcess(directory, Arrays.asList("bash", "-c",
 					String.format("kill %s `cat %s`", signal, pidFile.toAbsolutePath()))).runAndWait(log::info);
 		}
 	}
 
 
-	private static void stop(long pid, boolean force) throws IOException {
+	private static void stop(long pid, Path directory, boolean force) throws IOException {
 		if (OS.get() == OS.WINDOWS) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("taskkill");
@@ -353,11 +353,11 @@ class DefaultCassandraProcess implements CassandraProcess {
 			arguments.add("/T");
 			arguments.add("/pid");
 			arguments.add(pid);
-			new RunProcess(arguments).runAndWait(log::info);
+			new RunProcess(directory, arguments).runAndWait(log::info);
 		}
 		else {
 			String signal = force ? "-9" : "-SIGINT";
-			new RunProcess(Arrays.asList("kill", signal, pid)).runAndWait(log::info);
+			new RunProcess(directory, Arrays.asList("kill", signal, pid)).runAndWait(log::info);
 		}
 	}
 
