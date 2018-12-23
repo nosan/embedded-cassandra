@@ -68,7 +68,8 @@ public class OSTests {
 		parameters.add(new Object[]{"Linux", OS.LINUX});
 		parameters.add(new Object[]{"Mac OS X", OS.MAC});
 		parameters.add(new Object[]{"Mac OS", OS.MAC});
-		parameters.add(new Object[]{"SunOS", OS.OTHER});
+		parameters.add(new Object[]{"SunOS", OS.SOLARIS});
+		parameters.add(new Object[]{"Aix", OS.OTHER});
 		return parameters;
 	}
 

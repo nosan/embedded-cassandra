@@ -82,7 +82,7 @@ public enum OS {
 		if (name.contains("mac")) {
 			return MAC;
 		}
-		if (name.contains("solaris")) {
+		if (name.contains("solaris") || name.contains("sunos")) {
 			return SOLARIS;
 		}
 		if (name.contains("win")) {
