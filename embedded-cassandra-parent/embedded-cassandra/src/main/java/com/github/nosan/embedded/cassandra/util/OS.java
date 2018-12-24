@@ -75,18 +75,17 @@ public enum OS {
 	private static OS detect() {
 		String name = new SystemProperty("os.name").get()
 				.toLowerCase(Locale.ENGLISH);
-
 		if (name.contains("linux")) {
 			return LINUX;
 		}
-		if (name.contains("mac")) {
-			return MAC;
+		if (name.contains("windows")) {
+			return WINDOWS;
 		}
 		if (name.contains("solaris") || name.contains("sunos")) {
 			return SOLARIS;
 		}
-		if (name.contains("win")) {
-			return WINDOWS;
+		if (name.contains("mac")) {
+			return MAC;
 		}
 		return OTHER;
 	}
