@@ -26,7 +26,6 @@ import org.apiguardian.api.API;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
-
 /**
  * Configuration properties for the {@link Cassandra}.
  *

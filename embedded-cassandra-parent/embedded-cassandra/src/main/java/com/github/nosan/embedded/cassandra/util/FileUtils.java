@@ -110,7 +110,6 @@ public abstract class FileUtils {
 		return true;
 	}
 
-
 	/**
 	 * Tests whether a {@code Path} is a temporary.
 	 *

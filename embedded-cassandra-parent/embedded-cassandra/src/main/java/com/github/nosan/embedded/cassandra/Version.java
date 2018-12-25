@@ -68,7 +68,6 @@ public final class Version implements Comparable<Version> {
 		this(major, minor, -1);
 	}
 
-
 	/**
 	 * Creates a {@link Version}.
 	 *
@@ -77,7 +76,6 @@ public final class Version implements Comparable<Version> {
 	public Version(int major) {
 		this(major, -1, -1);
 	}
-
 
 	/**
 	 * Returns a major value.

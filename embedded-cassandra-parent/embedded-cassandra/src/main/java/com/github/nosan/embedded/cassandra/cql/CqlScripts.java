@@ -59,7 +59,6 @@ public final class CqlScripts implements CqlScript {
 				Collections.emptyList()));
 	}
 
-
 	@Nonnull
 	@Override
 	public Collection<String> getStatements() {

@@ -68,7 +68,6 @@ public abstract class ClassUtils {
 		return cl;
 	}
 
-
 	/**
 	 * Determines the package name for the given class.
 	 *

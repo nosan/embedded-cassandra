@@ -49,7 +49,6 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 		this.encoding = (encoding != null) ? encoding : Charset.defaultCharset();
 	}
 
-
 	/**
 	 * {@inheritDoc}
 	 *

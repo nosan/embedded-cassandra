@@ -57,9 +57,7 @@ public enum OS {
 	 */
 	OTHER;
 
-
 	private static final OS CURRENT = detect();
-
 
 	/**
 	 * Determines the current OS based on {@code System.getProperty(os.name)}.

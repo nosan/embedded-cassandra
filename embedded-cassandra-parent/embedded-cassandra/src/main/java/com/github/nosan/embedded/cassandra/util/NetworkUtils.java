@@ -60,7 +60,6 @@ public abstract class NetworkUtils {
 		}
 	}
 
-
 	/**
 	 * Return the first IPv4 or IPv6 address by the interface name.
 	 *
@@ -105,7 +104,6 @@ public abstract class NetworkUtils {
 			throw new UncheckedIOException(ex);
 		}
 	}
-
 
 	/**
 	 * Return the {@code localhost} address.

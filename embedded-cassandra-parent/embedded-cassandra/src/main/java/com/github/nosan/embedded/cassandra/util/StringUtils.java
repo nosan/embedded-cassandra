@@ -29,7 +29,6 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class StringUtils {
 
-
 	/**
 	 * Check whether the given {@code String} is empty.
 	 *

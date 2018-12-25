@@ -20,7 +20,6 @@ import javax.annotation.Nonnull;
 
 import org.apiguardian.api.API;
 
-
 /**
  * Simple interface that allows the Cassandra to be {@link #start() started} and {@link #stop()
  * stopped}.

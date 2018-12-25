@@ -25,7 +25,6 @@ import javax.annotation.Nullable;
 
 import org.apiguardian.api.API;
 
-
 /**
  * Utility class for dealing with {@link Process}.
  *

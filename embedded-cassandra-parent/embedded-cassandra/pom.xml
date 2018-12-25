@@ -24,7 +24,6 @@
 
     <artifactId>embedded-cassandra</artifactId>
 
-
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -59,7 +58,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>

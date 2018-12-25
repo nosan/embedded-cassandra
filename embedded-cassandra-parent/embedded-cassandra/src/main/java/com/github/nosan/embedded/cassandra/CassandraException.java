@@ -38,7 +38,6 @@ public class CassandraException extends RuntimeException {
 		super(message);
 	}
 
-
 	/**
 	 * Creates a new exception.
 	 *
@@ -47,7 +46,6 @@ public class CassandraException extends RuntimeException {
 	public CassandraException(@Nullable Throwable cause) {
 		super(cause);
 	}
-
 
 	/**
 	 * Creates a new exception.

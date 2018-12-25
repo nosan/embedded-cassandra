@@ -34,7 +34,6 @@ import org.slf4j.MDC;
 @API(since = "1.2.8", status = API.Status.INTERNAL)
 public abstract class MDCUtils {
 
-
 	/**
 	 * Return a copy of the current thread's context map, with keys and values of
 	 * type String.

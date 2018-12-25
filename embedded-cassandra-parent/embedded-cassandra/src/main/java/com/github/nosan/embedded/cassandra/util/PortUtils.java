@@ -52,7 +52,6 @@ public abstract class PortUtils {
 	 */
 	public static final int MAX = 65535;
 
-
 	/**
 	 * Find a free {@code TCP} port.
 	 *
