@@ -159,7 +159,6 @@ public abstract class AbstractLocalCassandraTests {
 		assertThat(this.output.toString()).doesNotContain("Stops Apache Cassandra");
 	}
 
-
 	@Test
 	public void shouldNotGetSettings() {
 		this.throwable.expect(CassandraException.class);
@@ -191,7 +190,6 @@ public abstract class AbstractLocalCassandraTests {
 		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
-
 	@Test
 	public void shouldStartOnDefaultSettingsAndBeRestarted() {
 		new CassandraRunner(this.factory).run(assertCreateKeyspace());
@@ -219,7 +217,6 @@ public abstract class AbstractLocalCassandraTests {
 		assertCassandraHasBeenStopped();
 	}
 
-
 	@Test
 	public void shouldPassAllowRootIfNecessary() {
 		LocalCassandraFactory factory = this.factory;
@@ -236,7 +233,6 @@ public abstract class AbstractLocalCassandraTests {
 		assertCassandraHasBeenStopped();
 		assertDirectoryHasBeenDeletedCorrectly();
 	}
-
 
 	private void runAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
 		Path configurationFile = this.temporaryFolder.newFile("cassandra.yaml").toPath();
@@ -306,7 +302,6 @@ public abstract class AbstractLocalCassandraTests {
 		@Nonnull
 		private final String statement;
 
-
 		CqlAssert(@Nonnull String statement) {
 			this.statement = Objects.requireNonNull(statement);
 		}
@@ -345,7 +340,6 @@ public abstract class AbstractLocalCassandraTests {
 			this.addressMapper = addressMapper;
 			this.portMapper = portMapper;
 		}
-
 
 		@Override
 		public void accept(@Nonnull Cassandra cassandra) {

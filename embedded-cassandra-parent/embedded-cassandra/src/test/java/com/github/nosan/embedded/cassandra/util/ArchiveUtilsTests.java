@@ -74,6 +74,25 @@ public class ArchiveUtilsTests {
 
 	}
 
+	@Parameterized.Parameters(name = "{0}")
+	public static Iterable<Object[]> archives() {
+		List<Object[]> parameters = new ArrayList<>();
+		parameters.add(new Object[]{"tar.gz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
+		parameters.add(new Object[]{"tgz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
+		parameters.add(new Object[]{"tar.bz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
+		parameters.add(new Object[]{"tar.xz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ});
+		parameters.add(new Object[]{"txz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ});
+		parameters.add(new Object[]{"tbz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
+		parameters.add(new Object[]{"a", ArchiveStreamFactory.AR, null});
+		parameters.add(new Object[]{"ar", ArchiveStreamFactory.AR, null});
+		parameters.add(new Object[]{"cpio", ArchiveStreamFactory.CPIO, null});
+		parameters.add(new Object[]{"jar", ArchiveStreamFactory.JAR, null});
+		parameters.add(new Object[]{"tar", ArchiveStreamFactory.TAR, null});
+		parameters.add(new Object[]{"zip", ArchiveStreamFactory.ZIP, null});
+		parameters.add(new Object[]{"zipx", ArchiveStreamFactory.ZIP, null});
+		return parameters;
+	}
+
 	private static void archive(String archiveFormat, File archive, File file) throws Exception {
 		ArchiveStreamFactory af = new ArchiveStreamFactory();
 		try (ArchiveOutputStream os = af.createArchiveOutputStream(archiveFormat,
@@ -99,25 +118,6 @@ public class ArchiveUtilsTests {
 				IOUtils.copy(new ByteArrayInputStream(content), os);
 			}
 		}
-	}
-
-	@Parameterized.Parameters(name = "{0}")
-	public static Iterable<Object[]> archives() {
-		List<Object[]> parameters = new ArrayList<>();
-		parameters.add(new Object[]{"tar.gz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
-		parameters.add(new Object[]{"tgz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP});
-		parameters.add(new Object[]{"tar.bz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
-		parameters.add(new Object[]{"tar.xz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ});
-		parameters.add(new Object[]{"txz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ});
-		parameters.add(new Object[]{"tbz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2});
-		parameters.add(new Object[]{"a", ArchiveStreamFactory.AR, null});
-		parameters.add(new Object[]{"ar", ArchiveStreamFactory.AR, null});
-		parameters.add(new Object[]{"cpio", ArchiveStreamFactory.CPIO, null});
-		parameters.add(new Object[]{"jar", ArchiveStreamFactory.JAR, null});
-		parameters.add(new Object[]{"tar", ArchiveStreamFactory.TAR, null});
-		parameters.add(new Object[]{"zip", ArchiveStreamFactory.ZIP, null});
-		parameters.add(new Object[]{"zipx", ArchiveStreamFactory.ZIP, null});
-		return parameters;
 	}
 
 }

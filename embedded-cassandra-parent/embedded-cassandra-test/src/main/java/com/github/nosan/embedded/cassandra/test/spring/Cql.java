@@ -117,7 +117,6 @@ public @interface Cql {
 	 */
 	String cluster() default "";
 
-
 	/**
 	 * Enumeration of <em>phases</em> that dictate when CQL scripts are executed.
 	 */

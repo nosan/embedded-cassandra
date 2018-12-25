@@ -42,7 +42,6 @@ import org.springframework.util.StringUtils;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
 
-
 /**
  * {@code TestExecutionListener} that provides support for executing CQL
  * {@link Cql#scripts scripts} and inlined {@link Cql#statements statements}
@@ -161,6 +160,5 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			return null;
 		}
 	}
-
 
 }

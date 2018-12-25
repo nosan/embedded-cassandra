@@ -35,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class LocalCassandraFactoryBuilderTests {
 
-
 	@Test
 	public void buildFactory() throws Exception {
 		String[] jvmOptions = {"1", "2"};

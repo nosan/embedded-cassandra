@@ -86,7 +86,6 @@ abstract class CqlResourceUtils {
 		return cqlScripts.toArray(new CqlScript[0]);
 	}
 
-
 	/**
 	 * Converts Spring {@link Resource} as {@link URL}.
 	 *
@@ -107,7 +106,6 @@ abstract class CqlResourceUtils {
 		Assert.isTrue(locations.length == 1, "Invalid location length");
 		return resourceLoader.getResource(locations[0]).getURL();
 	}
-
 
 	private static int compareByURL(Resource r, Resource r1) {
 		try {

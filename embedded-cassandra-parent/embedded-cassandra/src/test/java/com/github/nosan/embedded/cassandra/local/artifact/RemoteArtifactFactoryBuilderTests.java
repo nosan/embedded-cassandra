@@ -57,7 +57,6 @@ public class RemoteArtifactFactoryBuilderTests {
 				.setConnectTimeout(Duration.ofMinutes(100))
 				.build();
 
-
 		assertThat(factory.getDirectory()).isEqualTo(FileUtils.getTmpDirectory());
 		assertThat(factory.getUrlFactory()).isEqualTo(urlFactory);
 		assertThat(factory.getProxy()).isEqualTo(proxy);

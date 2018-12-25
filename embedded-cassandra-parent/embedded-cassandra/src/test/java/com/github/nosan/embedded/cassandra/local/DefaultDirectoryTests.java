@@ -43,7 +43,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DefaultDirectoryTests {
 
-
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -76,7 +75,6 @@ public class DefaultDirectoryTests {
 	public void shouldInitializeDirectoryFlatArchive() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 
-
 		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, archive, Collections.emptyList());
 
 		Path directory = workDir.initialize();
@@ -88,7 +86,6 @@ public class DefaultDirectoryTests {
 		assertThat(directory.resolve("bin")).exists();
 
 	}
-
 
 	@Test
 	public void directoryNotValidNoCassandraExecutable() throws Exception {
@@ -105,14 +102,12 @@ public class DefaultDirectoryTests {
 		this.throwable.expectMessage("Impossible to determine a base directory");
 		this.throwable.expect(IllegalStateException.class);
 
-
 		Path archiveFolder = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 		Path archiveFlat = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 		ArchiveUtils.extract(archiveFolder, this.rootDirectory, ignore -> true);
 		DefaultDirectory workDir = new DefaultDirectory(this.rootDirectory, archiveFlat, Collections.emptyList());
 		workDir.initialize();
 	}
-
 
 	@Test
 	public void shouldDestroyTemporaryDirectory() throws Exception {
@@ -129,9 +124,7 @@ public class DefaultDirectoryTests {
 		assertThat(this.rootDirectory).doesNotExist();
 		assertThat(directory).doesNotExist();
 
-
 	}
-
 
 	@Test
 	public void shouldNotDestroyDirectory() throws Exception {
@@ -187,6 +180,5 @@ public class DefaultDirectoryTests {
 						Collections.emptyList());
 		workDir.initialize();
 	}
-
 
 }

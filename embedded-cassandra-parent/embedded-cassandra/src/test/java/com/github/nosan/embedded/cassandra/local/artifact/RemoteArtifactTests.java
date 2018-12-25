@@ -89,7 +89,6 @@ public class RemoteArtifactTests {
 		this.factory.create(new Version(3, 11, 3)).get();
 	}
 
-
 	@Test
 	public void shouldNotWorkDirectoryNotWritable() throws Exception {
 		if (OS.get() != OS.WINDOWS) {
@@ -124,7 +123,6 @@ public class RemoteArtifactTests {
 
 	}
 
-
 	@Test
 	public void shouldDownloadArtifactIfNotExistsNoProgress() throws Exception {
 		HttpServer server = this.webServer.get();
@@ -145,7 +143,6 @@ public class RemoteArtifactTests {
 		assertThat(archive).hasBinaryContent(content);
 
 	}
-
 
 	@Test
 	public void shouldNotDownloadArtifactIfExists() throws Exception {
@@ -190,7 +187,6 @@ public class RemoteArtifactTests {
 	@Test
 	public void proxyIsInvalid() throws Exception {
 
-
 		this.throwable.expect(SocketException.class);
 		this.throwable.expectMessage("Connection refused");
 
@@ -224,6 +220,5 @@ public class RemoteArtifactTests {
 		}
 
 	}
-
 
 }

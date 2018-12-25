@@ -72,7 +72,6 @@ class PortReplacerCustomizer implements DirectoryCustomizer {
 		}
 	}
 
-
 	private static void setPort(Map<Object, Object> source, String property, Supplier<Integer> portSupplier,
 			Supplier<InetAddress> addressSupplier) {
 
@@ -103,7 +102,6 @@ class PortReplacerCustomizer implements DirectoryCustomizer {
 		setPort(newSource, "storage_port", settings::getStoragePort, settings::getRealListenAddress);
 		setPort(newSource, "ssl_storage_port", settings::getSslStoragePort, settings::getRealListenAddress);
 	}
-
 
 	private static Map<?, ?> load(Yaml yaml, Path source) {
 		try (InputStream is = Files.newInputStream(source)) {

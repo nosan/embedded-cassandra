@@ -38,10 +38,8 @@ import org.springframework.util.Assert;
  */
 class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
-
 	@Nonnull
 	private final EmbeddedCassandra annotation;
-
 
 	/**
 	 * Creates a {@link EmbeddedCassandraContextCustomizer}.

@@ -55,6 +55,11 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 	public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
 	}
 
+	@Override
+	public int getOrder() {
+		return Ordered.LOWEST_PRECEDENCE;
+	}
+
 	private void process(BeanDefinitionRegistry registry,
 			ConfigurableListableBeanFactory beanFactory) {
 		BeanDefinitionHolder holder = getClusterBeanDefinition(beanFactory);
@@ -92,10 +97,5 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
 		beanDefinition.setPrimary(primary);
 		return beanDefinition;
-	}
-
-	@Override
-	public int getOrder() {
-		return Ordered.LOWEST_PRECEDENCE;
 	}
 }

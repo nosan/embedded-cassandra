@@ -42,7 +42,6 @@ class LogbackFileCustomizer implements DirectoryCustomizer {
 	@Nullable
 	private final URL logbackFile;
 
-
 	/**
 	 * Creates a {@link LogbackFileCustomizer}.
 	 *

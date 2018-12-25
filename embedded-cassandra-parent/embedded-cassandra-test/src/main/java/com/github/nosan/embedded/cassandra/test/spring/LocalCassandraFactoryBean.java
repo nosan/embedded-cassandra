@@ -58,7 +58,6 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 	@Nullable
 	private ApplicationContext context;
 
-
 	/**
 	 * Creates a {@link LocalCassandraFactoryBean}.
 	 *
@@ -70,12 +69,10 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedLocalCassandra must not be null");
 	}
 
-
 	@Override
 	public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
 		this.context = Objects.requireNonNull(applicationContext, "Application Context must not be null");
 	}
-
 
 	@Override
 	@Nonnull
@@ -108,13 +105,11 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		return factory;
 	}
 
-
 	@Override
 	@Nonnull
 	public Class<?> getObjectType() {
 		return LocalCassandraFactory.class;
 	}
-
 
 	private static ArtifactFactory getArtifactFactory(EmbeddedLocalCassandra.Artifact annotation,
 			ApplicationContext context) {

@@ -66,14 +66,12 @@ abstract class TransportUtils {
 		return !condition.test(settings);
 	}
 
-
 	private static boolean isStorageReady(Settings settings) {
 		InetAddress address = settings.getRealListenAddress();
 		int storagePort = settings.getStoragePort();
 		int sslStoragePort = settings.getSslStoragePort();
 		return PortUtils.isPortBusy(address, storagePort) || PortUtils.isPortBusy(address, sslStoragePort);
 	}
-
 
 	private static boolean isNativeTransportReady(Settings settings) {
 		InetAddress address = settings.getRealAddress();
@@ -90,6 +88,5 @@ abstract class TransportUtils {
 		int port = settings.getRpcPort();
 		return PortUtils.isPortBusy(address, port);
 	}
-
 
 }

@@ -57,7 +57,6 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 	@Nullable
 	private ApplicationContext context;
 
-
 	/**
 	 * Creates a {@link EmbeddedCassandraFactoryBean}.
 	 *
@@ -86,7 +85,6 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 		return TestCassandra.class;
 	}
 
-
 	@Override
 	public void destroy() {
 		TestCassandra cassandra = this.cassandra;
@@ -105,7 +103,8 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 		config.setTestClass(this.testClass);
 		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
 		CqlScript[] cqlScripts = CqlResourceUtils.getScripts(context, config);
-		TestCassandra cassandra = new TestCassandra(BeanFactoryUtils.getBean(context, CassandraFactory.class),
+		TestCassandra cassandra = new TestCassandra(annotation.registerShutdownHook(),
+				BeanFactoryUtils.getBean(context, CassandraFactory.class),
 				BeanFactoryUtils.getBean(context, ClusterFactory.class), cqlScripts);
 		this.cassandra = cassandra;
 		cassandra.start();

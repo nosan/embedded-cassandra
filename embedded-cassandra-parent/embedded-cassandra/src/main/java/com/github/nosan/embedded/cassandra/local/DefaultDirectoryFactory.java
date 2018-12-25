@@ -55,7 +55,6 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 	@Nullable
 	private final URL commitLogArchivingFile;
 
-
 	/**
 	 * Creates a {@link DefaultDirectoryFactory}.
 	 *

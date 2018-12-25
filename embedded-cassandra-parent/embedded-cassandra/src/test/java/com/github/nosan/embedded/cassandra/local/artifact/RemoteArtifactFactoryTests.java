@@ -56,7 +56,6 @@ public class RemoteArtifactFactoryTests {
 		factory.setReadTimeout(Duration.ofSeconds(100));
 		factory.setConnectTimeout(Duration.ofMinutes(100));
 
-
 		RemoteArtifact artifact = (RemoteArtifact) factory.create(new Version(3, 11, 2));
 		assertThat(ReflectionUtils.getField(artifact, "version")).isEqualTo(new Version(3, 11, 2));
 		assertThat(ReflectionUtils.getField(artifact, "directory")).isEqualTo(FileUtils.getTmpDirectory());

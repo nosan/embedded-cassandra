@@ -21,7 +21,6 @@ import java.nio.file.Path;
 
 import javax.annotation.Nonnull;
 
-
 /**
  * Customizer interface used to customize a {@code directory}.
  *

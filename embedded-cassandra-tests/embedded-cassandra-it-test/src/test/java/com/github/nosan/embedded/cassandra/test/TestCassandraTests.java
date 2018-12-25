@@ -87,14 +87,6 @@ public class TestCassandraTests {
 		assertString(row1, "first_name", "$'Frodo;'");
 	}
 
-	private static KeyspaceMetadata getKeyspace(String name) {
-		return cassandra.getCluster().getMetadata().getKeyspace(name);
-	}
-
-	private static void assertString(Row row, String column, String value) {
-		assertThat(row.get(column, String.class)).isEqualTo(value);
-	}
-
 	@BeforeClass
 	public static void startCassandra() {
 		cassandra.start();
@@ -103,5 +95,13 @@ public class TestCassandraTests {
 	@AfterClass
 	public static void stopCassandra() {
 		cassandra.stop();
+	}
+
+	private static KeyspaceMetadata getKeyspace(String name) {
+		return cassandra.getCluster().getMetadata().getKeyspace(name);
+	}
+
+	private static void assertString(Row row, String column, String value) {
+		assertThat(row.get(column, String.class)).isEqualTo(value);
 	}
 }

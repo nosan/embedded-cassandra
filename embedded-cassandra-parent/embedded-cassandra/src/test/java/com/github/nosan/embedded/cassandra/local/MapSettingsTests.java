@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class MapSettingsTests {
 
-
 	@Test
 	public void shouldParseCassandraYamlUtf8() throws Exception {
 		assertSettings(load("/cassandra.yaml"));
@@ -84,7 +83,6 @@ public class MapSettingsTests {
 		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
 		assertThat(settings.getBroadcastRpcAddress()).isNull();
 	}
-
 
 	@Test
 	public void defaultSettingsV4() {

@@ -64,7 +64,6 @@ public class TransportUtilsTests {
 
 	}
 
-
 	private static final class TestSettings implements Settings {
 
 		private final int port;
@@ -76,7 +75,6 @@ public class TransportUtilsTests {
 		private final int storagePort;
 
 		private final int sslStoragePort;
-
 
 		private TestSettings(int storagePort, int sslStoragePort, int port, Integer sslPort, int rpcPort) {
 			this.port = port;

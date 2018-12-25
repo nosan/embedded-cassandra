@@ -39,10 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class PortReplacerCustomizerTests {
 
-
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
-
 
 	@Test
 	public void shouldReplaceWithRandomPorts() throws Exception {
@@ -67,7 +65,6 @@ public class PortReplacerCustomizerTests {
 		assertThat(settings.getSslStoragePort()).isNotEqualTo(0);
 
 	}
-
 
 	@Test
 	public void shouldNotReplaceAndShouldNotModify() throws IOException {

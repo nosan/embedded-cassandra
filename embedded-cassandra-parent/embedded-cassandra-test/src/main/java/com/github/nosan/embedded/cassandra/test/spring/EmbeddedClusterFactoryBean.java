@@ -40,10 +40,8 @@ class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationCon
 
 	static final String BEAN_NAME = "embeddedCluster";
 
-
 	@Nullable
 	private ApplicationContext context;
-
 
 	@Override
 	public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
@@ -61,7 +59,6 @@ class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationCon
 		}
 		return cassandra.getCluster();
 	}
-
 
 	@Nonnull
 	@Override

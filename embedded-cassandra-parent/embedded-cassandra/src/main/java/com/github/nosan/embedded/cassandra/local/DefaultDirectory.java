@@ -72,7 +72,6 @@ class DefaultDirectory implements Directory {
 		this.customizers = Collections.unmodifiableList(new ArrayList<>(customizers));
 	}
 
-
 	@Nonnull
 	public Path initialize() throws IOException {
 		Path archive = this.archive;
@@ -105,7 +104,6 @@ class DefaultDirectory implements Directory {
 		return directory;
 	}
 
-
 	@Override
 	public void destroy() throws IOException {
 		if (FileUtils.isTemporary(this.directory)) {
@@ -115,7 +113,6 @@ class DefaultDirectory implements Directory {
 			FileUtils.delete(this.directory);
 		}
 	}
-
 
 	@Override
 	@Nonnull

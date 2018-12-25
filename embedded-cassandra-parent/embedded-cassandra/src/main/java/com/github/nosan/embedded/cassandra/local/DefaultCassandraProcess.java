@@ -183,7 +183,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 		return settings;
 	}
 
-
 	@Override
 	public void stop() throws IOException {
 		Process process = this.process;
@@ -244,7 +243,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-
 	private static Settings getSettings(Path directory, Version version) throws IOException {
 		Path target = directory.resolve("conf/cassandra.yaml");
 		try (InputStream is = Files.newInputStream(target)) {
@@ -253,7 +251,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-
 	private static String getJavaHome(Path javaHome) {
 		if (javaHome != null) {
 			return String.valueOf(javaHome.toAbsolutePath());
@@ -261,11 +258,9 @@ class DefaultCassandraProcess implements CassandraProcess {
 		return new SystemProperty("java.home").or("");
 	}
 
-
 	private static String getPidString(long pid) {
 		return (pid > 0) ? String.valueOf(pid) : "???";
 	}
-
 
 	private static void await(Settings settings, Duration timeout, OutputReadiness output, Process process)
 			throws Exception {
@@ -285,7 +280,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 					" or not if <console> output is disabled.", timeout.toMillis()), output);
 		}
 	}
-
 
 	private static void stop(Process process, Path pidFile, Path directory, long pid) throws IOException {
 		if (pidFile != null && Files.exists(pidFile)) {
@@ -342,7 +336,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-
 	private static void stop(long pid, Path directory, boolean force) throws IOException {
 		if (OS.get() == OS.WINDOWS) {
 			List<Object> arguments = new ArrayList<>();
@@ -360,7 +353,6 @@ class DefaultCassandraProcess implements CassandraProcess {
 			new RunProcess(directory, Arrays.asList("kill", signal, pid)).runAndWait(log::info);
 		}
 	}
-
 
 	private static void throwException(String message, OutputCapture outputCapture) throws IOException {
 		StringBuilder builder = new StringBuilder(message);

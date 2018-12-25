@@ -13,7 +13,6 @@
     <artifactId>embedded-cassandra-parent</artifactId>
     <packaging>pom</packaging>
 
-
     <modules>
         <module>embedded-cassandra</module>
         <module>embedded-cassandra-test</module>

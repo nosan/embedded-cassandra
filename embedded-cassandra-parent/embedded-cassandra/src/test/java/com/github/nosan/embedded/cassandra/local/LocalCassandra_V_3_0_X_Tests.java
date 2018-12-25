@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.local;
 
 import com.github.nosan.embedded.cassandra.Version;
 
-
 /**
  * Tests for {@link LocalCassandra}.
  *
@@ -29,6 +28,5 @@ public class LocalCassandra_V_3_0_X_Tests extends AbstractLocalCassandraTests {
 	public LocalCassandra_V_3_0_X_Tests() {
 		super(new Version(3, 0, 17));
 	}
-
 
 }

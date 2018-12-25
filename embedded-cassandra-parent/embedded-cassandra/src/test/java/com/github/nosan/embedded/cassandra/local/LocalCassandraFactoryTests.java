@@ -80,7 +80,6 @@ public class LocalCassandraFactoryTests {
 		factory.setAllowRoot(allowRoot);
 		factory.setCommitLogArchivingFile(commitLogArchivingFile);
 
-
 		Cassandra cassandra = factory.create();
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(version);
 		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory")).isEqualTo(artifactFactory);

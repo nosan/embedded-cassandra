@@ -36,6 +36,5 @@ public class StackTraceFilterTests {
 		assertThat(filter.test("... twxt")).isTrue();
 		assertThat(filter.test("text")).isTrue();
 
-
 	}
 }

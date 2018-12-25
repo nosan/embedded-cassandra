@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.local;
 
 import com.github.nosan.embedded.cassandra.Version;
 
-
 /**
  * Tests for {@link LocalCassandra}.
  *

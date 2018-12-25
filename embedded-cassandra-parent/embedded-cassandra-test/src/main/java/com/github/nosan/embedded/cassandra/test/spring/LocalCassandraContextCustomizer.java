@@ -37,7 +37,6 @@ import org.springframework.util.Assert;
  */
 class LocalCassandraContextCustomizer implements ContextCustomizer {
 
-
 	@Nonnull
 	private final EmbeddedLocalCassandra annotation;
 
@@ -74,6 +73,5 @@ class LocalCassandraContextCustomizer implements ContextCustomizer {
 	public int hashCode() {
 		return getClass().hashCode();
 	}
-
 
 }

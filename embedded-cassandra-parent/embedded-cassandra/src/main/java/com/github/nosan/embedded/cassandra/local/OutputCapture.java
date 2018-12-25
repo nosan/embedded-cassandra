@@ -52,7 +52,6 @@ class OutputCapture implements RunProcess.Output {
 		this.lines.addLast(line);
 	}
 
-
 	/**
 	 * Returns true if this buffer doesn't have lines.
 	 *

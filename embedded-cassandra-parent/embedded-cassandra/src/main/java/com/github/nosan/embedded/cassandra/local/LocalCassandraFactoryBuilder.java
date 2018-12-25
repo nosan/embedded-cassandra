@@ -133,7 +133,6 @@ public final class LocalCassandraFactoryBuilder {
 		return setJavaHome((javaHome != null) ? javaHome.toPath() : null);
 	}
 
-
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getStartupTimeout() timeout} attribute.
 	 *
@@ -297,7 +296,6 @@ public final class LocalCassandraFactoryBuilder {
 		return this;
 	}
 
-
 	/**
 	 * Add additional {@link LocalCassandraFactory#getJvmOptions() jvmOptions}.
 	 *
@@ -389,7 +387,6 @@ public final class LocalCassandraFactoryBuilder {
 		}
 	}
 
-
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getTopologyFile() topologyFile} attribute.
 	 *
@@ -416,7 +413,6 @@ public final class LocalCassandraFactoryBuilder {
 		return this;
 	}
 
-
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile() commitLogArchivingFile}
 	 * attribute.
@@ -430,7 +426,6 @@ public final class LocalCassandraFactoryBuilder {
 		this.commitLogArchivingFile = commitLogArchivingFile;
 		return this;
 	}
-
 
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile() commitLogArchivingFile}
@@ -450,7 +445,6 @@ public final class LocalCassandraFactoryBuilder {
 			throw new IllegalArgumentException(ex);
 		}
 	}
-
 
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile() commitLogArchivingFile}

@@ -36,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DefaultCassandraProcessFactoryTests {
 
-
 	@Test
 	public void shouldCreateProcess() {
 		Duration startupTimeout = Duration.ofMillis(1000);
