@@ -34,7 +34,6 @@ public class CassandraExtensionTests {
 	@RegisterExtension
 	public static final CassandraExtension cassandra = new CassandraExtension(CqlScript.classpath("init.cql"));
 
-
 	@Test
 	public void selectRoles() {
 		assertThat(cassandra.executeStatement("SELECT * FROM  test.roles").all())

@@ -42,10 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 public class CqlExecutionListenerPrimaryTests {
 
-
 	@ClassRule
 	public static final CassandraRule cassandra = new CassandraRule();
-
 
 	@Autowired
 	private Cluster cluster;
@@ -68,7 +66,6 @@ public class CqlExecutionListenerPrimaryTests {
 			assertThat(rs.one().getLong(0)).isZero();
 		}
 	}
-
 
 	@Configuration
 	static class Context {

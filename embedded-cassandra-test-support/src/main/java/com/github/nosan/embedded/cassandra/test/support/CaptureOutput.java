@@ -45,7 +45,6 @@ public final class CaptureOutput implements TestRule {
 	@Nullable
 	private ByteArrayOutputStream output;
 
-
 	@Override
 	public Statement apply(Statement base, Description description) {
 		return new Statement() {
@@ -62,7 +61,6 @@ public final class CaptureOutput implements TestRule {
 		};
 	}
 
-
 	@Override
 	@Nonnull
 	public String toString() {
@@ -73,7 +71,6 @@ public final class CaptureOutput implements TestRule {
 		}
 		return output.toString();
 	}
-
 
 	/**
 	 * Reset the current output.
@@ -128,7 +125,6 @@ public final class CaptureOutput implements TestRule {
 		catch (IOException ignore) {
 		}
 	}
-
 
 	private static final class TeeOutputStream extends OutputStream {
 

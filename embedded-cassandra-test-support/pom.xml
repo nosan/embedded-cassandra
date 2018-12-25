@@ -12,7 +12,6 @@
 
     <artifactId>embedded-cassandra-test-support</artifactId>
 
-
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -20,6 +19,5 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-
 
 </project>

@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
  */
 public abstract class ReflectionUtils {
 
-
 	/**
 	 * Returns the value of the field on the specified object.
 	 *
@@ -72,7 +71,6 @@ public abstract class ReflectionUtils {
 		});
 	}
 
-
 	/**
 	 * Returns the value of the static field on the specified class.
 	 *
@@ -90,7 +88,6 @@ public abstract class ReflectionUtils {
 			return field.get(null);
 		});
 	}
-
 
 	/**
 	 * Returns the value of the static method on the specified class.

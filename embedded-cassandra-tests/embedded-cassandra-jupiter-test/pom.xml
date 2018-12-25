@@ -12,7 +12,6 @@
 
     <artifactId>embedded-cassandra-jupiter-test</artifactId>
 
-
     <dependencies>
         <dependency>
             <groupId>com.github.nosan</groupId>
@@ -40,6 +39,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
 </project>

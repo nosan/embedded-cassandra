@@ -63,7 +63,6 @@ public class LocalCassandraTests {
 	@Autowired
 	private LocalCassandraFactory localCassandraFactory;
 
-
 	@Autowired
 	private Cluster cluster;
 
@@ -77,7 +76,6 @@ public class LocalCassandraTests {
 		}
 		assertThat(this.localCassandraFactory.getArtifactFactory()).isSameAs(this.remoteArtifactFactory);
 	}
-
 
 	@Configuration
 	static class TestConfiguration {

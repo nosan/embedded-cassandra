@@ -49,13 +49,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"  KEY );")
 public class EmbeddedCassandraConfigurationTests {
 
-
 	@ClassRule
 	public static final CaptureOutput OUTPUT = new CaptureOutput();
 
 	@Autowired
 	private Cluster cluster;
-
 
 	@Test
 	public void shouldSelectFromRoles() {

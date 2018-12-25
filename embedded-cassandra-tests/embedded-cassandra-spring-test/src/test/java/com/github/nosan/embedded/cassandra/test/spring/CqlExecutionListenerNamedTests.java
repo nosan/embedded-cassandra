@@ -45,10 +45,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CqlExecutionListenerNamedTests {
 
-
 	@ClassRule
 	public static final CassandraRule cassandra = new CassandraRule();
-
 
 	@Autowired
 	private Cluster customCluster;
@@ -70,7 +68,6 @@ public class CqlExecutionListenerNamedTests {
 		}
 	}
 
-
 	@Configuration
 	static class Context {
 
@@ -83,7 +80,6 @@ public class CqlExecutionListenerNamedTests {
 		public Cluster cluster() {
 			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
 		}
-
 
 	}
 }

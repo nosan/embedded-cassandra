@@ -44,10 +44,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Cql(statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CqlExecutionListenerMultiTests {
 
-
 	@ClassRule
 	public static final CassandraRule cassandra = new CassandraRule();
-
 
 	@Autowired
 	private Cluster cluster;
@@ -68,7 +66,6 @@ public class CqlExecutionListenerMultiTests {
 			assertThat(rs.one().getLong(0)).isZero();
 		}
 	}
-
 
 	@Configuration
 	static class Context {
