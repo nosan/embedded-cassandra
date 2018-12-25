@@ -33,7 +33,9 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,6 +47,7 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
+import com.github.nosan.embedded.cassandra.util.ThreadNameSupplier;
 
 /**
  * {@link Artifact} which implements a remote {@code archive}. It checks if {@code archive} doesn't exist locally, it
@@ -58,6 +61,15 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 class RemoteArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(Artifact.class);
+
+	private static final AtomicLong instanceCounter = new AtomicLong();
+
+	@Nonnull
+	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("artifact-%d",
+			instanceCounter.incrementAndGet()));
+
+	@Nonnull
+	private final ThreadFactory threadFactory = runnable -> new Thread(runnable, this.threadNameSupplier.get());
 
 	@Nonnull
 	private final Version version;
@@ -171,7 +183,7 @@ class RemoteArtifact implements Artifact {
 		try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel();
 				ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
 			log.info("Downloading Cassandra from ({}). It takes a while...", urlConnection.getURL());
-			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
 			try {
 				if (size > 0) {
 					Map<String, String> context = MDCUtils.getContext();
