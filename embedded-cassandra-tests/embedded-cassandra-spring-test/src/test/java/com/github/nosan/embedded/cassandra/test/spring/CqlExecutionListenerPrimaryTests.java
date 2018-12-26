@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.test.junit.CassandraRule;
@@ -41,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@TestPropertySource("classpath:application.properties")
 public class CqlExecutionListenerPrimaryTests {
 
 	@ClassRule
@@ -52,7 +50,7 @@ public class CqlExecutionListenerPrimaryTests {
 
 	@Test
 	@Cql(scripts = {"/init.cql", "/users-data.cql"})
-	@Cql(statements = "${drop.keyspace}", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+	@Cql(statements = "DROP KEYSPACE yest", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void shouldHaveUser() {
 		try (Session session = this.cluster.connect()) {
 			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
