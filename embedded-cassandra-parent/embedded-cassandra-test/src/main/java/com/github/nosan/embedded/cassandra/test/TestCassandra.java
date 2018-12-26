@@ -16,7 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,6 +41,9 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
 import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
+import com.github.nosan.embedded.cassandra.util.MDCUtils;
+import com.github.nosan.embedded.cassandra.util.ThreadNameSupplier;
+import com.github.nosan.embedded.cassandra.util.ThreadUtils;
 
 /**
  * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and
@@ -57,6 +63,12 @@ public class TestCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);
 
+	private static final AtomicLong instanceCounter = new AtomicLong();
+
+	@Nonnull
+	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("test-cassandra-%d",
+			instanceCounter.incrementAndGet()));
+
 	@Nonnull
 	private final Object lock = new Object();
 
@@ -70,6 +82,9 @@ public class TestCassandra implements Cassandra {
 	private final ClusterFactory clusterFactory;
 
 	@Nullable
+	private volatile Thread ownerThread;
+
+	@Nullable
 	private volatile Cluster cluster;
 
 	@Nullable
@@ -77,14 +92,23 @@ public class TestCassandra implements Cassandra {
 
 	private volatile boolean started;
 
-
 	/**
 	 * Creates a {@link TestCassandra}.
 	 *
 	 * @param scripts CQL scripts to execute
 	 */
 	public TestCassandra(@Nullable CqlScript... scripts) {
-		this(null, null, scripts);
+		this(true, null, null, scripts);
+	}
+
+	/**
+	 * Creates a {@link TestCassandra}.
+	 *
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public TestCassandra(boolean registerShutdownHook, @Nullable CqlScript... scripts) {
+		this(registerShutdownHook, null, null, scripts);
 	}
 
 	/**
@@ -94,7 +118,7 @@ public class TestCassandra implements Cassandra {
 	 * @param scripts CQL scripts to execute
 	 */
 	public TestCassandra(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
-		this(null, clusterFactory, scripts);
+		this(true, null, clusterFactory, scripts);
 	}
 
 	/**
@@ -104,7 +128,31 @@ public class TestCassandra implements Cassandra {
 	 * @param scripts CQL scripts to execute
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory, @Nullable CqlScript... scripts) {
-		this(cassandraFactory, null, scripts);
+		this(true, cassandraFactory, null, scripts);
+	}
+
+	/**
+	 * Creates a {@link TestCassandra}.
+	 *
+	 * @param clusterFactory factory to create a {@link Cluster}
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public TestCassandra(boolean registerShutdownHook, @Nonnull ClusterFactory clusterFactory,
+			@Nonnull CqlScript... scripts) {
+		this(registerShutdownHook, null, clusterFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link TestCassandra}.
+	 *
+	 * @param cassandraFactory factory to create a {@link Cassandra}
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public TestCassandra(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
+			@Nullable CqlScript... scripts) {
+		this(registerShutdownHook, cassandraFactory, null, scripts);
 	}
 
 	/**
@@ -116,9 +164,25 @@ public class TestCassandra implements Cassandra {
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory,
 			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
+		this(true, cassandraFactory, clusterFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link TestCassandra}.
+	 *
+	 * @param cassandraFactory factory to create a {@link Cassandra}
+	 * @param clusterFactory factory to create a {@link Cluster}
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public TestCassandra(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
+			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		this.cassandra = (cassandraFactory != null) ? cassandraFactory.create() : new LocalCassandraFactory().create();
 		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
+		if (registerShutdownHook) {
+			addShutdownHook();
+		}
 	}
 
 	@Override
@@ -128,8 +192,11 @@ public class TestCassandra implements Cassandra {
 				return;
 			}
 			this.started = true;
+			if (log.isDebugEnabled()) {
+				log.debug("Starts Test Cassandra ({})", this.cassandra);
+			}
 			try {
-				this.cassandra.start();
+				startCassandra();
 				CqlScript[] scripts = this.scripts;
 				if (scripts.length > 0) {
 					executeScripts(scripts);
@@ -152,6 +219,9 @@ public class TestCassandra implements Cassandra {
 		synchronized (this.lock) {
 			if (!this.started) {
 				return;
+			}
+			if (log.isDebugEnabled()) {
+				log.debug("Stops Test Cassandra ({})", this.cassandra);
 			}
 			try {
 				Session session = this.session;
@@ -182,12 +252,16 @@ public class TestCassandra implements Cassandra {
 
 			this.cluster = null;
 
-			this.cassandra.stop();
+			try {
+				stopCassandra();
+			}
+			catch (Throwable ex) {
+				throw new CassandraException("Unable to stop Test Cassandra", ex);
+			}
 
 			this.started = false;
 		}
 	}
-
 
 	@Nonnull
 	@Override
@@ -317,4 +391,93 @@ public class TestCassandra implements Cassandra {
 		return CqlUtils.executeStatement(getSession(), statement);
 	}
 
+	@Override
+	@Nonnull
+	public String toString() {
+		return String.format("%s [%s]", getClass().getSimpleName(), this.cassandra);
+	}
+
+	private void startCassandra() throws Throwable {
+		AtomicReference<Throwable> throwable = new AtomicReference<>();
+		Map<String, String> context = MDCUtils.getContext();
+		Thread thread = new Thread(() -> {
+			MDCUtils.setContext(context);
+			try {
+				this.cassandra.start();
+			}
+			catch (Throwable ex) {
+				throwable.set(ex);
+			}
+		}, this.threadNameSupplier.get());
+		this.ownerThread = thread;
+
+		thread.start();
+		join(thread);
+
+		Throwable ex = throwable.get();
+		if (ex != null) {
+			throw ex;
+		}
+	}
+
+	private void stopCassandra() throws Throwable {
+		Thread ownerThread = this.ownerThread;
+		interrupt(ownerThread);
+		join(ownerThread);
+		this.ownerThread = null;
+
+		AtomicReference<Throwable> throwable = new AtomicReference<>();
+		Map<String, String> context = MDCUtils.getContext();
+		Thread thread = new Thread(() -> {
+			MDCUtils.setContext(context);
+			try {
+				this.cassandra.stop();
+			}
+			catch (Throwable ex) {
+				throwable.set(ex);
+			}
+		}, this.threadNameSupplier.get());
+
+		thread.start();
+		join(thread);
+
+		Throwable ex = throwable.get();
+		if (ex != null) {
+			throw ex;
+		}
+	}
+
+	private void addShutdownHook() {
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			String threadName = this.threadNameSupplier.get();
+			runtime.addShutdownHook(new Thread(() -> {
+				interrupt(this.ownerThread);
+				stop();
+			}, String.format("%s-hook", threadName)));
+		}
+		catch (Throwable ex) {
+			throw new CassandraException("Test Cassandra shutdown hook is not registered", ex);
+		}
+	}
+
+	private static void join(Thread thread) {
+		try {
+			ThreadUtils.join(thread);
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+	}
+
+	private static void interrupt(Thread thread) {
+		try {
+			ThreadUtils.interrupt(thread);
+		}
+		catch (SecurityException ex) {
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("%s is not able to interrupt a %s", Thread.currentThread(), thread), ex);
+			}
+		}
+	}
 }

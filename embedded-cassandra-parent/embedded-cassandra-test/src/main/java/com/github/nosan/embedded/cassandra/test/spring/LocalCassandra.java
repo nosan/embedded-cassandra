@@ -233,4 +233,13 @@ public @interface LocalCassandra {
 	 */
 	@AliasFor(annotation = EmbeddedLocalCassandra.class)
 	EmbeddedCassandra.Replace replace() default EmbeddedCassandra.Replace.ANY;
+
+	/**
+	 * Alias for {@link EmbeddedLocalCassandra#registerTestShutdownHook()}.
+	 *
+	 * @return The value of the {@code registerTestShutdownHook} attribute
+	 * @since 1.2.8
+	 */
+	@AliasFor(annotation = EmbeddedLocalCassandra.class)
+	boolean registerTestShutdownHook() default true;
 }

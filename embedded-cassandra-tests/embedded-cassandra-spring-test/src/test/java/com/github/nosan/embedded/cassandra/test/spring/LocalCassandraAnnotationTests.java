@@ -58,6 +58,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		commitLogArchivingFile = "classpath:/commit_log_archiving.properties",
 		startupTimeout = 240000,
 		jmxPort = 8000,
+		registerTestShutdownHook = false,
 		allowRoot = true,
 		registerShutdownHook = false,
 		artifact = @EmbeddedLocalCassandra.Artifact(directory = "target/artifact", proxyHost = "localhost",
@@ -112,6 +113,5 @@ public class LocalCassandraAnnotationTests {
 
 		}
 	}
-
 
 }

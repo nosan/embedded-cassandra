@@ -68,6 +68,16 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	/**
 	 * Creates a {@link CassandraRule}.
 	 *
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public CassandraRule(boolean registerShutdownHook, @Nullable CqlScript... scripts) {
+		super(registerShutdownHook, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraRule}.
+	 *
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
@@ -88,15 +98,51 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	/**
 	 * Creates a {@link CassandraRule}.
 	 *
+	 * @param clusterFactory factory to create a {@link Cluster}
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public CassandraRule(boolean registerShutdownHook, @Nonnull ClusterFactory clusterFactory,
+			@Nonnull CqlScript... scripts) {
+		super(registerShutdownHook, clusterFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraRule}.
+	 *
+	 * @param cassandraFactory factory to create a {@link Cassandra}
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public CassandraRule(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
+			@Nullable CqlScript... scripts) {
+		super(registerShutdownHook, cassandraFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraRule}.
+	 *
 	 * @param cassandraFactory factory to create a {@link Cassandra}
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraRule(@Nullable CassandraFactory cassandraFactory, @Nullable ClusterFactory clusterFactory,
-			@Nullable CqlScript... scripts) {
+	public CassandraRule(@Nullable CassandraFactory cassandraFactory,
+			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		super(cassandraFactory, clusterFactory, scripts);
 	}
 
+	/**
+	 * Creates a {@link CassandraRule}.
+	 *
+	 * @param cassandraFactory factory to create a {@link Cassandra}
+	 * @param clusterFactory factory to create a {@link Cluster}
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public CassandraRule(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
+			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
+		super(registerShutdownHook, cassandraFactory, clusterFactory, scripts);
+	}
 
 	@Override
 	@Nonnull

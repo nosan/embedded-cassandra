@@ -234,6 +234,15 @@ public @interface EmbeddedLocalCassandra {
 	EmbeddedCassandra.Replace replace() default EmbeddedCassandra.Replace.ANY;
 
 	/**
+	 * Alias for {@link EmbeddedCassandra#registerShutdownHook()}.
+	 *
+	 * @return The value of the {@code registerTestShutdownHook} attribute
+	 * @since 1.2.8
+	 */
+	@AliasFor(annotation = EmbeddedCassandra.class, attribute = "registerShutdownHook")
+	boolean registerTestShutdownHook() default true;
+
+	/**
 	 * Annotation that describes {@link RemoteArtifactFactory} attributes.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)

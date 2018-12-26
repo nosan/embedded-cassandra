@@ -57,7 +57,6 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public class CassandraExtension extends TestCassandra implements BeforeAllCallback, AfterAllCallback {
 
-
 	/**
 	 * Creates a {@link CassandraExtension}.
 	 *
@@ -65,6 +64,16 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 */
 	public CassandraExtension(@Nullable CqlScript... scripts) {
 		super(scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraExtension}.
+	 *
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public CassandraExtension(boolean registerShutdownHook, @Nullable CqlScript... scripts) {
+		super(registerShutdownHook, scripts);
 	}
 
 	/**
@@ -90,13 +99,50 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	/**
 	 * Creates a {@link CassandraExtension}.
 	 *
+	 * @param clusterFactory factory to create a {@link Cluster}
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public CassandraExtension(boolean registerShutdownHook, @Nonnull ClusterFactory clusterFactory,
+			@Nonnull CqlScript... scripts) {
+		super(registerShutdownHook, clusterFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraExtension}.
+	 *
+	 * @param cassandraFactory factory to create a {@link Cassandra}
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public CassandraExtension(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
+			@Nullable CqlScript... scripts) {
+		super(registerShutdownHook, cassandraFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraExtension}.
+	 *
 	 * @param cassandraFactory factory to create a {@link Cassandra}
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraExtension(@Nullable CassandraFactory cassandraFactory, @Nullable ClusterFactory clusterFactory,
-			@Nullable CqlScript... scripts) {
+	public CassandraExtension(@Nullable CassandraFactory cassandraFactory,
+			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		super(cassandraFactory, clusterFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraExtension}.
+	 *
+	 * @param cassandraFactory factory to create a {@link Cassandra}
+	 * @param clusterFactory factory to create a {@link Cluster}
+	 * @param scripts CQL scripts to execute
+	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 */
+	public CassandraExtension(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
+			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
+		super(registerShutdownHook, cassandraFactory, clusterFactory, scripts);
 	}
 
 	@Override

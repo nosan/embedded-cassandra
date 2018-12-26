@@ -23,6 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.datastax.driver.core.Cluster;
 import org.apiguardian.api.API;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.test.annotation.DirtiesContext;
@@ -114,7 +115,16 @@ public @interface EmbeddedCassandra {
 	Replace replace() default Replace.ANY;
 
 	/**
-	 * What the {@code Cluster} should be replaced.
+	 * Register a shutdown hook with the JVM runtime, stops {@link TestCassandra} on JVM shutdown unless it has already
+	 * been stopped at that time.
+	 *
+	 * @return The value of the {@code registerShutdownHook} attribute
+	 * @since 1.2.8
+	 */
+	boolean registerShutdownHook() default true;
+
+	/**
+	 * What the {@link Cluster} should be replaced.
 	 */
 	enum Replace {
 
