@@ -62,7 +62,7 @@ public @interface Cql {
 	 * (e.g., a path prefixed with
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
 	 * <p>All resources will be loaded by {@link ResourcePatternResolver}.
-	 * Resources which was loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
+	 * Resources which were loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
 	 * Resource.getURL().toString()}.
 	 *
 	 * @return CQL Scripts
