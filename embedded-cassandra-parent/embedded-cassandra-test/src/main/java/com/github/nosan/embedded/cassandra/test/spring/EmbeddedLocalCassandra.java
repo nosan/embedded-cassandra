@@ -77,6 +77,8 @@ public @interface EmbeddedLocalCassandra {
 
 	/**
 	 * Sets attribute for {@link LocalCassandraFactory#getVersion()}.
+	 * <p>
+	 * This value can contain a {@code Spring} placeholder.
 	 *
 	 * @return The value of the {@code version} attribute
 	 * @see Version
@@ -88,6 +90,8 @@ public @interface EmbeddedLocalCassandra {
 	 * <p>
 	 * Path will be interpreted as a Spring
 	 * {@link Resource}.
+	 * <p>
+	 * This value can contain a {@code Spring} placeholder.
 	 *
 	 * @return The value of the {@code configurationFile} attribute
 	 * @see Resource
@@ -99,6 +103,8 @@ public @interface EmbeddedLocalCassandra {
 	 * <p>
 	 * Path will be interpreted as a Spring
 	 * {@link Resource}.
+	 * <p>
+	 * This value can contain a {@code Spring} placeholder.
 	 *
 	 * @return The value of the {@code logbackFile} attribute
 	 * @see Resource
@@ -110,6 +116,8 @@ public @interface EmbeddedLocalCassandra {
 	 * <p>
 	 * Path will be interpreted as a Spring
 	 * {@link Resource}.
+	 * <p>
+	 * This value can contain a {@code Spring} placeholder.
 	 *
 	 * @return the value of {@code rackFile} attribute
 	 * @see Resource
@@ -121,6 +129,8 @@ public @interface EmbeddedLocalCassandra {
 	 * <p>
 	 * Path will be interpreted as a Spring
 	 * {@link Resource}.
+	 * <p>
+	 * This value can contain a {@code Spring} placeholder.
 	 *
 	 * @return the value of {@code topologyFile} attribute
 	 * @see Resource
@@ -132,6 +142,8 @@ public @interface EmbeddedLocalCassandra {
 	 * <p>
 	 * Path will be interpreted as a Spring
 	 * {@link Resource}.
+	 * <p>
+	 * This value can contain a {@code Spring} placeholder.
 	 *
 	 * @return the value of {@code commitLogArchivingFile} attribute
 	 * @see Resource
@@ -143,6 +155,8 @@ public @interface EmbeddedLocalCassandra {
 	 * Sets attribute for {@link LocalCassandraFactory#getWorkingDirectory()}.
 	 * <p>
 	 * Path will be interpreted as a {@link Path}.
+	 * <p>
+	 * This value can contain a {@code Spring} placeholder.
 	 *
 	 * @return The value of the {@code workingDirectory} attribute
 	 * @see Path
@@ -153,6 +167,8 @@ public @interface EmbeddedLocalCassandra {
 	 * Sets attribute for {@link LocalCassandraFactory#getJavaHome()}.
 	 * <p>
 	 * Path will be interpreted as a {@link Path}.
+	 * <p>
+	 * This value can contain a {@code Spring} placeholder.
 	 *
 	 * @return The value of the {@code javaHome} attribute
 	 * @see Path
@@ -168,6 +184,8 @@ public @interface EmbeddedLocalCassandra {
 
 	/**
 	 * Sets attribute for {@link LocalCassandraFactory#getJvmOptions()}.
+	 * <p>
+	 * This value can contain a {@code Spring} placeholder.
 	 *
 	 * @return The value of the {@code jvmOptions} attribute
 	 */
@@ -253,6 +271,8 @@ public @interface EmbeddedLocalCassandra {
 		 * Sets attribute for {@link RemoteArtifactFactory#getDirectory()}.
 		 * <p>
 		 * Path will be interpreted as a {@link Path}.
+		 * <p>
+		 * This value can contain a {@code Spring} placeholder.
 		 *
 		 * @return The value of the {@code directory} attribute
 		 */
@@ -267,6 +287,8 @@ public @interface EmbeddedLocalCassandra {
 
 		/**
 		 * Sets proxy host attribute for {@link RemoteArtifactFactory#getProxy()}}.
+		 * <p>
+		 * This value can contain a {@code Spring} placeholder.
 		 *
 		 * @return The value of the {@code proxyHost} attribute
 		 */
