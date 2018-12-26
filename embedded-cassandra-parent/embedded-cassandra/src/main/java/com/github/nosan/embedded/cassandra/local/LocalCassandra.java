@@ -26,7 +26,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,10 +40,11 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.util.MDCUtils;
+import com.github.nosan.embedded.cassandra.util.ThreadNameSupplier;
+import com.github.nosan.embedded.cassandra.util.ThreadUtils;
 
 /**
- * This class just a wrapper on {@link CassandraProcess}. The main purpose is initialize/destroy all resources
- * before/after calling {@link CassandraProcess}.
+ * This {@link Cassandra} implementation just a wrapper on {@link CassandraProcess}.
  *
  * @author Dmytro Nosan
  * @see LocalCassandraFactory
@@ -54,8 +54,11 @@ class LocalCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(LocalCassandra.class);
 
+	private static final AtomicLong instanceCounter = new AtomicLong();
+
 	@Nonnull
-	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier();
+	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("cassandra-%d",
+			instanceCounter.incrementAndGet()));
 
 	@Nonnull
 	private final Object lock = new Object();
@@ -82,7 +85,7 @@ class LocalCassandra implements Cassandra {
 	private volatile Settings settings;
 
 	@Nullable
-	private volatile Thread thread;
+	private volatile Thread ownerThread;
 
 	private volatile boolean started;
 
@@ -147,7 +150,7 @@ class LocalCassandra implements Cassandra {
 					throwable.set(ex);
 				}
 			}, this.threadNameSupplier.get());
-			this.thread = thread;
+			this.ownerThread = thread;
 
 			thread.start();
 			join(thread);
@@ -176,6 +179,11 @@ class LocalCassandra implements Cassandra {
 			long start = System.currentTimeMillis();
 			Version version = this.version;
 			log.info("Stops Apache Cassandra ({}) ", version);
+
+			Thread ownerThread = this.ownerThread;
+			interrupt(ownerThread);
+			join(ownerThread);
+			this.ownerThread = null;
 
 			AtomicReference<Throwable> throwable = new AtomicReference<>();
 			Map<String, String> context = MDCUtils.getContext();
@@ -214,6 +222,12 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
+	@Override
+	@Nonnull
+	public String toString() {
+		return String.format("%s [%s]", getClass().getSimpleName(), this.version);
+	}
+
 	private void startInternal() throws IOException {
 		Version version = this.version;
 
@@ -229,13 +243,6 @@ class LocalCassandra implements Cassandra {
 	}
 
 	private void stopInternal() throws IOException {
-		Thread thread = this.thread;
-		if (thread != null) {
-			interrupt(thread);
-			join(thread);
-			this.thread = null;
-		}
-
 		CassandraProcess process = this.process;
 		if (process != null) {
 			process.stop();
@@ -256,59 +263,36 @@ class LocalCassandra implements Cassandra {
 		this.directory = null;
 	}
 
-	private void join(Thread thread) {
+	private void addShutdownHook() {
 		try {
-			if (log.isDebugEnabled()) {
-				log.debug("{} <join to> {}", Thread.currentThread(), thread);
-			}
-			thread.join();
+			Runtime runtime = Runtime.getRuntime();
+			runtime.addShutdownHook(new Thread(() -> {
+				interrupt(this.ownerThread);
+				stop();
+			}, String.format("%s-hook", this.threadNameSupplier.get())));
+		}
+		catch (Throwable ex) {
+			throw new CassandraException("Cassandra shutdown hook is not registered", ex);
+		}
+	}
+
+	private static void join(Thread thread) {
+		try {
+			ThreadUtils.join(thread);
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 		}
 	}
 
-	private void interrupt(Thread thread) {
-		if (thread.isAlive() && !thread.isInterrupted()) {
-			if (log.isDebugEnabled()) {
-				log.debug("{} <interrupt> {}", Thread.currentThread(), thread);
-			}
-			thread.interrupt();
-		}
-	}
-
-	private void addShutdownHook() {
+	private static void interrupt(Thread thread) {
 		try {
-			Runtime runtime = Runtime.getRuntime();
-			runtime.addShutdownHook(new Thread(() -> {
-				Thread thread = this.thread;
-				if (thread != null) {
-					interrupt(thread);
-				}
-				stop();
-			}, String.format("%s-hook", this.threadNameSupplier.get())));
+			ThreadUtils.interrupt(thread);
 		}
-		catch (Throwable ex) {
-			throw new CassandraException("Cassandra shutdown hook could not be registered", ex);
+		catch (SecurityException ex) {
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("%s is not able to interrupt a %s", Thread.currentThread(), thread), ex);
+			}
 		}
 	}
-
-	/**
-	 * {@link Supplier} to generate a thread name.
-	 */
-	private static final class ThreadNameSupplier implements Supplier<String> {
-
-		private static final AtomicLong instanceCounter = new AtomicLong();
-
-		private final AtomicLong threadCounter = new AtomicLong();
-
-		private final long id = instanceCounter.incrementAndGet();
-
-		@Override
-		@Nonnull
-		public String get() {
-			return String.format("cassandra-%d-thread-%d", this.id, this.threadCounter.incrementAndGet());
-		}
-	}
-
 }
