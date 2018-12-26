@@ -40,7 +40,7 @@ public abstract class ThreadUtils {
 	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
 	public static void join(@Nullable Thread thread) throws InterruptedException {
-		if (thread != null) {
+		if (thread != null && thread.isAlive()) {
 			if (log.isDebugEnabled()) {
 				log.debug("{} <join to> {}", Thread.currentThread(), thread);
 			}
@@ -56,7 +56,7 @@ public abstract class ThreadUtils {
 	 * @throws SecurityException – if the current thread cannot modify this thread
 	 */
 	public static void interrupt(@Nullable Thread thread) throws SecurityException {
-		if (thread != null) {
+		if (thread != null && thread.isAlive()) {
 			thread.interrupt();
 			if (log.isDebugEnabled()) {
 				log.debug("{} is interrupted by {}", thread, Thread.currentThread());
