@@ -140,5 +140,22 @@ abstract class CqlResourceUtils {
 		public String toString() {
 			return this.resource.toString();
 		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (other == null || getClass() != other.getClass()) {
+				return false;
+			}
+			SpringCqlScript that = (SpringCqlScript) other;
+			return Objects.equals(this.resource, that.resource);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.resource);
+		}
 	}
 }
