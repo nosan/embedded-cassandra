@@ -60,15 +60,17 @@ public @interface Cql {
 	 * starting with a slash will be treated as an <em>absolute</em> classpath resource,
 	 * for example: {@code "/org/example/schema.cql"}. A path which references a URL
 	 * (e.g., a path prefixed with
-	 * {@code http:}, etc.) will be loaded using the specified resource protocol. <p>All resources will be loaded
-	 * by {@link ResourcePatternResolver} and <b>sorted</b> by {@code Resource.getURL().toString()}
+	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
+	 * <p>All resources will be loaded by {@link ResourcePatternResolver}.
+	 * Resources which was loaded from a path with a {@code wildcard e.g. *} will be <b>sorted</b> by {@code
+	 * Resource.getURL().toString()}.
 	 *
 	 * @return CQL Scripts
 	 */
 	String[] scripts() default {};
 
 	/**
-	 * <em>Inlined CQL statements</em> to execute.
+	 * <em>CQL statements</em> to execute.
 	 * <p>This attribute may be used in conjunction with or instead of
 	 * {@link #scripts}.
 	 * <h3>Ordering</h3>
