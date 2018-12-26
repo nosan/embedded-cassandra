@@ -46,10 +46,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@LocalCassandra(version = "2.2.12", scripts = "/init.cql", statements =
+@EmbeddedLocalCassandra(version = "2.2.12", scripts = "/init.cql", statements =
 		"CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
 				"  KEY );")
-public class LocalCassandraTests {
+public class EmbeddedLocalCassandraTests {
 
 	@ClassRule
 	public static final CaptureOutput OUTPUT = new CaptureOutput();

@@ -32,7 +32,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -50,25 +49,24 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@TestPropertySource("classpath:application.properties")
-@LocalCassandra(version = "${version}", configurationFile = "${configurationFile}",
-		logbackFile = "${logbackFile}",
-		rackFile = "${rackFile}",
-		workingDirectory = "${workingDirectory}", javaHome = "${javaHome}",
-		jvmOptions = {"${jvmOptions}"},
-		topologyFile = "${topologyFile}",
-		commitLogArchivingFile = "${commitLogArchivingFile}",
+@EmbeddedLocalCassandra(version = "2.2.13", configurationFile = "classpath:/cassandra.yaml",
+		logbackFile = "classpath:/logback-test.xml",
+		rackFile = "classpath:/rack.properties",
+		workingDirectory = "target/cassandra", javaHome = "target/java",
+		jvmOptions = {"-Dtest.property=property"},
+		topologyFile = "classpath:/topology.properties",
+		commitLogArchivingFile = "classpath:/commit_log_archiving.properties",
 		startupTimeout = 240000,
 		jmxPort = 8000,
 		registerTestShutdownHook = false,
 		allowRoot = true,
 		registerShutdownHook = false,
-		artifact = @EmbeddedLocalCassandra.Artifact(directory = "${artifactDirectory}", proxyHost = "${proxyHost}",
+		artifact = @EmbeddedLocalCassandra.Artifact(directory = "target/artifact", proxyHost = "localhost",
 				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000,
 				proxyType = Proxy.Type.SOCKS,
 				urlFactory = DefaultUrlFactory.class),
 		replace = EmbeddedCassandra.Replace.NONE)
-public class LocalCassandraAnnotationPlaceholdersTests {
+public class EmbeddedLocalCassandraAnnotationTests {
 
 	@Autowired
 	private LocalCassandraFactory factory;
@@ -85,8 +83,8 @@ public class LocalCassandraAnnotationPlaceholdersTests {
 		assertThat(af.getUrlFactory()).isInstanceOf(DefaultUrlFactory.class);
 		assertThat(af.getProxy().address()).isEqualTo(new InetSocketAddress("localhost", 8080));
 		assertThat(af.getProxy().type()).isEqualTo(Proxy.Type.SOCKS);
-		assertThat(factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
+		assertThat(factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
 		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(4));
 		assertThat(factory.getLogbackFile()).isEqualTo(getClass().getResource("/logback-test.xml"));
