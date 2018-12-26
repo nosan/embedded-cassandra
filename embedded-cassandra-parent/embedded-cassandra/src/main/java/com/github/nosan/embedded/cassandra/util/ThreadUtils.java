@@ -57,10 +57,10 @@ public abstract class ThreadUtils {
 	 */
 	public static void interrupt(@Nullable Thread thread) throws SecurityException {
 		if (thread != null) {
-			if (log.isDebugEnabled()) {
-				log.debug("{} <interrupt> {}", Thread.currentThread(), thread);
-			}
 			thread.interrupt();
+			if (log.isDebugEnabled()) {
+				log.debug("{} is interrupted by {}", thread, Thread.currentThread());
+			}
 		}
 	}
 

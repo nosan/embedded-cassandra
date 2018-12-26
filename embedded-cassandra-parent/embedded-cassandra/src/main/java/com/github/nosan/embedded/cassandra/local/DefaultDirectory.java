@@ -106,11 +106,12 @@ class DefaultDirectory implements Directory {
 
 	@Override
 	public void destroy() throws IOException {
-		if (FileUtils.isTemporary(this.directory)) {
+		Path directory = this.directory;
+		if (FileUtils.isTemporary(directory) && Files.exists(directory)) {
 			if (log.isDebugEnabled()) {
-				log.debug("Delete recursively working directory ({})", this.directory);
+				log.debug("Delete recursively working directory ({})", directory);
 			}
-			FileUtils.delete(this.directory);
+			FileUtils.delete(directory);
 		}
 	}
 
