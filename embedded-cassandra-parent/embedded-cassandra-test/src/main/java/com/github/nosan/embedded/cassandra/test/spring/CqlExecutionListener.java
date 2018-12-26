@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.util.Assert;
@@ -109,11 +111,14 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		Cluster cluster = getCluster(cql.cluster(), testContext);
 		Assert.state(cluster != null, () -> String.format("Failed to execute CQL scripts for a test context %s: " +
 				"supply a '%s' bean", Cluster.class, testContext));
+		Environment environment = context.getEnvironment();
 		try (Session session = cluster.connect()) {
 			CqlConfig config = new CqlConfig();
-			config.setEncoding(cql.encoding());
-			config.setScripts(cql.scripts());
-			config.setStatements(cql.statements());
+			config.setEncoding(environment.resolvePlaceholders(cql.encoding()));
+			config.setScripts(Arrays.stream(cql.scripts())
+					.map(environment::resolvePlaceholders).toArray(String[]::new));
+			config.setStatements(Arrays.stream(cql.statements())
+					.map(environment::resolvePlaceholders).toArray(String[]::new));
 			config.setTestClass(testContext.getTestClass());
 			CqlScript[] scripts = CqlResourceUtils.getScripts(context, config);
 			CqlScriptUtils.executeScripts(session, scripts);

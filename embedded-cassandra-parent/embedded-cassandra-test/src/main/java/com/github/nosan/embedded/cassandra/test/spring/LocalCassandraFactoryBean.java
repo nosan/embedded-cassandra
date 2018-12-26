@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,6 +32,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.env.Environment;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
@@ -77,27 +79,33 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 	@Override
 	@Nonnull
 	public LocalCassandraFactory getObject() throws Exception {
+		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
+		Environment environment = context.getEnvironment();
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		EmbeddedLocalCassandra annotation = this.annotation;
-		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
 		Class<?> testClass = this.testClass;
-		factory.setConfigurationFile(CqlResourceUtils.getURL(context, testClass, annotation.configurationFile()));
-		factory.setLogbackFile(CqlResourceUtils.getURL(context, testClass, annotation.logbackFile()));
-		factory.setTopologyFile(CqlResourceUtils.getURL(context, testClass, annotation.topologyFile()));
-		factory.setRackFile(CqlResourceUtils.getURL(context, testClass, annotation.rackFile()));
-		factory.setCommitLogArchivingFile(
-				CqlResourceUtils.getURL(context, testClass, annotation.commitLogArchivingFile()));
+		factory.setConfigurationFile(CqlResourceUtils.getURL(context, testClass,
+				environment.resolvePlaceholders(annotation.configurationFile())));
+		factory.setLogbackFile(CqlResourceUtils.getURL(context, testClass,
+				environment.resolvePlaceholders(annotation.logbackFile())));
+		factory.setTopologyFile(CqlResourceUtils.getURL(context, testClass,
+				environment.resolvePlaceholders(annotation.topologyFile())));
+		factory.setRackFile(CqlResourceUtils.getURL(context, testClass,
+				environment.resolvePlaceholders(annotation.rackFile())));
+		factory.setCommitLogArchivingFile(CqlResourceUtils.getURL(context, testClass,
+				environment.resolvePlaceholders(annotation.commitLogArchivingFile())));
 		if (StringUtils.hasText(annotation.workingDirectory())) {
-			factory.setWorkingDirectory(Paths.get(annotation.workingDirectory()));
+			factory.setWorkingDirectory(Paths.get(environment.resolvePlaceholders(annotation.workingDirectory())));
 		}
 		if (StringUtils.hasText(annotation.javaHome())) {
-			factory.setJavaHome(Paths.get(annotation.javaHome()));
+			factory.setJavaHome(Paths.get(environment.resolvePlaceholders(annotation.javaHome())));
 		}
 		if (StringUtils.hasText(annotation.version())) {
-			factory.setVersion(Version.parse(annotation.version()));
+			factory.setVersion(Version.parse(environment.resolvePlaceholders(annotation.version())));
 		}
 		factory.setStartupTimeout(Duration.ofMillis(annotation.startupTimeout()));
-		factory.getJvmOptions().addAll(Arrays.asList(annotation.jvmOptions()));
+		factory.getJvmOptions().addAll(Arrays.stream(annotation.jvmOptions())
+				.map(environment::resolvePlaceholders).collect(Collectors.toList()));
 		factory.setJmxPort(annotation.jmxPort());
 		factory.setAllowRoot(annotation.allowRoot());
 		factory.setRegisterShutdownHook(annotation.registerShutdownHook());
@@ -113,17 +121,19 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 
 	private static ArtifactFactory getArtifactFactory(EmbeddedLocalCassandra.Artifact annotation,
 			ApplicationContext context) {
+		Environment environment = context.getEnvironment();
 		ArtifactFactory artifactFactory = BeanFactoryUtils.getBean(context, ArtifactFactory.class);
 		if (artifactFactory != null) {
 			return artifactFactory;
 		}
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
 		if (StringUtils.hasText(annotation.directory())) {
-			factory.setDirectory(Paths.get(annotation.directory()));
+			factory.setDirectory(Paths.get(environment.resolvePlaceholders(annotation.directory())));
 		}
 		if (annotation.proxyType() != Proxy.Type.DIRECT && StringUtils.hasText(annotation.proxyHost()) &&
 				annotation.proxyPort() != -1) {
-			factory.setProxy(new Proxy(annotation.proxyType(), new InetSocketAddress(annotation.proxyHost(),
+			factory.setProxy(new Proxy(annotation.proxyType(), new InetSocketAddress(
+					environment.resolvePlaceholders(annotation.proxyHost()),
 					annotation.proxyPort())));
 		}
 		if (!UrlFactory.class.equals(annotation.urlFactory())) {
