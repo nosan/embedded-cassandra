@@ -21,6 +21,7 @@ import java.net.Proxy;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -84,32 +85,44 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		EmbeddedLocalCassandra annotation = this.annotation;
 		Class<?> testClass = this.testClass;
-		factory.setConfigurationFile(CqlResourceUtils.getURL(context, testClass,
-				environment.resolvePlaceholders(annotation.configurationFile())));
-		factory.setLogbackFile(CqlResourceUtils.getURL(context, testClass,
-				environment.resolvePlaceholders(annotation.logbackFile())));
-		factory.setTopologyFile(CqlResourceUtils.getURL(context, testClass,
-				environment.resolvePlaceholders(annotation.topologyFile())));
-		factory.setRackFile(CqlResourceUtils.getURL(context, testClass,
-				environment.resolvePlaceholders(annotation.rackFile())));
-		factory.setCommitLogArchivingFile(CqlResourceUtils.getURL(context, testClass,
-				environment.resolvePlaceholders(annotation.commitLogArchivingFile())));
-		if (StringUtils.hasText(annotation.workingDirectory())) {
-			factory.setWorkingDirectory(Paths.get(environment.resolvePlaceholders(annotation.workingDirectory())));
+		String configurationFile = environment.resolvePlaceholders(annotation.configurationFile());
+		String logbackFile = environment.resolvePlaceholders(annotation.logbackFile());
+		String topologyFile = environment.resolvePlaceholders(annotation.topologyFile());
+		String rackFile = environment.resolvePlaceholders(annotation.rackFile());
+		String commitLogArchivingFile = environment.resolvePlaceholders(annotation.commitLogArchivingFile());
+		String workingDirectory = environment.resolvePlaceholders(annotation.workingDirectory());
+		String javaHome = environment.resolvePlaceholders(annotation.javaHome());
+		String version = environment.resolvePlaceholders(annotation.version());
+		Duration startupTimeout = Duration.ofMillis(annotation.startupTimeout());
+		int jmxPort = annotation.jmxPort();
+		boolean allowRoot = annotation.allowRoot();
+		boolean registerShutdownHook = annotation.registerShutdownHook();
+		EmbeddedLocalCassandra.Artifact artifact = annotation.artifact();
+		List<String> jvmOptions = Arrays.stream(annotation.jvmOptions())
+				.map(environment::resolvePlaceholders)
+				.filter(StringUtils::hasText)
+				.collect(Collectors.toList());
+
+		if (StringUtils.hasText(workingDirectory)) {
+			factory.setWorkingDirectory(Paths.get(workingDirectory));
 		}
-		if (StringUtils.hasText(annotation.javaHome())) {
-			factory.setJavaHome(Paths.get(environment.resolvePlaceholders(annotation.javaHome())));
+		if (StringUtils.hasText(javaHome)) {
+			factory.setJavaHome(Paths.get(javaHome));
 		}
-		if (StringUtils.hasText(annotation.version())) {
-			factory.setVersion(Version.parse(environment.resolvePlaceholders(annotation.version())));
+		if (StringUtils.hasText(version)) {
+			factory.setVersion(Version.parse(version));
 		}
-		factory.setStartupTimeout(Duration.ofMillis(annotation.startupTimeout()));
-		factory.getJvmOptions().addAll(Arrays.stream(annotation.jvmOptions())
-				.map(environment::resolvePlaceholders).collect(Collectors.toList()));
-		factory.setJmxPort(annotation.jmxPort());
-		factory.setAllowRoot(annotation.allowRoot());
-		factory.setRegisterShutdownHook(annotation.registerShutdownHook());
-		factory.setArtifactFactory(getArtifactFactory(annotation.artifact(), context));
+		factory.setConfigurationFile(CqlResourceUtils.getURL(context, testClass, configurationFile));
+		factory.setLogbackFile(CqlResourceUtils.getURL(context, testClass, logbackFile));
+		factory.setTopologyFile(CqlResourceUtils.getURL(context, testClass, topologyFile));
+		factory.setRackFile(CqlResourceUtils.getURL(context, testClass, rackFile));
+		factory.setCommitLogArchivingFile(CqlResourceUtils.getURL(context, testClass, commitLogArchivingFile));
+		factory.setStartupTimeout(startupTimeout);
+		factory.getJvmOptions().addAll(jvmOptions);
+		factory.setJmxPort(jmxPort);
+		factory.setAllowRoot(allowRoot);
+		factory.setRegisterShutdownHook(registerShutdownHook);
+		factory.setArtifactFactory(getArtifactFactory(artifact, context));
 		return factory;
 	}
 
@@ -126,21 +139,26 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		if (artifactFactory != null) {
 			return artifactFactory;
 		}
+		String directory = environment.resolvePlaceholders(annotation.directory());
+		String proxyHost = environment.resolvePlaceholders(annotation.proxyHost());
+		int proxyPort = annotation.proxyPort();
+		Proxy.Type proxyType = annotation.proxyType();
+		Class<? extends UrlFactory> urlFactory = annotation.urlFactory();
+		Duration readTimeout = Duration.ofMillis(annotation.readTimeout());
+		Duration connectTimeout = Duration.ofMillis(annotation.connectTimeout());
+
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
-		if (StringUtils.hasText(annotation.directory())) {
-			factory.setDirectory(Paths.get(environment.resolvePlaceholders(annotation.directory())));
+		if (StringUtils.hasText(directory)) {
+			factory.setDirectory(Paths.get(directory));
 		}
-		if (annotation.proxyType() != Proxy.Type.DIRECT && StringUtils.hasText(annotation.proxyHost()) &&
-				annotation.proxyPort() != -1) {
-			factory.setProxy(new Proxy(annotation.proxyType(), new InetSocketAddress(
-					environment.resolvePlaceholders(annotation.proxyHost()),
-					annotation.proxyPort())));
+		if (proxyType != Proxy.Type.DIRECT && StringUtils.hasText(proxyHost) && proxyPort != -1) {
+			factory.setProxy(new Proxy(proxyType, new InetSocketAddress(proxyHost, proxyPort)));
 		}
-		if (!UrlFactory.class.equals(annotation.urlFactory())) {
-			factory.setUrlFactory(BeanUtils.instantiateClass(annotation.urlFactory()));
+		if (!UrlFactory.class.equals(urlFactory)) {
+			factory.setUrlFactory(BeanUtils.instantiateClass(urlFactory));
 		}
-		factory.setReadTimeout(Duration.ofMillis(annotation.readTimeout()));
-		factory.setConnectTimeout(Duration.ofMillis(annotation.connectTimeout()));
+		factory.setReadTimeout(readTimeout);
+		factory.setConnectTimeout(connectTimeout);
 		return factory;
 	}
 

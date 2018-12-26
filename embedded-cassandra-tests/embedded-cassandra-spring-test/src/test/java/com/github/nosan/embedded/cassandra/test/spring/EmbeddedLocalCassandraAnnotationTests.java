@@ -77,10 +77,12 @@ public class EmbeddedLocalCassandraAnnotationTests {
 		ArtifactFactory artifactFactory = factory.getArtifactFactory();
 		assertThat(artifactFactory).isInstanceOf(RemoteArtifactFactory.class);
 		RemoteArtifactFactory af = (RemoteArtifactFactory) artifactFactory;
+		assertThat(af).isNotNull();
 		assertThat(af.getDirectory()).isEqualTo(Paths.get("target/artifact"));
 		assertThat(af.getReadTimeout()).isEqualTo(Duration.ofSeconds(15));
 		assertThat(af.getConnectTimeout()).isEqualTo(Duration.ofSeconds(20));
 		assertThat(af.getUrlFactory()).isInstanceOf(DefaultUrlFactory.class);
+		assertThat(af.getProxy()).isNotNull();
 		assertThat(af.getProxy().address()).isEqualTo(new InetSocketAddress("localhost", 8080));
 		assertThat(af.getProxy().type()).isEqualTo(Proxy.Type.SOCKS);
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
@@ -97,7 +99,6 @@ public class EmbeddedLocalCassandraAnnotationTests {
 		assertThat(factory.getJmxPort()).isEqualTo(8000);
 		assertThat(factory.isAllowRoot()).isTrue();
 		assertThat(factory.isRegisterShutdownHook()).isFalse();
-
 	}
 
 	@Configuration
