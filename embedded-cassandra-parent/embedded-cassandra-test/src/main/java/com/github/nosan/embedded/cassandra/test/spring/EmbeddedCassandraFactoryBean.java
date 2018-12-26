@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -29,7 +28,6 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.env.Environment;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
@@ -98,14 +96,11 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 	@Override
 	public void afterPropertiesSet() throws IOException {
 		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
-		Environment environment = context.getEnvironment();
 		EmbeddedCassandra annotation = this.annotation;
 		CqlConfig config = new CqlConfig();
-		config.setEncoding(environment.resolvePlaceholders(annotation.encoding()));
-		config.setScripts(Arrays.stream(annotation.scripts())
-				.map(environment::resolvePlaceholders).toArray(String[]::new));
-		config.setStatements(Arrays.stream(annotation.statements())
-				.map(environment::resolvePlaceholders).toArray(String[]::new));
+		config.setEncoding(annotation.encoding());
+		config.setScripts(annotation.scripts());
+		config.setStatements(annotation.statements());
 		config.setTestClass(this.testClass);
 		CqlScript[] cqlScripts = CqlResourceUtils.getScripts(context, config);
 		TestCassandra cassandra = new TestCassandra(annotation.registerShutdownHook(),
