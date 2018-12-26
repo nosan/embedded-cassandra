@@ -50,7 +50,7 @@ public class CqlExecutionListenerPrimaryTests {
 
 	@Test
 	@Cql(scripts = {"/init.cql", "/users-data.cql"})
-	@Cql(statements = "DROP KEYSPACE yest", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+	@Cql(statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void shouldHaveUser() {
 		try (Session session = this.cluster.connect()) {
 			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
