@@ -29,7 +29,7 @@ public class ThreadUtilsTests {
 
 	private static final Runnable TARGET = () -> {
 		try {
-			Thread.sleep(3000);
+			Thread.sleep(1500);
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
@@ -43,7 +43,7 @@ public class ThreadUtilsTests {
 		thread.start();
 		ThreadUtils.join(thread);
 		long elapsed = System.currentTimeMillis() - millis;
-		assertThat(elapsed).isGreaterThanOrEqualTo(3000);
+		assertThat(elapsed).isGreaterThanOrEqualTo(1500);
 
 	}
 
