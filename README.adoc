@@ -45,7 +45,7 @@ class Scratch {
 }
 ----
 
-Factory has a lot of different methods to control your `Cassandra` instance (e.g. setVersion, setConfiguration, etc..).
+Factory has a lot of different methods to control your `Cassandra` instance (e.g. `setRackFile`, `setTopologyFile`, `setJavaHome`, etc..).
 By default `Cassandra` is running on `default` ports and uses `3.11.3` version.
 `Cassandra` interface doesn't include any utility methods to work with it, the main goal of
 this interface to start and stop `Cassandra`, hence if you want to test your `Cassandra` code, you
