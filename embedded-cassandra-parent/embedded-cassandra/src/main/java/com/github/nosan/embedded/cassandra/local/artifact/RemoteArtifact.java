@@ -133,17 +133,19 @@ class RemoteArtifact implements Artifact {
 
 		for (URL url : urls) {
 			try {
-				Path target = this.directory.resolve(getName(url));
+				String name = getName(url);
+				Path target = this.directory.resolve(name);
 				if (!Files.exists(target)) {
 					if (log.isDebugEnabled()) {
 						log.debug("({}) doesn't exist, it will be downloaded from ({})", target, url);
 					}
-					Path source = download(url);
+					URLConnection urlConnection = getUrlConnection(url);
+					Path source = download(name, urlConnection);
 					try {
-						if (target.getParent() != null) {
-							Files.createDirectories(target.getParent());
-						}
-						if (!(Files.exists(target) || Thread.currentThread().isInterrupted())) {
+						if (!Files.exists(target) && isDownloaded(source, urlConnection)) {
+							if (target.getParent() != null) {
+								Files.createDirectories(target.getParent());
+							}
 							return Files.move(source, target);
 						}
 						return source;
@@ -168,47 +170,28 @@ class RemoteArtifact implements Artifact {
 		throw exception;
 	}
 
-	private Path download(URL url) throws IOException {
-		URLConnection urlConnection = getUrlConnection(url);
-		Path tempFile = FileUtils.getTmpDirectory()
-				.resolve(String.format("%s-%s", UUID.randomUUID(), getName(url)));
-		Files.createFile(tempFile);
-		try {
-			tempFile.toFile().deleteOnExit();
+	private String getName(URL url) {
+		String file = url.getFile();
+		if (StringUtils.hasText(file) && file.lastIndexOf("/") != -1) {
+			file = file.substring(file.lastIndexOf("/") + 1);
 		}
-		catch (Throwable ex) {
-			log.error(String.format("Shutdown hook is not registered for (%s)", tempFile), ex);
+		if (!StringUtils.hasText(file)) {
+			throw new IllegalArgumentException(
+					String.format("There is no way to determine a file name from (%s)", url));
 		}
-		long size = urlConnection.getContentLengthLong();
-		try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel();
-				ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
-			log.info("Downloading Cassandra from ({}). It takes a while...", urlConnection.getURL());
-			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
-			try {
-				if (size > 0) {
-					Map<String, String> context = MDCUtils.getContext();
-					executorService.scheduleAtFixedRate(() -> {
-						MDCUtils.setContext(context);
-						try {
-							long current = Files.size(tempFile);
-							log.info("Downloaded {} / {}  {}%", current, size, (current * 100) / size);
-						}
-						catch (IOException ignore) {
-						}
-					}, 0, 3, TimeUnit.SECONDS);
-				}
-				fileChannel.transferFrom(urlChannel, 0, Long.MAX_VALUE);
-			}
-			finally {
-				executorService.shutdownNow();
-			}
-		}
-		catch (IOException ex) {
-			throw new IOException(String.format("Could not download Cassandra from (%s)", urlConnection.getURL()), ex);
-		}
+		return file;
+	}
 
-		log.info("Cassandra ({}) has been downloaded", this.version);
-		return tempFile;
+	private boolean isDownloaded(Path file, URLConnection urlConnection) {
+		long contentLength = urlConnection.getContentLengthLong();
+		if (contentLength > 0) {
+			try {
+				return contentLength == Files.size(file);
+			}
+			catch (Exception ignore) {
+			}
+		}
+		return !Thread.currentThread().isInterrupted();
 	}
 
 	private URLConnection getUrlConnection(URL url) throws IOException {
@@ -237,15 +220,50 @@ class RemoteArtifact implements Artifact {
 		return urlConnection;
 	}
 
-	private String getName(URL url) {
-		String file = url.getFile();
-		if (StringUtils.hasText(file) && file.lastIndexOf("/") != -1) {
-			file = file.substring(file.lastIndexOf("/") + 1);
+	private Path download(String name, URLConnection urlConnection) throws IOException {
+		URL url = urlConnection.getURL();
+		long contentLength = urlConnection.getContentLengthLong();
+		Path tempFile = FileUtils.getTmpDirectory()
+				.resolve(String.format("%s-%s", UUID.randomUUID(), name));
+		Files.createFile(tempFile);
+		try {
+			tempFile.toFile().deleteOnExit();
 		}
-		if (!StringUtils.hasText(file)) {
-			throw new IllegalArgumentException(
-					String.format("There is no way to determine a file name from (%s)", url));
+		catch (Throwable ex) {
+			log.error(String.format("Shutdown hook is not registered for (%s)", tempFile), ex);
 		}
-		return file;
+		try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel();
+				ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
+			log.info("Downloading Cassandra from ({}). It takes a while...", url);
+			ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
+			try {
+				showProgress(contentLength, tempFile, scheduledExecutor);
+				fileChannel.transferFrom(urlChannel, 0, Long.MAX_VALUE);
+			}
+			finally {
+				scheduledExecutor.shutdown();
+			}
+		}
+		catch (IOException ex) {
+			throw new IOException(String.format("Could not download Cassandra from (%s)", url), ex);
+		}
+		log.info("Cassandra ({}) has been downloaded", this.version);
+		return tempFile;
+	}
+
+	private void showProgress(long contentLength, Path file, ScheduledExecutorService scheduledExecutor) {
+		if (contentLength > 0) {
+			Map<String, String> context = MDCUtils.getContext();
+			scheduledExecutor.scheduleAtFixedRate(() -> {
+				MDCUtils.setContext(context);
+				try {
+					long current = Files.size(file);
+					log.info("Downloaded {} / {}  {}%", current, contentLength,
+							(current * 100) / contentLength);
+				}
+				catch (Exception ignore) {
+				}
+			}, 0, 3, TimeUnit.SECONDS);
+		}
 	}
 }
