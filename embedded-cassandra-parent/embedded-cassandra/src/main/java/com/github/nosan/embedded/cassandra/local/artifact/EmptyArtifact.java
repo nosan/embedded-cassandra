@@ -52,13 +52,14 @@ class EmptyArtifact implements Artifact {
 		Path directory = FileUtils.getTmpDirectory();
 		Path tempFile = directory.resolve(String.format("empty-apache-cassandra-%s-%s.zip",
 				this.version, UUID.randomUUID()));
+		Files.createFile(tempFile);
 		try {
 			tempFile.toFile().deleteOnExit();
 		}
 		catch (Throwable ex) {
 			log.error(String.format("Shutdown hook is not registered for (%s)", tempFile), ex);
 		}
-		return Files.createFile(tempFile);
+		return tempFile;
 	}
 
 }
