@@ -262,9 +262,12 @@ public @interface EmbeddedLocalCassandra {
 
 	/**
 	 * Annotation that describes {@link RemoteArtifactFactory} attributes.
+	 *
+	 * @see RemoteArtifactFactory
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({})
+	@Documented
 	@interface Artifact {
 
 		/**
