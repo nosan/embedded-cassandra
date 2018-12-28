@@ -61,8 +61,8 @@ public final class CaptureOutput implements TestRule {
 		};
 	}
 
-	@Override
 	@Nonnull
+	@Override
 	public String toString() {
 		flush();
 		ByteArrayOutputStream output = this.output;

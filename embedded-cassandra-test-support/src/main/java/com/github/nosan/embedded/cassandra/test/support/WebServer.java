@@ -79,8 +79,8 @@ public final class WebServer extends ExternalResource implements Supplier<HttpSe
 	 *
 	 * @return a server
 	 */
-	@Override
 	@Nonnull
+	@Override
 	public HttpServer get() {
 		return Objects.requireNonNull(this.server, "Http Server is not initialized.");
 	}

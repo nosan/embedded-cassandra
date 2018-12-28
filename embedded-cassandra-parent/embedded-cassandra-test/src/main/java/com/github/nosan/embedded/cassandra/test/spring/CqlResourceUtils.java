@@ -135,8 +135,8 @@ abstract class CqlResourceUtils {
 			return this.resource.getInputStream();
 		}
 
-		@Override
 		@Nonnull
+		@Override
 		public String toString() {
 			return this.resource.toString();
 		}

@@ -391,8 +391,8 @@ public class TestCassandra implements Cassandra {
 		return CqlUtils.executeStatement(getSession(), statement);
 	}
 
-	@Override
 	@Nonnull
+	@Override
 	public String toString() {
 		return String.format("%s [%s]", getClass().getSimpleName(), this.cassandra);
 	}

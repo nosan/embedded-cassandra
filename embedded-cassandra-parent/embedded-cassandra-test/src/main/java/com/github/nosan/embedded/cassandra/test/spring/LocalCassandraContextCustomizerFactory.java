@@ -34,8 +34,8 @@ import org.springframework.test.context.ContextCustomizerFactory;
  */
 class LocalCassandraContextCustomizerFactory implements ContextCustomizerFactory {
 
-	@Override
 	@Nullable
+	@Override
 	public ContextCustomizer createContextCustomizer(@Nonnull Class<?> testClass,
 			@Nonnull List<ContextConfigurationAttributes> configAttributes) {
 		EmbeddedLocalCassandra annotation =

@@ -77,8 +77,8 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		this.context = Objects.requireNonNull(applicationContext, "Application Context must not be null");
 	}
 
-	@Override
 	@Nonnull
+	@Override
 	public LocalCassandraFactory getObject() throws Exception {
 		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
 		Environment environment = context.getEnvironment();
@@ -126,8 +126,8 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		return factory;
 	}
 
-	@Override
 	@Nonnull
+	@Override
 	public Class<?> getObjectType() {
 		return LocalCassandraFactory.class;
 	}

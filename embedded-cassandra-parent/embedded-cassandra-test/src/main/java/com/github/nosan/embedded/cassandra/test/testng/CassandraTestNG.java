@@ -145,14 +145,14 @@ public class CassandraTestNG extends TestCassandra {
 		super(registerShutdownHook, cassandraFactory, clusterFactory, scripts);
 	}
 
-	@Override
 	@BeforeClass(alwaysRun = true)
+	@Override
 	public void start() throws CassandraException {
 		super.start();
 	}
 
-	@Override
 	@AfterClass(alwaysRun = true)
+	@Override
 	public void stop() throws CassandraException {
 		super.stop();
 	}

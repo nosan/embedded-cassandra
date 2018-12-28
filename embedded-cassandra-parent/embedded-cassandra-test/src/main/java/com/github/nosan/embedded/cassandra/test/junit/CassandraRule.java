@@ -144,8 +144,8 @@ public class CassandraRule extends TestCassandra implements TestRule {
 		super(registerShutdownHook, cassandraFactory, clusterFactory, scripts);
 	}
 
-	@Override
 	@Nonnull
+	@Override
 	public Statement apply(@Nonnull Statement base, @Nonnull Description description) {
 		return new Statement() {
 			@Override

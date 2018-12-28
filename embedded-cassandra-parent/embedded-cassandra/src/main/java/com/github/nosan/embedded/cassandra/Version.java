@@ -123,8 +123,8 @@ public final class Version implements Comparable<Version> {
 				this.patch == version.patch;
 	}
 
-	@Override
 	@Nonnull
+	@Override
 	public String toString() {
 		StringBuilder text = new StringBuilder().append(this.major);
 		if (this.minor >= 0) {
