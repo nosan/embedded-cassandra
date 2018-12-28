@@ -39,7 +39,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * <pre>
  * public class CassandraTests extends CassandraTestNG {
  * public CassandraTests(){
- *     super(cassandraFactory, clusterFactory, scripts[]);
+ *     super(&#47;* constructor parameters *&#47;);
  * }
  * &#64;Test
  * public void test() {
