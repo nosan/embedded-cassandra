@@ -38,6 +38,7 @@ public class RunProcessTests {
 			OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
 			int exit = new RunProcess(Arrays.asList("bash", "-c", "echo 'Hello World' > 1.txt; cat 1.txt"))
 					.runAndWait(bufferOutput);
+			new RunProcess(Arrays.asList("sleep", "1")).runAndWait();
 			assertThat(bufferOutput.toString()).isEqualTo("Hello World");
 			assertThat(exit).isEqualTo(0);
 			new RunProcess(Arrays.asList("rm", "1.txt")).runAndWait();
@@ -49,6 +50,7 @@ public class RunProcessTests {
 		if (OS.get() == OS.WINDOWS) {
 			OutputCapture bufferOutput = new OutputCapture(Integer.MAX_VALUE);
 			int exit = new RunProcess(Arrays.asList("echo", "Hello World")).runAndWait(bufferOutput);
+			new RunProcess(Arrays.asList("sleep", "1")).runAndWait();
 			assertThat(bufferOutput.toString()).isEqualTo("Hello World");
 			assertThat(exit).isEqualTo(0);
 		}
