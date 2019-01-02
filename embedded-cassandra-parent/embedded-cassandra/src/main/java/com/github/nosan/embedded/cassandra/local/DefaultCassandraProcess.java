@@ -327,11 +327,11 @@ class DefaultCassandraProcess implements CassandraProcess {
 			}
 			arguments.add("-p");
 			arguments.add(pidFile.toAbsolutePath());
-			new RunProcess(directory, arguments).runAndWait(log::info);
+			new RunProcess(true, directory, arguments).runAndWait(log::info);
 		}
 		else {
 			String signal = force ? "-9" : "-SIGINT";
-			new RunProcess(directory, Arrays.asList("bash", "-c",
+			new RunProcess(true, directory, Arrays.asList("bash", "-c",
 					String.format("kill %s `cat %s`", signal, pidFile.toAbsolutePath()))).runAndWait(log::info);
 		}
 	}
@@ -346,11 +346,11 @@ class DefaultCassandraProcess implements CassandraProcess {
 			arguments.add("/T");
 			arguments.add("/pid");
 			arguments.add(pid);
-			new RunProcess(directory, arguments).runAndWait(log::info);
+			new RunProcess(true, directory, arguments).runAndWait(log::info);
 		}
 		else {
 			String signal = force ? "-9" : "-SIGINT";
-			new RunProcess(directory, Arrays.asList("kill", signal, pid)).runAndWait(log::info);
+			new RunProcess(true, directory, Arrays.asList("kill", signal, pid)).runAndWait(log::info);
 		}
 	}
 
