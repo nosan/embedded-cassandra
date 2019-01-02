@@ -140,9 +140,10 @@ class RemoteArtifact implements Artifact {
 						log.debug("({}) doesn't exist, it will be downloaded from ({})", target, url);
 					}
 					URLConnection urlConnection = getUrlConnection(url);
-					Path source = download(name, urlConnection);
+					long contentLength = urlConnection.getContentLengthLong();
+					Path source = download(name, urlConnection, contentLength);
 					try {
-						if (!Files.exists(target) && isDownloaded(source, urlConnection)) {
+						if (!Files.exists(target) && isDownloaded(source, contentLength)) {
 							if (target.getParent() != null) {
 								Files.createDirectories(target.getParent());
 							}
@@ -172,7 +173,7 @@ class RemoteArtifact implements Artifact {
 
 	private String getName(URL url) {
 		String file = url.getFile();
-		if (StringUtils.hasText(file) && file.lastIndexOf("/") != -1) {
+		if (StringUtils.hasText(file) && file.contains("/")) {
 			file = file.substring(file.lastIndexOf("/") + 1);
 		}
 		if (!StringUtils.hasText(file)) {
@@ -182,8 +183,7 @@ class RemoteArtifact implements Artifact {
 		return file;
 	}
 
-	private boolean isDownloaded(Path file, URLConnection urlConnection) {
-		long contentLength = urlConnection.getContentLengthLong();
+	private boolean isDownloaded(Path file, long contentLength) {
 		if (contentLength > 0) {
 			try {
 				return contentLength == Files.size(file);
@@ -220,9 +220,8 @@ class RemoteArtifact implements Artifact {
 		return urlConnection;
 	}
 
-	private Path download(String name, URLConnection urlConnection) throws IOException {
+	private Path download(String name, URLConnection urlConnection, long contentLength) throws IOException {
 		URL url = urlConnection.getURL();
-		long contentLength = urlConnection.getContentLengthLong();
 		Path tempFile = FileUtils.getTmpDirectory()
 				.resolve(String.format("%s-%s", UUID.randomUUID(), name));
 		Files.createFile(tempFile);
