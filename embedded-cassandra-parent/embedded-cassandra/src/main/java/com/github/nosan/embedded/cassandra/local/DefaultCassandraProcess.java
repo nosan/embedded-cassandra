@@ -159,7 +159,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 		OutputReadiness output = new OutputReadiness();
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
-		Process process = new RunProcess(directory, environment, arguments)
+		Process process = new RunProcess(true, directory, environment, arguments)
 				.run(new FilteredOutput(output, outputFilter),
 						new FilteredOutput(LoggerFactory.getLogger(Cassandra.class)::info, outputFilter));
 		this.process = process;
