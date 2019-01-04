@@ -2,11 +2,11 @@
 
 `Embedded Cassandra` provides an easy way to run `Cassandra`.
 
-= License
+== License
 
 This project uses link:http://www.apache.org/licenses/LICENSE-2.0[Apache License 2.0]
 
-= Why?
+== Why?
 
  - It is much easier than installing right version by hand
  - It is possible to use different version/configuration per project/test.
@@ -14,11 +14,32 @@ This project uses link:http://www.apache.org/licenses/LICENSE-2.0[Apache License
  - Provides different extensions for popular frameworks: `JUnit`, `TestNG`, `Spring`
  - Easy to configure
 
-= Modules
+== Maven dependency
+
+[source,xml]
+----
+
+    <!-- For testing -->
+     <dependency>
+         <groupId>com.github.nosan</groupId>
+         <artifactId>embedded-cassandra-test</artifactId>
+         <version>${version}</version>
+     </dependency>
+
+     <!-- Core  -->
+     <dependency>
+          <groupId>com.github.nosan</groupId>
+          <artifactId>embedded-cassandra</artifactId>
+          <version>${version}</version>
+    </dependency>
+
+----
+
+== Modules
 
 There are a number of modules in Embedded Cassandra, here is a quick overview:
 
-== embedded-cassandra image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra"]
+== embedded-cassandra
 
 Simple module that allows the Cassandra to be started and stopped.
 
@@ -53,7 +74,7 @@ should use `TestCassandra` from `embedded-cassandra-test` module.
 
 TIP: It is possible to run `Cassandra` on the random ports, just use `0` for port values.
 
-==  embedded-cassandra-test image:https://img.shields.io/maven-central/v/com.github.nosan/embedded-cassandra-test.svg["Maven Central", link="https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra-test"]
+==  embedded-cassandra-test
 
 This module contains core items that can be helpful when testing your `Cassandra`.
 
