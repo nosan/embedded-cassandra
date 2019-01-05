@@ -213,7 +213,10 @@ public abstract class FileUtils {
 		if (globSyntax.startsWith("glob:")) {
 			globSyntax = globSyntax.substring(5);
 		}
-		globSyntax = (path + "/" + globSyntax).replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
+		if (StringUtils.hasText(String.valueOf(path.toAbsolutePath()))) {
+			globSyntax = (path.toAbsolutePath() + "/" + globSyntax);
+		}
+		globSyntax = globSyntax.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
 		globSyntax = "glob:" + globSyntax;
 		globSyntax = (OS.get() == OS.WINDOWS) ? globSyntax.replaceAll("/", WINDOWS + WINDOWS) : globSyntax;
 		return fileSystem.getPathMatcher(globSyntax);
