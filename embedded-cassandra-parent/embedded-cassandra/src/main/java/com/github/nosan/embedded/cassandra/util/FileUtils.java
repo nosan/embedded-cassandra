@@ -142,11 +142,13 @@ public abstract class FileUtils {
 	/**
 	 * Walks a file tree with a {@code glob} pattern filter. Resources will be sorted by {@link
 	 * URI#compareTo(URI)}.
+	 * <b>Note!</b> Prefix {@code glob:} will be added automatically.
 	 *
 	 * @param uri the {@link URI} to start with. (must be <b>file:</b> or <b>jar:</b>)
 	 * @param globSyntax the glob syntax (e.g. <b>**</b>)
 	 * @return the sorted resources
 	 * @throws IOException if an I/O error occurs
+	 * @see FileSystem#getPathMatcher(String)
 	 * @since 1.2.10
 	 */
 	@Nonnull
