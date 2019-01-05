@@ -70,7 +70,7 @@ abstract class CqlResourceUtils {
 			Charset charset = StringUtils.hasText(encoding) ? Charset.forName(encoding) : null;
 			for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
 				List<Resource> resources = new ArrayList<>(Arrays.asList(resolver.getResources(script)));
-				resources.sort(CqlResourceUtils::compareByURL);
+				resources.sort(CqlResourceUtils::compare);
 				resources.forEach(resource -> cqlScripts.add(new SpringCqlScript(resource, charset)));
 			}
 		}
@@ -101,12 +101,16 @@ abstract class CqlResourceUtils {
 		return resourceLoader.getResource(locations[0]).getURL();
 	}
 
-	private static int compareByURL(Resource r, Resource r1) {
+	private static int compare(Resource r, Resource r1) {
+		return toURL(r).toString().compareTo(toURL(r1).toString());
+	}
+
+	private static URL toURL(Resource resource) {
 		try {
-			return r.getURL().toString().compareTo(r1.getURL().toString());
+			return resource.getURL();
 		}
-		catch (Throwable ex) {
-			return 0;
+		catch (IOException ex) {
+			throw new IllegalStateException(String.format("Could not transfer (%s) to URL", resource), ex);
 		}
 	}
 
