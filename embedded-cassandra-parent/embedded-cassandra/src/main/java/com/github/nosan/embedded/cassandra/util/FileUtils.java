@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;
@@ -34,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -172,19 +170,8 @@ public abstract class FileUtils {
 				return walkGlobFileTree(fileSystem.getPath("/"), glob);
 			}
 		}
-		if ("war".equals(uri.getScheme())) {
-			String[] tokens = uri.toString().split("[*]");
-			if (tokens.length == 2) {
-				String jarUri = tokens[0];
-				String jarEntry = tokens[1];
-				try (FileSystem fileSystem = FileSystems
-						.newFileSystem(URI.create(String.format("jar:%s", jarUri.substring(4))), env, cl)) {
-					return walkGlobFileTree(fileSystem.getPath(jarEntry), glob);
-				}
-			}
-		}
 		if ("jar".equals(uri.getScheme())) {
-			String[] tokens = uri.toString().split("[!]");
+			String[] tokens = uri.toString().split("!");
 			if (tokens.length == 2) {
 				String jarUri = tokens[0];
 				String jarEntry = tokens[1];
@@ -218,14 +205,7 @@ public abstract class FileUtils {
 	}
 
 	private static boolean isJar(URI uri) {
-		try {
-			try (JarFile ignore = new JarFile(new File(uri))) {
-				return true;
-			}
-		}
-		catch (IOException ex) {
-			return false;
-		}
+		return uri.toString().endsWith(".jar");
 	}
 
 	private static PathMatcher toPathMatcher(Path path, String glob) {
