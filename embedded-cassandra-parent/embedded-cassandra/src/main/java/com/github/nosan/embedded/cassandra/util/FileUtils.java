@@ -192,7 +192,8 @@ public abstract class FileUtils {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-				if (Files.exists(file) && pathMatcher.matches(file.toAbsolutePath())) {
+				Path normalizePath = Paths.get(normalizePath(String.valueOf(file.toAbsolutePath())));
+				if (Files.exists(file) && pathMatcher.matches(normalizePath)) {
 					uris.add(file.toUri());
 				}
 				return FileVisitResult.CONTINUE;
@@ -214,10 +215,12 @@ public abstract class FileUtils {
 		if (StringUtils.hasText(String.valueOf(path.toAbsolutePath()))) {
 			globSyntax = (path.toAbsolutePath() + "/" + globSyntax);
 		}
-		globSyntax = globSyntax.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
-		globSyntax = "glob:" + globSyntax;
-		globSyntax = (OS.get() == OS.WINDOWS) ? globSyntax.replaceAll("/", WINDOWS + WINDOWS) : globSyntax;
-		return fileSystem.getPathMatcher(globSyntax);
+		return fileSystem.getPathMatcher("glob:" + normalizePath(globSyntax));
+	}
+
+	private static String normalizePath(String path) {
+		String newPath = path.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
+		return (OS.get() == OS.WINDOWS) ? newPath.replaceAll("/", WINDOWS + WINDOWS) : newPath;
 	}
 
 }
