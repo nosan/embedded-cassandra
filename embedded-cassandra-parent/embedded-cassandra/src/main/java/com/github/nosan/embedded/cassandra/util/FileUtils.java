@@ -213,15 +213,14 @@ public abstract class FileUtils {
 			globSyntax = globSyntax.substring(5);
 		}
 		globSyntax = path.toAbsolutePath() + "/" + globSyntax;
-		return fileSystem.getPathMatcher(String.format("glob:%s", normalizePath(fileSystem, globSyntax)));
-	}
-
-	private static String normalizePath(FileSystem fileSystem, String path) {
-		String newPath = path.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
+		globSyntax = globSyntax.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
 		if ("\\".equals(fileSystem.getSeparator())) {
-			return newPath.replaceAll("/", WINDOWS + WINDOWS);
+			globSyntax = globSyntax.replaceAll("/", WINDOWS + WINDOWS);
 		}
-		return newPath.replaceAll("/", fileSystem.getSeparator());
+		else {
+			globSyntax = globSyntax.replaceAll("/", fileSystem.getSeparator());
+		}
+		return fileSystem.getPathMatcher(String.format("glob:%s", globSyntax.trim()));
 	}
 
 }
