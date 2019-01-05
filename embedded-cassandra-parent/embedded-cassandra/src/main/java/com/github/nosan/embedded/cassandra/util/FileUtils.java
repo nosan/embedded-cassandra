@@ -184,7 +184,7 @@ public abstract class FileUtils {
 	}
 
 	private static Set<URI> walkGlobFileTree(Path path, String glob) throws IOException {
-		if (!Files.exists(path)) {
+		if (!Files.exists(path) || !Files.isReadable(path)) {
 			return Collections.emptySet();
 		}
 		PathMatcher pathMatcher = toPathMatcher(path, glob);
@@ -192,8 +192,10 @@ public abstract class FileUtils {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-				Path normalizePath = Paths.get(normalizePath(String.valueOf(file.toAbsolutePath())));
-				if (Files.exists(file) && pathMatcher.matches(normalizePath)) {
+				FileSystem fileSystem = file.getFileSystem();
+				Path normalizedPath = fileSystem.getPath(normalizePath(fileSystem,
+						String.valueOf(file.toAbsolutePath())));
+				if (Files.isReadable(file) && pathMatcher.matches(normalizedPath.toAbsolutePath())) {
 					uris.add(file.toUri());
 				}
 				return FileVisitResult.CONTINUE;
@@ -212,15 +214,13 @@ public abstract class FileUtils {
 		if (globSyntax.startsWith("glob:")) {
 			globSyntax = globSyntax.substring(5);
 		}
-		if (StringUtils.hasText(String.valueOf(path.toAbsolutePath()))) {
-			globSyntax = (path.toAbsolutePath() + "/" + globSyntax);
-		}
-		return fileSystem.getPathMatcher("glob:" + normalizePath(globSyntax));
+		globSyntax = path.toAbsolutePath() + "/" + globSyntax;
+		return fileSystem.getPathMatcher(String.format("glob:%s", normalizePath(fileSystem, globSyntax)));
 	}
 
-	private static String normalizePath(String path) {
-		String newPath = path.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
-		return (OS.get() == OS.WINDOWS) ? newPath.replaceAll("/", WINDOWS + WINDOWS) : newPath;
+	private static String normalizePath(FileSystem fileSystem, String path) {
+		return path.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim()
+				.replaceAll("/", fileSystem.getSeparator());
 	}
 
 }
