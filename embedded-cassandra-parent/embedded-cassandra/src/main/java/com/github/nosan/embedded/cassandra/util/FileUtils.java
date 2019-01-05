@@ -166,7 +166,8 @@ public abstract class FileUtils {
 	private static Set<URI> walkGlobFileTree(URI uri, String glob, ClassLoader cl) throws IOException {
 		Map<String, Object> env = Collections.emptyMap();
 		if ("file".equals(uri.getScheme()) && isJar(uri)) {
-			try (FileSystem fileSystem = FileSystems.newFileSystem(URI.create(String.format("jar:%s", uri)), env, cl)) {
+			URI jarUri = URI.create(String.format("jar:%s", uri));
+			try (FileSystem fileSystem = FileSystems.newFileSystem(jarUri, env, cl)) {
 				return walkGlobFileTree(fileSystem.getPath("/"), glob);
 			}
 		}
