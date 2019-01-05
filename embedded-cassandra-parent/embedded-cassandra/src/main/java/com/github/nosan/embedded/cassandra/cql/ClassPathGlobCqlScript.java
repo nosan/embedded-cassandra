@@ -194,7 +194,8 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	private static Set<URL> getURLs(ClassLoader classLoader) {
 		try {
-			Enumeration<URL> enumeration = (classLoader != null) ? classLoader.getResources("") : null;
+			Enumeration<URL> enumeration =
+					(classLoader != null) ? classLoader.getResources("") : ClassLoader.getSystemResources("");
 			if (enumeration == null) {
 				return Collections.emptySet();
 			}
