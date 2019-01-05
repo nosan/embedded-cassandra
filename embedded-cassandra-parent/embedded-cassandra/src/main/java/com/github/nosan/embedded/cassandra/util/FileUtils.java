@@ -155,7 +155,7 @@ public abstract class FileUtils {
 	public static List<URI> walkGlobFileTree(@Nonnull URI uri, @Nonnull String globSyntax) throws IOException {
 		Objects.requireNonNull(uri, "URI must not be null");
 		Objects.requireNonNull(globSyntax, "Glob must not be null");
-		return walkGlobFileTree(uri, toGlobSyntax(globSyntax), ClassUtils.getClassLoader())
+		return walkGlobFileTree(uri, globSyntax, ClassUtils.getClassLoader())
 				.stream()
 				.sorted(URI::compareTo)
 				.collect(Collectors.toList());
@@ -185,7 +185,7 @@ public abstract class FileUtils {
 
 	private static Set<URI> walkGlobFileTree(Path path, String globSyntax) throws IOException {
 		FileSystem fileSystem = path.getFileSystem();
-		PathMatcher pathMatcher = fileSystem.getPathMatcher(globSyntax);
+		PathMatcher pathMatcher = fileSystem.getPathMatcher(toGlobSyntax(globSyntax));
 		return walkGlobFileTree(path, pathMatcher);
 	}
 
