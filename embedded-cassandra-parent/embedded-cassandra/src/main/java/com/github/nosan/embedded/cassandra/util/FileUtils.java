@@ -195,7 +195,7 @@ public abstract class FileUtils {
 				FileSystem fileSystem = file.getFileSystem();
 				Path normalizedPath = fileSystem.getPath(normalizePath(fileSystem,
 						String.valueOf(file.toAbsolutePath())));
-				if (Files.isReadable(file) && pathMatcher.matches(normalizedPath.toAbsolutePath())) {
+				if (pathMatcher.matches(normalizedPath.toAbsolutePath()) && Files.isReadable(file)) {
 					uris.add(file.toUri());
 				}
 				return FileVisitResult.CONTINUE;
@@ -219,8 +219,11 @@ public abstract class FileUtils {
 	}
 
 	private static String normalizePath(FileSystem fileSystem, String path) {
-		return path.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim()
-				.replaceAll("/", fileSystem.getSeparator());
+		String newPath = path.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
+		if ("\\".equals(fileSystem.getSeparator())) {
+			return newPath.replaceAll("/", WINDOWS + WINDOWS);
+		}
+		return newPath.replaceAll("/", fileSystem.getSeparator());
 	}
 
 }
