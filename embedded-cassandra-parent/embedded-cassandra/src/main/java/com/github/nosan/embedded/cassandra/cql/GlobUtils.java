@@ -72,8 +72,7 @@ abstract class GlobUtils {
 		if ("file".equals(uri.getScheme()) && isJarOrZip(uri)) {
 			try (FileSystem fileSystem = FileSystems
 					.newFileSystem(URI.create(String.format("jar:%s", uri)), Collections.emptyMap(), classLoader)) {
-				PathMatcher pathMatcher = fileSystem.getPathMatcher(globSyntax);
-				return walkFileTree(fileSystem.getPath("/"), pathMatcher);
+				return walkFileTree(fileSystem.getPath("/"), globSyntax);
 			}
 		}
 		if ("jar".equals(uri.getScheme())) {
@@ -83,23 +82,27 @@ abstract class GlobUtils {
 				String jarPath = tokens[1];
 				try (FileSystem fileSystem = FileSystems
 						.newFileSystem(URI.create(jarUri), Collections.emptyMap(), classLoader)) {
-					PathMatcher pathMatcher = fileSystem.getPathMatcher(globSyntax);
-					return walkFileTree(fileSystem.getPath(jarPath), pathMatcher);
+					return walkFileTree(fileSystem.getPath(jarPath), globSyntax);
 				}
 			}
 		}
-		Path path = Paths.get(uri);
-		PathMatcher pathMatcher = path.getFileSystem().getPathMatcher(globSyntax);
+		return walkFileTree(Paths.get(uri), globSyntax);
+	}
+
+
+	private static List<URI> walkFileTree(Path path, String globSyntax) throws IOException {
+		FileSystem fileSystem = path.getFileSystem();
+		PathMatcher pathMatcher = fileSystem.getPathMatcher(globSyntax);
 		return walkFileTree(path, pathMatcher);
 	}
 
-	private static List<URI> walkFileTree(Path directory, PathMatcher pathMatcher) throws IOException {
+	private static List<URI> walkFileTree(Path path, PathMatcher pathMatcher) throws IOException {
 		List<URI> uris = new ArrayList<>();
-		Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
 				if (!isClassFile(file) && Files.exists(file)) {
-					int beginIndex = Math.max(Math.min(directory.getNameCount(), file.getNameCount() - 1), 0);
+					int beginIndex = Math.max(Math.min(path.getNameCount(), file.getNameCount() - 1), 0);
 					int endIndex = file.getNameCount();
 					if (pathMatcher.matches(file.subpath(beginIndex, endIndex))) {
 						uris.add(file.toUri());
