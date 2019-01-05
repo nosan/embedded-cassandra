@@ -193,10 +193,7 @@ public abstract class FileUtils {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-				FileSystem fileSystem = file.getFileSystem();
-				Path normalizedPath = fileSystem.getPath(normalizePath(fileSystem,
-						String.valueOf(file.toAbsolutePath())));
-				if (pathMatcher.matches(normalizedPath.toAbsolutePath()) && Files.isReadable(file)) {
+				if (pathMatcher.matches(file.toAbsolutePath()) && Files.isReadable(file)) {
 					uris.add(file.toUri());
 				}
 				return FileVisitResult.CONTINUE;
