@@ -115,6 +115,24 @@ public class FileUtilsTests {
 	}
 
 	@Test
+	public void walkWar() throws URISyntaxException, IOException {
+		URI uri = getClass().getResource("/test.war").toURI();
+		String glob = "glob:**";
+		List<URI> uris = FileUtils.walkGlobFileTree(uri, glob);
+		assertThat(uris).hasSize(2);
+		assertThat(uris).allMatch(FileUtilsTests::hasStream);
+	}
+
+	@Test
+	public void walkWarUri() throws URISyntaxException, IOException {
+		URI uri = new URI("war", getClass().getResource("/test.war").toURI().toString(), "*/");
+		String glob = "**";
+		List<URI> uris = FileUtils.walkGlobFileTree(uri, glob);
+		assertThat(uris).hasSize(2);
+		assertThat(uris).allMatch(FileUtilsTests::hasStream);
+	}
+
+	@Test
 	public void walkJar() throws URISyntaxException, IOException {
 		URI uri = getClass().getResource("/test.jar").toURI();
 		String glob = "glob:**";

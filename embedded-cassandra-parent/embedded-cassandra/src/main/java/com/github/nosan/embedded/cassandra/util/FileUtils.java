@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;
@@ -30,8 +31,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -144,7 +147,7 @@ public abstract class FileUtils {
 	 * {@link URI#compareTo(URI)}.
 	 * <b>Note!</b> Prefix {@code glob:} will be added automatically.
 	 *
-	 * @param uri the {@link URI} to start with. (must be <b>file:</b> or <b>jar:</b>)
+	 * @param uri the {@link URI} to start with. (must be <b>file:,jar:,war:</b>)
 	 * @param glob the glob pattern (e.g. <b>**</b>)
 	 * @return the sorted resources
 	 * @throws IOException if an I/O error occurs
@@ -162,21 +165,31 @@ public abstract class FileUtils {
 
 	}
 
-	private static Set<URI> walkGlobFileTree(URI uri, String glob, ClassLoader classLoader) throws IOException {
-		if ("file".equals(uri.getScheme()) && isJarOrZip(uri)) {
-			try (FileSystem fileSystem = FileSystems
-					.newFileSystem(URI.create(String.format("jar:%s", uri)), Collections.emptyMap(), classLoader)) {
+	private static Set<URI> walkGlobFileTree(URI uri, String glob, ClassLoader cl) throws IOException {
+		Map<String, Object> env = Collections.emptyMap();
+		if ("file".equals(uri.getScheme()) && isJar(uri)) {
+			try (FileSystem fileSystem = FileSystems.newFileSystem(URI.create(String.format("jar:%s", uri)), env, cl)) {
 				return walkGlobFileTree(fileSystem.getPath("/"), glob);
 			}
 		}
-		if ("jar".equals(uri.getScheme())) {
-			String[] tokens = uri.toString().split("!");
+		if ("war".equals(uri.getScheme())) {
+			String[] tokens = uri.toString().split("[*]");
 			if (tokens.length == 2) {
 				String jarUri = tokens[0];
-				String jarPath = tokens[1];
+				String jarEntry = tokens[1];
 				try (FileSystem fileSystem = FileSystems
-						.newFileSystem(URI.create(jarUri), Collections.emptyMap(), classLoader)) {
-					return walkGlobFileTree(fileSystem.getPath(jarPath), glob);
+						.newFileSystem(URI.create(String.format("jar:%s", jarUri.substring(4))), env, cl)) {
+					return walkGlobFileTree(fileSystem.getPath(jarEntry), glob);
+				}
+			}
+		}
+		if ("jar".equals(uri.getScheme())) {
+			String[] tokens = uri.toString().split("[!]");
+			if (tokens.length == 2) {
+				String jarUri = tokens[0];
+				String jarEntry = tokens[1];
+				try (FileSystem fileSystem = FileSystems.newFileSystem(URI.create(jarUri), env, cl)) {
+					return walkGlobFileTree(fileSystem.getPath(jarEntry), glob);
 				}
 			}
 		}
@@ -204,8 +217,15 @@ public abstract class FileUtils {
 		return uris;
 	}
 
-	private static boolean isJarOrZip(URI uri) {
-		return uri.toString().endsWith(".jar") || uri.toString().endsWith(".zip");
+	private static boolean isJar(URI uri) {
+		try {
+			try (JarFile ignore = new JarFile(new File(uri))) {
+				return true;
+			}
+		}
+		catch (IOException ex) {
+			return false;
+		}
 	}
 
 	private static PathMatcher toPathMatcher(Path path, String glob) {
