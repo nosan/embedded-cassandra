@@ -140,8 +140,8 @@ public abstract class FileUtils {
 	}
 
 	/**
-	 * Walks a file tree with a {@code glob} pattern filter. Resources will be sorted by {@link
-	 * URI#compareTo(URI)}.
+	 * Walks a file tree with a {@code glob} pattern filter. Resources will be sorted by
+	 * {@link URI#compareTo(URI)}.
 	 * <b>Note!</b> Prefix {@code glob:} will be added automatically.
 	 *
 	 * @param uri the {@link URI} to start with. (must be <b>file:</b> or <b>jar:</b>)
@@ -184,25 +184,22 @@ public abstract class FileUtils {
 	}
 
 	private static Set<URI> walkGlobFileTree(Path path, String globSyntax) throws IOException {
-		FileSystem fileSystem = path.getFileSystem();
-		PathMatcher pathMatcher = fileSystem.getPathMatcher(toGlobSyntax(globSyntax));
-		return walkGlobFileTree(path, pathMatcher);
-	}
-
-	private static Set<URI> walkGlobFileTree(Path path, PathMatcher pathMatcher) throws IOException {
 		if (!Files.exists(path)) {
 			return Collections.emptySet();
 		}
+		FileSystem fileSystem = path.getFileSystem();
+		PathMatcher pathMatcher = fileSystem.getPathMatcher(toGlobSyntax(globSyntax));
 		Set<URI> uris = new LinkedHashSet<>();
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-				if (Files.exists(file)) {
-					int beginIndex = Math.max(Math.min(path.getNameCount(), file.getNameCount() - 1), 0);
-					int endIndex = file.getNameCount();
-					if (pathMatcher.matches(file.subpath(beginIndex, endIndex))) {
-						uris.add(file.toUri());
-					}
+				if (!Files.exists(file) || !Files.isReadable(file)) {
+					return FileVisitResult.CONTINUE;
+				}
+				int beginIndex = Math.max(Math.min(path.getNameCount(), file.getNameCount() - 1), 0);
+				int endIndex = file.getNameCount();
+				if (pathMatcher.matches(file.subpath(beginIndex, endIndex))) {
+					uris.add(file.toUri());
 				}
 				return FileVisitResult.CONTINUE;
 			}
