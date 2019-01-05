@@ -27,8 +27,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -190,13 +192,13 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 	}
 
-	private static List<URL> getURLs(ClassLoader classLoader) {
+	private static Set<URL> getURLs(ClassLoader classLoader) {
 		try {
 			Enumeration<URL> enumeration = (classLoader != null) ? classLoader.getResources("") : null;
 			if (enumeration == null) {
-				return Collections.emptyList();
+				return Collections.emptySet();
 			}
-			return Collections.list(enumeration);
+			return new LinkedHashSet<>(Collections.list(enumeration));
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(String.format("Could not get URLs for ClassLoader (%s)", classLoader), ex);
