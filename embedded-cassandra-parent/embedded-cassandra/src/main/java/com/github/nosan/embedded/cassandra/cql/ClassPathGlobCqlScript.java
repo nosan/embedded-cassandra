@@ -18,23 +18,17 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -43,12 +37,11 @@ import javax.annotation.Nullable;
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
-import com.github.nosan.embedded.cassandra.util.OS;
 
 /**
- * {@link CqlScript} implementation for class path {@code glob matching} resources.
+ * Glob {@link CqlScript} implementation for {@link ClassLoader#getResources(String)}.
  * <p>
- * All resources will be interpreted as a {@link Path} and <b>sorted</b> by {@code Path.toUri().toURL().toString()}
+ * All resources will be interpreted as a {@link URI} and <b>sorted</b> by {@code uri.toURL().toString()}.
  * <blockquote>
  * <table border="0" summary="Pattern Language">
  * <tr>
@@ -134,9 +127,9 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	 */
 	public ClassPathGlobCqlScript(@Nonnull String glob, @Nullable ClassLoader classLoader,
 			@Nullable Charset encoding) {
-		Objects.requireNonNull(glob, "glob must not be null");
-		this.encoding = encoding;
+		Objects.requireNonNull(glob, "Glob must not be null");
 		this.glob = normalize(glob);
+		this.encoding = encoding;
 		this.classLoader = (classLoader != null) ? classLoader : ClassUtils.getClassLoader();
 	}
 
@@ -144,41 +137,21 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	 * {@inheritDoc}
 	 *
 	 * @throws UncheckedIOException if an I/O error occurs
-	 * @throws RuntimeException if any other error occurs
 	 */
 	@Nonnull
 	@Override
 	public Collection<String> getStatements() {
-		Set<Path> candidates = new LinkedHashSet<>();
-		PathMatcher pathMatcher = getPathMatcher(this.glob);
-		try {
-			URL[] urls = getUrls();
-			for (URL url : urls) {
-				Path directory = Paths.get(url.toURI());
-				Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-						int beginIndex = Math.max(Math.min(directory.getNameCount(), file.getNameCount() - 1), 0);
-						int endIndex = file.getNameCount();
-						if (pathMatcher.matches(file.subpath(beginIndex, endIndex))) {
-							candidates.add(file);
-						}
-						return FileVisitResult.CONTINUE;
-					}
-				});
-			}
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
-		catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-		List<PathCqlScript> scripts = candidates.stream()
-				.sorted(ClassPathGlobCqlScript::compareByURL)
-				.map(path -> new PathCqlScript(path, this.encoding))
+		ClassLoader classLoader = this.classLoader;
+		String glob = this.glob;
+		Charset encoding = this.encoding;
+		List<CqlScript> scripts = getURLs(classLoader).stream()
+				.map(ClassPathGlobCqlScript::toURI)
+				.map(uri -> GlobUtils.walkFileTree(uri, classLoader, glob))
+				.flatMap(Collection::stream)
+				.map(ClassPathGlobCqlScript::toURL)
+				.sorted(Comparator.comparing(URL::toString))
+				.map(url -> new UrlCqlScript(url, encoding))
 				.collect(Collectors.toList());
-
 		return new CqlScripts(scripts).getStatements();
 	}
 
@@ -207,33 +180,39 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		return this.glob;
 	}
 
-	private URL[] getUrls() throws IOException {
-		ClassLoader classLoader = this.classLoader;
-		Enumeration<URL> enumeration = (classLoader != null) ?
-				classLoader.getResources("") : ClassLoader.getSystemResources("");
-		if (enumeration == null) {
-			return new URL[0];
+	private static List<URL> getURLs(ClassLoader classLoader) {
+		try {
+			Enumeration<URL> enumeration = (classLoader != null) ? classLoader.getResources("") : null;
+			if (enumeration == null) {
+				return Collections.emptyList();
+			}
+			return Collections.list(enumeration);
 		}
-		return Collections.list(enumeration).toArray(new URL[0]);
+		catch (IOException ex) {
+			throw new UncheckedIOException(String.format("Could not get URLs for ClassLoader (%s)", classLoader), ex);
+		}
 	}
 
-	private static int compareByURL(Path p1, Path p2) {
+	private static URI toURI(URL url) {
 		try {
-			return p1.toUri().toURL().toString().compareTo(p2.toUri().toURL().toString());
+			return url.toURI();
 		}
-		catch (Throwable ex) {
-			return 0;
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException(String.format("Could not transform (%s) to the URI", url), ex);
+		}
+	}
+
+	private static URL toURL(URI uri) {
+		try {
+			return uri.toURL();
+		}
+		catch (MalformedURLException ex) {
+			throw new IllegalStateException(String.format("Could not transform (%s) to the URL", uri), ex);
 		}
 	}
 
 	private static String normalize(String glob) {
 		return glob.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
-	}
-
-	private static PathMatcher getPathMatcher(String glob) {
-		String globSyntax = String.format("glob:%s",
-				(OS.get() == OS.WINDOWS) ? glob.replaceAll("/", WINDOWS + WINDOWS) : glob);
-		return FileSystems.getDefault().getPathMatcher(globSyntax);
 	}
 
 }
