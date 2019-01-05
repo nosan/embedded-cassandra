@@ -17,12 +17,22 @@
 package com.github.nosan.embedded.cassandra.util;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,6 +47,8 @@ import org.apiguardian.api.API;
  */
 @API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class FileUtils {
+
+	private static final String WINDOWS = "\\\\";
 
 	private static final Path TMP_DIR = Paths.get(new SystemProperty("java.io.tmpdir").get());
 
@@ -125,6 +137,87 @@ public abstract class FileUtils {
 			path = path.getParent();
 		}
 		return tmpDir.equals(path);
+	}
+
+	/**
+	 * Walks a file tree with a {@code glob} pattern filter. Resources will be sorted by {@link
+	 * URI#compareTo(URI)}.
+	 *
+	 * @param uri the {@link URI} to start with. (must be <b>file:</b> or <b>jar:</b>)
+	 * @param globSyntax the glob syntax (e.g. <b>**</b>)
+	 * @return the sorted resources
+	 * @throws IOException if an I/O error occurs
+	 * @since 1.2.10
+	 */
+	@Nonnull
+	public static List<URI> walkGlobFileTree(@Nonnull URI uri, @Nonnull String globSyntax) throws IOException {
+		Objects.requireNonNull(uri, "URI must not be null");
+		Objects.requireNonNull(globSyntax, "Glob must not be null");
+		return walkGlobFileTree(uri, toGlobSyntax(globSyntax), ClassUtils.getClassLoader())
+				.stream()
+				.sorted(URI::compareTo)
+				.collect(Collectors.toList());
+
+	}
+
+	private static Set<URI> walkGlobFileTree(URI uri, String globSyntax, ClassLoader classLoader) throws IOException {
+		if ("file".equals(uri.getScheme()) && isJarOrZip(uri)) {
+			try (FileSystem fileSystem = FileSystems
+					.newFileSystem(URI.create(String.format("jar:%s", uri)), Collections.emptyMap(), classLoader)) {
+				return walkGlobFileTree(fileSystem.getPath("/"), globSyntax);
+			}
+		}
+		if ("jar".equals(uri.getScheme())) {
+			String[] tokens = uri.toString().split("!");
+			if (tokens.length == 2) {
+				String jarUri = tokens[0];
+				String jarPath = tokens[1];
+				try (FileSystem fileSystem = FileSystems
+						.newFileSystem(URI.create(jarUri), Collections.emptyMap(), classLoader)) {
+					return walkGlobFileTree(fileSystem.getPath(jarPath), globSyntax);
+				}
+			}
+		}
+		return walkGlobFileTree(Paths.get(uri), globSyntax);
+	}
+
+	private static Set<URI> walkGlobFileTree(Path path, String globSyntax) throws IOException {
+		FileSystem fileSystem = path.getFileSystem();
+		PathMatcher pathMatcher = fileSystem.getPathMatcher(globSyntax);
+		return walkGlobFileTree(path, pathMatcher);
+	}
+
+	private static Set<URI> walkGlobFileTree(Path path, PathMatcher pathMatcher) throws IOException {
+		if (!Files.exists(path)) {
+			return Collections.emptySet();
+		}
+		Set<URI> uris = new LinkedHashSet<>();
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+				if (Files.exists(file)) {
+					int beginIndex = Math.max(Math.min(path.getNameCount(), file.getNameCount() - 1), 0);
+					int endIndex = file.getNameCount();
+					if (pathMatcher.matches(file.subpath(beginIndex, endIndex))) {
+						uris.add(file.toUri());
+					}
+				}
+				return FileVisitResult.CONTINUE;
+			}
+		});
+		return uris;
+	}
+
+	private static boolean isJarOrZip(URI uri) {
+		return uri.toString().endsWith(".jar") || uri.toString().endsWith(".zip");
+	}
+
+	private static String toGlobSyntax(String glob) {
+		String newGlob = glob.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
+		if (!newGlob.startsWith("glob:")) {
+			newGlob = "glob:" + newGlob;
+		}
+		return (OS.get() == OS.WINDOWS) ? newGlob.replaceAll("/", WINDOWS + WINDOWS) : newGlob;
 	}
 
 }

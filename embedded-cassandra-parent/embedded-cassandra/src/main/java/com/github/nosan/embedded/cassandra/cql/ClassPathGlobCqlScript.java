@@ -37,6 +37,7 @@ import javax.annotation.Nullable;
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
+import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 /**
  * Glob {@link CqlScript} implementation for {@link ClassLoader#getResources(String)}.
@@ -146,7 +147,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		Charset encoding = this.encoding;
 		List<CqlScript> scripts = getURLs(classLoader).stream()
 				.map(ClassPathGlobCqlScript::toURI)
-				.map(uri -> GlobUtils.walkFileTree(uri, classLoader, glob))
+				.map(uri -> walkGlobFileTree(uri, glob))
 				.flatMap(Collection::stream)
 				.map(ClassPathGlobCqlScript::toURL)
 				.sorted(Comparator.comparing(URL::toString))
@@ -178,6 +179,15 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	@Nonnull
 	public String toString() {
 		return this.glob;
+	}
+
+	private static List<URI> walkGlobFileTree(URI uri, String glob) {
+		try {
+			return FileUtils.walkGlobFileTree(uri, glob);
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
 	}
 
 	private static List<URL> getURLs(ClassLoader classLoader) {
@@ -212,7 +222,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	}
 
 	private static String normalize(String glob) {
-		return glob.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
+		return glob.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
 	}
 
 }
