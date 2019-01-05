@@ -184,7 +184,7 @@ public abstract class FileUtils {
 	}
 
 	private static Set<URI> walkGlobFileTree(Path path, String glob) throws IOException {
-		if (!Files.exists(path) || !Files.isReadable(path)) {
+		if (!Files.exists(path)) {
 			return Collections.emptySet();
 		}
 		PathMatcher pathMatcher = toPathMatcher(path, glob);
@@ -192,7 +192,7 @@ public abstract class FileUtils {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-				if (Files.exists(file) && Files.isReadable(file)) {
+				if (Files.exists(file)) {
 					if (pathMatcher.matches(file.toAbsolutePath())) {
 						uris.add(file.toUri());
 					}
