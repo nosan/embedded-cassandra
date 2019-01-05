@@ -145,28 +145,28 @@ public abstract class FileUtils {
 	 * <b>Note!</b> Prefix {@code glob:} will be added automatically.
 	 *
 	 * @param uri the {@link URI} to start with. (must be <b>file:</b> or <b>jar:</b>)
-	 * @param glob the glob pattern (e.g. <b>**</b>)
+	 * @param globSyntax the glob syntax (e.g. <b>**</b>)
 	 * @return the sorted resources
 	 * @throws IOException if an I/O error occurs
 	 * @see FileSystem#getPathMatcher(String)
 	 * @since 1.2.10
 	 */
 	@Nonnull
-	public static List<URI> walkGlobFileTree(@Nonnull URI uri, @Nonnull String glob) throws IOException {
+	public static List<URI> walkGlobFileTree(@Nonnull URI uri, @Nonnull String globSyntax) throws IOException {
 		Objects.requireNonNull(uri, "URI must not be null");
-		Objects.requireNonNull(glob, "Glob must not be null");
-		return walkGlobFileTree(uri, glob, ClassUtils.getClassLoader())
+		Objects.requireNonNull(globSyntax, "Glob must not be null");
+		return walkGlobFileTree(uri, globSyntax, ClassUtils.getClassLoader())
 				.stream()
 				.sorted(URI::compareTo)
 				.collect(Collectors.toList());
 
 	}
 
-	private static Set<URI> walkGlobFileTree(URI uri, String glob, ClassLoader classLoader) throws IOException {
+	private static Set<URI> walkGlobFileTree(URI uri, String globSyntax, ClassLoader classLoader) throws IOException {
 		if ("file".equals(uri.getScheme()) && isJarOrZip(uri)) {
 			try (FileSystem fileSystem = FileSystems
 					.newFileSystem(URI.create(String.format("jar:%s", uri)), Collections.emptyMap(), classLoader)) {
-				return walkGlobFileTree(fileSystem.getPath("/"), glob);
+				return walkGlobFileTree(fileSystem.getPath("/"), globSyntax);
 			}
 		}
 		if ("jar".equals(uri.getScheme())) {
@@ -176,23 +176,29 @@ public abstract class FileUtils {
 				String jarPath = tokens[1];
 				try (FileSystem fileSystem = FileSystems
 						.newFileSystem(URI.create(jarUri), Collections.emptyMap(), classLoader)) {
-					return walkGlobFileTree(fileSystem.getPath(jarPath), glob);
+					return walkGlobFileTree(fileSystem.getPath(jarPath), globSyntax);
 				}
 			}
 		}
-		return walkGlobFileTree(Paths.get(uri), glob);
+		return walkGlobFileTree(Paths.get(uri), globSyntax);
 	}
 
-	private static Set<URI> walkGlobFileTree(Path path, String glob) throws IOException {
+	private static Set<URI> walkGlobFileTree(Path path, String globSyntax) throws IOException {
 		if (!Files.exists(path)) {
 			return Collections.emptySet();
 		}
-		PathMatcher pathMatcher = toPathMatcher(path, glob);
+		FileSystem fileSystem = path.getFileSystem();
+		PathMatcher pathMatcher = fileSystem.getPathMatcher(toGlobSyntax(globSyntax));
 		Set<URI> uris = new LinkedHashSet<>();
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-				if (Files.exists(file) && pathMatcher.matches(file.toAbsolutePath())) {
+				if (!Files.exists(file) || !Files.isReadable(file)) {
+					return FileVisitResult.CONTINUE;
+				}
+				int beginIndex = Math.max(Math.min(path.getNameCount(), file.getNameCount() - 1), 0);
+				int endIndex = file.getNameCount();
+				if (pathMatcher.matches(file.subpath(beginIndex, endIndex))) {
 					uris.add(file.toUri());
 				}
 				return FileVisitResult.CONTINUE;
@@ -205,19 +211,12 @@ public abstract class FileUtils {
 		return uri.toString().endsWith(".jar") || uri.toString().endsWith(".zip");
 	}
 
-	private static PathMatcher toPathMatcher(Path path, String glob) {
-		FileSystem fileSystem = path.getFileSystem();
-		String globSyntax = glob;
-		if (globSyntax.startsWith("glob:")) {
-			globSyntax = globSyntax.substring(5);
+	private static String toGlobSyntax(String glob) {
+		String newGlob = glob.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
+		if (!newGlob.startsWith("glob:")) {
+			newGlob = "glob:" + newGlob;
 		}
-		if (StringUtils.hasText(String.valueOf(path.toAbsolutePath()))) {
-			globSyntax = (path.toAbsolutePath() + "/" + globSyntax);
-		}
-		globSyntax = globSyntax.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
-		globSyntax = "glob:" + globSyntax;
-		globSyntax = (OS.get() == OS.WINDOWS) ? globSyntax.replaceAll("/", WINDOWS + WINDOWS) : globSyntax;
-		return fileSystem.getPathMatcher(globSyntax);
+		return (OS.get() == OS.WINDOWS) ? newGlob.replaceAll("/", WINDOWS + WINDOWS) : newGlob;
 	}
 
 }
