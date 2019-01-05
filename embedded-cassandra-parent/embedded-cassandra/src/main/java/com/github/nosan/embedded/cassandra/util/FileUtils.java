@@ -192,10 +192,8 @@ public abstract class FileUtils {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-				if (Files.exists(file)) {
-					if (pathMatcher.matches(file.toAbsolutePath())) {
-						uris.add(file.toUri());
-					}
+				if (Files.exists(file) && pathMatcher.matches(file.toAbsolutePath())) {
+					uris.add(file.toUri());
 				}
 				return FileVisitResult.CONTINUE;
 			}
