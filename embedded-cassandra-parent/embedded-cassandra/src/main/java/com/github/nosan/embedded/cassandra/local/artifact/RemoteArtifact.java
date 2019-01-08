@@ -188,7 +188,11 @@ class RemoteArtifact implements Artifact {
 			try {
 				return contentLength == Files.size(file);
 			}
-			catch (Exception ignore) {
+			catch (Exception ex) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Could not compare content length (%s) with file (%s)",
+							contentLength, file), ex);
+				}
 			}
 		}
 		return !Thread.currentThread().isInterrupted();

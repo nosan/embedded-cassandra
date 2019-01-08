@@ -23,6 +23,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apiguardian.api.API;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
@@ -33,6 +35,8 @@ import org.slf4j.MDC;
  */
 @API(since = "1.2.8", status = API.Status.INTERNAL)
 public abstract class MDCUtils {
+
+	private static final Logger log = LoggerFactory.getLogger(MDCUtils.class);
 
 	/**
 	 * Return a copy of the current thread's context map, with keys and values of
@@ -46,7 +50,10 @@ public abstract class MDCUtils {
 			Map<String, String> context = MDC.getCopyOfContextMap();
 			return (context != null) ? Collections.unmodifiableMap(context) : Collections.emptyMap();
 		}
-		catch (Throwable ignore) {
+		catch (Throwable ex) {
+			if (log.isDebugEnabled()) {
+				log.debug("Could not get MDC context", ex);
+			}
 			return Collections.emptyMap();
 		}
 	}
@@ -65,7 +72,10 @@ public abstract class MDCUtils {
 		try {
 			MDC.setContextMap(context);
 		}
-		catch (Throwable ignore) {
+		catch (Throwable ex) {
+			if (log.isDebugEnabled()) {
+				log.debug("Could not set MDC context", ex);
+			}
 		}
 	}
 }

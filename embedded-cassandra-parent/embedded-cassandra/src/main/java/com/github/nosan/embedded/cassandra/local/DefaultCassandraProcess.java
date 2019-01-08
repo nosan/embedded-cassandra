@@ -299,19 +299,29 @@ class DefaultCassandraProcess implements CassandraProcess {
 				stop(pidFile, directory, true);
 			}
 		}
-		catch (Throwable ignore) {
+		catch (Throwable ex) {
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Could not force stop a process (%s) by file (%s)", getPidString(pid), pidFile),
+						ex);
+			}
 		}
 		try {
 			if (pid > 0) {
 				stop(pid, directory, true);
 			}
 		}
-		catch (Throwable ignore) {
+		catch (Throwable ex) {
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Could not force <kill or taskkill> a process (%s)", getPidString(pid)), ex);
+			}
 		}
 		try {
 			process.destroyForcibly();
 		}
-		catch (Throwable ignore) {
+		catch (Throwable ex) {
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Could not force destroy a process (%s)", getPidString(pid)), ex);
+			}
 		}
 	}
 
