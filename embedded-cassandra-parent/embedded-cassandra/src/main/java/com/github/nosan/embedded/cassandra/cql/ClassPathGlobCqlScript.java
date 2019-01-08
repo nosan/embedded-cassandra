@@ -18,11 +18,18 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,14 +44,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apiguardian.api.API;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
-import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 /**
  * Glob {@link CqlScript} implementation for {@link ClassLoader#getResources(String)}.
  * <p>
- * All resources will be interpreted as a {@link URI} and <b>sorted</b> by {@code uri.toURL().toString()}.
+ * All resources will be interpreted as {@link URL} and <b>sorted</b> by {@code URL.toString()}.
  * <blockquote>
  * <table border="0" summary="Pattern Language">
  * <tr>
@@ -81,10 +89,12 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
 @API(since = "1.2.6", status = API.Status.STABLE)
 public final class ClassPathGlobCqlScript implements CqlScript {
 
+	private static final Logger log = LoggerFactory.getLogger(ClassPathGlobCqlScript.class);
+
 	private static final String WINDOWS = "\\\\";
 
 	@Nonnull
-	private final String glob;
+	private final String pattern;
 
 	@Nullable
 	private final Charset encoding;
@@ -95,43 +105,43 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	/**
 	 * Create a new {@link ClassPathGlobCqlScript}.
 	 *
-	 * @param glob the glob pattern within the class path
+	 * @param pattern the glob pattern within the class path
 	 */
-	public ClassPathGlobCqlScript(@Nonnull String glob) {
-		this(glob, null, null);
+	public ClassPathGlobCqlScript(@Nonnull String pattern) {
+		this(pattern, null, null);
 	}
 
 	/**
 	 * Create a new {@link ClassPathGlobCqlScript}.
 	 *
-	 * @param glob the glob pattern within the class path
+	 * @param pattern the glob pattern within the class path
 	 * @param encoding the encoding to use for reading from the resource
 	 */
-	public ClassPathGlobCqlScript(@Nonnull String glob, @Nullable Charset encoding) {
-		this(glob, null, encoding);
+	public ClassPathGlobCqlScript(@Nonnull String pattern, @Nullable Charset encoding) {
+		this(pattern, null, encoding);
 	}
 
 	/**
 	 * Create a new {@link ClassPathGlobCqlScript}.
 	 *
-	 * @param glob the glob pattern within the class path
+	 * @param pattern the glob pattern within the class path
 	 * @param classLoader the class loader to load the resource with.
 	 */
-	public ClassPathGlobCqlScript(@Nonnull String glob, @Nullable ClassLoader classLoader) {
-		this(glob, classLoader, null);
+	public ClassPathGlobCqlScript(@Nonnull String pattern, @Nullable ClassLoader classLoader) {
+		this(pattern, classLoader, null);
 	}
 
 	/**
 	 * Create a new {@link ClassPathGlobCqlScript}.
 	 *
-	 * @param glob the glob pattern within the class path
+	 * @param pattern the glob pattern within the class path
 	 * @param classLoader the class loader to load the resource with.
 	 * @param encoding the encoding to use for reading from the resource
 	 */
-	public ClassPathGlobCqlScript(@Nonnull String glob, @Nullable ClassLoader classLoader,
+	public ClassPathGlobCqlScript(@Nonnull String pattern, @Nullable ClassLoader classLoader,
 			@Nullable Charset encoding) {
-		Objects.requireNonNull(glob, "Glob must not be null");
-		this.glob = normalize(glob);
+		Objects.requireNonNull(pattern, "Pattern must not be null");
+		this.pattern = normalizePattern(pattern);
 		this.encoding = encoding;
 		this.classLoader = (classLoader != null) ? classLoader : ClassUtils.getClassLoader();
 	}
@@ -144,14 +154,11 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	@Nonnull
 	@Override
 	public Collection<String> getStatements() {
-		ClassLoader classLoader = this.classLoader;
-		String glob = this.glob;
+		String pattern = this.pattern;
 		Charset encoding = this.encoding;
-		List<CqlScript> scripts = getURLs(classLoader).stream()
-				.map(ClassPathGlobCqlScript::toURI)
-				.map(uri -> walkGlobFileTree(uri, glob))
-				.flatMap(Collection::stream)
-				.map(ClassPathGlobCqlScript::toURL)
+		ClassLoader classLoader = this.classLoader;
+		List<UrlCqlScript> scripts = walkFileTree(classLoader, pattern)
+				.stream()
 				.sorted(Comparator.comparing(URL::toString))
 				.map(url -> new UrlCqlScript(url, encoding))
 				.collect(Collectors.toList());
@@ -167,65 +174,116 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 			return false;
 		}
 		ClassPathGlobCqlScript that = (ClassPathGlobCqlScript) other;
-		return Objects.equals(this.glob, that.glob) &&
+		return Objects.equals(this.pattern, that.pattern) &&
 				Objects.equals(this.encoding, that.encoding) &&
 				Objects.equals(this.classLoader, that.classLoader);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.glob, this.encoding, this.classLoader);
+		return Objects.hash(this.pattern, this.encoding, this.classLoader);
 	}
 
 	@Override
 	@Nonnull
 	public String toString() {
-		return this.glob;
+		return this.pattern;
 	}
 
-	private static List<URI> walkGlobFileTree(URI uri, String glob) {
-		try {
-			return FileUtils.walkGlobFileTree(uri, glob);
+	private static Set<URL> walkFileTree(ClassLoader cl, String pattern) {
+		if (!isPattern(pattern)) {
+			return getResources(cl, pattern);
 		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
+		String directory = getRootDirectory(pattern);
+		String subPattern = pattern.substring(directory.length());
+		return getResources(cl, directory)
+				.stream()
+				.map(url -> walkFileTree(url, cl, subPattern))
+				.flatMap(Collection::stream)
+				.collect(Collectors.toSet());
+	}
+
+	private static Set<URL> walkFileTree(URL url, ClassLoader cl, String pattern) {
+		try {
+			if ("jar".equals(url.getProtocol())) {
+				int index = url.toString().indexOf("!/");
+				if (index != -1) {
+					String jarUri = url.toString().substring(0, index);
+					String jarEntry = url.toString().substring(index + 1);
+					try (FileSystem fileSystem = FileSystems
+							.newFileSystem(URI.create(jarUri), Collections.emptyMap(), cl)) {
+						return walkFileTree(fileSystem.getPath(jarEntry), pattern);
+					}
+				}
+			}
+			return walkFileTree(Paths.get(url.toURI()), pattern);
+		}
+		catch (Exception ex) {
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Could not find resources for URL (%s) and glob pattern (%s)", url, pattern),
+						ex);
+			}
+			return Collections.emptySet();
 		}
 	}
 
-	private static Set<URL> getURLs(ClassLoader classLoader) {
+	private static Set<URL> walkFileTree(Path path, String pattern) throws IOException {
+		Set<URL> urls = new LinkedHashSet<>();
+		if (!Files.exists(path) || !Files.isReadable(path)) {
+			return urls;
+		}
+		String globSyntax = normalizePath(String.format("glob:%s/%s", path.toAbsolutePath(), pattern));
+		PathMatcher matcher = path.getFileSystem().getPathMatcher(globSyntax);
+		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (matcher.matches(file.toAbsolutePath()) && Files.isReadable(file)) {
+					urls.add(file.toUri().toURL());
+				}
+				return FileVisitResult.CONTINUE;
+			}
+		});
+		return urls;
+	}
+
+	private static Set<URL> getResources(ClassLoader cl, String name) {
 		try {
-			Enumeration<URL> enumeration =
-					(classLoader != null) ? classLoader.getResources("") : ClassLoader.getSystemResources("");
+			Enumeration<URL> enumeration = (cl != null) ? cl.getResources(name) : ClassLoader.getSystemResources(name);
 			if (enumeration == null) {
 				return Collections.emptySet();
 			}
 			return new LinkedHashSet<>(Collections.list(enumeration));
 		}
 		catch (IOException ex) {
-			throw new UncheckedIOException(String.format("Could not get URLs for ClassLoader (%s)", classLoader), ex);
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Could not get URLs for ClassLoader (%s) and Location (%s)", cl, name), ex);
+			}
+			return Collections.emptySet();
 		}
 	}
 
-	private static URI toURI(URL url) {
-		try {
-			return url.toURI();
+	private static String getRootDirectory(String pattern) {
+		int endIndex = pattern.length();
+		while (endIndex > 0 && isPattern(pattern.substring(0, endIndex))) {
+			endIndex = pattern.lastIndexOf('/', endIndex - 2) + 1;
 		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException(String.format("Could not transform (%s) to the URI", url), ex);
-		}
+		return pattern.substring(0, endIndex);
 	}
 
-	private static URL toURL(URI uri) {
-		try {
-			return uri.toURL();
-		}
-		catch (MalformedURLException ex) {
-			throw new IllegalStateException(String.format("Could not transform (%s) to the URL", uri), ex);
-		}
+	private static boolean isPattern(String pattern) {
+		return pattern.contains("*") || pattern.contains("?") || pattern.contains("[") || pattern.contains("{");
 	}
 
-	private static String normalize(String glob) {
-		return glob.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
+	private static String normalizePath(String path) {
+		return path.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
+	}
+
+	private static String normalizePattern(String pattern) {
+		pattern = normalizePath(pattern);
+		while (pattern.startsWith("/")) {
+			pattern = pattern.substring(1);
+		}
+		return pattern;
 	}
 
 }

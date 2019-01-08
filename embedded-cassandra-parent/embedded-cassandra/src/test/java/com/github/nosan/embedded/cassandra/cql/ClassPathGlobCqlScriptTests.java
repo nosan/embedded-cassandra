@@ -41,64 +41,86 @@ public class ClassPathGlobCqlScriptTests {
 			"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}";
 
 	@Nonnull
-	private final String glob;
+	private final String pattern;
+
+	@Nonnull
+	private final String name;
 
 	@Nonnull
 	private final String[] statements;
 
-	public ClassPathGlobCqlScriptTests(@Nonnull String glob, @Nonnull Array statements) {
-		this.glob = glob;
-		this.statements = statements.statements;
+	public ClassPathGlobCqlScriptTests(AssertData assertData) {
+		this.pattern = assertData.pattern;
+		this.name = assertData.name;
+		this.statements = assertData.statements;
 	}
 
 	@Test
-	public void assertStatements() {
-		ClassPathGlobCqlScript classPathCqlScript = new ClassPathGlobCqlScript(this.glob);
-		assertThat(classPathCqlScript.getStatements()).containsExactly(this.statements);
-	}
-
-	@Test
-	public void assertEquals() {
-		ClassPathGlobCqlScript script = new ClassPathGlobCqlScript(this.glob);
-		assertThat(script).isEqualTo(script);
+	public void test() {
+		ClassPathGlobCqlScript script = new ClassPathGlobCqlScript(this.pattern);
+		assertThat(script.toString()).isEqualTo(this.name);
 		assertThat(script).isNotEqualTo(new ClassPathGlobCqlScript("sometext"));
-		assertThat(script.hashCode()).isEqualTo(script.hashCode());
-		assertThat(script.toString()).isEqualTo(this.glob);
+		assertThat(script).isEqualTo(script);
+		assertThat(script.getStatements()).containsExactly(this.statements);
 	}
 
-	@Parameterized.Parameters(name = "{0} {1}")
-	public static Iterable<Object[]> globs() {
-		List<Object[]> parameters = new ArrayList<>();
-		parameters.add(new Object[]{"**/**.cql", new Array(KEYSPACE)});
-		parameters.add(new Object[]{"**/*.cql", new Array(KEYSPACE)});
-		parameters.add(new Object[]{"**.cql", new Array(KEYSPACE, ROLE)});
-		parameters.add(new Object[]{"**{roles,keyspace}.cql", new Array(KEYSPACE, ROLE)});
-		parameters.add(new Object[]{"{roles,keyspace}.cql", new Array(ROLE)});
-		parameters.add(new Object[]{"**/{roles,keyspace}.cql", new Array(KEYSPACE)});
-		parameters.add(new Object[]{"**{keyspace}.cql", new Array(KEYSPACE)});
-		parameters.add(new Object[]{"*/*.cql", new Array()});
-		parameters.add(new Object[]{"**/key*.cql", new Array(KEYSPACE)});
-		parameters.add(new Object[]{"com/*/*/embe*ed/**/keyspa?e.cql", new Array(KEYSPACE)});
-		parameters.add(new Object[]{"roles.cql", new Array(ROLE)});
-		parameters.add(new Object[]{"/roles.cql", new Array(ROLE)});
-		parameters.add(new Object[]{"*.cql", new Array(ROLE)});
-		parameters.add(new Object[]{"rol?s.cql", new Array(ROLE)});
+	@Parameterized.Parameters(name = "{index} {0}")
+	public static Iterable<AssertData> patterns() {
+		List<AssertData> parameters = new ArrayList<>();
+		parameters.add(new AssertData("/.cql", ".cql"));
+		parameters.add(new AssertData("/*.cql", "*.cql", new String[]{ROLE}));
+		parameters.add(new AssertData("**/**.cql", new String[]{KEYSPACE}));
+		parameters.add(new AssertData("**/*.cql", new String[]{KEYSPACE}));
+		parameters.add(new AssertData("**.cql", new String[]{KEYSPACE, ROLE}));
+		parameters.add(new AssertData("**{roles,keyspace}.cql", new String[]{KEYSPACE, ROLE}));
+		parameters.add(new AssertData("{roles,keyspace}.cql", new String[]{ROLE}));
+		parameters.add(new AssertData("**/{roles,keyspace}.cql", new String[]{KEYSPACE}));
+		parameters.add(new AssertData("**{keyspace}.cql", new String[]{KEYSPACE}));
+		parameters.add(new AssertData("*/*.cql"));
+		parameters.add(new AssertData("**/key*.cql", new String[]{KEYSPACE}));
+		parameters.add(new AssertData("**\\key*.cql", "**/key*.cql", new String[]{KEYSPACE}));
+		parameters.add(new AssertData("com/*/*/embe*ed/**/keyspa?e.cql", new String[]{KEYSPACE}));
+		parameters.add(new AssertData("roles.cql", new String[]{ROLE}));
+		parameters.add(new AssertData("/roles.cql", "roles.cql", new String[]{ROLE}));
+		parameters.add(new AssertData("\\roles.cql", "roles.cql", new String[]{ROLE}));
+		parameters.add(new AssertData("*.cql", new String[]{ROLE}));
+		parameters.add(new AssertData("rol?s.cql", new String[]{ROLE}));
 		return parameters;
 	}
 
-	private static final class Array {
+	private static final class AssertData {
 
 		@Nonnull
 		private final String[] statements;
 
-		Array(@Nonnull String... statements) {
+		@Nonnull
+		private final String pattern;
+
+		@Nonnull
+		private final String name;
+
+		AssertData(@Nonnull String pattern, @Nonnull String name, @Nonnull String[] statements) {
+			this.pattern = pattern;
+			this.name = name;
 			this.statements = statements;
+		}
+
+		AssertData(@Nonnull String pattern, @Nonnull String name) {
+			this(pattern, name, new String[0]);
+		}
+
+		AssertData(@Nonnull String pattern, @Nonnull String[] statements) {
+			this(pattern, pattern, statements);
+		}
+
+		AssertData(@Nonnull String pattern) {
+			this(pattern, pattern, new String[0]);
 		}
 
 		@Override
 		@Nonnull
 		public String toString() {
-			return String.format("(%s) statements", this.statements.length);
+			return String.format("(%s) (%s) (%s) statements", this.pattern, this.name, this.statements.length);
 		}
 	}
 

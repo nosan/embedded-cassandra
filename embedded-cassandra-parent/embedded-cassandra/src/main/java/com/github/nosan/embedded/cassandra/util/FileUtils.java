@@ -17,23 +17,12 @@
 package com.github.nosan.embedded.cassandra.util;
 
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,8 +37,6 @@ import org.apiguardian.api.API;
  */
 @API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class FileUtils {
-
-	private static final String WINDOWS = "\\\\";
 
 	private static final Path TMP_DIR = Paths.get(new SystemProperty("java.io.tmpdir").get());
 
@@ -138,89 +125,6 @@ public abstract class FileUtils {
 			path = path.getParent();
 		}
 		return tmpDir.equals(path);
-	}
-
-	/**
-	 * Walks a file tree with a {@code glob} pattern filter. Resources will be sorted by
-	 * {@link URI#compareTo(URI)}.
-	 * <b>Note!</b> Prefix {@code glob:} will be added automatically.
-	 *
-	 * @param uri the {@link URI} to start with. (must be <b>file:,jar:,war:</b>)
-	 * @param glob the glob pattern (e.g. <b>**</b>)
-	 * @return the sorted resources
-	 * @throws IOException if an I/O error occurs
-	 * @see FileSystem#getPathMatcher(String)
-	 * @since 1.2.10
-	 */
-	@Nonnull
-	public static List<URI> walkGlobFileTree(@Nonnull URI uri, @Nonnull String glob) throws IOException {
-		Objects.requireNonNull(uri, "URI must not be null");
-		Objects.requireNonNull(glob, "Glob must not be null");
-		return walkGlobFileTree(uri, glob, ClassUtils.getClassLoader())
-				.stream()
-				.sorted(URI::compareTo)
-				.collect(Collectors.toList());
-
-	}
-
-	private static Set<URI> walkGlobFileTree(URI uri, String glob, ClassLoader cl) throws IOException {
-		Map<String, Object> env = Collections.emptyMap();
-		if ("file".equals(uri.getScheme()) && isJar(uri)) {
-			URI jarUri = URI.create(String.format("jar:%s", uri));
-			try (FileSystem fileSystem = FileSystems.newFileSystem(jarUri, env, cl)) {
-				return walkGlobFileTree(fileSystem.getPath("/"), glob);
-			}
-		}
-		if ("jar".equals(uri.getScheme())) {
-			String[] tokens = uri.toString().split("!");
-			if (tokens.length == 2) {
-				String jarUri = tokens[0];
-				String jarEntry = tokens[1];
-				try (FileSystem fileSystem = FileSystems.newFileSystem(URI.create(jarUri), env, cl)) {
-					return walkGlobFileTree(fileSystem.getPath(jarEntry), glob);
-				}
-			}
-		}
-		return walkGlobFileTree(Paths.get(uri), glob);
-	}
-
-	private static Set<URI> walkGlobFileTree(Path path, String glob) throws IOException {
-		if (!Files.exists(path) || !Files.isReadable(path)) {
-			return Collections.emptySet();
-		}
-		PathMatcher pathMatcher = toPathMatcher(path, glob);
-		Set<URI> uris = new LinkedHashSet<>();
-		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-				if (pathMatcher.matches(file.toAbsolutePath()) && Files.isReadable(file)) {
-					uris.add(file.toUri());
-				}
-				return FileVisitResult.CONTINUE;
-			}
-		});
-		return uris;
-	}
-
-	private static boolean isJar(URI uri) {
-		return uri.toString().endsWith(".jar");
-	}
-
-	private static PathMatcher toPathMatcher(Path path, String glob) {
-		FileSystem fileSystem = path.getFileSystem();
-		String globSyntax = glob;
-		if (globSyntax.startsWith("glob:")) {
-			globSyntax = globSyntax.substring(5);
-		}
-		globSyntax = path.toAbsolutePath() + "/" + globSyntax;
-		globSyntax = globSyntax.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
-		if ("\\".equals(fileSystem.getSeparator())) {
-			globSyntax = globSyntax.replaceAll("/", WINDOWS + WINDOWS);
-		}
-		else {
-			globSyntax = globSyntax.replaceAll("/", fileSystem.getSeparator());
-		}
-		return fileSystem.getPathMatcher(String.format("glob:%s", globSyntax.trim()));
 	}
 
 }

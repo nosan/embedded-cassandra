@@ -18,11 +18,7 @@ package com.github.nosan.embedded.cassandra.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.UUID;
 
 import org.junit.Rule;
@@ -30,7 +26,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for {@link FileUtils}.
@@ -103,45 +98,4 @@ public class FileUtilsTests {
 		assertThat(FileUtils.getTmpDirectory())
 				.isEqualTo(Paths.get(new SystemProperty("java.io.tmpdir").get()));
 	}
-
-	@Test
-	public void walkPath() throws URISyntaxException, IOException {
-		String glob = "**.cql";
-		URI uri = getClass().getResource("/com/github").toURI();
-		List<URI> uris = FileUtils.walkGlobFileTree(uri, glob);
-		assertThat(uris).containsExactly(
-				getClass().getResource("/com/github/nosan/embedded/cassandra/cql/keyspace.cql").toURI());
-		assertThat(uris).allMatch(FileUtilsTests::hasStream);
-	}
-
-	@Test
-	public void walkJar() throws URISyntaxException, IOException {
-		URI uri = getClass().getResource("/test.jar").toURI();
-		String glob = "glob:**";
-		List<URI> uris = FileUtils.walkGlobFileTree(uri, glob);
-		assertThat(uris).hasSize(3);
-		assertThat(uris).allMatch(FileUtilsTests::hasStream);
-	}
-
-	@Test
-	public void walkJarUri() throws URISyntaxException, IOException {
-		URI uri = new URI("jar", getClass().getResource("/test.jar").toURI().toString(), "!/");
-		String glob = "**";
-		List<URI> uris = FileUtils.walkGlobFileTree(uri, glob);
-		assertThat(uris).hasSize(3);
-		assertThat(uris).allMatch(FileUtilsTests::hasStream);
-	}
-
-	private static boolean hasStream(URI uri) {
-		try {
-			try (InputStream ignore = uri.toURL().openStream()) {
-				return true;
-			}
-		}
-		catch (IOException ex) {
-			fail(String.format("Could not open stream for (%s)", uri), ex);
-		}
-		return false;
-	}
-
 }
