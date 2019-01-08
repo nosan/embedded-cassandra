@@ -141,7 +141,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	public ClassPathGlobCqlScript(@Nonnull String pattern, @Nullable ClassLoader classLoader,
 			@Nullable Charset encoding) {
 		Objects.requireNonNull(pattern, "Pattern must not be null");
-		this.pattern = normalizePattern(pattern);
+		this.pattern = cleanPattern(pattern);
 		this.encoding = encoding;
 		this.classLoader = (classLoader != null) ? classLoader : ClassUtils.getClassLoader();
 	}
@@ -232,7 +232,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		if (!Files.exists(path) || !Files.isReadable(path)) {
 			return urls;
 		}
-		String globSyntax = normalizePath(String.format("glob:%s/%s", path.toAbsolutePath(), pattern));
+		String globSyntax = cleanLocation(String.format("glob:%s/%s", path.toAbsolutePath(), pattern));
 		PathMatcher matcher = path.getFileSystem().getPathMatcher(globSyntax);
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 			@Override
@@ -274,16 +274,16 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		return pattern.contains("*") || pattern.contains("?") || pattern.contains("[") || pattern.contains("{");
 	}
 
-	private static String normalizePath(String path) {
+	private static String cleanLocation(String path) {
 		return path.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
 	}
 
-	private static String normalizePattern(String pattern) {
-		pattern = normalizePath(pattern);
+	private static String cleanPattern(String pattern) {
+		pattern = cleanLocation(pattern);
 		while (pattern.startsWith("/")) {
 			pattern = pattern.substring(1);
 		}
-		return pattern;
+		return pattern.trim();
 	}
 
 }
