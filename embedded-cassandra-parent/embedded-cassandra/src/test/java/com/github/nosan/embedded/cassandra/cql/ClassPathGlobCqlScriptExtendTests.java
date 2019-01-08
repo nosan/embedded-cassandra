@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.regex.PatternSyntaxException;
 
 import org.junit.Test;
 
@@ -58,6 +59,13 @@ public class ClassPathGlobCqlScriptExtendTests {
 		String pattern = "nosan/**/*.cql";
 		Collection<String> statements = getStatements(url, pattern);
 		assertThat(statements).containsExactly(KEYSPACE);
+	}
+
+	@Test(expected = PatternSyntaxException.class)
+	public void invalidSyntax() {
+		URL url = getClass().getResource("/test.zip");
+		String pattern = "{";
+		getStatements(url, pattern);
 	}
 
 	private static Collection<String> getStatements(URL url, String pattern) {

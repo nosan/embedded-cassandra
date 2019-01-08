@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
@@ -157,7 +158,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		String pattern = this.pattern;
 		Charset encoding = this.encoding;
 		ClassLoader classLoader = this.classLoader;
-		List<UrlCqlScript> scripts = walkFileTree(classLoader, pattern)
+		List<UrlCqlScript> scripts = getResourcesByPattern(classLoader, pattern)
 				.stream()
 				.sorted(Comparator.comparing(URL::toString))
 				.map(url -> new UrlCqlScript(url, encoding))
@@ -190,20 +191,20 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		return this.pattern;
 	}
 
-	private static Set<URL> walkFileTree(ClassLoader cl, String pattern) {
-		if (!isPattern(pattern)) {
+	private static Set<URL> getResourcesByPattern(ClassLoader cl, String pattern) {
+		if (!hasPattern(pattern)) {
 			return getResources(cl, pattern);
 		}
 		String directory = getRootDirectory(pattern);
 		String subPattern = pattern.substring(directory.length());
 		return getResources(cl, directory)
 				.stream()
-				.map(url -> walkFileTree(url, cl, subPattern))
+				.map(url -> getResourcesByPattern(url, cl, subPattern))
 				.flatMap(Collection::stream)
 				.collect(Collectors.toSet());
 	}
 
-	private static Set<URL> walkFileTree(URL url, ClassLoader cl, String pattern) {
+	private static Set<URL> getResourcesByPattern(URL url, ClassLoader cl, String pattern) {
 		try {
 			if ("jar".equals(url.getProtocol())) {
 				int index = url.toString().indexOf("!/");
@@ -212,13 +213,13 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 					String jarEntry = url.toString().substring(index + 1);
 					try (FileSystem fileSystem = FileSystems
 							.newFileSystem(URI.create(jarUri), Collections.emptyMap(), cl)) {
-						return walkFileTree(fileSystem.getPath(jarEntry), pattern);
+						return getResourcesByPattern(fileSystem.getPath(jarEntry), pattern);
 					}
 				}
 			}
-			return walkFileTree(Paths.get(url.toURI()), pattern);
+			return getResourcesByPattern(Paths.get(url.toURI()), pattern);
 		}
-		catch (Exception ex) {
+		catch (IOException | URISyntaxException ex) {
 			if (log.isDebugEnabled()) {
 				log.debug(String.format("Could not find resources for URL (%s) and glob pattern (%s)", url, pattern),
 						ex);
@@ -227,11 +228,17 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 	}
 
-	private static Set<URL> walkFileTree(Path path, String pattern) throws IOException {
-		Set<URL> urls = new LinkedHashSet<>();
-		if (!Files.exists(path) || !Files.isReadable(path)) {
-			return urls;
+	private static Set<URL> getResourcesByPattern(Path path, String pattern) throws IOException {
+		if (!Files.exists(path)) {
+			return Collections.emptySet();
 		}
+		if (!Files.isReadable(path)) {
+			return Collections.emptySet();
+		}
+		if (!Files.isDirectory(path)) {
+			return Collections.emptySet();
+		}
+		Set<URL> urls = new LinkedHashSet<>();
 		String globSyntax = cleanLocation(String.format("glob:%s/%s", path.toAbsolutePath(), pattern));
 		PathMatcher matcher = path.getFileSystem().getPathMatcher(globSyntax);
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
@@ -249,14 +256,11 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	private static Set<URL> getResources(ClassLoader cl, String name) {
 		try {
 			Enumeration<URL> enumeration = (cl != null) ? cl.getResources(name) : ClassLoader.getSystemResources(name);
-			if (enumeration == null) {
-				return Collections.emptySet();
-			}
 			return new LinkedHashSet<>(Collections.list(enumeration));
 		}
 		catch (IOException ex) {
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("Could not get URLs for ClassLoader (%s) and Location (%s)", cl, name), ex);
+				log.debug(String.format("Could not get URLs for location (%s)", name), ex);
 			}
 			return Collections.emptySet();
 		}
@@ -264,13 +268,13 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	private static String getRootDirectory(String pattern) {
 		int endIndex = pattern.length();
-		while (endIndex > 0 && isPattern(pattern.substring(0, endIndex))) {
+		while (endIndex > 0 && hasPattern(pattern.substring(0, endIndex))) {
 			endIndex = pattern.lastIndexOf('/', endIndex - 2) + 1;
 		}
 		return pattern.substring(0, endIndex);
 	}
 
-	private static boolean isPattern(String pattern) {
+	private static boolean hasPattern(String pattern) {
 		return pattern.contains("*") || pattern.contains("?") || pattern.contains("[") || pattern.contains("{");
 	}
 
@@ -283,7 +287,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		while (pattern.startsWith("/")) {
 			pattern = pattern.substring(1);
 		}
-		return pattern.trim();
+		return pattern;
 	}
 
 }
