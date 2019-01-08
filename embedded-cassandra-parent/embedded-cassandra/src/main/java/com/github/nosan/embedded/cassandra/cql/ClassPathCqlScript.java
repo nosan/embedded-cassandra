@@ -190,7 +190,6 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 		return location;
 	}
 
-	@Nullable
 	private URL getURL() {
 		String location = this.location;
 		if (this.contextClass != null) {
@@ -204,10 +203,11 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 
 	private static String normalize(String location, Class<?> contextClass) {
 		location = location.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
-		if (contextClass == null) {
-			while (location.startsWith("/")) {
-				location = location.substring(1);
-			}
+		if (contextClass != null) {
+			return location;
+		}
+		while (location.startsWith("/")) {
+			location = location.substring(1);
 		}
 		return location;
 	}
