@@ -20,6 +20,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apiguardian.api.API;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility methods for dealing with classes.
@@ -29,6 +31,8 @@ import org.apiguardian.api.API;
  */
 @API(since = "1.2.1", status = API.Status.INTERNAL)
 public abstract class ClassUtils {
+
+	private static final Logger log = LoggerFactory.getLogger(ClassUtils.class);
 
 	/**
 	 * Return the one of the  {@code ClassLoader} to use.
@@ -49,20 +53,29 @@ public abstract class ClassUtils {
 		try {
 			cl = Thread.currentThread().getContextClassLoader();
 		}
-		catch (Throwable ignore) {
+		catch (Throwable ex) {
+			if (log.isDebugEnabled()) {
+				log.debug(String.format("Could not get (%s) a class loader", Thread.currentThread()), ex);
+			}
 		}
 		if (cl == null) {
 			try {
 				cl = ClassUtils.class.getClassLoader();
 			}
-			catch (Throwable ignore) {
+			catch (Throwable ex) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Could not get (%s) a class loader", ClassUtils.class), ex);
+				}
 			}
 		}
 		if (cl == null) {
 			try {
 				cl = ClassLoader.getSystemClassLoader();
 			}
-			catch (Throwable ignore) {
+			catch (Throwable ex) {
+				if (log.isDebugEnabled()) {
+					log.debug("Could not get a system class loader", ex);
+				}
 			}
 		}
 		return cl;
