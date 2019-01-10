@@ -29,7 +29,7 @@ public class FilteredOutputTests {
 
 	@Test
 	public void shouldFilter() {
-		OutputCapture delegate = new OutputCapture(500);
+		BufferedOutput delegate = new BufferedOutput(500);
 		FilteredOutput filteredOutput = new FilteredOutput(delegate, line -> line.equals("text"));
 		filteredOutput.accept("Hello world");
 		filteredOutput.accept("text");

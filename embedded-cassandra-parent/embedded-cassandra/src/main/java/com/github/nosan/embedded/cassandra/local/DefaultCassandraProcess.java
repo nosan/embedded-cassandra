@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -27,11 +28,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,6 +45,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.ProcessUtils;
@@ -86,7 +89,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	private Process process;
 
 	@Nullable
-	private Settings settings;
+	private SmartSettings settings;
 
 	private long pid = -1;
 
@@ -118,14 +121,13 @@ class DefaultCassandraProcess implements CassandraProcess {
 		Path directory = this.directory;
 		Version version = this.version;
 		Duration timeout = this.timeout;
-		int major = version.getMajor();
-		int minor = version.getMinor();
-		Settings settings = getSettings(directory, version);
+		SmartSettings settings = getSettings(directory, version);
 		this.settings = settings;
 		Path executable = (OS.get() == OS.WINDOWS) ?
 				directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
 		Path pidFile = directory.resolve(String.format("bin/%s.pid", UUID.randomUUID()));
 		this.pidFile = pidFile;
+		String javaHome = getJavaHome(this.javaHome);
 
 		List<Object> arguments = new ArrayList<>();
 		if (OS.get() == OS.WINDOWS) {
@@ -135,41 +137,61 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 		arguments.add(executable.toAbsolutePath());
 		arguments.add("-f");
-
-		if (OS.get() == OS.WINDOWS && (major > 2 || (major == 2 && minor > 1))) {
+		if (OS.get() == OS.WINDOWS && (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1))) {
 			arguments.add("-a");
 		}
-		if (this.allowRoot && OS.get() != OS.WINDOWS && (major > 3 || (major == 3 && minor > 1))) {
+		if (this.allowRoot && OS.get() != OS.WINDOWS &&
+				(version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
 			arguments.add("-R");
 		}
 		arguments.add("-p");
 		arguments.add(pidFile.toAbsolutePath());
 
-		Map<String, String> environment = new LinkedHashMap<>();
-
 		List<String> jvmOptions = new ArrayList<>();
 		int jmxPort = (this.jmxPort != 0) ? this.jmxPort : PortUtils.getPort();
 		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", jmxPort));
 		jvmOptions.addAll(this.jvmOptions);
-		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
 
-		String javaHome = getJavaHome(this.javaHome);
+		Map<String, String> environment = new LinkedHashMap<>();
 		if (StringUtils.hasText(javaHome)) {
 			environment.put("JAVA_HOME", javaHome);
 		}
-		OutputReadiness output = new OutputReadiness();
+		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
+
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
+		BufferedOutput bufferedOutput = new BufferedOutput(10);
+		ReadinessOutput readinessOutput = new ReadinessOutput();
 		Process process = new RunProcess(true, directory, environment, arguments)
-				.run(new FilteredOutput(output, outputFilter),
+				.run(new FilteredOutput(bufferedOutput, outputFilter),
+						new FilteredOutput(readinessOutput, outputFilter),
+						new FilteredOutput(new RpcAddressParser(settings), outputFilter),
+						new FilteredOutput(new ListenAddressParser(settings), outputFilter),
 						new FilteredOutput(LoggerFactory.getLogger(Cassandra.class)::info, outputFilter));
+
 		this.process = process;
 		this.pid = ProcessUtils.getPid(process);
 
 		if (log.isDebugEnabled()) {
 			log.debug("Cassandra Process ({}) has been started", getPidString(this.pid));
 		}
+
 		try {
-			await(settings, timeout, output, process);
+			long start = System.currentTimeMillis();
+			boolean result = WaitUtils.await(timeout, () -> {
+				if (!process.isAlive()) {
+					throwException("Cassandra is not alive. Please see logs for more details.", bufferedOutput);
+				}
+				long elapsed = System.currentTimeMillis() - start;
+				//when it is not possible check cassandra output.
+				if (elapsed > 20000L) {
+					return TransportUtils.isReady(settings);
+				}
+				return readinessOutput.isReady() && TransportUtils.isReady(settings);
+			});
+			if (!result) {
+				throwException(String.format("Cassandra has not been started, seems like (%d) milliseconds " +
+						"is not enough.", timeout.toMillis()), bufferedOutput);
+			}
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
@@ -192,39 +214,37 @@ class DefaultCassandraProcess implements CassandraProcess {
 		Settings settings = this.settings;
 
 		if (process != null && process.isAlive()) {
+
 			if (log.isDebugEnabled()) {
 				log.debug("Stops Cassandra process ({})", getPidString(pid));
 			}
-
 			try {
 				stop(process, pidFile, directory, pid);
-			}
-			catch (Exception ex) {
-				log.error(String.format("Process (%s) has not been stopped correctly", getPidString(pid)), ex);
-				forceStop(process, pidFile, directory, pid);
-			}
-
-			try {
-				if (settings != null) {
-					WaitUtils.await(Duration.ofSeconds(5), () -> TransportUtils.isDisabled(settings)
-							&& !process.isAlive());
-				}
-				else {
-					process.waitFor(5, TimeUnit.SECONDS);
-				}
 			}
 			catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
-			catch (Exception ex) {
-				log.error(String.format("Could not check whether process (%s) is stopped or not", getPidString(pid)),
-						ex);
+			catch (Throwable ex) {
+				log.error(String.format("Process (%s) has not been stopped correctly. Try to force stop it",
+						getPidString(pid)), ex);
+				forceStop(process, pidFile, directory, pid);
 			}
-
+			if (settings != null) {
+				try {
+					WaitUtils.await(Duration.ofSeconds(5), () -> TransportUtils.isDisabled(settings)
+							&& !process.isAlive());
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
+				catch (Exception ex) {
+					log.error(String.format("Could not check whether process (%s) is stopped or not",
+							getPidString(pid)), ex);
+				}
+			}
 			if (process.isAlive()) {
 				forceStop(process, pidFile, directory, pid);
 			}
-
 			try {
 				process.waitFor(5, TimeUnit.SECONDS);
 			}
@@ -243,11 +263,11 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-	private static Settings getSettings(Path directory, Version version) throws IOException {
+	private static SmartSettings getSettings(Path directory, Version version) throws IOException {
 		Path target = directory.resolve("conf/cassandra.yaml");
 		try (InputStream is = Files.newInputStream(target)) {
 			Yaml yaml = new Yaml();
-			return new NodeSettings(version, yaml.loadAs(is, Map.class));
+			return new SmartSettings(version, yaml.loadAs(is, Map.class));
 		}
 	}
 
@@ -262,26 +282,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 		return (pid > 0) ? String.valueOf(pid) : "???";
 	}
 
-	private static void await(Settings settings, Duration timeout, OutputReadiness output, Process process)
-			throws Exception {
-		if (log.isDebugEnabled()) {
-			log.debug("Waits ({}) for Cassandra transport and output", timeout);
-		}
-		boolean result = WaitUtils.await(timeout, () -> {
-			if (!process.isAlive()) {
-				throwException("Cassandra Process is not alive. Please see logs for more details.", output);
-			}
-			return output.isReady() && TransportUtils.isReady(settings);
-		});
-		if (!result) {
-			throwException(String.format("Cassandra has not been started, seems like (%d) milliseconds " +
-					"is not enough. This could happen either Cassandra transport is not ready" +
-					" or there is no way to determine  whether Cassandra is started" +
-					" or not if <console> output is disabled.", timeout.toMillis()), output);
-		}
-	}
-
-	private static void stop(Process process, Path pidFile, Path directory, long pid) throws IOException {
+	private static void stop(Process process, Path pidFile, Path directory, long pid)
+			throws IOException, InterruptedException {
 		if (pidFile != null && Files.exists(pidFile)) {
 			stop(pidFile, directory, false);
 		}
@@ -299,6 +301,9 @@ class DefaultCassandraProcess implements CassandraProcess {
 				stop(pidFile, directory, true);
 			}
 		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
 		catch (Throwable ex) {
 			if (log.isDebugEnabled()) {
 				log.debug(String.format("Could not force stop a process (%s) by file (%s)", getPidString(pid), pidFile),
@@ -309,6 +314,9 @@ class DefaultCassandraProcess implements CassandraProcess {
 			if (pid > 0) {
 				stop(pid, directory, true);
 			}
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
 		}
 		catch (Throwable ex) {
 			if (log.isDebugEnabled()) {
@@ -325,7 +333,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-	private static void stop(Path pidFile, Path directory, boolean force) throws IOException {
+	private static void stop(Path pidFile, Path directory, boolean force) throws IOException, InterruptedException {
 		if (OS.get() == OS.WINDOWS) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("powershell");
@@ -346,7 +354,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-	private static void stop(long pid, Path directory, boolean force) throws IOException {
+	private static void stop(long pid, Path directory, boolean force) throws IOException, InterruptedException {
 		if (OS.get() == OS.WINDOWS) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("taskkill");
@@ -364,10 +372,10 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-	private static void throwException(String message, OutputCapture outputCapture) throws IOException {
+	private static void throwException(String message, BufferedOutput bufferedOutput) throws IOException {
 		StringBuilder builder = new StringBuilder(message);
-		if (!outputCapture.isEmpty()) {
-			Collection<String> lines = outputCapture.lines();
+		if (!bufferedOutput.isEmpty()) {
+			Collection<String> lines = bufferedOutput.lines();
 			builder.append(String.format(" Last (%s) lines:", lines.size()));
 			for (String line : lines) {
 				builder.append(String.format("%n\t%s", line));
@@ -377,26 +385,110 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 	/**
-	 * A simple implementation of {@link OutputCapture} class to check whether {@code cassandra} output is ready or not.
+	 * A simple implementation of {@link RunProcess.Output} class to find a {@code rpc_address} and set it into
+	 * the {@link SmartSettings}.
 	 */
-	private static final class OutputReadiness extends OutputCapture {
+	private static final class RpcAddressParser implements RunProcess.Output {
 
-		private volatile boolean ready = false;
+		@Nonnull
+		private final SmartSettings settings;
+
+		@Nonnull
+		private final Pattern regex;
+
+		private boolean alreadySet;
 
 		/**
-		 * Creates a new {@link OutputReadiness}.
+		 * Creates a new {@link RpcAddressParser}.
+		 *
+		 * @param settings the node settings
 		 */
-		OutputReadiness() {
-			super(10);
+		RpcAddressParser(@Nonnull SmartSettings settings) {
+			this.settings = settings;
+			this.regex = Pattern.compile(String.format(".*/(.+):(%d|%d).*", settings.getPort(), settings.getSslPort()));
 		}
 
 		@Override
 		public void accept(@Nonnull String line) {
-			if (!this.ready) {
-				String lowerCase = line.toLowerCase(Locale.ENGLISH);
-				this.ready = lowerCase.contains("listening for cql") || lowerCase.contains("not starting native");
+			if (this.alreadySet) {
+				return;
 			}
-			super.accept(line);
+			Matcher matcher = this.regex.matcher(line);
+			if (matcher.matches()) {
+				String address = matcher.group(1).trim();
+				try {
+					this.settings.setRealAddress(NetworkUtils.getInetAddress(address.trim()));
+					this.alreadySet = true;
+				}
+				catch (Throwable ex) {
+					if (log.isDebugEnabled()) {
+						log.debug(String.format("Could not parse an InetAddress (%s)", address), ex);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * A simple implementation of {@link RunProcess.Output} class to find a {@code listen_address} and set it into
+	 * the {@link SmartSettings}.
+	 */
+	private static final class ListenAddressParser implements RunProcess.Output {
+
+		@Nonnull
+		private final SmartSettings settings;
+
+		@Nonnull
+		private final Pattern regex;
+
+		private boolean alreadySet;
+
+		/**
+		 * Creates a new {@link ListenAddressParser}.
+		 *
+		 * @param settings the node settings
+		 */
+		ListenAddressParser(@Nonnull SmartSettings settings) {
+			this.settings = settings;
+			this.regex = Pattern.compile(
+					String.format(".*/(.+):(%d|%d).*", settings.getStoragePort(), settings.getSslStoragePort()));
+		}
+
+		@Override
+		public void accept(@Nonnull String line) {
+			if (this.alreadySet) {
+				return;
+			}
+			Matcher matcher = this.regex.matcher(line);
+			if (matcher.matches()) {
+				String address = matcher.group(1).trim();
+				try {
+					this.settings.setRealListenAddress(NetworkUtils.getInetAddress(address.trim()));
+					this.alreadySet = true;
+				}
+				catch (Throwable ex) {
+					if (log.isDebugEnabled()) {
+						log.debug(String.format("Could not parse an InetAddress (%s)", address), ex);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * A simple implementation of {@link RunProcess.Output} class to check whether {@code cassandra} output is ready or
+	 * not.
+	 */
+	private static final class ReadinessOutput implements RunProcess.Output {
+
+		private boolean ready = false;
+
+		@Override
+		public void accept(@Nonnull String line) {
+			if (!this.ready) {
+				this.ready = line.matches("(?i).*listening\\s*for\\s*cql.*") ||
+						line.matches("(?i).*not\\s*starting\\s*native.*");
+			}
 		}
 
 		/**
@@ -406,6 +498,67 @@ class DefaultCassandraProcess implements CassandraProcess {
 		 */
 		boolean isReady() {
 			return this.ready;
+		}
+	}
+
+	/**
+	 * A basic implementation of the {@link NodeSettings} with an opportunity to set {@code realListenAddress} and
+	 * {@code realAddress}.
+	 */
+	private static final class SmartSettings extends NodeSettings {
+
+		@Nullable
+		private volatile InetAddress realListenAddress;
+
+		@Nullable
+		private volatile InetAddress realAddress;
+
+		/**
+		 * Creates a new {@link SmartSettings}.
+		 *
+		 * @param version a version
+		 * @param properties a node properties
+		 */
+		SmartSettings(@Nonnull Version version, @Nullable Map<?, ?> properties) {
+			super(version, properties);
+		}
+
+		@Nonnull
+		@Override
+		public InetAddress getRealAddress() {
+			InetAddress address = this.realAddress;
+			if (address != null) {
+				return address;
+			}
+			return super.getRealAddress();
+		}
+
+		/**
+		 * Set the rpc address.
+		 *
+		 * @param address an IP address
+		 */
+		void setRealAddress(@Nullable InetAddress address) {
+			this.realAddress = address;
+		}
+
+		@Nonnull
+		@Override
+		public InetAddress getRealListenAddress() {
+			InetAddress address = this.realListenAddress;
+			if (address != null) {
+				return address;
+			}
+			return super.getRealListenAddress();
+		}
+
+		/**
+		 * Set the listen address.
+		 *
+		 * @param address an IP address
+		 */
+		void setRealListenAddress(@Nullable InetAddress address) {
+			this.realListenAddress = address;
 		}
 	}
 }

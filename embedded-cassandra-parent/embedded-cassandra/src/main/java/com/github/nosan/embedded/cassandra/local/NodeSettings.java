@@ -35,7 +35,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * @author Dmytro Nosan
  * @since 1.2.10
  */
-final class NodeSettings implements Settings {
+class NodeSettings implements Settings {
 
 	@Nonnull
 	private final Version version;
