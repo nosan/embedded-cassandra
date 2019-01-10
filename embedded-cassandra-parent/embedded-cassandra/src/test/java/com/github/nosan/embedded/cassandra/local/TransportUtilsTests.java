@@ -94,7 +94,6 @@ public class TransportUtilsTests {
 			return this.sslStoragePort;
 		}
 
-
 		@Override
 		public boolean isStartNativeTransport() {
 			return true;
