@@ -39,18 +39,14 @@ public abstract class PortUtils {
 	/**
 	 * The default minimum value for port ranges used when finding an available
 	 * socket port.
-	 *
-	 * @since 1.1.0
 	 */
-	public static final int MIN = 1024;
+	private static final int MIN = 1024;
 
 	/**
 	 * The default maximum value for port ranges used when finding an available
 	 * socket port.
-	 *
-	 * @since 1.1.0
 	 */
-	public static final int MAX = 65535;
+	private static final int MAX = 65535;
 
 	/**
 	 * Find a free {@code TCP} port.
@@ -90,7 +86,7 @@ public abstract class PortUtils {
 	 */
 	public static boolean isPortBusy(@Nullable InetAddress address, int port) {
 		try (Socket s = new Socket()) {
-			s.connect(getInetSocketAddress(address, port), 10);
+			s.connect(new InetSocketAddress(address, port), 10);
 			return true;
 		}
 		catch (IOException ex) {
@@ -100,19 +96,12 @@ public abstract class PortUtils {
 
 	private static boolean isPortAvailable(InetAddress address, int port) {
 		try (ServerSocket ss = new ServerSocket()) {
-			ss.bind(getInetSocketAddress(address, port), 1);
+			ss.bind(new InetSocketAddress(address, port), 1);
 		}
 		catch (IOException ex) {
 			return false;
 		}
 		return !isPortBusy(address, port);
-	}
-
-	private static InetSocketAddress getInetSocketAddress(InetAddress address, int port) {
-		if (address != null) {
-			return new InetSocketAddress(address, port);
-		}
-		return new InetSocketAddress(NetworkUtils.getLocalhost(), port);
 	}
 
 }
