@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apiguardian.api.API;
 
@@ -42,6 +43,7 @@ import org.apiguardian.api.API;
  */
 @API(since = "1.1.0", status = API.Status.INTERNAL)
 public abstract class NetworkUtils {
+
 	/**
 	 * Determines the IP address of a host, given the host's name.
 	 *
@@ -50,8 +52,7 @@ public abstract class NetworkUtils {
 	 * @throws UncheckedIOException if no IP address for the host could be found
 	 */
 	@Nonnull
-	public static InetAddress getInetAddress(@Nonnull String address) {
-		Objects.requireNonNull(address, "Address must not be null");
+	public static InetAddress getInetAddress(@Nullable String address) {
 		try {
 			return InetAddress.getByName(address);
 		}
@@ -95,7 +96,7 @@ public abstract class NetworkUtils {
 		try {
 			NetworkInterface networkInterface = NetworkInterface.getByName(interfaceName);
 			if (networkInterface == null) {
-				throw new IllegalArgumentException(String.format("(%s) interface is not valid", interfaceName));
+				throw new SocketException(String.format("(%s) interface is not valid", interfaceName));
 			}
 			Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
 			return Collections.unmodifiableList(Collections.list(addresses));
@@ -109,14 +110,15 @@ public abstract class NetworkUtils {
 	 * Return the {@code localhost} address.
 	 *
 	 * @return the localhost
+	 * @throws UncheckedIOException if no IP address for the host could be found
 	 */
 	@Nonnull
 	public static InetAddress getLocalhost() {
 		try {
-			return InetAddress.getByName("localhost");
+			return InetAddress.getLocalHost();
 		}
 		catch (UnknownHostException ex) {
-			return InetAddress.getLoopbackAddress();
+			throw new UncheckedIOException(ex);
 		}
 	}
 
