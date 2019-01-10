@@ -42,14 +42,14 @@ import com.github.nosan.embedded.cassandra.util.PortUtils;
  * @author Dmytro Nosan
  * @since 1.0.9
  */
-class PortReplacerCustomizer implements DirectoryCustomizer {
+class RandomPortConfigurationFileCustomizer implements DirectoryCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(PortReplacerCustomizer.class);
+	private static final Logger log = LoggerFactory.getLogger(RandomPortConfigurationFileCustomizer.class);
 
 	@Nonnull
 	private final Version version;
 
-	PortReplacerCustomizer(@Nonnull Version version) {
+	RandomPortConfigurationFileCustomizer(@Nonnull Version version) {
 		this.version = version;
 	}
 
@@ -95,7 +95,7 @@ class PortReplacerCustomizer implements DirectoryCustomizer {
 	}
 
 	private static void replace(Map<Object, Object> newSource, Version version) {
-		MapSettings settings = new MapSettings(newSource, version);
+		NodeSettings settings = new NodeSettings(version, newSource);
 		setPort(newSource, "native_transport_port", settings::getPort, settings::getRealAddress);
 		setPort(newSource, "native_transport_port_ssl", settings::getSslPort, settings::getRealAddress);
 		setPort(newSource, "rpc_port", settings::getRpcPort, settings::getRealAddress);

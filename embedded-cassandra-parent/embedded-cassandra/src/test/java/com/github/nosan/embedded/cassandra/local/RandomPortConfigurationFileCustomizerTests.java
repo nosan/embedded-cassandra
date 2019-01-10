@@ -33,11 +33,11 @@ import com.github.nosan.embedded.cassandra.Version;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link PortReplacerCustomizer}.
+ * Tests for {@link RandomPortConfigurationFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
-public class PortReplacerCustomizerTests {
+public class RandomPortConfigurationFileCustomizerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -46,7 +46,7 @@ public class PortReplacerCustomizerTests {
 	public void shouldReplaceWithRandomPorts() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		Version version = new Version(3, 11, 3);
-		PortReplacerCustomizer customizer = new PortReplacerCustomizer(version);
+		RandomPortConfigurationFileCustomizer customizer = new RandomPortConfigurationFileCustomizer(version);
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-all-ports.yaml")) {
 			Files.copy(inputStream, directory.resolve("cassandra.yaml"));
 		}
@@ -54,9 +54,9 @@ public class PortReplacerCustomizerTests {
 		customizer.customize(directory.getParent());
 
 		assertThat(directory.resolve("cassandra.yaml")).exists();
-		MapSettings settings;
+		NodeSettings settings;
 		try (InputStream inputStream = Files.newInputStream(directory.resolve("cassandra.yaml"))) {
-			settings = new MapSettings(new Yaml().loadAs(inputStream, Map.class), version);
+			settings = new NodeSettings(version, new Yaml().loadAs(inputStream, Map.class));
 		}
 		assertThat(settings.getPort()).isNotEqualTo(0);
 		assertThat(settings.getRpcPort()).isNotEqualTo(0);
@@ -70,7 +70,7 @@ public class PortReplacerCustomizerTests {
 	public void shouldNotReplaceAndShouldNotModify() throws IOException {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		Version version = new Version(3, 11, 3);
-		PortReplacerCustomizer customizer = new PortReplacerCustomizer(version);
+		RandomPortConfigurationFileCustomizer customizer = new RandomPortConfigurationFileCustomizer(version);
 		Path configurationFile = directory.resolve("cassandra.yaml");
 
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
@@ -85,9 +85,9 @@ public class PortReplacerCustomizerTests {
 		assertThat(Files.getLastModifiedTime(configurationFile))
 				.isEqualTo(lastModifiedTime);
 
-		MapSettings settings;
+		NodeSettings settings;
 		try (InputStream inputStream = Files.newInputStream(configurationFile)) {
-			settings = new MapSettings(new Yaml().loadAs(inputStream, Map.class), version);
+			settings = new NodeSettings(version, new Yaml().loadAs(inputStream, Map.class));
 		}
 		assertThat(settings.getPort()).isEqualTo(9042);
 		assertThat(settings.getRpcPort()).isEqualTo(9160);

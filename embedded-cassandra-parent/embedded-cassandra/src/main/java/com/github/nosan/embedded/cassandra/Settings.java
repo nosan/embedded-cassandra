@@ -42,21 +42,27 @@ public interface Settings {
 	 * @return The value of the {@code clusterName} attribute
 	 */
 	@Nullable
-	String getClusterName();
+	default String getClusterName() {
+		return null;
+	}
 
 	/**
 	 * The port for inter-node communication.
 	 *
 	 * @return The value of the {@code storagePort} attribute or {@code 7000}
 	 */
-	int getStoragePort();
+	default int getStoragePort() {
+		return 7000;
+	}
 
 	/**
 	 * SSL port, for encrypted communication.
 	 *
 	 * @return The value of the {@code sslStoragePort} attribute or {@code 7001}
 	 */
-	int getSslStoragePort();
+	default int getSslStoragePort() {
+		return 7001;
+	}
 
 	/**
 	 * Address to bind to and tell other Cassandra nodes to connect to.
@@ -65,7 +71,9 @@ public interface Settings {
 	 * @see #getRealListenAddress()
 	 */
 	@Nullable
-	String getListenAddress();
+	default String getListenAddress() {
+		return null;
+	}
 
 	/**
 	 * The interface that Cassandra binds to for connecting to other Cassandra nodes.
@@ -73,7 +81,9 @@ public interface Settings {
 	 * @return The value of the {@code listenInterface} attribute
 	 */
 	@Nullable
-	String getListenInterface();
+	default String getListenInterface() {
+		return null;
+	}
 
 	/**
 	 * The IP address a node tells other nodes in the cluster to contact it by.
@@ -81,7 +91,9 @@ public interface Settings {
 	 * @return The value of the {@code broadcastAddress} attribute
 	 */
 	@Nullable
-	String getBroadcastAddress();
+	default String getBroadcastAddress() {
+		return null;
+	}
 
 	/**
 	 * The address to bind the native/rpc transport server to.
@@ -91,7 +103,9 @@ public interface Settings {
 	 * @see #getRealAddress()
 	 */
 	@Nullable
-	String getRpcAddress();
+	default String getRpcAddress() {
+		return null;
+	}
 
 	/**
 	 * The listen RPC interface for client connections.
@@ -99,7 +113,9 @@ public interface Settings {
 	 * @return The value of the {@code rpcInterface} attribute
 	 */
 	@Nullable
-	String getRpcInterface();
+	default String getRpcInterface() {
+		return null;
+	}
 
 	/**
 	 * RPC address to broadcast to drivers and other Cassandra nodes.
@@ -107,21 +123,27 @@ public interface Settings {
 	 * @return The value of the {@code broadcastRpcAddress} attribute
 	 */
 	@Nullable
-	String getBroadcastRpcAddress();
+	default String getBroadcastRpcAddress() {
+		return null;
+	}
 
 	/**
 	 * Whether native transport is started or not.
 	 *
 	 * @return The value of the {@code startNativeTransport} attribute
 	 */
-	boolean isStartNativeTransport();
+	default boolean isStartNativeTransport() {
+		return getVersion().getMajor() > 2;
+	}
 
 	/**
 	 * Port for the CQL native transport to listen for clients on.
 	 *
 	 * @return The value of the {@code nativeTransportPort} attribute or {@code 9042}
 	 */
-	int getPort();
+	default int getPort() {
+		return 9042;
+	}
 
 	/**
 	 * SSL Port for the CQL native transport.
@@ -129,21 +151,27 @@ public interface Settings {
 	 * @return The value of the {@code nativeTransportPortSsl} attribute
 	 */
 	@Nullable
-	Integer getSslPort();
+	default Integer getSslPort() {
+		return null;
+	}
 
 	/**
 	 * Whether RPC transport is started or not.
 	 *
 	 * @return The value of the {@code startRpc} attribute
 	 */
-	boolean isStartRpc();
+	default boolean isStartRpc() {
+		return getVersion().getMajor() < 4;
+	}
 
 	/**
 	 * Thrift port for client connections.
 	 *
 	 * @return The value of the {@code rpcPort} attribute or {@code 9160}
 	 */
-	int getRpcPort();
+	default int getRpcPort() {
+		return 9160;
+	}
 
 	/**
 	 * Cassandra version.
@@ -161,7 +189,9 @@ public interface Settings {
 	 * @return The value of the {@code listenOnBroadcastAddress} attribute
 	 * @since 1.1.0
 	 */
-	boolean isListenOnBroadcastAddress();
+	default boolean isListenOnBroadcastAddress() {
+		return false;
+	}
 
 	/**
 	 * If you choose to specify the interface by name and the interface has an IPv4 and an IPv6 address you can
@@ -171,7 +201,9 @@ public interface Settings {
 	 * @return The value of the {@code listenInterfacePreferIpv6} attribute
 	 * @since 1.1.0
 	 */
-	boolean isListenInterfacePreferIpv6();
+	default boolean isListenInterfacePreferIpv6() {
+		return false;
+	}
 
 	/**
 	 * If you choose to specify the interface by name and the interface has an IPv4 and an IPv6 address you can
@@ -181,10 +213,13 @@ public interface Settings {
 	 * @return The value of the {@code rpcInterfacePreferIpv6} attribute
 	 * @since 1.1.0
 	 */
-	boolean isRpcInterfacePreferIpv6();
+	default boolean isRpcInterfacePreferIpv6() {
+		return false;
+	}
 
 	/**
 	 * The {@code real} address to bind the native/rpc transport server to.
+	 * If both {@code rpcAddress} and {@code rpcInterface} are null, then {@link #getRealListenAddress()} will be used.
 	 *
 	 * @return The value of the {@code rpcAddress} or determine address from {@code rpcInterface} attribute
 	 * @since 1.1.0
@@ -204,11 +239,11 @@ public interface Settings {
 							.orElseThrow(() -> new IllegalStateException(
 									String.format("There is no address for interface (%s)", rpcInterface))));
 		}
-		return NetworkUtils.getLocalhost();
+		return getRealListenAddress();
 	}
 
 	/**
-	 * the {@code real} address to bind to and tell other Cassandra nodes to connect to.
+	 * The {@code real} address to bind to and tell other Cassandra nodes to connect to.
 	 *
 	 * @return The value of the {@code listenAddress} or determine address from {@code listenInterface} attribute
 	 * @since 1.1.0

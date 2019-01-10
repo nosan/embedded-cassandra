@@ -28,11 +28,11 @@ import com.github.nosan.embedded.cassandra.Version;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link MapSettings}.
+ * Tests for {@link NodeSettings}.
  *
  * @author Dmytro Nosan
  */
-public class MapSettingsTests {
+public class NodeSettingsTests {
 
 	@Test
 	public void shouldParseCassandraYamlUtf8() throws Exception {
@@ -45,26 +45,9 @@ public class MapSettingsTests {
 	}
 
 	@Test
-	public void shouldBeTheSameSettings() throws Exception {
-		assertThat(load("/cassandra-utf16.yaml"))
-				.isEqualTo(load("/cassandra.yaml"));
-	}
-
-	@Test
-	public void prettyToString() throws Exception {
-		assertThat(load("/cassandra.yaml").toString())
-				.isEqualTo("MapSettings[port=9042, rpcPort=9160, storagePort=7000, sslStoragePort=7001," +
-						" startNativeTransport=true, startRpc=false, clusterName='Test Cluster', " +
-						"sslPort=9142, rpcAddress='localhost', listenAddress='localhost'," +
-						" broadcastAddress='1.2.3.4', broadcastRpcAddress='1.2.3.4', listenInterface='eth0', " +
-						"rpcInterface='eth1', version=3.11.3, rpcInterfacePreferIpv6=false, " +
-						"listenInterfacePreferIpv6=false, listenOnBroadcastAddress=false]");
-	}
-
-	@Test
 	public void defaultSettingsV3() {
-		MapSettings settings = new MapSettings(null, new Version(3, 11, 3));
-		assertThat(settings.getClusterName()).isEqualTo("Test Cluster");
+		NodeSettings settings = new NodeSettings(new Version(3, 11, 3), null);
+		assertThat(settings.getClusterName()).isNull();
 		assertThat(settings.getPort()).isEqualTo(9042);
 		assertThat(settings.getRpcPort()).isEqualTo(9160);
 		assertThat(settings.getStoragePort()).isEqualTo(7000);
@@ -86,8 +69,8 @@ public class MapSettingsTests {
 
 	@Test
 	public void defaultSettingsV4() {
-		MapSettings settings = new MapSettings(null, new Version(4, 0, 0));
-		assertThat(settings.getClusterName()).isEqualTo("Test Cluster");
+		NodeSettings settings = new NodeSettings(new Version(4, 0, 0), null);
+		assertThat(settings.getClusterName()).isNull();
 		assertThat(settings.getPort()).isEqualTo(9042);
 		assertThat(settings.getRpcPort()).isEqualTo(9160);
 		assertThat(settings.getStoragePort()).isEqualTo(7000);
@@ -107,7 +90,7 @@ public class MapSettingsTests {
 		assertThat(settings.getBroadcastRpcAddress()).isNull();
 	}
 
-	private void assertSettings(MapSettings settings) {
+	private void assertSettings(NodeSettings settings) {
 		assertThat(settings.getClusterName()).isEqualTo("Test Cluster");
 		assertThat(settings.getPort()).isEqualTo(9042);
 		assertThat(settings.getRpcPort()).isEqualTo(9160);
@@ -128,9 +111,9 @@ public class MapSettingsTests {
 		assertThat(settings.getBroadcastRpcAddress()).isEqualTo("1.2.3.4");
 	}
 
-	private MapSettings load(String resource) throws IOException {
+	private NodeSettings load(String resource) throws IOException {
 		try (InputStream is = getClass().getResourceAsStream(resource)) {
-			return new MapSettings(new Yaml().loadAs(is, Map.class), new Version(3, 11, 3));
+			return new NodeSettings(new Version(3, 11, 3), new Yaml().loadAs(is, Map.class));
 		}
 	}
 }

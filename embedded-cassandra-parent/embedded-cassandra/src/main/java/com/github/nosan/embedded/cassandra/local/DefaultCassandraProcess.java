@@ -247,7 +247,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		Path target = directory.resolve("conf/cassandra.yaml");
 		try (InputStream is = Files.newInputStream(target)) {
 			Yaml yaml = new Yaml();
-			return new MapSettings(yaml.loadAs(is, Map.class), version);
+			return new NodeSettings(version, yaml.loadAs(is, Map.class));
 		}
 	}
 

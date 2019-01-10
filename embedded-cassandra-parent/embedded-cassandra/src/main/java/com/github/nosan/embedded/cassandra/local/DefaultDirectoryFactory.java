@@ -88,7 +88,7 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 		customizers.add(new RackFileCustomizer(this.rackFile));
 		customizers.add(new TopologyFileCustomizer(this.topologyFile));
 		customizers.add(new CommitLogArchivingFileCustomizer(this.commitLogArchivingFile));
-		customizers.add(new PortReplacerCustomizer(this.version));
+		customizers.add(new RandomPortConfigurationFileCustomizer(this.version));
 		return new DefaultDirectory(this.directory, archive, customizers);
 	}
 }

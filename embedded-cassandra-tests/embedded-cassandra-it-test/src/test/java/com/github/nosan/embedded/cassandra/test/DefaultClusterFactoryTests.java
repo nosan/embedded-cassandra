@@ -110,55 +110,10 @@ public class DefaultClusterFactoryTests {
 			return this.clusterName;
 		}
 
-		@Override
-		public int getStoragePort() {
-			return -1;
-		}
-
-		@Override
-		public int getSslStoragePort() {
-			return -1;
-		}
-
-		@Nonnull
-		@Override
-		public String getListenAddress() {
-			return null;
-		}
-
-		@Nullable
-		@Override
-		public String getListenInterface() {
-			return null;
-		}
-
-		@Nonnull
-		@Override
-		public String getBroadcastAddress() {
-			return null;
-		}
-
 		@Nonnull
 		@Override
 		public String getRpcAddress() {
 			return this.address;
-		}
-
-		@Nullable
-		@Override
-		public String getRpcInterface() {
-			return null;
-		}
-
-		@Nonnull
-		@Override
-		public String getBroadcastRpcAddress() {
-			return null;
-		}
-
-		@Override
-		public boolean isStartNativeTransport() {
-			return false;
 		}
 
 		@Override
@@ -166,41 +121,10 @@ public class DefaultClusterFactoryTests {
 			return this.port;
 		}
 
-		@Nullable
-		@Override
-		public Integer getSslPort() {
-			return null;
-		}
-
-		@Override
-		public boolean isStartRpc() {
-			return false;
-		}
-
-		@Override
-		public int getRpcPort() {
-			return -1;
-		}
-
 		@Nonnull
 		@Override
 		public Version getVersion() {
-			return null;
-		}
-
-		@Override
-		public boolean isListenOnBroadcastAddress() {
-			return false;
-		}
-
-		@Override
-		public boolean isListenInterfacePreferIpv6() {
-			return false;
-		}
-
-		@Override
-		public boolean isRpcInterfacePreferIpv6() {
-			return false;
+			return new Version(0);
 		}
 	}
 }

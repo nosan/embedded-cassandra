@@ -84,12 +84,6 @@ public class TransportUtilsTests {
 			this.sslStoragePort = sslStoragePort;
 		}
 
-		@Nonnull
-		@Override
-		public String getClusterName() {
-			return null;
-		}
-
 		@Override
 		public int getStoragePort() {
 			return this.storagePort;
@@ -100,41 +94,6 @@ public class TransportUtilsTests {
 			return this.sslStoragePort;
 		}
 
-		@Nullable
-		@Override
-		public String getListenAddress() {
-			return null;
-		}
-
-		@Nullable
-		@Override
-		public String getListenInterface() {
-			return null;
-		}
-
-		@Nullable
-		@Override
-		public String getBroadcastAddress() {
-			return null;
-		}
-
-		@Nullable
-		@Override
-		public String getRpcAddress() {
-			return null;
-		}
-
-		@Nullable
-		@Override
-		public String getRpcInterface() {
-			return null;
-		}
-
-		@Nullable
-		@Override
-		public String getBroadcastRpcAddress() {
-			return null;
-		}
 
 		@Override
 		public boolean isStartNativeTransport() {
@@ -165,22 +124,7 @@ public class TransportUtilsTests {
 		@Nonnull
 		@Override
 		public Version getVersion() {
-			return null;
-		}
-
-		@Override
-		public boolean isListenOnBroadcastAddress() {
-			return false;
-		}
-
-		@Override
-		public boolean isListenInterfacePreferIpv6() {
-			return false;
-		}
-
-		@Override
-		public boolean isRpcInterfacePreferIpv6() {
-			return false;
+			return new Version(0);
 		}
 	}
 }

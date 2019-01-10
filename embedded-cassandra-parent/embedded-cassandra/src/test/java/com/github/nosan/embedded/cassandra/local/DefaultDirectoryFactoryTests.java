@@ -65,7 +65,7 @@ public class DefaultDirectoryFactoryTests {
 		assertThat(ReflectionUtils.getField(customizers.get(4), "topologyFile")).isEqualTo(topologyFile);
 		assertThat(ReflectionUtils.getField(customizers.get(5), "commitLogArchivingFile"))
 				.isEqualTo(commitLogArchivingFile);
-		assertThat(customizers).last().isInstanceOf(PortReplacerCustomizer.class);
+		assertThat(customizers).last().isInstanceOf(RandomPortConfigurationFileCustomizer.class);
 
 	}
 }
