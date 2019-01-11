@@ -41,8 +41,8 @@ public abstract class ThreadUtils {
 	 */
 	public static void join(@Nullable Thread thread) throws InterruptedException {
 		if (thread != null && thread.isAlive()) {
-			if (log.isDebugEnabled()) {
-				log.debug("{} <join to> {}", Thread.currentThread(), thread);
+			if (log.isTraceEnabled()) {
+				log.trace("{} <join to> {}", Thread.currentThread(), thread);
 			}
 			thread.join();
 		}
@@ -58,8 +58,8 @@ public abstract class ThreadUtils {
 	public static void interrupt(@Nullable Thread thread) throws SecurityException {
 		if (thread != null && thread.isAlive()) {
 			thread.interrupt();
-			if (log.isDebugEnabled()) {
-				log.debug("{} is interrupted by {}", thread, Thread.currentThread());
+			if (log.isTraceEnabled()) {
+				log.trace("{} is interrupted by {}", thread, Thread.currentThread());
 			}
 		}
 	}

@@ -117,7 +117,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	@Override
 	@Nonnull
-	public Settings start() throws IOException {
+	public Settings start() throws IOException, InterruptedException {
 		Path directory = this.directory;
 		Version version = this.version;
 		Duration timeout = this.timeout;
@@ -193,10 +193,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 						"is not enough.", timeout.toMillis()), bufferedOutput);
 			}
 		}
-		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
-		catch (IOException ex) {
+		catch (InterruptedException | IOException ex) {
 			throw ex;
 		}
 		catch (Exception ex) {
@@ -206,7 +203,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 	@Override
-	public void stop() throws IOException {
+	public void stop() throws IOException, InterruptedException {
 		Process process = this.process;
 		Path pidFile = this.pidFile;
 		Path directory = this.directory;
@@ -218,44 +215,32 @@ class DefaultCassandraProcess implements CassandraProcess {
 			if (log.isDebugEnabled()) {
 				log.debug("Stops Cassandra process ({})", getPidString(pid));
 			}
-			try {
-				stop(process, pidFile, directory, pid);
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
-			catch (Throwable ex) {
-				log.error(String.format("Process (%s) has not been stopped correctly. Try to force stop it",
-						getPidString(pid)), ex);
-				forceStop(process, pidFile, directory, pid);
-			}
+
+			stop(process, pidFile, directory, pid);
+
 			if (settings != null) {
 				try {
 					WaitUtils.await(Duration.ofSeconds(5), () -> TransportUtils.isDisabled(settings)
 							&& !process.isAlive());
 				}
 				catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
+					throw ex;
 				}
 				catch (Exception ex) {
 					log.error(String.format("Could not check whether process (%s) is stopped or not",
 							getPidString(pid)), ex);
 				}
 			}
+
 			if (process.isAlive()) {
 				forceStop(process, pidFile, directory, pid);
 			}
-			try {
-				process.waitFor(5, TimeUnit.SECONDS);
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
 
-			if (process.isAlive()) {
+			if (!process.waitFor(3, TimeUnit.SECONDS)) {
 				throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
 						getPidString(pid)));
 			}
+
 			this.settings = null;
 			this.pid = -1;
 			this.pidFile = null;
@@ -282,55 +267,72 @@ class DefaultCassandraProcess implements CassandraProcess {
 		return (pid > 0) ? String.valueOf(pid) : "???";
 	}
 
-	private static void stop(Process process, Path pidFile, Path directory, long pid)
-			throws IOException, InterruptedException {
+	private static void stop(Process process, Path pidFile, Path directory, long pid) throws InterruptedException {
 		if (pidFile != null && Files.exists(pidFile)) {
-			stop(pidFile, directory, false);
+			try {
+				stop(pidFile, directory, false);
+			}
+			catch (InterruptedException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Could not stop a process (%s) by file (%s)",
+							getPidString(pid), pidFile), ex);
+				}
+			}
 		}
 		else if (pid > 0) {
-			stop(pid, directory, false);
+			try {
+				stop(pid, directory, false);
+			}
+			catch (InterruptedException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Could not  <kill or taskkill> a process (%s)", getPidString(pid)),
+							ex);
+				}
+			}
 		}
 		else {
 			process.destroy();
 		}
 	}
 
-	private static void forceStop(Process process, Path pidFile, Path directory, long pid) {
-		try {
-			if (pidFile != null && Files.exists(pidFile)) {
+	private static void forceStop(Process process, Path pidFile, Path directory, long pid) throws
+			InterruptedException {
+		if (pidFile != null && Files.exists(pidFile)) {
+			try {
 				stop(pidFile, directory, true);
 			}
-		}
-		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
-		catch (Throwable ex) {
-			if (log.isDebugEnabled()) {
-				log.debug(String.format("Could not force stop a process (%s) by file (%s)", getPidString(pid), pidFile),
-						ex);
+			catch (InterruptedException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Could not force stop a process (%s) by file (%s)", getPidString(pid),
+							pidFile),
+							ex);
+				}
 			}
 		}
-		try {
-			if (pid > 0) {
+		if (pid > 0) {
+			try {
 				stop(pid, directory, true);
 			}
-		}
-		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
-		catch (Throwable ex) {
-			if (log.isDebugEnabled()) {
-				log.debug(String.format("Could not force <kill or taskkill> a process (%s)", getPidString(pid)), ex);
+			catch (InterruptedException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				if (log.isDebugEnabled()) {
+					log.debug(String.format("Could not force <kill or taskkill> a process (%s)", getPidString(pid)),
+							ex);
+				}
 			}
 		}
-		try {
-			process.destroyForcibly();
-		}
-		catch (Throwable ex) {
-			if (log.isDebugEnabled()) {
-				log.debug(String.format("Could not force destroy a process (%s)", getPidString(pid)), ex);
-			}
-		}
+		process.destroyForcibly();
 	}
 
 	private static void stop(Path pidFile, Path directory, boolean force) throws IOException, InterruptedException {
