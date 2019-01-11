@@ -21,13 +21,13 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link OutputCapture}.
+ * Tests for {@link BufferedOutput}.
  *
  * @author Dmytro Nosan
  */
-public class OutputCaptureTests {
+public class BufferedOutputTests {
 
-	private final OutputCapture output = new OutputCapture(2);
+	private final BufferedOutput output = new BufferedOutput(2);
 
 	@Test
 	public void shouldKeepLines() {

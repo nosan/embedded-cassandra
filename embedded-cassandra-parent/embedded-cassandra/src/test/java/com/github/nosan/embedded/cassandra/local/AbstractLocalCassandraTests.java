@@ -98,12 +98,19 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldFailCassandraNoOutput() {
+	public void shouldStartCassandraNoOutput() {
 		this.factory.setLogbackFile(getClass().getResource("/logback-empty.xml"));
-		this.throwable.expect(CassandraException.class);
-		this.throwable.expectCause(new CauseMatcher(IOException.class, "<console> output is disabled"));
 		CassandraRunner runner = new CassandraRunner(this.factory);
-		runner.run(new NotReachable());
+		runner.run(assertCreateKeyspace());
+		assertDirectoryHasBeenDeletedCorrectly();
+	}
+
+	@Test
+	public void shouldStartCassandraNoOutputAndNotTransportWorseCase() {
+		this.factory.setLogbackFile(getClass().getResource("/logback-empty.xml"));
+		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
+		CassandraRunner runner = new CassandraRunner(this.factory);
+		runner.run(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort));
 		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
@@ -128,7 +135,8 @@ public abstract class AbstractLocalCassandraTests {
 	@Test
 	public void notEnoughTime() {
 		this.throwable.expect(CassandraException.class);
-		this.throwable.expectCause(new CauseMatcher(IOException.class, "Cassandra transport is not ready"));
+		this.throwable.expectCause(new CauseMatcher(IOException.class,
+				"Cassandra has not been started, seems like (2000) milliseconds is not enough"));
 		this.factory.setStartupTimeout(Duration.ofSeconds(2L));
 		new CassandraRunner(this.factory).run(new NotReachable());
 		assertDirectoryHasBeenDeletedCorrectly();

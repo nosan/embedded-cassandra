@@ -29,18 +29,18 @@ import javax.annotation.Nonnull;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-class OutputCapture implements RunProcess.Output {
+class BufferedOutput implements RunProcess.Output {
 
 	private final ConcurrentLinkedDeque<String> lines = new ConcurrentLinkedDeque<>();
 
 	private final int count;
 
 	/**
-	 * Creates a new {@link OutputCapture}.
+	 * Creates a new {@link BufferedOutput}.
 	 *
 	 * @param count lines limit
 	 */
-	OutputCapture(int count) {
+	BufferedOutput(int count) {
 		this.count = count;
 	}
 
