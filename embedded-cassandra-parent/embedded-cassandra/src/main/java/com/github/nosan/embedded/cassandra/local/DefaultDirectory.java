@@ -82,6 +82,9 @@ class DefaultDirectory implements Directory {
 		try {
 			log.info("Extract ({}) into ({}). It takes a while...", archive, rootDirectory);
 			ArchiveUtils.extract(archive, rootDirectory, path -> {
+				if (Files.exists(path)) {
+					return false;
+				}
 				Path subPath = path.subpath(rootDirectory.getNameCount(), path.getNameCount());
 				for (int i = 0; i < subPath.getNameCount(); i++) {
 					String name = String.valueOf(subPath.getName(i));
