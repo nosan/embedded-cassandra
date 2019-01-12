@@ -137,9 +137,11 @@ class LocalCassandra implements Cassandra {
 				start0();
 			}
 			catch (InterruptedException ex) {
-				log.warn("Cassandra launch was interrupted.");
-				Thread.currentThread().interrupt();
+				if (log.isDebugEnabled()) {
+					log.debug("Cassandra launch was interrupted");
+				}
 				stopSilently();
+				Thread.currentThread().interrupt();
 			}
 			catch (Throwable ex) {
 				stopSilently();
@@ -158,7 +160,9 @@ class LocalCassandra implements Cassandra {
 				stop0();
 			}
 			catch (InterruptedException ex) {
-				log.warn("Cassandra stop was interrupted.");
+				if (log.isDebugEnabled()) {
+					log.debug("Cassandra stop was interrupted");
+				}
 				Thread.currentThread().interrupt();
 			}
 			catch (Throwable ex) {
@@ -185,16 +189,17 @@ class LocalCassandra implements Cassandra {
 	}
 
 	private void start0() throws Throwable {
+		this.started = true;
+		this.ownerThread = Thread.currentThread();
 		long start = System.currentTimeMillis();
 		Version version = this.version;
 		log.info("Starts Apache Cassandra ({}) ", version);
-		this.started = true;
-
 		AtomicReference<Throwable> throwable = new AtomicReference<>();
 		Map<String, String> context = MDCUtils.getContext();
+
 		Thread thread = new Thread(() -> {
-			MDCUtils.setContext(context);
 			try {
+				MDCUtils.setContext(context);
 				Artifact artifact = this.artifactFactory.create(version);
 				Path archive = artifact.get();
 
@@ -205,11 +210,13 @@ class LocalCassandra implements Cassandra {
 				this.process = process;
 				this.settings = process.start();
 			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 			catch (Throwable ex) {
 				throwable.set(ex);
 			}
 		}, this.threadNameSupplier.get());
-		this.ownerThread = thread;
 
 		thread.start();
 
@@ -217,10 +224,9 @@ class LocalCassandra implements Cassandra {
 			ThreadUtils.join(thread);
 		}
 		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
 			interrupt(thread);
+			throw ex;
 		}
-
 		Throwable ex = throwable.get();
 		if (ex != null) {
 			throw ex;
@@ -233,27 +239,16 @@ class LocalCassandra implements Cassandra {
 		long start = System.currentTimeMillis();
 		Version version = this.version;
 		log.info("Stops Apache Cassandra ({}) ", version);
-
-		Thread ownerThread = this.ownerThread;
-		interrupt(ownerThread);
-		try {
-			ThreadUtils.join(ownerThread);
-		}
-		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
-		this.ownerThread = null;
-
 		AtomicReference<Throwable> throwable = new AtomicReference<>();
 		Map<String, String> context = MDCUtils.getContext();
+
 		Thread thread = new Thread(() -> {
-			MDCUtils.setContext(context);
 			try {
+				MDCUtils.setContext(context);
 				CassandraProcess process = this.process;
 				if (process != null) {
 					process.stop();
 				}
-
 				this.process = null;
 				this.settings = null;
 
@@ -268,27 +263,32 @@ class LocalCassandra implements Cassandra {
 				}
 				this.directory = null;
 			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 			catch (Throwable ex) {
 				throwable.set(ex);
 			}
 		}, this.threadNameSupplier.get());
 
 		thread.start();
+
 		try {
 			ThreadUtils.join(thread);
 		}
 		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
 			interrupt(thread);
+			throw ex;
 		}
 
 		Throwable ex = throwable.get();
 		if (ex != null) {
 			throw ex;
 		}
-		this.started = false;
 		long end = System.currentTimeMillis();
 		log.info("Apache Cassandra ({}) has been stopped ({} ms)", version, end - start);
+		this.ownerThread = null;
+		this.started = false;
 	}
 
 	private void addShutdownHook() {
@@ -308,7 +308,7 @@ class LocalCassandra implements Cassandra {
 		try {
 			stop();
 		}
-		catch (CassandraException ex) {
+		catch (Throwable ex) {
 			log.error("Unable to stop Cassandra", ex);
 		}
 	}

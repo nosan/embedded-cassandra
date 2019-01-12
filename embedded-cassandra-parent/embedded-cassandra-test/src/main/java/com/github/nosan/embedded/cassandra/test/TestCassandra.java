@@ -195,9 +195,11 @@ public class TestCassandra implements Cassandra {
 				start0();
 			}
 			catch (InterruptedException ex) {
-				log.warn("Test Cassandra launch was interrupted.");
-				Thread.currentThread().interrupt();
+				if (log.isDebugEnabled()) {
+					log.debug("Test Cassandra launch was interrupted");
+				}
 				stopSilently();
+				Thread.currentThread().interrupt();
 			}
 			catch (Throwable ex) {
 				stopSilently();
@@ -216,7 +218,9 @@ public class TestCassandra implements Cassandra {
 				stop0();
 			}
 			catch (InterruptedException ex) {
-				log.warn("Test Cassandra stop was interrupted.");
+				if (log.isDebugEnabled()) {
+					log.debug("Test Cassandra stop was interrupted");
+				}
 				Thread.currentThread().interrupt();
 			}
 			catch (Throwable ex) {
@@ -362,42 +366,43 @@ public class TestCassandra implements Cassandra {
 
 	private void start0() throws Throwable {
 		this.started = true;
+		this.ownerThread = Thread.currentThread();
 		if (log.isDebugEnabled()) {
 			log.debug("Starts Test Cassandra ({})", this.cassandra);
 		}
 		AtomicReference<Throwable> throwable = new AtomicReference<>();
 		Map<String, String> context = MDCUtils.getContext();
+
 		Thread thread = new Thread(() -> {
-			MDCUtils.setContext(context);
 			try {
+				MDCUtils.setContext(context);
 				this.cassandra.start();
-				if (Thread.interrupted()) {
-					throw new InterruptedException();
-				}
 			}
 			catch (Throwable ex) {
 				throwable.set(ex);
 			}
 		}, this.threadNameSupplier.get());
-		this.ownerThread = thread;
 
 		thread.start();
+
 		try {
 			ThreadUtils.join(thread);
 		}
 		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
 			interrupt(thread);
+			throw ex;
 		}
 
 		Throwable ex = throwable.get();
 		if (ex != null) {
 			throw ex;
 		}
-
 		CqlScript[] scripts = this.scripts;
 		if (scripts.length > 0) {
 			executeScripts(scripts);
+		}
+		if (log.isDebugEnabled()) {
+			log.debug("Test Cassandra ({}) has been started", this.cassandra);
 		}
 	}
 
@@ -434,25 +439,13 @@ public class TestCassandra implements Cassandra {
 
 		this.cluster = null;
 
-		Thread ownerThread = this.ownerThread;
-		interrupt(ownerThread);
-		try {
-			ThreadUtils.join(ownerThread);
-		}
-		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
-		this.ownerThread = null;
-
 		AtomicReference<Throwable> throwable = new AtomicReference<>();
 		Map<String, String> context = MDCUtils.getContext();
+
 		Thread thread = new Thread(() -> {
-			MDCUtils.setContext(context);
 			try {
+				MDCUtils.setContext(context);
 				this.cassandra.stop();
-				if (Thread.interrupted()) {
-					throw new InterruptedException();
-				}
 			}
 			catch (Throwable ex) {
 				throwable.set(ex);
@@ -460,21 +453,23 @@ public class TestCassandra implements Cassandra {
 		}, this.threadNameSupplier.get());
 
 		thread.start();
+
 		try {
 			ThreadUtils.join(thread);
 		}
 		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
 			interrupt(thread);
+			throw ex;
 		}
-
 		Throwable ex = throwable.get();
 		if (ex != null) {
 			throw ex;
 		}
-
+		if (log.isDebugEnabled()) {
+			log.debug("Test Cassandra ({}) has been stopped", this.cassandra);
+		}
+		this.ownerThread = null;
 		this.started = false;
-
 	}
 
 	private void addShutdownHook() {
@@ -495,7 +490,7 @@ public class TestCassandra implements Cassandra {
 		try {
 			stop();
 		}
-		catch (CassandraException ex) {
+		catch (Throwable ex) {
 			log.error("Unable to stop Test Cassandra", ex);
 		}
 	}
