@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 import org.apiguardian.api.API;
 
 /**
- * Simple interface that allows the Cassandra to be {@link #start() started} and {@link #stop()
+ * Simple interface that allows the {@code Cassandra} to be {@link #start() started} and {@link #stop()
  * stopped}.
  *
  * @author Dmytro Nosan
@@ -32,26 +32,27 @@ import org.apiguardian.api.API;
 public interface Cassandra {
 
 	/**
-	 * Starts the Cassandra. Calling this method on an already started {@code Cassandra} has no
-	 * effect.
+	 * Starts the {@code Cassandra}. Calling this method on an already started {@code Cassandra} has no
+	 * effect. Causes the current thread to wait, until the {@code Cassandra} has
+	 * started.
 	 *
-	 * @throws CassandraException if the Cassandra cannot be started
+	 * @throws CassandraException if the {@code Cassandra} cannot be started
 	 */
 	void start() throws CassandraException;
 
 	/**
-	 * Stops the Cassandra. Calling this method on an already stopped {@code Cassandra} has no
-	 * effect.
+	 * Stops the {@code Cassandra}. Calling this method on an already stopped {@code Cassandra} has no
+	 * effect. Causes the current thread to wait, until the {@code Cassandra} has stopped.
 	 *
-	 * @throws CassandraException if the Cassandra cannot be stopped
+	 * @throws CassandraException if the {@code Cassandra} cannot be stopped
 	 */
 	void stop() throws CassandraException;
 
 	/**
-	 * Returns the settings this Cassandra is running on.
+	 * Returns the settings this {@code Cassandra} is running on.
 	 *
 	 * @return the settings
-	 * @throws CassandraException if Cassandra is not started.
+	 * @throws CassandraException if {@code Cassandra} is not started.
 	 */
 	@Nonnull
 	Settings getSettings() throws CassandraException;

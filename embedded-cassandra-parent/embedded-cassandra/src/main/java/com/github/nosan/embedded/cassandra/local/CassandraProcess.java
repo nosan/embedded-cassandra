@@ -38,15 +38,17 @@ interface CassandraProcess {
 	 *
 	 * @return the settings
 	 * @throws IOException if the Cassandra cannot be started
+	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
 	@Nonnull
-	Settings start() throws IOException;
+	Settings start() throws IOException, InterruptedException;
 
 	/**
 	 * Stops the Cassandra.
 	 *
 	 * @throws IOException if the Cassandra cannot be stopped
+	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	void stop() throws IOException;
+	void stop() throws IOException, InterruptedException;
 
 }
