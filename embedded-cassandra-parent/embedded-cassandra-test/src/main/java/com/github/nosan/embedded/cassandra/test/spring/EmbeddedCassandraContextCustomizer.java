@@ -77,5 +77,4 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	public int hashCode() {
 		return getClass().hashCode();
 	}
-
 }

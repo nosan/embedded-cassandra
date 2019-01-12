@@ -57,5 +57,4 @@ abstract class WaitUtils {
 		while (rem > 0);
 		return false;
 	}
-
 }

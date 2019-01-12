@@ -65,5 +65,4 @@ class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationCon
 	public Class<?> getObjectType() {
 		return Cluster.class;
 	}
-
 }

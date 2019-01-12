@@ -180,5 +180,4 @@ class NodeSettings implements Settings {
 			}
 		};
 	}
-
 }

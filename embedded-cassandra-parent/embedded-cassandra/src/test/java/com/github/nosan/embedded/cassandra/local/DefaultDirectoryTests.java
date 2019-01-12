@@ -180,5 +180,4 @@ public class DefaultDirectoryTests {
 						Collections.emptyList());
 		workDir.initialize();
 	}
-
 }

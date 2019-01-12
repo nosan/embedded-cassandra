@@ -50,5 +50,4 @@ interface CassandraProcess {
 	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
 	void stop() throws IOException, InterruptedException;
-
 }

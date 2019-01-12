@@ -56,5 +56,4 @@ public class CassandraException extends RuntimeException {
 	public CassandraException(@Nullable String message, @Nullable Throwable cause) {
 		super(message, cause);
 	}
-
 }

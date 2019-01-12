@@ -156,5 +156,4 @@ public class CassandraTestNG extends TestCassandra {
 	public void stop() throws CassandraException {
 		super.stop();
 	}
-
 }

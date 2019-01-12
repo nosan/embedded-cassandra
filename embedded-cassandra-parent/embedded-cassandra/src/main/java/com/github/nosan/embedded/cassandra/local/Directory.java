@@ -44,5 +44,4 @@ interface Directory {
 	 * @throws IOException in the case of any IO errors
 	 */
 	void destroy() throws IOException;
-
 }

@@ -35,5 +35,4 @@ class StackTraceFilter implements Predicate<String> {
 	public boolean test(@Nonnull String line) {
 		return !STACKTRACE_PATTERN.matcher(line).matches();
 	}
-
 }

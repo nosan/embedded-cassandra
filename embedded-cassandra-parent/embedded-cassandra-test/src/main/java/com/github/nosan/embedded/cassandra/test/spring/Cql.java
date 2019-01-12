@@ -136,5 +136,4 @@ public @interface Cql {
 		 */
 		AFTER_TEST_METHOD
 	}
-
 }

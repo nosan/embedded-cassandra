@@ -176,5 +176,4 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 		}
 		return new RemoteArtifact(version, directory, urlFactory, getProxy(), readTimeout, connectTimeout);
 	}
-
 }

@@ -87,5 +87,4 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 	protected final Charset getEncoding() {
 		return this.encoding;
 	}
-
 }

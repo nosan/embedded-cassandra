@@ -155,5 +155,4 @@ public abstract class CqlScriptParser {
 		return Collections.unmodifiableList(statements);
 
 	}
-
 }

@@ -56,6 +56,5 @@ public interface Cassandra {
 	 */
 	@Nonnull
 	Settings getSettings() throws CassandraException;
-
 }
 

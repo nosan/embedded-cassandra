@@ -73,5 +73,4 @@ public class ClassPathGlobCqlScriptExtendTests {
 		ClassPathGlobCqlScript script = new ClassPathGlobCqlScript(pattern, cl);
 		return script.getStatements();
 	}
-
 }

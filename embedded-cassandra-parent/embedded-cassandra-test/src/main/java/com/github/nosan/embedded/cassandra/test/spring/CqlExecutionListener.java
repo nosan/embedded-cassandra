@@ -160,5 +160,4 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			return null;
 		}
 	}
-
 }

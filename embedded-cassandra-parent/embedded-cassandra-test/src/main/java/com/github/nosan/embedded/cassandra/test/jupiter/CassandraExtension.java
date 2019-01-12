@@ -154,5 +154,4 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	public void afterAll(@Nonnull ExtensionContext context) {
 		stop();
 	}
-
 }

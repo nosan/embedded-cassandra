@@ -90,5 +90,4 @@ public final class FileCqlScript extends AbstractCqlResourceScript {
 	public String toString() {
 		return String.valueOf(this.location);
 	}
-
 }

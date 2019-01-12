@@ -145,5 +145,4 @@ class DefaultDirectory implements Directory {
 				Files.exists(bin.resolve("cassandra.ps1")) &&
 				Files.exists(conf.resolve("cassandra.yaml"));
 	}
-
 }

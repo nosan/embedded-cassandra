@@ -43,5 +43,4 @@ public class EmbeddedCassandraConfigurationNoReplaceTests {
 	public void shouldNotReplace() {
 		assertThat(this.applicationContext.getBeanNamesForType(Cluster.class)).isEmpty();
 	}
-
 }

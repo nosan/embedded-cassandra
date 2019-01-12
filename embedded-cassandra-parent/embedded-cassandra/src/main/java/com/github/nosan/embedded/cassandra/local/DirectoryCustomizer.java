@@ -37,5 +37,4 @@ interface DirectoryCustomizer {
 	 * @throws IOException in the case of any IO errors
 	 */
 	void customize(@Nonnull Path directory) throws IOException;
-
 }

@@ -57,5 +57,4 @@ public class CqlExecutionListenerTests {
 			assertThat(rs.one().getLong(0)).isZero();
 		}
 	}
-
 }

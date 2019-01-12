@@ -289,5 +289,4 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 		return pattern;
 	}
-
 }

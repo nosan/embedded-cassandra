@@ -45,5 +45,4 @@ class LocalCassandraContextCustomizerFactory implements ContextCustomizerFactory
 		}
 		return null;
 	}
-
 }

@@ -79,5 +79,4 @@ public final class CauseMatcher extends TypeSafeMatcher<Throwable> {
 					.appendValue(this.expectedMessage);
 		}
 	}
-
 }

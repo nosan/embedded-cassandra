@@ -167,5 +167,4 @@ public final class CaptureOutput implements TestRule {
 			return this.original;
 		}
 	}
-
 }

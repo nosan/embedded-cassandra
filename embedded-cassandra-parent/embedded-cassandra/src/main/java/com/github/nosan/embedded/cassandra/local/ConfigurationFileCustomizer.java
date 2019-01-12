@@ -68,5 +68,4 @@ class ConfigurationFileCustomizer implements DirectoryCustomizer {
 			}
 		}
 	}
-
 }

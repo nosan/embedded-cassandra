@@ -264,5 +264,4 @@ class RunProcess {
 		@Override
 		void accept(@Nonnull String line);
 	}
-
 }

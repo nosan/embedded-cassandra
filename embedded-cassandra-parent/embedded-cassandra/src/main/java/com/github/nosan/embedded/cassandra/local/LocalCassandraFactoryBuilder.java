@@ -489,5 +489,4 @@ public final class LocalCassandraFactoryBuilder {
 		factory.setCommitLogArchivingFile(this.commitLogArchivingFile);
 		return factory;
 	}
-
 }

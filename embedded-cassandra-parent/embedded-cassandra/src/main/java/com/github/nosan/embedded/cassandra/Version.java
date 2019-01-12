@@ -176,5 +176,4 @@ public final class Version implements Comparable<Version> {
 		throw new IllegalArgumentException(
 				String.format("Version (%s) is invalid. Expected format is %s", version, VERSION_PATTERN));
 	}
-
 }

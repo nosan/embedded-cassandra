@@ -109,7 +109,6 @@ public class CassandraTestNGTests extends CassandraTestNG {
 	@Test
 	public void testMe() {
 	}
-
 }
 
 ----
@@ -149,7 +148,6 @@ public class CassandraExtensionTests {
 	@Test
 	public void testMe() {
 	}
-
 }
 
 ----
@@ -189,7 +187,6 @@ public class CassandraRuleTests {
 	@Test
 	public void testMe() {
 	}
-
 }
 
 ----
@@ -232,7 +229,6 @@ public class CassandraTests {
    @Test
    public void test() {
    }
-
 }
 
 ----
@@ -286,7 +282,6 @@ public class CqlScriptTests {
 			assertThat(rs.one().getLong(0)).isZero();
 		}
 	}
-
 }
 
 ----
@@ -316,7 +311,6 @@ public class CassandraSpringBootTests {
 	@Test
 	public void testMe() {
 	}
-
 }
 
 ----

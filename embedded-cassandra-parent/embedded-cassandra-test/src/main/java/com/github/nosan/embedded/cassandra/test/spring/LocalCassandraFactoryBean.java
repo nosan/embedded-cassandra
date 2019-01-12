@@ -161,5 +161,4 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		factory.setConnectTimeout(connectTimeout);
 		return factory;
 	}
-
 }

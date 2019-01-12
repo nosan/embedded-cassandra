@@ -141,5 +141,4 @@ public @interface EmbeddedCassandra {
 		NONE
 
 	}
-
 }

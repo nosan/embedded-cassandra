@@ -121,5 +121,4 @@ public class LocalCassandraFactoryTests {
 		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory")).isInstanceOf(RemoteArtifactFactory.class);
 
 	}
-
 }

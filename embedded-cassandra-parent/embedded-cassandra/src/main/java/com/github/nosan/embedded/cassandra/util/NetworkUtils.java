@@ -121,5 +121,4 @@ public abstract class NetworkUtils {
 			throw new UncheckedIOException(ex);
 		}
 	}
-
 }

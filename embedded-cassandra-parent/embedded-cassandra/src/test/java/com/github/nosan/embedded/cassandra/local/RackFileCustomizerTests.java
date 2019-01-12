@@ -56,5 +56,4 @@ public class RackFileCustomizerTests {
 		customizer.customize(directory.getParent());
 		assertThat(directory.resolve("cassandra-rackdc.properties")).doesNotExist();
 	}
-
 }

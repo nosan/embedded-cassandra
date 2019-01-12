@@ -73,5 +73,4 @@ class LocalCassandraContextCustomizer implements ContextCustomizer {
 	public int hashCode() {
 		return getClass().hashCode();
 	}
-
 }

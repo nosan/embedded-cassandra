@@ -164,5 +164,4 @@ public interface CqlScript {
 	static CqlScript statements(@Nullable String... statements) {
 		return new StaticCqlScript(statements);
 	}
-
 }

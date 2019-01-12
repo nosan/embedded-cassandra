@@ -123,5 +123,4 @@ public class ClassPathGlobCqlScriptTests {
 			return String.format("(%s) (%s) (%s) statements", this.pattern, this.name, this.statements.length);
 		}
 	}
-
 }

@@ -109,5 +109,4 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 		this.cassandra = cassandra;
 		cassandra.start();
 	}
-
 }

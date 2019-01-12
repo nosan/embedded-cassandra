@@ -265,5 +265,4 @@ public interface Settings {
 		}
 		return NetworkUtils.getLocalhost();
 	}
-
 }

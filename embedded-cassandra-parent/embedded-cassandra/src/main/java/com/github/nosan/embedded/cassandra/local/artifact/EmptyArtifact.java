@@ -61,5 +61,4 @@ class EmptyArtifact implements Artifact {
 		}
 		return tempFile;
 	}
-
 }

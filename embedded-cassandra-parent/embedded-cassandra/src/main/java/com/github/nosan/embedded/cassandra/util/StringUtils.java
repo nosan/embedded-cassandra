@@ -67,5 +67,4 @@ public abstract class StringUtils {
 		}
 		return false;
 	}
-
 }

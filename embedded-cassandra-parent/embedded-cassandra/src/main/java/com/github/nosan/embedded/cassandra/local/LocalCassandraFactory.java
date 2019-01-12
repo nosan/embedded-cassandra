@@ -392,5 +392,4 @@ public final class LocalCassandraFactory implements CassandraFactory {
 				getCommitLogArchivingFile(), getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot(),
 				isRegisterShutdownHook());
 	}
-
 }

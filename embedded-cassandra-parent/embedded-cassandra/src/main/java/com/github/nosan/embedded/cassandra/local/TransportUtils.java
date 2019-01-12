@@ -88,5 +88,4 @@ abstract class TransportUtils {
 		int port = settings.getRpcPort();
 		return PortUtils.isPortBusy(address, port);
 	}
-
 }

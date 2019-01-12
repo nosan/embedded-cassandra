@@ -45,5 +45,4 @@ class EmbeddedCassandraContextCustomizerFactory implements ContextCustomizerFact
 		}
 		return null;
 	}
-
 }

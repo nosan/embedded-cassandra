@@ -211,5 +211,4 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 		}
 		return location.trim();
 	}
-
 }
