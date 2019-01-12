@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
@@ -155,6 +156,32 @@ class NodeSettings implements Settings {
 	public boolean isRpcInterfacePreferIpv6() {
 		return getBool("rpc_interface_prefer_ipv6", this.properties)
 				.orElse(Settings.super.isRpcInterfacePreferIpv6());
+	}
+
+	@Override
+	@Nonnull
+	public String toString() {
+		return new StringJoiner(", ", "[", "]")
+				.add("clusterName=" + getClusterName())
+				.add("storagePort=" + getStoragePort())
+				.add("sslStoragePort=" + getSslStoragePort())
+				.add("listenAddress=" + getListenAddress())
+				.add("listenInterface=" + getListenInterface())
+				.add("broadcastAddress=" + getBroadcastAddress())
+				.add("rpcAddress=" + getRpcAddress())
+				.add("rpcInterface=" + getRpcInterface())
+				.add("broadcastRpcAddress=" + getBroadcastRpcAddress())
+				.add("startNativeTransport=" + isStartNativeTransport())
+				.add("port=" + getPort())
+				.add("sslPort=" + getSslPort())
+				.add("startRpc=" + isStartRpc())
+				.add("rpcPort=" + getRpcPort())
+				.add("listenOnBroadcastAddress=" + isListenOnBroadcastAddress())
+				.add("listenInterfacePreferIpv6=" + isListenInterfacePreferIpv6())
+				.add("rpcInterfacePreferIpv6=" + isRpcInterfacePreferIpv6())
+				.add("realAddress=" + getRealAddress())
+				.add("realListenAddress=" + getRealListenAddress())
+				.toString();
 	}
 
 	private static Optional<Integer> getInt(String name, Map<?, ?> source) {
