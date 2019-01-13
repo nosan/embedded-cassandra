@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -172,8 +171,7 @@ public class DefaultDirectoryTests {
 
 	@Test
 	public void invalidArchive() throws Exception {
-		this.throwable.expectMessage("could not be extracted into ");
-		this.throwable.expect(IOException.class);
+		this.throwable.expect(IllegalArgumentException.class);
 
 		DefaultDirectory workDir =
 				new DefaultDirectory(this.rootDirectory, this.temporaryFolder.newFile().toPath(),
