@@ -43,7 +43,7 @@ public class ThreadUtilsTests {
 		thread.start();
 		ThreadUtils.join(thread);
 		long elapsed = System.currentTimeMillis() - millis;
-		assertThat(elapsed).isGreaterThanOrEqualTo(1500);
+		assertThat(elapsed).isGreaterThanOrEqualTo(1000);
 
 	}
 
