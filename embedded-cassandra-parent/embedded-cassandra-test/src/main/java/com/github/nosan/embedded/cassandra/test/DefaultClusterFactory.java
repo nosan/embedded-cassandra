@@ -25,6 +25,7 @@ import com.datastax.driver.core.SocketOptions;
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
  * {@link ClusterFactory} with a default strategy.
@@ -44,10 +45,12 @@ public class DefaultClusterFactory implements ClusterFactory {
 		socketOptions.setReadTimeoutMillis(30000);
 		Cluster.Builder builder = Cluster.builder()
 				.addContactPoints(settings.getRealAddress())
-				.withClusterName(settings.getClusterName())
 				.withCredentials("cassandra", "cassandra")
 				.withPort(settings.getPort())
 				.withSocketOptions(socketOptions);
+		if (StringUtils.hasText(settings.getClusterName())) {
+			builder = builder.withClusterName(settings.getClusterName());
+		}
 		builder = configure(builder, settings);
 		Objects.requireNonNull(builder, "Cluster.Builder must not be null");
 		return builder.build();
@@ -63,6 +66,9 @@ public class DefaultClusterFactory implements ClusterFactory {
 	 */
 	@Nonnull
 	protected Cluster.Builder configure(@Nonnull Cluster.Builder builder, @Nonnull Settings settings) {
+		if (settings.getSslPort() != null && settings.getSslPort() == settings.getPort()) {
+			builder = builder.withSSL();
+		}
 		return builder.withoutJMXReporting().withoutMetrics();
 	}
 }
