@@ -474,12 +474,10 @@ public class TestCassandra implements Cassandra {
 
 	private void addShutdownHook() {
 		try {
-			Runtime runtime = Runtime.getRuntime();
-			String threadName = this.threadNameSupplier.get();
-			runtime.addShutdownHook(new Thread(() -> {
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				interrupt(this.ownerThread);
 				stopSilently();
-			}, String.format("%s-hook", threadName)));
+			}, String.format("%s-hook", this.threadNameSupplier.get())));
 		}
 		catch (Throwable ex) {
 			throw new CassandraException("Test Cassandra shutdown hook is not registered", ex);
