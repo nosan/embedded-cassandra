@@ -95,7 +95,7 @@ class DefaultDirectory implements Directory {
 				return true;
 			});
 		}
-		catch (Exception ex) {
+		catch (IOException ex) {
 			throw new IOException(
 					String.format("Archive (%s) could not be extracted into (%s)", archive, rootDirectory), ex);
 		}

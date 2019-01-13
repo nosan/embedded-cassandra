@@ -27,8 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -204,21 +202,13 @@ class RunProcess {
 	private static Process start(ProcessBuilder builder, boolean daemon, Output[] outputs) throws IOException {
 		Process process = builder.start();
 		if (outputs != null && outputs.length > 0) {
-			CountDownLatch latch = new CountDownLatch(1);
 			Map<String, String> context = MDCUtils.getContext();
 			Thread thread = new Thread(() -> {
 				MDCUtils.setContext(context);
-				latch.countDown();
 				read(process, outputs);
 			}, Thread.currentThread().getName());
 			thread.setDaemon(daemon);
 			thread.start();
-			try {
-				latch.await(1, TimeUnit.SECONDS);
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
 		}
 		return process;
 	}

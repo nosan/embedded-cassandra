@@ -33,12 +33,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.compress.utils.IOUtils;
@@ -134,9 +136,6 @@ public abstract class ArchiveUtils {
 				}
 			}
 		}
-		catch (Exception ex) {
-			throw new IOException(String.format("Could not read an archive (%s)", archive), ex);
-		}
 	}
 
 	private static ArchiveFactory createArchiveFactory(Path source) {
@@ -199,7 +198,7 @@ public abstract class ArchiveUtils {
 					return (cstream != null) ? af.createArchiveInputStream(archiveFormat, cstream)
 							: af.createArchiveInputStream(archiveFormat, stream);
 				}
-				catch (Exception ex) {
+				catch (IOException | ArchiveException | CompressorException ex) {
 					IOUtils.closeQuietly(cstream);
 					IOUtils.closeQuietly(stream);
 					throw new IOException("Could not create a stream", ex);

@@ -422,7 +422,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 					this.settings.setRealAddress(NetworkUtils.getInetAddress(address.trim()));
 					this.alreadySet = true;
 				}
-				catch (Throwable ex) {
+				catch (Exception ex) {
 					if (log.isDebugEnabled()) {
 						log.debug(String.format("Could not parse an InetAddress (%s)", address), ex);
 					}
@@ -468,7 +468,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 					this.settings.setRealListenAddress(NetworkUtils.getInetAddress(address.trim()));
 					this.alreadySet = true;
 				}
-				catch (Throwable ex) {
+				catch (Exception ex) {
 					if (log.isDebugEnabled()) {
 						log.debug(String.format("Could not parse an InetAddress (%s)", address), ex);
 					}

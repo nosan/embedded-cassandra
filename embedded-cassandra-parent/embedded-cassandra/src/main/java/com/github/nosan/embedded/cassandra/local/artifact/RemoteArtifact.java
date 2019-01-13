@@ -264,7 +264,7 @@ class RemoteArtifact implements Artifact {
 					log.info("Downloaded {} / {}  {}%", current, contentLength,
 							(current * 100) / contentLength);
 				}
-				catch (Exception ignore) {
+				catch (IOException ignore) {
 				}
 			}, 0, 3, TimeUnit.SECONDS);
 		}
