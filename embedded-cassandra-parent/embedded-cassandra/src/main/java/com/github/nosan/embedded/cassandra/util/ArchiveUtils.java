@@ -126,8 +126,9 @@ public abstract class ArchiveUtils {
 					Files.createDirectories(path);
 				}
 				else {
-					if (path.getParent() != null) {
-						Files.createDirectories(path.getParent());
+					Path parent = path.getParent();
+					if (parent != null && !Files.exists(parent)) {
+						Files.createDirectories(parent);
 					}
 					Files.copy(stream, path, StandardCopyOption.REPLACE_EXISTING);
 				}
