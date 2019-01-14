@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -71,6 +72,9 @@ public class TestCassandra implements Cassandra {
 			instanceCounter.incrementAndGet()));
 
 	@Nonnull
+	private final AtomicBoolean shutdownHookRegistered = new AtomicBoolean(false);
+
+	@Nonnull
 	private final Object lock = new Object();
 
 	@Nonnull
@@ -81,6 +85,8 @@ public class TestCassandra implements Cassandra {
 
 	@Nonnull
 	private final ClusterFactory clusterFactory;
+
+	private final boolean registerShutdownHook;
 
 	@Nullable
 	private volatile Thread launchThread;
@@ -181,9 +187,7 @@ public class TestCassandra implements Cassandra {
 		this.cassandra = (cassandraFactory != null) ? cassandraFactory.create() : new LocalCassandraFactory().create();
 		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
-		if (registerShutdownHook) {
-			addShutdownHook();
-		}
+		this.registerShutdownHook = registerShutdownHook;
 	}
 
 	@Override
@@ -192,6 +196,11 @@ public class TestCassandra implements Cassandra {
 			if (this.started) {
 				return;
 			}
+
+			if (this.registerShutdownHook && this.shutdownHookRegistered.compareAndSet(false, true)) {
+				addShutdownHook();
+			}
+
 			try {
 				start0();
 			}

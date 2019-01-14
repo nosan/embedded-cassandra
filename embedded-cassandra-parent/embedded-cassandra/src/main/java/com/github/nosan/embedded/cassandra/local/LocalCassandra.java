@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -60,10 +61,15 @@ class LocalCassandra implements Cassandra {
 			instanceCounter.incrementAndGet()));
 
 	@Nonnull
+	private final AtomicBoolean shutdownHookRegistered = new AtomicBoolean(false);
+
+	@Nonnull
 	private final Object lock = new Object();
 
 	@Nonnull
 	private final Version version;
+
+	private final boolean registerShutdownHook;
 
 	@Nonnull
 	private final ArtifactFactory artifactFactory;
@@ -122,9 +128,7 @@ class LocalCassandra implements Cassandra {
 				configurationFile, logbackFile, rackFile, topologyFile, commitLogArchivingFile);
 		this.processFactory = new DefaultCassandraProcessFactory(startupTimeout, jvmOptions, version,
 				javaHome, jmxPort, allowRoot);
-		if (registerShutdownHook) {
-			addShutdownHook();
-		}
+		this.registerShutdownHook = registerShutdownHook;
 	}
 
 	@Override
@@ -133,6 +137,11 @@ class LocalCassandra implements Cassandra {
 			if (this.started) {
 				return;
 			}
+
+			if (this.registerShutdownHook && this.shutdownHookRegistered.compareAndSet(false, true)) {
+				addShutdownHook();
+			}
+
 			try {
 				start0();
 			}
