@@ -30,11 +30,16 @@ import org.apiguardian.api.API;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.test.junit.CassandraRuleBuilder;
+import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtensionBuilder;
 
 /**
  * Abstract Builder to create a sub-class of the {@link TestCassandra}.
  *
  * @author Dmytro Nosan
+ * @see TestCassandraBuilder
+ * @see CassandraRuleBuilder
+ * @see CassandraExtensionBuilder
  * @since 1.2.10
  */
 @API(since = "1.2.10", status = API.Status.STABLE)
