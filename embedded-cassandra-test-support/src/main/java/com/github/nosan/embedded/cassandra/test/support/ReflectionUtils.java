@@ -45,7 +45,6 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(name, "Name must not be null");
 		return run(() -> {
 			Field field = findField(target.getClass(), name);
-			field.setAccessible(true);
 			return field.get(target);
 		});
 	}
@@ -68,7 +67,6 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(arguments, "Arguments must not be null");
 		return run(() -> {
 			Method method = findMethod(target.getClass(), name, types);
-			method.setAccessible(true);
 			return method.invoke(null, arguments);
 		});
 	}
@@ -86,7 +84,6 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(name, "Name must not be null");
 		return run(() -> {
 			Field field = findField(target, name);
-			field.setAccessible(true);
 			return field.get(null);
 		});
 	}
@@ -109,7 +106,6 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(arguments, "Arguments must not be null");
 		return run(() -> {
 			Method method = findMethod(target, name, types);
-			method.setAccessible(true);
 			return method.invoke(null, arguments);
 		});
 	}
@@ -119,6 +115,7 @@ public abstract class ReflectionUtils {
 			Field[] fields = searchType.getDeclaredFields();
 			for (Field field : fields) {
 				if (name.equals(field.getName())) {
+					field.setAccessible(true);
 					return field;
 				}
 			}
@@ -132,13 +129,13 @@ public abstract class ReflectionUtils {
 			for (Method method : methods) {
 				if (name.equals(method.getName()) &&
 						(types == null || Arrays.equals(types, method.getParameterTypes()))) {
+					method.setAccessible(true);
 					return method;
 				}
 			}
 		}
 		throw new NoSuchMethodException(name);
 	}
-
 
 	private static Object run(Callable callable) {
 		try {
