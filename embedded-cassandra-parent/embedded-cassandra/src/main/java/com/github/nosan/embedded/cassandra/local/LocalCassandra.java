@@ -141,7 +141,7 @@ class LocalCassandra implements Cassandra {
 					log.debug("Cassandra launch was interrupted");
 				}
 				stopSilently();
-				Thread.currentThread().interrupt();
+				interrupt(Thread.currentThread());
 			}
 			catch (Throwable ex) {
 				stopSilently();
@@ -163,7 +163,7 @@ class LocalCassandra implements Cassandra {
 				if (log.isDebugEnabled()) {
 					log.debug("Cassandra stop was interrupted");
 				}
-				Thread.currentThread().interrupt();
+				interrupt(Thread.currentThread());
 			}
 			catch (Throwable ex) {
 				throw new CassandraException("Unable to stop Cassandra", ex);
