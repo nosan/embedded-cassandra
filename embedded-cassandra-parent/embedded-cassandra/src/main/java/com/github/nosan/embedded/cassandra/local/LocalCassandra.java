@@ -84,7 +84,7 @@ class LocalCassandra implements Cassandra {
 	private volatile Settings settings;
 
 	@Nullable
-	private volatile Thread ownerThread;
+	private volatile Thread launchThread;
 
 	private volatile boolean started;
 
@@ -190,7 +190,6 @@ class LocalCassandra implements Cassandra {
 
 	private void start0() throws Throwable {
 		this.started = true;
-		this.ownerThread = Thread.currentThread();
 		long start = System.currentTimeMillis();
 		Version version = this.version;
 		log.info("Starts Apache Cassandra ({}) ", version);
@@ -210,15 +209,13 @@ class LocalCassandra implements Cassandra {
 				this.process = process;
 				this.settings = process.start();
 			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
 			catch (Throwable ex) {
 				throwable.set(ex);
 			}
 		}, this.threadNameSupplier.get());
 
 		thread.start();
+		this.launchThread = thread;
 
 		try {
 			ThreadUtils.join(thread);
@@ -263,9 +260,6 @@ class LocalCassandra implements Cassandra {
 				}
 				this.directory = null;
 			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
 			catch (Throwable ex) {
 				throwable.set(ex);
 			}
@@ -287,14 +281,13 @@ class LocalCassandra implements Cassandra {
 		}
 		long end = System.currentTimeMillis();
 		log.info("Apache Cassandra ({}) has been stopped ({} ms)", version, end - start);
-		this.ownerThread = null;
 		this.started = false;
 	}
 
 	private void addShutdownHook() {
 		try {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				interrupt(this.ownerThread);
+				interrupt(this.launchThread);
 				stopSilently();
 			}, String.format("%s-hook", this.threadNameSupplier.get())));
 		}

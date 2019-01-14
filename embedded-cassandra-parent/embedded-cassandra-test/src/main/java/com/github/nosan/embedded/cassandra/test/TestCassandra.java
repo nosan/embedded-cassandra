@@ -82,7 +82,7 @@ public class TestCassandra implements Cassandra {
 	private final ClusterFactory clusterFactory;
 
 	@Nullable
-	private volatile Thread ownerThread;
+	private volatile Thread launchThread;
 
 	@Nullable
 	private volatile Cluster cluster;
@@ -199,7 +199,7 @@ public class TestCassandra implements Cassandra {
 					log.debug("Test Cassandra launch was interrupted");
 				}
 				stopSilently();
-				Thread.currentThread().interrupt();
+				interrupt(Thread.currentThread());
 			}
 			catch (Throwable ex) {
 				stopSilently();
@@ -221,7 +221,7 @@ public class TestCassandra implements Cassandra {
 				if (log.isDebugEnabled()) {
 					log.debug("Test Cassandra stop was interrupted");
 				}
-				Thread.currentThread().interrupt();
+				interrupt(Thread.currentThread());
 			}
 			catch (Throwable ex) {
 				throw new CassandraException("Unable to stop Test Cassandra", ex);
@@ -366,7 +366,6 @@ public class TestCassandra implements Cassandra {
 
 	private void start0() throws Throwable {
 		this.started = true;
-		this.ownerThread = Thread.currentThread();
 		if (log.isDebugEnabled()) {
 			log.debug("Starts Test Cassandra ({})", this.cassandra);
 		}
@@ -377,12 +376,16 @@ public class TestCassandra implements Cassandra {
 			try {
 				MDCUtils.setContext(context);
 				this.cassandra.start();
+				if (Thread.interrupted()) {
+					throw new InterruptedException();
+				}
 			}
 			catch (Throwable ex) {
 				throwable.set(ex);
 			}
 		}, this.threadNameSupplier.get());
 
+		this.launchThread = thread;
 		thread.start();
 
 		try {
@@ -446,6 +449,9 @@ public class TestCassandra implements Cassandra {
 			try {
 				MDCUtils.setContext(context);
 				this.cassandra.stop();
+				if (Thread.interrupted()) {
+					throw new InterruptedException();
+				}
 			}
 			catch (Throwable ex) {
 				throwable.set(ex);
@@ -468,14 +474,13 @@ public class TestCassandra implements Cassandra {
 		if (log.isDebugEnabled()) {
 			log.debug("Test Cassandra ({}) has been stopped", this.cassandra);
 		}
-		this.ownerThread = null;
 		this.started = false;
 	}
 
 	private void addShutdownHook() {
 		try {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				interrupt(this.ownerThread);
+				interrupt(this.launchThread);
 				stopSilently();
 			}, String.format("%s-hook", this.threadNameSupplier.get())));
 		}
