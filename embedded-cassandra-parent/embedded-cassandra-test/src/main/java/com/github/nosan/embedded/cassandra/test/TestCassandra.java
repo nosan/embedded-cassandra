@@ -47,7 +47,8 @@ import com.github.nosan.embedded.cassandra.util.ThreadUtils;
 
 /**
  * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and
- * {@link #stop() stopped}.
+ * {@link #stop() stopped}. {@link TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to
+ * the underlying {@link Cassandra}.
  * <p>
  * In addition to the basic functionality includes utility methods to test {@code Cassandra} code.
  *

@@ -47,6 +47,5 @@ public class LocalCassandraInterruptionTests {
 		assertThat(this.output.toString()).contains("Cassandra launch was interrupted");
 		assertThat(this.output.toString()).contains("Apache Cassandra (3.11.3) has been stopped");
 
-
 	}
 }
