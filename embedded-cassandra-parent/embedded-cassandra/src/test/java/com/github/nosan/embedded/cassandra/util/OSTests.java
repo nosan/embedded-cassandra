@@ -52,7 +52,7 @@ public class OSTests {
 
 	@Test
 	public void detect() {
-		assertThat(ReflectionUtils.getStaticMethod(OS.class, "detect", new Object[0]))
+		assertThat(ReflectionUtils.getStaticMethod(OS.class, "detect", new Class[0], new Object[0]))
 				.isEqualTo(this.expectedOS);
 		EnumSet<OS> os = EnumSet.allOf(OS.class);
 		os.remove(this.expectedOS);

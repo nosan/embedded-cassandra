@@ -54,6 +54,7 @@ import com.github.nosan.embedded.cassandra.util.ThreadUtils;
  * In addition to the basic functionality includes utility methods to test {@code Cassandra} code.
  *
  * @author Dmytro Nosan
+ * @see TestCassandraBuilder
  * @see CassandraFactory
  * @see CqlScriptUtils
  * @see CqlUtils

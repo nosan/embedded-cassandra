@@ -48,6 +48,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * </pre>
  *
  * @author Dmytro Nosan
+ * @see CassandraRuleBuilder
  * @see CqlScript
  * @see ClusterFactory
  * @see CassandraFactory

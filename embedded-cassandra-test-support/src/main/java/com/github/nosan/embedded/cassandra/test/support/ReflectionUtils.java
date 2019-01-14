@@ -44,7 +44,7 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		return run(() -> {
-			Field field = target.getClass().getDeclaredField(name);
+			Field field = findField(target.getClass(), name);
 			field.setAccessible(true);
 			return field.get(target);
 		});
@@ -56,18 +56,20 @@ public abstract class ReflectionUtils {
 	 * @param target object from which the represented method's value is
 	 * to be extracted
 	 * @param name method name
+	 * @param types argument types
 	 * @param arguments method arguments
 	 * @return the value of the represented  method in object
 	 */
-	public static Object getMethod(@Nonnull Object target, @Nonnull String name, @Nonnull Object[] arguments) {
+	public static Object getMethod(@Nonnull Object target, @Nonnull String name, @Nonnull
+			Class<?>[] types, @Nonnull Object[] arguments) {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
+		Objects.requireNonNull(types, "Types must not be null");
 		Objects.requireNonNull(arguments, "Arguments must not be null");
 		return run(() -> {
-			Method method = target.getClass().getDeclaredMethod(name, Arrays.stream(arguments)
-					.map(Object::getClass).toArray(Class[]::new));
+			Method method = findMethod(target.getClass(), name, types);
 			method.setAccessible(true);
-			return method.invoke(target, arguments);
+			return method.invoke(null, arguments);
 		});
 	}
 
@@ -83,7 +85,7 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		return run(() -> {
-			Field field = target.getDeclaredField(name);
+			Field field = findField(target, name);
 			field.setAccessible(true);
 			return field.get(null);
 		});
@@ -95,20 +97,48 @@ public abstract class ReflectionUtils {
 	 * @param target class from which the represented method's value is
 	 * to be extracted
 	 * @param name method name
+	 * @param types argument types
 	 * @param arguments method arguments
 	 * @return the value of the represented static method in class
 	 */
-	public static Object getStaticMethod(@Nonnull Class<?> target, @Nonnull String name, @Nonnull Object[] arguments) {
+	public static Object getStaticMethod(@Nonnull Class<?> target, @Nonnull String name,
+			@Nonnull Class<?>[] types, @Nonnull Object[] arguments) {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
+		Objects.requireNonNull(types, "Types must not be null");
 		Objects.requireNonNull(arguments, "Arguments must not be null");
 		return run(() -> {
-			Method method = target.getDeclaredMethod(name, Arrays.stream(arguments)
-					.map(Object::getClass).toArray(Class[]::new));
+			Method method = findMethod(target, name, types);
 			method.setAccessible(true);
 			return method.invoke(null, arguments);
 		});
 	}
+
+	private static Field findField(Class<?> clazz, String name) throws NoSuchFieldException {
+		for (Class<?> searchType = clazz; searchType != null; searchType = searchType.getSuperclass()) {
+			Field[] fields = searchType.getDeclaredFields();
+			for (Field field : fields) {
+				if (name.equals(field.getName())) {
+					return field;
+				}
+			}
+		}
+		throw new NoSuchFieldException(name);
+	}
+
+	private static Method findMethod(Class<?> clazz, String name, Class<?>[] types) throws NoSuchMethodException {
+		for (Class<?> searchType = clazz; searchType != null; searchType = searchType.getSuperclass()) {
+			Method[] methods = searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods();
+			for (Method method : methods) {
+				if (name.equals(method.getName()) &&
+						(types == null || Arrays.equals(types, method.getParameterTypes()))) {
+					return method;
+				}
+			}
+		}
+		throw new NoSuchMethodException(name);
+	}
+
 
 	private static Object run(Callable callable) {
 		try {
