@@ -60,8 +60,10 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @return {@code this} builder for use in a chained invocation
 	 */
 	@Nonnull
-	public final B addScripts(@Nonnull Collection<? extends CqlScript> scripts) {
-		this.scripts.addAll(scripts);
+	public final B addScripts(@Nullable Collection<? extends CqlScript> scripts) {
+		if (scripts != null) {
+			this.scripts.addAll(scripts);
+		}
 		return (B) this;
 	}
 
@@ -72,8 +74,11 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @return {@code this} builder for use in a chained invocation
 	 */
 	@Nonnull
-	public final B addScripts(@Nonnull CqlScript... scripts) {
-		return addScripts(Arrays.asList(scripts));
+	public final B addScripts(@Nullable CqlScript... scripts) {
+		if (scripts != null) {
+			return addScripts(Arrays.asList(scripts));
+		}
+		return (B) this;
 	}
 
 	/**
@@ -137,7 +142,7 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @return {@code this} builder for use in a chained invocation
 	 */
 	@Nonnull
-	public final B setScripts(@Nonnull Collection<? extends CqlScript> scripts) {
+	public final B setScripts(@Nullable Collection<? extends CqlScript> scripts) {
 		this.scripts.clear();
 		return addScripts(scripts);
 	}
