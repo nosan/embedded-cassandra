@@ -39,7 +39,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class CassandraRuleBuilderTests {
 
-
 	@Test
 	public void shouldBuildCassandraRule() {
 		ClusterFactory clusterFactory = (settings) -> null;
