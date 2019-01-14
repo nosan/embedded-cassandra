@@ -54,7 +54,7 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	private CassandraFactory cassandraFactory;
 
 	@Nonnull
-	private List<CqlScript> scripts = new ArrayList<>();
+	private final List<CqlScript> scripts = new ArrayList<>();
 
 	private boolean registerShutdownHook = true;
 
