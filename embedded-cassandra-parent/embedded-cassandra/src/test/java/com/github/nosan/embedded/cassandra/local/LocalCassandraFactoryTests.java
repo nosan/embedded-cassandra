@@ -78,10 +78,12 @@ public class LocalCassandraFactoryTests {
 		factory.setJavaHome(javaDirectory);
 		factory.setJmxPort(jmxPort);
 		factory.setAllowRoot(allowRoot);
+		factory.setRegisterShutdownHook(false);
 		factory.setCommitLogArchivingFile(commitLogArchivingFile);
 
 		Cassandra cassandra = factory.create();
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(version);
+		assertThat(ReflectionUtils.getField(cassandra, "registerShutdownHook")).isEqualTo(false);
 		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory")).isEqualTo(artifactFactory);
 
 		Object processFactory = ReflectionUtils.getField(cassandra, "processFactory");
@@ -111,8 +113,11 @@ public class LocalCassandraFactoryTests {
 	public void createDefaultLocalCassandra() {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		Cassandra cassandra = factory.create();
-		Object processFactory = ReflectionUtils.getField(cassandra, "processFactory");
+
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(new Version(3, 11, 3));
+		assertThat(ReflectionUtils.getField(cassandra, "registerShutdownHook")).isEqualTo(true);
+
+		Object processFactory = ReflectionUtils.getField(cassandra, "processFactory");
 		assertThat(ReflectionUtils.getField(processFactory, "version")).isEqualTo(new Version(3, 11, 3));
 		assertThat(ReflectionUtils.getField(processFactory, "startupTimeout")).isEqualTo(Duration.ofMinutes(1));
 		assertThat(ReflectionUtils.getField(processFactory, "jmxPort")).isEqualTo(7199);

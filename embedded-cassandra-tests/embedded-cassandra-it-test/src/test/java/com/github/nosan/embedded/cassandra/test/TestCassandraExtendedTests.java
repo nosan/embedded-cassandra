@@ -17,6 +17,9 @@
 package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -25,6 +28,7 @@ import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
+import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class TestCassandraInterruptionTests {
+public class TestCassandraExtendedTests {
 
 	@Rule
 	public final CaptureOutput output = new CaptureOutput();
@@ -58,5 +62,52 @@ public class TestCassandraInterruptionTests {
 		assertThat(this.output.toString()).contains("Cassandra launch was interrupted");
 		assertThat(this.output.toString()).contains("Apache Cassandra (3.11.3) has been stopped");
 
+	}
+
+	@Test
+	public void shouldRegisterShutdownHookOnlyOnce() throws ClassNotFoundException {
+		Set<Thread> beforeHooks = getHooks();
+		TestCassandra testCassandra = new TestCassandra(true);
+		try {
+			testCassandra.start();
+		}
+		finally {
+			testCassandra.stop();
+		}
+		try {
+			testCassandra.start();
+		}
+		finally {
+			testCassandra.stop();
+		}
+		Set<Thread> afterHooks = getHooks();
+		afterHooks.removeAll(beforeHooks);
+		assertThat(afterHooks).filteredOn(
+				thread -> thread.getName().contains("test-cassandra-") && thread.getName().endsWith("-hook"))
+				.hasSize(1);
+	}
+
+	@Test
+	public void shouldNotRegisterShutdownHook() throws ClassNotFoundException {
+		Set<Thread> beforeHooks = getHooks();
+		TestCassandra testCassandra = new TestCassandra(false);
+		try {
+			testCassandra.start();
+		}
+		finally {
+			testCassandra.stop();
+		}
+		Set<Thread> afterHooks = getHooks();
+		afterHooks.removeAll(beforeHooks);
+		assertThat(afterHooks)
+				.noneMatch(thread -> thread.getName().contains("test-cassandra-") &&
+						thread.getName().endsWith("-hook"));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Set<Thread> getHooks() throws ClassNotFoundException {
+		return new LinkedHashSet<>(((Map<Thread, Thread>) ReflectionUtils
+				.getStaticField(Class.forName("java.lang.ApplicationShutdownHooks"), "hooks"))
+				.keySet());
 	}
 }
