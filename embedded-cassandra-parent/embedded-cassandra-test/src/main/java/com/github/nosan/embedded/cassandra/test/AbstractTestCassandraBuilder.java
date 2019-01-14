@@ -82,6 +82,18 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	}
 
 	/**
+	 * Sets  {@link CqlScript} to execute.
+	 *
+	 * @param scripts CQL scripts
+	 * @return {@code this} builder for use in a chained invocation
+	 */
+	@Nonnull
+	public final B setScripts(@Nullable CqlScript... scripts) {
+		this.scripts.clear();
+		return addScripts(scripts);
+	}
+
+	/**
 	 * Return the {@link ClusterFactory} to use.
 	 *
 	 * @return the cluster factory attribute
