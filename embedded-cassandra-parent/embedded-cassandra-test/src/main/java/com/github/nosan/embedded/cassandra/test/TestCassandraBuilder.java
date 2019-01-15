@@ -26,7 +26,7 @@ import org.apiguardian.api.API;
  * @author Dmytro Nosan
  * @since 1.2.10
  */
-@API(since = "1.2.10", status = API.Status.STABLE)
+@API(since = "1.2.10", status = API.Status.EXPERIMENTAL)
 public final class TestCassandraBuilder extends AbstractTestCassandraBuilder<TestCassandra, TestCassandraBuilder> {
 
 	@Nonnull

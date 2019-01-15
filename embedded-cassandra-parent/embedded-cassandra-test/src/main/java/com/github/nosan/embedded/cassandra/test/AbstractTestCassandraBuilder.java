@@ -42,7 +42,7 @@ import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtensionBuilde
  * @see CassandraExtensionBuilder
  * @since 1.2.10
  */
-@API(since = "1.2.10", status = API.Status.STABLE)
+@API(since = "1.2.10", status = API.Status.EXPERIMENTAL)
 @SuppressWarnings("unchecked")
 public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 		B extends AbstractTestCassandraBuilder<C, B>> {
