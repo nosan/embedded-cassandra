@@ -209,7 +209,9 @@ class LocalCassandra implements Cassandra {
 			try {
 				MDCUtils.setContext(context);
 				Artifact artifact = this.artifactFactory.create(version);
+				Objects.requireNonNull(artifact, "Artifact must not be null");
 				Path archive = artifact.get();
+				Objects.requireNonNull(archive, "Archive must not be null");
 
 				Directory directory = this.directoryFactory.create(archive);
 				this.directory = directory;

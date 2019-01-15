@@ -189,6 +189,7 @@ public class TestCassandra implements Cassandra {
 		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
 		this.registerShutdownHook = registerShutdownHook;
+		Objects.requireNonNull(this.cassandra, "Cassandra must not be null");
 	}
 
 	@Override
