@@ -202,13 +202,13 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	}
 
 	private static String cleanLocation(String location, Class<?> contextClass) {
-		location = location.replaceAll(WINDOWS, "/").replaceAll("/+", "/");
+		location = location.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
 		if (contextClass != null) {
 			return location;
 		}
 		while (location.startsWith("/")) {
 			location = location.substring(1);
 		}
-		return location.trim();
+		return location;
 	}
 }
