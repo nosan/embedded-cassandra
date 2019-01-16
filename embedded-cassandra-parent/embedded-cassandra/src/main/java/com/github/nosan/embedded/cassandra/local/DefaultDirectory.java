@@ -76,9 +76,7 @@ class DefaultDirectory implements Directory {
 	public Path initialize() throws IOException {
 		Path archive = this.archive;
 		Path rootDirectory = this.directory;
-		if (log.isDebugEnabled()) {
-			log.debug("Initialize working directory ({})", rootDirectory);
-		}
+		log.info("Initialize working directory ({})", rootDirectory);
 		try {
 			log.info("Extract ({}) into ({}). It takes a while...", archive, rootDirectory);
 			ArchiveUtils.extract(archive, rootDirectory, path -> {
@@ -96,10 +94,13 @@ class DefaultDirectory implements Directory {
 			throw new IOException(
 					String.format("Archive (%s) could not be extracted into (%s)", archive, rootDirectory), ex);
 		}
+		log.info("({}) Archive has been extracted into ({})", archive, rootDirectory);
 		Path directory = getDirectory(this.directory);
 		for (DirectoryCustomizer customizer : this.customizers) {
 			customizer.customize(directory);
 		}
+
+		log.info("Working directory ({}) has been initialized.", rootDirectory);
 
 		return directory;
 	}
@@ -108,9 +109,7 @@ class DefaultDirectory implements Directory {
 	public void destroy() throws IOException {
 		Path directory = this.directory;
 		if (FileUtils.isTemporary(directory) && Files.exists(directory)) {
-			if (log.isDebugEnabled()) {
-				log.debug("Delete recursively working directory ({})", directory);
-			}
+			log.info("Delete recursively working directory ({})", directory);
 			FileUtils.delete(directory);
 		}
 	}
