@@ -52,7 +52,7 @@ public abstract class MDCUtils {
 		}
 		catch (Throwable ex) {
 			if (log.isDebugEnabled()) {
-				log.debug("Could not get MDC context", ex);
+				log.error("Could not get MDC context", ex);
 			}
 			return Collections.emptyMap();
 		}
@@ -74,7 +74,7 @@ public abstract class MDCUtils {
 		}
 		catch (Throwable ex) {
 			if (log.isDebugEnabled()) {
-				log.debug("Could not set MDC context", ex);
+				log.error("Could not set MDC context", ex);
 			}
 		}
 	}

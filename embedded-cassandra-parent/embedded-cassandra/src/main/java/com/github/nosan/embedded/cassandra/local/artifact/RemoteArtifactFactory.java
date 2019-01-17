@@ -57,8 +57,8 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 
 	/**
 	 * The directory where an {@code archive} should be saved from
-	 * {@link UrlFactory#create(Version) URL}. Default directory is: {@link FileUtils#getUserHomeDirectory()
-	 * user.home}
+	 * {@link UrlFactory#create(Version) URL}. Default directory is {@link FileUtils#getTmpDirectory()
+	 * user.home}{@code /Downloads}
 	 *
 	 * @return The value of the {@code directory} attribute
 	 */
@@ -160,7 +160,8 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 		Objects.requireNonNull(version, "Version must not be null");
 		Path directory = getDirectory();
 		if (directory == null) {
-			directory = FileUtils.getUserHomeDirectory();
+			directory = FileUtils.getUserHomeDirectory()
+					.resolve("Downloads");
 		}
 		UrlFactory urlFactory = getUrlFactory();
 		if (urlFactory == null) {

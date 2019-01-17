@@ -27,7 +27,6 @@ import com.github.nosan.embedded.cassandra.Settings;
  * stopped}.
  *
  * @author Dmytro Nosan
- * @see CassandraProcessFactory
  * @see DefaultCassandraProcess
  * @since 1.0.9
  */
@@ -47,7 +46,6 @@ interface CassandraProcess {
 	 * Stops the Cassandra.
 	 *
 	 * @throws IOException if the Cassandra cannot be stopped
-	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	void stop() throws IOException, InterruptedException;
+	void stop() throws IOException;
 }

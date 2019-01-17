@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -58,97 +59,27 @@ class RunProcess {
 	@Nonnull
 	private final Map<String, String> environment;
 
-	private final boolean daemon;
-
-	/**
-	 * Creates a new {@link RunProcess} instance.
-	 *
-	 * @param arguments the program to execute and its arguments
-	 */
-	RunProcess(@Nonnull List<?> arguments) {
-		this(false, null, null, arguments);
-	}
-
-	/**
-	 * Creates a new {@link RunProcess} instance.
-	 *
-	 * @param arguments the program to execute and its arguments
-	 * @param daemon whether process is daemon or not
-	 */
-	RunProcess(boolean daemon, @Nonnull List<?> arguments) {
-		this(daemon, null, null, arguments);
-	}
-
-	/**
-	 * Creates a new {@link RunProcess} instance.
-	 *
-	 * @param arguments the program to execute and its arguments
-	 * @param environment the environment variables
-	 */
-	RunProcess(@Nullable Map<String, String> environment, @Nonnull List<?> arguments) {
-		this(false, null, environment, arguments);
-	}
-
-	/**
-	 * Creates a new {@link RunProcess} instance.
-	 *
-	 * @param arguments the program to execute and its arguments
-	 * @param environment the environment variables
-	 * @param daemon whether process is daemon or not
-	 */
-	RunProcess(boolean daemon, @Nullable Map<String, String> environment, @Nonnull List<?> arguments) {
-		this(daemon, null, environment, arguments);
-	}
+	@Nonnull
+	private final ThreadFactory threadFactory;
 
 	/**
 	 * Creates a new {@link RunProcess} instance.
 	 *
 	 * @param workingDirectory the working directory of the child process
-	 * @param arguments the program to execute and its arguments
-	 */
-	RunProcess(@Nullable Path workingDirectory, @Nonnull List<?> arguments) {
-		this(false, workingDirectory, null, arguments);
-	}
-
-	/**
-	 * Creates a new {@link RunProcess} instance.
-	 *
-	 * @param workingDirectory the working directory of the child process
-	 * @param arguments the program to execute and its arguments
-	 * @param daemon whether process is daemon or not
-	 */
-	RunProcess(boolean daemon, @Nullable Path workingDirectory, @Nonnull List<?> arguments) {
-		this(daemon, workingDirectory, null, arguments);
-	}
-
-	/**
-	 * Creates a new {@link RunProcess} instance.
-	 *
-	 * @param workingDirectory the working directory of the child process
-	 * @param arguments the program to execute and its arguments
 	 * @param environment the environment variables
-	 */
-	RunProcess(@Nullable Path workingDirectory, @Nullable Map<String, String> environment,
-			@Nonnull List<?> arguments) {
-		this(false, workingDirectory, environment, arguments);
-	}
-
-	/**
-	 * Creates a new {@link RunProcess} instance.
-	 *
-	 * @param workingDirectory the working directory of the child process
 	 * @param arguments the program to execute and its arguments
-	 * @param environment the environment variables
-	 * @param daemon whether process is daemon or not
+	 * @param threadFactory factory for creating process readers.
 	 */
-	RunProcess(boolean daemon, @Nullable Path workingDirectory, @Nullable Map<String, String> environment,
+	RunProcess(@Nullable Path workingDirectory,
+			@Nullable Map<String, String> environment,
+			@Nullable ThreadFactory threadFactory,
 			@Nonnull List<?> arguments) {
 		Objects.requireNonNull(arguments, "Arguments must not be null");
 		this.workingDirectory = workingDirectory;
 		this.arguments = Collections.unmodifiableList(new ArrayList<>(arguments));
 		this.environment = Collections.unmodifiableMap((environment != null) ?
 				new LinkedHashMap<>(environment) : Collections.emptyMap());
-		this.daemon = daemon;
+		this.threadFactory = (threadFactory != null) ? threadFactory : Thread::new;
 	}
 
 	/**
@@ -196,19 +127,18 @@ class RunProcess {
 			}
 			log.debug(message.toString());
 		}
-		return start(processBuilder, this.daemon, outputs);
+		return start(processBuilder, this.threadFactory, outputs);
 	}
 
-	private static Process start(ProcessBuilder builder, boolean daemon, Output[] outputs) throws IOException {
+	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory, Output[] outputs)
+			throws IOException {
 		Process process = builder.start();
 		if (outputs != null && outputs.length > 0) {
 			Map<String, String> context = MDCUtils.getContext();
-			Thread thread = new Thread(() -> {
+			threadFactory.newThread(() -> {
 				MDCUtils.setContext(context);
 				read(process, outputs);
-			}, Thread.currentThread().getName());
-			thread.setDaemon(daemon);
-			thread.start();
+			}).start();
 		}
 		return process;
 	}

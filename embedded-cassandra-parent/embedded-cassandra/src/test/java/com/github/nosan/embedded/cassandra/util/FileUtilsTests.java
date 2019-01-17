@@ -57,28 +57,74 @@ public class FileUtilsTests {
 		assertThat(FileUtils.delete(newFolder.toPath())).isTrue();
 		assertThat(dir).doesNotExist();
 		assertThat(file).doesNotExist();
+	}
 
+	@Test
+	public void copyFile() throws IOException {
+		File src = this.temporaryFolder.newFile();
+		File dest = new File(this.temporaryFolder.getRoot(), UUID.randomUUID().toString());
+		assertThat(src).exists();
+		assertThat(dest).doesNotExist();
+		FileUtils.copy(src.toPath(), dest.toPath(), p -> true);
+		assertThat(dest).exists();
+	}
+
+	@Test
+	public void copyDir() throws IOException {
+		File src = this.temporaryFolder.newFolder();
+		File folder = new File(src, UUID.randomUUID().toString());
+		File file = new File(folder, UUID.randomUUID().toString());
+
+		assertThat(folder.mkdir()).isTrue();
+		assertThat(file.createNewFile()).isTrue();
+
+		File dest = new File(this.temporaryFolder.getRoot(), UUID.randomUUID().toString());
+
+		assertThat(src).exists();
+		assertThat(dest).doesNotExist();
+
+		FileUtils.copy(src.toPath(), dest.toPath(), p -> true);
+
+		assertThat(dest).exists();
+		assertThat(dest.toPath().resolve(folder.getName())).exists();
+		assertThat(dest.toPath().resolve(folder.getName()).resolve(file.getName())).exists();
+	}
+
+	@Test
+	public void shouldNotCopyFile() throws IOException {
+		File src = this.temporaryFolder.newFile();
+		File dest = new File(this.temporaryFolder.getRoot(), UUID.randomUUID().toString());
+		assertThat(src).exists();
+		assertThat(dest).doesNotExist();
+		FileUtils.copy(src.toPath(), dest.toPath(), p -> false);
+		assertThat(dest).doesNotExist();
+	}
+
+	@Test
+	public void shouldNotCopyNestedFiles() throws IOException {
+		File src = this.temporaryFolder.newFolder();
+		File folder = new File(src, UUID.randomUUID().toString());
+		File file = new File(folder, UUID.randomUUID().toString());
+
+		assertThat(folder.mkdir()).isTrue();
+		assertThat(file.createNewFile()).isTrue();
+
+		File dest = new File(this.temporaryFolder.getRoot(), UUID.randomUUID().toString());
+
+		assertThat(src).exists();
+		assertThat(dest).doesNotExist();
+
+		FileUtils.copy(src.toPath(), dest.toPath(), p -> false);
+
+		assertThat(dest).exists();
+		assertThat(dest.toPath().resolve(folder.getName())).exists();
+		assertThat(dest.toPath().resolve(folder.getName()).resolve(file.getName())).doesNotExist();
 	}
 
 	@Test
 	public void shouldNotDelete() throws IOException {
 		assertThat(FileUtils.delete(Paths.get(UUID.randomUUID().toString()))).isFalse();
 		assertThat(FileUtils.delete(null)).isFalse();
-	}
-
-	@Test
-	public void shouldBeTemporary() throws IOException {
-		assertThat(FileUtils.isTemporary(this.temporaryFolder.newFolder().toPath()))
-				.isTrue();
-		assertThat(FileUtils.isTemporary(this.temporaryFolder.newFile().toPath()))
-				.isTrue();
-	}
-
-	@Test
-	public void shouldNotBeTemporary() {
-		assertThat(FileUtils.isTemporary(null)).isFalse();
-		assertThat(FileUtils.isTemporary(new File("").toPath()))
-				.isFalse();
 	}
 
 	@Test

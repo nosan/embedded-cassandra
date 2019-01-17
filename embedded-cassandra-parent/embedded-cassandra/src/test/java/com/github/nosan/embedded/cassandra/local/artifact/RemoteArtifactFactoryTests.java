@@ -49,7 +49,6 @@ public class RemoteArtifactFactoryTests {
 				return new URL[0];
 			}
 		};
-
 		factory.setUrlFactory(urlFactory);
 		factory.setProxy(proxy);
 		factory.setDirectory(FileUtils.getTmpDirectory());
@@ -63,7 +62,6 @@ public class RemoteArtifactFactoryTests {
 		assertThat(ReflectionUtils.getField(artifact, "proxy")).isEqualTo(proxy);
 		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isEqualTo(Duration.ofSeconds(100));
 		assertThat(ReflectionUtils.getField(artifact, "connectTimeout")).isEqualTo(Duration.ofMinutes(100));
-
 	}
 
 	@Test
@@ -71,11 +69,11 @@ public class RemoteArtifactFactoryTests {
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
 		RemoteArtifact artifact = (RemoteArtifact) factory.create(new Version(3, 11, 3));
 		assertThat(ReflectionUtils.getField(artifact, "version")).isEqualTo(new Version(3, 11, 3));
-		assertThat(ReflectionUtils.getField(artifact, "directory")).isEqualTo(FileUtils.getUserHomeDirectory());
+		assertThat(ReflectionUtils.getField(artifact, "directory"))
+				.isEqualTo(FileUtils.getUserHomeDirectory().resolve("Downloads"));
 		assertThat(ReflectionUtils.getField(artifact, "urlFactory")).isInstanceOf(DefaultUrlFactory.class);
 		assertThat(ReflectionUtils.getField(artifact, "proxy")).isNull();
 		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isEqualTo(Duration.ofSeconds(30));
 		assertThat(ReflectionUtils.getField(artifact, "connectTimeout")).isEqualTo(Duration.ofSeconds(30));
-
 	}
 }

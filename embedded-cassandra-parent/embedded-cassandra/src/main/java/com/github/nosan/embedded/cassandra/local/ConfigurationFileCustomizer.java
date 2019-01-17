@@ -29,6 +29,8 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nosan.embedded.cassandra.Version;
+
 /**
  * {@link DirectoryCustomizer} to initialize {@code cassandra.yaml}.
  *
@@ -52,7 +54,7 @@ class ConfigurationFileCustomizer implements DirectoryCustomizer {
 	}
 
 	@Override
-	public void customize(@Nonnull Path directory) throws IOException {
+	public void customize(@Nonnull Path directory, @Nonnull Version version) throws IOException {
 		URL configurationFile = this.configurationFile;
 		if (configurationFile != null) {
 			Path target = directory.resolve("conf/cassandra.yaml");

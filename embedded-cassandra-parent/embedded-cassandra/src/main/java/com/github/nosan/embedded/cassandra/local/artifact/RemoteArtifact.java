@@ -16,19 +16,17 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -45,14 +43,12 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
-import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.ThreadNameSupplier;
 
 /**
- * {@link Artifact} which implements a remote {@code archive}. It checks if {@code archive} doesn't exist locally, it
- * tries to download it using {@link UrlFactory#create(Version) URL} and store locally. Artifact name generates based
- * on {@code URL}.
+ * {@link Artifact} implementation, that downloads {@code archive} from the internet, if {@code archive} doesn't exist
+ * locally.
  *
  * @author Dmytro Nosan
  * @see RemoteArtifactFactory
@@ -69,7 +65,11 @@ class RemoteArtifact implements Artifact {
 			instanceCounter.incrementAndGet()));
 
 	@Nonnull
-	private final ThreadFactory threadFactory = runnable -> new Thread(runnable, this.threadNameSupplier.get());
+	private final ThreadFactory threadFactory = runnable -> {
+		Thread thread = new Thread(runnable, this.threadNameSupplier.get());
+		thread.setDaemon(true);
+		return thread;
+	};
 
 	@Nonnull
 	private final Version version;
@@ -113,102 +113,75 @@ class RemoteArtifact implements Artifact {
 	@Override
 	@Nonnull
 	public Path get() throws IOException {
-		URL[] urls = this.urlFactory.create(this.version);
+		Version version = this.version;
+		URL[] urls = this.urlFactory.create(version);
 		Objects.requireNonNull(urls, "URLs must not be null");
-		if (urls.length == 0) {
-			throw new IOException("URLs must not be empty");
+		URLConnection urlConnection = getUrlConnection(this.proxy, this.readTimeout, this.connectTimeout, urls);
+		String name = getName(urlConnection.getURL());
+		long length = urlConnection.getContentLengthLong();
+		Path artifact = this.directory.resolve(name);
+		if (isDownloaded(artifact, length)) {
+			return artifact;
 		}
-		if (!Files.exists(this.directory)) {
-			Files.createDirectories(this.directory);
+		Path tempArtifact = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString()).resolve(name);
+		Files.createDirectories(tempArtifact.getParent());
+		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
+		try (InputStream inputStream = urlConnection.getInputStream()) {
+			long start = System.currentTimeMillis();
+			log.info("Downloading Apache Cassandra ({}) from ({}).", version, urlConnection.getURL());
+			executorService.scheduleAtFixedRate(() -> progress(tempArtifact, length), 0, 1500, TimeUnit.MILLISECONDS);
+			Files.copy(inputStream, tempArtifact);
+			long elapsed = System.currentTimeMillis() - start;
+			log.info("Apache Cassandra ({}) has been downloaded ({} ms)", version, elapsed);
 		}
-		if (!Files.isDirectory(this.directory)) {
-			throw new IllegalArgumentException(
-					String.format("(%s) exists and is a file, directory or path expected.", this.directory));
+		finally {
+			executorService.shutdown();
 		}
-		if (!Files.isWritable(this.directory)) {
-			throw new IllegalArgumentException(String.format("(%s) is not writable", this.directory));
+		if (isDownloaded(artifact, length)) {
+			return artifact;
 		}
-
-		IOException exception = null;
-
-		for (URL url : urls) {
+		if (isDownloaded(tempArtifact, length)) {
+			Files.createDirectories(artifact.getParent());
 			try {
-				String name = getName(url);
-				Path target = this.directory.resolve(name);
-				if (!Files.exists(target)) {
-					if (log.isDebugEnabled()) {
-						log.debug("({}) doesn't exist, it will be downloaded from ({})", target, url);
-					}
-					URLConnection urlConnection = getUrlConnection(url);
-					long contentLength = urlConnection.getContentLengthLong();
-					Path source = download(name, urlConnection, contentLength);
-					try {
-						if (!Files.exists(target) && isDownloaded(source, contentLength)) {
-							if (target.getParent() != null) {
-								Files.createDirectories(target.getParent());
-							}
-							return Files.move(source, target);
-						}
-						return source;
-					}
-					catch (IOException ex) {
-						log.error(String.format("Could not rename (%s) as (%s)", source, target), ex);
-						return source;
-					}
-				}
-
-				return target;
+				return Files.move(tempArtifact, artifact, StandardCopyOption.REPLACE_EXISTING);
 			}
 			catch (IOException ex) {
-				if (exception == null) {
-					exception = ex;
+				if (log.isDebugEnabled()) {
+					log.error(String.format("Could not rename (%s) as (%s).", tempArtifact, artifact));
 				}
-				else {
-					exception.addSuppressed(ex);
-				}
+				return tempArtifact;
+			}
+		}
+		throw new IOException(String.format("Apache Cassandra (%s) is not downloaded from URLs (%s)",
+				version, Arrays.toString(urls)));
+	}
+
+	private static URLConnection getUrlConnection(Proxy proxy, Duration readTimeout, Duration connectTimeout,
+			URL... urls) throws IOException {
+		IOException exception = new IOException(String.format("Could not create an URLConnection from URLs (%s)",
+				Arrays.toString(urls)));
+		for (URL url : urls) {
+			try {
+				return getUrlConnection(proxy, readTimeout, connectTimeout, url);
+			}
+			catch (IOException ex) {
+				exception.addSuppressed(ex);
 			}
 		}
 		throw exception;
 	}
 
-	private String getName(URL url) {
-		String file = url.getFile();
-		if (StringUtils.hasText(file) && file.contains("/")) {
-			file = file.substring(file.lastIndexOf("/") + 1);
-		}
-		if (!StringUtils.hasText(file)) {
-			throw new IllegalArgumentException(
-					String.format("There is no way to determine a file name from (%s)", url));
-		}
-		return file;
-	}
-
-	private boolean isDownloaded(Path file, long contentLength) {
-		if (contentLength > 0) {
-			try {
-				return contentLength == Files.size(file);
-			}
-			catch (Exception ex) {
-				if (log.isDebugEnabled()) {
-					log.debug(String.format("Could not compare content length (%s) with file (%s)",
-							contentLength, file), ex);
-				}
-			}
-		}
-		return !Thread.currentThread().isInterrupted();
-	}
-
-	private URLConnection getUrlConnection(URL url) throws IOException {
-		URLConnection urlConnection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
+	private static URLConnection getUrlConnection(Proxy proxy, Duration readTimeout, Duration connectTimeout, URL url)
+			throws IOException {
+		URLConnection urlConnection = (proxy != null) ? url.openConnection(proxy) : url.openConnection();
 		if (urlConnection instanceof HttpURLConnection) {
 			HttpURLConnection connection = (HttpURLConnection) urlConnection;
-			if (this.connectTimeout != null) {
-				connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
+			if (connectTimeout != null) {
+				connection.setConnectTimeout(Math.toIntExact(connectTimeout.toMillis()));
 			}
-			if (this.readTimeout != null) {
-				connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
+			if (readTimeout != null) {
+				connection.setReadTimeout(Math.toIntExact(readTimeout.toMillis()));
 			}
-			connection.setInstanceFollowRedirects(false);
 			switch (connection.getResponseCode()) {
 				case 301:
 				case 302:
@@ -217,56 +190,51 @@ class RemoteArtifact implements Artifact {
 				case 308:
 					String location = connection.getHeaderField("Location");
 					if (StringUtils.hasText(location)) {
-						return getUrlConnection(new URL(url, location));
+						return getUrlConnection(proxy, readTimeout, connectTimeout, new URL(url, location));
 					}
 			}
 		}
 		return urlConnection;
 	}
 
-	private Path download(String name, URLConnection urlConnection, long contentLength) throws IOException {
-		URL url = urlConnection.getURL();
-		Path tempFile = FileUtils.getTmpDirectory()
-				.resolve(String.format("%s-%s", UUID.randomUUID(), name));
-		Files.createFile(tempFile);
-		try {
-			tempFile.toFile().deleteOnExit();
+	private static String getName(URL url) {
+		String name = url.getFile();
+		if (StringUtils.hasText(name) && name.contains("/")) {
+			name = name.substring(name.lastIndexOf("/") + 1);
 		}
-		catch (Throwable ex) {
-			log.error(String.format("Shutdown hook is not registered for (%s)", tempFile), ex);
+		if (!StringUtils.hasText(name)) {
+			throw new IllegalArgumentException(
+					String.format("There is no way to determine a file name from (%s)", url));
 		}
-		try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel();
-				ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
-			log.info("Downloading Cassandra from ({}). It takes a while...", url);
-			ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
-			try {
-				showProgress(contentLength, tempFile, scheduledExecutor);
-				fileChannel.transferFrom(urlChannel, 0, Long.MAX_VALUE);
-			}
-			finally {
-				scheduledExecutor.shutdown();
-			}
-		}
-		catch (IOException ex) {
-			throw new IOException(String.format("Could not download Cassandra from (%s)", url), ex);
-		}
-		log.info("Cassandra ({}) has been downloaded", this.version);
-		return tempFile;
+		return name;
 	}
 
-	private void showProgress(long contentLength, Path file, ScheduledExecutorService scheduledExecutor) {
-		if (contentLength > 0) {
-			Map<String, String> context = MDCUtils.getContext();
-			scheduledExecutor.scheduleAtFixedRate(() -> {
-				MDCUtils.setContext(context);
-				try {
-					long current = Files.size(file);
-					log.info("Downloaded {} / {}  {}%", current, contentLength,
-							(current * 100) / contentLength);
-				}
-				catch (IOException ignore) {
-				}
-			}, 0, 3, TimeUnit.SECONDS);
+	private static boolean isDownloaded(Path file, long length) {
+		if (!Files.exists(file)) {
+			return false;
+		}
+		if (length < 0) {
+			return true;
+		}
+		try {
+			return Files.size(file) == length;
+		}
+		catch (IOException ex) {
+			if (log.isDebugEnabled()) {
+				log.error(String.format("Could not compare content-length (%s) with a file (%s)", length, file), ex);
+			}
+		}
+		return true;
+	}
+
+	private static void progress(Path file, long length) {
+		if (length > 0 && Files.exists(file)) {
+			try {
+				long current = Files.size(file);
+				log.info("Downloaded {} / {}  {}%", current, length, (current * 100) / length);
+			}
+			catch (IOException ignore) {
+			}
 		}
 	}
 }

@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -25,20 +26,28 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
+import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 
 /**
- * Default factory to create a {@link Directory}.
+ * Basic implementation of the {@link Initializer}.
  *
  * @author Dmytro Nosan
- * @since 1.0.9
+ * @since 1.3.0
  */
-class DefaultDirectoryFactory implements DirectoryFactory {
+class DefaultInitializer implements Initializer {
+
+	@Nonnull
+	private final Path workingDirectory;
 
 	@Nonnull
 	private final Version version;
 
 	@Nonnull
-	private final Path directory;
+	private final ArtifactFactory artifactFactory;
+
+	@Nonnull
+	private final Path artifactDirectory;
 
 	@Nullable
 	private final URL configurationFile;
@@ -56,21 +65,26 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 	private final URL commitLogArchivingFile;
 
 	/**
-	 * Creates a {@link DefaultDirectoryFactory}.
+	 * Creates a new {@link DefaultInitializer}.
 	 *
 	 * @param version a version
-	 * @param directory a working directory
+	 * @param artifactFactory a factory to create {@link Artifact}
+	 * @param workingDirectory a directory to keep data/logs/etc... (must be writable)
+	 * @param artifactDirectory a directory to extract an {@link Artifact} (must be writable)
 	 * @param configurationFile URL to {@code cassandra.yaml}
 	 * @param logbackFile URL to {@code logback.xml}
 	 * @param rackFile URL to {@code cassandra-rackdc.properties}
 	 * @param topologyFile URL to {@code cassandra-topology.properties}
 	 * @param commitLogArchivingFile URL to {@code commitlog_archiving.properties}
 	 */
-	DefaultDirectoryFactory(@Nonnull Version version, @Nonnull Path directory, @Nullable URL configurationFile,
-			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
-			@Nullable URL commitLogArchivingFile) {
+	DefaultInitializer(@Nonnull Path workingDirectory, @Nonnull Version version,
+			@Nonnull ArtifactFactory artifactFactory, @Nonnull Path artifactDirectory,
+			@Nullable URL configurationFile, @Nullable URL logbackFile,
+			@Nullable URL rackFile, @Nullable URL topologyFile, @Nullable URL commitLogArchivingFile) {
+		this.workingDirectory = workingDirectory;
 		this.version = version;
-		this.directory = directory;
+		this.artifactFactory = artifactFactory;
+		this.artifactDirectory = artifactDirectory;
 		this.configurationFile = configurationFile;
 		this.logbackFile = logbackFile;
 		this.rackFile = rackFile;
@@ -78,17 +92,19 @@ class DefaultDirectoryFactory implements DirectoryFactory {
 		this.commitLogArchivingFile = commitLogArchivingFile;
 	}
 
-	@Nonnull
 	@Override
-	public Directory create(@Nonnull Path archive) {
+	public void initialize() throws IOException {
 		List<DirectoryCustomizer> customizers = new ArrayList<>();
-		customizers.add(new ExecutableCustomizer());
+		customizers.add(new ArtifactCustomizer(this.artifactFactory, this.artifactDirectory));
+		customizers.add(new ExecutableFileCustomizer());
 		customizers.add(new LogbackFileCustomizer(this.logbackFile));
 		customizers.add(new ConfigurationFileCustomizer(this.configurationFile));
 		customizers.add(new RackFileCustomizer(this.rackFile));
 		customizers.add(new TopologyFileCustomizer(this.topologyFile));
 		customizers.add(new CommitLogArchivingFileCustomizer(this.commitLogArchivingFile));
-		customizers.add(new RandomPortConfigurationFileCustomizer(this.version));
-		return new DefaultDirectory(this.directory, archive, customizers);
+		customizers.add(new RandomPortConfigurationFileCustomizer());
+		for (DirectoryCustomizer customizer : customizers) {
+			customizer.customize(this.workingDirectory, this.version);
+		}
 	}
 }

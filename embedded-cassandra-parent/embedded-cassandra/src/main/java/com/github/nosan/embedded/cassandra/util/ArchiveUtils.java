@@ -21,13 +21,15 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -82,58 +84,32 @@ public abstract class ArchiveUtils {
 	 * The destination is expected to be a writable directory.
 	 *
 	 * @param archive the archive file to extract
-	 * @param destination the directory to which to extract the files
-	 * @param include the filter to check whether {@code Path} should be included or not
+	 * @param dest the directory to which to extract the files
+	 * @param entryFilter the filter to check whether {@code entry file} should be extracted or not
 	 * @throws IOException in the case of I/O errors
 	 */
-	public static void extract(@Nonnull Path archive, @Nonnull Path destination,
-			@Nullable Predicate<? super Path> include)
+	public static void extract(@Nonnull Path archive, @Nonnull Path dest,
+			@Nullable Predicate<? super String> entryFilter)
 			throws IOException {
 		Objects.requireNonNull(archive, "Archive must not be null");
-		Objects.requireNonNull(destination, "Destination must not be null");
-
-		if (Files.isDirectory(archive)) {
-			throw new IllegalArgumentException(String.format("Can not extract (%s) Source is a directory.",
-					archive));
-		}
-		if (!Files.exists(archive)) {
-			throw new IllegalArgumentException(String.format("Archive (%s) is not found", archive));
-		}
-		if (!Files.isReadable(archive)) {
-			throw new IllegalArgumentException(
-					String.format("Can not extract (%s). Can not read from  source.", archive));
-		}
-		if (!Files.exists(destination)) {
-			Files.createDirectories(destination);
-		}
-		if (!Files.isDirectory(destination)) {
-			throw new IllegalArgumentException(
-					String.format("(%s) exists and is a file, directory or path expected.", destination));
-		}
-		if (!Files.isWritable(destination)) {
-			throw new IllegalArgumentException(String.format("(%s) is not writable", destination));
-		}
-
+		Objects.requireNonNull(dest, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archive);
+		Path tempDir = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString());
 		try (ArchiveInputStream stream = archiveFactory.create(archive)) {
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
-				Path path = destination.resolve(entry.getName());
-				if (include != null && !include.test(path)) {
-					continue;
-				}
 				if (entry.isDirectory()) {
-					Files.createDirectories(path);
+					Path dir = dest.resolve(entry.getName());
+					Files.createDirectories(dir);
 				}
-				else {
-					Path parent = path.getParent();
-					if (parent != null && !Files.exists(parent)) {
-						Files.createDirectories(parent);
-					}
-					Files.copy(stream, path, StandardCopyOption.REPLACE_EXISTING);
-				}
-				if (OS.get() != OS.WINDOWS) {
-					FileModeUtils.set(entry, path);
+				else if (entryFilter == null || entryFilter.test(entry.getName())) {
+					Path tempFile = tempDir.resolve(entry.getName());
+					Files.createDirectories(tempFile.getParent());
+					Files.copy(stream, tempFile);
+					FileModeUtils.set(entry, tempFile);
+					Path file = dest.resolve(entry.getName());
+					Files.createDirectories(file.getParent());
+					Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
 				}
 			}
 		}
@@ -217,6 +193,22 @@ public abstract class ArchiveUtils {
 
 		private static final int MASK = 511;
 
+		private static final Map<Integer, PosixFilePermission> permissions;
+
+		static {
+			Map<Integer, PosixFilePermission> values = new LinkedHashMap<>();
+			values.put(256, PosixFilePermission.OWNER_READ);
+			values.put(128, PosixFilePermission.OWNER_WRITE);
+			values.put(64, PosixFilePermission.OWNER_EXECUTE);
+			values.put(32, PosixFilePermission.GROUP_READ);
+			values.put(16, PosixFilePermission.GROUP_WRITE);
+			values.put(8, PosixFilePermission.GROUP_EXECUTE);
+			values.put(4, PosixFilePermission.OTHERS_READ);
+			values.put(2, PosixFilePermission.OTHERS_WRITE);
+			values.put(1, PosixFilePermission.OTHERS_EXECUTE);
+			permissions = Collections.unmodifiableMap(values);
+		}
+
 		/**
 		 * Sets the file mode onto the given file.
 		 *
@@ -224,17 +216,29 @@ public abstract class ArchiveUtils {
 		 * @param file the file to apply the mode onto
 		 */
 		static void set(@Nonnull ArchiveEntry entry, @Nonnull Path file) {
+			if (OS.get() == OS.WINDOWS) {
+				return;
+			}
 			long mode = getMode(entry) & MASK;
 			if (mode > 0) {
+				Set<PosixFilePermission> permissions = getPermissions(mode);
 				try {
-					List<String> cmd = Arrays.asList("chmod",
-							Long.toOctalString(mode), String.valueOf(file.toAbsolutePath()));
-					new ProcessBuilder(cmd).start();
+					Files.setPosixFilePermissions(file, permissions);
 				}
-				catch (IOException ex) {
-					log.error(String.format("Could not set a permission (%s) to (%s)", mode, file), ex);
+				catch (Throwable ex) {
+					if (log.isDebugEnabled()) {
+						log.error(String.format("Could not set permission(s) (%s) to (%s)", permissions, file), ex);
+					}
 				}
 			}
+		}
+
+		private static Set<PosixFilePermission> getPermissions(long mode) {
+			return permissions.entrySet()
+					.stream()
+					.filter(entry -> (mode & entry.getKey()) > 0)
+					.map(Map.Entry::getValue)
+					.collect(Collectors.toSet());
 		}
 
 		private static long getMode(ArchiveEntry entry) {

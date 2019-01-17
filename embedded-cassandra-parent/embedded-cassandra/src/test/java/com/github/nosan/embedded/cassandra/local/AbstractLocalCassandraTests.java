@@ -31,8 +31,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -94,7 +96,6 @@ public abstract class AbstractLocalCassandraTests {
 			runner.run(new NotReachable());
 		});
 		assertCassandraHasBeenStopped();
-		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
@@ -102,7 +103,6 @@ public abstract class AbstractLocalCassandraTests {
 		this.factory.setLogbackFile(getClass().getResource("/logback-empty.xml"));
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(assertCreateKeyspace());
-		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
@@ -111,7 +111,6 @@ public abstract class AbstractLocalCassandraTests {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort));
-		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
@@ -119,7 +118,6 @@ public abstract class AbstractLocalCassandraTests {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
 		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort));
 		assertCassandraHasBeenStopped();
-		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
@@ -139,7 +137,6 @@ public abstract class AbstractLocalCassandraTests {
 				"Cassandra has not been started, seems like (2000) milliseconds is not enough"));
 		this.factory.setStartupTimeout(Duration.ofSeconds(2L));
 		new CassandraRunner(this.factory).run(new NotReachable());
-		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
@@ -147,7 +144,6 @@ public abstract class AbstractLocalCassandraTests {
 		this.throwable.expect(CassandraException.class);
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
 		new CassandraRunner(this.factory).run(new NotReachable());
-		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
@@ -161,7 +157,6 @@ public abstract class AbstractLocalCassandraTests {
 		}));
 		assertThat(this.output.toString()).contains("Stops Apache Cassandra");
 		assertCassandraHasBeenStopped();
-		assertDirectoryHasBeenDeletedCorrectly();
 		this.output.reset();
 		c.stop();
 		assertThat(this.output.toString()).doesNotContain("Stops Apache Cassandra");
@@ -183,45 +178,86 @@ public abstract class AbstractLocalCassandraTests {
 		this.throwable.expectCause(new CauseMatcher(IOException.class, "invalid_property"));
 
 		new CassandraRunner(this.factory).run(new NotReachable());
-		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	@Test
-	public void shouldRunMoreThanOneCassandra() {
+	public void shouldRunMoreThanOneCassandra() throws Throwable {
 		this.factory.setJmxPort(0);
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-random.yaml"));
-		CassandraRunner runner = new CassandraRunner(this.factory);
-		runner.run(cassandra -> {
+		List<Throwable> exceptions = new CopyOnWriteArrayList<>();
+		Runnable runnable = () -> {
+			try {
+				CassandraRunner runner = new CassandraRunner(this.factory);
+				runner.run(assertCreateKeyspace());
+			}
+			catch (Throwable ex) {
+				exceptions.add(ex);
+			}
+		};
+		Thread t = new Thread(runnable);
+		Thread t1 = new Thread(runnable);
+		t.start();
+		t1.start();
+		t.join();
+		t1.join();
+
+		try {
+			assertThat(exceptions).isEmpty();
+		}
+		catch (Throwable ex) {
+			for (Throwable exception : exceptions) {
+				ex.addSuppressed(exception);
+			}
+			throw ex;
+		}
+	}
+
+	@Test
+	public void shouldReInitializedCassandra() throws IOException {
+		Path path = this.temporaryFolder.newFolder(UUID.randomUUID().toString()).toPath();
+		this.factory.setWorkingDirectory(path);
+		Cassandra cassandra = this.factory.create();
+		try {
+			cassandra.start();
 			assertCreateKeyspace().accept(cassandra);
-			runner.run(assertCreateKeyspace());
-		});
-		assertDirectoryHasBeenDeletedCorrectly();
+		}
+		finally {
+			cassandra.stop();
+		}
+		assertCassandraHasBeenStopped();
+		FileUtils.delete(path);
+		this.output.reset();
+		try {
+			cassandra.start();
+			assertCreateKeyspace().accept(cassandra);
+		}
+		finally {
+			cassandra.stop();
+		}
+		assertCassandraHasBeenStopped();
 	}
 
 	@Test
-	public void shouldStartOnDefaultSettingsAndBeRestarted() {
-		new CassandraRunner(this.factory).run(assertCreateKeyspace());
-		assertCassandraHasBeenStopped();
-		assertDirectoryHasBeenDeletedCorrectly();
-		this.output.reset();
-		new CassandraRunner(this.factory).run(assertCreateKeyspace());
-		assertCassandraHasBeenStopped();
-		assertDirectoryHasBeenDeletedCorrectly();
-
-	}
-
-	@Test
-	public void shouldKeepDataBetweenLaunches() {
-		this.factory.setWorkingDirectory(FileUtils.getUserDirectory()
-				.resolve("target")
-				.resolve(UUID.randomUUID().toString()));
-		Runtime.getRuntime().addShutdownHook(new Thread(() ->
-				IOUtils.closeQuietly(() -> FileUtils.delete(this.factory.getWorkingDirectory()))));
-		CassandraRunner runner = new CassandraRunner(this.factory);
-		runner.run(assertCreateKeyspace());
+	public void shouldInitializedOnlyOnce() throws IOException {
+		Path path = this.temporaryFolder.newFolder(UUID.randomUUID().toString()).toPath();
+		this.factory.setWorkingDirectory(path);
+		Cassandra cassandra = this.factory.create();
+		try {
+			cassandra.start();
+			assertCreateKeyspace().accept(cassandra);
+		}
+		finally {
+			cassandra.stop();
+		}
 		assertCassandraHasBeenStopped();
 		this.output.reset();
-		runner.run(assertDeleteKeyspace());
+		try {
+			cassandra.start();
+			assertDeleteKeyspace().accept(cassandra);
+		}
+		finally {
+			cassandra.stop();
+		}
 		assertCassandraHasBeenStopped();
 	}
 
@@ -239,7 +275,6 @@ public abstract class AbstractLocalCassandraTests {
 			assertThat(this.output.toString()).doesNotContain(" -R, -p,");
 		}
 		assertCassandraHasBeenStopped();
-		assertDirectoryHasBeenDeletedCorrectly();
 	}
 
 	private void runAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
@@ -262,13 +297,7 @@ public abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(assertCreateKeyspace()
 				.andThen(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort)));
-		assertDirectoryHasBeenDeletedCorrectly();
 		assertCassandraHasBeenStopped();
-	}
-
-	private void assertDirectoryHasBeenDeletedCorrectly() {
-		assertThat(this.output.toString()).contains("Delete recursively working");
-		assertThat(this.output.toString()).doesNotContain("has not been deleted");
 	}
 
 	private void assertCassandraHasBeenStopped() {

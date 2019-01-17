@@ -16,14 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.junit;
 
-import javax.annotation.Nonnull;
-
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
-import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.junit.CassandraRule;
@@ -41,27 +36,15 @@ public class CassandraRuleBuilderTests {
 
 	@Test
 	public void shouldBuildCassandraRule() {
-		ClusterFactory clusterFactory = (settings) -> null;
-		Cassandra cassandra = new Cassandra() {
-			@Override
-			public void start() throws CassandraException {
-
-			}
-
-			@Override
-			public void stop() throws CassandraException {
-
-			}
-
-			@Nonnull
-			@Override
-			public Settings getSettings() throws CassandraException {
-				return null;
-			}
+		ClusterFactory clusterFactory = (settings) -> {
+			throw new UnsupportedOperationException();
 		};
-
-		CassandraFactory cassandraFactory = () -> cassandra;
-		CqlScript script = () -> null;
+		CassandraFactory cassandraFactory = () -> {
+			throw new UnsupportedOperationException();
+		};
+		CqlScript script = () -> {
+			throw new UnsupportedOperationException();
+		};
 		CassandraRule cassandraRule = new CassandraRuleBuilder()
 				.addScripts(script)
 				.setRegisterShutdownHook(false)
@@ -69,7 +52,7 @@ public class CassandraRuleBuilderTests {
 				.setCassandraFactory(cassandraFactory)
 				.build();
 
-		assertThat(ReflectionUtils.getField(cassandraRule, "cassandra")).isEqualTo(cassandra);
+		assertThat(ReflectionUtils.getField(cassandraRule, "cassandraFactory")).isEqualTo(cassandraFactory);
 		assertThat(ReflectionUtils.getField(cassandraRule, "registerShutdownHook")).isEqualTo(false);
 		assertThat(ReflectionUtils.getField(cassandraRule, "scripts")).isEqualTo(new CqlScript[]{script});
 		assertThat(ReflectionUtils.getField(cassandraRule, "clusterFactory")).isEqualTo(clusterFactory);

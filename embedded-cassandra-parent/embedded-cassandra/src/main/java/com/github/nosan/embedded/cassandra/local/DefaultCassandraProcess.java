@@ -30,7 +30,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,23 +53,36 @@ import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.ProcessUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.SystemProperty;
+import com.github.nosan.embedded.cassandra.util.ThreadNameSupplier;
 
 /**
  * Default implementation of the {@link CassandraProcess}.
  *
  * @author Dmytro Nosan
- * @see DefaultCassandraProcessFactory
  * @since 1.0.9
  */
 class DefaultCassandraProcess implements CassandraProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultCassandraProcess.class);
 
-	@Nonnull
-	private final Path directory;
+	private static final AtomicLong instanceCounter = new AtomicLong();
 
 	@Nonnull
-	private final Duration timeout;
+	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("cassandra-%d",
+			instanceCounter.incrementAndGet()));
+
+	@Nonnull
+	private final ThreadFactory threadFactory = runnable -> {
+		Thread thread = new Thread(runnable, this.threadNameSupplier.get());
+		thread.setDaemon(true);
+		return thread;
+	};
+
+	@Nonnull
+	private final Path workingDirectory;
+
+	@Nonnull
+	private final Duration startupTimeout;
 
 	@Nonnull
 	private final List<String> jvmOptions;
@@ -96,18 +111,18 @@ class DefaultCassandraProcess implements CassandraProcess {
 	/**
 	 * Creates a {@link DefaultCassandraProcess}.
 	 *
-	 * @param directory a configured base directory
+	 * @param workingDirectory a configured base directory
 	 * @param version a version
-	 * @param timeout a startup timeout
+	 * @param startupTimeout a startup timeout
 	 * @param jvmOptions additional {@code JVM} options
 	 * @param javaHome java home directory
 	 * @param allowRoot allow running as a root
 	 * @param jmxPort JMX port
 	 */
-	DefaultCassandraProcess(@Nonnull Path directory, @Nonnull Version version, @Nonnull Duration timeout,
+	DefaultCassandraProcess(@Nonnull Path workingDirectory, @Nonnull Version version, @Nonnull Duration startupTimeout,
 			@Nonnull List<String> jvmOptions, @Nullable Path javaHome, int jmxPort, boolean allowRoot) {
-		this.directory = directory;
-		this.timeout = timeout;
+		this.workingDirectory = workingDirectory;
+		this.startupTimeout = startupTimeout;
 		this.version = version;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
@@ -118,9 +133,10 @@ class DefaultCassandraProcess implements CassandraProcess {
 	@Override
 	@Nonnull
 	public Settings start() throws IOException, InterruptedException {
-		Path directory = this.directory;
+		Path directory = this.workingDirectory;
 		Version version = this.version;
-		Duration timeout = this.timeout;
+		Duration timeout = this.startupTimeout;
+		ThreadFactory threadFactory = this.threadFactory;
 		SmartSettings settings = getSettings(directory, version);
 		this.settings = settings;
 		Path executable = (OS.get() == OS.WINDOWS) ?
@@ -161,7 +177,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		BufferedOutput bufferedOutput = new BufferedOutput(10);
 		ReadinessOutput readinessOutput = new ReadinessOutput();
-		Process process = new RunProcess(true, directory, environment, arguments)
+		Process process = new RunProcess(directory, environment, threadFactory, arguments)
 				.run(new FilteredOutput(bufferedOutput, outputFilter),
 						new FilteredOutput(readinessOutput, outputFilter),
 						new FilteredOutput(new RpcAddressParser(settings), outputFilter),
@@ -203,44 +219,43 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 	@Override
-	public void stop() throws IOException, InterruptedException {
+	public void stop() throws IOException {
 		Process process = this.process;
 		Path pidFile = this.pidFile;
-		Path directory = this.directory;
+		Path directory = this.workingDirectory;
 		long pid = this.pid;
+		ThreadFactory threadFactory = this.threadFactory;
 		Settings settings = this.settings;
-
 		if (process != null && process.isAlive()) {
-
 			if (log.isDebugEnabled()) {
 				log.debug("Stops Cassandra process ({})", getPidString(pid));
 			}
-
-			stop(process, pidFile, directory, pid);
-
+			stop(threadFactory, process, pidFile, directory, pid);
 			if (settings != null) {
 				try {
 					WaitUtils.await(Duration.ofSeconds(5), () -> TransportUtils.isDisabled(settings)
 							&& !process.isAlive());
 				}
 				catch (InterruptedException ex) {
-					throw ex;
+					Thread.currentThread().interrupt();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					log.error(String.format("Could not check whether process (%s) is stopped or not",
 							getPidString(pid)), ex);
 				}
 			}
-
 			if (process.isAlive()) {
-				forceStop(process, pidFile, directory, pid);
+				forceStop(threadFactory, process, pidFile, directory, pid);
 			}
-
-			if (!process.waitFor(3, TimeUnit.SECONDS)) {
-				throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
-						getPidString(pid)));
+			try {
+				if (!process.waitFor(3, TimeUnit.SECONDS)) {
+					throw new IOException(String.format("Casandra Process (%s) has not been stopped correctly",
+							getPidString(pid)));
+				}
 			}
-
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 			this.settings = null;
 			this.pid = -1;
 			this.pidFile = null;
@@ -267,33 +282,29 @@ class DefaultCassandraProcess implements CassandraProcess {
 		return (pid > 0) ? String.valueOf(pid) : "???";
 	}
 
-	private static void stop(Process process, Path pidFile, Path directory, long pid) throws InterruptedException {
+	private static void stop(ThreadFactory threadFactory, Process process, Path pidFile, Path directory, long pid) {
 		if (pidFile != null && Files.exists(pidFile)) {
 			try {
-				stop(pidFile, directory, false);
+				stop(threadFactory, pidFile, directory, false);
 			}
 			catch (InterruptedException ex) {
-				throw ex;
+				Thread.currentThread().interrupt();
 			}
-			catch (Exception ex) {
-				if (log.isDebugEnabled()) {
-					log.debug(String.format("Could not stop a process (%s) by file (%s)",
-							getPidString(pid), pidFile), ex);
-				}
+			catch (Throwable ex) {
+				log.error(String.format("Could not stop a process (%s) by file (%s)",
+						getPidString(pid), pidFile), ex);
 			}
 		}
 		else if (pid > 0) {
 			try {
-				stop(pid, directory, false);
+				stop(threadFactory, pid, directory, false);
 			}
 			catch (InterruptedException ex) {
-				throw ex;
+				Thread.currentThread().interrupt();
 			}
-			catch (Exception ex) {
-				if (log.isDebugEnabled()) {
-					log.debug(String.format("Could not  <kill or taskkill> a process (%s)", getPidString(pid)),
-							ex);
-				}
+			catch (Throwable ex) {
+				log.error(String.format("Could not  <kill or taskkill> a process (%s)", getPidString(pid)),
+						ex);
 			}
 		}
 		else {
@@ -301,41 +312,37 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-	private static void forceStop(Process process, Path pidFile, Path directory, long pid) throws
-			InterruptedException {
+	private static void forceStop(ThreadFactory threadFactory, Process process, Path pidFile, Path directory,
+			long pid) {
 		if (pidFile != null && Files.exists(pidFile)) {
 			try {
-				stop(pidFile, directory, true);
+				stop(threadFactory, pidFile, directory, true);
 			}
 			catch (InterruptedException ex) {
-				throw ex;
+				Thread.currentThread().interrupt();
 			}
-			catch (Exception ex) {
-				if (log.isDebugEnabled()) {
-					log.debug(String.format("Could not force stop a process (%s) by file (%s)", getPidString(pid),
-							pidFile),
-							ex);
-				}
+			catch (Throwable ex) {
+				log.error(String.format("Could not force stop a process (%s) by file (%s)", getPidString(pid), pidFile),
+						ex);
 			}
 		}
 		if (pid > 0) {
 			try {
-				stop(pid, directory, true);
+				stop(threadFactory, pid, directory, true);
 			}
 			catch (InterruptedException ex) {
-				throw ex;
+				Thread.currentThread().interrupt();
 			}
-			catch (Exception ex) {
-				if (log.isDebugEnabled()) {
-					log.debug(String.format("Could not force <kill or taskkill> a process (%s)", getPidString(pid)),
-							ex);
-				}
+			catch (Throwable ex) {
+				log.error(String.format("Could not force <kill or taskkill> a process (%s)", getPidString(pid)),
+						ex);
 			}
 		}
 		process.destroyForcibly();
 	}
 
-	private static void stop(Path pidFile, Path directory, boolean force) throws IOException, InterruptedException {
+	private static void stop(ThreadFactory threadFactory, Path pidFile, Path directory, boolean force)
+			throws IOException, InterruptedException {
 		if (OS.get() == OS.WINDOWS) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("powershell");
@@ -347,16 +354,19 @@ class DefaultCassandraProcess implements CassandraProcess {
 			}
 			arguments.add("-p");
 			arguments.add(pidFile.toAbsolutePath());
-			new RunProcess(true, directory, arguments).runAndWait(log::info);
+			new RunProcess(directory, null, threadFactory, arguments).runAndWait(log::info);
 		}
 		else {
 			String signal = force ? "-9" : "-SIGINT";
-			new RunProcess(true, directory, Arrays.asList("bash", "-c",
-					String.format("kill %s `cat %s`", signal, pidFile.toAbsolutePath()))).runAndWait(log::info);
+			new RunProcess(directory, null,
+					threadFactory,
+					Arrays.asList("bash", "-c", String.format("kill %s `cat %s`", signal, pidFile.toAbsolutePath())))
+					.runAndWait(log::info);
 		}
 	}
 
-	private static void stop(long pid, Path directory, boolean force) throws IOException, InterruptedException {
+	private static void stop(ThreadFactory threadFactory, long pid, Path directory, boolean force)
+			throws IOException, InterruptedException {
 		if (OS.get() == OS.WINDOWS) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("taskkill");
@@ -366,11 +376,12 @@ class DefaultCassandraProcess implements CassandraProcess {
 			arguments.add("/T");
 			arguments.add("/pid");
 			arguments.add(pid);
-			new RunProcess(true, directory, arguments).runAndWait(log::info);
+			new RunProcess(directory, null, threadFactory, arguments).runAndWait(log::info);
 		}
 		else {
 			String signal = force ? "-9" : "-SIGINT";
-			new RunProcess(true, directory, Arrays.asList("kill", signal, pid)).runAndWait(log::info);
+			new RunProcess(directory, null, threadFactory, Arrays.asList("kill", signal, pid))
+					.runAndWait(log::info);
 		}
 	}
 
@@ -422,9 +433,9 @@ class DefaultCassandraProcess implements CassandraProcess {
 					this.settings.setRealAddress(NetworkUtils.getInetAddress(address.trim()));
 					this.alreadySet = true;
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					if (log.isDebugEnabled()) {
-						log.debug(String.format("Could not parse an InetAddress (%s)", address), ex);
+						log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
 					}
 				}
 			}
@@ -468,9 +479,9 @@ class DefaultCassandraProcess implements CassandraProcess {
 					this.settings.setRealListenAddress(NetworkUtils.getInetAddress(address.trim()));
 					this.alreadySet = true;
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					if (log.isDebugEnabled()) {
-						log.debug(String.format("Could not parse an InetAddress (%s)", address), ex);
+						log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
 					}
 				}
 			}

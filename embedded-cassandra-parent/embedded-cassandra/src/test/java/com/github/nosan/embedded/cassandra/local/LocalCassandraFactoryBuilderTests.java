@@ -45,6 +45,7 @@ public class LocalCassandraFactoryBuilderTests {
 		Path topology = Paths.get("topology");
 		Path commitLogArchiving = Paths.get("commitLog");
 		Path workingDirectory = Paths.get(UUID.randomUUID().toString());
+		Path artifactDirectory = Paths.get(UUID.randomUUID().toString());
 		Path javaDirectory = Paths.get(UUID.randomUUID().toString());
 		Version version = new Version(3, 11, 0);
 		int jmxPort = 8000;
@@ -66,6 +67,7 @@ public class LocalCassandraFactoryBuilderTests {
 				.setStartupTimeout(Duration.ofMinutes(1))
 				.setJmxPort(jmxPort)
 				.setAllowRoot(allowRoot)
+				.setArtifactDirectory(artifactDirectory)
 				.setRegisterShutdownHook(registerShutdownHook)
 				.build();
 
@@ -78,6 +80,7 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getRackFile()).isEqualTo(rack.toUri().toURL());
 		assertThat(factory.getTopologyFile()).isEqualTo(topology.toUri().toURL());
 		assertThat(factory.getWorkingDirectory()).isEqualTo(workingDirectory);
+		assertThat(factory.getArtifactDirectory()).isEqualTo(artifactDirectory);
 		assertThat(factory.getJavaHome()).isEqualTo(javaDirectory);
 		assertThat(factory.getJmxPort()).isEqualTo(jmxPort);
 		assertThat(factory.isAllowRoot()).isEqualTo(allowRoot);
@@ -89,7 +92,6 @@ public class LocalCassandraFactoryBuilderTests {
 	public void defaultBuild() {
 		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder()
 				.build();
-
 		assertThat(factory.getJvmOptions()).isEmpty();
 		assertThat(factory.getArtifactFactory()).isNull();
 		assertThat(factory.getConfigurationFile()).isNull();
@@ -99,6 +101,7 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getCommitLogArchivingFile()).isNull();
 		assertThat(factory.getTopologyFile()).isNull();
 		assertThat(factory.getWorkingDirectory()).isNull();
+		assertThat(factory.getArtifactDirectory()).isNull();
 		assertThat(factory.getJavaHome()).isNull();
 		assertThat(factory.getJmxPort()).isEqualTo(7199);
 		assertThat(factory.isAllowRoot()).isFalse();

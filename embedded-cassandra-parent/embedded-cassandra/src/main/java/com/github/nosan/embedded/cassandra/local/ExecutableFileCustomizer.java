@@ -22,40 +22,43 @@ import java.nio.file.Path;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.OS;
 
 /**
- * {@link DirectoryCustomizer} to set 'executable mode' to {@code cassandra} file.
+ * {@link DirectoryCustomizer} to set 'executable permission' to {@code bin/cassandra} file.
  *
  * @author Dmytro Nosan
  * @since 1.2.5
  */
-class ExecutableCustomizer implements DirectoryCustomizer {
+class ExecutableFileCustomizer implements DirectoryCustomizer {
+
+	private static final Logger log = LoggerFactory.getLogger(ExecutableFileCustomizer.class);
 
 	@Override
-	public void customize(@Nonnull Path directory) {
-		if (OS.get() == OS.WINDOWS) {
-			setExecutable(directory.resolve("bin/cassandra.ps1"));
-			setExecutable(directory.resolve("bin/stop-server.ps1"));
-		}
-		else {
+	public void customize(@Nonnull Path directory, @Nonnull Version version) {
+		if (OS.get() != OS.WINDOWS) {
 			setExecutable(directory.resolve("bin/cassandra"));
 		}
 	}
 
-	private static boolean setExecutable(Path path) {
+	private static void setExecutable(Path path) {
 		try {
-			if (!Files.exists(path)) {
-				return false;
-			}
-			if (Files.isExecutable(path)) {
-				return true;
+			if (!Files.exists(path) || Files.isExecutable(path)) {
+				return;
 			}
 			File file = path.toFile();
-			return file.setExecutable(true) || file.setExecutable(true, false);
+			if (!file.setExecutable(true) || file.setExecutable(true, false)) {
+				log.debug("'executable' permission has been set to ({})", file);
+			}
 		}
 		catch (Exception ex) {
-			return false;
+			if (log.isDebugEnabled()) {
+				log.error(String.format("Could not set 'executable' permission to (%s)", path), ex);
+			}
 		}
 	}
 }

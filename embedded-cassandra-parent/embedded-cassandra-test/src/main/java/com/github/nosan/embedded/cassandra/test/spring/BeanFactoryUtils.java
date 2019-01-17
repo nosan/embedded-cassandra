@@ -50,7 +50,7 @@ abstract class BeanFactoryUtils {
 		}
 		catch (NoUniqueBeanDefinitionException ex) {
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("'%s' doesn't have an unique bean of type '%s'.", context, targetClass), ex);
+				log.error(String.format("'%s' doesn't have an unique bean of type '%s'.", context, targetClass), ex);
 			}
 		}
 		catch (NoSuchBeanDefinitionException ex) {

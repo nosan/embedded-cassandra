@@ -59,6 +59,9 @@ public final class LocalCassandraFactoryBuilder {
 	private Path workingDirectory;
 
 	@Nullable
+	private Path artifactDirectory;
+
+	@Nullable
 	private URL configurationFile;
 
 	@Nullable
@@ -168,6 +171,31 @@ public final class LocalCassandraFactoryBuilder {
 	public LocalCassandraFactoryBuilder setArtifactFactory(@Nullable ArtifactFactory artifactFactory) {
 		this.artifactFactory = artifactFactory;
 		return this;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getArtifactDirectory() artifactDirectory} attribute.
+	 *
+	 * @param artifactDirectory The value for artifactDirectory
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.3.0
+	 */
+	@Nonnull
+	public LocalCassandraFactoryBuilder setArtifactDirectory(@Nullable Path artifactDirectory) {
+		this.artifactDirectory = artifactDirectory;
+		return this;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getArtifactDirectory() artifactDirectory} attribute.
+	 *
+	 * @param artifactDirectory The value for artifactDirectory
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.3.0
+	 */
+	@Nonnull
+	public LocalCassandraFactoryBuilder setArtifactDirectory(@Nullable File artifactDirectory) {
+		return setArtifactDirectory((artifactDirectory != null) ? artifactDirectory.toPath() : null);
 	}
 
 	/**
@@ -487,6 +515,7 @@ public final class LocalCassandraFactoryBuilder {
 		factory.setAllowRoot(this.allowRoot);
 		factory.setRegisterShutdownHook(this.registerShutdownHook);
 		factory.setCommitLogArchivingFile(this.commitLogArchivingFile);
+		factory.setArtifactDirectory(this.artifactDirectory);
 		return factory;
 	}
 }

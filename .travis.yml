@@ -4,21 +4,21 @@ dist: trusty
 
 matrix:
   include:
-  - os: linux
-    jdk: oraclejdk8
-    before_install:
-    #IPv6
-    - sudo bash -c 'if [ `cat /proc/net/if_inet6 | wc -l` = "0" ]; then echo "Enabling IPv6" ; sysctl net.ipv6.conf.all.disable_ipv6=0 ; sysctl net.ipv6.conf.default.disable_ipv6=0 ; sysctl net.ipv6.conf.lo.disable_ipv6=0 ; fi'
-  - os: osx
-    osx_image: xcode9.3
+    - os: linux
+      jdk: oraclejdk8
+      before_install:
+        #IPv6
+        - sudo bash -c 'if [ `cat /proc/net/if_inet6 | wc -l` = "0" ]; then echo "Enabling IPv6" ; sysctl net.ipv6.conf.all.disable_ipv6=0 ; sysctl net.ipv6.conf.default.disable_ipv6=0 ; sysctl net.ipv6.conf.lo.disable_ipv6=0 ; fi'
+    - os: osx
+      osx_image: xcode9.3
 
 script:
-- java -version
-- ./mvnw -Dsurefire.rerunFailingTestsCount=1 -B clean install
+  - java -version
+  - ./mvnw -Dsurefire.rerunFailingTestsCount=1 -B clean install
 
 after_failure:
-- cat **/**/target/surefire-reports/*.txt
+  - cat **/**/target/surefire-reports/*.txt
 
 cache:
   directories:
-  - $HOME/.m2
+    - $HOME/.m2

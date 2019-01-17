@@ -94,9 +94,9 @@ rpc_server_type: sync
 rpc_timeout_in_ms: 10000
 saved_caches_directory: /var/lib/cassandra/saved_caches
 seed_provider:
-- class_name: org.apache.cassandra.locator.SimpleSeedProvider
-  parameters:
-  - seeds: localhost
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: localhost
 sliced_buffer_size_in_kb: 64
 slow_query_log_timeout_in_ms: 500
 snapshot_before_compaction: false
@@ -117,19 +117,19 @@ windows_timer_interval: 1
 write_request_timeout_in_ms: 2000
 allocate_tokens_for_keyspace: KEYSPACE
 hinted_handoff_disabled_datacenters:
-- DC1
-- DC2
+  - DC1
+  - DC2
 hints_directory: /var/lib/cassandra/hints
 hints_compression:
-- class_name: LZ4Compressor
-  parameters:
-  -
+  - class_name: LZ4Compressor
+    parameters:
+      -
 network_authorizer: AllowAllNetworkAuthorizer
 roles_update_interval_in_ms: 2000
 permissions_update_interval_in_ms: 2000
 credentials_update_interval_in_ms: 2000
 data_file_directories:
-- /var/lib/cassandra/data
+  - /var/lib/cassandra/data
 cdc_raw_directory: /var/lib/cassandra/cdc_raw
 prepared_statements_cache_size_mb: 4096
 key_cache_keys_to_save: 100
@@ -141,9 +141,9 @@ commitlog_sync_batch_window_in_ms: 2
 commitlog_sync_group_window_in_ms: 1000
 periodic_commitlog_sync_lag_block_in_ms: 1000
 commitlog_compression:
-- class_name: LZ4Compressor
-  parameters:
-  -
+  - class_name: LZ4Compressor
+    parameters:
+      -
 file_cache_size_in_mb: 512
 disk_optimization_strategy: ssd
 memtable_heap_space_in_mb: 2048
@@ -208,18 +208,18 @@ transparent_data_encryption_options:
   cipher: AES/CBC/PKCS5Padding
   key_alias: testing:1
   key_provider:
-  - class_name: org.apache.cassandra.security.JKSKeyProvider
-    parameters:
-    - keystore: conf/.keystore
-      keystore_password: cassandra
-      store_type: JCEKS
-      key_password: cassandra
+    - class_name: org.apache.cassandra.security.JKSKeyProvider
+      parameters:
+        - keystore: conf/.keystore
+          keystore_password: cassandra
+          store_type: JCEKS
+          key_password: cassandra
 back_pressure_strategy:
-- class_name: org.apache.cassandra.net.RateBasedBackPressure
-  parameters:
-  - high_ratio: 0.90
-    factor: 5
-    flow: FAST
+  - class_name: org.apache.cassandra.net.RateBasedBackPressure
+    parameters:
+      - high_ratio: 0.90
+        factor: 5
+        flow: FAST
 full_query_log_dir: /tmp/cassandrafullquerylog
 audit_logging_options:
   enabled: false

@@ -24,6 +24,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.github.nosan.embedded.cassandra.Version;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -41,7 +43,7 @@ public class RackFileCustomizerTests {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		RackFileCustomizer customizer =
 				new RackFileCustomizer(getClass().getResource("/cassandra-rackdc.properties"));
-		customizer.customize(directory.getParent());
+		customizer.customize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-rackdc.properties")) {
 			assertThat(directory.resolve("cassandra-rackdc.properties")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
@@ -53,7 +55,7 @@ public class RackFileCustomizerTests {
 	public void notCustomize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		RackFileCustomizer customizer = new RackFileCustomizer(null);
-		customizer.customize(directory.getParent());
+		customizer.customize(directory.getParent(), new Version(3, 11, 3));
 		assertThat(directory.resolve("cassandra-rackdc.properties")).doesNotExist();
 	}
 }

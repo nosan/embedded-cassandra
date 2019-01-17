@@ -91,6 +91,7 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		String rackFile = environment.resolvePlaceholders(annotation.rackFile());
 		String commitLogArchivingFile = environment.resolvePlaceholders(annotation.commitLogArchivingFile());
 		String workingDirectory = environment.resolvePlaceholders(annotation.workingDirectory());
+		String artifactDirectory = environment.resolvePlaceholders(annotation.artifactDirectory());
 		String javaHome = environment.resolvePlaceholders(annotation.javaHome());
 		String version = environment.resolvePlaceholders(annotation.version());
 		Duration startupTimeout = Duration.ofMillis(annotation.startupTimeout());
@@ -105,6 +106,9 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 
 		if (StringUtils.hasText(workingDirectory)) {
 			factory.setWorkingDirectory(Paths.get(workingDirectory));
+		}
+		if (StringUtils.hasText(artifactDirectory)) {
+			factory.setArtifactDirectory(Paths.get(artifactDirectory));
 		}
 		if (StringUtils.hasText(javaHome)) {
 			factory.setJavaHome(Paths.get(javaHome));

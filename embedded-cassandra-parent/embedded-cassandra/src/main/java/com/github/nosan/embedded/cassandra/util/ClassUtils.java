@@ -55,7 +55,7 @@ public abstract class ClassUtils {
 		}
 		catch (Throwable ex) {
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("Could not get (%s) a class loader", Thread.currentThread()), ex);
+				log.error(String.format("Could not get (%s) a class loader", Thread.currentThread()), ex);
 			}
 		}
 		if (cl == null) {
@@ -64,7 +64,7 @@ public abstract class ClassUtils {
 			}
 			catch (Throwable ex) {
 				if (log.isDebugEnabled()) {
-					log.debug(String.format("Could not get (%s) a class loader", ClassUtils.class), ex);
+					log.error(String.format("Could not get (%s) a class loader", ClassUtils.class), ex);
 				}
 			}
 		}
@@ -74,7 +74,7 @@ public abstract class ClassUtils {
 			}
 			catch (Throwable ex) {
 				if (log.isDebugEnabled()) {
-					log.debug("Could not get a system class loader", ex);
+					log.error("Could not get a system class loader", ex);
 				}
 			}
 		}

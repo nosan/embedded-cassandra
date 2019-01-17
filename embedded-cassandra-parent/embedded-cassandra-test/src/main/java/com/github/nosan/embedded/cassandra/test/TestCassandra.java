@@ -16,11 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,9 +40,6 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
 import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
-import com.github.nosan.embedded.cassandra.util.MDCUtils;
-import com.github.nosan.embedded.cassandra.util.ThreadNameSupplier;
-import com.github.nosan.embedded.cassandra.util.ThreadUtils;
 
 /**
  * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and
@@ -66,11 +61,7 @@ public class TestCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);
 
-	private static final AtomicLong instanceCounter = new AtomicLong();
-
-	@Nonnull
-	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("test-cassandra-%d",
-			instanceCounter.incrementAndGet()));
+	private final boolean registerShutdownHook;
 
 	@Nonnull
 	private final AtomicBoolean shutdownHookRegistered = new AtomicBoolean(false);
@@ -82,15 +73,13 @@ public class TestCassandra implements Cassandra {
 	private final CqlScript[] scripts;
 
 	@Nonnull
-	private final Cassandra cassandra;
-
-	@Nonnull
 	private final ClusterFactory clusterFactory;
 
-	private final boolean registerShutdownHook;
+	@Nonnull
+	private final CassandraFactory cassandraFactory;
 
 	@Nullable
-	private volatile Thread launchThread;
+	private volatile Cassandra cassandra;
 
 	@Nullable
 	private volatile Cluster cluster;
@@ -185,11 +174,10 @@ public class TestCassandra implements Cassandra {
 	 */
 	public TestCassandra(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
 			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
-		this.cassandra = (cassandraFactory != null) ? cassandraFactory.create() : new LocalCassandraFactory().create();
+		this.cassandraFactory = (cassandraFactory != null) ? cassandraFactory : new LocalCassandraFactory();
 		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
 		this.registerShutdownHook = registerShutdownHook;
-		Objects.requireNonNull(this.cassandra, "Cassandra must not be null");
 	}
 
 	@Override
@@ -198,11 +186,15 @@ public class TestCassandra implements Cassandra {
 			if (this.started) {
 				return;
 			}
-
 			if (this.registerShutdownHook && this.shutdownHookRegistered.compareAndSet(false, true)) {
-				addShutdownHook();
+				try {
+					Runtime.getRuntime().addShutdownHook(
+							new Thread(this::stopSilently, "Test Cassandra Hook"));
+				}
+				catch (Throwable ex) {
+					throw new CassandraException("Test Cassandra shutdown hook is not registered", ex);
+				}
 			}
-
 			try {
 				start0();
 			}
@@ -211,7 +203,7 @@ public class TestCassandra implements Cassandra {
 					log.debug("Test Cassandra launch was interrupted");
 				}
 				stopSilently();
-				interrupt(Thread.currentThread());
+				Thread.currentThread().interrupt();
 			}
 			catch (Throwable ex) {
 				stopSilently();
@@ -229,12 +221,6 @@ public class TestCassandra implements Cassandra {
 			try {
 				stop0();
 			}
-			catch (InterruptedException ex) {
-				if (log.isDebugEnabled()) {
-					log.debug("Test Cassandra stop was interrupted");
-				}
-				interrupt(Thread.currentThread());
-			}
 			catch (Throwable ex) {
 				throw new CassandraException("Unable to stop Test Cassandra", ex);
 			}
@@ -246,7 +232,11 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public Settings getSettings() throws CassandraException {
 		synchronized (this.lock) {
-			return this.cassandra.getSettings();
+			Cassandra cassandra = this.cassandra;
+			Settings settings = (cassandra != null) ? cassandra.getSettings() : null;
+			return Optional.ofNullable(settings)
+					.orElseThrow(() -> new CassandraException(
+							"Test Cassandra is not initialized. Please start it before calling this method."));
 		}
 	}
 
@@ -376,54 +366,31 @@ public class TestCassandra implements Cassandra {
 		return String.format("%s [%s]", getClass().getSimpleName(), this.cassandra);
 	}
 
-	private void start0() throws Throwable {
+	private void start0() throws InterruptedException {
 		this.started = true;
+		Cassandra cassandra = this.cassandraFactory.create();
+		Objects.requireNonNull(cassandra, "Cassandra must not be null");
+		this.cassandra = cassandra;
 		if (log.isDebugEnabled()) {
-			log.debug("Starts Test Cassandra ({})", this.cassandra);
+			log.debug("Starts Test Cassandra ({})", cassandra);
 		}
-		AtomicReference<Throwable> throwable = new AtomicReference<>();
-		Map<String, String> context = MDCUtils.getContext();
-
-		Thread thread = new Thread(() -> {
-			try {
-				MDCUtils.setContext(context);
-				this.cassandra.start();
-				if (Thread.interrupted()) {
-					throw new InterruptedException();
-				}
-			}
-			catch (Throwable ex) {
-				throwable.set(ex);
-			}
-		}, this.threadNameSupplier.get());
-
-		this.launchThread = thread;
-		thread.start();
-
-		try {
-			ThreadUtils.join(thread);
-		}
-		catch (InterruptedException ex) {
-			interrupt(thread);
-			throw ex;
-		}
-
-		Throwable ex = throwable.get();
-		if (ex != null) {
-			throw ex;
+		cassandra.start();
+		if (Thread.interrupted()) {
+			throw new InterruptedException();
 		}
 		CqlScript[] scripts = this.scripts;
 		if (scripts.length > 0) {
 			executeScripts(scripts);
 		}
 		if (log.isDebugEnabled()) {
-			log.debug("Test Cassandra ({}) has been started", this.cassandra);
+			log.debug("Test Cassandra ({}) has been started", cassandra);
 		}
 	}
 
-	private void stop0() throws Throwable {
+	private void stop0() {
+		Cassandra cassandra = this.cassandra;
 		if (log.isDebugEnabled()) {
-			log.debug("Stops Test Cassandra ({})", this.cassandra);
+			log.debug("Stops Test Cassandra ({})", cassandra);
 		}
 		try {
 			Session session = this.session;
@@ -438,7 +405,6 @@ public class TestCassandra implements Cassandra {
 			log.error(String.format("Session (%s) has not been closed", this.session), ex);
 		}
 		this.session = null;
-
 		try {
 			Cluster cluster = this.cluster;
 			if (cluster != null) {
@@ -451,53 +417,14 @@ public class TestCassandra implements Cassandra {
 		catch (Throwable ex) {
 			log.error(String.format("Cluster (%s) has not been closed", this.cluster), ex);
 		}
-
 		this.cluster = null;
-
-		AtomicReference<Throwable> throwable = new AtomicReference<>();
-		Map<String, String> context = MDCUtils.getContext();
-
-		Thread thread = new Thread(() -> {
-			try {
-				MDCUtils.setContext(context);
-				this.cassandra.stop();
-				if (Thread.interrupted()) {
-					throw new InterruptedException();
-				}
-			}
-			catch (Throwable ex) {
-				throwable.set(ex);
-			}
-		}, this.threadNameSupplier.get());
-
-		thread.start();
-
-		try {
-			ThreadUtils.join(thread);
+		if (cassandra != null) {
+			cassandra.stop();
 		}
-		catch (InterruptedException ex) {
-			interrupt(thread);
-			throw ex;
-		}
-		Throwable ex = throwable.get();
-		if (ex != null) {
-			throw ex;
-		}
-		if (log.isDebugEnabled()) {
-			log.debug("Test Cassandra ({}) has been stopped", this.cassandra);
-		}
+		this.cassandra = null;
 		this.started = false;
-	}
-
-	private void addShutdownHook() {
-		try {
-			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				interrupt(this.launchThread);
-				stopSilently();
-			}, String.format("%s-hook", this.threadNameSupplier.get())));
-		}
-		catch (Throwable ex) {
-			throw new CassandraException("Test Cassandra shutdown hook is not registered", ex);
+		if (log.isDebugEnabled()) {
+			log.debug("Test Cassandra ({}) has been stopped", cassandra);
 		}
 	}
 
@@ -510,14 +437,4 @@ public class TestCassandra implements Cassandra {
 		}
 	}
 
-	private static void interrupt(Thread thread) {
-		try {
-			ThreadUtils.interrupt(thread);
-		}
-		catch (SecurityException ex) {
-			if (log.isDebugEnabled()) {
-				log.debug(String.format("%s is not able to interrupt a %s", Thread.currentThread(), thread), ex);
-			}
-		}
-	}
 }

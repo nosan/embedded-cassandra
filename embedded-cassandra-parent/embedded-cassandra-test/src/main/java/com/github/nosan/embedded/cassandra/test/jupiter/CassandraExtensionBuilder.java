@@ -37,6 +37,5 @@ public final class CassandraExtensionBuilder
 	public CassandraExtension build() {
 		return new CassandraExtension(isRegisterShutdownHook(), getCassandraFactory(), getClusterFactory(),
 				getScripts());
-
 	}
 }

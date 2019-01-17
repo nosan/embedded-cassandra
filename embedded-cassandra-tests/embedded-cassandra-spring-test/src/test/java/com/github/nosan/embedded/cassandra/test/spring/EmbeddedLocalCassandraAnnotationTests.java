@@ -52,7 +52,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EmbeddedLocalCassandra(version = "2.2.13", configurationFile = "classpath:/cassandra.yaml",
 		logbackFile = "classpath:/logback-test.xml",
 		rackFile = "classpath:/rack.properties",
-		workingDirectory = "target/cassandra", javaHome = "target/java",
+		workingDirectory = "target/cassandra",
+		artifactDirectory = "target/artifact",
+		javaHome = "target/java",
 		jvmOptions = {"-Dtest.property=property"},
 		topologyFile = "classpath:/topology.properties",
 		commitLogArchivingFile = "classpath:/commit_log_archiving.properties",
@@ -86,6 +88,7 @@ public class EmbeddedLocalCassandraAnnotationTests {
 		assertThat(af.getProxy().address()).isEqualTo(new InetSocketAddress("localhost", 8080));
 		assertThat(af.getProxy().type()).isEqualTo(Proxy.Type.SOCKS);
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
+		assertThat(factory.getArtifactDirectory()).isEqualTo(Paths.get("target/artifact"));
 		assertThat(factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
 		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(4));

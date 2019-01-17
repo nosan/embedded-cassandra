@@ -24,6 +24,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.github.nosan.embedded.cassandra.Version;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -40,7 +42,7 @@ public class CommitLogArchivingFileCustomizerTests {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		CommitLogArchivingFileCustomizer customizer =
 				new CommitLogArchivingFileCustomizer(getClass().getResource("/commitlog_archiving.properties"));
-		customizer.customize(directory.getParent());
+		customizer.customize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/commitlog_archiving.properties")) {
 			assertThat(directory.resolve("commitlog_archiving.properties")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
@@ -52,7 +54,7 @@ public class CommitLogArchivingFileCustomizerTests {
 	public void notCustomize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		CommitLogArchivingFileCustomizer customizer = new CommitLogArchivingFileCustomizer(null);
-		customizer.customize(directory.getParent());
+		customizer.customize(directory.getParent(), new Version(3, 11, 3));
 		assertThat(directory.resolve("commitlog_archiving.properties")).doesNotExist();
 	}
 }

@@ -21,6 +21,8 @@ import java.nio.file.Path;
 
 import javax.annotation.Nonnull;
 
+import com.github.nosan.embedded.cassandra.Version;
+
 /**
  * Customizer interface used to customize a {@code directory}.
  *
@@ -33,8 +35,9 @@ interface DirectoryCustomizer {
 	/**
 	 * Customize a directory.
 	 *
-	 * @param directory the base directory
+	 * @param directory the base directory (CASSANDRA_HOME)
+	 * @param version a version
 	 * @throws IOException in the case of any IO errors
 	 */
-	void customize(@Nonnull Path directory) throws IOException;
+	void customize(@Nonnull Path directory, @Nonnull Version version) throws IOException;
 }
