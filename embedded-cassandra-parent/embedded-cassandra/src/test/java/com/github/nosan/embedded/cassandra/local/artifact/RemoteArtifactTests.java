@@ -26,7 +26,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -84,7 +87,7 @@ public class RemoteArtifactTests {
 		}
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, content.length);
-			sleep(2000);
+			sleep(4000);
 			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
@@ -98,7 +101,7 @@ public class RemoteArtifactTests {
 	}
 
 	@Test
-	public void shouldDownloadArtifactNoProgress() throws Exception {
+	public void shouldDownloadArtifact() throws Exception {
 		HttpServer server = this.webServer.get();
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
@@ -116,6 +119,61 @@ public class RemoteArtifactTests {
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 	}
+
+	@Test
+	public void shouldDownloadArtifactRedirection() throws Exception {
+		HttpServer server = this.webServer.get();
+		byte[] content;
+		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
+			content = IOUtils.toByteArray(inputStream);
+		}
+		server.createContext("/apache-cassandra-3.1.1.zip", exchange -> {
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+			exchange.getResponseBody().write(content);
+			exchange.close();
+		});
+		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+			exchange.getResponseHeaders().put("Location", Collections.singletonList("/apache-cassandra-3.1.1.zip"));
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
+			exchange.close();
+		});
+		Artifact artifact = this.factory.create(new Version(3, 1, 1));
+		Path archive = artifact.get();
+		assertThat(this.output.toString()).doesNotContain("Downloaded");
+		assertThat(archive).exists().hasParent(this.factory.getDirectory());
+		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
+		assertThat(archive).hasBinaryContent(content);
+	}
+
+	@Test
+	public void shouldDownloadArtifactURLs() throws Exception {
+		HttpServer server = this.webServer.get();
+		byte[] content;
+		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
+			content = IOUtils.toByteArray(inputStream);
+		}
+		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+			exchange.getResponseBody().write(content);
+			exchange.close();
+		});
+		UrlFactory delegate = this.factory.getUrlFactory();
+		this.factory.setUrlFactory(new UrlFactory() {
+			@Nonnull
+			@Override
+			public URL[] create(@Nonnull Version version) throws MalformedURLException {
+				return Stream.concat(Stream.of(new URL("http://localhost:8080/cassandra.zip")),
+						Arrays.stream(delegate.create(version))).toArray(URL[]::new);
+			}
+		});
+		Artifact artifact = this.factory.create(new Version(3, 1, 1));
+		Path archive = artifact.get();
+		assertThat(this.output.toString()).doesNotContain("Downloaded");
+		assertThat(archive).exists().hasParent(this.factory.getDirectory());
+		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
+		assertThat(archive).hasBinaryContent(content);
+	}
+
 
 	@Test
 	public void shouldNotDownloadArtifactIfExists() throws Exception {
@@ -139,6 +197,18 @@ public class RemoteArtifactTests {
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
+	}
+
+
+	@Test
+	public void shouldNotDownloadInvalidStatus() {
+		HttpServer server = this.webServer.get();
+		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+			exchange.sendResponseHeaders(400, 0);
+			exchange.close();
+		});
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+				.hasStackTraceContaining("HTTP status for URL");
 	}
 
 	@Test

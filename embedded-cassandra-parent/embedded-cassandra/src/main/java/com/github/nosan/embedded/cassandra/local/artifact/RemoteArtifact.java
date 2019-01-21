@@ -129,7 +129,7 @@ class RemoteArtifact implements Artifact {
 		try (InputStream inputStream = urlConnection.getInputStream()) {
 			long start = System.currentTimeMillis();
 			log.info("Downloading Apache Cassandra ({}) from ({}).", version, urlConnection.getURL());
-			executorService.scheduleAtFixedRate(() -> progress(tempArtifact, length), 0, 1500, TimeUnit.MILLISECONDS);
+			executorService.scheduleAtFixedRate(() -> progress(tempArtifact, length), 0, 3, TimeUnit.SECONDS);
 			Files.copy(inputStream, tempArtifact);
 			long elapsed = System.currentTimeMillis() - start;
 			log.info("Apache Cassandra ({}) has been downloaded ({} ms)", version, elapsed);
@@ -182,18 +182,22 @@ class RemoteArtifact implements Artifact {
 			if (readTimeout != null) {
 				connection.setReadTimeout(Math.toIntExact(readTimeout.toMillis()));
 			}
-			switch (connection.getResponseCode()) {
-				case 301:
-				case 302:
-				case 303:
-				case 307:
-				case 308:
-					String location = connection.getHeaderField("Location");
-					if (StringUtils.hasText(location)) {
-						return getUrlConnection(proxy, readTimeout, connectTimeout, new URL(url, location));
-					}
+			int status = connection.getResponseCode();
+			if (status >= 200 && status < 300) {
+				return connection;
+			}
+			else if (status >= 400 && status <= 599) {
+				throw new IOException(String.format("HTTP status for URL (%s) is invalid", url));
+			}
+			if (status >= 300 && status < 400) {
+				String location = connection.getHeaderField("Location");
+				if (StringUtils.hasText(location)) {
+					return getUrlConnection(proxy, readTimeout, connectTimeout, new URL(url, location));
+				}
 			}
 		}
+		urlConnection.setUseCaches(true);
+		urlConnection.getInputStream();
 		return urlConnection;
 	}
 
