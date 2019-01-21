@@ -188,8 +188,7 @@ public class TestCassandra implements Cassandra {
 			}
 			if (this.registerShutdownHook && this.shutdownHookRegistered.compareAndSet(false, true)) {
 				try {
-					Runtime.getRuntime().addShutdownHook(
-							new Thread(this::stopSilently, "Test Cassandra Hook"));
+					Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, "Test Cassandra Hook"));
 				}
 				catch (Throwable ex) {
 					throw new CassandraException("Test Cassandra shutdown hook is not registered", ex);
@@ -367,13 +366,13 @@ public class TestCassandra implements Cassandra {
 	}
 
 	private void start0() throws InterruptedException {
-		this.started = true;
 		Cassandra cassandra = this.cassandraFactory.create();
 		Objects.requireNonNull(cassandra, "Cassandra must not be null");
-		this.cassandra = cassandra;
 		if (log.isDebugEnabled()) {
 			log.debug("Starts Test Cassandra ({})", cassandra);
 		}
+		this.cassandra = cassandra;
+		this.started = true;
 		cassandra.start();
 		if (Thread.interrupted()) {
 			throw new InterruptedException();
