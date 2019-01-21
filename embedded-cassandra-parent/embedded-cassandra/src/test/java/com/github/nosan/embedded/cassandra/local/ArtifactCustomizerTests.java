@@ -136,7 +136,6 @@ public class ArtifactCustomizerTests {
 		customizer.customize(this.workingDirectory, this.version);
 	}
 
-
 	private static final class StaticArtifactFactory implements ArtifactFactory {
 
 		@Nonnull
@@ -163,5 +162,4 @@ public class ArtifactCustomizerTests {
 			throw new UnsupportedOperationException();
 		}
 	}
-
 }

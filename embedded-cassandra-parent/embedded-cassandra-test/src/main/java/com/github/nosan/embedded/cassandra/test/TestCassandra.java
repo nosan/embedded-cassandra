@@ -435,5 +435,4 @@ public class TestCassandra implements Cassandra {
 			log.error("Unable to stop Test Cassandra", ex);
 		}
 	}
-
 }

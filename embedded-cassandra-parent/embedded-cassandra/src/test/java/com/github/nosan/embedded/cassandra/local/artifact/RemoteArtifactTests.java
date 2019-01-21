@@ -174,7 +174,6 @@ public class RemoteArtifactTests {
 		assertThat(archive).hasBinaryContent(content);
 	}
 
-
 	@Test
 	public void shouldNotDownloadArtifactIfExists() throws Exception {
 		HttpServer server = this.webServer.get();
@@ -198,7 +197,6 @@ public class RemoteArtifactTests {
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 	}
-
 
 	@Test
 	public void shouldNotDownloadInvalidStatus() {
