@@ -186,14 +186,14 @@ class RemoteArtifact implements Artifact {
 			if (status >= 200 && status < 300) {
 				return connection;
 			}
-			else if (status >= 400 && status <= 599) {
-				throw new IOException(String.format("HTTP status for URL (%s) is invalid", url));
-			}
-			if (status >= 300 && status < 400) {
+			else if (status >= 300 && status < 400) {
 				String location = connection.getHeaderField("Location");
 				if (StringUtils.hasText(location)) {
 					return getUrlConnection(proxy, readTimeout, connectTimeout, new URL(url, location));
 				}
+			}
+			else if (status >= 400) {
+				throw new IOException(String.format("HTTP status for URL (%s) is invalid", url));
 			}
 		}
 		urlConnection.setUseCaches(true);
