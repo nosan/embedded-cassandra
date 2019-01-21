@@ -47,14 +47,14 @@ import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtensionBuilde
 public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 		B extends AbstractTestCassandraBuilder<C, B>> {
 
+	@Nonnull
+	private final List<CqlScript> scripts = new ArrayList<>();
+
 	@Nullable
 	private ClusterFactory clusterFactory;
 
 	@Nullable
 	private CassandraFactory cassandraFactory;
-
-	@Nonnull
-	private final List<CqlScript> scripts = new ArrayList<>();
 
 	private boolean registerShutdownHook = true;
 
@@ -84,18 +84,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 			return addScripts(Arrays.asList(scripts));
 		}
 		return (B) this;
-	}
-
-	/**
-	 * Sets  {@link CqlScript} to execute.
-	 *
-	 * @param scripts CQL scripts
-	 * @return {@code this} builder for use in a chained invocation
-	 */
-	@Nonnull
-	public final B setScripts(@Nullable CqlScript... scripts) {
-		this.scripts.clear();
-		return addScripts(scripts);
 	}
 
 	/**
@@ -150,6 +138,18 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	@Nonnull
 	protected final CqlScript[] getScripts() {
 		return this.scripts.toArray(new CqlScript[0]);
+	}
+
+	/**
+	 * Sets  {@link CqlScript} to execute.
+	 *
+	 * @param scripts CQL scripts
+	 * @return {@code this} builder for use in a chained invocation
+	 */
+	@Nonnull
+	public final B setScripts(@Nullable CqlScript... scripts) {
+		this.scripts.clear();
+		return addScripts(scripts);
 	}
 
 	/**

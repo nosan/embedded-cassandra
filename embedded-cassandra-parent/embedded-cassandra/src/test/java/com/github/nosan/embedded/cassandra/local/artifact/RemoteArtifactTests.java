@@ -16,17 +16,15 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -37,15 +35,14 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.WebServer;
-import com.github.nosan.embedded.cassandra.util.OS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link RemoteArtifact}.
@@ -63,9 +60,6 @@ public class RemoteArtifactTests {
 	@Rule
 	public final CaptureOutput output = new CaptureOutput();
 
-	@Rule
-	public final ExpectedException throwable = ExpectedException.none();
-
 	private RemoteArtifactFactory factory;
 
 	@Before
@@ -82,27 +76,7 @@ public class RemoteArtifactTests {
 	}
 
 	@Test
-	public void shouldNotWorkDirectoryIsFile() throws Exception {
-		this.throwable.expect(IllegalArgumentException.class);
-		this.throwable.expectMessage("exists and is a file");
-		this.factory.setDirectory(this.temporaryFolder.newFile().toPath());
-		this.factory.create(new Version(3, 11, 3)).get();
-	}
-
-	@Test
-	public void shouldNotWorkDirectoryNotWritable() throws Exception {
-		if (OS.get() != OS.WINDOWS) {
-			this.throwable.expect(IllegalArgumentException.class);
-			this.throwable.expectMessage("is not writable");
-			File file = this.temporaryFolder.newFolder();
-			assertThat(file.setReadOnly()).describedAs("setReadOnly").isTrue();
-			this.factory.setDirectory(file.toPath());
-			this.factory.create(new Version(3, 11, 3)).get();
-		}
-	}
-
-	@Test
-	public void shouldDownloadArtifactIfNotExistsShowProgress() throws Exception {
+	public void shouldDownloadArtifactAndShowProgress() throws Exception {
 		HttpServer server = this.webServer.get();
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
@@ -110,7 +84,7 @@ public class RemoteArtifactTests {
 		}
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, content.length);
-			sleep(500);
+			sleep(2000);
 			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
@@ -124,7 +98,7 @@ public class RemoteArtifactTests {
 	}
 
 	@Test
-	public void shouldDownloadArtifactIfNotExistsNoProgress() throws Exception {
+	public void shouldDownloadArtifactNoProgress() throws Exception {
 		HttpServer server = this.webServer.get();
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
@@ -141,34 +115,44 @@ public class RemoteArtifactTests {
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
-
 	}
 
 	@Test
 	public void shouldNotDownloadArtifactIfExists() throws Exception {
-		this.factory.setDirectory(Paths.get(getClass().getResource("/").toURI()));
-		Artifact artifact = this.factory.create(new Version(3, 11, 3));
+		HttpServer server = this.webServer.get();
+		byte[] content;
+		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
+			content = IOUtils.toByteArray(inputStream);
+		}
+		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, content.length);
+			exchange.getResponseBody().write(content);
+			exchange.close();
+		});
+		Files.createDirectories(this.factory.getDirectory());
+		Files.copy(new ByteArrayInputStream(content), this.factory.getDirectory().
+				resolve("apache-cassandra-3.1.1.zip"));
+
+		Artifact artifact = this.factory.create(new Version(3, 1, 1));
 		Path archive = artifact.get();
 		assertThat(this.output.toString()).doesNotContain("Downloaded");
-		assertThat(this.output.toString()).doesNotContain("It takes a while...");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
-		assertThat(archive).hasFileName("apache-cassandra-3.11.3.zip");
+		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
+		assertThat(archive).hasBinaryContent(content);
 	}
 
 	@Test
-	public void readTimeoutIsExceeded() throws Exception {
+	public void readTimeoutIsExceeded() {
 		HttpServer server = this.webServer.get();
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(1200));
 
-		this.throwable.expect(SocketTimeoutException.class);
-		this.throwable.expectMessage("Read timed out");
-
 		this.factory.setReadTimeout(Duration.ofSeconds(1));
-		this.factory.create(new Version(3, 1, 1)).get();
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+				.hasStackTraceContaining("Read timed out");
 	}
 
 	@Test
-	public void connectTimeoutIsExceeded() throws Exception {
+	public void connectTimeoutIsExceeded() {
 		this.factory.setUrlFactory(new UrlFactory() {
 			@Nonnull
 			@Override
@@ -176,38 +160,35 @@ public class RemoteArtifactTests {
 				return new URL[]{new URL("http://example.com:81/apache-cassandra-3.1.1.zip")};
 			}
 		});
-
-		this.throwable.expect(SocketTimeoutException.class);
-		this.throwable.expectMessage("connect timed out");
-
 		this.factory.setConnectTimeout(Duration.ofSeconds(1));
-		this.factory.create(new Version(3, 1, 1)).get();
+
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+				.hasStackTraceContaining("connect timed out");
 	}
 
 	@Test
-	public void proxyIsInvalid() throws Exception {
-
-		this.throwable.expect(SocketException.class);
-		this.throwable.expectMessage("Connection refused");
-
+	public void proxyIsInvalid() {
 		this.factory.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
-		this.factory.create(new Version(3, 1, 1)).get();
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+				.hasStackTraceContaining("Connection refused");
 
 	}
 
 	@Test
-	public void urlDoesNotHaveFileName() throws Exception {
-		this.throwable.expect(IllegalArgumentException.class);
-		this.throwable.expectMessage("There is no way to determine");
-
+	public void impossibleDetermineFileName() {
+		HttpServer server = this.webServer.get();
+		server.createContext("/", exchange -> exchange.sendResponseHeaders(200, 0));
 		this.factory.setUrlFactory(new UrlFactory() {
 			@Nonnull
 			@Override
 			public URL[] create(@Nonnull Version version) throws MalformedURLException {
-				return new URL[]{new URL("http://localhost:8080/")};
+				return new URL[]{new URL(String.format(
+						"http://%s:%d/", server.getAddress().getHostName(), server.getAddress().getPort()
+				))};
 			}
 		});
-		this.factory.create(new Version(3, 1, 1)).get();
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+				.hasStackTraceContaining("There is no way to determine");
 
 	}
 

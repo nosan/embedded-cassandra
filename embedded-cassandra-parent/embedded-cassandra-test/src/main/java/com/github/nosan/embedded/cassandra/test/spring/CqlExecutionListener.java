@@ -129,8 +129,10 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			}
 		}
 		catch (BeansException ex) {
-			log.error(String.format("Failed to retrieve '%s' named '%s' bean for a test context %s", name,
-					Cluster.class, testContext), ex);
+			if (log.isDebugEnabled()) {
+				log.error(String.format("Failed to retrieve '%s' named '%s' bean for a test context %s", name,
+						Cluster.class, testContext), ex);
+			}
 			return null;
 		}
 		try {
@@ -146,7 +148,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			}
 			catch (BeansException ex) {
 				if (log.isDebugEnabled()) {
-					log.debug(String.format("Failed to retrieve '%s' primary bean for a test context %s",
+					log.error(String.format("Failed to retrieve '%s' primary bean for a test context %s",
 							Cluster.class, testContext), ex);
 				}
 			}
@@ -154,7 +156,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 		catch (BeansException ex) {
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("Failed to retrieve '%s' named 'cluster' bean for a test context %s",
+				log.error(String.format("Failed to retrieve '%s' named 'cluster' bean for a test context %s",
 						Cluster.class, testContext), ex);
 			}
 			return null;

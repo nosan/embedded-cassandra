@@ -3,9 +3,9 @@ num_tokens: 256
 commitlog_sync: periodic
 commitlog_sync_period_in_ms: 10000
 seed_provider:
-- class_name: org.apache.cassandra.locator.SimpleSeedProvider
-  parameters:
-  - seeds: "#seed"
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "#seed"
 listen_interface: "#interface"
 rpc_interface: "#interface"
 endpoint_snitch: SimpleSnitch

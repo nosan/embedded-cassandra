@@ -59,6 +59,9 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	private Duration startupTimeout;
 
 	@Nullable
+	private Path artifactDirectory;
+
+	@Nullable
 	private Path workingDirectory;
 
 	@Nullable
@@ -263,11 +266,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Cassandra directory. This directory keeps data/logs and other files. By default {@link
-	 * FileUtils#getTmpDirectory() tmp.dir} is used.
-	 * <p>
-	 * <b>Note!</b> Temporary directory will be removed at the end, if you don't want to follow this behaviour, you must
-	 * specify a {@code real} directory instead of {@code temporary}.
+	 * Cassandra directory. This directory keeps data/logs and other files. Default value is {@link
+	 * FileUtils#getTmpDirectory() tmp.dir}{@code /embedded-cassandra/{version}/{UUID}}.
 	 *
 	 * @return The value of the {@code workingDirectory} attribute
 	 */
@@ -367,6 +367,28 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		this.commitLogArchivingFile = commitLogArchivingFile;
 	}
 
+	/**
+	 * Directory to extract an {@link Artifact} (must be writable). Default value is {@link
+	 * FileUtils#getTmpDirectory() tmp.dir}{@code /embedded-cassandra/{version}/apache-cassandra-{version}}.
+	 *
+	 * @return The value of the {@code artifactDirectory} attribute
+	 * @since 1.3.0
+	 */
+	@Nullable
+	public Path getArtifactDirectory() {
+		return this.artifactDirectory;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getArtifactDirectory} attribute.
+	 *
+	 * @param artifactDirectory The value for artifactDirectory
+	 * @since 1.3.0
+	 */
+	public void setArtifactDirectory(@Nullable Path artifactDirectory) {
+		this.artifactDirectory = artifactDirectory;
+	}
+
 	@Nonnull
 	@Override
 	public Cassandra create() {
@@ -384,12 +406,21 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 		Path workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null) {
-			workingDirectory = FileUtils.getTmpDirectory().
-					resolve(String.format("embedded-cassandra-%s", UUID.randomUUID()));
+			workingDirectory = FileUtils.getTmpDirectory()
+					.resolve(String.format("embedded-cassandra/%s/%s", version, UUID.randomUUID()));
+		}
+		Path artifactDirectory = getArtifactDirectory();
+		if (artifactDirectory == null) {
+			artifactDirectory = FileUtils.getTmpDirectory()
+					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
+		}
+		if (artifactDirectory.equals(workingDirectory)) {
+			throw new IllegalArgumentException(String.format("Artifact Directory (%s) must not be the same" +
+					" as Working Directory (%s)", artifactDirectory, workingDirectory));
 		}
 		return new LocalCassandra(version, artifactFactory, workingDirectory,
-				startupTimeout, getConfigurationFile(), getLogbackFile(), getRackFile(), getTopologyFile(),
-				getCommitLogArchivingFile(), getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot(),
-				isRegisterShutdownHook());
+				artifactDirectory, startupTimeout, getConfigurationFile(), getLogbackFile(), getRackFile(),
+				getTopologyFile(), getCommitLogArchivingFile(), getJvmOptions(), getJavaHome(), getJmxPort(),
+				isAllowRoot(), isRegisterShutdownHook());
 	}
 }

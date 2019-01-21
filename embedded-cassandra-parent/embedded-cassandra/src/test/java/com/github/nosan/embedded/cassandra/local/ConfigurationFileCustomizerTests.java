@@ -24,6 +24,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.github.nosan.embedded.cassandra.Version;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -41,7 +43,7 @@ public class ConfigurationFileCustomizerTests {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		ConfigurationFileCustomizer customizer =
 				new ConfigurationFileCustomizer(getClass().getResource("/cassandra.yaml"));
-		customizer.customize(directory.getParent());
+		customizer.customize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
 			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));

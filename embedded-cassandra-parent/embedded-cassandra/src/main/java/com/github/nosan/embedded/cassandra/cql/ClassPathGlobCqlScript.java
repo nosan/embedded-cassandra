@@ -221,7 +221,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 		catch (IOException | URISyntaxException ex) {
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("Could not find resources for URL (%s) and glob pattern (%s)", url, pattern),
+				log.error(String.format("Could not find resources for URL (%s) and glob pattern (%s)", url, pattern),
 						ex);
 			}
 			return Collections.emptySet();
@@ -259,9 +259,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 			return new LinkedHashSet<>(Collections.list(enumeration));
 		}
 		catch (IOException ex) {
-			if (log.isDebugEnabled()) {
-				log.debug(String.format("Could not get URLs for location (%s)", name), ex);
-			}
+			log.error(String.format("Could not get URLs for location (%s)", name), ex);
 			return Collections.emptySet();
 		}
 	}

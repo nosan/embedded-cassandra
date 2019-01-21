@@ -16,23 +16,21 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.nio.file.Path;
-
-import javax.annotation.Nonnull;
+import java.io.IOException;
 
 /**
- * Factory that creates a {@link Directory}.
+ * Basic strategy to initialize the {@code Cassandra}.
  *
  * @author Dmytro Nosan
- * @since 1.0.9
+ * @since 1.3.0
  */
-interface DirectoryFactory {
+@FunctionalInterface
+interface Initializer {
+
 	/**
-	 * Creates a new  configured {@link Directory}.
+	 * Initialize the {@code Cassandra}.
 	 *
-	 * @param archive the archive to initialize a directory
-	 * @return {@code directory} to use
+	 * @throws IOException in the case of any IO errors
 	 */
-	@Nonnull
-	Directory create(@Nonnull Path archive);
+	void initialize() throws IOException;
 }

@@ -46,22 +46,15 @@ class RandomPortConfigurationFileCustomizer implements DirectoryCustomizer {
 
 	private static final Logger log = LoggerFactory.getLogger(RandomPortConfigurationFileCustomizer.class);
 
-	@Nonnull
-	private final Version version;
-
-	RandomPortConfigurationFileCustomizer(@Nonnull Version version) {
-		this.version = version;
-	}
-
 	@Override
-	public void customize(@Nonnull Path directory) throws IOException {
+	public void customize(@Nonnull Path directory, @Nonnull Version version) throws IOException {
 		Yaml yaml = new Yaml();
 		Path configurationFile = directory.resolve("conf/cassandra.yaml");
 
 		Map<Object, Object> originalSource = new LinkedHashMap<>(load(yaml, configurationFile));
 		Map<Object, Object> newSource = new LinkedHashMap<>(originalSource);
 
-		replace(newSource, this.version);
+		replace(newSource, version);
 
 		if (newSource.equals(originalSource)) {
 			return;
@@ -105,12 +98,12 @@ class RandomPortConfigurationFileCustomizer implements DirectoryCustomizer {
 
 	private static Map<?, ?> load(Yaml yaml, Path source) {
 		try (InputStream is = Files.newInputStream(source)) {
-			Map<?, ?> value = yaml.loadAs(is, Map.class);
-			return (value != null) ? value : Collections.emptyMap();
+			Map<?, ?> values = yaml.loadAs(is, Map.class);
+			return (values != null) ? values : Collections.emptyMap();
 		}
 		catch (IOException ex) {
 			if (log.isDebugEnabled()) {
-				log.debug(String.format("Could not read properties from (%s)", source), ex);
+				log.error(String.format("Could not read properties from (%s)", source), ex);
 			}
 			return Collections.emptyMap();
 		}

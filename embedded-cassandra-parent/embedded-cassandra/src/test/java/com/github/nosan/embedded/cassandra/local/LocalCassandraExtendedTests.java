@@ -40,21 +40,6 @@ public class LocalCassandraExtendedTests {
 	public final CaptureOutput output = new CaptureOutput();
 
 	@Test
-	public void interruptCassandra() throws InterruptedException {
-		Cassandra cassandra = new LocalCassandraFactory().create();
-
-		Thread thread = new Thread(cassandra::start);
-		thread.start();
-		Thread.sleep(5000);
-		thread.interrupt();
-		thread.join();
-
-		assertThat(this.output.toString()).contains("Cassandra launch was interrupted");
-		assertThat(this.output.toString()).contains("Apache Cassandra (3.11.3) has been stopped");
-
-	}
-
-	@Test
 	public void shouldRegisterShutdownHookOnlyOnce() throws ClassNotFoundException {
 		Set<Thread> beforeHooks = getHooks();
 		LocalCassandraFactory factory = new LocalCassandraFactory();
@@ -75,8 +60,7 @@ public class LocalCassandraExtendedTests {
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks).filteredOn(
-				thread -> thread.getName().contains("cassandra-") &&
-						thread.getName().endsWith("-hook"))
+				thread -> thread.getName().equals("Cassandra Hook"))
 				.hasSize(1);
 	}
 
@@ -95,8 +79,7 @@ public class LocalCassandraExtendedTests {
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks)
-				.noneMatch(thread -> thread.getName().contains("cassandra-") &&
-						thread.getName().endsWith("-hook"));
+				.noneMatch(thread -> thread.getName().equals("Cassandra Hook"));
 	}
 
 	@SuppressWarnings("unchecked")

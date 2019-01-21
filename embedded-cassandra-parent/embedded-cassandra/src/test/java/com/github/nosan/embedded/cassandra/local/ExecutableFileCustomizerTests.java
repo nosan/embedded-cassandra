@@ -23,27 +23,28 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.OS;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ExecutableCustomizer}.
+ * Tests for {@link ExecutableFileCustomizer}.
  *
  * @author Dmytro Nosan
  */
-public class ExecutableCustomizerTests {
+public class ExecutableFileCustomizerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-	private final ExecutableCustomizer customizer = new ExecutableCustomizer();
+	private final ExecutableFileCustomizer customizer = new ExecutableFileCustomizer();
 
 	@Test
 	public void setExecutableUnixFile() throws IOException {
 		if (OS.get() != OS.WINDOWS) {
 			File file = createFile("cassandra");
-			this.customizer.customize(this.temporaryFolder.getRoot().toPath());
+			this.customizer.customize(this.temporaryFolder.getRoot().toPath(), new Version(3, 11, 3));
 			assertThat(file.canExecute()).isTrue();
 		}
 	}

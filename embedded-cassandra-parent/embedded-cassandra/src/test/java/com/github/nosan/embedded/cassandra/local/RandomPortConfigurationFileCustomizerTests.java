@@ -46,12 +46,12 @@ public class RandomPortConfigurationFileCustomizerTests {
 	public void shouldReplaceWithRandomPorts() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		Version version = new Version(3, 11, 3);
-		RandomPortConfigurationFileCustomizer customizer = new RandomPortConfigurationFileCustomizer(version);
+		RandomPortConfigurationFileCustomizer customizer = new RandomPortConfigurationFileCustomizer();
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-all-ports.yaml")) {
 			Files.copy(inputStream, directory.resolve("cassandra.yaml"));
 		}
 
-		customizer.customize(directory.getParent());
+		customizer.customize(directory.getParent(), version);
 
 		assertThat(directory.resolve("cassandra.yaml")).exists();
 		NodeSettings settings;
@@ -70,7 +70,7 @@ public class RandomPortConfigurationFileCustomizerTests {
 	public void shouldNotReplaceAndShouldNotModify() throws IOException {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		Version version = new Version(3, 11, 3);
-		RandomPortConfigurationFileCustomizer customizer = new RandomPortConfigurationFileCustomizer(version);
+		RandomPortConfigurationFileCustomizer customizer = new RandomPortConfigurationFileCustomizer();
 		Path configurationFile = directory.resolve("cassandra.yaml");
 
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
@@ -79,7 +79,7 @@ public class RandomPortConfigurationFileCustomizerTests {
 
 		FileTime lastModifiedTime = Files.getLastModifiedTime(configurationFile);
 
-		customizer.customize(directory.getParent());
+		customizer.customize(directory.getParent(), version);
 
 		assertThat(configurationFile).exists();
 		assertThat(Files.getLastModifiedTime(configurationFile))

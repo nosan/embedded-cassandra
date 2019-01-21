@@ -262,6 +262,19 @@ public @interface EmbeddedLocalCassandra {
 	boolean registerTestShutdownHook() default true;
 
 	/**
+	 * Sets attribute for {@link LocalCassandraFactory#getArtifactDirectory()}.
+	 * <p>
+	 * Path will be interpreted as a {@link Path}.
+	 * <p>
+	 * This value can contain a {@code spring} placeholder.
+	 *
+	 * @return The value of the {@code artifactDirectory} attribute
+	 * @see Path
+	 * @since 1.3.0
+	 */
+	String artifactDirectory() default "";
+
+	/**
 	 * Annotation that describes {@link RemoteArtifactFactory} attributes.
 	 *
 	 * @see RemoteArtifactFactory

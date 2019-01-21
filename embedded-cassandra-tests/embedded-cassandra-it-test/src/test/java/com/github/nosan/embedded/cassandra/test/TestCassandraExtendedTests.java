@@ -16,17 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
@@ -41,28 +37,6 @@ public class TestCassandraExtendedTests {
 
 	@Rule
 	public final CaptureOutput output = new CaptureOutput();
-
-	@Test
-	public void interruptTestCassandra() throws InterruptedException {
-		TestCassandra cassandra = new TestCassandra(new CqlScript() {
-			@Nonnull
-			@Override
-			public Collection<String> getStatements() {
-				throw new IllegalStateException("Why are you here ?");
-			}
-		});
-
-		Thread thread = new Thread(cassandra::start);
-		thread.start();
-		Thread.sleep(5000);
-		thread.interrupt();
-		thread.join();
-
-		assertThat(this.output.toString()).contains("Test Cassandra launch was interrupted");
-		assertThat(this.output.toString()).contains("Cassandra launch was interrupted");
-		assertThat(this.output.toString()).contains("Apache Cassandra (3.11.3) has been stopped");
-
-	}
 
 	@Test
 	public void shouldRegisterShutdownHookOnlyOnce() throws ClassNotFoundException {
@@ -83,7 +57,7 @@ public class TestCassandraExtendedTests {
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks).filteredOn(
-				thread -> thread.getName().contains("test-cassandra-") && thread.getName().endsWith("-hook"))
+				thread -> thread.getName().equals("Test Cassandra Hook"))
 				.hasSize(1);
 	}
 
@@ -100,8 +74,7 @@ public class TestCassandraExtendedTests {
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks)
-				.noneMatch(thread -> thread.getName().contains("test-cassandra-") &&
-						thread.getName().endsWith("-hook"));
+				.noneMatch(thread -> thread.getName().equals("Test Cassandra Hook"));
 	}
 
 	@SuppressWarnings("unchecked")

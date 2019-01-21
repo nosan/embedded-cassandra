@@ -24,6 +24,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.github.nosan.embedded.cassandra.Version;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -41,7 +43,7 @@ public class LogbackFileCustomizerTests {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
 		LogbackFileCustomizer customizer =
 				new LogbackFileCustomizer(getClass().getResource("/logback-test.xml"));
-		customizer.customize(directory.getParent());
+		customizer.customize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/logback-test.xml")) {
 			assertThat(directory.resolve("logback.xml")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));

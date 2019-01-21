@@ -23,9 +23,6 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 
@@ -36,8 +33,6 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
  * @since 1.2.8
  */
 class EmptyArtifact implements Artifact {
-
-	private static final Logger log = LoggerFactory.getLogger(EmptyArtifact.class);
 
 	@Nonnull
 	private final Version version;
@@ -52,13 +47,6 @@ class EmptyArtifact implements Artifact {
 		Path directory = FileUtils.getTmpDirectory();
 		Path tempFile = directory.resolve(String.format("empty-apache-cassandra-%s-%s.zip",
 				this.version, UUID.randomUUID()));
-		Files.createFile(tempFile);
-		try {
-			tempFile.toFile().deleteOnExit();
-		}
-		catch (Throwable ex) {
-			log.error(String.format("Shutdown hook is not registered for (%s)", tempFile), ex);
-		}
-		return tempFile;
+		return Files.createFile(tempFile);
 	}
 }

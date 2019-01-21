@@ -16,14 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.jupiter;
 
-import javax.annotation.Nonnull;
-
 import org.junit.jupiter.api.Test;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
-import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtension;
@@ -41,27 +36,15 @@ public class CassandraExtensionBuilderTests {
 
 	@Test
 	public void shouldBuildCassandraExtension() {
-		ClusterFactory clusterFactory = (settings) -> null;
-		Cassandra cassandra = new Cassandra() {
-			@Override
-			public void start() throws CassandraException {
-
-			}
-
-			@Override
-			public void stop() throws CassandraException {
-
-			}
-
-			@Nonnull
-			@Override
-			public Settings getSettings() throws CassandraException {
-				return null;
-			}
+		ClusterFactory clusterFactory = (settings) -> {
+			throw new UnsupportedOperationException();
 		};
-
-		CassandraFactory cassandraFactory = () -> cassandra;
-		CqlScript script = () -> null;
+		CassandraFactory cassandraFactory = () -> {
+			throw new UnsupportedOperationException();
+		};
+		CqlScript script = () -> {
+			throw new UnsupportedOperationException();
+		};
 		CassandraExtension cassandraExtension = new CassandraExtensionBuilder()
 				.addScripts(script)
 				.setRegisterShutdownHook(false)
@@ -69,7 +52,7 @@ public class CassandraExtensionBuilderTests {
 				.setCassandraFactory(cassandraFactory)
 				.build();
 
-		assertThat(ReflectionUtils.getField(cassandraExtension, "cassandra")).isEqualTo(cassandra);
+		assertThat(ReflectionUtils.getField(cassandraExtension, "cassandraFactory")).isEqualTo(cassandraFactory);
 		assertThat(ReflectionUtils.getField(cassandraExtension, "registerShutdownHook")).isEqualTo(false);
 		assertThat(ReflectionUtils.getField(cassandraExtension, "scripts")).isEqualTo(new CqlScript[]{script});
 		assertThat(ReflectionUtils.getField(cassandraExtension, "clusterFactory")).isEqualTo(clusterFactory);

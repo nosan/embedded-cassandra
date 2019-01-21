@@ -36,12 +36,13 @@ public class RunProcessTests {
 	public void shouldRunAndWaitUnix() throws Exception {
 		if (OS.get() != OS.WINDOWS) {
 			BufferedOutput bufferedOutput = new BufferedOutput(Integer.MAX_VALUE);
-			int exit = new RunProcess(Arrays.asList("bash", "-c", "echo 'Hello World' > 1.txt; cat 1.txt"))
+			int exit = new RunProcess(null, null, null,
+					Arrays.asList("bash", "-c", "echo 'Hello World' > 1.txt; cat 1.txt"))
 					.runAndWait(bufferedOutput);
-			new RunProcess(Arrays.asList("sleep", "1")).runAndWait();
+			new RunProcess(null, null, null, Arrays.asList("sleep", "1")).runAndWait();
 			assertThat(bufferedOutput.toString()).isEqualTo("Hello World");
 			assertThat(exit).isEqualTo(0);
-			new RunProcess(Arrays.asList("rm", "1.txt")).runAndWait();
+			new RunProcess(null, null, null, Arrays.asList("rm", "1.txt")).runAndWait();
 		}
 	}
 
@@ -49,8 +50,9 @@ public class RunProcessTests {
 	public void shouldRunAndWaitWindows() throws Exception {
 		if (OS.get() == OS.WINDOWS) {
 			BufferedOutput bufferedOutput = new BufferedOutput(Integer.MAX_VALUE);
-			int exit = new RunProcess(Arrays.asList("echo", "Hello World")).runAndWait(bufferedOutput);
-			new RunProcess(Arrays.asList("sleep", "1")).runAndWait();
+			int exit = new RunProcess(null, null, null, Arrays.asList("echo", "Hello World"))
+					.runAndWait(bufferedOutput);
+			new RunProcess(null, null, null, Arrays.asList("sleep", "1")).runAndWait();
 			assertThat(bufferedOutput.toString()).isEqualTo("Hello World");
 			assertThat(exit).isEqualTo(0);
 		}
@@ -58,7 +60,7 @@ public class RunProcessTests {
 
 	@Test
 	public void shouldRun() throws Exception {
-		Process process = new RunProcess(Arrays.asList("sleep", "2")).run();
+		Process process = new RunProcess(null, null, null, Arrays.asList("sleep", "2")).run();
 		assertThat(process.waitFor(1, TimeUnit.SECONDS)).isFalse();
 		assertThat(process.waitFor(2, TimeUnit.SECONDS)).isTrue();
 	}

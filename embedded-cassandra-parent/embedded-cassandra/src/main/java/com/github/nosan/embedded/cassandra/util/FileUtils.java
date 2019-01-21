@@ -22,7 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -111,19 +114,36 @@ public abstract class FileUtils {
 	}
 
 	/**
-	 * Tests whether a {@code Path} is a temporary.
+	 * Recursively copy the contents of the {@code src} file/directory
+	 * to the {@code dest} file/directory.
 	 *
-	 * @param path {@code Path} to test
-	 * @return {@code true} if the {@code Path} is a temporary
+	 * @param src the source directory
+	 * @param dest the destination directory
+	 * @param fileFilter the filter to check whether {@code src file} should be copied or not
+	 * @throws IOException in the case of I/O errors
+	 * @since 1.3.0
 	 */
-	public static boolean isTemporary(@Nullable Path path) {
-		if (path == null) {
-			return false;
-		}
-		Path tmpDir = getTmpDirectory();
-		while (path != null && path.getNameCount() > tmpDir.getNameCount()) {
-			path = path.getParent();
-		}
-		return tmpDir.equals(path);
+	public static void copy(@Nonnull Path src, @Nonnull Path dest, @Nonnull Predicate<? super Path> fileFilter)
+			throws IOException {
+		Objects.requireNonNull(src, "Source must not be null");
+		Objects.requireNonNull(dest, "Destination must not be null");
+		Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult preVisitDirectory(@Nonnull Path dir, @Nonnull BasicFileAttributes attributes)
+					throws IOException {
+				Files.createDirectories(dest.resolve(src.relativize(dir)));
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attributes)
+					throws IOException {
+				if (fileFilter.test(file)) {
+					Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+				}
+				return FileVisitResult.CONTINUE;
+			}
+		});
 	}
+
 }
