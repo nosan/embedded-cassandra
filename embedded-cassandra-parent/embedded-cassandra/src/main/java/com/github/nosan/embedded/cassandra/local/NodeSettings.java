@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
@@ -42,7 +42,7 @@ class NodeSettings implements Settings {
 	private final Version version;
 
 	@Nonnull
-	private final Map<?, ?> properties;
+	private final Map<Object, Object> properties;
 
 	/**
 	 * Creates a new {@link NodeSettings}.
@@ -158,30 +158,37 @@ class NodeSettings implements Settings {
 				.orElse(Settings.super.isRpcInterfacePreferIpv6());
 	}
 
+	@Nonnull
+	@Override
+	public Map<Object, Object> getProperties() {
+		return this.properties;
+	}
+
 	@Override
 	@Nonnull
 	public String toString() {
-		return new StringJoiner(", ", "[", "]")
-				.add("clusterName=" + getClusterName())
-				.add("storagePort=" + getStoragePort())
-				.add("sslStoragePort=" + getSslStoragePort())
-				.add("listenAddress=" + getListenAddress())
-				.add("listenInterface=" + getListenInterface())
-				.add("broadcastAddress=" + getBroadcastAddress())
-				.add("rpcAddress=" + getRpcAddress())
-				.add("rpcInterface=" + getRpcInterface())
-				.add("broadcastRpcAddress=" + getBroadcastRpcAddress())
-				.add("startNativeTransport=" + isStartNativeTransport())
-				.add("port=" + getPort())
-				.add("sslPort=" + getSslPort())
-				.add("startRpc=" + isStartRpc())
-				.add("rpcPort=" + getRpcPort())
-				.add("listenOnBroadcastAddress=" + isListenOnBroadcastAddress())
-				.add("listenInterfacePreferIpv6=" + isListenInterfacePreferIpv6())
-				.add("rpcInterfacePreferIpv6=" + isRpcInterfacePreferIpv6())
-				.add("realAddress=" + getRealAddress())
-				.add("realListenAddress=" + getRealListenAddress())
-				.toString();
+		Map<Object, Object> properties = new TreeMap<>(getProperties());
+		properties.put("version", getVersion());
+		properties.put("real_listen_address", getRealListenAddress());
+		properties.put("real_address", getRealAddress());
+		properties.put("cluster_name", getClusterName());
+		properties.put("storage_port", getStoragePort());
+		properties.put("ssl_storage_port", getSslStoragePort());
+		properties.put("listen_address", getListenAddress());
+		properties.put("listen_interface", getListenInterface());
+		properties.put("broadcast_address", getBroadcastAddress());
+		properties.put("rpc_address", getRpcAddress());
+		properties.put("rpc_interface", getRpcInterface());
+		properties.put("broadcast_rpc_address", getBroadcastRpcAddress());
+		properties.put("start_native_transport", isStartNativeTransport());
+		properties.put("native_transport_port", getPort());
+		properties.put("native_transport_port_ssl", getSslPort());
+		properties.put("start_rpc", isStartRpc());
+		properties.put("rpc_port", getRpcPort());
+		properties.put("listen_on_broadcast_address", isListenOnBroadcastAddress());
+		properties.put("listen_interface_prefer_ipv6", isListenInterfacePreferIpv6());
+		properties.put("rpc_interface_prefer_ipv6", isRpcInterfacePreferIpv6());
+		return properties.toString();
 	}
 
 	private static Optional<Integer> getInt(String name, Map<?, ?> source) {

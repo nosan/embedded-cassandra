@@ -17,6 +17,8 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.net.InetAddress;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -264,5 +266,16 @@ public interface Settings {
 									String.format("There is no address for interface (%s)", listenInterface))));
 		}
 		return NetworkUtils.getLocalhost();
+	}
+
+	/**
+	 * The {@code Cassandra} node properties.
+	 *
+	 * @return the node properties (may be empty)
+	 * @since 1.3.0
+	 */
+	@Nonnull
+	default Map<Object, Object> getProperties() {
+		return Collections.emptyMap();
 	}
 }

@@ -65,6 +65,7 @@ public class NodeSettingsTests {
 		assertThat(settings.isRpcInterfacePreferIpv6()).isEqualTo(false);
 		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
 		assertThat(settings.getBroadcastRpcAddress()).isNull();
+		assertThat(settings.getProperties()).isEmpty();
 	}
 
 	@Test
@@ -88,6 +89,7 @@ public class NodeSettingsTests {
 		assertThat(settings.isRpcInterfacePreferIpv6()).isEqualTo(false);
 		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
 		assertThat(settings.getBroadcastRpcAddress()).isNull();
+		assertThat(settings.getProperties()).isEmpty();
 	}
 
 	private void assertSettings(NodeSettings settings) {
@@ -109,6 +111,11 @@ public class NodeSettingsTests {
 		assertThat(settings.isRpcInterfacePreferIpv6()).isEqualTo(false);
 		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
 		assertThat(settings.getBroadcastRpcAddress()).isEqualTo("1.2.3.4");
+		assertThat(settings.getProperties()).containsEntry("authenticator", "AllowAllAuthenticator");
+		assertThat(settings.toString()).contains("authenticator=AllowAllAuthenticator")
+				.contains("version=" + settings.getVersion())
+				.contains("real_address=" + settings.getRealAddress())
+				.contains("real_listen_address=" + settings.getRealListenAddress());
 	}
 
 	private NodeSettings load(String resource) throws IOException {
@@ -116,4 +123,5 @@ public class NodeSettingsTests {
 			return new NodeSettings(new Version(3, 11, 3), new Yaml().loadAs(is, Map.class));
 		}
 	}
+
 }
