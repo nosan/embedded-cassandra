@@ -58,19 +58,6 @@ class RemoteArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(Artifact.class);
 
-	private static final AtomicLong instanceCounter = new AtomicLong();
-
-	@Nonnull
-	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("artifact-%d",
-			instanceCounter.incrementAndGet()));
-
-	@Nonnull
-	private final ThreadFactory threadFactory = runnable -> {
-		Thread thread = new Thread(runnable, this.threadNameSupplier.get());
-		thread.setDaemon(true);
-		return thread;
-	};
-
 	@Nonnull
 	private final Version version;
 
@@ -114,131 +101,237 @@ class RemoteArtifact implements Artifact {
 	@Nonnull
 	public Path get() throws IOException {
 		Version version = this.version;
+		Proxy proxy = this.proxy;
+		Duration readTimeout = this.readTimeout;
+		Duration connectTimeout = this.connectTimeout;
+		Path directory = this.directory;
 		URL[] urls = this.urlFactory.create(version);
 		Objects.requireNonNull(urls, "URLs must not be null");
-		URLConnection urlConnection = getUrlConnection(this.proxy, this.readTimeout, this.connectTimeout, urls);
-		String name = getName(urlConnection.getURL());
-		long length = urlConnection.getContentLengthLong();
-		Path artifact = this.directory.resolve(name);
-		if (isDownloaded(artifact, length)) {
-			return artifact;
-		}
-		Path tempArtifact = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString()).resolve(name);
-		Files.createDirectories(tempArtifact.getParent());
-		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
-		try (InputStream inputStream = urlConnection.getInputStream()) {
-			long start = System.currentTimeMillis();
-			log.info("Downloading Apache Cassandra ({}) from ({}).", version, urlConnection.getURL());
-			executorService.scheduleAtFixedRate(() -> progress(tempArtifact, length), 0, 3, TimeUnit.SECONDS);
-			Files.copy(inputStream, tempArtifact);
-			long elapsed = System.currentTimeMillis() - start;
-			log.info("Apache Cassandra ({}) has been downloaded ({} ms)", version, elapsed);
-		}
-		finally {
-			executorService.shutdown();
-		}
-		if (isDownloaded(artifact, length)) {
-			return artifact;
-		}
-		if (isDownloaded(tempArtifact, length)) {
-			Files.createDirectories(artifact.getParent());
+
+		IOException exceptions = new IOException(String.format("Could not download a resource from URLs %s",
+				Arrays.toString(urls)));
+
+		for (URL url : urls) {
 			try {
-				return Files.move(tempArtifact, artifact, StandardCopyOption.REPLACE_EXISTING);
+				Resource remoteResource = new RemoteResource(version, url, proxy, readTimeout, connectTimeout);
+				Resource localResource = new LocalResource(directory, remoteResource);
+				return localResource.getFile();
+			}
+			catch (Exception ex) {
+				exceptions.addSuppressed(ex);
+			}
+		}
+		throw exceptions;
+	}
+
+	/**
+	 * Resource that abstracts from the actual type of underlying source.
+	 */
+	private interface Resource {
+
+		/**
+		 * Return a File handle for this resource.
+		 *
+		 * @return the file
+		 * @throws IOException in case of any I/O errors
+		 */
+		@Nonnull
+		Path getFile() throws IOException;
+
+		/**
+		 * Return a name for this resource.
+		 *
+		 * @return a resource name
+		 */
+		@Nonnull
+		String getName();
+	}
+
+	/**
+	 * Local {@link Resource} implementation.
+	 */
+	private static final class LocalResource implements Resource {
+
+		@Nonnull
+		private final Path directory;
+
+		@Nonnull
+		private final Resource resource;
+
+		/**
+		 * Creates a {@link LocalResource}.
+		 *
+		 * @param directory a directory to store/search an artifact (directory must be writable)
+		 * @param resource a delegated resource
+		 */
+		LocalResource(@Nonnull Path directory, @Nonnull Resource resource) {
+			this.directory = directory;
+			this.resource = resource;
+		}
+
+		@Nonnull
+		@Override
+		public Path getFile() throws IOException {
+			Path file = this.directory.resolve(getName());
+			if (Files.exists(file)) {
+				return file;
+			}
+			log.info("File ({}) does not exist. Trying to download it...", file);
+			Path tempFile = this.resource.getFile();
+			try {
+				Files.createDirectories(file.getParent());
+				return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
 			}
 			catch (IOException ex) {
 				if (log.isDebugEnabled()) {
-					log.error(String.format("Could not rename (%s) as (%s).", tempArtifact, artifact));
+					log.error(String.format("Could not rename (%s) as (%s).", tempFile, file));
 				}
-				return tempArtifact;
+				return file;
 			}
 		}
-		throw new IOException(String.format("Apache Cassandra (%s) is not downloaded from URLs (%s)",
-				version, Arrays.toString(urls)));
-	}
 
-	private static URLConnection getUrlConnection(Proxy proxy, Duration readTimeout, Duration connectTimeout,
-			URL... urls) throws IOException {
-		IOException exception = new IOException(String.format("Could not create an URLConnection from URLs (%s)",
-				Arrays.toString(urls)));
-		for (URL url : urls) {
-			try {
-				return getUrlConnection(proxy, readTimeout, connectTimeout, url);
-			}
-			catch (IOException ex) {
-				exception.addSuppressed(ex);
-			}
+		@Nonnull
+		@Override
+		public String getName() {
+			return this.resource.getName();
 		}
-		throw exception;
+
 	}
 
-	private static URLConnection getUrlConnection(Proxy proxy, Duration readTimeout, Duration connectTimeout, URL url)
-			throws IOException {
-		URLConnection urlConnection = (proxy != null) ? url.openConnection(proxy) : url.openConnection();
-		if (urlConnection instanceof HttpURLConnection) {
-			HttpURLConnection connection = (HttpURLConnection) urlConnection;
-			if (connectTimeout != null) {
-				connection.setConnectTimeout(Math.toIntExact(connectTimeout.toMillis()));
+	/**
+	 * Remote {@link Resource} implementation.
+	 */
+	private static final class RemoteResource implements Resource {
+
+		private static final AtomicLong instanceCounter = new AtomicLong();
+
+		@Nonnull
+		private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("artifact-%d",
+				instanceCounter.incrementAndGet()));
+
+		@Nonnull
+		private final ThreadFactory threadFactory = runnable -> {
+			Thread thread = new Thread(runnable, this.threadNameSupplier.get());
+			thread.setDaemon(true);
+			return thread;
+		};
+
+		@Nonnull
+		private final Version version;
+
+		@Nonnull
+		private final URL url;
+
+		@Nullable
+		private final Proxy proxy;
+
+		@Nullable
+		private final Duration readTimeout;
+
+		@Nullable
+		private final Duration connectTimeout;
+
+		/**
+		 * Creates a {@link RemoteResource}.
+		 *
+		 * @param version a version
+		 * @param url URL to download a file
+		 * @param proxy proxy for {@code connection}
+		 * @param connectTimeout connect timeout for {@code connection}
+		 * @param readTimeout read timeout for {@code connection}
+		 */
+		RemoteResource(@Nonnull Version version, @Nonnull URL url, @Nullable Proxy proxy,
+				@Nullable Duration readTimeout,
+				@Nullable Duration connectTimeout) {
+			this.version = version;
+			this.url = url;
+			this.proxy = proxy;
+			this.readTimeout = readTimeout;
+			this.connectTimeout = connectTimeout;
+		}
+
+		@Nonnull
+		@Override
+		public Path getFile() throws IOException {
+			Path file = FileUtils.getTmpDirectory()
+					.resolve(UUID.randomUUID().toString()).resolve(getFileName(this.url));
+
+			URLConnection urlConnection = getUrlConnection(this.url, this.proxy, this.connectTimeout, this.readTimeout);
+			long size = urlConnection.getContentLengthLong();
+
+			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
+
+			try (InputStream inputStream = urlConnection.getInputStream()) {
+				log.info("Downloading Apache Cassandra ({}) from ({}).", this.version, urlConnection.getURL());
+				long start = System.currentTimeMillis();
+				Files.createDirectories(file.getParent());
+				executorService.scheduleAtFixedRate(() -> progress(file, size), 0, 3, TimeUnit.SECONDS);
+				Files.copy(inputStream, file);
+				long elapsed = System.currentTimeMillis() - start;
+				log.info("Apache Cassandra ({}) has been downloaded ({} ms)", this.version, elapsed);
 			}
-			if (readTimeout != null) {
-				connection.setReadTimeout(Math.toIntExact(readTimeout.toMillis()));
+			finally {
+				executorService.shutdown();
 			}
-			int status = connection.getResponseCode();
-			if (status >= 200 && status < 300) {
-				return connection;
+			return file;
+		}
+
+		@Nonnull
+		@Override
+		public String getName() {
+			return getFileName(this.url);
+		}
+
+		private static String getFileName(URL url) {
+			String name = url.getFile();
+			if (StringUtils.hasText(name) && name.contains("/")) {
+				name = name.substring(name.lastIndexOf("/") + 1);
 			}
-			else if (status >= 300 && status < 400) {
-				String location = connection.getHeaderField("Location");
-				if (StringUtils.hasText(location)) {
-					return getUrlConnection(proxy, readTimeout, connectTimeout, new URL(url, location));
+			if (!StringUtils.hasText(name)) {
+				throw new IllegalArgumentException(
+						String.format("There is no way to determine a file name from (%s)", url));
+			}
+			return name;
+		}
+
+		private static URLConnection getUrlConnection(URL url, Proxy proxy, Duration connectTimeout,
+				Duration readTimeout) throws IOException {
+			URLConnection urlConnection = (proxy != null) ? url.openConnection(proxy) : url.openConnection();
+			if (urlConnection instanceof HttpURLConnection) {
+				HttpURLConnection connection = (HttpURLConnection) urlConnection;
+				if (connectTimeout != null) {
+					connection.setConnectTimeout(Math.toIntExact(connectTimeout.toMillis()));
+				}
+				if (readTimeout != null) {
+					connection.setReadTimeout(Math.toIntExact(readTimeout.toMillis()));
+				}
+				int status = connection.getResponseCode();
+				if (status >= 200 && status < 300) {
+					return connection;
+				}
+				else if (status >= 300 && status < 400) {
+					String location = connection.getHeaderField("Location");
+					if (StringUtils.hasText(location)) {
+						return getUrlConnection(new URL(url, location), proxy, connectTimeout, readTimeout);
+					}
+				}
+				else if (status >= 400) {
+					throw new IOException(String.format("HTTP status for URL (%s) is invalid", url));
 				}
 			}
-			else if (status >= 400) {
-				throw new IOException(String.format("HTTP status for URL (%s) is invalid", url));
+			return urlConnection;
+		}
+
+		private static void progress(Path file, long size) {
+			if (size > 0 && Files.exists(file)) {
+				try {
+					long current = Files.size(file);
+					log.info("Downloaded {} / {}  {}%", current, size, (current * 100) / size);
+				}
+				catch (IOException ignore) {
+				}
 			}
 		}
-		urlConnection.setUseCaches(true);
-		urlConnection.getInputStream();
-		return urlConnection;
 	}
 
-	private static String getName(URL url) {
-		String name = url.getFile();
-		if (StringUtils.hasText(name) && name.contains("/")) {
-			name = name.substring(name.lastIndexOf("/") + 1);
-		}
-		if (!StringUtils.hasText(name)) {
-			throw new IllegalArgumentException(
-					String.format("There is no way to determine a file name from (%s)", url));
-		}
-		return name;
-	}
-
-	private static boolean isDownloaded(Path file, long length) {
-		if (!Files.exists(file)) {
-			return false;
-		}
-		if (length < 0) {
-			return true;
-		}
-		try {
-			return Files.size(file) == length;
-		}
-		catch (IOException ex) {
-			if (log.isDebugEnabled()) {
-				log.error(String.format("Could not compare content-length (%s) with a file (%s)", length, file), ex);
-			}
-		}
-		return true;
-	}
-
-	private static void progress(Path file, long length) {
-		if (length > 0 && Files.exists(file)) {
-			try {
-				long current = Files.size(file);
-				log.info("Downloaded {} / {}  {}%", current, length, (current * 100) / length);
-			}
-			catch (IOException ignore) {
-			}
-		}
-	}
 }

@@ -42,7 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@SuppressWarnings("unchecked")
 public class LocalCassandraFactoryTests {
 
 	@Test

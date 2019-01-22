@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local.artifact;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -162,7 +163,7 @@ public class RemoteArtifactTests {
 			@Nonnull
 			@Override
 			public URL[] create(@Nonnull Version version) throws MalformedURLException {
-				return Stream.concat(Stream.of(new URL("http://localhost:8080/cassandra.zip")),
+				return Stream.concat(Stream.of(new URL(String.format("http:/%s/cassandra.zip", server.getAddress()))),
 						Arrays.stream(delegate.create(version))).toArray(URL[]::new);
 			}
 		});
@@ -176,16 +177,10 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldNotDownloadArtifactIfExists() throws Exception {
-		HttpServer server = this.webServer.get();
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
 		}
-		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, content.length);
-			exchange.getResponseBody().write(content);
-			exchange.close();
-		});
 		Files.createDirectories(this.factory.getDirectory());
 		Files.copy(new ByteArrayInputStream(content), this.factory.getDirectory().
 				resolve("apache-cassandra-3.1.1.zip"));
@@ -207,6 +202,13 @@ public class RemoteArtifactTests {
 		});
 		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
 				.hasStackTraceContaining("HTTP status for URL");
+	}
+
+	@Test
+	public void urlListEmpty() {
+		this.factory.setUrlFactory(version -> new URL[0]);
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+				.isInstanceOf(IOException.class);
 	}
 
 	@Test
