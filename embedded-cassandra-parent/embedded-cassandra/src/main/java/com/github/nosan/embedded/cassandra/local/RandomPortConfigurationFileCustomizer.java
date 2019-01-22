@@ -87,13 +87,13 @@ class RandomPortConfigurationFileCustomizer implements DirectoryCustomizer {
 		source.put(property, newPort);
 	}
 
-	private static void replace(Map<Object, Object> newSource, Version version) {
-		NodeSettings settings = new NodeSettings(version, newSource);
-		setPort(newSource, "native_transport_port", settings::getPort, settings::getRealAddress);
-		setPort(newSource, "native_transport_port_ssl", settings::getSslPort, settings::getRealAddress);
-		setPort(newSource, "rpc_port", settings::getRpcPort, settings::getRealAddress);
-		setPort(newSource, "storage_port", settings::getStoragePort, settings::getRealListenAddress);
-		setPort(newSource, "ssl_storage_port", settings::getSslStoragePort, settings::getRealListenAddress);
+	private static void replace(Map<Object, Object> properties, Version version) {
+		NodeSettings settings = new NodeSettings(version, properties);
+		setPort(properties, "native_transport_port", settings::getPort, settings::getRealAddress);
+		setPort(properties, "native_transport_port_ssl", settings::getSslPort, settings::getRealAddress);
+		setPort(properties, "rpc_port", settings::getRpcPort, settings::getRealAddress);
+		setPort(properties, "storage_port", settings::getStoragePort, settings::getRealListenAddress);
+		setPort(properties, "ssl_storage_port", settings::getSslStoragePort, settings::getRealListenAddress);
 	}
 
 	private static Map<?, ?> load(Yaml yaml, Path source) {

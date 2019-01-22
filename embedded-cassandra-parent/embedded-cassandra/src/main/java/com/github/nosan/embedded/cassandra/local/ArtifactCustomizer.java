@@ -65,9 +65,9 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 
 	@Override
 	public void customize(@Nonnull Path directory, @Nonnull Version version) throws IOException {
+		Path artifactDirectory = this.artifactDirectory;
 		Artifact artifact = this.artifactFactory.create(version);
 		Objects.requireNonNull(artifact, "Artifact must not be null");
-		Path artifactDirectory = this.artifactDirectory;
 		extractArtifact(artifact, artifactDirectory);
 		copyArtifact(directory, artifactDirectory);
 	}
