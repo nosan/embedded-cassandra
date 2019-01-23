@@ -19,6 +19,8 @@ package com.github.nosan.embedded.cassandra;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -126,14 +128,10 @@ public final class Version implements Comparable<Version> {
 	@Nonnull
 	@Override
 	public String toString() {
-		StringBuilder text = new StringBuilder().append(this.major);
-		if (this.minor >= 0) {
-			text.append(".").append(this.minor);
-		}
-		if (this.patch >= 0) {
-			text.append(".").append(this.patch);
-		}
-		return text.toString();
+		return IntStream.of(this.major, this.minor, this.patch)
+				.filter(i -> i >= 0)
+				.mapToObj(Integer::toString)
+				.collect(Collectors.joining("."));
 	}
 
 	@Override
