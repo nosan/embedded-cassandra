@@ -94,8 +94,9 @@ public abstract class ArchiveUtils {
 		Objects.requireNonNull(archive, "Archive must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archive);
-		Path tempDir = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString());
 		try (ArchiveInputStream stream = archiveFactory.create(archive)) {
+			Path tempDir = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString());
+			tempDir.toFile().deleteOnExit();
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
 				if (entry.isDirectory()) {
@@ -104,6 +105,7 @@ public abstract class ArchiveUtils {
 				}
 				else if (entryFilter == null || entryFilter.test(entry.getName())) {
 					Path tempFile = tempDir.resolve(entry.getName());
+					tempFile.toFile().deleteOnExit();
 					Files.createDirectories(tempFile.getParent());
 					Files.copy(stream, tempFile);
 					FileModeUtils.set(entry, tempFile);

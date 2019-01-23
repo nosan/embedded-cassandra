@@ -253,13 +253,14 @@ class RemoteArtifact implements Artifact {
 		@Nonnull
 		@Override
 		public Path getFile() throws IOException {
-			Path file = FileUtils.getTmpDirectory()
-					.resolve(UUID.randomUUID().toString()).resolve(getFileName(this.url));
-
 			URLConnection urlConnection = getUrlConnection(this.url, this.proxy, this.connectTimeout, this.readTimeout);
 			long size = urlConnection.getContentLengthLong();
 
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
+
+			Path file = FileUtils.getTmpDirectory()
+					.resolve(UUID.randomUUID().toString()).resolve(getFileName(this.url));
+			file.toFile().deleteOnExit();
 
 			try (InputStream inputStream = urlConnection.getInputStream()) {
 				log.info("Downloading Apache Cassandra ({}) from ({}).", this.version, urlConnection.getURL());

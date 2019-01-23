@@ -45,8 +45,12 @@ class EmptyArtifact implements Artifact {
 	@Override
 	public Path get() throws IOException {
 		Path directory = FileUtils.getTmpDirectory();
-		Path tempFile = directory.resolve(String.format("empty-apache-cassandra-%s-%s.zip",
-				this.version, UUID.randomUUID()));
-		return Files.createFile(tempFile);
+		Path tempFile = directory.resolve(UUID.randomUUID().toString())
+				.resolve(String.format("apache-cassandra-%s.zip", this.version));
+		Files.createDirectories(tempFile.getParent());
+		tempFile.getParent().toFile().deleteOnExit();
+		Files.createFile(tempFile);
+		tempFile.toFile().deleteOnExit();
+		return tempFile;
 	}
 }
