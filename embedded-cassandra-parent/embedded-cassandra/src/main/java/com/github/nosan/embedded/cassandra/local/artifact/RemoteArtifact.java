@@ -265,7 +265,7 @@ class RemoteArtifact implements Artifact {
 				log.info("Downloading Apache Cassandra ({}) from ({}).", this.version, urlConnection.getURL());
 				long start = System.currentTimeMillis();
 				Files.createDirectories(file.getParent());
-				executorService.scheduleAtFixedRate(() -> progress(file, size), 0, 3, TimeUnit.SECONDS);
+				executorService.scheduleAtFixedRate(() -> progress(file, size), 50, 3000, TimeUnit.MILLISECONDS);
 				Files.copy(inputStream, file);
 				long elapsed = System.currentTimeMillis() - start;
 				log.info("Apache Cassandra ({}) has been downloaded ({} ms)", this.version, elapsed);
