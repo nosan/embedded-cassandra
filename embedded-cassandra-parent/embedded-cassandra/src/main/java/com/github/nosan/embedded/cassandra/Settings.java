@@ -169,10 +169,10 @@ public interface Settings {
 	/**
 	 * Thrift port for client connections.
 	 *
-	 * @return The value of the {@code rpcPort} attribute or {@code 9160}
+	 * @return The value of the {@code rpcPort} attribute or {@code 9160} / {@code -1}.
 	 */
 	default int getRpcPort() {
-		return 9160;
+		return getVersion().getMajor() < 4 ? 9160 : -1;
 	}
 
 	/**
@@ -269,7 +269,7 @@ public interface Settings {
 	}
 
 	/**
-	 * The {@code Cassandra} node properties.
+	 * The {@code Cassandra} <b>raw</b> properties.
 	 *
 	 * @return the node properties (may be empty)
 	 * @since 1.3.0

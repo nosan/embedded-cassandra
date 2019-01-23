@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,112 +62,112 @@ class NodeSettings implements Settings {
 		return this.version;
 	}
 
-	@Nullable
-	@Override
-	public String getClusterName() {
-		return get("cluster_name", this.properties).orElse(Settings.super.getClusterName());
-	}
-
-	@Override
-	public int getStoragePort() {
-		return getInt("storage_port", this.properties).orElse(Settings.super.getStoragePort());
-	}
-
-	@Override
-	public int getSslStoragePort() {
-		return getInt("ssl_storage_port", this.properties).orElse(Settings.super.getSslStoragePort());
-	}
-
-	@Nullable
-	@Override
-	public String getListenAddress() {
-		return get("listen_address", this.properties).orElse(Settings.super.getListenAddress());
-	}
-
-	@Nullable
-	@Override
-	public String getListenInterface() {
-		return get("listen_interface", this.properties).orElse(Settings.super.getListenInterface());
-	}
-
-	@Nullable
-	@Override
-	public String getBroadcastAddress() {
-		return get("broadcast_address", this.properties).orElse(Settings.super.getBroadcastAddress());
-	}
-
-	@Nullable
-	@Override
-	public String getRpcAddress() {
-		return get("rpc_address", this.properties).orElse(Settings.super.getRpcAddress());
-	}
-
-	@Nullable
-	@Override
-	public String getRpcInterface() {
-		return get("rpc_interface", this.properties).orElse(Settings.super.getRpcInterface());
-	}
-
-	@Nullable
-	@Override
-	public String getBroadcastRpcAddress() {
-		return get("broadcast_rpc_address", this.properties).orElse(Settings.super.getBroadcastRpcAddress());
-	}
-
-	@Override
-	public boolean isStartNativeTransport() {
-		return getBool("start_native_transport", this.properties).orElse(Settings.super.isStartNativeTransport());
-	}
-
-	@Override
-	public int getPort() {
-		return getInt("native_transport_port", this.properties).orElse(Settings.super.getPort());
-	}
-
-	@Nullable
-	@Override
-	public Integer getSslPort() {
-		return getInt("native_transport_port_ssl", this.properties).orElse(Settings.super.getSslPort());
-	}
-
-	@Override
-	public boolean isStartRpc() {
-		return getBool("start_rpc", this.properties).orElse(Settings.super.isStartRpc());
-	}
-
-	@Override
-	public int getRpcPort() {
-		return getInt("rpc_port", this.properties).orElse(Settings.super.getRpcPort());
-	}
-
-	@Override
-	public boolean isListenOnBroadcastAddress() {
-		return getBool("listen_on_broadcast_address", this.properties)
-				.orElse(Settings.super.isListenOnBroadcastAddress());
-	}
-
-	@Override
-	public boolean isListenInterfacePreferIpv6() {
-		return getBool("listen_interface_prefer_ipv6", this.properties)
-				.orElse(Settings.super.isListenInterfacePreferIpv6());
-	}
-
-	@Override
-	public boolean isRpcInterfacePreferIpv6() {
-		return getBool("rpc_interface_prefer_ipv6", this.properties)
-				.orElse(Settings.super.isRpcInterfacePreferIpv6());
-	}
-
 	@Nonnull
 	@Override
 	public Map<Object, Object> getProperties() {
 		return this.properties;
 	}
 
+	@Nullable
+	@Override
+	public String getClusterName() {
+		return getString("cluster_name", this.properties).orElse(Settings.super.getClusterName());
+	}
+
+	@Override
+	public int getStoragePort() {
+		return getInteger("storage_port", this.properties).orElse(Settings.super.getStoragePort());
+	}
+
+	@Override
+	public int getSslStoragePort() {
+		return getInteger("ssl_storage_port", this.properties).orElse(Settings.super.getSslStoragePort());
+	}
+
+	@Nullable
+	@Override
+	public String getListenAddress() {
+		return getString("listen_address", this.properties).orElse(Settings.super.getListenAddress());
+	}
+
+	@Nullable
+	@Override
+	public String getListenInterface() {
+		return getString("listen_interface", this.properties).orElse(Settings.super.getListenInterface());
+	}
+
+	@Nullable
+	@Override
+	public String getBroadcastAddress() {
+		return getString("broadcast_address", this.properties).orElse(Settings.super.getBroadcastAddress());
+	}
+
+	@Nullable
+	@Override
+	public String getRpcAddress() {
+		return getString("rpc_address", this.properties).orElse(Settings.super.getRpcAddress());
+	}
+
+	@Nullable
+	@Override
+	public String getRpcInterface() {
+		return getString("rpc_interface", this.properties).orElse(Settings.super.getRpcInterface());
+	}
+
+	@Nullable
+	@Override
+	public String getBroadcastRpcAddress() {
+		return getString("broadcast_rpc_address", this.properties).orElse(Settings.super.getBroadcastRpcAddress());
+	}
+
+	@Override
+	public boolean isStartNativeTransport() {
+		return getBoolean("start_native_transport", this.properties).orElse(Settings.super.isStartNativeTransport());
+	}
+
+	@Override
+	public int getPort() {
+		return getInteger("native_transport_port", this.properties).orElse(Settings.super.getPort());
+	}
+
+	@Nullable
+	@Override
+	public Integer getSslPort() {
+		return getInteger("native_transport_port_ssl", this.properties).orElse(Settings.super.getSslPort());
+	}
+
+	@Override
+	public boolean isStartRpc() {
+		return getBoolean("start_rpc", this.properties).orElse(Settings.super.isStartRpc());
+	}
+
+	@Override
+	public int getRpcPort() {
+		return getInteger("rpc_port", this.properties).orElse(Settings.super.getRpcPort());
+	}
+
+	@Override
+	public boolean isListenOnBroadcastAddress() {
+		return getBoolean("listen_on_broadcast_address", this.properties)
+				.orElse(Settings.super.isListenOnBroadcastAddress());
+	}
+
+	@Override
+	public boolean isListenInterfacePreferIpv6() {
+		return getBoolean("listen_interface_prefer_ipv6", this.properties)
+				.orElse(Settings.super.isListenInterfacePreferIpv6());
+	}
+
+	@Override
+	public boolean isRpcInterfacePreferIpv6() {
+		return getBoolean("rpc_interface_prefer_ipv6", this.properties)
+				.orElse(Settings.super.isRpcInterfacePreferIpv6());
+	}
+
 	@Override
 	@Nonnull
 	public String toString() {
-		Map<Object, Object> properties = new TreeMap<>(getProperties());
+		Map<Object, Object> properties = new LinkedHashMap<>(getProperties());
 		properties.put("version", getVersion());
 		properties.put("real_listen_address", getRealListenAddress());
 		properties.put("real_address", getRealAddress());
@@ -182,29 +182,29 @@ class NodeSettings implements Settings {
 		properties.put("broadcast_rpc_address", getBroadcastRpcAddress());
 		properties.put("start_native_transport", isStartNativeTransport());
 		properties.put("native_transport_port", getPort());
+		properties.put("rpc_port", getRpcPort());
 		properties.put("native_transport_port_ssl", getSslPort());
 		properties.put("start_rpc", isStartRpc());
-		properties.put("rpc_port", getRpcPort());
 		properties.put("listen_on_broadcast_address", isListenOnBroadcastAddress());
 		properties.put("listen_interface_prefer_ipv6", isListenInterfacePreferIpv6());
 		properties.put("rpc_interface_prefer_ipv6", isRpcInterfacePreferIpv6());
-		return properties.toString();
+		return properties.entrySet().stream().filter(entry -> entry.getValue() != null)
+				.map(String::valueOf).collect(Collectors.joining(",", "{", "}"));
 	}
 
-	private static Optional<Integer> getInt(String name, Map<?, ?> source) {
-		return get(name, source).filter(StringUtils::hasText).map(asInt());
+	private static Optional<Integer> getInteger(String name, Map<?, ?> source) {
+		return getString(name, source).filter(StringUtils::hasText).map(asInteger());
 	}
 
-	private static Optional<Boolean> getBool(String name, Map<?, ?> source) {
-		return get(name, source).filter(StringUtils::hasText).map(Boolean::valueOf);
+	private static Optional<Boolean> getBoolean(String name, Map<?, ?> source) {
+		return getString(name, source).filter(StringUtils::hasText).map(Boolean::valueOf);
 	}
 
-	private static Optional<String> get(String name, Map<?, ?> source) {
-		Object val = source.get(name);
-		return Optional.ofNullable(val).map(String::valueOf);
+	private static Optional<String> getString(String name, Map<?, ?> source) {
+		return Optional.ofNullable(source.get(name)).map(String::valueOf);
 	}
 
-	private static Function<String, Integer> asInt() {
+	private static Function<String, Integer> asInteger() {
 		return source -> {
 			try {
 				return Integer.decode(source);

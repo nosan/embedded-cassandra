@@ -73,7 +73,7 @@ public class NodeSettingsTests {
 		NodeSettings settings = new NodeSettings(new Version(4, 0, 0), null);
 		assertThat(settings.getClusterName()).isNull();
 		assertThat(settings.getPort()).isEqualTo(9042);
-		assertThat(settings.getRpcPort()).isEqualTo(9160);
+		assertThat(settings.getRpcPort()).isEqualTo(-1);
 		assertThat(settings.getStoragePort()).isEqualTo(7000);
 		assertThat(settings.getSslStoragePort()).isEqualTo(7001);
 		assertThat(settings.isStartNativeTransport()).isTrue();
