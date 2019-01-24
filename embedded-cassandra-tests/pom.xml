@@ -19,6 +19,7 @@
         <module>embedded-cassandra-jupiter-test</module>
         <module>embedded-cassandra-testng-test</module>
         <module>embedded-cassandra-spring-test</module>
+        <module>embedded-cassandra-spring-boot-test</module>
     </modules>
 
 </project>

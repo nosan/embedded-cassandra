@@ -42,6 +42,8 @@
         <commons-compress.version>1.18</commons-compress.version>
         <xz.version>1.8</xz.version>
         <apiguardian-api.version>1.0.0</apiguardian-api.version>
+        <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
+        <reactor-core.version>3.2.5.RELEASE</reactor-core.version>
     </properties>
 
     <dependencyManagement>
@@ -55,6 +57,26 @@
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-cassandra</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>${reactor-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
