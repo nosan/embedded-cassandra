@@ -37,6 +37,7 @@ public class SystemPropertyTests {
 		try {
 			System.setProperty("test", "value");
 			assertThat(new SystemProperty("test").get()).isEqualTo("value");
+			assertThat(new SystemProperty("test").orNull()).isEqualTo("value");
 		}
 		finally {
 			System.clearProperty("test");
@@ -48,6 +49,11 @@ public class SystemPropertyTests {
 		this.throwable.expect(NullPointerException.class);
 		this.throwable.expectMessage("Property value for key (test) is null");
 		new SystemProperty("test").get();
+	}
+
+	@Test
+	public void shouldReturnNull() {
+		assertThat(new SystemProperty("test").orNull()).isNull();
 	}
 
 	@Test

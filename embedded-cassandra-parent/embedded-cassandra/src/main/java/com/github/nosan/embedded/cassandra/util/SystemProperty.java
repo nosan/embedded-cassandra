@@ -22,11 +22,12 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.apiguardian.api.API;
 
 /**
- * Utility class for dealing with {@code System#Properties}.
+ * Utility class for dealing with {@code System Properties}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
@@ -37,7 +38,7 @@ public final class SystemProperty implements Supplier<String> {
 	private final String key;
 
 	/**
-	 * Creates  a {@code System.property} supplier.
+	 * Creates a {@link SystemProperty}.
 	 *
 	 * @param key key to lookup.
 	 */
@@ -54,7 +55,7 @@ public final class SystemProperty implements Supplier<String> {
 	@Nonnull
 	public String get() {
 		String value = getProperty(this.key);
-		return Objects.requireNonNull(value, String.format("Property value for key (%s) is null", this.key));
+		return Objects.requireNonNull(value, String.format("System Property for key (%s) is null", this.key));
 	}
 
 	/**
@@ -70,7 +71,18 @@ public final class SystemProperty implements Supplier<String> {
 		return (value != null) ? value : other;
 	}
 
-	private static String getProperty(@Nonnull String key) {
+	/**
+	 * Returns a {@link System#getProperty(String)} or {@code null}.
+	 *
+	 * @return a value, or {@code null}.
+	 * @since 1.3.0
+	 */
+	@Nullable
+	public String orNull() {
+		return getProperty(this.key);
+	}
+
+	private static String getProperty(String key) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
 			return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(key));
