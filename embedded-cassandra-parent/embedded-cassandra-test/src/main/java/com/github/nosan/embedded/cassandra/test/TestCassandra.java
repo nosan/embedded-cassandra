@@ -432,7 +432,9 @@ public class TestCassandra implements Cassandra {
 			stop();
 		}
 		catch (Throwable ex) {
-			log.error("Unable to stop Test Cassandra", ex);
+			if (log.isDebugEnabled()) {
+				log.error("Unable to stop Test Cassandra", ex);
+			}
 		}
 	}
 }

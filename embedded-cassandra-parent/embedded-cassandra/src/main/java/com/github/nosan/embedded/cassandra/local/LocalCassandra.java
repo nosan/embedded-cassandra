@@ -214,7 +214,9 @@ class LocalCassandra implements Cassandra {
 			stop();
 		}
 		catch (Throwable ex) {
-			log.error("Unable to stop Cassandra", ex);
+			if (log.isDebugEnabled()) {
+				log.error("Unable to stop Cassandra", ex);
+			}
 		}
 	}
 }
