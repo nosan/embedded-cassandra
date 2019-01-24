@@ -130,18 +130,18 @@ public class FileUtilsTests {
 	@Test
 	public void userDirectory() {
 		assertThat(FileUtils.getUserDirectory())
-				.isEqualTo(Paths.get(new SystemProperty("user.dir").get()));
+				.isEqualTo(Paths.get(new SystemProperty("user.dir").getNonnull()));
 	}
 
 	@Test
 	public void userHomeDirectory() {
 		assertThat(FileUtils.getUserHomeDirectory())
-				.isEqualTo(Paths.get(new SystemProperty("user.home").get()));
+				.isEqualTo(Paths.get(new SystemProperty("user.home").getNonnull()));
 	}
 
 	@Test
 	public void tmpDirectory() {
 		assertThat(FileUtils.getTmpDirectory())
-				.isEqualTo(Paths.get(new SystemProperty("java.io.tmpdir").get()));
+				.isEqualTo(Paths.get(new SystemProperty("java.io.tmpdir").getNonnull()));
 	}
 }

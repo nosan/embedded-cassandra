@@ -16,11 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link SystemProperty}.
@@ -29,15 +28,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class SystemPropertyTests {
 
-	@Rule
-	public final ExpectedException throwable = ExpectedException.none();
-
 	@Test
 	public void shouldGet() {
 		try {
 			System.setProperty("test", "value");
 			assertThat(new SystemProperty("test").get()).isEqualTo("value");
-			assertThat(new SystemProperty("test").orNull()).isEqualTo("value");
 		}
 		finally {
 			System.clearProperty("test");
@@ -46,20 +41,13 @@ public class SystemPropertyTests {
 
 	@Test
 	public void shouldNotGet() {
-		this.throwable.expect(NullPointerException.class);
-		this.throwable.expectMessage("Property value for key (test) is null");
-		new SystemProperty("test").get();
+		assertThatThrownBy(() -> new SystemProperty("test").getNonnull())
+				.isInstanceOf(NullPointerException.class)
+				.hasStackTraceContaining("System Property for key (test) is null");
 	}
 
 	@Test
 	public void shouldReturnNull() {
-		assertThat(new SystemProperty("test").orNull()).isNull();
-	}
-
-	@Test
-	public void shouldGetDefaultValue() {
-		String defaultValue = "defaultValue";
-		String value = new SystemProperty("test").or(defaultValue);
-		assertThat(value).isEqualTo(defaultValue);
+		assertThat(new SystemProperty("test").get()).isNull();
 	}
 }

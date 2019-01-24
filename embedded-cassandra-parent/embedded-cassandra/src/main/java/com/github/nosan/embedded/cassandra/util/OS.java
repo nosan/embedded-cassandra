@@ -71,7 +71,7 @@ public enum OS {
 
 	@Nonnull
 	private static OS detect() {
-		String name = new SystemProperty("os.name").get()
+		String name = new SystemProperty("os.name").getNonnull()
 				.toLowerCase(Locale.ENGLISH);
 		if (name.contains("linux")) {
 			return LINUX;

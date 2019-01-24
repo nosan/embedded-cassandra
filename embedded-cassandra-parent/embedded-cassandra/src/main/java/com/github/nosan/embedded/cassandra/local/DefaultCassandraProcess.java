@@ -275,7 +275,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		if (javaHome != null) {
 			return String.valueOf(javaHome.toAbsolutePath());
 		}
-		return new SystemProperty("java.home").or("");
+		return new SystemProperty("java.home").get();
 	}
 
 	private static String getPidString(long pid) {

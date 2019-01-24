@@ -49,37 +49,24 @@ public final class SystemProperty implements Supplier<String> {
 	/**
 	 * Returns a {@link System#getProperty(String)}.
 	 *
-	 * @return a value
+	 * @return a value, or {@code null}
 	 */
 	@Override
-	@Nonnull
+	@Nullable
 	public String get() {
+		return getProperty(this.key);
+	}
+
+	/**
+	 * Returns a {@link System#getProperty(String)}.
+	 *
+	 * @return a nonnull-value, or throw an {@code exception}
+	 * @throws NullPointerException if {@link SystemProperty#getProperty(String)} is nu
+	 */
+	@Nonnull
+	public String getNonnull() throws NullPointerException {
 		String value = getProperty(this.key);
 		return Objects.requireNonNull(value, String.format("System Property for key (%s) is null", this.key));
-	}
-
-	/**
-	 * Returns a {@link System#getProperty(String)} or the given default value.
-	 *
-	 * @param other default value
-	 * @return a value
-	 */
-	@Nonnull
-	public String or(@Nonnull String other) {
-		Objects.requireNonNull(other, "Value must not be null");
-		String value = getProperty(this.key);
-		return (value != null) ? value : other;
-	}
-
-	/**
-	 * Returns a {@link System#getProperty(String)} or {@code null}.
-	 *
-	 * @return a value, or {@code null}.
-	 * @since 1.3.0
-	 */
-	@Nullable
-	public String orNull() {
-		return getProperty(this.key);
 	}
 
 	private static String getProperty(String key) {
