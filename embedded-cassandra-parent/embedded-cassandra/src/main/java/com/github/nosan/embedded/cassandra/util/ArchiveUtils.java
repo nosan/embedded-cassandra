@@ -180,7 +180,8 @@ public abstract class ArchiveUtils {
 				catch (IOException | ArchiveException | CompressorException ex) {
 					IOUtils.closeQuietly(cstream);
 					IOUtils.closeQuietly(stream);
-					throw new IOException("Could not create a stream", ex);
+					throw new IOException(String.format("Could not create a stream for archive (%s)",
+							archive), ex);
 				}
 			};
 		}
