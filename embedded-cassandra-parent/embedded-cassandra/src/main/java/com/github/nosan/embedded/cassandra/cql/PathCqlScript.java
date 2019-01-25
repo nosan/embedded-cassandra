@@ -58,7 +58,7 @@ public final class PathCqlScript extends AbstractCqlResourceScript {
 	 */
 	public PathCqlScript(@Nonnull Path path, @Nullable Charset encoding) {
 		super(encoding);
-		this.path = Objects.requireNonNull(path, "Location must not be null");
+		this.path = Objects.requireNonNull(path, "Path must not be null");
 	}
 
 	@Nonnull

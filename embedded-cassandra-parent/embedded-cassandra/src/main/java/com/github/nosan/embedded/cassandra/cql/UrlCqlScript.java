@@ -57,7 +57,7 @@ public final class UrlCqlScript extends AbstractCqlResourceScript {
 	 */
 	public UrlCqlScript(@Nonnull URL url, @Nullable Charset encoding) {
 		super(encoding);
-		this.url = Objects.requireNonNull(url, "Location must not be null");
+		this.url = Objects.requireNonNull(url, "URL must not be null");
 	}
 
 	@Nonnull

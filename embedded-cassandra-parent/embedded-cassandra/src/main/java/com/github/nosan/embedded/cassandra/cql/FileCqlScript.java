@@ -58,7 +58,7 @@ public final class FileCqlScript extends AbstractCqlResourceScript {
 	 */
 	public FileCqlScript(@Nonnull File file, @Nullable Charset encoding) {
 		super(encoding);
-		this.file = Objects.requireNonNull(file, "Location must not be null");
+		this.file = Objects.requireNonNull(file, "File must not be null");
 	}
 
 	@Nonnull

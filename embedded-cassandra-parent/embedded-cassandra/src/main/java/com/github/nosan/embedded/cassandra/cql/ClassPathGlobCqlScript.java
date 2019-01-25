@@ -282,7 +282,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	private static String cleanPattern(String pattern) {
 		pattern = cleanLocation(pattern);
-		while (pattern.startsWith("/")) {
+		if (pattern.startsWith("/")) {
 			pattern = pattern.substring(1);
 		}
 		return pattern;

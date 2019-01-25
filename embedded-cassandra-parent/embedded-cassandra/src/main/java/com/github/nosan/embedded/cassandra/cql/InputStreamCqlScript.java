@@ -54,7 +54,7 @@ public final class InputStreamCqlScript extends AbstractCqlResourceScript {
 	 */
 	public InputStreamCqlScript(@Nonnull InputStream stream, @Nullable Charset encoding) {
 		super(encoding);
-		this.stream = Objects.requireNonNull(stream, "Location must not be null");
+		this.stream = Objects.requireNonNull(stream, "Stream must not be null");
 	}
 
 	@Nonnull
