@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -64,9 +63,6 @@ public class TestCassandra implements Cassandra {
 	private final boolean registerShutdownHook;
 
 	@Nonnull
-	private final AtomicBoolean shutdownHookRegistered = new AtomicBoolean(false);
-
-	@Nonnull
 	private final Object lock = new Object();
 
 	@Nonnull
@@ -86,6 +82,8 @@ public class TestCassandra implements Cassandra {
 
 	@Nullable
 	private volatile Session session;
+
+	private volatile boolean shutdownHookRegistered;
 
 	private volatile boolean started;
 
@@ -186,9 +184,10 @@ public class TestCassandra implements Cassandra {
 			if (this.started) {
 				return;
 			}
-			if (this.registerShutdownHook && this.shutdownHookRegistered.compareAndSet(false, true)) {
+			if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 				try {
 					Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, "Test Cassandra Hook"));
+					this.shutdownHookRegistered = true;
 				}
 				catch (Throwable ex) {
 					throw new CassandraException("Test Cassandra shutdown hook is not registered", ex);

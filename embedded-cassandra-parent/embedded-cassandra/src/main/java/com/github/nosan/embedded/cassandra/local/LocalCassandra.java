@@ -23,7 +23,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,9 +51,6 @@ class LocalCassandra implements Cassandra {
 	private final boolean registerShutdownHook;
 
 	@Nonnull
-	private final AtomicBoolean shutdownHookRegistered = new AtomicBoolean(false);
-
-	@Nonnull
 	private final Object lock = new Object();
 
 	@Nonnull
@@ -68,6 +64,8 @@ class LocalCassandra implements Cassandra {
 
 	@Nullable
 	private volatile Settings settings;
+
+	private volatile boolean shutdownHookRegistered;
 
 	private volatile boolean started;
 
@@ -123,9 +121,10 @@ class LocalCassandra implements Cassandra {
 				throw new CassandraException("Unable to initialize Cassandra", ex);
 			}
 
-			if (this.registerShutdownHook && this.shutdownHookRegistered.compareAndSet(false, true)) {
+			if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 				try {
 					Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, "Cassandra Hook"));
+					this.shutdownHookRegistered = true;
 				}
 				catch (Throwable ex) {
 					throw new CassandraException("Cassandra shutdown hook is not registered", ex);
