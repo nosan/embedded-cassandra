@@ -65,7 +65,7 @@ public class ClassPathCqlScriptTests {
 				.isEqualTo(new ClassPathCqlScript("/roles.cql"));
 
 		assertThat(new ClassPathCqlScript("/hz.cql", getClass()))
-				.isNotEqualTo(new ClassPathCqlScript("/hz.cql"));
+				.isEqualTo(new ClassPathCqlScript("/hz.cql"));
 
 		assertThat(new ClassPathCqlScript("/roles.cql", getClass(), StandardCharsets.UTF_16LE))
 				.isNotEqualTo(new ClassPathCqlScript("/roles.cql", getClass()));

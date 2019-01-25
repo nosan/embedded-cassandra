@@ -39,37 +39,37 @@ import org.apiguardian.api.API;
 public final class PathCqlScript extends AbstractCqlResourceScript {
 
 	@Nonnull
-	private final Path location;
+	private final Path path;
 
 	/**
 	 * Create a new {@link PathCqlScript} based on a Path.
 	 *
-	 * @param location a Path
+	 * @param path a Path
 	 */
-	public PathCqlScript(@Nonnull Path location) {
-		this(location, null);
+	public PathCqlScript(@Nonnull Path path) {
+		this(path, null);
 	}
 
 	/**
 	 * Create a new {@link PathCqlScript} based on a Path.
 	 *
-	 * @param location a path
+	 * @param path a path
 	 * @param encoding encoding the encoding to use for reading from the resource
 	 */
-	public PathCqlScript(@Nonnull Path location, @Nullable Charset encoding) {
+	public PathCqlScript(@Nonnull Path path, @Nullable Charset encoding) {
 		super(encoding);
-		this.location = Objects.requireNonNull(location, "Location must not be null");
+		this.path = Objects.requireNonNull(path, "Location must not be null");
 	}
 
 	@Nonnull
 	@Override
 	protected InputStream getInputStream() throws IOException {
-		return Files.newInputStream(this.location);
+		return Files.newInputStream(this.path);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.location, getEncoding());
+		return Objects.hash(this.path, getEncoding());
 	}
 
 	@Override
@@ -81,13 +81,13 @@ public final class PathCqlScript extends AbstractCqlResourceScript {
 			return false;
 		}
 		PathCqlScript that = (PathCqlScript) other;
-		return Objects.equals(this.location, that.location)
+		return Objects.equals(this.path, that.path)
 				&& Objects.equals(getEncoding(), that.getEncoding());
 	}
 
 	@Override
 	@Nonnull
 	public String toString() {
-		return String.valueOf(this.location);
+		return String.valueOf(this.path);
 	}
 }

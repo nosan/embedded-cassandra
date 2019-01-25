@@ -39,37 +39,37 @@ import org.apiguardian.api.API;
 public final class FileCqlScript extends AbstractCqlResourceScript {
 
 	@Nonnull
-	private final File location;
+	private final File file;
 
 	/**
 	 * Create a new {@link FileCqlScript} based on a File.
 	 *
-	 * @param location a File
+	 * @param file a File
 	 */
-	public FileCqlScript(@Nonnull File location) {
-		this(location, null);
+	public FileCqlScript(@Nonnull File file) {
+		this(file, null);
 	}
 
 	/**
 	 * Create a new {@link FileCqlScript} based on a File.
 	 *
-	 * @param location a File
+	 * @param file a File
 	 * @param encoding encoding the encoding to use for reading from the resource
 	 */
-	public FileCqlScript(@Nonnull File location, @Nullable Charset encoding) {
+	public FileCqlScript(@Nonnull File file, @Nullable Charset encoding) {
 		super(encoding);
-		this.location = Objects.requireNonNull(location, "Location must not be null");
+		this.file = Objects.requireNonNull(file, "Location must not be null");
 	}
 
 	@Nonnull
 	@Override
 	protected InputStream getInputStream() throws IOException {
-		return new FileInputStream(this.location);
+		return new FileInputStream(this.file);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.location, getEncoding());
+		return Objects.hash(this.file, getEncoding());
 	}
 
 	@Override
@@ -81,13 +81,13 @@ public final class FileCqlScript extends AbstractCqlResourceScript {
 			return false;
 		}
 		FileCqlScript that = (FileCqlScript) other;
-		return Objects.equals(this.location, that.location)
+		return Objects.equals(this.file, that.file)
 				&& Objects.equals(getEncoding(), that.getEncoding());
 	}
 
 	@Override
 	@Nonnull
 	public String toString() {
-		return String.valueOf(this.location);
+		return String.valueOf(this.file);
 	}
 }

@@ -35,37 +35,37 @@ import org.apiguardian.api.API;
 public final class InputStreamCqlScript extends AbstractCqlResourceScript {
 
 	@Nonnull
-	private final InputStream location;
+	private final InputStream stream;
 
 	/**
 	 * Create a new {@link InputStreamCqlScript} based on a InputStream.
 	 *
-	 * @param location a InputStream
+	 * @param stream a InputStream
 	 */
-	public InputStreamCqlScript(@Nonnull InputStream location) {
-		this(location, null);
+	public InputStreamCqlScript(@Nonnull InputStream stream) {
+		this(stream, null);
 	}
 
 	/**
 	 * Create a new {@link InputStreamCqlScript} based on a InputStream.
 	 *
-	 * @param location a InputStream
+	 * @param stream a InputStream
 	 * @param encoding encoding the encoding to use for reading from the resource
 	 */
-	public InputStreamCqlScript(@Nonnull InputStream location, @Nullable Charset encoding) {
+	public InputStreamCqlScript(@Nonnull InputStream stream, @Nullable Charset encoding) {
 		super(encoding);
-		this.location = Objects.requireNonNull(location, "Location must not be null");
+		this.stream = Objects.requireNonNull(stream, "Location must not be null");
 	}
 
 	@Nonnull
 	@Override
 	protected InputStream getInputStream() {
-		return this.location;
+		return this.stream;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.location, getEncoding());
+		return Objects.hash(this.stream, getEncoding());
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public final class InputStreamCqlScript extends AbstractCqlResourceScript {
 			return false;
 		}
 		InputStreamCqlScript that = (InputStreamCqlScript) other;
-		return Objects.equals(this.location, that.location)
+		return Objects.equals(this.stream, that.stream)
 				&& Objects.equals(getEncoding(), that.getEncoding());
 	}
 

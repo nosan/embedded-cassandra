@@ -38,37 +38,37 @@ import org.apiguardian.api.API;
 public final class UrlCqlScript extends AbstractCqlResourceScript {
 
 	@Nonnull
-	private final URL location;
+	private final URL url;
 
 	/**
 	 * Create a new {@link UrlCqlScript} based on a URL path.
 	 *
-	 * @param location a URL path
+	 * @param url a URL path
 	 */
-	public UrlCqlScript(@Nonnull URL location) {
-		this(location, null);
+	public UrlCqlScript(@Nonnull URL url) {
+		this(url, null);
 	}
 
 	/**
 	 * Create a new {@link UrlCqlScript} based on a URL path.
 	 *
-	 * @param location a URL path
+	 * @param url a URL path
 	 * @param encoding encoding the encoding to use for reading from the resource
 	 */
-	public UrlCqlScript(@Nonnull URL location, @Nullable Charset encoding) {
+	public UrlCqlScript(@Nonnull URL url, @Nullable Charset encoding) {
 		super(encoding);
-		this.location = Objects.requireNonNull(location, "Location must not be null");
+		this.url = Objects.requireNonNull(url, "Location must not be null");
 	}
 
 	@Nonnull
 	@Override
 	protected InputStream getInputStream() throws IOException {
-		return this.location.openStream();
+		return this.url.openStream();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.location, getEncoding());
+		return Objects.hash(this.url, getEncoding());
 	}
 
 	@Override
@@ -80,13 +80,13 @@ public final class UrlCqlScript extends AbstractCqlResourceScript {
 			return false;
 		}
 		UrlCqlScript that = (UrlCqlScript) other;
-		return Objects.equals(this.location, that.location)
+		return Objects.equals(this.url, that.url)
 				&& Objects.equals(getEncoding(), that.getEncoding());
 	}
 
 	@Override
 	@Nonnull
 	public String toString() {
-		return String.valueOf(this.location);
+		return String.valueOf(this.url);
 	}
 }
