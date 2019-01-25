@@ -48,7 +48,6 @@ class EmptyArtifact implements Artifact {
 		Path tempFile = directory.resolve(UUID.randomUUID().toString())
 				.resolve(String.format("apache-cassandra-%s.zip", this.version));
 		Files.createDirectories(tempFile.getParent());
-		tempFile.getParent().toFile().deleteOnExit();
 		Files.createFile(tempFile);
 		tempFile.toFile().deleteOnExit();
 		return tempFile;

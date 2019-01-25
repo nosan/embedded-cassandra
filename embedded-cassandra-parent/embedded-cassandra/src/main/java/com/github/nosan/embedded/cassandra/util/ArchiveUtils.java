@@ -96,7 +96,6 @@ public abstract class ArchiveUtils {
 		ArchiveFactory archiveFactory = createArchiveFactory(archive);
 		try (ArchiveInputStream stream = archiveFactory.create(archive)) {
 			Path tempDir = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString());
-			tempDir.toFile().deleteOnExit();
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
 				if (entry.isDirectory()) {
