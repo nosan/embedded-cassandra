@@ -176,7 +176,6 @@ class RemoteArtifact implements Artifact {
 			if (Files.exists(file)) {
 				return file;
 			}
-			log.info("File ({}) does not exist. Trying to download it...", file);
 			Path tempFile = this.resource.getFile();
 			try {
 				Files.createDirectories(file.getParent());
