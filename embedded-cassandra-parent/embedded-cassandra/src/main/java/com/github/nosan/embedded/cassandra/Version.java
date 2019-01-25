@@ -202,7 +202,7 @@ public final class Version implements Comparable<Version> {
 
 	private static int nonNegative(int value) {
 		if (value < 0) {
-			throw new IllegalArgumentException(String.format("Value (%s) must not be positive or zero", value));
+			throw new IllegalArgumentException(String.format("Value (%s) must be positive or zero", value));
 		}
 		return value;
 	}

@@ -60,7 +60,7 @@ public final class SystemProperty implements Supplier<String> {
 	/**
 	 * Returns a {@link System#getProperty(String)}.
 	 *
-	 * @return a nonnull-value, or throw an {@code NullPointerException}
+	 * @return a nonnull-value, or throw a {@code NullPointerException}
 	 * @throws NullPointerException if {@link SystemProperty#getProperty(String)} is null
 	 */
 	@Nonnull
