@@ -41,11 +41,11 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class FileUtils {
 
-	private static final Path TMP_DIR = Paths.get(new SystemProperty("java.io.tmpdir").getNonnull());
+	private static final Path TMP_DIR = Paths.get(new SystemProperty("java.io.tmpdir").getRequired());
 
-	private static final Path USER_HOME_DIR = Paths.get(new SystemProperty("user.home").getNonnull());
+	private static final Path USER_HOME_DIR = Paths.get(new SystemProperty("user.home").getRequired());
 
-	private static final Path USER_DIR = Paths.get(new SystemProperty("user.dir").getNonnull());
+	private static final Path USER_DIR = Paths.get(new SystemProperty("user.dir").getRequired());
 
 	/**
 	 * Return the temporary directory.

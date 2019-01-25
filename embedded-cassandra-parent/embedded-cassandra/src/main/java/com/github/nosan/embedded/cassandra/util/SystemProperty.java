@@ -64,7 +64,7 @@ public final class SystemProperty implements Supplier<String> {
 	 * @throws NullPointerException if {@link SystemProperty#getProperty(String)} is nu
 	 */
 	@Nonnull
-	public String getNonnull() throws NullPointerException {
+	public String getRequired() throws NullPointerException {
 		String value = getProperty(this.key);
 		return Objects.requireNonNull(value, String.format("System Property for key (%s) is null", this.key));
 	}

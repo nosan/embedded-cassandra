@@ -41,7 +41,7 @@ public class SystemPropertyTests {
 
 	@Test
 	public void shouldNotGet() {
-		assertThatThrownBy(() -> new SystemProperty("test").getNonnull())
+		assertThatThrownBy(() -> new SystemProperty("test").getRequired())
 				.isInstanceOf(NullPointerException.class)
 				.hasStackTraceContaining("System Property for key (test) is null");
 	}
