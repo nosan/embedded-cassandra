@@ -74,7 +74,19 @@ public class VersionTests {
 	public void shouldNotParse() {
 		this.throwable.expect(IllegalArgumentException.class);
 		this.throwable.expectMessage("Expected format is ");
-		Version.parse("1.q");
+		Version.parse("q");
+	}
 
+	@Test
+	public void shouldParseBetaVersion() {
+		String text = "1.1.0-beta1";
+		Version version = Version.parse(text);
+		assertThat(version).isEqualTo(Version.parse(text));
+		assertThat(version).isEqualByComparingTo(Version.parse(text));
+		assertThat(version).isNotEqualByComparingTo(new Version(1, 1, 0));
+		assertThat(version.getMajor()).isEqualTo(1);
+		assertThat(version.getMinor()).isEqualTo(1);
+		assertThat(version.getPatch()).isEqualTo(0);
+		assertThat(version.toString()).isEqualTo(text);
 	}
 }

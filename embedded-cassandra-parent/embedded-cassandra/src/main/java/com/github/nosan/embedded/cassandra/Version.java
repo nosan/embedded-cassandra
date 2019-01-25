@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -38,8 +39,10 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class Version implements Comparable<Version> {
 
-	private static final Pattern VERSION_PATTERN =
-			Pattern.compile("^\\s*([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?\\s*$");
+	private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?(.*)$");
+
+	@Nonnull
+	private final String rawVersion;
 
 	private final int major;
 
@@ -54,10 +57,8 @@ public final class Version implements Comparable<Version> {
 	 * @param minor a minor value
 	 * @param patch a patch value
 	 */
-	public Version(int major, int minor, int patch) {
-		this.major = Math.max(major, 0);
-		this.minor = Math.max(minor, -1);
-		this.patch = Math.max(patch, -1);
+	public Version(@Nonnegative int major, @Nonnegative int minor, @Nonnegative int patch) {
+		this(nonNegative(major), nonNegative(minor), nonNegative(patch), null);
 	}
 
 	/**
@@ -66,8 +67,8 @@ public final class Version implements Comparable<Version> {
 	 * @param major a major value
 	 * @param minor a minor value
 	 */
-	public Version(int major, int minor) {
-		this(major, minor, -1);
+	public Version(@Nonnegative int major, @Nonnegative int minor) {
+		this(nonNegative(major), nonNegative(minor), -1, null);
 	}
 
 	/**
@@ -75,8 +76,23 @@ public final class Version implements Comparable<Version> {
 	 *
 	 * @param major a major value
 	 */
-	public Version(int major) {
-		this(major, -1, -1);
+	public Version(@Nonnegative int major) {
+		this(nonNegative(major), -1, -1, null);
+	}
+
+	/**
+	 * Creates a {@link Version}.
+	 *
+	 * @param major a major value
+	 * @param minor a minor value
+	 * @param patch a patch value
+	 * @param rawVersion a string value of the version
+	 */
+	private Version(int major, int minor, int patch, @Nullable String rawVersion) {
+		this.major = major;
+		this.minor = minor;
+		this.patch = patch;
+		this.rawVersion = StringUtils.hasText(rawVersion) ? rawVersion : toRawVersion(major, minor, patch);
 	}
 
 	/**
@@ -107,11 +123,6 @@ public final class Version implements Comparable<Version> {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(this.major, this.minor, this.patch);
-	}
-
-	@Override
 	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
@@ -122,16 +133,19 @@ public final class Version implements Comparable<Version> {
 		Version version = (Version) other;
 		return this.major == version.major &&
 				this.minor == version.minor &&
-				this.patch == version.patch;
+				this.patch == version.patch &&
+				this.rawVersion.equals(version.rawVersion);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.major, this.minor, this.patch, this.rawVersion);
 	}
 
 	@Nonnull
 	@Override
 	public String toString() {
-		return IntStream.of(this.major, this.minor, this.patch)
-				.filter(i -> i >= 0)
-				.mapToObj(Integer::toString)
-				.collect(Collectors.joining("."));
+		return this.rawVersion;
 	}
 
 	@Override
@@ -140,7 +154,11 @@ public final class Version implements Comparable<Version> {
 		if (majorCmp == 0) {
 			int minCmp = Integer.compare(this.minor, other.minor);
 			if (minCmp == 0) {
-				return Integer.compare(this.patch, other.patch);
+				int patchCmp = Integer.compare(this.patch, other.patch);
+				if (patchCmp == 0) {
+					return this.rawVersion.compareTo(other.rawVersion);
+				}
+				return patchCmp;
 			}
 			return minCmp;
 		}
@@ -156,7 +174,7 @@ public final class Version implements Comparable<Version> {
 	@Nonnull
 	public static Version parse(@Nonnull String version) {
 		Objects.requireNonNull(version, "Version must not be null");
-		Matcher matcher = VERSION_PATTERN.matcher(version);
+		Matcher matcher = VERSION_PATTERN.matcher(version.trim());
 		if (matcher.find()) {
 			int major = Integer.parseInt(matcher.group(1));
 			int minor = -1;
@@ -169,9 +187,23 @@ public final class Version implements Comparable<Version> {
 			if (StringUtils.hasText(patchGroup)) {
 				patch = Integer.parseInt(patchGroup);
 			}
-			return new Version(major, minor, patch);
+			return new Version(major, minor, patch, matcher.group());
 		}
 		throw new IllegalArgumentException(
 				String.format("Version (%s) is invalid. Expected format is %s", version, VERSION_PATTERN));
+	}
+
+	private static String toRawVersion(int major, int minor, int patch) {
+		return IntStream.of(major, minor, patch)
+				.filter(i -> i >= 0)
+				.mapToObj(Integer::toString)
+				.collect(Collectors.joining("."));
+	}
+
+	private static int nonNegative(int value) {
+		if (value < 0) {
+			throw new IllegalArgumentException(String.format("Value (%s) must not be positive or zero", value));
+		}
+		return value;
 	}
 }
