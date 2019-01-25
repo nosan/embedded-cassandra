@@ -54,11 +54,9 @@ public final class Version implements Comparable<Version> {
 	 * Creates a {@link Version}.
 	 *
 	 * @param major a major value
-	 * @param minor a minor value
-	 * @param patch a patch value
 	 */
-	public Version(@Nonnegative int major, @Nonnegative int minor, @Nonnegative int patch) {
-		this(nonNegative(major), nonNegative(minor), nonNegative(patch), null);
+	public Version(@Nonnegative int major) {
+		this(nonNegative(major), -1, -1, null);
 	}
 
 	/**
@@ -75,9 +73,11 @@ public final class Version implements Comparable<Version> {
 	 * Creates a {@link Version}.
 	 *
 	 * @param major a major value
+	 * @param minor a minor value
+	 * @param patch a patch value
 	 */
-	public Version(@Nonnegative int major) {
-		this(nonNegative(major), -1, -1, null);
+	public Version(@Nonnegative int major, @Nonnegative int minor, @Nonnegative int patch) {
+		this(nonNegative(major), nonNegative(minor), nonNegative(patch), null);
 	}
 
 	/**
