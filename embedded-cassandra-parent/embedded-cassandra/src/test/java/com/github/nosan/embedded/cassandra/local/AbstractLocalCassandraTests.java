@@ -47,7 +47,6 @@ import com.datastax.driver.core.SocketOptions;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
@@ -55,13 +54,13 @@ import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
-import com.github.nosan.embedded.cassandra.test.support.CauseMatcher;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.OS;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 
 /**
@@ -70,9 +69,6 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Dmytro Nosan
  */
 public abstract class AbstractLocalCassandraTests {
-
-	@Rule
-	public final ExpectedException throwable = ExpectedException.none();
 
 	@Rule
 	public final CaptureOutput output = new CaptureOutput();
@@ -90,11 +86,9 @@ public abstract class AbstractLocalCassandraTests {
 	@Test
 	public void shouldFailCassandraUseSamePorts() {
 		CassandraRunner runner = new CassandraRunner(this.factory);
-		runner.run(cassandra -> {
-			this.throwable.expect(CassandraException.class);
-			this.throwable.expectCause(new CauseMatcher(IOException.class));
-			runner.run(new NotReachable());
-		});
+		runner.run(cassandra -> assertThatThrownBy(() ->
+				runner.run(new NotReachable())).isInstanceOf(CassandraException.class)
+				.hasCauseInstanceOf(IOException.class));
 		assertCassandraHasBeenStopped();
 	}
 
@@ -132,18 +126,19 @@ public abstract class AbstractLocalCassandraTests {
 
 	@Test
 	public void notEnoughTime() {
-		this.throwable.expect(CassandraException.class);
-		this.throwable.expectCause(new CauseMatcher(IOException.class,
-				"Cassandra has not been started, seems like (2000) milliseconds is not enough"));
 		this.factory.setStartupTimeout(Duration.ofSeconds(2L));
-		new CassandraRunner(this.factory).run(new NotReachable());
+
+		assertThatThrownBy(() -> new CassandraRunner(this.factory).run(new NotReachable()))
+				.isInstanceOf(CassandraException.class)
+				.hasStackTraceContaining(
+						"Cassandra has not been started, seems like (2000) milliseconds is not enough");
 	}
 
 	@Test
 	public void shouldOverrideJavaHome() {
-		this.throwable.expect(CassandraException.class);
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
-		new CassandraRunner(this.factory).run(new NotReachable());
+		assertThatThrownBy(() -> new CassandraRunner(this.factory).run(new NotReachable()))
+				.isInstanceOf(CassandraException.class);
 	}
 
 	@Test
@@ -164,20 +159,17 @@ public abstract class AbstractLocalCassandraTests {
 
 	@Test
 	public void shouldNotGetSettings() {
-		this.throwable.expect(CassandraException.class);
-		this.throwable.expectMessage("Please start it before calling this method");
-
-		this.factory.create().getSettings();
+		assertThatThrownBy(() -> this.factory.create().getSettings())
+				.hasStackTraceContaining("Please start it before calling this method")
+				.isInstanceOf(CassandraException.class);
 	}
 
 	@Test
 	public void shouldCatchCassandraError() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-invalid.yaml"));
-
-		this.throwable.expect(CassandraException.class);
-		this.throwable.expectCause(new CauseMatcher(IOException.class, "invalid_property"));
-
-		new CassandraRunner(this.factory).run(new NotReachable());
+		assertThatThrownBy(() -> new CassandraRunner(this.factory).run(new NotReachable()))
+				.hasStackTraceContaining("invalid_property")
+				.isInstanceOf(CassandraException.class);
 	}
 
 	@Test

@@ -25,15 +25,14 @@ import com.datastax.driver.core.MetricsOptions;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link DefaultClusterFactory}.
@@ -41,9 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 public class DefaultClusterFactoryTests {
-
-	@Rule
-	public final ExpectedException throwable = ExpectedException.none();
 
 	private final DefaultClusterFactory factory = new DefaultClusterFactory();
 
@@ -83,9 +79,9 @@ public class DefaultClusterFactoryTests {
 		assertThat(protocolOptions.getPort()).isEqualTo(9000);
 		assertThat(cluster.getClusterName()).isEqualTo("my name");
 
-		this.throwable.expect(NoHostAvailableException.class);
-		this.throwable.expectMessage("google.com");
-		cluster.connect();
+		assertThatThrownBy(cluster::connect)
+				.isInstanceOf(NoHostAvailableException.class)
+				.hasStackTraceContaining("google.com");
 	}
 
 	private static final class TestSettings implements Settings {

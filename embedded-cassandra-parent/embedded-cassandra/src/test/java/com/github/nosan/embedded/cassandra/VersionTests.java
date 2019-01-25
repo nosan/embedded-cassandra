@@ -16,11 +16,10 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link Version}.
@@ -28,9 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 public class VersionTests {
-
-	@Rule
-	public final ExpectedException throwable = ExpectedException.none();
 
 	@Test
 	public void shouldParseMajorMinorPatch() {
@@ -72,9 +68,9 @@ public class VersionTests {
 
 	@Test
 	public void shouldNotParse() {
-		this.throwable.expect(IllegalArgumentException.class);
-		this.throwable.expectMessage("Expected format is ");
-		Version.parse("q");
+		assertThatThrownBy(() -> Version.parse("q"))
+				.hasStackTraceContaining("Expected format is ")
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test

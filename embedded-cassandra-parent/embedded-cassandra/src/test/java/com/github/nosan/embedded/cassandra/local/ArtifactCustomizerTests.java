@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -34,6 +33,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link ArtifactCustomizer}.
@@ -44,9 +44,6 @@ public class ArtifactCustomizerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-	@Rule
-	public final ExpectedException throwable = ExpectedException.none();
 
 	private final Version version = new Version(3, 11, 3);
 
@@ -62,9 +59,6 @@ public class ArtifactCustomizerTests {
 
 	@Test
 	public void impossibleToDetermineBaseDirectory() throws Exception {
-		this.throwable.expectMessage("Impossible to determine a base directory");
-		this.throwable.expect(IllegalStateException.class);
-
 		Path plain = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 		Path root = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 
@@ -73,7 +67,9 @@ public class ArtifactCustomizerTests {
 		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(this.version, root),
 				this.artifactDirectory);
 
-		customizer.customize(this.workingDirectory, this.version);
+		assertThatThrownBy(() -> customizer.customize(this.workingDirectory, this.version))
+				.hasStackTraceContaining("Impossible to determine a base directory")
+				.isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -115,25 +111,25 @@ public class ArtifactCustomizerTests {
 
 	@Test
 	public void directoryNotValidNoCassandraExecutable() throws Exception {
-		this.throwable.expectMessage("doesn't have one of the ");
-		this.throwable.expect(IllegalStateException.class);
 
 		Path archive = Paths.get(getClass().getResource("/empty.zip").toURI());
 		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(this.version, archive),
 				this.artifactDirectory);
 
-		customizer.customize(this.workingDirectory, this.version);
+		assertThatThrownBy(() -> customizer.customize(this.workingDirectory, this.version))
+				.hasStackTraceContaining("doesn't have one of the ")
+				.isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
 	public void invalidArchive() throws Exception {
-		this.throwable.expect(IllegalArgumentException.class);
 
 		Path archive = this.temporaryFolder.newFile().toPath();
 		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(this.version, archive),
 				this.artifactDirectory);
 
-		customizer.customize(this.workingDirectory, this.version);
+		assertThatThrownBy(() -> customizer.customize(this.workingDirectory, this.version))
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	private static final class StaticArtifactFactory implements ArtifactFactory {
