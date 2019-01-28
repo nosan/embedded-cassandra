@@ -42,7 +42,7 @@ public final class Version implements Comparable<Version> {
 	private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?(.*)$");
 
 	@Nonnull
-	private final String rawVersion;
+	private final String version;
 
 	private final int major;
 
@@ -86,13 +86,13 @@ public final class Version implements Comparable<Version> {
 	 * @param major a major value
 	 * @param minor a minor value
 	 * @param patch a patch value
-	 * @param rawVersion a string value of the version
+	 * @param version a string value of the version
 	 */
-	private Version(int major, int minor, int patch, @Nullable String rawVersion) {
+	private Version(int major, int minor, int patch, @Nullable String version) {
 		this.major = major;
 		this.minor = minor;
 		this.patch = patch;
-		this.rawVersion = StringUtils.hasText(rawVersion) ? rawVersion : toRawVersion(major, minor, patch);
+		this.version = StringUtils.hasText(version) ? version : toVersion(major, minor, patch);
 	}
 
 	/**
@@ -130,33 +130,31 @@ public final class Version implements Comparable<Version> {
 		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		Version version = (Version) other;
-		return this.major == version.major &&
-				this.minor == version.minor &&
-				this.patch == version.patch &&
-				this.rawVersion.equals(version.rawVersion);
+		Version v = (Version) other;
+		return this.version.equals(v.version);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.major, this.minor, this.patch, this.rawVersion);
+		return Objects.hash(this.version);
 	}
 
 	@Nonnull
 	@Override
 	public String toString() {
-		return this.rawVersion;
+		return this.version;
 	}
 
 	@Override
 	public int compareTo(@Nonnull Version other) {
+		Objects.requireNonNull(other, "Version must not be null");
 		int majorCmp = Integer.compare(this.major, other.major);
 		if (majorCmp == 0) {
 			int minCmp = Integer.compare(this.minor, other.minor);
 			if (minCmp == 0) {
 				int patchCmp = Integer.compare(this.patch, other.patch);
 				if (patchCmp == 0) {
-					return this.rawVersion.compareTo(other.rawVersion);
+					return this.version.compareTo(other.version);
 				}
 				return patchCmp;
 			}
@@ -193,7 +191,7 @@ public final class Version implements Comparable<Version> {
 				String.format("Version (%s) is invalid. Expected format is %s", version, VERSION_PATTERN));
 	}
 
-	private static String toRawVersion(int major, int minor, int patch) {
+	private static String toVersion(int major, int minor, int patch) {
 		return IntStream.of(major, minor, patch)
 				.filter(i -> i >= 0)
 				.mapToObj(Integer::toString)
