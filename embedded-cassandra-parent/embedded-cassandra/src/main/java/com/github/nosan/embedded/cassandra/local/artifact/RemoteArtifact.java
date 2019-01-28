@@ -316,7 +316,8 @@ class RemoteArtifact implements Artifact {
 					}
 				}
 				else if (status >= 400) {
-					throw new IOException(String.format("HTTP status for URL (%s) is invalid", url));
+					throw new IOException(String.format("HTTP (%d %s) status for URL (%s) is invalid", status,
+							connection.getResponseMessage(), url));
 				}
 			}
 			return urlConnection;
