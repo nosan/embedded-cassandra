@@ -201,7 +201,7 @@ public class RemoteArtifactTests {
 			exchange.close();
 		});
 		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
-				.hasStackTraceContaining("HTTP status for URL");
+				.hasStackTraceContaining("HTTP (400 Bad Request) status for URL");
 	}
 
 	@Test
