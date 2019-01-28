@@ -31,6 +31,7 @@ import com.github.nosan.embedded.cassandra.Settings;
  * @since 1.0.0
  */
 @API(since = "1.0.0", status = API.Status.STABLE)
+@FunctionalInterface
 public interface ClusterFactory {
 
 	/**
