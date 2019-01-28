@@ -221,7 +221,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 		catch (IOException | URISyntaxException ex) {
 			if (log.isDebugEnabled()) {
-				log.error(String.format("Could not find resources for URL (%s) and glob pattern (%s)", url, pattern),
+				log.error(String.format("Could not find resources for URL (%s) with a glob pattern (%s)", url, pattern),
 						ex);
 			}
 			return Collections.emptySet();
