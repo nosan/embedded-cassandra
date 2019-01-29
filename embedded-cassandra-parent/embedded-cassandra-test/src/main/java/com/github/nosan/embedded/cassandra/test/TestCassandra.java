@@ -358,12 +358,6 @@ public class TestCassandra implements Cassandra {
 		return CqlUtils.executeStatement(getSession(), statement);
 	}
 
-	@Nonnull
-	@Override
-	public String toString() {
-		return String.format("%s [%s]", getClass().getSimpleName(), this.cassandra);
-	}
-
 	private void start0() throws InterruptedException {
 		Cassandra cassandra = this.cassandraFactory.create();
 		Objects.requireNonNull(cassandra, "Cassandra must not be null");
