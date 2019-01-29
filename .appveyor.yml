@@ -13,7 +13,7 @@ build_script:
   - mvnw.cmd -Dsurefire.rerunFailingTestsCount=1 -B clean install
 
 on_failure:
-  - cat **/**/target/surefire-reports/*.txt
+  - cat **/**/target/surefire-reports/*-output.txt
 
 cache:
   - C:/Users/appveyor/.m2

@@ -260,7 +260,7 @@
                     <configuration>
                         <reportFormat>brief</reportFormat>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                        <useFile>true</useFile>
+                        <useFile>false</useFile>
                         <disableXmlReport>true</disableXmlReport>
                         <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
                         <failIfNoTests>false</failIfNoTests>
