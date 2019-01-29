@@ -240,6 +240,7 @@ public class TestCassandra implements Cassandra {
 
 	/**
 	 * Lazy initialize a {@link Cluster}.
+	 * This {@link Cluster} will be closed by this {@code Cassandra}.
 	 *
 	 * @return a cluster
 	 */
@@ -261,6 +262,7 @@ public class TestCassandra implements Cassandra {
 
 	/**
 	 * Lazy initialize a {@link Session} using a {@link #getCluster() Cluster}.
+	 * This {@link Session} will be closed by this {@code Cassandra}.
 	 *
 	 * @return a session
 	 */
