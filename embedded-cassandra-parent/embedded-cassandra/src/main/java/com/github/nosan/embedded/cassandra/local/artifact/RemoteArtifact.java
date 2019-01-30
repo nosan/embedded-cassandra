@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
+import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.ThreadNameSupplier;
 
@@ -265,7 +267,11 @@ class RemoteArtifact implements Artifact {
 				log.info("Downloading Apache Cassandra ({}) from ({}).", this.version, urlConnection.getURL());
 				long start = System.currentTimeMillis();
 				Files.createDirectories(file.getParent());
-				executorService.scheduleAtFixedRate(() -> progress(file, size), 50, 3000, TimeUnit.MILLISECONDS);
+				Map<String, String> context = MDCUtils.getContext();
+				executorService.scheduleAtFixedRate(() -> {
+					MDCUtils.setContext(context);
+					progress(file, size);
+				}, 50, 3000, TimeUnit.MILLISECONDS);
 				Files.copy(inputStream, file);
 				long elapsed = System.currentTimeMillis() - start;
 				log.info("Apache Cassandra ({}) has been downloaded ({} ms)", this.version, elapsed);
