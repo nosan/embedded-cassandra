@@ -54,7 +54,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EmbeddedLocalCassandra(version = "${version}", configurationFile = "${configurationFile}",
 		logbackFile = "${logbackFile}",
 		rackFile = "${rackFile}",
-		workingDirectory = "${workingDirectory}", javaHome = "${javaHome}",
+		workingDirectory = "${workingDirectory}",
+		artifactDirectory = "${artifactDirectory}",
+		javaHome = "${javaHome}",
 		jvmOptions = {"${jvmOptions}"},
 		topologyFile = "${topologyFile}",
 		commitLogArchivingFile = "${commitLogArchivingFile}",
@@ -89,6 +91,7 @@ public class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
 		assertThat(af.getProxy().type()).isEqualTo(Proxy.Type.SOCKS);
 		assertThat(factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
+		assertThat(factory.getArtifactDirectory()).isEqualTo(Paths.get("target/artifact"));
 		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(4));
 		assertThat(factory.getLogbackFile()).isEqualTo(getClass().getResource("/logback-test.xml"));
