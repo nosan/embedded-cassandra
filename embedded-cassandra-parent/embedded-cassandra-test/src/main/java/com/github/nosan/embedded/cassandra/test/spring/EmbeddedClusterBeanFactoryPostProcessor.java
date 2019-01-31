@@ -60,7 +60,7 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 		BeanDefinition bd = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
 		bd.setPrimary(true);
 		registry.registerBeanDefinition(EmbeddedClusterFactoryBean.BEAN_NAME, bd);
-		log.info("Primary '{}' bean has been registered", EmbeddedClusterFactoryBean.BEAN_NAME);
+		log.info("The primary '{}' bean has been registered", EmbeddedClusterFactoryBean.BEAN_NAME);
 	}
 
 	@Override
