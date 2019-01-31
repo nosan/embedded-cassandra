@@ -253,18 +253,16 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.test.spring.Cql;
-import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"}, replace = EmbeddedCassandra.Replace.NONE /* don't replace any cluster beans with an embedded cluster */)
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CqlScriptTests {
 
 	@Autowired
-	private Cluster cluster;
+	private Cluster myCluster;
 
 	@Test
 	@Cql(scripts = {"/users-data.cql"})
@@ -282,6 +280,16 @@ public class CqlScriptTests {
 			assertThat(rs.one().getLong(0)).isZero();
 		}
 	}
+
+    @Configuration
+    static class TestConfiguration {
+
+        @Bean
+        public Cluster myCluster() {
+            return ..;
+        }
+
+    }
 }
 
 ----
