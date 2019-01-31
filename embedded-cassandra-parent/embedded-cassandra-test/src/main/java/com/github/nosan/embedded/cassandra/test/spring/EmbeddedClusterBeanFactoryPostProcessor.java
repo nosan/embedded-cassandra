@@ -50,9 +50,8 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 		for (String name : factory.getBeanNamesForType(Cluster.class)) {
 			BeanDefinition bd = factory.getBeanDefinition(name);
 			if (bd.isPrimary()) {
-				log.warn("'{}' ({}) bean will not be used because @Primary '{}' bean already exists",
-						EmbeddedClusterFactoryBean.BEAN_NAME, Cluster.class.getTypeName(), name);
-				return;
+				bd.setPrimary(false);
+				log.warn("Set 'primary = false' for a '{}' bean", name);
 			}
 		}
 		if (registry.containsBeanDefinition(EmbeddedClusterFactoryBean.BEAN_NAME)) {
@@ -61,8 +60,7 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 		BeanDefinition bd = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
 		bd.setPrimary(true);
 		registry.registerBeanDefinition(EmbeddedClusterFactoryBean.BEAN_NAME, bd);
-		log.info("@Primary '{}' ({}) bean has been registered", EmbeddedClusterFactoryBean.BEAN_NAME,
-				Cluster.class.getTypeName());
+		log.info("Primary '{}' bean has been registered", EmbeddedClusterFactoryBean.BEAN_NAME);
 	}
 
 	@Override

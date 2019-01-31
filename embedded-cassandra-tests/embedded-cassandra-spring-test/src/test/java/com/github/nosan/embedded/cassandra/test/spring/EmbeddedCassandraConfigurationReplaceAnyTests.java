@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -36,23 +37,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @EmbeddedCassandra
-public class EmbeddedCassandraConfigurationReplaceMultiTests {
+public class EmbeddedCassandraConfigurationReplaceAnyTests {
 
 	@Autowired
 	private TestService testService;
 
 	@Test
-	public void createKeyspace() {
+	public void shouldReplacePrimaryClusterBean() {
 		assertThat(this.testService.createKeyspace("test")).isTrue();
 	}
 
 	@Configuration
-	@Import({TestService.class})
+	@Import(TestService.class)
 	static class TestConfiguration {
 
 		@Bean
+		@Primary
 		public Cluster cluster1() {
-			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
+			return Cluster.builder()
+					.withClusterName("primary cluster")
+					.withPort(9000).addContactPoint("localhost").build();
 		}
 
 		@Bean
