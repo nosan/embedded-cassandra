@@ -67,7 +67,7 @@ public class CqlExecutionListenerDefaultTests {
 	}
 
 	@Configuration
-	static class Context {
+	static class TestConfiguration {
 
 		@Bean
 		public Cluster customCluster() {

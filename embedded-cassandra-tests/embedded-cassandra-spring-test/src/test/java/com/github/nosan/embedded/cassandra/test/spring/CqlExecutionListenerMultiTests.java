@@ -38,8 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {CqlExecutionListenerMultiTests.Context.class,
-		CqlExecutionListenerMultiTests.Context2.class})
+@ContextConfiguration
 @Cql(scripts = "/init.cql", encoding = "UTF-8")
 @Cql(statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CqlExecutionListenerMultiTests {
@@ -68,18 +67,17 @@ public class CqlExecutionListenerMultiTests {
 	}
 
 	@Configuration
-	static class Context {
+	static class TestConfiguration {
 
 		@Bean
 		public Cluster customCluster() {
 			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
-
 		}
 
 	}
 
 	@Configuration
-	static class Context2 {
+	static class TestConfiguration2 {
 
 		@Bean
 		public Cluster customCluster() {

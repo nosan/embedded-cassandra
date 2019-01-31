@@ -68,7 +68,7 @@ public class CqlExecutionListenerPrimaryTests {
 	}
 
 	@Configuration
-	static class Context {
+	static class TestConfiguration {
 
 		@Bean
 		@Primary

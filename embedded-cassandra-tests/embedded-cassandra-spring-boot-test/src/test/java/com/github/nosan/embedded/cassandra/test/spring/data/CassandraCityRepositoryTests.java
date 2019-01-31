@@ -16,13 +16,11 @@
 
 package com.github.nosan.embedded.cassandra.test.spring.data;
 
-import java.time.Duration;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.cassandra.core.ReactiveCassandraTemplate;
+import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
@@ -30,31 +28,29 @@ import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Sample tests for {@link EmbeddedCassandra} using reactive repositories.
+ * Sample tests for {@link EmbeddedCassandra}.
  *
  * @author Dmytro Nosan
  */
 @RunWith(SpringRunner.class)
-@EmbeddedCassandra(scripts = "classpath:setup.cql", replace = EmbeddedCassandra.Replace.NONE)
 @SpringBootTest
-public class EmbeddedCassandraCityReactiveRepositoryTests {
+@EmbeddedCassandra(scripts = "/setup.cql", replace = EmbeddedCassandra.Replace.NONE)
+public class CassandraCityRepositoryTests {
 
 	@Autowired
-	private ReactiveCassandraTemplate cassandraTemplate;
+	private CassandraTemplate cassandraTemplate;
 
 	@Autowired
-	private CityReactiveRepository cityReactiveRepository;
+	private CityRepository cityRepository;
 
 	@Test
 	public void testRepository() {
 		City city = new City();
 		city.setId(Long.MAX_VALUE);
 		city.setName("Lviv");
-		city = this.cityReactiveRepository.save(city).block(Duration.ofSeconds(5));
-		assertThat(city).isNotNull();
+		city = this.cityRepository.save(city);
 		assertThat(city.getId()).isNotNull();
-		assertThat(this.cassandraTemplate.exists(city.getId(), City.class)
-				.block(Duration.ofSeconds(5))).isTrue();
+		assertThat(this.cassandraTemplate.exists(city.getId(), City.class)).isTrue();
 	}
 
 }
