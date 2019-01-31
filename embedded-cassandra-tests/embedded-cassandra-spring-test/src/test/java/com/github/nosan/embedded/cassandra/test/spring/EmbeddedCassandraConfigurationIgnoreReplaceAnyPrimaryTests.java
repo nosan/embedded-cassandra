@@ -22,7 +22,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -37,24 +36,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @EmbeddedCassandra
-public class EmbeddedCassandraConfigurationReplacePrimaryTests {
+public class EmbeddedCassandraConfigurationIgnoreReplaceAnyPrimaryTests {
 
 	@Autowired
-	private TestService testService;
+	private Cluster cluster;
 
 	@Test
 	public void shouldReplacePrimaryClusterBean() {
-		assertThat(this.testService.createKeyspace("test")).isTrue();
+		assertThat(this.cluster.getClusterName()).isEqualTo("primary cluster");
 	}
 
 	@Configuration
-	@Import({TestService.class})
-	static class Context {
+	static class TestConfiguration {
 
 		@Bean
 		@Primary
 		public Cluster cluster1() {
-			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
+			return Cluster.builder()
+					.withClusterName("primary cluster")
+					.withPort(9000).addContactPoint("localhost").build();
 		}
 
 		@Bean
@@ -62,5 +62,9 @@ public class EmbeddedCassandraConfigurationReplacePrimaryTests {
 			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
 		}
 
+		@Bean
+		public ExcludeCassandraRegistryPostProcessor excludeCassandraProcessor() {
+			return new ExcludeCassandraRegistryPostProcessor();
+		}
 	}
 }

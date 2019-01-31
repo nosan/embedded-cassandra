@@ -131,7 +131,7 @@ public @interface EmbeddedCassandra {
 	enum Replace {
 
 		/**
-		 * Replace any {@code Cluster} beans.
+		 * Replace any {@code Cluster} beans with an embedded <b>primary</b> {@link Cluster} bean (if possible).
 		 */
 		ANY,
 

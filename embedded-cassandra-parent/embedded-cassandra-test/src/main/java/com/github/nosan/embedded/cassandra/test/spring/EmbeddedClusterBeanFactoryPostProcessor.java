@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -32,7 +31,7 @@ import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
 /**
- * {@link BeanDefinitionRegistryPostProcessor} to register or replace a {@link Cluster} bean.
+ * {@link BeanDefinitionRegistryPostProcessor} to register an embedded <b>primary</b> {@link Cluster} bean.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
@@ -44,11 +43,26 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 	private static final Logger log = LoggerFactory.getLogger(EmbeddedClusterBeanFactoryPostProcessor.class);
 
 	@Override
-	public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry)
-			throws BeansException {
+	public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
 		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, registry,
 				String.format("(%s) can only be used with a ConfigurableListableBeanFactory", getClass()));
-		process(registry, (ConfigurableListableBeanFactory) registry);
+		ConfigurableListableBeanFactory factory = (ConfigurableListableBeanFactory) registry;
+		for (String name : factory.getBeanNamesForType(Cluster.class)) {
+			BeanDefinition bd = factory.getBeanDefinition(name);
+			if (bd.isPrimary()) {
+				log.warn("'{}' ({}) bean will not be used because @Primary '{}' bean already exists",
+						EmbeddedClusterFactoryBean.BEAN_NAME, Cluster.class.getTypeName(), name);
+				return;
+			}
+		}
+		if (registry.containsBeanDefinition(EmbeddedClusterFactoryBean.BEAN_NAME)) {
+			registry.removeBeanDefinition(EmbeddedClusterFactoryBean.BEAN_NAME);
+		}
+		BeanDefinition bd = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
+		bd.setPrimary(true);
+		registry.registerBeanDefinition(EmbeddedClusterFactoryBean.BEAN_NAME, bd);
+		log.info("@Primary '{}' ({}) bean has been registered", EmbeddedClusterFactoryBean.BEAN_NAME,
+				Cluster.class.getTypeName());
 	}
 
 	@Override
@@ -60,42 +74,4 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 
-	private void process(BeanDefinitionRegistry registry,
-			ConfigurableListableBeanFactory beanFactory) {
-		BeanDefinitionHolder holder = getClusterBeanDefinition(beanFactory);
-		if (registry.containsBeanDefinition(holder.getBeanName())) {
-			registry.removeBeanDefinition(holder.getBeanName());
-		}
-		registry.registerBeanDefinition(holder.getBeanName(),
-				holder.getBeanDefinition());
-	}
-
-	private BeanDefinitionHolder getClusterBeanDefinition(ConfigurableListableBeanFactory beanFactory) {
-		String[] beanNames = beanFactory.getBeanNamesForType(Cluster.class);
-		if (beanNames.length == 1) {
-			String beanName = beanNames[0];
-			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-			log.info("Replacing '{}' Cluster bean with {} embedded version",
-					beanName, (!beanDefinition.isPrimary() ? "" : "a primary"));
-			return new BeanDefinitionHolder(
-					createEmbeddedBeanDefinition(beanDefinition.isPrimary()),
-					beanName);
-		}
-		for (String beanName : beanNames) {
-			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-			if (beanDefinition.isPrimary()) {
-				log.info("Replacing primary '{}' Cluster bean with a primary embedded version", beanName);
-				return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true), beanName);
-			}
-		}
-		log.info("There is no Cluster beans. Embedded primary '{}' Cluster bean will be registered",
-				EmbeddedClusterFactoryBean.BEAN_NAME);
-		return new BeanDefinitionHolder(createEmbeddedBeanDefinition(true), EmbeddedClusterFactoryBean.BEAN_NAME);
-	}
-
-	private BeanDefinition createEmbeddedBeanDefinition(boolean primary) {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
-		beanDefinition.setPrimary(primary);
-		return beanDefinition;
-	}
 }

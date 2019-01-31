@@ -48,7 +48,7 @@ public class EmbeddedCassandraConfigurationReplaceMultiTests {
 
 	@Configuration
 	@Import({TestService.class})
-	static class Context {
+	static class TestConfiguration {
 
 		@Bean
 		public Cluster cluster1() {
