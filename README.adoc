@@ -259,7 +259,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"})
+@EmbeddedCassandra(scripts = {"/keyspace.cql", "/users.cql"}, replace = EmbeddedCassandra.Replace.NONE /* don't replace any cluster beans with an embedded cluster */)
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CqlScriptTests {
 
@@ -305,7 +305,7 @@ import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@EmbeddedCassandra(scripts = "classpath:init.cql", replace = EmbeddedCassandra.Replace.NONE /* use auto-configured cluster. */)
+@EmbeddedCassandra(scripts = "/init.cql", replace = EmbeddedCassandra.Replace.NONE /* don't replace any cluster beans with an embedded cluster */)
 public class CassandraSpringBootTests {
 
 	@Test
