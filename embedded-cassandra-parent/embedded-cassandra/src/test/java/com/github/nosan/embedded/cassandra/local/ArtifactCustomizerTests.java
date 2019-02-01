@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -86,8 +87,8 @@ public class ArtifactCustomizerTests {
 		assertThat(workingDirectory.resolve("javadoc")).exists();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
-		assertThat(Files.list(workingDirectory.resolve("doc")).count()).isZero();
-		assertThat(Files.list(workingDirectory.resolve("javadoc")).count()).isZero();
+		assertThat(count(workingDirectory.resolve("doc"))).isZero();
+		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
 	}
 
 	@Test
@@ -105,8 +106,8 @@ public class ArtifactCustomizerTests {
 		assertThat(workingDirectory.resolve("javadoc")).exists();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
-		assertThat(Files.list(workingDirectory.resolve("doc")).count()).isZero();
-		assertThat(Files.list(workingDirectory.resolve("javadoc")).count()).isZero();
+		assertThat(count(workingDirectory.resolve("doc"))).isZero();
+		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
 	}
 
 	@Test
@@ -130,6 +131,10 @@ public class ArtifactCustomizerTests {
 
 		assertThatThrownBy(() -> customizer.customize(this.workingDirectory, this.version))
 				.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	private static long count(Path directory) throws IOException {
+		return Files.list(directory).count();
 	}
 
 	private static final class StaticArtifactFactory implements ArtifactFactory {

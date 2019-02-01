@@ -110,9 +110,9 @@ public @interface EmbeddedCassandra {
 	String encoding() default "";
 
 	/**
-	 * Determines what type of existing {@code Cluster} beans can be replaced.
+	 * Determines what type of existing {@link Cluster} beans can be replaced.
 	 *
-	 * @return the type of existing {@code Cluster} to replace
+	 * @return the type of existing {@link Cluster} to replace
 	 */
 	Replace replace() default Replace.ANY;
 
@@ -131,12 +131,12 @@ public @interface EmbeddedCassandra {
 	enum Replace {
 
 		/**
-		 * Replace any {@code Cluster} beans with an embedded <b>primary</b> {@link Cluster} bean.
+		 * Replace any {@link Cluster} beans with an embedded <b>primary</b> {@link Cluster} bean.
 		 */
 		ANY,
 
 		/**
-		 * Don't replace {@code Cluster} beans.
+		 * Don't replace {@link Cluster} beans.
 		 */
 		NONE
 
