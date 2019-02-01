@@ -72,9 +72,7 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 
 	private static void extractArtifact(Artifact artifact, Path artifactDirectory) throws IOException {
 		Path archive = artifact.get();
-		if (log.isDebugEnabled()) {
-			log.debug("Extract ({}) into ({}).", archive, artifactDirectory);
-		}
+		log.info("Extract ({}) into ({}).", archive, artifactDirectory);
 		try {
 			ArchiveUtils.extract(archive, artifactDirectory, entry -> shouldExtract(artifactDirectory, entry));
 		}
@@ -82,29 +80,23 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 			throw new IOException(String.format("Artifact (%s) could not be extracted into (%s)",
 					archive, artifactDirectory), ex);
 		}
-		if (log.isDebugEnabled()) {
-			log.debug("({}) Archive has been extracted into ({})", archive, artifactDirectory);
-		}
+		log.info("({}) Archive has been extracted into ({})", archive, artifactDirectory);
 	}
 
 	private static void copyArtifact(Path workingDirectory, Path artifactDirectory) throws IOException {
 		Path baseDir = determineBaseDir(artifactDirectory);
-		if (log.isDebugEnabled()) {
-			log.debug("Copy ({}) folder into ({}).", baseDir, workingDirectory);
-		}
+		log.info("Copy ({}) folder into ({}).", baseDir, workingDirectory);
 		try {
 			FileUtils.copy(baseDir, workingDirectory, file -> shouldCopy(baseDir, workingDirectory, file));
 		}
 		catch (IOException ex) {
 			throw new IOException(String.format("Could not copy folder (%s) into (%s)", baseDir, workingDirectory), ex);
 		}
-		if (log.isDebugEnabled()) {
-			log.debug("({}) Folder has been copied into ({})", baseDir, artifactDirectory);
-		}
+		log.info("({}) Folder has been copied into ({})", baseDir, workingDirectory);
 	}
 
-	private static boolean shouldCopy(Path src, Path dest, Path srcFile) {
-		Path destFile = dest.resolve(src.relativize(srcFile));
+	private static boolean shouldCopy(Path srcDir, Path destDir, Path srcFile) {
+		Path destFile = destDir.resolve(srcDir.relativize(srcFile));
 		if (!Files.exists(destFile)) {
 			return true;
 		}
