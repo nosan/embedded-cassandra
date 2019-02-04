@@ -79,7 +79,11 @@ class RunProcess {
 		this.arguments = Collections.unmodifiableList(new ArrayList<>(arguments));
 		this.environment = Collections.unmodifiableMap((environment != null) ?
 				new LinkedHashMap<>(environment) : Collections.emptyMap());
-		this.threadFactory = (threadFactory != null) ? threadFactory : Thread::new;
+		this.threadFactory = (threadFactory != null) ? threadFactory : (runnable) -> {
+			Thread thread = new Thread(runnable);
+			thread.setDaemon(true);
+			return thread;
+		};
 	}
 
 	/**
@@ -150,7 +154,14 @@ class RunProcess {
 			while ((line = readline(reader)) != null) {
 				if (StringUtils.hasText(line)) {
 					for (Output output : outputs) {
-						output.accept(line);
+						try {
+							output.accept(line);
+						}
+						catch (Throwable ex) {
+							if (log.isDebugEnabled()) {
+								log.error(String.format("Output (%s) did not handle a line (%s)", output, line), ex);
+							}
+						}
 					}
 				}
 			}

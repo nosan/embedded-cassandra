@@ -98,13 +98,13 @@ public abstract class CqlScriptParser {
 				singleQuote = !singleQuote;
 				continue;
 			}
-			//double quote " text "
+			//double quote "text"
 			else if (!singleQuote && !doubleDollar && c == DOUBLE_QUOTE) {
 				result.append(DOUBLE_QUOTE);
 				doubleQuote = !doubleQuote;
 				continue;
 			}
-			//double dollars $$ some text $$
+			//double dollars $$text$$
 			else if (!singleQuote && !doubleQuote && script.startsWith(DOUBLE_DOLLAR, index)) {
 				result.append(DOUBLE_DOLLAR);
 				index++;
@@ -113,7 +113,7 @@ public abstract class CqlScriptParser {
 			}
 
 			if (!singleQuote && !doubleQuote && !doubleDollar) {
-				// single comments
+				// single comment
 				if (script.startsWith(SINGLE_DASH_COMMENT, index)
 						|| script.startsWith(SINGLE_SLASH_COMMENT, index)) {
 					if (script.indexOf(LINE_SEPARATOR, index) < 0) {
