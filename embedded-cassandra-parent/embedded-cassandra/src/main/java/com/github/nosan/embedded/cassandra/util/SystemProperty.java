@@ -35,15 +35,15 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.INTERNAL)
 public final class SystemProperty implements Supplier<String> {
 
-	private final String key;
+	private final String name;
 
 	/**
 	 * Creates a {@link SystemProperty}.
 	 *
-	 * @param key key to lookup.
+	 * @param name key to lookup.
 	 */
-	public SystemProperty(@Nonnull String key) {
-		this.key = Objects.requireNonNull(key, "Key must not be null");
+	public SystemProperty(@Nonnull String name) {
+		this.name = Objects.requireNonNull(name, "Name must not be null");
 	}
 
 	/**
@@ -54,7 +54,7 @@ public final class SystemProperty implements Supplier<String> {
 	@Override
 	@Nullable
 	public String get() {
-		return getProperty(this.key);
+		return getProperty(this.name);
 	}
 
 	/**
@@ -65,8 +65,8 @@ public final class SystemProperty implements Supplier<String> {
 	 */
 	@Nonnull
 	public String getRequired() throws NullPointerException {
-		String value = getProperty(this.key);
-		return Objects.requireNonNull(value, String.format("System Property for key (%s) is null", this.key));
+		String value = getProperty(this.name);
+		return Objects.requireNonNull(value, String.format("System Property for key (%s) is null", this.name));
 	}
 
 	private static String getProperty(String key) {
