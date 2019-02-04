@@ -123,7 +123,7 @@ public abstract class FileUtils {
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.3.0
 	 */
-	public static void copy(@Nonnull Path src, @Nonnull Path dest, @Nonnull Predicate<? super Path> fileFilter)
+	public static void copy(@Nonnull Path src, @Nonnull Path dest, @Nullable Predicate<? super Path> fileFilter)
 			throws IOException {
 		Objects.requireNonNull(src, "Source must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
@@ -138,7 +138,7 @@ public abstract class FileUtils {
 			@Override
 			public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attributes)
 					throws IOException {
-				if (fileFilter.test(file)) {
+				if (fileFilter == null || fileFilter.test(file)) {
 					Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
 				}
 				return FileVisitResult.CONTINUE;
