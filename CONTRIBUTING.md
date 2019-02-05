@@ -1,12 +1,12 @@
 # Contributing to Embedded Cassandra
 
-Embedded Cassandra is released under the Apache 2.0 license.
+`Embedded Cassandra` is released under the Apache 2.0 license.
 
 ## Contributions
 
-Embedded Cassandra welcomes contributions from everyone.
+`Embedded Cassandra` welcomes contributions from everyone.
 
-Contributions to Embedded Cassandra should be made in the form of `GitHub pull requests`. Each pull request will
+Contributions to `Embedded Cassandra` should be made in the form of `GitHub pull requests`. Each pull request will
 be reviewed by a contributor.
 
 ## Pull Request Checklist
