@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.nio.file.ProviderNotFoundException;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
@@ -219,7 +220,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 			}
 			return getResourcesByPattern(Paths.get(url.toURI()), pattern);
 		}
-		catch (IOException | URISyntaxException ex) {
+		catch (IOException | URISyntaxException | ProviderNotFoundException ex) {
 			if (log.isDebugEnabled()) {
 				log.error(String.format("Could not find resources for URL (%s) with a glob pattern (%s)", url, pattern),
 						ex);
