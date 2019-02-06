@@ -328,23 +328,23 @@ class RemoteArtifact implements Artifact {
 		private static void showProgress(Path file, long size, ScheduledExecutorService executorService) {
 			if (size > 0) {
 				Map<String, String> context = MDCUtils.getContext();
-				long[] prevPercent = {0L};
-				int percentStep = 5;
+				long[] prevPercent = new long[1];
+				int minPercentStep = 5;
 				executorService.scheduleAtFixedRate(() -> {
-					if (Files.exists(file)) {
-						MDCUtils.setContext(context);
-						try {
+					MDCUtils.setContext(context);
+					try {
+						if (Files.exists(file)) {
 							long current = Files.size(file);
 							long percent = Math.max(current * 100, 1) / size;
-							if (percent - prevPercent[0] >= percentStep) {
+							if (percent - prevPercent[0] >= minPercentStep) {
 								prevPercent[0] = percent;
 								log.info("Downloaded {} / {}  {}% ", current, size, percent);
 							}
 						}
-						catch (Throwable ex) {
-							if (log.isTraceEnabled()) {
-								log.error(String.format("Could not show progress for a file (%s)", file), ex);
-							}
+					}
+					catch (Throwable ex) {
+						if (log.isTraceEnabled()) {
+							log.error(String.format("Could not show progress for a file (%s)", file), ex);
 						}
 					}
 				}, 0, 1, TimeUnit.SECONDS);
