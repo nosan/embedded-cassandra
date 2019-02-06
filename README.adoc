@@ -2,7 +2,7 @@
 
 `Embedded Cassandra` provides an easy way to run http://cassandra.apache.org/[Apache Cassandra] within `Java Application`.
 
-You can find more information link:DOCUMENTATION.adoc[here].
+You can find more information link:https://github.com/nosan/embedded-cassandra/wiki[here].
 
 ==== Issues
 
