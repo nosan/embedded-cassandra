@@ -186,7 +186,9 @@ public class TestCassandra implements Cassandra {
 			}
 			if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 				try {
-					Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, "Test Cassandra Hook"));
+					String name = String.format("Hook:%s:%s", getClass().getSimpleName(),
+							Integer.toHexString(hashCode()));
+					Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, name));
 					this.shutdownHookRegistered = true;
 				}
 				catch (Throwable ex) {
