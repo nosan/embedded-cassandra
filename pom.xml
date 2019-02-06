@@ -263,6 +263,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.22.1</version>
                     <configuration>
+                        <forkCount>0</forkCount>
                         <reportFormat>brief</reportFormat>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <useFile>false</useFile>
