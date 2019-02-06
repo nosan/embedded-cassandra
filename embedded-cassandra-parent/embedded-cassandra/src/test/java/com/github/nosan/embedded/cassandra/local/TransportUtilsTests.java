@@ -45,8 +45,12 @@ public class TransportUtilsTests {
 	@Test
 	public void testPorts() throws Exception {
 		Set<Integer> ports = new LinkedHashSet<>();
+		int attempts = 0;
 		while (ports.size() != 5) {
 			ports.add(PortUtils.getPort());
+			if (attempts++ > 64511) {
+				throw new IllegalStateException("Can't reserve ports...");
+			}
 		}
 		List<ServerSocket> sockets = new ArrayList<>();
 		Iterator<Integer> it = ports.iterator();
