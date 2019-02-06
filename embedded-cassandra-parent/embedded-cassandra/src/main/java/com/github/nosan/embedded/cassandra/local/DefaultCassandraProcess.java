@@ -233,7 +233,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 			stop(threadFactory, process, pidFile, directory, pid);
 			if (settings != null) {
 				try {
-					WaitUtils.await(Duration.ofSeconds(5), () -> TransportUtils.isDisabled(settings)
+					WaitUtils.await(Duration.ofSeconds(10), () -> TransportUtils.isDisabled(settings)
 							&& !process.isAlive());
 				}
 				catch (InterruptedException ex) {
