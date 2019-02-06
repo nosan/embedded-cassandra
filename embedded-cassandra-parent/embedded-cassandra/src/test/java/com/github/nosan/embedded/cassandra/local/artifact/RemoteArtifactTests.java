@@ -88,8 +88,10 @@ public class RemoteArtifactTests {
 		}
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, content.length);
-			sleep(4000);
-			exchange.getResponseBody().write(content);
+			for (int i = 0; i < content.length; i += 8192) {
+				exchange.getResponseBody().write(content, i, Math.min(8192, content.length - i));
+				sleep(100);
+			}
 			exchange.close();
 		});
 		Artifact artifact = this.factory.create(new Version(3, 1, 1));
@@ -214,9 +216,9 @@ public class RemoteArtifactTests {
 	@Test
 	public void readTimeoutIsExceeded() {
 		HttpServer server = this.webServer.get();
-		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(1200));
+		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(600));
 
-		this.factory.setReadTimeout(Duration.ofSeconds(1));
+		this.factory.setReadTimeout(Duration.ofMillis(200));
 		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
 				.hasStackTraceContaining("Read timed out");
 	}

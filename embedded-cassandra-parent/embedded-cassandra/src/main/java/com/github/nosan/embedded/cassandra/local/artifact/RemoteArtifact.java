@@ -267,11 +267,7 @@ class RemoteArtifact implements Artifact {
 				log.info("Downloading Apache Cassandra ({}) from ({}).", this.version, urlConnection.getURL());
 				long start = System.currentTimeMillis();
 				Files.createDirectories(file.getParent());
-				Map<String, String> context = MDCUtils.getContext();
-				executorService.scheduleAtFixedRate(() -> {
-					MDCUtils.setContext(context);
-					progress(file, size);
-				}, 50, 3000, TimeUnit.MILLISECONDS);
+				showProgress(file, size, executorService);
 				Files.copy(inputStream, file);
 				long elapsed = System.currentTimeMillis() - start;
 				log.info("Apache Cassandra ({}) has been downloaded ({} ms)", this.version, elapsed);
@@ -329,14 +325,29 @@ class RemoteArtifact implements Artifact {
 			return urlConnection;
 		}
 
-		private static void progress(Path file, long size) {
-			if (size > 0 && Files.exists(file)) {
-				try {
-					long current = Files.size(file);
-					log.info("Downloaded {} / {}  {}%", current, size, (current * 100) / size);
-				}
-				catch (IOException ignore) {
-				}
+		private static void showProgress(Path file, long size, ScheduledExecutorService executorService) {
+			if (size > 0) {
+				Map<String, String> context = MDCUtils.getContext();
+				long[] prevPercent = {0L};
+				int percentStep = 5;
+				executorService.scheduleAtFixedRate(() -> {
+					if (Files.exists(file)) {
+						MDCUtils.setContext(context);
+						try {
+							long current = Files.size(file);
+							long percent = Math.max(current * 100, 1) / size;
+							if (percent - prevPercent[0] >= percentStep) {
+								prevPercent[0] = percent;
+								log.info("Downloaded {} / {}  {}% ", current, size, percent);
+							}
+						}
+						catch (Throwable ex) {
+							if (log.isTraceEnabled()) {
+								log.error(String.format("Could not show progress for a file (%s)", file), ex);
+							}
+						}
+					}
+				}, 0, 1, TimeUnit.SECONDS);
 			}
 		}
 	}
