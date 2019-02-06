@@ -21,6 +21,6 @@ Also see link:CONTRIBUTING.md[CONTRIBUTING.md] if you wish to submit pull reques
 	$ ./mvnw clean install
 ----
 
-====  License
+==== License
 
 This project uses link:http://www.apache.org/licenses/LICENSE-2.0[Apache License 2.0]
