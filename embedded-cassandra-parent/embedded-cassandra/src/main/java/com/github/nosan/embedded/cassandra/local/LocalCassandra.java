@@ -123,8 +123,9 @@ class LocalCassandra implements Cassandra {
 
 			if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 				try {
-					String name = String.format("Hook:%s:%s", getClass().getSimpleName(),
-							Integer.toHexString(hashCode()));
+					String className = getClass().getSimpleName();
+					String hexString = Integer.toHexString(hashCode());
+					String name = String.format("Hook:%s:%s", className, hexString);
 					Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, name));
 					this.shutdownHookRegistered = true;
 				}
