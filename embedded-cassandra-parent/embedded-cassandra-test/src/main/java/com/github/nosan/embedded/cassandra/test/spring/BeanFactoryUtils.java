@@ -55,7 +55,7 @@ abstract class BeanFactoryUtils {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			if (log.isTraceEnabled()) {
-				log.trace(String.format("'%s' doesn't have a bean of type '%s'.", context, targetClass), ex);
+				log.error(String.format("'%s' doesn't have a bean of type '%s'.", context, targetClass), ex);
 			}
 		}
 		return null;
