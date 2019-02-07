@@ -90,12 +90,9 @@ abstract class CqlResourceUtils {
 	 * @throws IOException if an I/O error occurs
 	 * @since 1.0.7
 	 */
-	@Nullable
-	static URL getURL(@Nonnull ResourceLoader resourceLoader, @Nullable Class<?> testClass, @Nullable String resource)
+	@Nonnull
+	static URL getURL(@Nonnull ResourceLoader resourceLoader, @Nonnull String resource, @Nullable Class<?> testClass)
 			throws IOException {
-		if (!StringUtils.hasText(resource)) {
-			return null;
-		}
 		String[] locations = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, resource);
 		Assert.isTrue(locations.length == 1, "Invalid location length");
 		return resourceLoader.getResource(locations[0]).getURL();

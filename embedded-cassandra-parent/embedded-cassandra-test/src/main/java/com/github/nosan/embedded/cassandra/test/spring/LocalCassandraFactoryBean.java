@@ -116,11 +116,21 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		if (StringUtils.hasText(version)) {
 			factory.setVersion(Version.parse(version));
 		}
-		factory.setConfigurationFile(CqlResourceUtils.getURL(context, testClass, configurationFile));
-		factory.setLogbackFile(CqlResourceUtils.getURL(context, testClass, logbackFile));
-		factory.setTopologyFile(CqlResourceUtils.getURL(context, testClass, topologyFile));
-		factory.setRackFile(CqlResourceUtils.getURL(context, testClass, rackFile));
-		factory.setCommitLogArchivingFile(CqlResourceUtils.getURL(context, testClass, commitLogArchivingFile));
+		if (StringUtils.hasText(configurationFile)) {
+			factory.setConfigurationFile(CqlResourceUtils.getURL(context, configurationFile, testClass));
+		}
+		if (StringUtils.hasText(logbackFile)) {
+			factory.setLogbackFile(CqlResourceUtils.getURL(context, logbackFile, testClass));
+		}
+		if (StringUtils.hasText(topologyFile)) {
+			factory.setTopologyFile(CqlResourceUtils.getURL(context, topologyFile, testClass));
+		}
+		if (StringUtils.hasText(rackFile)) {
+			factory.setRackFile(CqlResourceUtils.getURL(context, rackFile, testClass));
+		}
+		if (StringUtils.hasText(commitLogArchivingFile)) {
+			factory.setCommitLogArchivingFile(CqlResourceUtils.getURL(context, commitLogArchivingFile, testClass));
+		}
 		factory.setStartupTimeout(startupTimeout);
 		factory.getJvmOptions().addAll(jvmOptions);
 		factory.setJmxPort(jmxPort);
