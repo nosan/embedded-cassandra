@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -107,7 +108,7 @@ abstract class CqlResourceUtils {
 			return resource.getURL();
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException(String.format("Could not transfer (%s) to URL", resource), ex);
+			throw new UncheckedIOException(String.format("Could not transfer (%s) to URL", resource), ex);
 		}
 	}
 
