@@ -65,4 +65,9 @@ class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationCon
 	public Class<?> getObjectType() {
 		return Cluster.class;
 	}
+
+	@Override
+	public boolean isSingleton() {
+		return true;
+	}
 }

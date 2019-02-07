@@ -147,6 +147,11 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		return LocalCassandraFactory.class;
 	}
 
+	@Override
+	public boolean isSingleton() {
+		return true;
+	}
+
 	private static ArtifactFactory getArtifactFactory(EmbeddedLocalCassandra.Artifact annotation,
 			ApplicationContext context) {
 		Environment environment = context.getEnvironment();

@@ -106,4 +106,9 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 		this.cassandra = cassandra;
 		cassandra.start();
 	}
+
+	@Override
+	public boolean isSingleton() {
+		return true;
+	}
 }
