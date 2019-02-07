@@ -95,17 +95,14 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 
 	@Override
 	public void afterPropertiesSet() throws IOException {
-		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
+		ApplicationContext applicationContext = Objects.requireNonNull(this.context, "Context must not be null");
 		EmbeddedCassandra annotation = this.annotation;
-		CqlConfig config = new CqlConfig();
-		config.setEncoding(annotation.encoding());
-		config.setScripts(annotation.scripts());
-		config.setStatements(annotation.statements());
-		config.setTestClass(this.testClass);
-		CqlScript[] scripts = CqlResourceUtils.getScripts(context, config);
+		CqlConfig config = new CqlConfig(this.testClass, annotation.scripts(),
+				annotation.statements(), annotation.encoding());
+		CqlScript[] scripts = CqlResourceUtils.getScripts(applicationContext, config);
 		TestCassandra cassandra = new TestCassandra(annotation.registerShutdownHook(),
-				BeanFactoryUtils.getBean(context, CassandraFactory.class),
-				BeanFactoryUtils.getBean(context, ClusterFactory.class), scripts);
+				BeanFactoryUtils.getBean(applicationContext, CassandraFactory.class),
+				BeanFactoryUtils.getBean(applicationContext, ClusterFactory.class), scripts);
 		this.cassandra = cassandra;
 		cassandra.start();
 	}

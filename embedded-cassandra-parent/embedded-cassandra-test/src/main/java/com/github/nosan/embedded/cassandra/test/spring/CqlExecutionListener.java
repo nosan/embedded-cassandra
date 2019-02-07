@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,17 +25,10 @@ import javax.annotation.Nonnull;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import org.apiguardian.api.API;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
@@ -59,8 +51,6 @@ import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class CqlExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Logger log = LoggerFactory.getLogger(CqlExecutionListener.class);
-
 	@Override
 	public int getOrder() {
 		return 5000;
@@ -76,7 +66,8 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		executeCqlScripts(testContext, Cql.ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
-	private void executeCqlScripts(TestContext testContext, Cql.ExecutionPhase executionPhase) throws IOException {
+	private static void executeCqlScripts(TestContext testContext, Cql.ExecutionPhase executionPhase)
+			throws IOException {
 		Objects.requireNonNull(testContext, "Test Context must not be null");
 		Set<Cql> methodAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(
 				testContext.getTestMethod(), Cql.class, CqlGroup.class);
@@ -93,73 +84,35 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 	}
 
-	private void executeCqlScripts(Set<Cql> cqlAnnotations, Cql.ExecutionPhase executionPhase,
+	private static void executeCqlScripts(Set<Cql> cqlAnnotations, Cql.ExecutionPhase executionPhase,
 			TestContext testContext) throws IOException {
 		for (Cql cql : cqlAnnotations) {
-			executeCqlScripts(cql, executionPhase, testContext);
+			if (executionPhase == cql.executionPhase()) {
+				executeCqlScripts(cql, testContext);
+			}
 		}
 	}
 
-	private void executeCqlScripts(Cql cql, Cql.ExecutionPhase executionPhase, TestContext testContext)
-			throws IOException {
-		if (executionPhase != cql.executionPhase()) {
-			return;
-		}
-		ApplicationContext context = testContext.getApplicationContext();
+	private static void executeCqlScripts(Cql cql, TestContext testContext) throws IOException {
+		ApplicationContext applicationContext = testContext.getApplicationContext();
 		Cluster cluster = getCluster(cql.cluster(), testContext);
-		Assert.state(cluster != null, () -> String.format("Failed to execute CQL scripts for a test context %s: " +
-				"supply a '%s' bean", Cluster.class, testContext));
 		try (Session session = cluster.connect()) {
-			CqlConfig config = new CqlConfig();
-			config.setEncoding(cql.encoding());
-			config.setScripts(cql.scripts());
-			config.setStatements(cql.statements());
-			config.setTestClass(testContext.getTestClass());
-			CqlScript[] scripts = CqlResourceUtils.getScripts(context, config);
+			CqlConfig config = new CqlConfig(testContext.getTestClass(), cql.scripts(),
+					cql.statements(), cql.encoding());
+			CqlScript[] scripts = CqlResourceUtils.getScripts(applicationContext, config);
 			CqlScriptUtils.executeScripts(session, scripts);
 		}
-
 	}
 
-	private Cluster getCluster(String name, TestContext testContext) {
-		BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
-		try {
-			if (StringUtils.hasText(name)) {
-				return bf.getBean(name, Cluster.class);
-			}
+	private static Cluster getCluster(String name, TestContext testContext) {
+		ApplicationContext applicationContext = testContext.getApplicationContext();
+		if (StringUtils.hasText(name)) {
+			return applicationContext.getBean(name, Cluster.class);
 		}
-		catch (BeansException ex) {
-			if (log.isDebugEnabled()) {
-				log.error(String.format("Failed to retrieve '%s' named '%s' bean for a test context %s", name,
-						Cluster.class, testContext), ex);
-			}
-			return null;
+		Cluster cluster = BeanFactoryUtils.getBean(applicationContext, Cluster.class);
+		if (cluster == null) {
+			return applicationContext.getBean("cluster", Cluster.class);
 		}
-		try {
-			if (bf instanceof ListableBeanFactory) {
-				ListableBeanFactory lbf = (ListableBeanFactory) bf;
-				Map<String, Cluster> clusters = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, Cluster.class);
-				if (clusters.size() == 1) {
-					return clusters.values().iterator().next();
-				}
-			}
-			try {
-				return bf.getBean(Cluster.class);
-			}
-			catch (BeansException ex) {
-				if (log.isDebugEnabled()) {
-					log.error(String.format("Failed to retrieve '%s' primary bean for a test context %s",
-							Cluster.class, testContext), ex);
-				}
-			}
-			return bf.getBean("cluster", Cluster.class);
-		}
-		catch (BeansException ex) {
-			if (log.isDebugEnabled()) {
-				log.error(String.format("Failed to retrieve '%s' named 'cluster' bean for a test context %s",
-						Cluster.class, testContext), ex);
-			}
-			return null;
-		}
+		return cluster;
 	}
 }

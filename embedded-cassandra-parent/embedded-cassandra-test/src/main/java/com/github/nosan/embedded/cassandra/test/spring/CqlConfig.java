@@ -28,16 +28,32 @@ import javax.annotation.Nullable;
 class CqlConfig {
 
 	@Nullable
-	private Class<?> testClass;
+	private final Class<?> testClass;
 
 	@Nullable
-	private String[] scripts;
+	private final String[] scripts;
 
 	@Nullable
-	private String[] statements;
+	private final String[] statements;
 
 	@Nullable
-	private String encoding;
+	private final String encoding;
+
+	/**
+	 * Creates a {@link CqlConfig}.
+	 *
+	 * @param testClass a test class
+	 * @param encoding The encoding for the supplied CQL scripts
+	 * @param scripts The paths to the CQL scripts to execute.
+	 * @param statements CQL statements to execute.
+	 */
+	CqlConfig(@Nullable Class<?> testClass, @Nullable String[] scripts, @Nullable String[] statements,
+			@Nullable String encoding) {
+		this.testClass = testClass;
+		this.scripts = scripts;
+		this.statements = statements;
+		this.encoding = encoding;
+	}
 
 	/**
 	 * Return the {@code test} class.
@@ -45,73 +61,37 @@ class CqlConfig {
 	 * @return The value of the {@code testClass} attribute
 	 */
 	@Nullable
-	public Class<?> getTestClass() {
+	Class<?> getTestClass() {
 		return this.testClass;
 	}
 
 	/**
-	 * Initializes the value for the {@link CqlConfig#getTestClass} attribute.
-	 *
-	 * @param testClass The value for testClass
-	 */
-	public void setTestClass(@Nullable Class<?> testClass) {
-		this.testClass = testClass;
-	}
-
-	/**
-	 * Return CQL Scripts.
+	 * The paths to the CQL scripts to execute.
 	 *
 	 * @return The value of the {@code scripts} attribute
 	 */
 	@Nullable
-	public String[] getScripts() {
+	String[] getScripts() {
 		return this.scripts;
 	}
 
 	/**
-	 * Initializes the value for the {@link CqlConfig#getScripts} attribute.
-	 *
-	 * @param scripts The value for scripts
-	 */
-	public void setScripts(@Nullable String[] scripts) {
-		this.scripts = scripts;
-	}
-
-	/**
-	 * Return CQL Statements.
+	 * CQL statements to execute.
 	 *
 	 * @return The value of the {@code statements} attribute
 	 */
 	@Nullable
-	public String[] getStatements() {
+	String[] getStatements() {
 		return this.statements;
 	}
 
 	/**
-	 * Initializes the value for the {@link CqlConfig#getStatements} attribute.
-	 *
-	 * @param statements The value for statements
-	 */
-	public void setStatements(@Nullable String[] statements) {
-		this.statements = statements;
-	}
-
-	/**
-	 * Return the encoding of {@link #getScripts()}.
+	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
 	 *
 	 * @return The value of the {@code encoding} attribute
 	 */
 	@Nullable
-	public String getEncoding() {
+	String getEncoding() {
 		return this.encoding;
-	}
-
-	/**
-	 * Initializes the value for the {@link CqlConfig#getEncoding} attribute.
-	 *
-	 * @param encoding The value for encoding
-	 */
-	public void setEncoding(@Nullable String encoding) {
-		this.encoding = encoding;
 	}
 }

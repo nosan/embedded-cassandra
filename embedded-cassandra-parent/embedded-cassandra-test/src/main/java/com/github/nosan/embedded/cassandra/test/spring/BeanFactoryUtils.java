@@ -16,13 +16,17 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -36,29 +40,33 @@ abstract class BeanFactoryUtils {
 	private static final Logger log = LoggerFactory.getLogger(BeanFactoryUtils.class);
 
 	/**
-	 * Retrieves a bean only if it an unique.
+	 * Retrieves a bean only if it an unique and exists.
 	 *
 	 * @param context the application context
-	 * @param targetClass the required type
-	 * @param <T> the type
-	 * @return a bean
+	 * @param targetClass - type the bean must match; can be an interface or superclass
+	 * @param <T> type of the bean
+	 * @return an instance of the bean, or {@code null}
+	 * @throws BeansException if the bean could not be created
 	 */
 	@Nullable
-	static <T> T getBean(@Nonnull ApplicationContext context, @Nonnull Class<T> targetClass) {
+	static <T> T getBean(@Nonnull ApplicationContext context, @Nonnull Class<T> targetClass) throws BeansException {
 		try {
+			AutowireCapableBeanFactory beanFactory = context.getAutowireCapableBeanFactory();
+			if (beanFactory instanceof ListableBeanFactory) {
+				ListableBeanFactory listableBeanFactory = (ListableBeanFactory) beanFactory;
+				Map<String, T> beans = org.springframework.beans.factory.BeanFactoryUtils
+						.beansOfTypeIncludingAncestors(listableBeanFactory, targetClass);
+				if (beans.size() == 1) {
+					return beans.values().iterator().next();
+				}
+			}
 			return context.getBean(targetClass);
 		}
-		catch (NoUniqueBeanDefinitionException ex) {
-			if (log.isDebugEnabled()) {
-				log.error(String.format("'%s' doesn't have an unique bean of type '%s'.", context, targetClass), ex);
-			}
-		}
 		catch (NoSuchBeanDefinitionException ex) {
-			if (log.isTraceEnabled()) {
-				log.error(String.format("'%s' doesn't have a bean of type '%s'.", context, targetClass), ex);
+			if (log.isDebugEnabled()) {
+				log.error(ex.getMessage(), ex);
 			}
 		}
 		return null;
-
 	}
 }

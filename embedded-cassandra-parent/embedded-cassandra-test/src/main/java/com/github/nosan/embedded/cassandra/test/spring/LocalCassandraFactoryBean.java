@@ -80,8 +80,8 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 	@Nonnull
 	@Override
 	public LocalCassandraFactory getObject() throws Exception {
-		ApplicationContext context = Objects.requireNonNull(this.context, "Context must not be null");
-		Environment environment = context.getEnvironment();
+		ApplicationContext applicationContext = Objects.requireNonNull(this.context, "Context must not be null");
+		Environment environment = applicationContext.getEnvironment();
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		EmbeddedLocalCassandra annotation = this.annotation;
 		Class<?> testClass = this.testClass;
@@ -117,26 +117,27 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 			factory.setVersion(Version.parse(version));
 		}
 		if (StringUtils.hasText(configurationFile)) {
-			factory.setConfigurationFile(CqlResourceUtils.getURL(context, configurationFile, testClass));
+			factory.setConfigurationFile(CqlResourceUtils.getURL(applicationContext, configurationFile, testClass));
 		}
 		if (StringUtils.hasText(logbackFile)) {
-			factory.setLogbackFile(CqlResourceUtils.getURL(context, logbackFile, testClass));
+			factory.setLogbackFile(CqlResourceUtils.getURL(applicationContext, logbackFile, testClass));
 		}
 		if (StringUtils.hasText(topologyFile)) {
-			factory.setTopologyFile(CqlResourceUtils.getURL(context, topologyFile, testClass));
+			factory.setTopologyFile(CqlResourceUtils.getURL(applicationContext, topologyFile, testClass));
 		}
 		if (StringUtils.hasText(rackFile)) {
-			factory.setRackFile(CqlResourceUtils.getURL(context, rackFile, testClass));
+			factory.setRackFile(CqlResourceUtils.getURL(applicationContext, rackFile, testClass));
 		}
 		if (StringUtils.hasText(commitLogArchivingFile)) {
-			factory.setCommitLogArchivingFile(CqlResourceUtils.getURL(context, commitLogArchivingFile, testClass));
+			factory.setCommitLogArchivingFile(CqlResourceUtils.getURL(applicationContext,
+					commitLogArchivingFile, testClass));
 		}
 		factory.setStartupTimeout(startupTimeout);
 		factory.getJvmOptions().addAll(jvmOptions);
 		factory.setJmxPort(jmxPort);
 		factory.setAllowRoot(allowRoot);
 		factory.setRegisterShutdownHook(registerShutdownHook);
-		factory.setArtifactFactory(getArtifactFactory(artifact, context));
+		factory.setArtifactFactory(getArtifactFactory(artifact, applicationContext));
 		return factory;
 	}
 
