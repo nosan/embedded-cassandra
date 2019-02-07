@@ -150,7 +150,7 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 	private static ArtifactFactory getArtifactFactory(EmbeddedLocalCassandra.Artifact annotation,
 			ApplicationContext context) {
 		Environment environment = context.getEnvironment();
-		ArtifactFactory artifactFactory = BeanFactoryUtils.getBean(context, ArtifactFactory.class);
+		ArtifactFactory artifactFactory = BeanFactoryUtils.getIfUnique(context, ArtifactFactory.class);
 		if (artifactFactory != null) {
 			return artifactFactory;
 		}

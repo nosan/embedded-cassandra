@@ -109,7 +109,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		if (StringUtils.hasText(name)) {
 			return applicationContext.getBean(name, Cluster.class);
 		}
-		Cluster cluster = BeanFactoryUtils.getBean(applicationContext, Cluster.class);
+		Cluster cluster = BeanFactoryUtils.getIfUnique(applicationContext, Cluster.class);
 		if (cluster == null) {
 			return applicationContext.getBean("cluster", Cluster.class);
 		}

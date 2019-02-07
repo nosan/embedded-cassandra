@@ -101,8 +101,8 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 				annotation.statements(), annotation.encoding());
 		CqlScript[] scripts = CqlResourceUtils.getScripts(applicationContext, config);
 		TestCassandra cassandra = new TestCassandra(annotation.registerShutdownHook(),
-				BeanFactoryUtils.getBean(applicationContext, CassandraFactory.class),
-				BeanFactoryUtils.getBean(applicationContext, ClusterFactory.class), scripts);
+				BeanFactoryUtils.getIfUnique(applicationContext, CassandraFactory.class),
+				BeanFactoryUtils.getIfUnique(applicationContext, ClusterFactory.class), scripts);
 		this.cassandra = cassandra;
 		cassandra.start();
 	}

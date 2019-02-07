@@ -40,7 +40,7 @@ abstract class BeanFactoryUtils {
 	private static final Logger log = LoggerFactory.getLogger(BeanFactoryUtils.class);
 
 	/**
-	 * Retrieves a bean only if it an unique and exists.
+	 * Retrieves a bean only if it a unique and exists.
 	 *
 	 * @param context the application context
 	 * @param targetClass type the bean must match; can be an interface or superclass
@@ -49,7 +49,7 @@ abstract class BeanFactoryUtils {
 	 * @throws BeansException if the bean could not be created
 	 */
 	@Nullable
-	static <T> T getBean(@Nonnull ApplicationContext context, @Nonnull Class<T> targetClass) throws BeansException {
+	static <T> T getIfUnique(@Nonnull ApplicationContext context, @Nonnull Class<T> targetClass) throws BeansException {
 		try {
 			AutowireCapableBeanFactory beanFactory = context.getAutowireCapableBeanFactory();
 			if (beanFactory instanceof ListableBeanFactory) {

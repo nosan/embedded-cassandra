@@ -53,7 +53,7 @@ class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationCon
 	public Cluster getObject() {
 		ApplicationContext context = this.context;
 		Objects.requireNonNull(context, "Context must not be null");
-		TestCassandra cassandra = BeanFactoryUtils.getBean(context, TestCassandra.class);
+		TestCassandra cassandra = BeanFactoryUtils.getIfUnique(context, TestCassandra.class);
 		if (cassandra == null) {
 			throw new NoSuchBeanDefinitionException(TestCassandra.class);
 		}
