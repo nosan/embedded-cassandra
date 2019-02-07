@@ -28,7 +28,7 @@ import com.github.nosan.embedded.cassandra.test.AbstractTestCassandraBuilder;
  * @author Dmytro Nosan
  * @since 1.2.10
  */
-@API(since = "1.2.10", status = API.Status.EXPERIMENTAL)
+@API(since = "1.2.10", status = API.Status.MAINTAINED)
 public final class CassandraRuleBuilder extends AbstractTestCassandraBuilder<CassandraRule, CassandraRuleBuilder> {
 
 	@Nonnull
