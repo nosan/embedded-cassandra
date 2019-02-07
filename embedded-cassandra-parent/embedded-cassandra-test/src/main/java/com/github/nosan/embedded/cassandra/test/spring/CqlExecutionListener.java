@@ -88,12 +88,12 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			TestContext testContext) throws IOException {
 		for (Cql cql : cqlAnnotations) {
 			if (executionPhase == cql.executionPhase()) {
-				executeCqlScripts(cql, testContext);
+				executeCqlScripts(testContext, cql);
 			}
 		}
 	}
 
-	private static void executeCqlScripts(Cql cql, TestContext testContext) throws IOException {
+	private static void executeCqlScripts(TestContext testContext, Cql cql) throws IOException {
 		ApplicationContext applicationContext = testContext.getApplicationContext();
 		Cluster cluster = getCluster(cql.cluster(), testContext);
 		try (Session session = cluster.connect()) {
