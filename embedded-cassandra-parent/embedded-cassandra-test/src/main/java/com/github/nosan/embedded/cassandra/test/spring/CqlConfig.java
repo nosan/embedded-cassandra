@@ -86,7 +86,7 @@ class CqlConfig {
 	}
 
 	/**
-	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
+	 * The encoding for the supplied CQL scripts.
 	 *
 	 * @return The value of the {@code encoding} attribute
 	 */

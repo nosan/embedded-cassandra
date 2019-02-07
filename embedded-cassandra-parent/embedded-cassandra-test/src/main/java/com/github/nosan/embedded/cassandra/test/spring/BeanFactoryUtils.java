@@ -43,7 +43,7 @@ abstract class BeanFactoryUtils {
 	 * Retrieves a bean only if it an unique and exists.
 	 *
 	 * @param context the application context
-	 * @param targetClass - type the bean must match; can be an interface or superclass
+	 * @param targetClass type the bean must match; can be an interface or superclass
 	 * @param <T> type of the bean
 	 * @return an instance of the bean, or {@code null}
 	 * @throws BeansException if the bean could not be created
