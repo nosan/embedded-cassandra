@@ -42,7 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Cql(cluster = "customCluster", scripts = "/init.cql")
 @Cql(cluster = "customCluster", statements = "DROP KEYSPACE test",
 		executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-
 public class CqlExecutionListenerNamedTests {
 
 	@ClassRule

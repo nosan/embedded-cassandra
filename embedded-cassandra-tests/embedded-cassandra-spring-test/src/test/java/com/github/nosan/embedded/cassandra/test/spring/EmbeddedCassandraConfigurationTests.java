@@ -78,11 +78,13 @@ public class EmbeddedCassandraConfigurationTests {
 		@Bean
 		public ClusterFactory clusterFactory() {
 			return new DefaultClusterFactory() {
+
 				@Nonnull
 				@Override
 				protected Cluster.Builder configure(@Nonnull Cluster.Builder builder, @Nonnull Settings settings) {
 					return builder.withClusterName("My cluster");
 				}
+
 			};
 		}
 	}
