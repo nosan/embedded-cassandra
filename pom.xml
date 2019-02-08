@@ -354,6 +354,10 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <failOnWarnings>true</failOnWarnings>
+                    <failOnError>true</failOnError>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
