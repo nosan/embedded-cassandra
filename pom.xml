@@ -187,11 +187,6 @@
             <artifactId>jsr305</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>org.apiguardian</groupId>
-            <artifactId>apiguardian-api</artifactId>
-            <optional>true</optional>
-        </dependency>
     </dependencies>
 
     <build>
