@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import java.io.IOException;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -94,7 +93,7 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 	}
 
 	@Override
-	public void afterPropertiesSet() throws IOException {
+	public void afterPropertiesSet() {
 		ApplicationContext applicationContext = Objects.requireNonNull(this.context, "Context must not be null");
 		EmbeddedCassandra annotation = this.annotation;
 		CqlConfig config = new CqlConfig(this.testClass, annotation.scripts(),

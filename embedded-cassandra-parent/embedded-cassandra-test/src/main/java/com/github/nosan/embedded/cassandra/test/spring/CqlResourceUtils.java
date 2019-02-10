@@ -23,6 +23,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -55,11 +56,10 @@ abstract class CqlResourceUtils {
 	 * @param resolver {@link ResourcePatternResolver} for Spring resources.
 	 * @param config CQL config.
 	 * @return CQL scripts.
-	 * @throws IOException if an I/O error occurs
+	 * @throws UncheckedIOException if an I/O error occurs
 	 */
 	@Nonnull
-	static CqlScript[] getScripts(@Nonnull ResourcePatternResolver resolver, @Nonnull CqlConfig config)
-			throws IOException {
+	static CqlScript[] getScripts(@Nonnull ResourcePatternResolver resolver, @Nonnull CqlConfig config) {
 		List<CqlScript> cqlScripts = new ArrayList<>();
 
 		String[] scripts = config.getScripts();
@@ -70,9 +70,9 @@ abstract class CqlResourceUtils {
 		if (!ObjectUtils.isEmpty(scripts)) {
 			Charset charset = StringUtils.hasText(encoding) ? Charset.forName(encoding) : null;
 			for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
-				List<Resource> resources = new ArrayList<>(Arrays.asList(resolver.getResources(script)));
-				resources.sort(CqlResourceUtils::compare);
-				resources.forEach(resource -> cqlScripts.add(new SpringCqlScript(resource, charset)));
+				for (Resource resource : getResources(script, resolver)) {
+					cqlScripts.add(new SpringCqlScript(resource, charset));
+				}
 			}
 		}
 		if (!ObjectUtils.isEmpty(statements)) {
@@ -88,19 +88,14 @@ abstract class CqlResourceUtils {
 	 * @param resource a path to the resource
 	 * @param testClass class to load the resource
 	 * @return URL
-	 * @throws IOException if an I/O error occurs
+	 * @throws UncheckedIOException if an I/O error occurs
 	 * @since 1.0.7
 	 */
 	@Nonnull
-	static URL getURL(@Nonnull ResourceLoader resourceLoader, @Nonnull String resource, @Nullable Class<?> testClass)
-			throws IOException {
+	static URL getURL(@Nonnull ResourceLoader resourceLoader, @Nonnull String resource, @Nullable Class<?> testClass) {
 		String[] locations = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, resource);
 		Assert.isTrue(locations.length == 1, "Invalid location length");
-		return resourceLoader.getResource(locations[0]).getURL();
-	}
-
-	private static int compare(Resource r, Resource r1) {
-		return toURL(r).toString().compareTo(toURL(r1).toString());
+		return toURL(resourceLoader.getResource(locations[0]));
 	}
 
 	private static URL toURL(Resource resource) {
@@ -108,7 +103,19 @@ abstract class CqlResourceUtils {
 			return resource.getURL();
 		}
 		catch (IOException ex) {
-			throw new UncheckedIOException(String.format("Could not transfer (%s) to URL", resource), ex);
+			throw new UncheckedIOException(String.format("Could not get URL for (%s)", resource), ex);
+		}
+	}
+
+	private static List<Resource> getResources(String script, ResourcePatternResolver resourcePatternResolver) {
+		try {
+			List<Resource> resources = new ArrayList<>(Arrays.asList(resourcePatternResolver.getResources(script)));
+			resources.removeIf(resource -> !resource.exists());
+			resources.sort(Comparator.comparing(r -> toURL(r).toString()));
+			return resources;
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
 		}
 	}
 

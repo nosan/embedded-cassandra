@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -57,17 +56,16 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	@Override
-	public void beforeTestMethod(@Nonnull TestContext testContext) throws IOException {
+	public void beforeTestMethod(@Nonnull TestContext testContext) {
 		executeCqlScripts(testContext, Cql.ExecutionPhase.BEFORE_TEST_METHOD);
 	}
 
 	@Override
-	public void afterTestMethod(@Nonnull TestContext testContext) throws IOException {
+	public void afterTestMethod(@Nonnull TestContext testContext) {
 		executeCqlScripts(testContext, Cql.ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
-	private static void executeCqlScripts(TestContext testContext, Cql.ExecutionPhase executionPhase)
-			throws IOException {
+	private static void executeCqlScripts(TestContext testContext, Cql.ExecutionPhase executionPhase) {
 		Objects.requireNonNull(testContext, "Test Context must not be null");
 		Set<Cql> methodAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(
 				testContext.getTestMethod(), Cql.class, CqlGroup.class);
@@ -85,7 +83,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	private static void executeCqlScripts(Set<Cql> cqlAnnotations, Cql.ExecutionPhase executionPhase,
-			TestContext testContext) throws IOException {
+			TestContext testContext) {
 		for (Cql cql : cqlAnnotations) {
 			if (executionPhase == cql.executionPhase()) {
 				executeCqlScripts(testContext, cql);
@@ -93,7 +91,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 	}
 
-	private static void executeCqlScripts(TestContext testContext, Cql cql) throws IOException {
+	private static void executeCqlScripts(TestContext testContext, Cql cql) {
 		ApplicationContext applicationContext = testContext.getApplicationContext();
 		Cluster cluster = getCluster(cql.cluster(), testContext);
 		try (Session session = cluster.connect()) {
