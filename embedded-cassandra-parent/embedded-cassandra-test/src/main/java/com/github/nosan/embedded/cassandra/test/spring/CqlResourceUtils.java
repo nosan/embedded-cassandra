@@ -51,7 +51,7 @@ import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
 abstract class CqlResourceUtils {
 
 	/**
-	 * Converts Spring {@link Resource} as {@link CqlScript}.
+	 * Resolve the given {@link CqlConfig} into {@link CqlScript} objects.
 	 *
 	 * @param resolver {@link ResourcePatternResolver} for Spring resources.
 	 * @param config CQL config.
@@ -82,20 +82,21 @@ abstract class CqlResourceUtils {
 	}
 
 	/**
-	 * Converts Spring {@link Resource} as {@link URL}.
+	 * Resolve the given location into URL object.
 	 *
 	 * @param resourceLoader {@link ResourceLoader} to load resource
-	 * @param resource a path to the resource
+	 * @param location a path to the resource
 	 * @param testClass class to load the resource
-	 * @return URL
+	 * @return the URL to the resource, or {@code null}
 	 * @throws UncheckedIOException if an I/O error occurs
 	 * @since 1.0.7
 	 */
-	@Nonnull
-	static URL getURL(@Nonnull ResourceLoader resourceLoader, @Nonnull String resource, @Nullable Class<?> testClass) {
-		String[] locations = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, resource);
+	@Nullable
+	static URL getURL(@Nonnull ResourceLoader resourceLoader, @Nonnull String location, @Nullable Class<?> testClass) {
+		String[] locations = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, location);
 		Assert.isTrue(locations.length == 1, "Invalid location length");
-		return toURL(resourceLoader.getResource(locations[0]));
+		Resource resource = resourceLoader.getResource(locations[0]);
+		return resource.exists() ? toURL(resource) : null;
 	}
 
 	private static URL toURL(Resource resource) {
