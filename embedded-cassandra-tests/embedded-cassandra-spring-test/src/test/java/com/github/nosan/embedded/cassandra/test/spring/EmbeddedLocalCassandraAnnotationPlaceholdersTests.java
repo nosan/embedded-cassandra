@@ -68,8 +68,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		artifact = @EmbeddedLocalCassandra.Artifact(directory = "${artifactDirectory}", proxyHost = "${proxyHost}",
 				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000,
 				proxyType = Proxy.Type.SOCKS,
-				urlFactory = DefaultUrlFactory.class),
-		replace = EmbeddedCassandra.Replace.NONE)
+				urlFactory = DefaultUrlFactory.class))
 public class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
 
 	@Autowired

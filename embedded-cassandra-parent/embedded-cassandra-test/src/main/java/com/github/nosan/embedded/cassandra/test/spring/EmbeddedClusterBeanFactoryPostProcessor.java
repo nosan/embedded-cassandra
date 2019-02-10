@@ -31,7 +31,8 @@ import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
 /**
- * {@link BeanDefinitionRegistryPostProcessor} to register an embedded <b>primary</b> {@link Cluster} bean.
+ * {@link BeanDefinitionRegistryPostProcessor} to register an embedded <b>primary</b> version of the {@link Cluster}
+ * bean with a name {@code embeddedCluster}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0

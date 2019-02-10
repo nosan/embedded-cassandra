@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@EmbeddedCassandra(scripts = "/setup.cql", replace = EmbeddedCassandra.Replace.NONE)
+@EmbeddedCassandra(scripts = "/setup.cql")
 public class CassandraCityRepositoryTests {
 
 	@Autowired

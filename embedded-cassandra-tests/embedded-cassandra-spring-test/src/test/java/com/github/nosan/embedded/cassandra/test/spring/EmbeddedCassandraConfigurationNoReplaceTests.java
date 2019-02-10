@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@EmbeddedCassandra(replace = EmbeddedCassandra.Replace.NONE)
+@EmbeddedCassandra
 public class EmbeddedCassandraConfigurationNoReplaceTests {
 
 	@Autowired

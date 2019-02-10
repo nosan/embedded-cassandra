@@ -42,7 +42,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * &#064;Autowired
  * private TestCassandra cassandra;
  * &#064;Autowired
- * private Cluster cluster;
+ * private Cluster cluster; // `replace` attribute is Replace.ANY
  * }
  * </pre>
  * <p>
@@ -114,7 +114,7 @@ public @interface EmbeddedCassandra {
 	 *
 	 * @return the type of existing {@link Cluster} to replace
 	 */
-	Replace replace() default Replace.ANY;
+	Replace replace() default Replace.NONE;
 
 	/**
 	 * Register a shutdown hook with the JVM runtime, stops {@link TestCassandra} on JVM shutdown unless it has already

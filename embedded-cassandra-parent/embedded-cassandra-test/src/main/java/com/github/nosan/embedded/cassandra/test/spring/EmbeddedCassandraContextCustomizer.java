@@ -58,9 +58,9 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 		RootBeanDefinition bd = new RootBeanDefinition(EmbeddedCassandraFactoryBean.class);
+		bd.setPrimary(true);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, mergedConfig.getTestClass());
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
-		bd.setPrimary(true);
 		registry.registerBeanDefinition(EmbeddedCassandraFactoryBean.BEAN_NAME, bd);
 		if (this.annotation.replace() == EmbeddedCassandra.Replace.ANY) {
 			registry.registerBeanDefinition(EmbeddedClusterBeanFactoryPostProcessor.BEAN_NAME,

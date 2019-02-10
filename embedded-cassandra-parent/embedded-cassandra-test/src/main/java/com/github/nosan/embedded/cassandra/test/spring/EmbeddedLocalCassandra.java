@@ -250,7 +250,7 @@ public @interface EmbeddedLocalCassandra {
 	 * @return the type of existing {@code Cluster} to replace
 	 */
 	@AliasFor(annotation = EmbeddedCassandra.class)
-	EmbeddedCassandra.Replace replace() default EmbeddedCassandra.Replace.ANY;
+	EmbeddedCassandra.Replace replace() default EmbeddedCassandra.Replace.NONE;
 
 	/**
 	 * Alias for {@link EmbeddedCassandra#registerShutdownHook()}.

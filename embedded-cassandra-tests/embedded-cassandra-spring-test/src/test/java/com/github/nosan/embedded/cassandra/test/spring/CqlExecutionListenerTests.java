@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@EmbeddedCassandra(scripts = {"/init.cql"})
+@EmbeddedCassandra(scripts = "/init.cql", replace = EmbeddedCassandra.Replace.ANY)
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 public class CqlExecutionListenerTests {
 

@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @EmbeddedCassandra(scripts = "/init.cql", statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
-		"  KEY );")
+		"  KEY );", replace = EmbeddedCassandra.Replace.ANY)
 public class EmbeddedCassandraConfigurationTests {
 
 	@ClassRule
