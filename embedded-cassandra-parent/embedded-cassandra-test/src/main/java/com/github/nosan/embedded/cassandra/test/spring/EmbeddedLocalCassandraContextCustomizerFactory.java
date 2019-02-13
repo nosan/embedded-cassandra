@@ -32,7 +32,7 @@ import org.springframework.test.context.ContextCustomizerFactory;
  * @author Dmytro Nosan
  * @since 1.0.7
  */
-class LocalCassandraContextCustomizerFactory implements ContextCustomizerFactory {
+class EmbeddedLocalCassandraContextCustomizerFactory implements ContextCustomizerFactory {
 
 	@Nullable
 	@Override
@@ -41,7 +41,7 @@ class LocalCassandraContextCustomizerFactory implements ContextCustomizerFactory
 		EmbeddedLocalCassandra annotation =
 				AnnotatedElementUtils.findMergedAnnotation(testClass, EmbeddedLocalCassandra.class);
 		if (annotation != null) {
-			return new LocalCassandraContextCustomizer(annotation);
+			return new EmbeddedLocalCassandraContextCustomizer(annotation);
 		}
 		return null;
 	}

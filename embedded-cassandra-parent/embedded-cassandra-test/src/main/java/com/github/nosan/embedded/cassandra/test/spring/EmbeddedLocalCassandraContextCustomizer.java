@@ -37,19 +37,19 @@ import org.springframework.util.Assert;
  * @author Dmytro Nosan
  * @since 1.0.7
  */
-class LocalCassandraContextCustomizer implements ContextCustomizer {
+class EmbeddedLocalCassandraContextCustomizer implements ContextCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(LocalCassandraContextCustomizer.class);
+	private static final Logger log = LoggerFactory.getLogger(EmbeddedLocalCassandraContextCustomizer.class);
 
 	@Nonnull
 	private final EmbeddedLocalCassandra annotation;
 
 	/**
-	 * Creates {@link LocalCassandraContextCustomizer}.
+	 * Creates {@link EmbeddedLocalCassandraContextCustomizer}.
 	 *
 	 * @param annotation annotation
 	 */
-	LocalCassandraContextCustomizer(@Nonnull EmbeddedLocalCassandra annotation) {
+	EmbeddedLocalCassandraContextCustomizer(@Nonnull EmbeddedLocalCassandra annotation) {
 		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedLocalCassandra must not be null");
 	}
 

@@ -64,7 +64,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
  * @see EmbeddedCassandra
  * @see LocalCassandraFactory
  * @see RemoteArtifactFactory
- * @see LocalCassandraContextCustomizer
+ * @see EmbeddedLocalCassandraContextCustomizer
  * @see LocalCassandraFactoryBean
  * @since 1.2.6
  */
