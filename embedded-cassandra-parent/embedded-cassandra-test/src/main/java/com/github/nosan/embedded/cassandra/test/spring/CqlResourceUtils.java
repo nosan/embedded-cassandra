@@ -22,7 +22,6 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -30,11 +29,12 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.test.context.util.TestContextResourceUtils;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -49,6 +49,8 @@ import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
  * @since 1.0.0
  */
 abstract class CqlResourceUtils {
+
+	private static final Logger log = LoggerFactory.getLogger(CqlResourceUtils.class);
 
 	/**
 	 * Resolve the given {@link CqlConfig} into {@link CqlScript} objects.
@@ -94,9 +96,12 @@ abstract class CqlResourceUtils {
 	@Nullable
 	static URL getURL(@Nonnull ResourceLoader resourceLoader, @Nonnull String location, @Nullable Class<?> testClass) {
 		String[] locations = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, location);
-		Assert.isTrue(locations.length == 1, "Invalid location length");
 		Resource resource = resourceLoader.getResource(locations[0]);
-		return resource.exists() ? toURL(resource) : null;
+		if (resource.exists()) {
+			return toURL(resource);
+		}
+		log.warn("{} does not exist. Please check your configuration.", resource);
+		return null;
 	}
 
 	private static URL toURL(Resource resource) {
@@ -110,8 +115,15 @@ abstract class CqlResourceUtils {
 
 	private static List<Resource> getResources(String script, ResourcePatternResolver resourcePatternResolver) {
 		try {
-			List<Resource> resources = new ArrayList<>(Arrays.asList(resourcePatternResolver.getResources(script)));
-			resources.removeIf(resource -> !resource.exists());
+			List<Resource> resources = new ArrayList<>();
+			for (Resource resource : resourcePatternResolver.getResources(script)) {
+				if (resource.exists()) {
+					resources.add(resource);
+				}
+				else {
+					log.warn("{} does not exist. Please check your configuration.", resource);
+				}
+			}
 			resources.sort(Comparator.comparing(r -> toURL(r).toString()));
 			return resources;
 		}
