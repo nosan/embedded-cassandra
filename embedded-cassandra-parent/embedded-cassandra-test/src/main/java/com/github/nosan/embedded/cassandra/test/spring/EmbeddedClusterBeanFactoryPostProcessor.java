@@ -52,16 +52,13 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 			BeanDefinition bd = factory.getBeanDefinition(name);
 			if (bd.isPrimary()) {
 				bd.setPrimary(false);
-				log.warn("Set 'primary = false' for a '{}' bean", name);
+				log.warn("Bean '{}' is not anymore a primary bean", name);
 			}
-		}
-		if (registry.containsBeanDefinition(EmbeddedClusterFactoryBean.BEAN_NAME)) {
-			registry.removeBeanDefinition(EmbeddedClusterFactoryBean.BEAN_NAME);
 		}
 		BeanDefinition bd = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
 		bd.setPrimary(true);
-		registry.registerBeanDefinition(EmbeddedClusterFactoryBean.BEAN_NAME, bd);
-		log.info("The primary '{}' bean has been registered", EmbeddedClusterFactoryBean.BEAN_NAME);
+		BeanDefinitionUtils.registerBeanDefinition(registry, EmbeddedClusterFactoryBean.BEAN_NAME, bd);
+		log.info("'{}' has been registered as a primary bean", EmbeddedClusterFactoryBean.BEAN_NAME);
 	}
 
 	@Override

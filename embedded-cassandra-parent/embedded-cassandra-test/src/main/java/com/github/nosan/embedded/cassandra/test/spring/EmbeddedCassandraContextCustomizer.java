@@ -21,6 +21,8 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -37,6 +39,8 @@ import org.springframework.util.Assert;
  * @since 1.0.0
  */
 class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
+
+	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraContextCustomizer.class);
 
 	@Nonnull
 	private final EmbeddedCassandra annotation;
@@ -61,9 +65,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		bd.setPrimary(true);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, mergedConfig.getTestClass());
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
-		registry.registerBeanDefinition(EmbeddedCassandraFactoryBean.BEAN_NAME, bd);
+		BeanDefinitionUtils.registerBeanDefinition(registry, EmbeddedCassandraFactoryBean.BEAN_NAME, bd);
+		log.info("'{}' has been registered as a primary bean", EmbeddedCassandraFactoryBean.BEAN_NAME);
 		if (this.annotation.replace() == EmbeddedCassandra.Replace.ANY) {
-			registry.registerBeanDefinition(EmbeddedClusterBeanFactoryPostProcessor.BEAN_NAME,
+			BeanDefinitionUtils.registerBeanDefinition(registry, EmbeddedClusterBeanFactoryPostProcessor.BEAN_NAME,
 					new RootBeanDefinition(EmbeddedClusterBeanFactoryPostProcessor.class));
 		}
 	}
@@ -77,4 +82,5 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	public int hashCode() {
 		return getClass().hashCode();
 	}
+
 }

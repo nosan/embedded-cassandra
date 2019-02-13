@@ -21,6 +21,8 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -36,6 +38,8 @@ import org.springframework.util.Assert;
  * @since 1.0.7
  */
 class LocalCassandraContextCustomizer implements ContextCustomizer {
+
+	private static final Logger log = LoggerFactory.getLogger(LocalCassandraContextCustomizer.class);
 
 	@Nonnull
 	private final EmbeddedLocalCassandra annotation;
@@ -60,8 +64,8 @@ class LocalCassandraContextCustomizer implements ContextCustomizer {
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, mergedConfig.getTestClass());
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
 		bd.setPrimary(true);
-		registry.registerBeanDefinition(LocalCassandraFactoryBean.BEAN_NAME, bd);
-
+		BeanDefinitionUtils.registerBeanDefinition(registry, LocalCassandraFactoryBean.BEAN_NAME, bd);
+		log.info("'{}' has been registered as a primary bean", LocalCassandraFactoryBean.BEAN_NAME);
 	}
 
 	@Override
