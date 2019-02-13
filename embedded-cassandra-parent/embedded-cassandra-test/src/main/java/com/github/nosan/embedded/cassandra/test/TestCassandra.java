@@ -112,7 +112,7 @@ public class TestCassandra implements Cassandra {
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public TestCassandra(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
+	public TestCassandra(@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		this(true, null, clusterFactory, scripts);
 	}
 
@@ -133,8 +133,8 @@ public class TestCassandra implements Cassandra {
 	 * @param scripts CQL scripts to execute
 	 * @param registerShutdownHook whether shutdown hook should be registered or not
 	 */
-	public TestCassandra(boolean registerShutdownHook, @Nonnull ClusterFactory clusterFactory,
-			@Nonnull CqlScript... scripts) {
+	public TestCassandra(boolean registerShutdownHook, @Nullable ClusterFactory clusterFactory,
+			@Nullable CqlScript... scripts) {
 		this(registerShutdownHook, null, clusterFactory, scripts);
 	}
 

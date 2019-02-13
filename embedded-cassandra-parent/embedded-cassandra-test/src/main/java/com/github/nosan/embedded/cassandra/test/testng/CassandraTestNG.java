@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.testng;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.datastax.driver.core.Cluster;
@@ -82,7 +81,7 @@ public class CassandraTestNG extends TestCassandra {
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraTestNG(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
+	public CassandraTestNG(@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		super(clusterFactory, scripts);
 	}
 
@@ -103,8 +102,8 @@ public class CassandraTestNG extends TestCassandra {
 	 * @param scripts CQL scripts to execute
 	 * @param registerShutdownHook whether shutdown hook should be registered or not
 	 */
-	public CassandraTestNG(boolean registerShutdownHook, @Nonnull ClusterFactory clusterFactory,
-			@Nonnull CqlScript... scripts) {
+	public CassandraTestNG(boolean registerShutdownHook, @Nullable ClusterFactory clusterFactory,
+			@Nullable CqlScript... scripts) {
 		super(registerShutdownHook, clusterFactory, scripts);
 	}
 

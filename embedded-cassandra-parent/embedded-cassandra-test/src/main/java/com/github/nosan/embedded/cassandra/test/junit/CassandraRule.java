@@ -82,7 +82,7 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraRule(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
+	public CassandraRule(@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		super(clusterFactory, scripts);
 	}
 
@@ -103,8 +103,8 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 * @param scripts CQL scripts to execute
 	 * @param registerShutdownHook whether shutdown hook should be registered or not
 	 */
-	public CassandraRule(boolean registerShutdownHook, @Nonnull ClusterFactory clusterFactory,
-			@Nonnull CqlScript... scripts) {
+	public CassandraRule(boolean registerShutdownHook, @Nullable ClusterFactory clusterFactory,
+			@Nullable CqlScript... scripts) {
 		super(registerShutdownHook, clusterFactory, scripts);
 	}
 

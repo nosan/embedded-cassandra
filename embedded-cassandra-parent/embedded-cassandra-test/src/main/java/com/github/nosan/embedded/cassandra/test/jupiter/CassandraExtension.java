@@ -83,7 +83,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraExtension(@Nonnull ClusterFactory clusterFactory, @Nonnull CqlScript... scripts) {
+	public CassandraExtension(@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		super(clusterFactory, scripts);
 	}
 
@@ -104,8 +104,8 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 * @param scripts CQL scripts to execute
 	 * @param registerShutdownHook whether shutdown hook should be registered or not
 	 */
-	public CassandraExtension(boolean registerShutdownHook, @Nonnull ClusterFactory clusterFactory,
-			@Nonnull CqlScript... scripts) {
+	public CassandraExtension(boolean registerShutdownHook, @Nullable ClusterFactory clusterFactory,
+			@Nullable CqlScript... scripts) {
 		super(registerShutdownHook, clusterFactory, scripts);
 	}
 
