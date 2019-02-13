@@ -47,7 +47,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
  * LocalCassandraFactory}.
  * <p>The typical usage of this annotation is like:
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class)
+ * &#064;RunWith(SpringRunner.class) //for JUnit4
  * &#064;EmbeddedLocalCassandra(version = "2.2.12", ...)
  * public class CassandraTests {
  * &#064;Autowired
