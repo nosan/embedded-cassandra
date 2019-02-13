@@ -48,7 +48,7 @@
         <xz.version>1.8</xz.version>
         <apiguardian-api.version>1.0.0</apiguardian-api.version>
         <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
-        <reactor-core.version>3.2.5.RELEASE</reactor-core.version>
+        <reactor-core.version>3.2.6.RELEASE</reactor-core.version>
     </properties>
 
     <dependencyManagement>
