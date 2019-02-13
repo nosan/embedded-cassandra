@@ -19,8 +19,6 @@ package com.github.nosan.embedded.cassandra;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -34,6 +32,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * Simple class to represent {@link Cassandra} version.
  *
  * @author Dmytro Nosan
+ * @see #parse(String)
  * @since 1.0.0
  */
 @API(since = "1.0.0", status = API.Status.STABLE)
@@ -56,7 +55,7 @@ public final class Version implements Comparable<Version> {
 	 * @param major a major value
 	 */
 	public Version(@Nonnegative int major) {
-		this(nonNegative(major), -1, -1, null);
+		this(nonNegative(major), -1, -1, Integer.toString(major));
 	}
 
 	/**
@@ -66,7 +65,7 @@ public final class Version implements Comparable<Version> {
 	 * @param minor a minor value
 	 */
 	public Version(@Nonnegative int major, @Nonnegative int minor) {
-		this(nonNegative(major), nonNegative(minor), -1, null);
+		this(nonNegative(major), nonNegative(minor), -1, String.format("%s.%s", major, minor));
 	}
 
 	/**
@@ -77,7 +76,8 @@ public final class Version implements Comparable<Version> {
 	 * @param patch a patch value
 	 */
 	public Version(@Nonnegative int major, @Nonnegative int minor, @Nonnegative int patch) {
-		this(nonNegative(major), nonNegative(minor), nonNegative(patch), null);
+		this(nonNegative(major), nonNegative(minor), nonNegative(patch),
+				String.format("%s.%s.%s", major, minor, patch));
 	}
 
 	/**
@@ -88,11 +88,11 @@ public final class Version implements Comparable<Version> {
 	 * @param patch a patch value
 	 * @param version a string value of the version
 	 */
-	private Version(int major, int minor, int patch, @Nullable String version) {
+	private Version(int major, int minor, int patch, @Nonnull String version) {
 		this.major = major;
 		this.minor = minor;
 		this.patch = patch;
-		this.version = StringUtils.hasText(version) ? version : toVersion(major, minor, patch);
+		this.version = version;
 	}
 
 	/**
@@ -166,7 +166,7 @@ public final class Version implements Comparable<Version> {
 	/**
 	 * Parses a {@code version}.
 	 *
-	 * @param version a version (expected format ({@link #VERSION_PATTERN}))
+	 * @param version a text version (expected format ({@link #VERSION_PATTERN}))
 	 * @return a parsed {@link Version}
 	 */
 	@Nonnull
@@ -189,13 +189,6 @@ public final class Version implements Comparable<Version> {
 		}
 		throw new IllegalArgumentException(
 				String.format("Version (%s) is invalid. Expected format is %s", version, VERSION_PATTERN));
-	}
-
-	private static String toVersion(int major, int minor, int patch) {
-		return IntStream.of(major, minor, patch)
-				.filter(i -> i >= 0)
-				.mapToObj(Integer::toString)
-				.collect(Collectors.joining("."));
 	}
 
 	private static int nonNegative(int value) {

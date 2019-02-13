@@ -47,6 +47,7 @@ public class VersionTests {
 		assertThat(version).isEqualTo(new Version(3, 11));
 		assertThat(version).isEqualByComparingTo(new Version(3, 11));
 		assertThat(version).isNotEqualByComparingTo(new Version(3, 11, 2));
+		assertThat(version).isNotEqualByComparingTo(new Version(3, 12, 2));
 		assertThat(version.getMajor()).isEqualTo(3);
 		assertThat(version.getMinor()).isEqualTo(11);
 		assertThat(version.getPatch()).isEqualTo(-1);
@@ -56,10 +57,9 @@ public class VersionTests {
 	@Test
 	public void shouldParseMajor() {
 		Version version = Version.parse("3");
-		assertThat(version)
-				.isEqualTo(new Version(3));
+		assertThat(version).isEqualTo(new Version(3));
 		assertThat(version).isEqualByComparingTo(new Version(3));
-		assertThat(version).isNotEqualByComparingTo(new Version(3, 11, 2));
+		assertThat(version).isNotEqualByComparingTo(new Version(4, 0));
 		assertThat(version.getMajor()).isEqualTo(3);
 		assertThat(version.getMinor()).isEqualTo(-1);
 		assertThat(version.getPatch()).isEqualTo(-1);
@@ -80,6 +80,7 @@ public class VersionTests {
 		assertThat(version).isEqualTo(Version.parse(text));
 		assertThat(version).isEqualByComparingTo(Version.parse(text));
 		assertThat(version).isNotEqualByComparingTo(new Version(1, 1, 0));
+		assertThat(version).isNotEqualByComparingTo(new Version(1, 1, 1));
 		assertThat(version.getMajor()).isEqualTo(1);
 		assertThat(version.getMinor()).isEqualTo(1);
 		assertThat(version.getPatch()).isEqualTo(0);
