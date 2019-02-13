@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 @EmbeddedCassandra(scripts = "/init.cql", statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
 		"  KEY );", replace = EmbeddedCassandra.Replace.ANY)
-public class EmbeddedCassandraConfigurationTests {
+public class EmbeddedCassandraTests {
 
 	@ClassRule
 	public static final CaptureOutput OUTPUT = new CaptureOutput();

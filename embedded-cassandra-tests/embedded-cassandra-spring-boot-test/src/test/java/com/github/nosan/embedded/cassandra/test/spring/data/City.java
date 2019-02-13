@@ -28,7 +28,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
  * @author Dmytro Nosan
  */
 @Table("city")
-public class City {
+class City {
 
 	@PrimaryKey
 	@CassandraType(type = Name.BIGINT)
@@ -37,19 +37,19 @@ public class City {
 	@Column
 	private String name;
 
-	public Long getId() {
+	Long getId() {
 		return this.id;
 	}
 
-	public void setId(Long id) {
+	void setId(Long id) {
 		this.id = id;
 	}
 
-	public String getName() {
+	String getName() {
 		return this.name;
 	}
 
-	public void setName(String name) {
+	void setName(String name) {
 		this.name = name;
 	}
 

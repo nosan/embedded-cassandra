@@ -23,6 +23,5 @@ import org.springframework.data.cassandra.repository.ReactiveCassandraRepository
  *
  * @author Dmytro Nosan
  */
-public interface CityReactiveRepository extends ReactiveCassandraRepository<City, Long> {
-
+interface CityReactiveRepository extends ReactiveCassandraRepository<City, Long> {
 }

@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.test.spring;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Session;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,31 +38,28 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@Cql(scripts = "/init.cql")
-@Cql(statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-public class CqlExecutionListenerDefaultTests {
+@Cql(cluster = "customCluster", scripts = "/init.cql")
+@Cql(cluster = "customCluster", statements = "DROP KEYSPACE test",
+		executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+public class CqlExecutionListenerCustomNameTests {
 
 	@ClassRule
 	public static final CassandraRule cassandra = new CassandraRule();
 
 	@Autowired
-	private Cluster cluster;
+	private Cluster customCluster;
 
 	@Test
-	@Cql(scripts = "/users-data.cql")
+	@Cql(cluster = "customCluster", scripts = "/users-data.cql")
 	public void shouldHaveUser() {
-		try (Session session = this.cluster.connect()) {
-			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
-			assertThat(rs.one().getLong(0)).isEqualTo(1);
-		}
+		ResultSet rs = this.customCluster.connect().execute("SELECT COUNT(*) FROM test.users");
+		assertThat(rs.one().getLong(0)).isEqualTo(1);
 	}
 
 	@Test
 	public void shouldNotHaveUser() {
-		try (Session session = this.cluster.connect()) {
-			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
-			assertThat(rs.one().getLong(0)).isZero();
-		}
+		ResultSet rs = this.customCluster.connect().execute("SELECT COUNT(*) FROM test.users");
+		assertThat(rs.one().getLong(0)).isZero();
 	}
 
 	@Configuration
@@ -71,12 +67,12 @@ public class CqlExecutionListenerDefaultTests {
 
 		@Bean
 		public Cluster customCluster() {
-			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
+			return cassandra.getCluster();
 		}
 
 		@Bean
 		public Cluster cluster() {
-			return cassandra.getCluster();
+			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
 		}
 
 	}

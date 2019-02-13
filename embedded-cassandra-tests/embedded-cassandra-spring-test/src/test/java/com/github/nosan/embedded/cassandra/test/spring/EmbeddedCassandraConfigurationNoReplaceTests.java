@@ -50,8 +50,8 @@ public class EmbeddedCassandraConfigurationNoReplaceTests {
 	static class TestConfiguration {
 
 		@Bean
-		public ExcludeCassandraRegistryPostProcessor excludeCassandraProcessor() {
-			return new ExcludeCassandraRegistryPostProcessor();
+		public ExcludeCassandraBeanDefinitionRegistryPostProcessor excludeCassandraProcessor() {
+			return new ExcludeCassandraBeanDefinitionRegistryPostProcessor();
 		}
 	}
 }

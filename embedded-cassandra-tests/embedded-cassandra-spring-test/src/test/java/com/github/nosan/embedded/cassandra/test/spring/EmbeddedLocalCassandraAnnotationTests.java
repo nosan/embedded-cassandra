@@ -24,8 +24,6 @@ import java.time.Duration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -38,12 +36,12 @@ import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link LocalCassandraContextCustomizer}.
+ * Tests for {@link EmbeddedLocalCassandraContextCustomizer}.
  *
  * @author Dmytro Nosan
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = ExcludeCassandraBeanDefinitionRegistryPostProcessor.class)
 @EmbeddedLocalCassandra(version = "2.2.13", configurationFile = "classpath:/cassandra.yaml",
 		logbackFile = "classpath:/logback-test.xml",
 		rackFile = "classpath:/rack.properties",
@@ -98,12 +96,4 @@ public class EmbeddedLocalCassandraAnnotationTests {
 		assertThat(factory.isRegisterShutdownHook()).isFalse();
 	}
 
-	@Configuration
-	static class TestConfiguration {
-
-		@Bean
-		public ExcludeCassandraRegistryPostProcessor excludeCassandraProcessor() {
-			return new ExcludeCassandraRegistryPostProcessor();
-		}
-	}
 }

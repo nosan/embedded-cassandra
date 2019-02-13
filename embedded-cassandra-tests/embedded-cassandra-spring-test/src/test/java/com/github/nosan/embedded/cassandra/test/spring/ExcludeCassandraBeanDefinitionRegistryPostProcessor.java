@@ -30,7 +30,7 @@ import com.github.nosan.embedded.cassandra.Cassandra;
  *
  * @author Dmytro Nosan
  */
-class ExcludeCassandraRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
+class ExcludeCassandraBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
 	@Override
 	public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
@@ -39,6 +39,5 @@ class ExcludeCassandraRegistryPostProcessor implements BeanDefinitionRegistryPos
 
 	@Override
 	public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
 	}
 }

@@ -18,14 +18,12 @@ package com.github.nosan.embedded.cassandra.test.spring;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Session;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -40,7 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class CqlExecutionListenerPrimaryTests {
+@Cql(scripts = "/init.cql")
+@Cql(statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+public class CqlExecutionListenerDefaultNameTests {
 
 	@ClassRule
 	public static final CassandraRule cassandra = new CassandraRule();
@@ -49,36 +49,29 @@ public class CqlExecutionListenerPrimaryTests {
 	private Cluster cluster;
 
 	@Test
-	@Cql(scripts = {"/init.cql", "/users-data.cql"})
-	@Cql(statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+	@Cql(scripts = "/users-data.cql")
 	public void shouldHaveUser() {
-		try (Session session = this.cluster.connect()) {
-			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
-			assertThat(rs.one().getLong(0)).isEqualTo(1);
-		}
+		ResultSet rs = this.cluster.connect().execute("SELECT COUNT(*) FROM test.users");
+		assertThat(rs.one().getLong(0)).isEqualTo(1);
 	}
 
 	@Test
-	@Cql(scripts = {"/init.cql"})
 	public void shouldNotHaveUser() {
-		try (Session session = this.cluster.connect()) {
-			ResultSet rs = session.execute("SELECT COUNT(*) FROM test.users");
-			assertThat(rs.one().getLong(0)).isZero();
-		}
+		ResultSet rs = this.cluster.connect().execute("SELECT COUNT(*) FROM test.users");
+		assertThat(rs.one().getLong(0)).isZero();
 	}
 
 	@Configuration
 	static class TestConfiguration {
 
 		@Bean
-		@Primary
-		public Cluster cluster1() {
-			return cassandra.getCluster();
+		public Cluster customCluster() {
+			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
 		}
 
 		@Bean
-		public Cluster cluster2() {
-			return Cluster.builder().withPort(9000).addContactPoint("localhost").build();
+		public Cluster cluster() {
+			return cassandra.getCluster();
 		}
 
 	}

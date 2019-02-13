@@ -23,11 +23,11 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandraContextCustomizerFactory}.
+ * Tests for {@link EmbeddedLocalCassandraContextCustomizerFactory}.
  *
  * @author Dmytro Nosan
  */
-public class EmbeddedCassandraContextCustomizerFactoryTests {
+public class EmbeddedLocalCassandraContextCustomizerFactoryTests {
 
 	private final EmbeddedCassandraContextCustomizerFactory factory = new EmbeddedCassandraContextCustomizerFactory();
 
@@ -43,7 +43,7 @@ public class EmbeddedCassandraContextCustomizerFactoryTests {
 				.isNull();
 	}
 
-	@EmbeddedCassandra
+	@EmbeddedLocalCassandra
 	private static class Annotated {
 
 	}

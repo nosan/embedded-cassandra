@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.test.spring;
 
 import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,11 +32,8 @@ class TestService {
 	private Cluster cluster;
 
 	boolean createKeyspace(String keyspace) {
-		try (Session connect = this.cluster.connect()) {
-			return connect.execute(String.format(""
-					+ "CREATE KEYSPACE  %s  WITH REPLICATION = { 'class' : 'SimpleStrategy', "
-					+ "'replication_factor' : 1 };", keyspace)).wasApplied();
-		}
-
+		return this.cluster.connect().execute(String.format(""
+				+ "CREATE KEYSPACE  %s  WITH REPLICATION = { 'class' : 'SimpleStrategy', "
+				+ "'replication_factor' : 1 };", keyspace)).wasApplied();
 	}
 }

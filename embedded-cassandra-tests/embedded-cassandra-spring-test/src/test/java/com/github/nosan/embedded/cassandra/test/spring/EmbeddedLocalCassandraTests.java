@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.test.spring;
 import javax.annotation.Nonnull;
 
 import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,11 +35,12 @@ import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
+import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link LocalCassandraContextCustomizer}.
+ * Tests for {@link EmbeddedLocalCassandraContextCustomizer}.
  *
  * @author Dmytro Nosan
  */
@@ -61,7 +61,10 @@ public class EmbeddedLocalCassandraTests {
 	private RemoteArtifactFactory remoteArtifactFactory;
 
 	@Autowired
-	private LocalCassandraFactory localCassandraFactory;
+	private LocalCassandraFactory cassandraFactory;
+
+	@Autowired
+	private ClusterFactory clusterFactory;
 
 	@Autowired
 	private Cluster cluster;
@@ -70,11 +73,10 @@ public class EmbeddedLocalCassandraTests {
 	public void shouldOverrideVersion() {
 		assertThat(OUTPUT.toString()).contains("Cassandra version: 2.2.12");
 		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
-		try (Session session = this.cluster.connect()) {
-			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
-					.isTrue();
-		}
-		assertThat(this.localCassandraFactory.getArtifactFactory()).isSameAs(this.remoteArtifactFactory);
+		assertThat(this.cluster.connect().execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
+		assertThat(this.cassandraFactory.getArtifactFactory()).isSameAs(this.remoteArtifactFactory);
+		assertThat(ReflectionUtils.getField(this.cassandra, "cassandraFactory")).isSameAs(this.cassandraFactory);
+		assertThat(ReflectionUtils.getField(this.cassandra, "clusterFactory")).isSameAs(this.clusterFactory);
 	}
 
 	@Configuration

@@ -21,16 +21,9 @@ import java.net.Proxy;
 import java.nio.file.Paths;
 import java.time.Duration;
 
-import javax.annotation.Nonnull;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -44,12 +37,12 @@ import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link LocalCassandraContextCustomizer}.
+ * Tests for {@link EmbeddedLocalCassandraContextCustomizer}.
  *
  * @author Dmytro Nosan
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration
+@ContextConfiguration(classes = ExcludeCassandraBeanDefinitionRegistryPostProcessor.class)
 @TestPropertySource("classpath:application.properties")
 @EmbeddedLocalCassandra(version = "${version}", configurationFile = "${configurationFile}",
 		logbackFile = "${logbackFile}",
@@ -105,17 +98,4 @@ public class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
 		assertThat(factory.isRegisterShutdownHook()).isFalse();
 	}
 
-	@Configuration
-	static class TestConfiguration implements BeanDefinitionRegistryPostProcessor {
-
-		@Override
-		public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
-			registry.removeBeanDefinition(EmbeddedCassandraFactoryBean.BEAN_NAME);
-		}
-
-		@Override
-		public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
-		}
-	}
 }
