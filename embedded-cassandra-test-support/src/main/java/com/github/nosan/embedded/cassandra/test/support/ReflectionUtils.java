@@ -18,9 +18,11 @@ package com.github.nosan.embedded.cassandra.test.support;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 
@@ -44,7 +46,7 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		return run(() -> {
-			Field field = findField(target.getClass(), name);
+			Field field = findField(target.getClass(), name, f -> !Modifier.isStatic(f.getModifiers()));
 			return field.get(target);
 		});
 	}
@@ -66,7 +68,7 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(types, "Types must not be null");
 		Objects.requireNonNull(arguments, "Arguments must not be null");
 		return run(() -> {
-			Method method = findMethod(target.getClass(), name, types);
+			Method method = findMethod(target.getClass(), name, types, m -> !Modifier.isStatic(m.getModifiers()));
 			return method.invoke(null, arguments);
 		});
 	}
@@ -83,7 +85,7 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		return run(() -> {
-			Field field = findField(target, name);
+			Field field = findField(target, name, f -> Modifier.isStatic(f.getModifiers()));
 			return field.get(null);
 		});
 	}
@@ -105,16 +107,17 @@ public abstract class ReflectionUtils {
 		Objects.requireNonNull(types, "Types must not be null");
 		Objects.requireNonNull(arguments, "Arguments must not be null");
 		return run(() -> {
-			Method method = findMethod(target, name, types);
+			Method method = findMethod(target, name, types, m -> Modifier.isStatic(m.getModifiers()));
 			return method.invoke(null, arguments);
 		});
 	}
 
-	private static Field findField(Class<?> clazz, String name) throws NoSuchFieldException {
+	private static Field findField(Class<?> clazz, String name, Predicate<? super Field> filter)
+			throws NoSuchFieldException {
 		for (Class<?> searchType = clazz; searchType != null; searchType = searchType.getSuperclass()) {
 			Field[] fields = searchType.getDeclaredFields();
 			for (Field field : fields) {
-				if (name.equals(field.getName())) {
+				if (name.equals(field.getName()) && filter.test(field)) {
 					field.setAccessible(true);
 					return field;
 				}
@@ -123,12 +126,13 @@ public abstract class ReflectionUtils {
 		throw new NoSuchFieldException(name);
 	}
 
-	private static Method findMethod(Class<?> clazz, String name, Class<?>[] types) throws NoSuchMethodException {
+	private static Method findMethod(Class<?> clazz, String name, Class<?>[] types, Predicate<? super Method> filter)
+			throws NoSuchMethodException {
 		for (Class<?> searchType = clazz; searchType != null; searchType = searchType.getSuperclass()) {
 			Method[] methods = searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods();
 			for (Method method : methods) {
-				if (name.equals(method.getName()) &&
-						(types == null || Arrays.equals(types, method.getParameterTypes()))) {
+				if (name.equals(method.getName()) && Arrays.equals(types, method.getParameterTypes())
+						&& filter.test(method)) {
 					method.setAccessible(true);
 					return method;
 				}
