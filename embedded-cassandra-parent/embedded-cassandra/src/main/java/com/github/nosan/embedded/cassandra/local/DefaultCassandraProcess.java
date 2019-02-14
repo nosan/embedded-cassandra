@@ -434,7 +434,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 					this.alreadySet = true;
 				}
 				catch (Throwable ex) {
-					if (log.isDebugEnabled()) {
+					if (log.isTraceEnabled()) {
 						log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
 					}
 				}
@@ -480,7 +480,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 					this.alreadySet = true;
 				}
 				catch (Throwable ex) {
-					if (log.isDebugEnabled()) {
+					if (log.isTraceEnabled()) {
 						log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
 					}
 				}

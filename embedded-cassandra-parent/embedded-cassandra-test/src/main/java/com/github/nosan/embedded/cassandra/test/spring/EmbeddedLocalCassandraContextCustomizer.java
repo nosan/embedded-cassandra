@@ -23,13 +23,11 @@ import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.util.Assert;
 
 /**
  * {@link ContextCustomizer} that register {@link LocalCassandraFactoryBean}.
@@ -55,16 +53,12 @@ class EmbeddedLocalCassandraContextCustomizer implements ContextCustomizer {
 	@Override
 	public void customizeContext(@Nonnull ConfigurableApplicationContext context,
 			@Nonnull MergedContextConfiguration mergedConfig) {
-		Assert.isInstanceOf(BeanDefinitionRegistry.class, context.getBeanFactory(),
-				String.format("(%s) can only be used with a BeanDefinitionRegistry", getClass()));
-		ConfigurableListableBeanFactory configurableListableBeanFactory = context.getBeanFactory();
-		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) configurableListableBeanFactory;
+		BeanDefinitionRegistry registry = BeanDefinitionUtils.getRegistry(context.getBeanFactory());
 		RootBeanDefinition bd = new RootBeanDefinition(LocalCassandraFactoryBean.class);
+		bd.setPrimary(true);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, this.testClass);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
-		bd.setPrimary(true);
 		BeanDefinitionUtils.registerBeanDefinition(registry, LocalCassandraFactoryBean.BEAN_NAME, bd);
-		log.info("'{}' has been registered as a primary bean", LocalCassandraFactoryBean.BEAN_NAME);
 	}
 
 	@Override

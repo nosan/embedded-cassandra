@@ -18,8 +18,12 @@ package com.github.nosan.embedded.cassandra.test.spring;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.util.Assert;
 
 /**
  * Utility class for dealing with {@link BeanDefinition}.
@@ -28,6 +32,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  * @since 1.4.1
  */
 abstract class BeanDefinitionUtils {
+
+	private static final Logger log = LoggerFactory.getLogger(BeanDefinitionUtils.class);
 
 	/**
 	 * Register a new bean definition with a registry. Replace existing {@link BeanDefinition} if exists.
@@ -42,5 +48,32 @@ abstract class BeanDefinitionUtils {
 			registry.removeBeanDefinition(beanName);
 		}
 		registry.registerBeanDefinition(beanName, beanDefinition);
+		log.info("'{}' bean has been registered{}.", beanName, beanDefinition.isPrimary() ? " as a primary bean" : "");
+	}
+
+	/**
+	 * Check that {@link ConfigurableListableBeanFactory} is instance of {@link BeanDefinitionRegistry} and cast it to
+	 * the registry.
+	 *
+	 * @param beanFactory the bean factory
+	 * @return the bean definition registry
+	 */
+	@Nonnull
+	static BeanDefinitionRegistry getRegistry(@Nonnull ConfigurableListableBeanFactory beanFactory) {
+		Assert.isInstanceOf(BeanDefinitionRegistry.class, beanFactory);
+		return (BeanDefinitionRegistry) beanFactory;
+	}
+
+	/**
+	 * Check that {@link BeanDefinitionRegistry} is instance of {@link ConfigurableListableBeanFactory} and cast it to
+	 * the registry.
+	 *
+	 * @param registry the bean definition registry
+	 * @return the bean factory
+	 */
+	@Nonnull
+	static ConfigurableListableBeanFactory getBeanFactory(@Nonnull BeanDefinitionRegistry registry) {
+		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, registry);
+		return (ConfigurableListableBeanFactory) registry;
 	}
 }

@@ -63,7 +63,7 @@ abstract class BeanFactoryUtils {
 			return context.getBean(targetClass);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
-			if (log.isDebugEnabled()) {
+			if (log.isTraceEnabled()) {
 				log.error(ex.getMessage(), ex);
 			}
 		}

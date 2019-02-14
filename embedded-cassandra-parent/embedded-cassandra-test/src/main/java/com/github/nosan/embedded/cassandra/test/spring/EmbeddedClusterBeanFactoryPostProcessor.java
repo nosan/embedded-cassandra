@@ -28,7 +28,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
-import org.springframework.util.Assert;
 
 /**
  * {@link BeanDefinitionRegistryPostProcessor} to register an embedded <b>primary</b> version of the {@link Cluster}
@@ -45,11 +44,9 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 
 	@Override
 	public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
-		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, registry,
-				String.format("(%s) can only be used with a ConfigurableListableBeanFactory", getClass()));
-		ConfigurableListableBeanFactory configurableListableBeanFactory = (ConfigurableListableBeanFactory) registry;
-		for (String name : configurableListableBeanFactory.getBeanNamesForType(Cluster.class)) {
-			BeanDefinition bd = configurableListableBeanFactory.getBeanDefinition(name);
+		ConfigurableListableBeanFactory factory = BeanDefinitionUtils.getBeanFactory(registry);
+		for (String name : factory.getBeanNamesForType(Cluster.class)) {
+			BeanDefinition bd = factory.getBeanDefinition(name);
 			if (bd.isPrimary()) {
 				bd.setPrimary(false);
 				log.warn("Bean '{}' is not anymore a primary bean", name);
@@ -58,7 +55,6 @@ class EmbeddedClusterBeanFactoryPostProcessor implements BeanDefinitionRegistryP
 		BeanDefinition bd = new RootBeanDefinition(EmbeddedClusterFactoryBean.class);
 		bd.setPrimary(true);
 		BeanDefinitionUtils.registerBeanDefinition(registry, EmbeddedClusterFactoryBean.BEAN_NAME, bd);
-		log.info("'{}' has been registered as a primary bean", EmbeddedClusterFactoryBean.BEAN_NAME);
 	}
 
 	@Override

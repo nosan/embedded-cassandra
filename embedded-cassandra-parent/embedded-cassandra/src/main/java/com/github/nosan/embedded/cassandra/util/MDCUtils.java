@@ -51,7 +51,7 @@ public abstract class MDCUtils {
 			return (context != null) ? Collections.unmodifiableMap(context) : Collections.emptyMap();
 		}
 		catch (Throwable ex) {
-			if (log.isDebugEnabled()) {
+			if (log.isTraceEnabled()) {
 				log.error("Could not get MDC context", ex);
 			}
 			return Collections.emptyMap();
@@ -73,7 +73,7 @@ public abstract class MDCUtils {
 			MDC.setContextMap(context);
 		}
 		catch (Throwable ex) {
-			if (log.isDebugEnabled()) {
+			if (log.isTraceEnabled()) {
 				log.error("Could not set MDC context", ex);
 			}
 		}
