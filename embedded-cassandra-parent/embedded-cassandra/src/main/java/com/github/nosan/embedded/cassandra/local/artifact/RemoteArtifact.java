@@ -119,7 +119,7 @@ class RemoteArtifact implements Artifact {
 				Resource localResource = new LocalResource(directory, remoteResource);
 				return localResource.getFile();
 			}
-			catch (Exception ex) {
+			catch (IOException ex) {
 				exceptions.addSuppressed(ex);
 			}
 		}
