@@ -112,13 +112,13 @@ public class LocalCassandraFactoryTests {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		Cassandra cassandra = factory.create();
 
-		Version version = new Version(3, 11, 3);
+		Version version = new Version(3, 11, 4);
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(version);
 		assertThat(ReflectionUtils.getField(cassandra, "registerShutdownHook")).isEqualTo(true);
 
 		Object process = ReflectionUtils.getField(cassandra, "process");
 		assertThat(ReflectionUtils.getField(process, "workingDirectory").toString()).
-				startsWith(FileUtils.getTmpDirectory().resolve("embedded-cassandra/3.11.3").toString());
+				startsWith(FileUtils.getTmpDirectory().resolve("embedded-cassandra/3.11.4").toString());
 		assertThat(ReflectionUtils.getField(process, "jvmOptions")).isEqualTo(Collections.emptyList());
 		assertThat(ReflectionUtils.getField(process, "startupTimeout")).isEqualTo(Duration.ofMinutes(1));
 		assertThat(ReflectionUtils.getField(process, "javaHome")).isNull();
@@ -128,12 +128,12 @@ public class LocalCassandraFactoryTests {
 
 		Object initializer = ReflectionUtils.getField(cassandra, "initializer");
 		assertThat(ReflectionUtils.getField(initializer, "workingDirectory").toString())
-				.startsWith(FileUtils.getTmpDirectory().resolve("embedded-cassandra/3.11.3").toString());
+				.startsWith(FileUtils.getTmpDirectory().resolve("embedded-cassandra/3.11.4").toString());
 		assertThat(ReflectionUtils.getField(initializer, "version")).isEqualTo(version);
 		assertThat(ReflectionUtils.getField(initializer, "logbackFile")).isNull();
 		assertThat(ReflectionUtils.getField(initializer, "artifactFactory")).isInstanceOf(RemoteArtifactFactory.class);
 		assertThat(ReflectionUtils.getField(initializer, "artifactDirectory")).
-				isEqualTo(FileUtils.getTmpDirectory().resolve("embedded-cassandra/3.11.3/apache-cassandra-3.11.3"));
+				isEqualTo(FileUtils.getTmpDirectory().resolve("embedded-cassandra/3.11.4/apache-cassandra-3.11.4"));
 		assertThat(ReflectionUtils.getField(initializer, "configurationFile")).isNull();
 		assertThat(ReflectionUtils.getField(initializer, "rackFile")).isNull();
 		assertThat(ReflectionUtils.getField(initializer, "topologyFile")).isNull();
