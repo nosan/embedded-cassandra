@@ -29,7 +29,7 @@ import com.github.nosan.embedded.cassandra.util.OS;
 public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
 
 	public LocalCassandra_V_2_1_X_Tests() {
-		super(new Version(2, 1, 20));
+		super(new Version(2, 1, 21));
 	}
 
 	@Override

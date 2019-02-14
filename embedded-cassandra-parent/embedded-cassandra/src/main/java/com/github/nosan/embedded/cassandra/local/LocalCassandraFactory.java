@@ -398,7 +398,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 		Version version = getVersion();
 		if (version == null) {
-			version = new Version(3, 11, 3);
+			version = new Version(3, 11, 4);
 		}
 		Duration startupTimeout = getStartupTimeout();
 		if (startupTimeout == null || startupTimeout.toMillis() <= 0) {

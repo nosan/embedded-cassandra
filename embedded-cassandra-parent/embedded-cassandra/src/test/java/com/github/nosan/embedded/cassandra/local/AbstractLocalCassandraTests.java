@@ -294,7 +294,7 @@ public abstract class AbstractLocalCassandraTests {
 
 	private void assertCassandraHasBeenStopped() {
 		assertThat(this.output.toString()).contains("has been stopped");
-		if (!new Version(2, 2, 13).equals(this.factory.getVersion())) {
+		if (!new Version(2, 2, 14).equals(this.factory.getVersion())) {
 			assertThat(this.output.toString()).contains("Announcing shutdown");
 		}
 	}
