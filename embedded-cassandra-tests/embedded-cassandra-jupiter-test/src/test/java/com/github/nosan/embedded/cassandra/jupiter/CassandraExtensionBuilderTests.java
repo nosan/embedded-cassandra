@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.jupiter;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
@@ -54,7 +56,8 @@ public class CassandraExtensionBuilderTests {
 
 		assertThat(ReflectionUtils.getField(cassandraExtension, "cassandraFactory")).isEqualTo(cassandraFactory);
 		assertThat(ReflectionUtils.getField(cassandraExtension, "registerShutdownHook")).isEqualTo(false);
-		assertThat(ReflectionUtils.getField(cassandraExtension, "scripts")).isEqualTo(new CqlScript[]{script});
+		assertThat(ReflectionUtils.getField(cassandraExtension, "scripts"))
+				.isEqualTo(Collections.singletonList(script));
 		assertThat(ReflectionUtils.getField(cassandraExtension, "clusterFactory")).isEqualTo(clusterFactory);
 	}
 }

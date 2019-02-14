@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.junit;
 
+import java.util.Collections;
+
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
@@ -54,7 +56,7 @@ public class CassandraRuleBuilderTests {
 
 		assertThat(ReflectionUtils.getField(cassandraRule, "cassandraFactory")).isEqualTo(cassandraFactory);
 		assertThat(ReflectionUtils.getField(cassandraRule, "registerShutdownHook")).isEqualTo(false);
-		assertThat(ReflectionUtils.getField(cassandraRule, "scripts")).isEqualTo(new CqlScript[]{script});
+		assertThat(ReflectionUtils.getField(cassandraRule, "scripts")).isEqualTo(Collections.singletonList(script));
 		assertThat(ReflectionUtils.getField(cassandraRule, "clusterFactory")).isEqualTo(clusterFactory);
 	}
 }
