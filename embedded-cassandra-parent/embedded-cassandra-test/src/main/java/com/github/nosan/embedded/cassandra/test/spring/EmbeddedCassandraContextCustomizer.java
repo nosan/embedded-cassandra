@@ -42,15 +42,14 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraContextCustomizer.class);
 
+	@Nullable
+	private final Class<?> testClass;
+
 	@Nonnull
 	private final EmbeddedCassandra annotation;
 
-	/**
-	 * Creates a {@link EmbeddedCassandraContextCustomizer}.
-	 *
-	 * @param annotation annotation
-	 */
-	EmbeddedCassandraContextCustomizer(@Nonnull EmbeddedCassandra annotation) {
+	EmbeddedCassandraContextCustomizer(@Nullable Class<?> testClass, @Nonnull EmbeddedCassandra annotation) {
+		this.testClass = testClass;
 		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedCassandra must not be null");
 	}
 
@@ -63,7 +62,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 		RootBeanDefinition bd = new RootBeanDefinition(EmbeddedCassandraFactoryBean.class);
 		bd.setPrimary(true);
-		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, mergedConfig.getTestClass());
+		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, this.testClass);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
 		BeanDefinitionUtils.registerBeanDefinition(registry, EmbeddedCassandraFactoryBean.BEAN_NAME, bd);
 		log.info("'{}' has been registered as a primary bean", EmbeddedCassandraFactoryBean.BEAN_NAME);

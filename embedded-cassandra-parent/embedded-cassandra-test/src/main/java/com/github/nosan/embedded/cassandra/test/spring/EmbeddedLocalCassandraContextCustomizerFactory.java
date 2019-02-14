@@ -38,10 +38,10 @@ class EmbeddedLocalCassandraContextCustomizerFactory implements ContextCustomize
 	@Override
 	public ContextCustomizer createContextCustomizer(@Nonnull Class<?> testClass,
 			@Nonnull List<ContextConfigurationAttributes> configAttributes) {
-		EmbeddedLocalCassandra annotation =
-				AnnotatedElementUtils.findMergedAnnotation(testClass, EmbeddedLocalCassandra.class);
+		EmbeddedLocalCassandra annotation = AnnotatedElementUtils.findMergedAnnotation(testClass,
+				EmbeddedLocalCassandra.class);
 		if (annotation != null) {
-			return new EmbeddedLocalCassandraContextCustomizer(annotation);
+			return new EmbeddedLocalCassandraContextCustomizer(testClass, annotation);
 		}
 		return null;
 	}

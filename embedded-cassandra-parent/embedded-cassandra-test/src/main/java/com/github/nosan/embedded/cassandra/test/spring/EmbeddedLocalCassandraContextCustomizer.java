@@ -41,15 +41,14 @@ class EmbeddedLocalCassandraContextCustomizer implements ContextCustomizer {
 
 	private static final Logger log = LoggerFactory.getLogger(EmbeddedLocalCassandraContextCustomizer.class);
 
+	@Nullable
+	private final Class<?> testClass;
+
 	@Nonnull
 	private final EmbeddedLocalCassandra annotation;
 
-	/**
-	 * Creates {@link EmbeddedLocalCassandraContextCustomizer}.
-	 *
-	 * @param annotation annotation
-	 */
-	EmbeddedLocalCassandraContextCustomizer(@Nonnull EmbeddedLocalCassandra annotation) {
+	EmbeddedLocalCassandraContextCustomizer(@Nullable Class<?> testClass, @Nonnull EmbeddedLocalCassandra annotation) {
+		this.testClass = testClass;
 		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedLocalCassandra must not be null");
 	}
 
@@ -58,10 +57,10 @@ class EmbeddedLocalCassandraContextCustomizer implements ContextCustomizer {
 			@Nonnull MergedContextConfiguration mergedConfig) {
 		Assert.isInstanceOf(BeanDefinitionRegistry.class, context.getBeanFactory(),
 				String.format("(%s) can only be used with a BeanDefinitionRegistry", getClass()));
-		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+		ConfigurableListableBeanFactory configurableListableBeanFactory = context.getBeanFactory();
+		BeanDefinitionRegistry registry = (BeanDefinitionRegistry) configurableListableBeanFactory;
 		RootBeanDefinition bd = new RootBeanDefinition(LocalCassandraFactoryBean.class);
-		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, mergedConfig.getTestClass());
+		bd.getConstructorArgumentValues().addIndexedArgumentValue(0, this.testClass);
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, this.annotation);
 		bd.setPrimary(true);
 		BeanDefinitionUtils.registerBeanDefinition(registry, LocalCassandraFactoryBean.BEAN_NAME, bd);

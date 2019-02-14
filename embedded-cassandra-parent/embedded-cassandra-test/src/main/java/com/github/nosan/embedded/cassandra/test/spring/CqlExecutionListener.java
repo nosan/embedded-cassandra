@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -66,7 +65,6 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	private static void executeCqlScripts(TestContext testContext, Cql.ExecutionPhase executionPhase) {
-		Objects.requireNonNull(testContext, "Test Context must not be null");
 		Set<Cql> methodAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(
 				testContext.getTestMethod(), Cql.class, CqlGroup.class);
 		Set<Cql> classAnnotations = AnnotatedElementUtils.findMergedRepeatableAnnotations(

@@ -16,6 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -66,7 +69,7 @@ public class TestCassandra implements Cassandra {
 	private final Object lock = new Object();
 
 	@Nonnull
-	private final CqlScript[] scripts;
+	private final List<CqlScript> scripts;
 
 	@Nonnull
 	private final ClusterFactory clusterFactory;
@@ -173,7 +176,7 @@ public class TestCassandra implements Cassandra {
 	public TestCassandra(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
 			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		this.cassandraFactory = (cassandraFactory != null) ? cassandraFactory : new LocalCassandraFactory();
-		this.scripts = (scripts != null) ? scripts : new CqlScript[0];
+		this.scripts = Collections.unmodifiableList(Arrays.asList((scripts != null) ? scripts : new CqlScript[0]));
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
 		this.registerShutdownHook = registerShutdownHook;
 	}
@@ -374,9 +377,8 @@ public class TestCassandra implements Cassandra {
 		if (Thread.interrupted()) {
 			throw new InterruptedException();
 		}
-		CqlScript[] scripts = this.scripts;
-		if (scripts.length > 0) {
-			executeScripts(scripts);
+		if (!this.scripts.isEmpty()) {
+			executeScripts(this.scripts.toArray(new CqlScript[0]));
 		}
 		if (log.isDebugEnabled()) {
 			log.debug("Test Cassandra ({}) has been started", cassandra);

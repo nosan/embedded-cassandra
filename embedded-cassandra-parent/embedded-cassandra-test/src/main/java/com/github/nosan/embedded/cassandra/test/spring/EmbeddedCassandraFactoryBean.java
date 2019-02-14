@@ -54,22 +54,16 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 	private TestCassandra cassandra;
 
 	@Nullable
-	private ApplicationContext context;
+	private ApplicationContext applicationContext;
 
-	/**
-	 * Creates a {@link EmbeddedCassandraFactoryBean}.
-	 *
-	 * @param testClass test class
-	 * @param annotation annotation
-	 */
 	EmbeddedCassandraFactoryBean(@Nullable Class<?> testClass, @Nonnull EmbeddedCassandra annotation) {
-		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedCassandra must not be null");
+		this.annotation = annotation;
 		this.testClass = testClass;
 	}
 
 	@Override
 	public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
-		this.context = Objects.requireNonNull(applicationContext, "Context must not be null");
+		this.applicationContext = applicationContext;
 	}
 
 	@Nonnull
@@ -94,14 +88,14 @@ class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
 
 	@Override
 	public void afterPropertiesSet() {
-		ApplicationContext applicationContext = Objects.requireNonNull(this.context, "Context must not be null");
+		ApplicationContext context = Objects.requireNonNull(this.applicationContext, "Context must not be null");
 		EmbeddedCassandra annotation = this.annotation;
 		CqlConfig config = new CqlConfig(this.testClass, annotation.scripts(),
 				annotation.statements(), annotation.encoding());
-		CqlScript[] scripts = CqlResourceUtils.getScripts(applicationContext, config);
+		CqlScript[] scripts = CqlResourceUtils.getScripts(context, config);
 		TestCassandra cassandra = new TestCassandra(annotation.registerShutdownHook(),
-				BeanFactoryUtils.getIfUnique(applicationContext, CassandraFactory.class),
-				BeanFactoryUtils.getIfUnique(applicationContext, ClusterFactory.class), scripts);
+				BeanFactoryUtils.getIfUnique(context, CassandraFactory.class),
+				BeanFactoryUtils.getIfUnique(context, ClusterFactory.class), scripts);
 		this.cassandra = cassandra;
 		cassandra.start();
 	}

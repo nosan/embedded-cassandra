@@ -24,7 +24,6 @@ import javax.annotation.Nullable;
 import com.datastax.driver.core.Cluster;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -41,21 +40,21 @@ class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationCon
 	static final String BEAN_NAME = "embeddedCluster";
 
 	@Nullable
-	private ApplicationContext context;
+	private ApplicationContext applicationContext;
 
 	@Override
 	public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
-		this.context = Objects.requireNonNull(applicationContext, "Context must not be null");
+		this.applicationContext = applicationContext;
 	}
 
 	@Nonnull
 	@Override
 	public Cluster getObject() {
-		ApplicationContext context = this.context;
-		Objects.requireNonNull(context, "Context must not be null");
+		ApplicationContext context = Objects.requireNonNull(this.applicationContext, "Context must not be null");
 		TestCassandra cassandra = BeanFactoryUtils.getIfUnique(context, TestCassandra.class);
 		if (cassandra == null) {
-			throw new NoSuchBeanDefinitionException(TestCassandra.class);
+			throw new IllegalStateException(String.format("'%s' bean requires a %s' bean",
+					BEAN_NAME, TestCassandra.class));
 		}
 		return cassandra.getCluster();
 	}

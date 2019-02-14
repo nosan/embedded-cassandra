@@ -59,30 +59,24 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 	private final EmbeddedLocalCassandra annotation;
 
 	@Nullable
-	private ApplicationContext context;
+	private ApplicationContext applicationContext;
 
-	/**
-	 * Creates a {@link LocalCassandraFactoryBean}.
-	 *
-	 * @param testClass test class
-	 * @param annotation annotation
-	 */
 	LocalCassandraFactoryBean(@Nullable Class<?> testClass, @Nonnull EmbeddedLocalCassandra annotation) {
 		this.testClass = testClass;
-		this.annotation = Objects.requireNonNull(annotation, "@EmbeddedLocalCassandra must not be null");
+		this.annotation = annotation;
 	}
 
 	@Override
 	public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
-		this.context = Objects.requireNonNull(applicationContext, "Application Context must not be null");
+		this.applicationContext = applicationContext;
 	}
 
 	@Nonnull
 	@Override
 	public LocalCassandraFactory getObject() {
-		ApplicationContext applicationContext = Objects.requireNonNull(this.context, "Context must not be null");
-		Environment environment = applicationContext.getEnvironment();
-		LocalCassandraFactory factory = new LocalCassandraFactory();
+		ApplicationContext context = Objects.requireNonNull(this.applicationContext, "Context must not be null");
+		Environment environment = context.getEnvironment();
+		LocalCassandraFactory localCassandraFactory = new LocalCassandraFactory();
 		EmbeddedLocalCassandra annotation = this.annotation;
 		Class<?> testClass = this.testClass;
 		String configurationFile = environment.resolvePlaceholders(annotation.configurationFile());
@@ -98,47 +92,46 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		int jmxPort = annotation.jmxPort();
 		boolean allowRoot = annotation.allowRoot();
 		boolean registerShutdownHook = annotation.registerShutdownHook();
-		EmbeddedLocalCassandra.Artifact artifact = annotation.artifact();
 		List<String> jvmOptions = Arrays.stream(annotation.jvmOptions())
 				.map(environment::resolvePlaceholders)
 				.filter(StringUtils::hasText)
 				.collect(Collectors.toList());
 
 		if (StringUtils.hasText(workingDirectory)) {
-			factory.setWorkingDirectory(Paths.get(workingDirectory));
+			localCassandraFactory.setWorkingDirectory(Paths.get(workingDirectory));
 		}
 		if (StringUtils.hasText(artifactDirectory)) {
-			factory.setArtifactDirectory(Paths.get(artifactDirectory));
+			localCassandraFactory.setArtifactDirectory(Paths.get(artifactDirectory));
 		}
 		if (StringUtils.hasText(javaHome)) {
-			factory.setJavaHome(Paths.get(javaHome));
+			localCassandraFactory.setJavaHome(Paths.get(javaHome));
 		}
 		if (StringUtils.hasText(version)) {
-			factory.setVersion(Version.parse(version));
+			localCassandraFactory.setVersion(Version.parse(version));
 		}
 		if (StringUtils.hasText(configurationFile)) {
-			factory.setConfigurationFile(CqlResourceUtils.getURL(applicationContext, configurationFile, testClass));
+			localCassandraFactory.setConfigurationFile(CqlResourceUtils.getURL(context, configurationFile, testClass));
 		}
 		if (StringUtils.hasText(logbackFile)) {
-			factory.setLogbackFile(CqlResourceUtils.getURL(applicationContext, logbackFile, testClass));
+			localCassandraFactory.setLogbackFile(CqlResourceUtils.getURL(context, logbackFile, testClass));
 		}
 		if (StringUtils.hasText(topologyFile)) {
-			factory.setTopologyFile(CqlResourceUtils.getURL(applicationContext, topologyFile, testClass));
+			localCassandraFactory.setTopologyFile(CqlResourceUtils.getURL(context, topologyFile, testClass));
 		}
 		if (StringUtils.hasText(rackFile)) {
-			factory.setRackFile(CqlResourceUtils.getURL(applicationContext, rackFile, testClass));
+			localCassandraFactory.setRackFile(CqlResourceUtils.getURL(context, rackFile, testClass));
 		}
 		if (StringUtils.hasText(commitLogArchivingFile)) {
-			factory.setCommitLogArchivingFile(CqlResourceUtils.getURL(applicationContext,
+			localCassandraFactory.setCommitLogArchivingFile(CqlResourceUtils.getURL(context,
 					commitLogArchivingFile, testClass));
 		}
-		factory.setStartupTimeout(startupTimeout);
-		factory.getJvmOptions().addAll(jvmOptions);
-		factory.setJmxPort(jmxPort);
-		factory.setAllowRoot(allowRoot);
-		factory.setRegisterShutdownHook(registerShutdownHook);
-		factory.setArtifactFactory(getArtifactFactory(artifact, applicationContext));
-		return factory;
+		localCassandraFactory.setStartupTimeout(startupTimeout);
+		localCassandraFactory.getJvmOptions().addAll(jvmOptions);
+		localCassandraFactory.setJmxPort(jmxPort);
+		localCassandraFactory.setAllowRoot(allowRoot);
+		localCassandraFactory.setRegisterShutdownHook(registerShutdownHook);
+		localCassandraFactory.setArtifactFactory(getArtifactFactory(annotation.artifact(), context));
+		return localCassandraFactory;
 	}
 
 	@Nonnull
@@ -154,11 +147,11 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 
 	private static ArtifactFactory getArtifactFactory(EmbeddedLocalCassandra.Artifact annotation,
 			ApplicationContext context) {
-		Environment environment = context.getEnvironment();
 		ArtifactFactory artifactFactory = BeanFactoryUtils.getIfUnique(context, ArtifactFactory.class);
 		if (artifactFactory != null) {
 			return artifactFactory;
 		}
+		Environment environment = context.getEnvironment();
 		String directory = environment.resolvePlaceholders(annotation.directory());
 		String proxyHost = environment.resolvePlaceholders(annotation.proxyHost());
 		int proxyPort = annotation.proxyPort();
@@ -167,18 +160,18 @@ class LocalCassandraFactoryBean implements FactoryBean<LocalCassandraFactory>, A
 		Duration readTimeout = Duration.ofMillis(annotation.readTimeout());
 		Duration connectTimeout = Duration.ofMillis(annotation.connectTimeout());
 
-		RemoteArtifactFactory factory = new RemoteArtifactFactory();
+		RemoteArtifactFactory remoteArtifactFactory = new RemoteArtifactFactory();
 		if (StringUtils.hasText(directory)) {
-			factory.setDirectory(Paths.get(directory));
+			remoteArtifactFactory.setDirectory(Paths.get(directory));
 		}
 		if (proxyType != Proxy.Type.DIRECT && StringUtils.hasText(proxyHost) && proxyPort != -1) {
-			factory.setProxy(new Proxy(proxyType, new InetSocketAddress(proxyHost, proxyPort)));
+			remoteArtifactFactory.setProxy(new Proxy(proxyType, new InetSocketAddress(proxyHost, proxyPort)));
 		}
 		if (!UrlFactory.class.equals(urlFactory)) {
-			factory.setUrlFactory(BeanUtils.instantiateClass(urlFactory));
+			remoteArtifactFactory.setUrlFactory(BeanUtils.instantiateClass(urlFactory));
 		}
-		factory.setReadTimeout(readTimeout);
-		factory.setConnectTimeout(connectTimeout);
-		return factory;
+		remoteArtifactFactory.setReadTimeout(readTimeout);
+		remoteArtifactFactory.setConnectTimeout(connectTimeout);
+		return remoteArtifactFactory;
 	}
 }

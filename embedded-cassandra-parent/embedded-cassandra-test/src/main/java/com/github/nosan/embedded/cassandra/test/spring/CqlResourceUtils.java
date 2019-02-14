@@ -55,13 +55,13 @@ abstract class CqlResourceUtils {
 	/**
 	 * Resolve the given {@link CqlConfig} into {@link CqlScript} objects.
 	 *
-	 * @param resolver {@link ResourcePatternResolver} for Spring resources.
+	 * @param resourcePatternResolver {@link ResourcePatternResolver} for Spring resources.
 	 * @param config CQL config.
 	 * @return CQL scripts.
 	 * @throws UncheckedIOException if an I/O error occurs
 	 */
 	@Nonnull
-	static CqlScript[] getScripts(@Nonnull ResourcePatternResolver resolver, @Nonnull CqlConfig config) {
+	static CqlScript[] getScripts(@Nonnull ResourcePatternResolver resourcePatternResolver, @Nonnull CqlConfig config) {
 		List<CqlScript> cqlScripts = new ArrayList<>();
 
 		String[] scripts = config.getScripts();
@@ -72,7 +72,7 @@ abstract class CqlResourceUtils {
 		if (!ObjectUtils.isEmpty(scripts)) {
 			Charset charset = StringUtils.hasText(encoding) ? Charset.forName(encoding) : null;
 			for (String script : TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts)) {
-				for (Resource resource : getResources(script, resolver)) {
+				for (Resource resource : getResources(script, resourcePatternResolver)) {
 					cqlScripts.add(new SpringCqlScript(resource, charset));
 				}
 			}
@@ -148,7 +148,7 @@ abstract class CqlResourceUtils {
 		 */
 		SpringCqlScript(@Nonnull Resource resource, @Nullable Charset encoding) {
 			super(encoding);
-			this.resource = Objects.requireNonNull(resource, "Resource must not be null");
+			this.resource = resource;
 		}
 
 		@Nonnull
