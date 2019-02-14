@@ -91,12 +91,13 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 
 	private static void executeCqlScripts(TestContext testContext, Cql cql) {
 		ApplicationContext applicationContext = testContext.getApplicationContext();
-		Cluster cluster = getCluster(cql.cluster(), testContext);
-		try (Session session = cluster.connect()) {
-			CqlConfig config = new CqlConfig(testContext.getTestClass(), cql.scripts(),
-					cql.statements(), cql.encoding());
-			CqlScript[] scripts = CqlResourceUtils.getScripts(applicationContext, config);
-			CqlScriptUtils.executeScripts(session, scripts);
+		CqlConfig config = new CqlConfig(testContext.getTestClass(), cql.scripts(), cql.statements(), cql.encoding());
+		CqlScript[] scripts = CqlResourceUtils.getScripts(applicationContext, config);
+		if (scripts.length > 0) {
+			Cluster cluster = getCluster(cql.cluster(), testContext);
+			try (Session session = cluster.connect()) {
+				CqlScriptUtils.executeScripts(session, scripts);
+			}
 		}
 	}
 
