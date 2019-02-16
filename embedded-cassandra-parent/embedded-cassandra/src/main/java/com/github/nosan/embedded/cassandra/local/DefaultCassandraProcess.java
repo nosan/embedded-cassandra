@@ -198,7 +198,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 					throwException("Cassandra is not alive. Please see logs for more details.", bufferedOutput);
 				}
 				long elapsed = System.currentTimeMillis() - start;
-				//when it is not possible check cassandra output.
+				//when it is not possible to check cassandra output.
 				if (elapsed > 20000L) {
 					return TransportUtils.isReady(settings);
 				}
