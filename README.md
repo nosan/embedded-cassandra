@@ -7,7 +7,7 @@ You can find more information [here](https://github.com/nosan/embedded-cassandra
 
 `Embedded Cassandra` uses GitHub's issue tracking system to report bugs and feature
 requests. If you want to raise an issue, please follow this [link](https://github.com/nosan/embedded-cassandra/issues)
-and use a predefined `GitHub` templates.
+and use predefined `GitHub` templates.
 
 Also see [CONTRIBUTING.md](CONTRIBUTING.md) if you wish to submit pull requests.
 
