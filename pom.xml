@@ -47,7 +47,7 @@
         <commons-compress.version>1.18</commons-compress.version>
         <xz.version>1.8</xz.version>
         <apiguardian-api.version>1.0.0</apiguardian-api.version>
-        <spring-boot.version>2.1.2.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.3.RELEASE</spring-boot.version>
         <reactor-core.version>3.2.6.RELEASE</reactor-core.version>
     </properties>
 
