@@ -254,7 +254,8 @@ class RemoteArtifact implements Artifact {
 		@Nonnull
 		@Override
 		public Path getFile() throws IOException {
-			URLConnection urlConnection = getUrlConnection(this.url, this.proxy, this.connectTimeout, this.readTimeout);
+			int maxRedirects = 10;
+			URLConnection urlConnection = getUrlConnection(this.url, maxRedirects, 1);
 			long size = urlConnection.getContentLengthLong();
 
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
@@ -284,6 +285,38 @@ class RemoteArtifact implements Artifact {
 			return getFileName(this.url);
 		}
 
+		private URLConnection getUrlConnection(URL url, int maxRedirects, int redirectCount) throws IOException {
+			URLConnection urlConnection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
+			if (urlConnection instanceof HttpURLConnection) {
+				HttpURLConnection connection = (HttpURLConnection) urlConnection;
+				if (this.connectTimeout != null) {
+					connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
+				}
+				if (this.readTimeout != null) {
+					connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
+				}
+				int status = connection.getResponseCode();
+				if (status >= 200 && status < 300) {
+					return connection;
+				}
+				else if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM ||
+						status == HttpURLConnection.HTTP_SEE_OTHER) {
+					if (maxRedirects <= redirectCount) {
+						String location = connection.getHeaderField("Location");
+						return getUrlConnection(new URL(url, location), maxRedirects, redirectCount + 1);
+					}
+					else {
+						throw new IOException(String.format("Too many redirects for URL (%s)", url));
+					}
+				}
+				else if (status >= 400) {
+					throw new IOException(String.format("HTTP (%d %s) status for URL (%s) is invalid", status,
+							connection.getResponseMessage(), url));
+				}
+			}
+			return urlConnection;
+		}
+
 		private static String getFileName(URL url) {
 			String name = url.getFile();
 			if (StringUtils.hasText(name) && name.contains("/")) {
@@ -294,35 +327,6 @@ class RemoteArtifact implements Artifact {
 						String.format("There is no way to determine a file name from (%s)", url));
 			}
 			return name;
-		}
-
-		private static URLConnection getUrlConnection(URL url, Proxy proxy, Duration connectTimeout,
-				Duration readTimeout) throws IOException {
-			URLConnection urlConnection = (proxy != null) ? url.openConnection(proxy) : url.openConnection();
-			if (urlConnection instanceof HttpURLConnection) {
-				HttpURLConnection connection = (HttpURLConnection) urlConnection;
-				if (connectTimeout != null) {
-					connection.setConnectTimeout(Math.toIntExact(connectTimeout.toMillis()));
-				}
-				if (readTimeout != null) {
-					connection.setReadTimeout(Math.toIntExact(readTimeout.toMillis()));
-				}
-				int status = connection.getResponseCode();
-				if (status >= 200 && status < 300) {
-					return connection;
-				}
-				else if (status >= 300 && status < 400) {
-					String location = connection.getHeaderField("Location");
-					if (StringUtils.hasText(location)) {
-						return getUrlConnection(new URL(url, location), proxy, connectTimeout, readTimeout);
-					}
-				}
-				else if (status >= 400) {
-					throw new IOException(String.format("HTTP (%d %s) status for URL (%s) is invalid", status,
-							connection.getResponseMessage(), url));
-				}
-			}
-			return urlConnection;
 		}
 
 		private static void showProgress(Path file, long size, ScheduledExecutorService executorService) {
