@@ -121,7 +121,7 @@ class RemoteArtifact implements Artifact {
 				return localResource.getFile();
 			}
 			catch (IOException ex) {
-				if (log.isDebugEnabled()) {
+				if (log.isTraceEnabled()) {
 					log.error(ex.getMessage(), ex);
 				}
 				exceptions.addSuppressed(ex);
