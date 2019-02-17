@@ -291,7 +291,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 				Thread.currentThread().interrupt();
 			}
 			catch (Throwable ex) {
-				log.error(String.format("Could not stop a process (%s) by file (%s)",
+				log.error(String.format("Could not stop a process (%s) by a file (%s)",
 						getPidString(pid), pidFile), ex);
 			}
 		}
@@ -322,7 +322,8 @@ class DefaultCassandraProcess implements CassandraProcess {
 				Thread.currentThread().interrupt();
 			}
 			catch (Throwable ex) {
-				log.error(String.format("Could not force stop a process (%s) by file (%s)", getPidString(pid), pidFile),
+				log.error(
+						String.format("Could not force stop a process (%s) by a file (%s)", getPidString(pid), pidFile),
 						ex);
 			}
 		}
