@@ -104,7 +104,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 	private Process process;
 
 	@Nullable
-	private SmartSettings settings;
+	private RuntimeNodeSettings settings;
 
 	private long pid = -1;
 
@@ -137,7 +137,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		Version version = this.version;
 		Duration timeout = this.startupTimeout;
 		ThreadFactory threadFactory = this.threadFactory;
-		SmartSettings settings = getSettings(directory, version);
+		RuntimeNodeSettings settings = getSettings(directory, version);
 		this.settings = settings;
 		Path executable = (OS.get() == OS.WINDOWS) ?
 				directory.resolve("bin/cassandra.ps1") : directory.resolve("bin/cassandra");
@@ -263,11 +263,11 @@ class DefaultCassandraProcess implements CassandraProcess {
 		}
 	}
 
-	private static SmartSettings getSettings(Path directory, Version version) throws IOException {
+	private static RuntimeNodeSettings getSettings(Path directory, Version version) throws IOException {
 		Path target = directory.resolve("conf/cassandra.yaml");
 		try (InputStream is = Files.newInputStream(target)) {
 			Yaml yaml = new Yaml();
-			return new SmartSettings(version, yaml.loadAs(is, Map.class));
+			return new RuntimeNodeSettings(version, yaml.loadAs(is, Map.class));
 		}
 	}
 
@@ -400,12 +400,12 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	/**
 	 * A simple implementation of {@link RunProcess.Output} class to find a {@code rpc_address} and set it into
-	 * the {@link SmartSettings}.
+	 * the {@link RuntimeNodeSettings}.
 	 */
 	private static final class RpcAddressParser implements RunProcess.Output {
 
 		@Nonnull
-		private final SmartSettings settings;
+		private final RuntimeNodeSettings settings;
 
 		@Nonnull
 		private final Pattern regex;
@@ -417,7 +417,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		 *
 		 * @param settings the node settings
 		 */
-		RpcAddressParser(@Nonnull SmartSettings settings) {
+		RpcAddressParser(@Nonnull RuntimeNodeSettings settings) {
 			this.settings = settings;
 			this.regex = Pattern.compile(String.format(".*/(.+):(%d|%d).*", settings.getPort(), settings.getSslPort()));
 		}
@@ -445,12 +445,12 @@ class DefaultCassandraProcess implements CassandraProcess {
 
 	/**
 	 * A simple implementation of {@link RunProcess.Output} class to find a {@code listen_address} and set it into
-	 * the {@link SmartSettings}.
+	 * the {@link RuntimeNodeSettings}.
 	 */
 	private static final class ListenAddressParser implements RunProcess.Output {
 
 		@Nonnull
-		private final SmartSettings settings;
+		private final RuntimeNodeSettings settings;
 
 		@Nonnull
 		private final Pattern regex;
@@ -462,7 +462,7 @@ class DefaultCassandraProcess implements CassandraProcess {
 		 *
 		 * @param settings the node settings
 		 */
-		ListenAddressParser(@Nonnull SmartSettings settings) {
+		ListenAddressParser(@Nonnull RuntimeNodeSettings settings) {
 			this.settings = settings;
 			this.regex = Pattern.compile(
 					String.format(".*/(.+):(%d|%d).*", settings.getStoragePort(), settings.getSslStoragePort()));
@@ -516,10 +516,10 @@ class DefaultCassandraProcess implements CassandraProcess {
 	}
 
 	/**
-	 * A basic implementation of the {@link NodeSettings} with an opportunity to set {@code realListenAddress} and
+	 * A basic implementation of the {@link NodeSettings} with a way to set {@code realListenAddress} and
 	 * {@code realAddress}.
 	 */
-	private static final class SmartSettings extends NodeSettings {
+	private static final class RuntimeNodeSettings extends NodeSettings {
 
 		@Nullable
 		private volatile InetAddress realListenAddress;
@@ -528,12 +528,12 @@ class DefaultCassandraProcess implements CassandraProcess {
 		private volatile InetAddress realAddress;
 
 		/**
-		 * Creates a new {@link SmartSettings}.
+		 * Creates a new {@link RuntimeNodeSettings}.
 		 *
 		 * @param version a version
 		 * @param properties a node properties
 		 */
-		SmartSettings(@Nonnull Version version, @Nullable Map<?, ?> properties) {
+		RuntimeNodeSettings(@Nonnull Version version, @Nullable Map<?, ?> properties) {
 			super(version, properties);
 		}
 

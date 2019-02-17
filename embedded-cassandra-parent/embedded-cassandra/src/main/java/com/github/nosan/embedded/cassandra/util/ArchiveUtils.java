@@ -134,6 +134,17 @@ public abstract class ArchiveUtils {
 	private interface ArchiveFactory {
 
 		/**
+		 * Reads the given archive file as an {@link ArchiveInputStream} which is used to access individual
+		 * {@link ArchiveEntry} objects within the archive without extracting the archive onto the file system.
+		 *
+		 * @param archive the archive file to stream
+		 * @return a new archive stream for the given archive
+		 * @throws IOException IOException in the case of I/O errors
+		 */
+		@Nonnull
+		ArchiveInputStream create(@Nonnull Path archive) throws IOException;
+
+		/**
 		 * Creates a factory for the given archive format.
 		 *
 		 * @param archiveFormat the archiveFormat format e.g. "tar" or "zip"
@@ -176,17 +187,6 @@ public abstract class ArchiveUtils {
 				}
 			};
 		}
-
-		/**
-		 * Reads the given archive file as an {@link ArchiveInputStream} which is used to access individual
-		 * {@link ArchiveEntry} objects within the archive without extracting the archive onto the file system.
-		 *
-		 * @param archive the archive file to stream
-		 * @return a new archive stream for the given archive
-		 * @throws IOException IOException in the case of I/O errors
-		 */
-		@Nonnull
-		ArchiveInputStream create(@Nonnull Path archive) throws IOException;
 	}
 
 	/**
