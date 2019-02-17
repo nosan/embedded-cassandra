@@ -122,7 +122,7 @@ class RemoteArtifact implements Artifact {
 			}
 			catch (IOException ex) {
 				if (log.isDebugEnabled()) {
-					log.error(ex.getMessage());
+					log.error(ex.getMessage(), ex);
 				}
 				exceptions.addSuppressed(ex);
 			}
