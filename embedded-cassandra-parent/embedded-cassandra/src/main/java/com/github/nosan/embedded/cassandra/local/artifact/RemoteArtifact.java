@@ -34,6 +34,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nonnull;
@@ -120,6 +121,9 @@ class RemoteArtifact implements Artifact {
 				return localResource.getFile();
 			}
 			catch (IOException ex) {
+				if (log.isDebugEnabled()) {
+					log.error(ex.getMessage());
+				}
 				exceptions.addSuppressed(ex);
 			}
 		}
@@ -185,7 +189,7 @@ class RemoteArtifact implements Artifact {
 			}
 			catch (IOException ex) {
 				if (log.isDebugEnabled()) {
-					log.error(String.format("Could not rename (%s) as (%s).", tempFile, file));
+					log.error(String.format("Could not rename (%s) as (%s).", tempFile, file), ex);
 				}
 				return file;
 			}
@@ -254,7 +258,7 @@ class RemoteArtifact implements Artifact {
 		@Nonnull
 		@Override
 		public Path getFile() throws IOException {
-			int maxRedirects = 10;
+			int maxRedirects = 20;
 			URLConnection urlConnection = getUrlConnection(this.url, maxRedirects, 1);
 			long size = urlConnection.getContentLengthLong();
 
@@ -286,24 +290,27 @@ class RemoteArtifact implements Artifact {
 		}
 
 		private URLConnection getUrlConnection(URL url, int maxRedirects, int redirectCount) throws IOException {
-			URLConnection urlConnection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
-			if (urlConnection instanceof HttpURLConnection) {
-				HttpURLConnection connection = (HttpURLConnection) urlConnection;
-				if (this.connectTimeout != null) {
-					connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
-				}
-				if (this.readTimeout != null) {
-					connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
-				}
-				int status = connection.getResponseCode();
+			URLConnection connection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
+			if (this.connectTimeout != null) {
+				connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
+			}
+			if (this.readTimeout != null) {
+				connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
+			}
+			if (connection instanceof HttpURLConnection) {
+				HttpURLConnection httpConnection = (HttpURLConnection) connection;
+				httpConnection.setInstanceFollowRedirects(false);
+				int status = httpConnection.getResponseCode();
 				if (status >= 200 && status < 300) {
-					return connection;
+					return httpConnection;
 				}
-				else if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM ||
-						status == HttpURLConnection.HTTP_SEE_OTHER) {
-					if (maxRedirects <= redirectCount) {
-						String location = connection.getHeaderField("Location");
-						return getUrlConnection(new URL(url, location), maxRedirects, redirectCount + 1);
+				else if (status >= 300 && status <= 307 && status != 306 && status != 304) {
+					if (redirectCount <= maxRedirects) {
+						String location = httpConnection.getHeaderField("Location");
+						if (StringUtils.hasText(location)) {
+							return getUrlConnection(new URL(httpConnection.getURL(), location),
+									maxRedirects, redirectCount + 1);
+						}
 					}
 					else {
 						throw new IOException(String.format("Too many redirects for URL (%s)", url));
@@ -311,10 +318,12 @@ class RemoteArtifact implements Artifact {
 				}
 				else if (status >= 400) {
 					throw new IOException(String.format("HTTP (%d %s) status for URL (%s) is invalid", status,
-							connection.getResponseMessage(), url));
+							httpConnection.getResponseMessage(), url));
 				}
+				return httpConnection;
 			}
-			return urlConnection;
+
+			return connection;
 		}
 
 		private static String getFileName(URL url) {
@@ -334,6 +343,7 @@ class RemoteArtifact implements Artifact {
 				Map<String, String> context = MDCUtils.getContext();
 				long[] prevPercent = new long[1];
 				int minPercentStep = 5;
+				AtomicBoolean logOnlyOnce = new AtomicBoolean(false);
 				executorService.scheduleAtFixedRate(() -> {
 					MDCUtils.setContext(context);
 					try {
@@ -347,7 +357,7 @@ class RemoteArtifact implements Artifact {
 						}
 					}
 					catch (Throwable ex) {
-						if (log.isTraceEnabled()) {
+						if (logOnlyOnce.compareAndSet(false, true)) {
 							log.error(String.format("Could not show progress for a file (%s)", file), ex);
 						}
 					}

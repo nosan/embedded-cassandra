@@ -149,6 +149,19 @@ public class RemoteArtifactTests {
 	}
 
 	@Test
+	public void shouldDownloadArtifactMaxRedirection() {
+		HttpServer server = this.webServer.get();
+		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+			exchange.getResponseHeaders()
+					.put("Location", Collections.singletonList("/dist/apache-cassandra-3.1.1.zip"));
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
+			exchange.close();
+		});
+		Artifact artifact = this.factory.create(new Version(3, 1, 1));
+		assertThatThrownBy(artifact::get).hasStackTraceContaining("Too many redirects for URL");
+	}
+
+	@Test
 	public void shouldDownloadArtifactURLs() throws Exception {
 		HttpServer server = this.webServer.get();
 		byte[] content;
