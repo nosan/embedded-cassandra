@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -64,16 +63,8 @@ abstract class BeanFactoryUtils {
 			}
 			return applicationContext.getBean(targetClass);
 		}
-		catch (NoUniqueBeanDefinitionException ex) {
-			if (log.isDebugEnabled()) {
-				log.error(ex.getMessage(), ex);
-			}
-		}
 		catch (NoSuchBeanDefinitionException ex) {
-			if (log.isTraceEnabled()) {
-				log.error(ex.getMessage(), ex);
-			}
+			return null;
 		}
-		return null;
 	}
 }

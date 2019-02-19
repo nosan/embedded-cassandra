@@ -208,11 +208,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Override
 		public Cluster getObject() {
 			ApplicationContext applicationContext = this.applicationContext;
-			TestCassandra cassandra = BeanFactoryUtils.getIfUnique(applicationContext, TestCassandra.class);
-			if (cassandra == null) {
-				throw new IllegalStateException(String.format("'%s' bean requires a %s' bean",
-						getClass().getName(), TestCassandra.class));
-			}
+			TestCassandra cassandra = applicationContext.getBean(EMBEDDED_CASSANDRA_BEAN_NAME, TestCassandra.class);
 			return cassandra.getCluster();
 		}
 
