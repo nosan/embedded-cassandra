@@ -37,7 +37,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedLocalCassandraContextCustomizer}.
+ * Tests for {@link EmbeddedLocalCassandra}.
  *
  * @author Dmytro Nosan
  */

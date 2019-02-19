@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
 
 /**
- * {@link ContextCustomizerFactory} to support {@link EmbeddedCassandra}.
+ * {@link ContextCustomizerFactory} to create {@link EmbeddedCassandraContextCustomizer}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0

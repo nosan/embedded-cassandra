@@ -40,7 +40,7 @@ import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedLocalCassandraContextCustomizer}.
+ * Tests for {@link EmbeddedLocalCassandra}.
  *
  * @author Dmytro Nosan
  */
