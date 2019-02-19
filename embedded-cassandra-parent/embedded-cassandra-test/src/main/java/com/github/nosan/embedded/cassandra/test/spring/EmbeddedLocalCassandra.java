@@ -66,7 +66,6 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @see EmbeddedCassandra
  * @see LocalCassandraFactory
  * @see RemoteArtifactFactory
- * @see EmbeddedLocalCassandraContextCustomizer
  * @since 1.2.6
  */
 @Retention(RetentionPolicy.RUNTIME)
