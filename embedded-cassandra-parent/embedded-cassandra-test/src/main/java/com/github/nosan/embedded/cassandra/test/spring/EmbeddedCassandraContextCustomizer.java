@@ -155,7 +155,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 		@Override
 		public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
+			if (beanFactory.containsBean(EmbeddedCassandraFactoryBean.class.getName())) {
+				//eager initialization
+				beanFactory.getBean(EmbeddedCassandraFactoryBean.class.getName(), TestCassandra.class);
+			}
 		}
 
 		@Override
