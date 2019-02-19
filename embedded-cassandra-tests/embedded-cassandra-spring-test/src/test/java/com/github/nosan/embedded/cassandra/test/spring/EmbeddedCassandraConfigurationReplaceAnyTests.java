@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -52,7 +51,6 @@ public class EmbeddedCassandraConfigurationReplaceAnyTests {
 	static class TestConfiguration {
 
 		@Bean
-		@Primary
 		public Cluster cluster1() {
 			return Cluster.builder()
 					.withClusterName("primary cluster")

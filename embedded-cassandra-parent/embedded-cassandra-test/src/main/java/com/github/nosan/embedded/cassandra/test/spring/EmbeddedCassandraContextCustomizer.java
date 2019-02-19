@@ -38,20 +38,16 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
@@ -64,13 +60,19 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
- * {@link ContextCustomizer} to add {@link EmbeddedCassandraRegistrar}, {@link LocalCassandraFactoryRegistrar} and
- * {@link EmbeddedClusterRegistrar}.
+ * {@link ContextCustomizer} to add {@link EmbeddedCassandraFactoryBean}, {@link LocalCassandraFactoryBean} and
+ * {@link EmbeddedClusterFactoryBean}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
 class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
+
+	private static final String LOCAL_CASSANDRA_FACTORY_BEAN_NAME = "localCassandraFactory";
+
+	private static final String EMBEDDED_CLUSTER_BEAN_NAME = "embeddedCluster";
+
+	private static final String EMBEDDED_CASSANDRA_BEAN_NAME = "embeddedCassandra";
 
 	@Override
 	public void customizeContext(@Nonnull ConfigurableApplicationContext context,
@@ -79,27 +81,25 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		BeanDefinitionRegistry registry = BeanDefinitionUtils.getRegistry(context.getBeanFactory());
 		ifAnnotationPresent(testClass, EmbeddedLocalCassandra.class, annotation -> {
 			BeanDefinitionUtils.registerBeanDefinition(registry,
-					LocalCassandraFactoryRegistrar.class.getName(), BeanDefinitionBuilder
-							.rootBeanDefinition(LocalCassandraFactoryRegistrar.class)
+					LOCAL_CASSANDRA_FACTORY_BEAN_NAME, asPrimary(BeanDefinitionBuilder
+							.rootBeanDefinition(LocalCassandraFactoryBean.class)
 							.addConstructorArgValue(testClass)
 							.addConstructorArgValue(annotation)
-							.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
-							.getBeanDefinition());
+							.getBeanDefinition()));
+
 		});
 		ifAnnotationPresent(testClass, EmbeddedCassandra.class, annotation -> {
 			BeanDefinitionUtils.registerBeanDefinition(registry,
-					EmbeddedCassandraRegistrar.class.getName(), BeanDefinitionBuilder
-							.rootBeanDefinition(EmbeddedCassandraRegistrar.class)
+					EMBEDDED_CASSANDRA_BEAN_NAME, asPrimary(BeanDefinitionBuilder
+							.rootBeanDefinition(EmbeddedCassandraFactoryBean.class)
 							.addConstructorArgValue(testClass)
 							.addConstructorArgValue(annotation)
-							.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
-							.getBeanDefinition());
+							.getBeanDefinition()));
 			if (annotation.replace() == EmbeddedCassandra.Replace.ANY) {
 				BeanDefinitionUtils.registerBeanDefinition(registry,
-						EmbeddedClusterRegistrar.class.getName(), BeanDefinitionBuilder
-								.rootBeanDefinition(EmbeddedClusterRegistrar.class)
-								.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
-								.getBeanDefinition());
+						EMBEDDED_CLUSTER_BEAN_NAME, asPrimary(BeanDefinitionBuilder
+								.rootBeanDefinition(EmbeddedClusterFactoryBean.class)
+								.getBeanDefinition()));
 			}
 		});
 	}
@@ -120,51 +120,9 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 				.ifPresent(consumer);
 	}
 
-	/**
-	 * {@link BeanDefinitionRegistryPostProcessor} adds a {@link EmbeddedCassandraFactoryBean}
-	 * bean definition as a primary bean.
-	 */
-	static class EmbeddedCassandraRegistrar implements BeanDefinitionRegistryPostProcessor, Ordered {
-
-		@Nonnull
-		private final Class<?> testClass;
-
-		@Nonnull
-		private final EmbeddedCassandra annotation;
-
-		EmbeddedCassandraRegistrar(@Nonnull Class<?> testClass, @Nonnull EmbeddedCassandra annotation) {
-			this.testClass = testClass;
-			this.annotation = annotation;
-		}
-
-		@Override
-		public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
-			ConfigurableListableBeanFactory beanFactory = BeanDefinitionUtils.getBeanFactory(registry);
-			for (String name : beanFactory.getBeanNamesForType(Cassandra.class)) {
-				beanFactory.getBeanDefinition(name).setPrimary(false);
-			}
-			BeanDefinition definition = BeanDefinitionBuilder
-					.rootBeanDefinition(EmbeddedCassandraFactoryBean.class)
-					.addConstructorArgValue(this.testClass)
-					.addConstructorArgValue(this.annotation)
-					.getBeanDefinition();
-			definition.setPrimary(true);
-			BeanDefinitionUtils.registerBeanDefinition(registry,
-					EmbeddedCassandraFactoryBean.class.getName(), definition);
-		}
-
-		@Override
-		public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
-			if (beanFactory.containsBean(EmbeddedCassandraFactoryBean.class.getName())) {
-				//eager initialization
-				beanFactory.getBean(EmbeddedCassandraFactoryBean.class.getName(), TestCassandra.class);
-			}
-		}
-
-		@Override
-		public int getOrder() {
-			return Ordered.LOWEST_PRECEDENCE;
-		}
+	private static BeanDefinition asPrimary(BeanDefinition definition) {
+		definition.setPrimary(true);
+		return definition;
 	}
 
 	/**
@@ -184,8 +142,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 		private ApplicationContext applicationContext;
 
-		EmbeddedCassandraFactoryBean(@Nonnull Class<?> testClass,
-				@Nonnull EmbeddedCassandra annotation) {
+		EmbeddedCassandraFactoryBean(@Nonnull Class<?> testClass, @Nonnull EmbeddedCassandra annotation) {
 			this.testClass = testClass;
 			this.annotation = annotation;
 		}
@@ -236,35 +193,6 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	/**
-	 * {@link BeanDefinitionRegistryPostProcessor} adds a {@link EmbeddedClusterFactoryBean}
-	 * bean definition as a primary bean.
-	 */
-	static class EmbeddedClusterRegistrar implements BeanDefinitionRegistryPostProcessor, Ordered {
-
-		@Override
-		public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
-			ConfigurableListableBeanFactory beanFactory = BeanDefinitionUtils.getBeanFactory(registry);
-			for (String name : beanFactory.getBeanNamesForType(Cluster.class)) {
-				beanFactory.getBeanDefinition(name).setPrimary(false);
-			}
-			BeanDefinition definition = BeanDefinitionBuilder.rootBeanDefinition(EmbeddedClusterFactoryBean.class)
-					.getBeanDefinition();
-			definition.setPrimary(true);
-			BeanDefinitionUtils.registerBeanDefinition(registry,
-					EmbeddedClusterFactoryBean.class.getName(), definition);
-		}
-
-		@Override
-		public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		}
-
-		@Override
-		public int getOrder() {
-			return Ordered.LOWEST_PRECEDENCE;
-		}
-	}
-
-	/**
 	 * {@link FactoryBean} used to create and configure a {@link Cluster}.
 	 */
 	static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationContextAware {
@@ -297,50 +225,6 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Override
 		public boolean isSingleton() {
 			return true;
-		}
-	}
-
-
-	/**
-	 * {@link BeanDefinitionRegistryPostProcessor} adds a {@link LocalCassandraFactoryBean}
-	 * bean definition as a primary bean.
-	 */
-	static class LocalCassandraFactoryRegistrar implements BeanDefinitionRegistryPostProcessor, Ordered {
-
-		@Nonnull
-		private final Class<?> testClass;
-
-		@Nonnull
-		private final EmbeddedLocalCassandra annotation;
-
-		LocalCassandraFactoryRegistrar(@Nonnull Class<?> testClass, @Nonnull EmbeddedLocalCassandra annotation) {
-			this.testClass = testClass;
-			this.annotation = annotation;
-		}
-
-		@Override
-		public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
-			ConfigurableListableBeanFactory beanFactory = BeanDefinitionUtils.getBeanFactory(registry);
-			for (String name : beanFactory.getBeanNamesForType(CassandraFactory.class)) {
-				beanFactory.getBeanDefinition(name).setPrimary(false);
-			}
-			BeanDefinition definition = BeanDefinitionBuilder
-					.rootBeanDefinition(LocalCassandraFactoryBean.class)
-					.addConstructorArgValue(this.testClass)
-					.addConstructorArgValue(this.annotation)
-					.getBeanDefinition();
-			definition.setPrimary(true);
-			BeanDefinitionUtils.registerBeanDefinition(registry, LocalCassandraFactoryBean.class.getName(), definition);
-		}
-
-		@Override
-		public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
-
-		}
-
-		@Override
-		public int getOrder() {
-			return Ordered.LOWEST_PRECEDENCE;
 		}
 	}
 

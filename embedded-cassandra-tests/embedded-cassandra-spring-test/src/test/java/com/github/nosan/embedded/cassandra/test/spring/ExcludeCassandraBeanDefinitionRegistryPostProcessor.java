@@ -34,10 +34,8 @@ class ExcludeCassandraBeanDefinitionRegistryPostProcessor implements BeanDefinit
 
 	@Override
 	public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
-		if (registry.containsBeanDefinition(EmbeddedCassandraContextCustomizer.EmbeddedCassandraFactoryBean
-				.class.getName())) {
-			registry.removeBeanDefinition(EmbeddedCassandraContextCustomizer.EmbeddedCassandraFactoryBean
-					.class.getName());
+		if (registry.containsBeanDefinition("embeddedCassandra")) {
+			registry.removeBeanDefinition("embeddedCassandra");
 		}
 	}
 
