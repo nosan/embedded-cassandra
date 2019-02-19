@@ -48,7 +48,7 @@ abstract class BeanDefinitionUtils {
 			registry.removeBeanDefinition(beanName);
 		}
 		registry.registerBeanDefinition(beanName, beanDefinition);
-		log.info("{} '{}' bean definition has been registered.",
+		log.info("{} '{}' bean has been registered.",
 				beanDefinition.isPrimary() ? "The @Primary" : "", beanName);
 	}
 
