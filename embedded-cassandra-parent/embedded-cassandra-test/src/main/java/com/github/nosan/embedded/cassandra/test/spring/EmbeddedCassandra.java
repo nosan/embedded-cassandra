@@ -46,6 +46,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * private Cluster cluster; // `replace` attribute is Replace.ANY
  * }
  * </pre>
+ * {@link TestCassandra} bean will be registered as a primary bean.
  * <p>
  * <b>Note!</b> It is possible to define you own {@link ClusterFactory} or {@link CassandraFactory} bean(s) to control
  * {@link TestCassandra} instance.
@@ -53,8 +54,6 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @author Dmytro Nosan
  * @see EmbeddedLocalCassandra
  * @see EmbeddedCassandraContextCustomizer
- * @see EmbeddedCassandraFactoryBean
- * @see EmbeddedClusterFactoryBean
  * @see ClusterFactory
  * @see CassandraFactory
  * @see TestCassandra

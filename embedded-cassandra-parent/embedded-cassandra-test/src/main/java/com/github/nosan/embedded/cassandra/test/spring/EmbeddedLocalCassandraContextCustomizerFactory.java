@@ -41,7 +41,7 @@ class EmbeddedLocalCassandraContextCustomizerFactory implements ContextCustomize
 		EmbeddedLocalCassandra annotation = AnnotatedElementUtils.findMergedAnnotation(testClass,
 				EmbeddedLocalCassandra.class);
 		if (annotation != null) {
-			return new EmbeddedLocalCassandraContextCustomizer(testClass, annotation);
+			return new EmbeddedLocalCassandraContextCustomizer();
 		}
 		return null;
 	}

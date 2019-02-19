@@ -35,14 +35,15 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
+import com.github.nosan.embedded.cassandra.test.ClusterFactory;
+import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
  * Annotation that can be specified on a test class that runs {@link Cassandra} based tests. This annotation extends
  * {@link EmbeddedCassandra} annotation and allows to customize {@link RemoteArtifactFactory}
  * and {@link LocalCassandraFactory}.
  * <p>
- * Customized {@link LocalCassandraFactory} will be registered as a <b>primary</b> bean with a name
- * <b><i>localCassandraFactory</i></b>.
+ * Customized {@link LocalCassandraFactory} will be registered as a <b>primary</b> bean.
  * <p> {@link RemoteArtifactFactory} <b>will not</b> be registered as a bean, but will be used by {@link
  * LocalCassandraFactory}.
  * <p>The typical usage of this annotation is like:
@@ -58,6 +59,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
  * </pre>
  * <p>
  * <b>Note!</b> It is possible to define you own {@link ArtifactFactory} bean to control {@link LocalCassandraFactory}
+ * instance, also is still possible to define you own {@link ClusterFactory} bean to control {@link TestCassandra}
  * instance.
  *
  * @author Dmytro Nosan
@@ -65,7 +67,6 @@ import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
  * @see LocalCassandraFactory
  * @see RemoteArtifactFactory
  * @see EmbeddedLocalCassandraContextCustomizer
- * @see LocalCassandraFactoryBean
  * @since 1.2.6
  */
 @Retention(RetentionPolicy.RUNTIME)

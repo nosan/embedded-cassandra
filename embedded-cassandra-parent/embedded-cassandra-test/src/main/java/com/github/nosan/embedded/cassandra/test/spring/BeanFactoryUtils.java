@@ -42,16 +42,17 @@ abstract class BeanFactoryUtils {
 	/**
 	 * Retrieves a bean only if it a unique and exists.
 	 *
-	 * @param context the application context
+	 * @param applicationContext the application context
 	 * @param targetClass type the bean must match; can be an interface or superclass
 	 * @param <T> type of the bean
 	 * @return an instance of the bean, or {@code null}
 	 * @throws BeansException if the bean could not be created
 	 */
 	@Nullable
-	static <T> T getIfUnique(@Nonnull ApplicationContext context, @Nonnull Class<T> targetClass) throws BeansException {
+	static <T> T getIfUnique(@Nonnull ApplicationContext applicationContext, @Nonnull Class<T> targetClass)
+			throws BeansException {
 		try {
-			AutowireCapableBeanFactory beanFactory = context.getAutowireCapableBeanFactory();
+			AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
 			if (beanFactory instanceof ListableBeanFactory) {
 				ListableBeanFactory listableBeanFactory = (ListableBeanFactory) beanFactory;
 				Map<String, T> beans = org.springframework.beans.factory.BeanFactoryUtils
@@ -60,7 +61,7 @@ abstract class BeanFactoryUtils {
 					return beans.values().iterator().next();
 				}
 			}
-			return context.getBean(targetClass);
+			return applicationContext.getBean(targetClass);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			if (log.isTraceEnabled()) {
