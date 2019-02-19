@@ -18,6 +18,8 @@ package com.github.nosan.embedded.cassandra.test.spring;
 
 import javax.annotation.Nonnull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -30,6 +32,8 @@ import org.springframework.util.Assert;
  * @since 1.4.1
  */
 abstract class BeanDefinitionUtils {
+
+	private static final Logger log = LoggerFactory.getLogger(BeanDefinitionUtils.class);
 
 	/**
 	 * Register a new bean definition with a registry. Replace existing {@link BeanDefinition} if exists.
@@ -44,6 +48,8 @@ abstract class BeanDefinitionUtils {
 			registry.removeBeanDefinition(beanName);
 		}
 		registry.registerBeanDefinition(beanName, beanDefinition);
+		log.info("{} '{}' bean definition has been registered.",
+				beanDefinition.isPrimary() ? "The @Primary" : "", beanName);
 	}
 
 	/**
