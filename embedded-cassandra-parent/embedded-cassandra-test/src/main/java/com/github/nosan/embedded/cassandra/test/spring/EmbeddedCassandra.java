@@ -46,7 +46,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * private Cluster cluster; // `replace` attribute is Replace.ANY
  * }
  * </pre>
- * {@link TestCassandra} bean will be registered as a primary bean.
+ * {@link TestCassandra} bean with a name <em>embeddedCassandra</em> will be registered as a <b>@Primary</b> bean.
  * <p>
  * <b>Note!</b> It is possible to define you own {@link ClusterFactory} or {@link CassandraFactory} bean(s) to control
  * {@link TestCassandra} instance.
@@ -131,7 +131,8 @@ public @interface EmbeddedCassandra {
 	enum Replace {
 
 		/**
-		 * Replace any {@link Cluster} beans with an embedded <b>primary</b> {@link Cluster} bean.
+		 * Replace any {@link Cluster} beans with an embedded <b>@Primary</b> {@link Cluster} bean with a name
+		 * <em>embeddedCluster</em>.
 		 */
 		ANY,
 

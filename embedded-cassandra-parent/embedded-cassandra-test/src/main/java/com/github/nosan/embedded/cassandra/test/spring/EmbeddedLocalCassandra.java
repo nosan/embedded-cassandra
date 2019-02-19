@@ -43,7 +43,8 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * {@link EmbeddedCassandra} annotation and allows to customize {@link RemoteArtifactFactory}
  * and {@link LocalCassandraFactory}.
  * <p>
- * Customized {@link LocalCassandraFactory} will be registered as a <b>primary</b> bean.
+ * Customized {@link LocalCassandraFactory} will be registered as a <b>@Primary</b> bean with a name
+ * <em>localCassandraFactory</em>.
  * <p> {@link RemoteArtifactFactory} <b>will not</b> be registered as a bean, but will be used by {@link
  * LocalCassandraFactory}.
  * <p>The typical usage of this annotation is like:
