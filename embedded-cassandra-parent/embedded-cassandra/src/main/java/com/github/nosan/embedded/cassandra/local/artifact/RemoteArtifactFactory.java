@@ -56,9 +56,8 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	private Duration connectTimeout;
 
 	/**
-	 * The directory where an {@code archive} should be saved from
-	 * {@link UrlFactory#create(Version) URL}. Default directory is {@link FileUtils#getTmpDirectory()
-	 * user.home}{@code /Downloads}
+	 * The directory where a downloaded {@code archive} should be saved. Default directory is
+	 * {@link FileUtils#getTmpDirectory() user.home}{@code /Downloads}
 	 *
 	 * @return The value of the {@code directory} attribute
 	 */
