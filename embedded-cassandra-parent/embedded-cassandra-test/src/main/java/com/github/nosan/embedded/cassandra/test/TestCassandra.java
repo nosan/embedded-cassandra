@@ -300,7 +300,7 @@ public class TestCassandra implements Cassandra {
 	 * @since 1.4.1
 	 */
 	@Nonnull
-	@API(since = "1.4.1", status = API.Status.MAINTAINED)
+	@API(since = "1.4.1", status = API.Status.EXPERIMENTAL)
 	public Cassandra getCassandra() {
 		Cassandra cassandra = this.cassandra;
 		if (cassandra == null) {
