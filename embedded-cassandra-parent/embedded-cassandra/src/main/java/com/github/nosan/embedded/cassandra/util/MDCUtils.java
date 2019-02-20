@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.util;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -54,7 +55,7 @@ public abstract class MDCUtils {
 			if (log.isTraceEnabled()) {
 				log.error("Could not get MDC context", ex);
 			}
-			return Collections.emptyMap();
+			return new LinkedHashMap<>();
 		}
 	}
 
@@ -67,7 +68,7 @@ public abstract class MDCUtils {
 	 */
 	public static void setContext(@Nullable Map<String, String> context) {
 		if (context == null) {
-			context = Collections.emptyMap();
+			context = new LinkedHashMap<>();
 		}
 		try {
 			MDC.setContextMap(context);
