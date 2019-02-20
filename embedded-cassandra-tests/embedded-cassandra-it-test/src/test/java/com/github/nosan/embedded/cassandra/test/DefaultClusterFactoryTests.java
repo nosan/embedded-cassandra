@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.datastax.driver.core.Cluster;
@@ -28,7 +27,6 @@ import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.Settings;
-import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,7 +104,7 @@ public class DefaultClusterFactoryTests {
 			return this.clusterName;
 		}
 
-		@Nonnull
+		@Nullable
 		@Override
 		public String getRpcAddress() {
 			return this.address;
@@ -115,12 +113,6 @@ public class DefaultClusterFactoryTests {
 		@Override
 		public int getPort() {
 			return this.port;
-		}
-
-		@Nonnull
-		@Override
-		public Version getVersion() {
-			return new Version(0);
 		}
 	}
 }

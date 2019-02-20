@@ -23,14 +23,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.Settings;
-import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +46,7 @@ public class TransportUtilsTests {
 		int attempts = 0;
 		while (ports.size() != 5) {
 			ports.add(PortUtils.getPort());
-			if (attempts++ > 64511) {
+			if (attempts++ > 500) {
 				throw new IllegalStateException("Can't reserve ports...");
 			}
 		}
@@ -122,12 +120,6 @@ public class TransportUtilsTests {
 		@Override
 		public int getRpcPort() {
 			return this.rpcPort;
-		}
-
-		@Nonnull
-		@Override
-		public Version getVersion() {
-			return new Version(0);
 		}
 	}
 }

@@ -182,7 +182,9 @@ public interface Settings {
 	 * @since 1.1.0
 	 */
 	@Nonnull
-	Version getVersion();
+	default Version getVersion() {
+		throw new UnsupportedOperationException("This method is not implemented");
+	}
 
 	/**
 	 * When using multiple physical network interfaces, set this to true to listen on broadcast_address in addition
