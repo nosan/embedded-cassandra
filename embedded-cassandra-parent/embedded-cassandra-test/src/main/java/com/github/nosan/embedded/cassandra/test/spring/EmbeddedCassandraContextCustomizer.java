@@ -60,8 +60,8 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
- * {@link ContextCustomizer} to add {@link EmbeddedCassandraFactoryBean}, {@link LocalCassandraFactoryBean} and
- * {@link EmbeddedClusterFactoryBean}.
+ * {@link ContextCustomizer} used to create {@link EmbeddedCassandraFactoryBean}, {@link LocalCassandraFactoryBean} and
+ * {@link EmbeddedClusterFactoryBean} beans.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
@@ -129,7 +129,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	 * {@link FactoryBean} used to create and configure a {@link TestCassandra}.
 	 */
 	static class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
-			DisposableBean, ApplicationContextAware, InitializingBean {
+			InitializingBean, DisposableBean, ApplicationContextAware {
 
 		@Nonnull
 		private final Class<?> testClass;
@@ -195,9 +195,11 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	/**
 	 * {@link FactoryBean} used to create and configure a {@link Cluster}.
 	 */
-	static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, ApplicationContextAware {
+	static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean, ApplicationContextAware {
 
 		private ApplicationContext applicationContext;
+
+		private Cluster cluster;
 
 		@Override
 		public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
@@ -207,9 +209,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Nonnull
 		@Override
 		public Cluster getObject() {
-			ApplicationContext applicationContext = this.applicationContext;
-			TestCassandra cassandra = applicationContext.getBean(EMBEDDED_CASSANDRA_BEAN_NAME, TestCassandra.class);
-			return cassandra.getCluster();
+			return Objects.requireNonNull(this.cluster, "Cluster is not initialized");
 		}
 
 		@Nonnull
@@ -222,13 +222,20 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		public boolean isSingleton() {
 			return true;
 		}
+
+		@Override
+		public void afterPropertiesSet() {
+			ApplicationContext applicationContext = this.applicationContext;
+			TestCassandra cassandra = applicationContext.getBean(EMBEDDED_CASSANDRA_BEAN_NAME, TestCassandra.class);
+			this.cluster = cassandra.getCluster();
+		}
 	}
 
 	/**
 	 * {@link FactoryBean} used to create and configure a {@link LocalCassandraFactory}.
 	 */
 	static class LocalCassandraFactoryBean
-			implements FactoryBean<LocalCassandraFactory>, ApplicationContextAware {
+			implements FactoryBean<LocalCassandraFactory>, InitializingBean, ApplicationContextAware {
 
 		@Nonnull
 		private final Class<?> testClass;
@@ -237,6 +244,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		private final EmbeddedLocalCassandra annotation;
 
 		private ApplicationContext applicationContext;
+
+		private LocalCassandraFactory cassandraFactory;
 
 		LocalCassandraFactoryBean(@Nonnull Class<?> testClass, @Nonnull EmbeddedLocalCassandra annotation) {
 			this.testClass = testClass;
@@ -251,6 +260,22 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Nonnull
 		@Override
 		public LocalCassandraFactory getObject() {
+			return Objects.requireNonNull(this.cassandraFactory, "Cassandra Factory is not initialized");
+		}
+
+		@Nonnull
+		@Override
+		public Class<?> getObjectType() {
+			return LocalCassandraFactory.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
+
+		@Override
+		public void afterPropertiesSet() {
 			ApplicationContext applicationContext = this.applicationContext;
 			Environment environment = applicationContext.getEnvironment();
 			EmbeddedLocalCassandra annotation = this.annotation;
@@ -314,18 +339,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			else {
 				factory.setArtifactFactory(getArtifactFactory(environment, annotation.artifact()));
 			}
-			return factory;
-		}
-
-		@Nonnull
-		@Override
-		public Class<?> getObjectType() {
-			return LocalCassandraFactory.class;
-		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
+			this.cassandraFactory = factory;
 		}
 
 		private static ArtifactFactory getArtifactFactory(
