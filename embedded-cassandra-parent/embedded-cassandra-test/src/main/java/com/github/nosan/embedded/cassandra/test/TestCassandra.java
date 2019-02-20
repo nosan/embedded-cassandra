@@ -429,10 +429,6 @@ public class TestCassandra implements Cassandra {
 	}
 
 	private void stop0() {
-		Cassandra cassandra = this.cassandra;
-		if (log.isDebugEnabled()) {
-			log.debug("Stops Test Cassandra ({})", cassandra);
-		}
 		try {
 			Session session = this.session;
 			if (session != null) {
@@ -461,15 +457,15 @@ public class TestCassandra implements Cassandra {
 		}
 		this.cluster = null;
 
+		Cassandra cassandra = this.cassandra;
 		if (cassandra != null) {
 			cassandra.stop();
+			if (log.isDebugEnabled()) {
+				log.debug("Test Cassandra ({}) has been stopped", cassandra);
+			}
 		}
 		this.cassandra = null;
-
 		this.started = false;
-		if (log.isDebugEnabled()) {
-			log.debug("Test Cassandra ({}) has been stopped", cassandra);
-		}
 	}
 
 	private void stopSilently() {
