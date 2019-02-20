@@ -19,7 +19,7 @@ package com.github.nosan.embedded.cassandra.local;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
+import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
 
 /**
  * Tests for {@link LocalCassandra}.
@@ -34,19 +34,15 @@ public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
 
 	@Override
 	@Test
+	@DisableIfOS("windows")
 	public void shouldRunOnInterfaceIPV4() throws Exception {
-		//cassandra.ps1 has a bug
-		if (OS.get() != OS.WINDOWS) {
-			super.shouldRunOnInterfaceIPV4();
-		}
+		super.shouldRunOnInterfaceIPV4();
 	}
 
 	@Override
 	@Test
+	@DisableIfOS("windows")
 	public void shouldRunOnInterfaceIPV6() throws Exception {
-		//cassandra.ps1 has a bug
-		if (OS.get() != OS.WINDOWS) {
-			super.shouldRunOnInterfaceIPV6();
-		}
+		super.shouldRunOnInterfaceIPV6();
 	}
 }

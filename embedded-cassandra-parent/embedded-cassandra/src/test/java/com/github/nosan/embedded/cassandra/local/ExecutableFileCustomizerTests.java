@@ -24,7 +24,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
+import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
+import com.github.nosan.embedded.cassandra.test.support.OSRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,15 +39,17 @@ public class ExecutableFileCustomizerTests {
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+	@Rule
+	public final OSRule osRule = new OSRule();
+
 	private final ExecutableFileCustomizer customizer = new ExecutableFileCustomizer();
 
 	@Test
+	@DisableIfOS("windows")
 	public void setExecutableUnixFile() throws IOException {
-		if (OS.get() != OS.WINDOWS) {
-			File file = createFile("cassandra");
-			this.customizer.customize(this.temporaryFolder.getRoot().toPath(), new Version(3, 11, 3));
-			assertThat(file.canExecute()).isTrue();
-		}
+		File file = createFile("cassandra");
+		this.customizer.customize(this.temporaryFolder.getRoot().toPath(), new Version(3, 11, 3));
+		assertThat(file.canExecute()).isTrue();
 	}
 
 	private File createFile(String name) throws IOException {

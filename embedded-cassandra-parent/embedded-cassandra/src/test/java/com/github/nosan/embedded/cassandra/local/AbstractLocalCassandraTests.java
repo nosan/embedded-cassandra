@@ -54,9 +54,10 @@ import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
+import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
+import com.github.nosan.embedded.cassandra.test.support.OSRule;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
-import com.github.nosan.embedded.cassandra.util.OS;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,6 +73,9 @@ public abstract class AbstractLocalCassandraTests {
 
 	@Rule
 	public final CaptureOutput output = new CaptureOutput();
+
+	@Rule
+	public final OSRule osRule = new OSRule();
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -260,13 +264,14 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
+	@DisableIfOS("windows")
 	public void shouldPassAllowRootIfNecessary() {
 		LocalCassandraFactory factory = this.factory;
-		Version version = factory.getVersion();
+		Version version = Objects.requireNonNull(factory.getVersion());
 		CassandraRunner runner = new CassandraRunner(factory);
 		factory.setAllowRoot(true);
 		runner.run(assertCreateKeyspace());
-		if (OS.get() != OS.WINDOWS && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
+		if ((version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
 			assertThat(this.output.toString()).contains(" -R, -p,");
 		}
 		else {
