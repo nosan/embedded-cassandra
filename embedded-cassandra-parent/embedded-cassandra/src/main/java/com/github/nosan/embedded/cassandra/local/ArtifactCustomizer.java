@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -115,7 +116,8 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 		int endIndex = entry.lastIndexOf('/');
 		if (endIndex != -1) {
 			for (String directory : entry.substring(0, endIndex).split("/")) {
-				if (directory.equalsIgnoreCase("javadoc") || directory.equalsIgnoreCase("doc")) {
+				String name = directory.toLowerCase(Locale.ENGLISH);
+				if (name.equals("javadoc") || name.equals("doc")) {
 					return false;
 				}
 			}
