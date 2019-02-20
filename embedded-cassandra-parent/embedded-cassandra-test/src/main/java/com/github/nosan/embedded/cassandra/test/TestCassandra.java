@@ -241,9 +241,7 @@ public class TestCassandra implements Cassandra {
 	@Nonnull
 	@Override
 	public Settings getSettings() throws CassandraException {
-		synchronized (this.lock) {
-			return getCassandra().getSettings();
-		}
+		return getCassandra().getSettings();
 	}
 
 	@Nonnull
@@ -260,18 +258,18 @@ public class TestCassandra implements Cassandra {
 	 */
 	@Nonnull
 	public Cluster getCluster() {
-		if (this.cluster == null) {
+		Cluster cluster = this.cluster;
+		if (cluster == null) {
 			synchronized (this.lock) {
-				if (this.cluster == null) {
-					Settings settings = getSettings();
-					this.cluster = this.clusterFactory.create(settings);
-					if (log.isDebugEnabled()) {
-						log.debug("Initialize a cluster ({})", this.cluster);
-					}
+				cluster = this.cluster;
+				if (cluster == null) {
+					cluster = this.clusterFactory.create(getSettings());
+					Objects.requireNonNull(cluster, "Cluster is not initialized");
+					this.cluster = cluster;
 				}
 			}
 		}
-		return Objects.requireNonNull(this.cluster, "Cluster is not initialized");
+		return cluster;
 	}
 
 	/**
@@ -282,17 +280,40 @@ public class TestCassandra implements Cassandra {
 	 */
 	@Nonnull
 	public Session getSession() {
-		if (this.session == null) {
+		Session session = this.session;
+		if (session == null) {
 			synchronized (this.lock) {
-				if (this.session == null) {
-					this.session = getCluster().connect();
-					if (log.isDebugEnabled()) {
-						log.debug("Initialize a session ({})", this.session);
-					}
+				session = this.session;
+				if (session == null) {
+					session = getCluster().connect();
+					this.session = session;
 				}
 			}
 		}
-		return Objects.requireNonNull(this.session, "Session is not initialized");
+		return session;
+	}
+
+	/**
+	 * Returns the underlying {@link Cassandra}.
+	 *
+	 * @return the underlying {@link Cassandra}.
+	 * @since 1.4.1
+	 */
+	@Nonnull
+	@API(since = "1.4.1", status = API.Status.MAINTAINED)
+	public Cassandra getCassandra() {
+		Cassandra cassandra = this.cassandra;
+		if (cassandra == null) {
+			synchronized (this.lock) {
+				cassandra = this.cassandra;
+				if (cassandra == null) {
+					cassandra = this.cassandraFactory.create();
+					Objects.requireNonNull(cassandra, "Cassandra is not initialized");
+					this.cassandra = cassandra;
+				}
+			}
+		}
+		return cassandra;
 	}
 
 	/**
@@ -380,16 +401,6 @@ public class TestCassandra implements Cassandra {
 		return String.format("Test Cassandra (%s)", getCassandra());
 	}
 
-	private Cassandra getCassandra() {
-		Cassandra cassandra = this.cassandra;
-		if (cassandra == null) {
-			cassandra = this.cassandraFactory.create();
-			Objects.requireNonNull(cassandra, "Cassandra must not be null");
-		}
-		this.cassandra = cassandra;
-		return cassandra;
-	}
-
 	private void initialize() {
 		if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 			String name = String.format("Hook:%s:%s", getClass().getSimpleName(),
@@ -418,7 +429,7 @@ public class TestCassandra implements Cassandra {
 	}
 
 	private void stop0() {
-		Cassandra cassandra = getCassandra();
+		Cassandra cassandra = this.cassandra;
 		if (log.isDebugEnabled()) {
 			log.debug("Stops Test Cassandra ({})", cassandra);
 		}
@@ -450,7 +461,9 @@ public class TestCassandra implements Cassandra {
 		}
 		this.cluster = null;
 
-		cassandra.stop();
+		if (cassandra != null) {
+			cassandra.stop();
+		}
 		this.cassandra = null;
 
 		this.started = false;
