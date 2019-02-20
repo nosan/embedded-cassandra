@@ -349,7 +349,10 @@ public abstract class AbstractLocalCassandraTests {
 			SocketOptions socketOptions = new SocketOptions();
 			socketOptions.setReadTimeoutMillis(30000);
 			socketOptions.setConnectTimeoutMillis(30000);
-			return Cluster.builder().withPort(settings.getPort())
+			return Cluster.builder()
+					.withoutMetrics()
+					.withoutJMXReporting()
+					.withPort(settings.getPort())
 					.withSocketOptions(socketOptions)
 					.addContactPoints(settings.getRealAddress())
 					.build();

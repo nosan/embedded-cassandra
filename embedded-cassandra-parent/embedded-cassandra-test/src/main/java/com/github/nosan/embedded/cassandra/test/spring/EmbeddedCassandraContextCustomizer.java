@@ -197,9 +197,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	 */
 	static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean, ApplicationContextAware {
 
-		private ApplicationContext applicationContext;
-
+		@Nullable
 		private Cluster cluster;
+
+		private ApplicationContext applicationContext;
 
 		@Override
 		public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
@@ -243,9 +244,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Nonnull
 		private final EmbeddedLocalCassandra annotation;
 
-		private ApplicationContext applicationContext;
-
+		@Nullable
 		private LocalCassandraFactory cassandraFactory;
+
+		private ApplicationContext applicationContext;
 
 		LocalCassandraFactoryBean(@Nonnull Class<?> testClass, @Nonnull EmbeddedLocalCassandra annotation) {
 			this.testClass = testClass;
