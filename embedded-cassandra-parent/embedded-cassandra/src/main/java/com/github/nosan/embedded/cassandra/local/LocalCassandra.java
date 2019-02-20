@@ -65,6 +65,9 @@ class LocalCassandra implements Cassandra {
 	@Nullable
 	private volatile Settings settings;
 
+	@Nonnull
+	private volatile State state = State.NEW;
+
 	private volatile boolean shutdownHookRegistered;
 
 	private volatile boolean started;
@@ -115,37 +118,30 @@ class LocalCassandra implements Cassandra {
 				return;
 			}
 			try {
+				this.state = State.INITIALIZING;
 				initialize();
+				this.state = State.INITIALIZED;
 			}
 			catch (Throwable ex) {
+				this.state = State.FAILED;
 				throw new CassandraException("Unable to initialize Cassandra", ex);
 			}
-
-			if (this.registerShutdownHook && !this.shutdownHookRegistered) {
-				try {
-					String className = getClass().getSimpleName();
-					String hexString = Integer.toHexString(hashCode());
-					String name = String.format("Hook:%s:%s", className, hexString);
-					Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, name));
-					this.shutdownHookRegistered = true;
-				}
-				catch (Throwable ex) {
-					throw new CassandraException("Cassandra shutdown hook is not registered", ex);
-				}
-			}
-
 			try {
+				this.state = State.STARTING;
 				start0();
+				this.state = State.STARTED;
 			}
 			catch (InterruptedException ex) {
 				if (log.isDebugEnabled()) {
 					log.debug("Cassandra launch was interrupted");
 				}
 				stopSilently();
+				this.state = State.INTERRUPTED;
 				Thread.currentThread().interrupt();
 			}
 			catch (Throwable ex) {
 				stopSilently();
+				this.state = State.FAILED;
 				throw new CassandraException("Unable to start Cassandra", ex);
 			}
 		}
@@ -159,9 +155,12 @@ class LocalCassandra implements Cassandra {
 				return;
 			}
 			try {
+				this.state = State.STOPPING;
 				stop0();
+				this.state = State.STOPPED;
 			}
 			catch (Throwable ex) {
+				this.state = State.FAILED;
 				throw new CassandraException("Unable to stop Cassandra", ex);
 			}
 		}
@@ -178,6 +177,12 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
+	@Nonnull
+	@Override
+	public State getState() {
+		return this.state;
+	}
+
 	@Override
 	@Nonnull
 	public String toString() {
@@ -189,6 +194,13 @@ class LocalCassandra implements Cassandra {
 		long start = System.currentTimeMillis();
 		this.initializer.initialize();
 		long elapsed = System.currentTimeMillis() - start;
+		if (this.registerShutdownHook && !this.shutdownHookRegistered) {
+			String className = getClass().getSimpleName();
+			String hexString = Integer.toHexString(hashCode());
+			String name = String.format("Hook:%s:%s", className, hexString);
+			Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, name));
+			this.shutdownHookRegistered = true;
+		}
 		log.info("Apache Cassandra ({}) has been initialized ({} ms)", this.version, elapsed);
 	}
 

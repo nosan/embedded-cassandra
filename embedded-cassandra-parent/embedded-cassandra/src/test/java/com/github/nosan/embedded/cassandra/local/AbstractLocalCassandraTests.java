@@ -143,17 +143,21 @@ public abstract class AbstractLocalCassandraTests {
 
 	@Test
 	public void shouldStartStopOnlyOnce() {
-		CassandraRunner runner = new CassandraRunner(this.factory);
-		Cassandra c = runner.run(assertCreateKeyspace().andThen(cassandra -> {
+		Cassandra cassandra = this.factory.create();
+		assertThat(cassandra.getState()).isEqualTo(Cassandra.State.NEW);
+		CassandraRunner runner = new CassandraRunner(cassandra);
+		runner.run(assertCreateKeyspace().andThen(unused -> {
+			assertThat(cassandra.getState()).isEqualTo(Cassandra.State.STARTED);
 			assertThat(this.output.toString()).contains("Starts Apache Cassandra");
 			this.output.reset();
 			cassandra.start();
 			assertThat(this.output.toString()).doesNotContain("Starts Apache Cassandra");
 		}));
+		assertThat(cassandra.getState()).isEqualTo(Cassandra.State.STOPPED);
 		assertThat(this.output.toString()).contains("Stops Apache Cassandra");
 		assertCassandraHasBeenStopped();
 		this.output.reset();
-		c.stop();
+		cassandra.stop();
 		assertThat(this.output.toString()).doesNotContain("Stops Apache Cassandra");
 	}
 
@@ -167,9 +171,11 @@ public abstract class AbstractLocalCassandraTests {
 	@Test
 	public void shouldCatchCassandraError() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-invalid.yaml"));
-		assertThatThrownBy(() -> new CassandraRunner(this.factory).run(new NotReachable()))
+		Cassandra cassandra = this.factory.create();
+		assertThatThrownBy(() -> new CassandraRunner(cassandra).run(new NotReachable()))
 				.hasStackTraceContaining("invalid_property")
 				.isInstanceOf(CassandraException.class);
+		assertThat(cassandra.getState()).isEqualTo(Cassandra.State.FAILED);
 	}
 
 	@Test

@@ -37,6 +37,10 @@ final class CassandraRunner {
 		this.factory = factory;
 	}
 
+	CassandraRunner(@Nonnull Cassandra cassandra) {
+		this(() -> cassandra);
+	}
+
 	/**
 	 * Creates and starts a new {@link Cassandra} based on the factory.
 	 *

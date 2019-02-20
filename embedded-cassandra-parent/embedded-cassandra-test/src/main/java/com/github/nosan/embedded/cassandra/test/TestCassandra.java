@@ -77,6 +77,9 @@ public class TestCassandra implements Cassandra {
 	@Nonnull
 	private final CassandraFactory cassandraFactory;
 
+	@Nonnull
+	private volatile State state = State.NEW;
+
 	@Nullable
 	private volatile Cassandra cassandra;
 
@@ -187,29 +190,31 @@ public class TestCassandra implements Cassandra {
 			if (this.started) {
 				return;
 			}
-			if (this.registerShutdownHook && !this.shutdownHookRegistered) {
-				try {
-					String name = String.format("Hook:%s:%s", getClass().getSimpleName(),
-							Integer.toHexString(hashCode()));
-					Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, name));
-					this.shutdownHookRegistered = true;
-				}
-				catch (Throwable ex) {
-					throw new CassandraException("Test Cassandra shutdown hook is not registered", ex);
-				}
+			try {
+				this.state = State.INITIALIZING;
+				initialize();
+				this.state = State.INITIALIZED;
+			}
+			catch (Throwable ex) {
+				this.state = State.FAILED;
+				throw new CassandraException("Unable to initialize Test Cassandra", ex);
 			}
 			try {
+				this.state = State.STARTING;
 				start0();
+				this.state = State.STARTED;
 			}
 			catch (InterruptedException ex) {
 				if (log.isDebugEnabled()) {
 					log.debug("Test Cassandra launch was interrupted");
 				}
 				stopSilently();
+				this.state = State.INTERRUPTED;
 				Thread.currentThread().interrupt();
 			}
 			catch (Throwable ex) {
 				stopSilently();
+				this.state = State.FAILED;
 				throw new CassandraException("Unable to start Test Cassandra", ex);
 			}
 		}
@@ -222,9 +227,12 @@ public class TestCassandra implements Cassandra {
 				return;
 			}
 			try {
+				this.state = State.STOPPING;
 				stop0();
+				this.state = State.STOPPED;
 			}
 			catch (Throwable ex) {
+				this.state = State.FAILED;
 				throw new CassandraException("Unable to stop Test Cassandra", ex);
 			}
 
@@ -241,6 +249,12 @@ public class TestCassandra implements Cassandra {
 					.orElseThrow(() -> new CassandraException(
 							"Test Cassandra is not initialized. Please start it before calling this method."));
 		}
+	}
+
+	@Nonnull
+	@Override
+	public State getState() {
+		return this.state;
 	}
 
 	/**
@@ -365,6 +379,15 @@ public class TestCassandra implements Cassandra {
 		return CqlUtils.executeStatement(getSession(), statement);
 	}
 
+	private void initialize() {
+		if (this.registerShutdownHook && !this.shutdownHookRegistered) {
+			String name = String.format("Hook:%s:%s", getClass().getSimpleName(),
+					Integer.toHexString(hashCode()));
+			Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, name));
+			this.shutdownHookRegistered = true;
+		}
+	}
+
 	private void start0() throws InterruptedException {
 		Cassandra cassandra = this.cassandraFactory.create();
 		Objects.requireNonNull(cassandra, "Cassandra must not be null");
@@ -374,7 +397,7 @@ public class TestCassandra implements Cassandra {
 		this.cassandra = cassandra;
 		this.started = true;
 		cassandra.start();
-		if (Thread.interrupted()) {
+		if (cassandra.getState() == State.INTERRUPTED || Thread.interrupted()) {
 			throw new InterruptedException();
 		}
 		if (!this.scripts.isEmpty()) {

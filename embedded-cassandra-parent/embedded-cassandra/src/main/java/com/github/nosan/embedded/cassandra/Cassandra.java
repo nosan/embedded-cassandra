@@ -56,5 +56,67 @@ public interface Cassandra {
 	 */
 	@Nonnull
 	Settings getSettings() throws CassandraException;
+
+	/**
+	 * Returns the {@link State state} of the {@code Cassandra}.
+	 *
+	 * @return the state
+	 * @since 1.4.1
+	 */
+	@Nonnull
+	default State getState() {
+		return State.UNKNOWN;
+	}
+
+	/**
+	 * Enumeration of <em>states</em> that describes in which state {@code Cassandra} can be.
+	 *
+	 * @since 1.4.1
+	 */
+	@API(status = API.Status.STABLE, since = "1.4.1")
+	enum State {
+
+		/**
+		 * {@code Cassandra} instance is newly created.
+		 */
+		NEW,
+		/**
+		 * {@code Cassandra} has been initializing, e.g. <em>Working Directory</em> is being prepared.
+		 */
+		INITIALIZING,
+		/**
+		 * {@code Cassandra} has been initialized.
+		 */
+		INITIALIZED,
+		/**
+		 * {@code Cassandra} has been starting and has not yet ready to allow the connection requests.
+		 */
+		STARTING,
+		/**
+		 * {@code Cassandra} has been started and is ready to accept new connections.
+		 */
+		STARTED,
+		/**
+		 * {@code Cassandra} has been stopping.
+		 */
+		STOPPING,
+		/**
+		 * {@code Cassandra} has been stopped.
+		 */
+		STOPPED,
+		/**
+		 * The {@link #start() startup} or {@link #stop() shutdown} failed.
+		 */
+		FAILED,
+		/**
+		 * The Startup {@link Thread#interrupt() interrupted}.
+		 */
+		INTERRUPTED,
+		/**
+		 * The state of the {@code Cassandra} is unknown.
+		 */
+		UNKNOWN
+	}
+
 }
 
