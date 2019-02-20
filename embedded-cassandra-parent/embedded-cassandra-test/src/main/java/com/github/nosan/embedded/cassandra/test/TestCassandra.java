@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -243,11 +242,7 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public Settings getSettings() throws CassandraException {
 		synchronized (this.lock) {
-			Cassandra cassandra = this.cassandra;
-			Settings settings = (cassandra != null) ? cassandra.getSettings() : null;
-			return Optional.ofNullable(settings)
-					.orElseThrow(() -> new CassandraException(
-							"Test Cassandra is not initialized. Please start it before calling this method."));
+			return getCassandra().getSettings();
 		}
 	}
 
@@ -379,6 +374,22 @@ public class TestCassandra implements Cassandra {
 		return CqlUtils.executeStatement(getSession(), statement);
 	}
 
+	@Nonnull
+	@Override
+	public String toString() {
+		return String.format("Test Cassandra (%s)", getCassandra());
+	}
+
+	private Cassandra getCassandra() {
+		Cassandra cassandra = this.cassandra;
+		if (cassandra == null) {
+			cassandra = this.cassandraFactory.create();
+			Objects.requireNonNull(cassandra, "Cassandra must not be null");
+		}
+		this.cassandra = cassandra;
+		return cassandra;
+	}
+
 	private void initialize() {
 		if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 			String name = String.format("Hook:%s:%s", getClass().getSimpleName(),
@@ -389,12 +400,10 @@ public class TestCassandra implements Cassandra {
 	}
 
 	private void start0() throws InterruptedException {
-		Cassandra cassandra = this.cassandraFactory.create();
-		Objects.requireNonNull(cassandra, "Cassandra must not be null");
+		Cassandra cassandra = getCassandra();
 		if (log.isDebugEnabled()) {
 			log.debug("Starts Test Cassandra ({})", cassandra);
 		}
-		this.cassandra = cassandra;
 		this.started = true;
 		cassandra.start();
 		if (cassandra.getState() == State.INTERRUPTED || Thread.interrupted()) {
@@ -409,7 +418,7 @@ public class TestCassandra implements Cassandra {
 	}
 
 	private void stop0() {
-		Cassandra cassandra = this.cassandra;
+		Cassandra cassandra = getCassandra();
 		if (log.isDebugEnabled()) {
 			log.debug("Stops Test Cassandra ({})", cassandra);
 		}
@@ -426,6 +435,7 @@ public class TestCassandra implements Cassandra {
 			log.error(String.format("Session (%s) has not been closed", this.session), ex);
 		}
 		this.session = null;
+
 		try {
 			Cluster cluster = this.cluster;
 			if (cluster != null) {
@@ -439,10 +449,10 @@ public class TestCassandra implements Cassandra {
 			log.error(String.format("Cluster (%s) has not been closed", this.cluster), ex);
 		}
 		this.cluster = null;
-		if (cassandra != null) {
-			cassandra.stop();
-		}
+
+		cassandra.stop();
 		this.cassandra = null;
+
 		this.started = false;
 		if (log.isDebugEnabled()) {
 			log.debug("Test Cassandra ({}) has been stopped", cassandra);
