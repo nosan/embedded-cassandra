@@ -73,7 +73,7 @@ public interface Cassandra {
 	 *
 	 * @since 1.4.1
 	 */
-	@API(status = API.Status.STABLE, since = "1.4.1")
+	@API(since = "1.4.1", status = API.Status.STABLE)
 	enum State {
 
 		/**
