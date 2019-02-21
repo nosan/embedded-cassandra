@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -240,27 +241,34 @@ class LocalCassandra implements Cassandra {
 		return String.format("%s [%s]", getClass().getSimpleName(), this.version);
 	}
 
-	private void initialize() throws IOException {
-		Version version = this.version;
-		log.info("Initialize Apache Cassandra ({}). It takes a while...", version);
-		long start = System.currentTimeMillis();
-		List<DirectoryCustomizer> customizers = new ArrayList<>();
-		customizers.add(new ArtifactCustomizer(this.artifactFactory, this.artifactDirectory));
-		customizers.add(new LogbackFileCustomizer(this.logbackFile));
-		customizers.add(new ConfigurationFileCustomizer(this.configurationFile));
-		customizers.add(new RackFileCustomizer(this.rackFile));
-		customizers.add(new TopologyFileCustomizer(this.topologyFile));
-		customizers.add(new CommitLogArchivingFileCustomizer(this.commitLogArchivingFile));
-		customizers.add(new RandomPortConfigurationFileCustomizer());
-		if (OS.get() != OS.WINDOWS) {
-			customizers.add(new ExecutableFileCustomizer());
+	private void initialize() throws IOException, InterruptedException {
+		try {
+			Version version = this.version;
+			log.info("Initialize Apache Cassandra ({}). It takes a while...", version);
+			long start = System.currentTimeMillis();
+			List<DirectoryCustomizer> customizers = new ArrayList<>();
+			customizers.add(new ArtifactCustomizer(this.artifactFactory, this.artifactDirectory));
+			customizers.add(new LogbackFileCustomizer(this.logbackFile));
+			customizers.add(new ConfigurationFileCustomizer(this.configurationFile));
+			customizers.add(new RackFileCustomizer(this.rackFile));
+			customizers.add(new TopologyFileCustomizer(this.topologyFile));
+			customizers.add(new CommitLogArchivingFileCustomizer(this.commitLogArchivingFile));
+			customizers.add(new RandomPortConfigurationFileCustomizer());
+			if (OS.get() != OS.WINDOWS) {
+				customizers.add(new ExecutableFileCustomizer());
+			}
+			for (DirectoryCustomizer customizer : customizers) {
+				customizer.customize(this.workingDirectory, version);
+			}
+			long elapsed = System.currentTimeMillis() - start;
+			log.info("Apache Cassandra ({}) has been initialized ({} ms)", version, elapsed);
 		}
-		for (DirectoryCustomizer customizer : customizers) {
-			customizer.customize(this.workingDirectory, version);
+		catch (IOException ex) {
+			if (isClosedByInterruptException(ex)) {
+				throw new InterruptedException();
+			}
+			throw ex;
 		}
-		long elapsed = System.currentTimeMillis() - start;
-		log.info("Apache Cassandra ({}) has been initialized ({} ms)", version, elapsed);
-
 	}
 
 	private void start0() throws IOException, InterruptedException {
@@ -320,5 +328,12 @@ class LocalCassandra implements Cassandra {
 				log.error("Unable to stop Cassandra", ex);
 			}
 		}
+	}
+
+	private static boolean isClosedByInterruptException(Throwable ex) {
+		if (ex instanceof ClosedByInterruptException) {
+			return true;
+		}
+		return ex != null && isClosedByInterruptException(ex.getCause());
 	}
 }
