@@ -88,7 +88,7 @@ public interface Cassandra {
 		 */
 		STARTING_FAILED,
 		/**
-		 * The startup has {@link Thread#interrupt() interrupted}.
+		 * The {@link #start() startup} has {@link Thread#interrupt() interrupted}.
 		 */
 		STARTING_INTERRUPTED,
 		/**
@@ -104,7 +104,7 @@ public interface Cassandra {
 		 */
 		STOPPING_FAILED,
 		/**
-		 * The shutdown has {@link Thread#interrupt() interrupted}.
+		 * The {@link #stop() shutdown} has {@link Thread#interrupt() interrupted}.
 		 */
 		STOPPING_INTERRUPTED,
 		/**
