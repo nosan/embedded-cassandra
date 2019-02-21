@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,9 +36,10 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
+import com.github.nosan.embedded.cassandra.util.OS;
 
 /**
- * This {@link Cassandra} implementation just a wrapper on {@link CassandraProcess}.
+ * This {@link Cassandra} implementation just a wrapper on {@link CassandraNode}.
  *
  * @author Dmytro Nosan
  * @see LocalCassandraFactory
@@ -50,6 +51,10 @@ class LocalCassandra implements Cassandra {
 
 	private final boolean registerShutdownHook;
 
+	private final int jmxPort;
+
+	private final boolean allowRoot;
+
 	@Nonnull
 	private final Object lock = new Object();
 
@@ -57,20 +62,43 @@ class LocalCassandra implements Cassandra {
 	private final Version version;
 
 	@Nonnull
-	private final Initializer initializer;
+	private final ArtifactFactory artifactFactory;
 
 	@Nonnull
-	private final CassandraProcess process;
+	private final Path workingDirectory;
+
+	@Nonnull
+	private final Path artifactDirectory;
+
+	@Nonnull
+	private final Duration startupTimeout;
 
 	@Nullable
-	private volatile Settings settings;
+	private final URL configurationFile;
+
+	@Nullable
+	private final URL logbackFile;
+
+	@Nullable
+	private final URL rackFile;
+
+	@Nullable
+	private final URL topologyFile;
+
+	@Nullable
+	private final URL commitLogArchivingFile;
+
+	@Nonnull
+	private final List<String> jvmOptions;
+
+	@Nullable
+	private final Path javaHome;
 
 	@Nonnull
 	private volatile State state = State.NEW;
 
-	private volatile boolean shutdownHookRegistered;
-
-	private volatile boolean started;
+	@Nullable
+	private volatile CassandraNode node;
 
 	/**
 	 * Creates a new {@link LocalCassandra}.
@@ -102,66 +130,85 @@ class LocalCassandra implements Cassandra {
 		Objects.requireNonNull(startupTimeout, "Startup timeout must not be null");
 		Objects.requireNonNull(jvmOptions, "JVM Options must not be null");
 		Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
+		this.artifactFactory = artifactFactory;
+		this.workingDirectory = workingDirectory;
+		this.artifactDirectory = artifactDirectory;
+		this.startupTimeout = startupTimeout;
+		this.configurationFile = configurationFile;
+		this.logbackFile = logbackFile;
+		this.rackFile = rackFile;
+		this.topologyFile = topologyFile;
+		this.commitLogArchivingFile = commitLogArchivingFile;
+		this.jvmOptions = jvmOptions;
+		this.javaHome = javaHome;
+		this.jmxPort = jmxPort;
+		this.allowRoot = allowRoot;
 		this.version = version;
 		this.registerShutdownHook = registerShutdownHook;
-		this.initializer = new DefaultInitializer(workingDirectory, version,
-				artifactFactory, artifactDirectory, configurationFile, logbackFile, rackFile,
-				topologyFile, commitLogArchivingFile);
-		this.process = new DefaultCassandraProcess(workingDirectory, version, startupTimeout, jvmOptions, javaHome,
-				jmxPort, allowRoot);
 	}
 
 	@Override
 	public void start() throws CassandraException {
 		synchronized (this.lock) {
-			if (this.started) {
-				return;
+			if (this.state == State.STARTING_FAILED ||
+					this.state == State.STOPPING_FAILED ||
+					this.state == State.INITIALIZING_FAILED ||
+					this.state == State.STARTING_INTERRUPTED ||
+					this.state == State.STOPPING_INTERRUPTED) {
+				stopSilently();
 			}
-			try {
-				this.state = State.INITIALIZING;
-				initialize();
-				this.state = State.INITIALIZED;
-			}
-			catch (Throwable ex) {
-				this.state = State.FAILED;
-				throw new CassandraException("Unable to initialize Cassandra", ex);
-			}
-			try {
-				this.state = State.STARTING;
-				start0();
-				this.state = State.STARTED;
-			}
-			catch (InterruptedException ex) {
-				if (log.isDebugEnabled()) {
-					log.debug("Cassandra launch was interrupted");
+			if (this.state == State.NEW || this.state == State.STOPPED) {
+				try {
+					registerShutdownHook();
 				}
-				stopSilently();
-				this.state = State.INTERRUPTED;
-				Thread.currentThread().interrupt();
-			}
-			catch (Throwable ex) {
-				stopSilently();
-				this.state = State.FAILED;
-				throw new CassandraException("Unable to start Cassandra", ex);
+				catch (Throwable ex) {
+					throw new CassandraException("Unable to register a shutdown hook for Cassandra", ex);
+				}
+				try {
+					this.state = State.INITIALIZING;
+					initialize();
+					this.state = State.INITIALIZED;
+				}
+				catch (Throwable ex) {
+					this.state = State.INITIALIZING_FAILED;
+					throw new CassandraException("Unable to initialize Cassandra", ex);
+				}
+				try {
+					this.state = State.STARTING;
+					start0();
+					this.state = State.STARTED;
+				}
+				catch (InterruptedException ex) {
+					stopSilently();
+					this.state = State.STARTING_INTERRUPTED;
+					Thread.currentThread().interrupt();
+				}
+				catch (Throwable ex) {
+					stopSilently();
+					this.state = State.STARTING_FAILED;
+					throw new CassandraException("Unable to start Cassandra", ex);
+				}
 			}
 		}
-
 	}
 
 	@Override
 	public void stop() throws CassandraException {
 		synchronized (this.lock) {
-			if (!this.started) {
-				return;
-			}
-			try {
-				this.state = State.STOPPING;
-				stop0();
-				this.state = State.STOPPED;
-			}
-			catch (Throwable ex) {
-				this.state = State.FAILED;
-				throw new CassandraException("Unable to stop Cassandra", ex);
+			if (this.state != State.NEW && this.state != State.STOPPED) {
+				try {
+					this.state = State.STOPPING;
+					stop0();
+					this.state = State.STOPPED;
+				}
+				catch (InterruptedException ex) {
+					this.state = State.STOPPING_INTERRUPTED;
+					Thread.currentThread().interrupt();
+				}
+				catch (Throwable ex) {
+					this.state = State.STOPPING_FAILED;
+					throw new CassandraException("Unable to stop Cassandra", ex);
+				}
 			}
 		}
 	}
@@ -170,10 +217,14 @@ class LocalCassandra implements Cassandra {
 	@Override
 	public Settings getSettings() throws CassandraException {
 		synchronized (this.lock) {
-			Settings settings = this.settings;
-			return Optional.ofNullable(settings)
-					.orElseThrow(() -> new CassandraException(
-							"Cassandra is not initialized. Please start it before calling this method."));
+			if (this.state == State.STARTED) {
+				CassandraNode node = this.node;
+				Settings settings = (node != null) ? node.getSettings() : null;
+				if (settings != null) {
+					return settings;
+				}
+			}
+			throw new CassandraException("Cassandra is not started. Please start it before calling this method.");
 		}
 	}
 
@@ -189,38 +240,71 @@ class LocalCassandra implements Cassandra {
 		return String.format("%s [%s]", getClass().getSimpleName(), this.version);
 	}
 
-	private void initialize() throws IOException {
-		log.info("Initialize Apache Cassandra ({}). It takes a while...", this.version);
-		long start = System.currentTimeMillis();
-		this.initializer.initialize();
-		long elapsed = System.currentTimeMillis() - start;
-		if (this.registerShutdownHook && !this.shutdownHookRegistered) {
+	private void registerShutdownHook() {
+		if (this.registerShutdownHook && this.state == State.NEW) {
 			String className = getClass().getSimpleName();
 			String hexString = Integer.toHexString(hashCode());
 			String name = String.format("Hook:%s:%s", className, hexString);
 			Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, name));
-			this.shutdownHookRegistered = true;
 		}
-		log.info("Apache Cassandra ({}) has been initialized ({} ms)", this.version, elapsed);
+	}
+
+	private void initialize() throws IOException {
+		Version version = this.version;
+		log.info("Initialize Apache Cassandra ({}). It takes a while...", version);
+		long start = System.currentTimeMillis();
+		List<DirectoryCustomizer> customizers = new ArrayList<>();
+		customizers.add(new ArtifactCustomizer(this.artifactFactory, this.artifactDirectory));
+		customizers.add(new LogbackFileCustomizer(this.logbackFile));
+		customizers.add(new ConfigurationFileCustomizer(this.configurationFile));
+		customizers.add(new RackFileCustomizer(this.rackFile));
+		customizers.add(new TopologyFileCustomizer(this.topologyFile));
+		customizers.add(new CommitLogArchivingFileCustomizer(this.commitLogArchivingFile));
+		customizers.add(new RandomPortConfigurationFileCustomizer());
+		if (OS.get() != OS.WINDOWS) {
+			customizers.add(new ExecutableFileCustomizer());
+		}
+		for (DirectoryCustomizer customizer : customizers) {
+			customizer.customize(this.workingDirectory, version);
+		}
+		long elapsed = System.currentTimeMillis() - start;
+		log.info("Apache Cassandra ({}) has been initialized ({} ms)", version, elapsed);
 	}
 
 	private void start0() throws IOException, InterruptedException {
-		log.info("Starts Apache Cassandra ({}) ", this.version);
+		Version version = this.version;
+		Path workingDirectory = this.workingDirectory;
+		Duration timeout = this.startupTimeout;
+		List<String> jvmOptions = this.jvmOptions;
+		Path javaHome = this.javaHome;
+		int jmxPort = this.jmxPort;
+		boolean allowRoot = this.allowRoot;
+		log.info("Starts Apache Cassandra ({}) ", version);
 		long start = System.currentTimeMillis();
-		this.started = true;
-		this.settings = this.process.start();
+		CassandraNode node;
+		if (OS.get() == OS.WINDOWS) {
+			node = new WindowsCassandraNode(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
+		}
+		else {
+			node = new UnixCassandraNode(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort, allowRoot);
+		}
+		this.node = node;
+		node.start();
 		long elapsed = System.currentTimeMillis() - start;
-		log.info("Apache Cassandra ({}) has been started ({} ms)", this.version, elapsed);
+		log.info("Apache Cassandra ({}) has been started ({} ms)", version, elapsed);
 	}
 
-	private void stop0() throws IOException {
-		log.info("Stops Apache Cassandra ({}) ", this.version);
-		long start = System.currentTimeMillis();
-		this.process.stop();
-		this.settings = null;
-		this.started = false;
-		long elapsed = System.currentTimeMillis() - start;
-		log.info("Apache Cassandra ({}) has been stopped ({} ms)", this.version, elapsed);
+	private void stop0() throws IOException, InterruptedException {
+		Version version = this.version;
+		CassandraNode node = this.node;
+		if (node != null) {
+			long start = System.currentTimeMillis();
+			log.info("Stops Apache Cassandra ({}) ", version);
+			node.stop();
+			this.node = null;
+			long elapsed = System.currentTimeMillis() - start;
+			log.info("Apache Cassandra ({}) has been stopped ({} ms)", version, elapsed);
+		}
 	}
 
 	private void stopSilently() {

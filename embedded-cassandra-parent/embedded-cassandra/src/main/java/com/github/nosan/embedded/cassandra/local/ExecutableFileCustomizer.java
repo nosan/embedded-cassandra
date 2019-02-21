@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.OS;
 
 /**
  * {@link DirectoryCustomizer} to set 'executable permission' to {@code bin/cassandra} file.
@@ -40,9 +39,7 @@ class ExecutableFileCustomizer implements DirectoryCustomizer {
 
 	@Override
 	public void customize(@Nonnull Path directory, @Nonnull Version version) {
-		if (OS.get() != OS.WINDOWS) {
-			setExecutable(directory.resolve("bin/cassandra"));
-		}
+		setExecutable(directory.resolve("bin/cassandra"));
 	}
 
 	private static void setExecutable(Path path) {

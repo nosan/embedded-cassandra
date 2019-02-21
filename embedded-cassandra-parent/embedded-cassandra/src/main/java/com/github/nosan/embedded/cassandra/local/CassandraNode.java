@@ -18,34 +18,41 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.Settings;
 
 /**
- * Simple interface that allows the Cassandra process to be {@link #start() started} and {@link #stop()
+ * Simple interface that allows the Cassandra Node to be {@link #start() started} and {@link #stop()
  * stopped}.
  *
  * @author Dmytro Nosan
- * @see DefaultCassandraProcess
- * @since 1.0.9
+ * @since 1.4.1
  */
-interface CassandraProcess {
+interface CassandraNode {
 
 	/**
-	 * Starts the Cassandra.
+	 * Starts the Cassandra Node.
 	 *
-	 * @return the settings
-	 * @throws IOException if the Cassandra cannot be started
+	 * @throws IOException if the Cassandra Node can not be started
 	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	@Nonnull
-	Settings start() throws IOException, InterruptedException;
+	void start() throws IOException, InterruptedException;
 
 	/**
-	 * Stops the Cassandra.
+	 * Stops the Cassandra Node.
 	 *
-	 * @throws IOException if the Cassandra cannot be stopped
+	 * @throws IOException if the Cassandra Node can not be stopped
+	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	void stop() throws IOException;
+	void stop() throws IOException, InterruptedException;
+
+	/**
+	 * Returns the settings this node is running on.
+	 *
+	 * @return the settings
+	 */
+	@Nullable
+	Settings getSettings();
+
 }

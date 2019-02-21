@@ -75,7 +75,6 @@ public interface Cassandra {
 	 */
 	@API(since = "1.4.1", status = API.Status.STABLE)
 	enum State {
-
 		/**
 		 * {@code Cassandra} instance is newly created.
 		 */
@@ -89,9 +88,21 @@ public interface Cassandra {
 		 */
 		INITIALIZED,
 		/**
+		 * {@code Cassandra} initializing has failed.
+		 */
+		INITIALIZING_FAILED,
+		/**
 		 * {@code Cassandra} has been starting and has not yet ready to allow the connection requests.
 		 */
 		STARTING,
+		/**
+		 * The {@link #start() startup} has failed.
+		 */
+		STARTING_FAILED,
+		/**
+		 * The startup has {@link Thread#interrupt() interrupted}.
+		 */
+		STARTING_INTERRUPTED,
 		/**
 		 * {@code Cassandra} has been started and is ready to accept new connections.
 		 */
@@ -101,17 +112,17 @@ public interface Cassandra {
 		 */
 		STOPPING,
 		/**
+		 * The {@link #stop() shutdown} has failed.
+		 */
+		STOPPING_FAILED,
+		/**
+		 * The shutdown has {@link Thread#interrupt() interrupted}.
+		 */
+		STOPPING_INTERRUPTED,
+		/**
 		 * {@code Cassandra} has been stopped.
 		 */
 		STOPPED,
-		/**
-		 * The {@link #start() startup} or {@link #stop() shutdown} failed.
-		 */
-		FAILED,
-		/**
-		 * The Startup {@link Thread#interrupt() interrupted}.
-		 */
-		INTERRUPTED,
 		/**
 		 * The state of the {@code Cassandra} is unknown.
 		 */

@@ -83,28 +83,21 @@ public class LocalCassandraFactoryTests {
 		factory.setArtifactDirectory(artifactDirectory);
 
 		Cassandra cassandra = factory.create();
-		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(version);
 		assertThat(ReflectionUtils.getField(cassandra, "registerShutdownHook")).isEqualTo(false);
-
-		Object process = ReflectionUtils.getField(cassandra, "process");
-		assertThat(ReflectionUtils.getField(process, "workingDirectory")).isEqualTo(workingDirectory);
-		assertThat(ReflectionUtils.getField(process, "jvmOptions")).isEqualTo(Collections.singletonList("arg1"));
-		assertThat(ReflectionUtils.getField(process, "startupTimeout")).isEqualTo(Duration.ofSeconds(30));
-		assertThat(ReflectionUtils.getField(process, "javaHome")).isEqualTo(javaDirectory);
-		assertThat(ReflectionUtils.getField(process, "version")).isEqualTo(version);
-		assertThat(ReflectionUtils.getField(process, "jmxPort")).isEqualTo(jmxPort);
-		assertThat(ReflectionUtils.getField(process, "allowRoot")).isEqualTo(allowRoot);
-
-		Object initializer = ReflectionUtils.getField(cassandra, "initializer");
-		assertThat(ReflectionUtils.getField(initializer, "workingDirectory")).isEqualTo(workingDirectory);
-		assertThat(ReflectionUtils.getField(initializer, "version")).isEqualTo(version);
-		assertThat(ReflectionUtils.getField(initializer, "logbackFile")).isEqualTo(logbackFile);
-		assertThat(ReflectionUtils.getField(initializer, "artifactFactory")).isEqualTo(artifactFactory);
-		assertThat(ReflectionUtils.getField(initializer, "artifactDirectory")).isEqualTo(artifactDirectory);
-		assertThat(ReflectionUtils.getField(initializer, "configurationFile")).isEqualTo(configurationFile);
-		assertThat(ReflectionUtils.getField(initializer, "rackFile")).isEqualTo(rackFile);
-		assertThat(ReflectionUtils.getField(initializer, "topologyFile")).isEqualTo(topologyFile);
-		assertThat(ReflectionUtils.getField(initializer, "commitLogArchivingFile")).isEqualTo(commitLogArchivingFile);
+		assertThat(ReflectionUtils.getField(cassandra, "jvmOptions")).isEqualTo(Collections.singletonList("arg1"));
+		assertThat(ReflectionUtils.getField(cassandra, "startupTimeout")).isEqualTo(Duration.ofSeconds(30));
+		assertThat(ReflectionUtils.getField(cassandra, "javaHome")).isEqualTo(javaDirectory);
+		assertThat(ReflectionUtils.getField(cassandra, "jmxPort")).isEqualTo(jmxPort);
+		assertThat(ReflectionUtils.getField(cassandra, "allowRoot")).isEqualTo(allowRoot);
+		assertThat(ReflectionUtils.getField(cassandra, "workingDirectory")).isEqualTo(workingDirectory);
+		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(version);
+		assertThat(ReflectionUtils.getField(cassandra, "logbackFile")).isEqualTo(logbackFile);
+		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory")).isEqualTo(artifactFactory);
+		assertThat(ReflectionUtils.getField(cassandra, "artifactDirectory")).isEqualTo(artifactDirectory);
+		assertThat(ReflectionUtils.getField(cassandra, "configurationFile")).isEqualTo(configurationFile);
+		assertThat(ReflectionUtils.getField(cassandra, "rackFile")).isEqualTo(rackFile);
+		assertThat(ReflectionUtils.getField(cassandra, "topologyFile")).isEqualTo(topologyFile);
+		assertThat(ReflectionUtils.getField(cassandra, "commitLogArchivingFile")).isEqualTo(commitLogArchivingFile);
 	}
 
 	@Test
@@ -115,28 +108,20 @@ public class LocalCassandraFactoryTests {
 		Version version = new Version(3, 11, 4);
 		assertThat(ReflectionUtils.getField(cassandra, "version")).isEqualTo(version);
 		assertThat(ReflectionUtils.getField(cassandra, "registerShutdownHook")).isEqualTo(true);
-
-		Object process = ReflectionUtils.getField(cassandra, "process");
-		assertThat(ReflectionUtils.getField(process, "workingDirectory").toString()).
+		assertThat(ReflectionUtils.getField(cassandra, "workingDirectory").toString()).
 				startsWith(FileUtils.getTmpDirectory().resolve("embedded-cassandra/3.11.4").toString());
-		assertThat(ReflectionUtils.getField(process, "jvmOptions")).isEqualTo(Collections.emptyList());
-		assertThat(ReflectionUtils.getField(process, "startupTimeout")).isEqualTo(Duration.ofMinutes(1));
-		assertThat(ReflectionUtils.getField(process, "javaHome")).isNull();
-		assertThat(ReflectionUtils.getField(process, "version")).isEqualTo(version);
-		assertThat(ReflectionUtils.getField(process, "jmxPort")).isEqualTo(7199);
-		assertThat(ReflectionUtils.getField(process, "allowRoot")).isEqualTo(false);
-
-		Object initializer = ReflectionUtils.getField(cassandra, "initializer");
-		assertThat(ReflectionUtils.getField(initializer, "workingDirectory").toString())
-				.startsWith(FileUtils.getTmpDirectory().resolve("embedded-cassandra/3.11.4").toString());
-		assertThat(ReflectionUtils.getField(initializer, "version")).isEqualTo(version);
-		assertThat(ReflectionUtils.getField(initializer, "logbackFile")).isNull();
-		assertThat(ReflectionUtils.getField(initializer, "artifactFactory")).isInstanceOf(RemoteArtifactFactory.class);
-		assertThat(ReflectionUtils.getField(initializer, "artifactDirectory")).
+		assertThat(ReflectionUtils.getField(cassandra, "jvmOptions")).isEqualTo(Collections.emptyList());
+		assertThat(ReflectionUtils.getField(cassandra, "startupTimeout")).isEqualTo(Duration.ofMinutes(1));
+		assertThat(ReflectionUtils.getField(cassandra, "javaHome")).isNull();
+		assertThat(ReflectionUtils.getField(cassandra, "jmxPort")).isEqualTo(7199);
+		assertThat(ReflectionUtils.getField(cassandra, "allowRoot")).isEqualTo(false);
+		assertThat(ReflectionUtils.getField(cassandra, "logbackFile")).isNull();
+		assertThat(ReflectionUtils.getField(cassandra, "artifactFactory")).isInstanceOf(RemoteArtifactFactory.class);
+		assertThat(ReflectionUtils.getField(cassandra, "artifactDirectory")).
 				isEqualTo(FileUtils.getTmpDirectory().resolve("embedded-cassandra/3.11.4/apache-cassandra-3.11.4"));
-		assertThat(ReflectionUtils.getField(initializer, "configurationFile")).isNull();
-		assertThat(ReflectionUtils.getField(initializer, "rackFile")).isNull();
-		assertThat(ReflectionUtils.getField(initializer, "topologyFile")).isNull();
-		assertThat(ReflectionUtils.getField(initializer, "commitLogArchivingFile")).isNull();
+		assertThat(ReflectionUtils.getField(cassandra, "configurationFile")).isNull();
+		assertThat(ReflectionUtils.getField(cassandra, "rackFile")).isNull();
+		assertThat(ReflectionUtils.getField(cassandra, "topologyFile")).isNull();
+		assertThat(ReflectionUtils.getField(cassandra, "commitLogArchivingFile")).isNull();
 	}
 }

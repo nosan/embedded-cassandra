@@ -135,7 +135,7 @@ public abstract class AbstractLocalCassandraTests {
 		assertThatThrownBy(() -> new CassandraRunner(this.factory).run(new NotReachable()))
 				.isInstanceOf(CassandraException.class)
 				.hasStackTraceContaining(
-						"Cassandra has not been started, seems like (2000) milliseconds is not enough");
+						"has not been started, seems like (2000) milliseconds is not enough");
 	}
 
 	@Test
@@ -170,16 +170,6 @@ public abstract class AbstractLocalCassandraTests {
 		assertThatThrownBy(() -> this.factory.create().getSettings())
 				.hasStackTraceContaining("Please start it before calling this method")
 				.isInstanceOf(CassandraException.class);
-	}
-
-	@Test
-	public void shouldCatchCassandraError() {
-		this.factory.setConfigurationFile(getClass().getResource("/cassandra-invalid.yaml"));
-		Cassandra cassandra = this.factory.create();
-		assertThatThrownBy(() -> new CassandraRunner(cassandra).run(new NotReachable()))
-				.hasStackTraceContaining("invalid_property")
-				.isInstanceOf(CassandraException.class);
-		assertThat(cassandra.getState()).isEqualTo(Cassandra.State.FAILED);
 	}
 
 	@Test
@@ -272,10 +262,10 @@ public abstract class AbstractLocalCassandraTests {
 		factory.setAllowRoot(true);
 		runner.run(assertCreateKeyspace());
 		if ((version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
-			assertThat(this.output.toString()).contains(" -R, -p,");
+			assertThat(this.output.toString()).contains(", -R");
 		}
 		else {
-			assertThat(this.output.toString()).doesNotContain(" -R, -p,");
+			assertThat(this.output.toString()).doesNotContain(", -R");
 		}
 		assertCassandraHasBeenStopped();
 	}
