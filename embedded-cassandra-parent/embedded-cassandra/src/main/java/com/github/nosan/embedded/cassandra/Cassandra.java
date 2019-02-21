@@ -88,7 +88,7 @@ public interface Cassandra {
 		 */
 		INITIALIZED,
 		/**
-		 * {@code Cassandra} initializing has failed.
+		 * {@code Cassandra} initialization has failed.
 		 */
 		INITIALIZING_FAILED,
 		/**
