@@ -167,14 +167,13 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		ThreadFactory threadFactory = this.threadFactory;
 		Map<String, String> environment = new LinkedHashMap<>();
 		if (process != null && process.isAlive()) {
-			boolean interrupted = false;
 			boolean result = false;
 			try {
 				stop(process, workingDirectory, version, environment, threadFactory, log::info);
 				result = waitForStopped(Duration.ofSeconds(10), process, settings);
 			}
 			catch (InterruptedException ex) {
-				interrupted = true;
+				throw ex;
 			}
 			catch (Throwable ex) {
 				log.error(String.format("Could not stop Cassandra Node (%s).", getId(process)), ex);
@@ -185,7 +184,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					result = waitForStopped(Duration.ofSeconds(3), process, settings);
 				}
 				catch (InterruptedException ex) {
-					interrupted = true;
+					throw ex;
 				}
 				catch (Throwable ex) {
 					log.error(String.format("Could not <force> stop Cassandra Node (%s).", getId(process)), ex);
@@ -197,14 +196,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					result = waitForStopped(Duration.ofSeconds(3), process, settings);
 				}
 				catch (InterruptedException ex) {
-					interrupted = true;
+					throw ex;
 				}
 				catch (Throwable ex) {
 					log.error(String.format("Could not destroy Cassandra Node (%s).", getId(process)), ex);
 				}
-			}
-			if (interrupted) {
-				throw new InterruptedException();
 			}
 			if (!result) {
 				throw new IOException(String.format("Casandra Node (%s) has not been stopped.", getId(process)));
