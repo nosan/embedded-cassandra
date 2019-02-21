@@ -166,7 +166,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		Version version = this.version;
 		ThreadFactory threadFactory = this.threadFactory;
 		Map<String, String> environment = new LinkedHashMap<>();
-		if (process != null && process.isAlive()) {
+		if (process != null) {
 			boolean result = false;
 			try {
 				stop(process, workingDirectory, version, environment, threadFactory, log::info);
