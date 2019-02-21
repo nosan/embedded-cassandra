@@ -80,18 +80,6 @@ public interface Cassandra {
 		 */
 		NEW,
 		/**
-		 * {@code Cassandra} has been initializing, e.g. <em>Working Directory</em> is being prepared.
-		 */
-		INITIALIZING,
-		/**
-		 * {@code Cassandra} has been initialized.
-		 */
-		INITIALIZED,
-		/**
-		 * {@code Cassandra} initialization has failed.
-		 */
-		INITIALIZING_FAILED,
-		/**
 		 * {@code Cassandra} has been starting and has not yet ready to allow the connection requests.
 		 */
 		STARTING,

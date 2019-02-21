@@ -182,10 +182,8 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public void start() throws CassandraException {
 		synchronized (this.lock) {
-			if (this.state == State.STARTING_FAILED ||
-					this.state == State.STOPPING_FAILED ||
-					this.state == State.STARTING_INTERRUPTED ||
-					this.state == State.STOPPING_INTERRUPTED) {
+			if (this.state == State.STARTING_FAILED || this.state == State.STOPPING_FAILED ||
+					this.state == State.STARTING_INTERRUPTED || this.state == State.STOPPING_INTERRUPTED) {
 				stopSilently();
 			}
 			if (this.state == State.NEW || this.state == State.STOPPED) {
