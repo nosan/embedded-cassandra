@@ -52,7 +52,7 @@ public final class OSRule implements TestRule {
 		if (enable != null) {
 			String os = System.getProperty("os.name");
 			String[] values = enable.value();
-			Assume.assumeTrue(String.format("(%s) is enabled only for %s. Current OS is [%s]",
+			Assume.assumeTrue(String.format("%s is enabled only for %s. Current OS is '%s'",
 					description, Arrays.toString(values), os), match(os, values));
 		}
 	}
@@ -61,8 +61,8 @@ public final class OSRule implements TestRule {
 		if (disable != null) {
 			String os = System.getProperty("os.name");
 			String[] values = disable.value();
-			Assume.assumeFalse(String.format("(%s) is disabled. Current OS [%s] contains either %s", os,
-					description, Arrays.toString(values)), match(os, values));
+			Assume.assumeFalse(String.format("%s is disabled. Current OS '%s' is on the list %s",
+					description, os, Arrays.toString(values)), match(os, values));
 		}
 	}
 
