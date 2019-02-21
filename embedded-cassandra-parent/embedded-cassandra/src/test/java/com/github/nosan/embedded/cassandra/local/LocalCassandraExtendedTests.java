@@ -60,7 +60,7 @@ public class LocalCassandraExtendedTests {
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks).filteredOn(
-				thread -> thread.getName().startsWith("Hook:LocalCassandra"))
+				thread -> thread.getName().startsWith("CassandraHook"))
 				.hasSize(1);
 	}
 
@@ -79,7 +79,7 @@ public class LocalCassandraExtendedTests {
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks)
-				.noneMatch(thread -> thread.getName().startsWith("Hook:LocalCassandra"));
+				.noneMatch(thread -> thread.getName().startsWith("CassandraHook"));
 	}
 
 	@SuppressWarnings("unchecked")

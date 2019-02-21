@@ -88,6 +88,9 @@ public class TestCassandra implements Cassandra {
 	@Nullable
 	private volatile Session session;
 
+	@Nullable
+	private volatile Thread currentThread;
+
 	/**
 	 * Creates a {@link TestCassandra}.
 	 *
@@ -182,31 +185,33 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public void start() throws CassandraException {
 		synchronized (this.lock) {
-			if (this.state == State.STARTING_FAILED || this.state == State.STOPPING_FAILED ||
-					this.state == State.STARTING_INTERRUPTED || this.state == State.STOPPING_INTERRUPTED) {
-				stopSilently();
-			}
-			if (this.state == State.NEW || this.state == State.STOPPED) {
+			if (this.state != State.STARTED) {
 				try {
-					registerShutdownHook();
+					this.currentThread = Thread.currentThread();
+					try {
+						registerShutdownHook();
+					}
+					catch (Throwable ex) {
+						throw new CassandraException("Unable to register a shutdown hook for Test Cassandra", ex);
+					}
+					try {
+						this.state = State.STARTING;
+						start0();
+						this.state = State.STARTED;
+					}
+					catch (InterruptedException ex) {
+						stopSilently();
+						this.state = State.STARTING_INTERRUPTED;
+						Thread.currentThread().interrupt();
+					}
+					catch (Throwable ex) {
+						stopSilently();
+						this.state = State.STARTING_FAILED;
+						throw new CassandraException("Unable to start Test Cassandra", ex);
+					}
 				}
-				catch (Throwable ex) {
-					throw new CassandraException("Unable to register a shutdown hook for Test Cassandra", ex);
-				}
-				try {
-					this.state = State.STARTING;
-					start0();
-					this.state = State.STARTED;
-				}
-				catch (InterruptedException ex) {
-					stopSilently();
-					this.state = State.STARTING_INTERRUPTED;
-					Thread.currentThread().interrupt();
-				}
-				catch (Throwable ex) {
-					stopSilently();
-					this.state = State.STARTING_FAILED;
-					throw new CassandraException("Unable to start Test Cassandra", ex);
+				finally {
+					this.currentThread = null;
 				}
 			}
 		}
@@ -215,19 +220,25 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public void stop() throws CassandraException {
 		synchronized (this.lock) {
-			if (this.state != State.NEW && this.state != State.STOPPED) {
+			if (this.state != State.STOPPED) {
 				try {
-					this.state = State.STOPPING;
-					stop0();
-					this.state = State.STOPPED;
+					this.currentThread = Thread.currentThread();
+					try {
+						this.state = State.STOPPING;
+						stop0();
+						this.state = State.STOPPED;
+					}
+					catch (InterruptedException ex) {
+						this.state = State.STOPPING_INTERRUPTED;
+						Thread.currentThread().interrupt();
+					}
+					catch (Throwable ex) {
+						this.state = State.STOPPING_FAILED;
+						throw new CassandraException("Unable to stop Test Cassandra", ex);
+					}
 				}
-				catch (InterruptedException ex) {
-					this.state = State.STOPPING_INTERRUPTED;
-					Thread.currentThread().interrupt();
-				}
-				catch (Throwable ex) {
-					this.state = State.STOPPING_FAILED;
-					throw new CassandraException("Unable to stop Test Cassandra", ex);
+				finally {
+					this.currentThread = null;
 				}
 			}
 		}
@@ -396,14 +407,6 @@ public class TestCassandra implements Cassandra {
 		return String.format("Test Cassandra (%s)", getCassandra());
 	}
 
-	private void registerShutdownHook() {
-		if (this.registerShutdownHook && this.state == State.NEW) {
-			String name = String.format("Hook:%s:%s", getClass().getSimpleName(),
-					Integer.toHexString(hashCode()));
-			Runtime.getRuntime().addShutdownHook(new Thread(this::stopSilently, name));
-		}
-	}
-
 	private void start0() throws InterruptedException {
 		Cassandra cassandra = getCassandra();
 		if (log.isDebugEnabled()) {
@@ -460,6 +463,18 @@ public class TestCassandra implements Cassandra {
 				log.debug("Test Cassandra ({}) has been stopped", cassandra);
 			}
 			this.cassandra = null;
+		}
+	}
+
+	private void registerShutdownHook() {
+		if (this.registerShutdownHook && this.state == State.NEW) {
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+				Thread currentThread = this.currentThread;
+				if (currentThread != null) {
+					currentThread.interrupt();
+				}
+				stopSilently();
+			}, "TestCassandraHook:" + Integer.toHexString(hashCode())));
 		}
 	}
 

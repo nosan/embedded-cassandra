@@ -57,7 +57,7 @@ public class TestCassandraExtendedTests {
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks).filteredOn(
-				thread -> thread.getName().startsWith("Hook:TestCassandra"))
+				thread -> thread.getName().startsWith("TestCassandraHook"))
 				.hasSize(1);
 	}
 
@@ -74,7 +74,7 @@ public class TestCassandraExtendedTests {
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks)
-				.noneMatch(thread -> thread.getName().startsWith("Hook:TestCassandra"));
+				.noneMatch(thread -> thread.getName().startsWith("TestCassandraHook"));
 	}
 
 	@SuppressWarnings("unchecked")
