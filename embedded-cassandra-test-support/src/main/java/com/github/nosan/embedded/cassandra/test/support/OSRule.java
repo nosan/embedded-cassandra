@@ -16,10 +16,12 @@
 
 package com.github.nosan.embedded.cassandra.test.support;
 
-import org.junit.rules.MethodRule;
+import java.util.Arrays;
+import java.util.Locale;
+
+import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
-import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
 /**
@@ -28,50 +30,45 @@ import org.junit.runners.model.Statement;
  * @author Dmytro Nosan
  * @since 1.4.1
  */
-public final class OSRule implements MethodRule, TestRule {
+public final class OSRule implements TestRule {
 
 	@Override
-	public Statement apply(Statement base, FrameworkMethod method, Object target) {
-		return new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				OSRule.evaluate(method.getAnnotation(EnableIfOS.class),
-						method.getAnnotation(DisableIfOS.class), base);
-			}
-		};
+	public Statement apply(Statement statement, Description description) {
+		Class<?> testClass = description.getTestClass();
+		if (description.getAnnotation(DisableIfOS.class) != null ||
+				description.getAnnotation(EnableIfOS.class) != null) {
+			evaluate(description, description.getAnnotation(DisableIfOS.class));
+			evaluate(description, description.getAnnotation(EnableIfOS.class));
+		}
+		else if (testClass.getAnnotation(EnableIfOS.class) != null ||
+				testClass.getAnnotation(DisableIfOS.class) != null) {
+			evaluate(description, testClass.getAnnotation(EnableIfOS.class));
+			evaluate(description, testClass.getAnnotation(DisableIfOS.class));
+		}
+		return statement;
 	}
 
-	@Override
-	public Statement apply(Statement base, Description description) {
-		return new Statement() {
-			@Override
-			public void evaluate() throws Throwable {
-				OSRule.evaluate(description.getAnnotation(EnableIfOS.class),
-						description.getAnnotation(DisableIfOS.class), base);
-			}
-		};
+	private static void evaluate(Description description, EnableIfOS enable) {
+		if (enable != null) {
+			String os = System.getProperty("os.name");
+			String[] values = enable.value();
+			Assume.assumeTrue(String.format("(%s) is enabled only for %s. Current OS is [%s]",
+					description, Arrays.toString(values), os), match(os, values));
+		}
 	}
 
-	private static void evaluate(EnableIfOS enable, DisableIfOS disable, Statement base) throws Throwable {
+	private static void evaluate(Description description, DisableIfOS disable) {
 		if (disable != null) {
-			if (!match(disable.value())) {
-				base.evaluate();
-			}
-		}
-		else if (enable != null) {
-			if (match(enable.value())) {
-				base.evaluate();
-			}
-		}
-		else {
-			base.evaluate();
+			String os = System.getProperty("os.name");
+			String[] values = disable.value();
+			Assume.assumeFalse(String.format("(%s) is disabled. Current OS [%s] contains either %s", os,
+					description, Arrays.toString(values)), match(os, values));
 		}
 	}
 
-	private static boolean match(String[] operatingSystems) {
-		String currentOS = System.getProperty("os.name").toLowerCase();
-		for (String os : operatingSystems) {
-			if (currentOS.contains(os.toLowerCase())) {
+	private static boolean match(String os, String[] systems) {
+		for (String s : systems) {
+			if (os.toLowerCase(Locale.ENGLISH).contains(s.toLowerCase(Locale.ENGLISH))) {
 				return true;
 			}
 		}
