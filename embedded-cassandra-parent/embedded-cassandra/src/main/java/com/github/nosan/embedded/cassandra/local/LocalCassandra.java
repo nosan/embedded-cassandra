@@ -315,7 +315,7 @@ class LocalCassandra implements Cassandra {
 					currentThread.interrupt();
 				}
 				stopSilently();
-			}, "CassandraHook:" + Integer.toHexString(hashCode())));
+			}, "CassandraHook#" + Integer.toHexString(hashCode())));
 		}
 	}
 

@@ -474,7 +474,7 @@ public class TestCassandra implements Cassandra {
 					currentThread.interrupt();
 				}
 				stopSilently();
-			}, "TestCassandraHook:" + Integer.toHexString(hashCode())));
+			}, "TestCassandraHook#" + Integer.toHexString(hashCode())));
 		}
 	}
 
