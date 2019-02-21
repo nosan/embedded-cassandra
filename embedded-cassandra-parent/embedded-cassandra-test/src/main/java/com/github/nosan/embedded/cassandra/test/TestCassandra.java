@@ -201,12 +201,12 @@ public class TestCassandra implements Cassandra {
 					}
 					catch (InterruptedException ex) {
 						stopSilently();
-						this.state = State.STARTING_INTERRUPTED;
+						this.state = State.START_INTERRUPTED;
 						Thread.currentThread().interrupt();
 					}
 					catch (Throwable ex) {
 						stopSilently();
-						this.state = State.STARTING_FAILED;
+						this.state = State.START_FAILED;
 						throw new CassandraException("Unable to start Test Cassandra", ex);
 					}
 				}
@@ -229,11 +229,11 @@ public class TestCassandra implements Cassandra {
 						this.state = State.STOPPED;
 					}
 					catch (InterruptedException ex) {
-						this.state = State.STOPPING_INTERRUPTED;
+						this.state = State.STOP_INTERRUPTED;
 						Thread.currentThread().interrupt();
 					}
 					catch (Throwable ex) {
-						this.state = State.STOPPING_FAILED;
+						this.state = State.STOP_FAILED;
 						throw new CassandraException("Unable to stop Test Cassandra", ex);
 					}
 				}
@@ -413,7 +413,7 @@ public class TestCassandra implements Cassandra {
 			log.debug("Starts Test Cassandra ({})", cassandra);
 		}
 		cassandra.start();
-		if (cassandra.getState() == State.STARTING_INTERRUPTED || Thread.interrupted()) {
+		if (cassandra.getState() == State.START_INTERRUPTED || Thread.interrupted()) {
 			throw new InterruptedException();
 		}
 		if (!this.scripts.isEmpty()) {
@@ -456,7 +456,7 @@ public class TestCassandra implements Cassandra {
 		Cassandra cassandra = this.cassandra;
 		if (cassandra != null) {
 			cassandra.stop();
-			if (cassandra.getState() == State.STOPPING_INTERRUPTED || Thread.interrupted()) {
+			if (cassandra.getState() == State.STOP_INTERRUPTED || Thread.interrupted()) {
 				throw new InterruptedException();
 			}
 			if (log.isDebugEnabled()) {

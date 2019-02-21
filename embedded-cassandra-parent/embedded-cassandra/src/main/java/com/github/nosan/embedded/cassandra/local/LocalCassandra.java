@@ -171,12 +171,12 @@ class LocalCassandra implements Cassandra {
 					}
 					catch (InterruptedException ex) {
 						stopSilently();
-						this.state = State.STARTING_INTERRUPTED;
+						this.state = State.START_INTERRUPTED;
 						Thread.currentThread().interrupt();
 					}
 					catch (Throwable ex) {
 						stopSilently();
-						this.state = State.STARTING_FAILED;
+						this.state = State.START_FAILED;
 						throw new CassandraException("Unable to start Cassandra", ex);
 					}
 				}
@@ -199,11 +199,11 @@ class LocalCassandra implements Cassandra {
 						this.state = State.STOPPED;
 					}
 					catch (InterruptedException ex) {
-						this.state = State.STOPPING_INTERRUPTED;
+						this.state = State.STOP_INTERRUPTED;
 						Thread.currentThread().interrupt();
 					}
 					catch (Throwable ex) {
-						this.state = State.STOPPING_FAILED;
+						this.state = State.STOP_FAILED;
 						throw new CassandraException("Unable to stop Cassandra", ex);
 					}
 				}

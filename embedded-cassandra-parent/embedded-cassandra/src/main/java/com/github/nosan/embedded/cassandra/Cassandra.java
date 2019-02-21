@@ -86,11 +86,11 @@ public interface Cassandra {
 		/**
 		 * The {@link #start() startup} has failed.
 		 */
-		STARTING_FAILED,
+		START_FAILED,
 		/**
 		 * The {@link #start() startup} has {@link Thread#interrupt() interrupted}.
 		 */
-		STARTING_INTERRUPTED,
+		START_INTERRUPTED,
 		/**
 		 * {@code Cassandra} has been started and is ready to accept new connections.
 		 */
@@ -102,11 +102,11 @@ public interface Cassandra {
 		/**
 		 * The {@link #stop() shutdown} has failed.
 		 */
-		STOPPING_FAILED,
+		STOP_FAILED,
 		/**
 		 * The {@link #stop() shutdown} has {@link Thread#interrupt() interrupted}.
 		 */
-		STOPPING_INTERRUPTED,
+		STOP_INTERRUPTED,
 		/**
 		 * {@code Cassandra} has been stopped.
 		 */
