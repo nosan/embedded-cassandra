@@ -65,16 +65,4 @@ abstract class BeanDefinitionUtils {
 		return (BeanDefinitionRegistry) beanFactory;
 	}
 
-	/**
-	 * Check that {@link BeanDefinitionRegistry} is instance of {@link ConfigurableListableBeanFactory} and cast it to
-	 * the registry.
-	 *
-	 * @param registry the bean definition registry
-	 * @return the bean factory
-	 */
-	@Nonnull
-	static ConfigurableListableBeanFactory getBeanFactory(@Nonnull BeanDefinitionRegistry registry) {
-		Assert.isInstanceOf(ConfigurableListableBeanFactory.class, registry);
-		return (ConfigurableListableBeanFactory) registry;
-	}
 }
