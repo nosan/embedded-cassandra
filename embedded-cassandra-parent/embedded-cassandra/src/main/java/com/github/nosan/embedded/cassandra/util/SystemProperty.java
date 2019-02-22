@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
 import org.apiguardian.api.API;
 
 /**
- * Utility class for dealing with {@code System Properties}.
+ * Utility class for dealing with {@code System and Environment Properties}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
@@ -47,33 +47,44 @@ public final class SystemProperty implements Supplier<String> {
 	}
 
 	/**
-	 * Returns a {@link System#getProperty(String)}.
+	 * Returns a {@link System#getProperty(String)} or a {@link System#getenv(String)}.
 	 *
 	 * @return a value, or {@code null}
 	 */
 	@Override
 	@Nullable
 	public String get() {
-		return getProperty(this.name);
+		String value = getSystemProperty(this.name);
+		if (value == null) {
+			value = getEnvironmentProperty(this.name);
+		}
+		return value;
 	}
 
 	/**
-	 * Returns a {@link System#getProperty(String)}.
+	 * Returns a {@link System#getProperty(String)} or a {@link System#getenv(String)}.
 	 *
 	 * @return a nonnull-value, or throw a {@code NullPointerException}
-	 * @throws NullPointerException if {@link SystemProperty#getProperty(String)} is null
 	 */
 	@Nonnull
-	public String getRequired() throws NullPointerException {
-		String value = getProperty(this.name);
-		return Objects.requireNonNull(value, String.format("System Property for key (%s) is null", this.name));
+	public String getRequired() {
+		return Objects.requireNonNull(get(), String.format("Either System or Environment Property " +
+				"for key (%s) is not present", this.name));
 	}
 
-	private static String getProperty(String key) {
+	private static String getSystemProperty(String key) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
 			return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(key));
 		}
 		return System.getProperty(key);
+	}
+
+	private static String getEnvironmentProperty(String key) {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null) {
+			return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getenv(key));
+		}
+		return System.getenv(key);
 	}
 }

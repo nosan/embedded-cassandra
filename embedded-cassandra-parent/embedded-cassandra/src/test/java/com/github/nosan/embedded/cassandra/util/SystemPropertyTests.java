@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
+import java.util.Map;
+
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class SystemPropertyTests {
 
 	@Test
-	public void shouldGet() {
+	public void shouldGetSystemProperty() {
 		try {
 			System.setProperty("test", "value");
 			assertThat(new SystemProperty("test").get()).isEqualTo("value");
@@ -40,10 +42,20 @@ public class SystemPropertyTests {
 	}
 
 	@Test
+	public void shouldGetEnvironmentProperty() {
+		Map<String, String> environment = System.getenv();
+		assertThat(environment).isNotEmpty();
+		String key = environment.keySet().iterator().next();
+		String value = environment.get(key);
+		assertThat(value).isNotNull();
+		assertThat(new SystemProperty(key).get()).isEqualTo(value);
+	}
+
+	@Test
 	public void shouldNotGet() {
 		assertThatThrownBy(() -> new SystemProperty("test").getRequired())
 				.isInstanceOf(NullPointerException.class)
-				.hasStackTraceContaining("System Property for key (test) is null");
+				.hasStackTraceContaining("Either System or Environment Property for key (test) is not present");
 	}
 
 	@Test
