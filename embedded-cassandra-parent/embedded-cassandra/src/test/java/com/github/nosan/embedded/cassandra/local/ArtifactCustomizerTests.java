@@ -83,12 +83,12 @@ public class ArtifactCustomizerTests {
 		customizer.customize(workingDirectory, this.version);
 
 		assertThat(workingDirectory).exists();
-		assertThat(workingDirectory.resolve("doc")).exists();
-		assertThat(workingDirectory.resolve("javadoc")).exists();
+		assertThat(workingDirectory.resolve("doc")).doesNotExist();
+		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
-		assertThat(count(workingDirectory.resolve("doc"))).isZero();
-		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
+		assertThat(count(workingDirectory.resolve("bin"))).isGreaterThan(0);
+		assertThat(count(workingDirectory.resolve("conf"))).isGreaterThan(0);
 	}
 
 	@Test
@@ -102,12 +102,12 @@ public class ArtifactCustomizerTests {
 		customizer.customize(workingDirectory, this.version);
 
 		assertThat(workingDirectory).exists();
-		assertThat(workingDirectory.resolve("doc")).exists();
-		assertThat(workingDirectory.resolve("javadoc")).exists();
+		assertThat(workingDirectory.resolve("doc")).doesNotExist();
+		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
-		assertThat(count(workingDirectory.resolve("doc"))).isZero();
-		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
+		assertThat(count(workingDirectory.resolve("bin"))).isGreaterThan(0);
+		assertThat(count(workingDirectory.resolve("conf"))).isGreaterThan(0);
 	}
 
 	@Test
