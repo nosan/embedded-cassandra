@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -165,7 +166,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		Version version = this.version;
 		ThreadFactory threadFactory = this.threadFactory;
 		Map<String, String> environment = new LinkedHashMap<>();
-		if (process != null) {
+		if (process != null && process.isAlive()) {
 			boolean result = false;
 			try {
 				stop(process, workingDirectory, version, environment, threadFactory, log::info);
@@ -180,7 +181,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			if (!result) {
 				try {
 					forceStop(process, workingDirectory, version, environment, threadFactory, log::info);
-					result = waitForStopped(Duration.ofSeconds(3), process, settings);
+					result = waitForStopped(Duration.ofSeconds(5), process, settings);
 				}
 				catch (InterruptedException ex) {
 					throw ex;
@@ -191,8 +192,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			}
 			if (!result) {
 				try {
-					process.destroyForcibly();
-					result = waitForStopped(Duration.ofSeconds(3), process, settings);
+					result = process.destroyForcibly().waitFor(3, TimeUnit.SECONDS);
 				}
 				catch (InterruptedException ex) {
 					throw ex;
@@ -290,7 +290,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 						"Please see logs for more details.", getId(process)));
 			}
 			long elapsed = System.currentTimeMillis() - start;
-			if (elapsed > 20000L) {
+			if (elapsed > 15000) {
 				return TransportUtils.isReady(settings);
 			}
 			return nodeReadiness.isReady() && TransportUtils.isReady(settings);
