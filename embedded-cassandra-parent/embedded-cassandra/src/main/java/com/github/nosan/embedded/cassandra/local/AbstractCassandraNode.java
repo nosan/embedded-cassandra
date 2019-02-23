@@ -290,7 +290,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 						"Please see logs for more details.", getId(process)));
 			}
 			long elapsed = System.currentTimeMillis() - start;
-			if (elapsed > 15000) {
+			if (elapsed > 20000) {
 				return TransportUtils.isReady(settings);
 			}
 			return nodeReadiness.isReady() && TransportUtils.isReady(settings);
