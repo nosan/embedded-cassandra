@@ -41,12 +41,6 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class FileUtils {
 
-	private static final Path TMP_DIR = Paths.get(new SystemProperty("java.io.tmpdir").getRequired());
-
-	private static final Path USER_HOME_DIR = Paths.get(new SystemProperty("user.home").getRequired());
-
-	private static final Path USER_DIR = Paths.get(new SystemProperty("user.dir").getRequired());
-
 	/**
 	 * Return the temporary directory.
 	 *
@@ -54,7 +48,7 @@ public abstract class FileUtils {
 	 */
 	@Nonnull
 	public static Path getTmpDirectory() {
-		return TMP_DIR;
+		return Paths.get(new SystemProperty("java.io.tmpdir").getRequired());
 	}
 
 	/**
@@ -64,7 +58,7 @@ public abstract class FileUtils {
 	 */
 	@Nonnull
 	public static Path getUserHomeDirectory() {
-		return USER_HOME_DIR;
+		return Paths.get(new SystemProperty("user.home").getRequired());
 	}
 
 	/**
@@ -74,7 +68,7 @@ public abstract class FileUtils {
 	 */
 	@Nonnull
 	public static Path getUserDirectory() {
-		return USER_DIR;
+		return Paths.get(new SystemProperty("user.dir").getRequired());
 	}
 
 	/**
