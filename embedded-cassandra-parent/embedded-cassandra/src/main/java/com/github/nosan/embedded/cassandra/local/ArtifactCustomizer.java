@@ -126,7 +126,7 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 	}
 
 	private static Path determineBaseDir(Path directory) throws IOException {
-		Set<Path> directories = Files.find(directory, 3, (path, attributes) -> {
+		Set<Path> directories = Files.find(directory, 1, (path, attributes) -> {
 			Path bin = path.resolve("bin");
 			Path lib = path.resolve("lib");
 			Path conf = path.resolve("conf");
