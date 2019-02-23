@@ -68,8 +68,8 @@ public final class SystemProperty implements Supplier<String> {
 	 */
 	@Nonnull
 	public String getRequired() {
-		return Objects.requireNonNull(get(), String.format("Either System or Environment Property " +
-				"for key (%s) is not present", this.name));
+		return Objects.requireNonNull(get(), () -> String.format("Both System and Environment Properties" +
+				" are not present for a key (%s)", this.name));
 	}
 
 	private static String getSystemProperty(String key) {

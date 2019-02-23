@@ -55,7 +55,7 @@ public class SystemPropertyTests {
 	public void shouldNotGet() {
 		assertThatThrownBy(() -> new SystemProperty("test").getRequired())
 				.isInstanceOf(NullPointerException.class)
-				.hasStackTraceContaining("Either System or Environment Property for key (test) is not present");
+				.hasStackTraceContaining("Both System and Environment Properties are not present for a key (test)");
 	}
 
 	@Test
