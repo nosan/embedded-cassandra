@@ -17,6 +17,8 @@
 package com.github.nosan.embedded.cassandra.util;
 
 import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -32,13 +34,12 @@ public class SystemPropertyTests {
 
 	@Test
 	public void shouldGetSystemProperty() {
-		try {
-			System.setProperty("test", "value");
-			assertThat(new SystemProperty("test").get()).isEqualTo("value");
-		}
-		finally {
-			System.clearProperty("test");
-		}
+		Properties properties = System.getProperties();
+		assertThat(properties).isNotEmpty();
+		Object key = properties.keySet().iterator().next();
+		Object value = properties.get(key);
+		assertThat(value).isNotNull();
+		assertThat(new SystemProperty(String.valueOf(key)).getRequired()).isEqualTo(value);
 	}
 
 	@Test
@@ -48,18 +49,19 @@ public class SystemPropertyTests {
 		String key = environment.keySet().iterator().next();
 		String value = environment.get(key);
 		assertThat(value).isNotNull();
-		assertThat(new SystemProperty(key).get()).isEqualTo(value);
+		assertThat(new SystemProperty(key).getRequired()).isEqualTo(value);
 	}
 
 	@Test
-	public void shouldNotGet() {
-		assertThatThrownBy(() -> new SystemProperty("test").getRequired())
-				.isInstanceOf(NullPointerException.class)
-				.hasStackTraceContaining("Both System and Environment Properties are not present for a key (test)");
+	public void shouldThrowException() {
+		String name = UUID.randomUUID().toString();
+		assertThatThrownBy(() -> new SystemProperty(name).getRequired()).isInstanceOf(NullPointerException.class)
+				.hasStackTraceContaining("Both System and Environment Properties " +
+						"are not present for a key (" + name + ")");
 	}
 
 	@Test
 	public void shouldReturnNull() {
-		assertThat(new SystemProperty("test").get()).isNull();
+		assertThat(new SystemProperty(UUID.randomUUID().toString()).get()).isNull();
 	}
 }
