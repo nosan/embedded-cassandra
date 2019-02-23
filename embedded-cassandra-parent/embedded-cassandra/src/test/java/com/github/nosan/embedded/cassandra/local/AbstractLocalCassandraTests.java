@@ -94,7 +94,6 @@ public abstract class AbstractLocalCassandraTests {
 				runner.run(new NotReachable())).isInstanceOf(CassandraException.class)
 				.hasCauseInstanceOf(IOException.class));
 		assertCassandraHasBeenStopped();
-		assertThat(this.output.toString()).doesNotContain("Unable to stop Cassandra");
 	}
 
 	@Test
@@ -296,6 +295,7 @@ public abstract class AbstractLocalCassandraTests {
 
 	private void assertCassandraHasBeenStopped() {
 		assertThat(this.output.toString()).contains("has been stopped");
+		assertThat(this.output.toString()).doesNotContain("Unable to stop Cassandra");
 		if (!new Version(2, 2, 14).equals(this.factory.getVersion())) {
 			assertThat(this.output.toString()).contains("Announcing shutdown");
 		}
