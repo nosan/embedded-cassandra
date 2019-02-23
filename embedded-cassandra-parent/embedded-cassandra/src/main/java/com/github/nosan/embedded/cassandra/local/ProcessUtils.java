@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.util;
+package com.github.nosan.embedded.cassandra.local;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.apiguardian.api.API;
 
 /**
  * Utility class for dealing with {@link Process}.
@@ -31,8 +28,7 @@ import org.apiguardian.api.API;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.INTERNAL)
-public abstract class ProcessUtils {
+abstract class ProcessUtils {
 
 	@Nullable
 	private static final Method PID_METHOD;
@@ -54,8 +50,7 @@ public abstract class ProcessUtils {
 	 * @param process a {@link Process}
 	 * @return the pid (or {@code -1})
 	 */
-	public static long getPid(@Nonnull Process process) {
-		Objects.requireNonNull(process, "Process must not be null");
+	static long getPid(@Nonnull Process process) {
 		try {
 			if (PID_METHOD != null) {
 				return Long.parseLong(String.valueOf(PID_METHOD.invoke(process)));

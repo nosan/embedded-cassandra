@@ -29,7 +29,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.ProcessUtils;
 
 /**
  * UNIX implementation of the {@link CassandraNode}.

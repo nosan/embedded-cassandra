@@ -24,6 +24,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -221,21 +222,25 @@ public abstract class ArchiveUtils {
 		 * @param file the file to apply the mode onto
 		 */
 		static void set(@Nonnull ArchiveEntry entry, @Nonnull Path file) {
-			if (OS.get() == OS.WINDOWS) {
-				return;
-			}
-			long mode = getMode(entry) & MASK;
-			if (mode > 0) {
-				Set<PosixFilePermission> permissions = getPermissions(mode);
-				try {
-					Files.setPosixFilePermissions(file, permissions);
-				}
-				catch (Throwable ex) {
-					if (log.isDebugEnabled()) {
-						log.error(String.format("Could not set permission(s) (%s) to (%s)", permissions, file), ex);
+			if (!isWindows()) {
+				long mode = getMode(entry) & MASK;
+				if (mode > 0) {
+					Set<PosixFilePermission> permissions = getPermissions(mode);
+					try {
+						Files.setPosixFilePermissions(file, permissions);
+					}
+					catch (Throwable ex) {
+						if (log.isDebugEnabled()) {
+							log.error(String.format("Could not set permission(s) (%s) to (%s)", permissions, file), ex);
+						}
 					}
 				}
 			}
+		}
+
+		private static boolean isWindows() {
+			return new SystemProperty("os.name").getRequired()
+					.toLowerCase(Locale.ENGLISH).contains("windows");
 		}
 
 		private static Set<PosixFilePermission> getPermissions(long mode) {

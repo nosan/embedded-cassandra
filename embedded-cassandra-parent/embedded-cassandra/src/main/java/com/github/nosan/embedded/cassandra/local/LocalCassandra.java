@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -37,7 +38,7 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
-import com.github.nosan.embedded.cassandra.util.OS;
+import com.github.nosan.embedded.cassandra.util.SystemProperty;
 
 /**
  * This {@link Cassandra} implementation just a wrapper on {@link CassandraNode}.
@@ -254,7 +255,7 @@ class LocalCassandra implements Cassandra {
 			customizers.add(new TopologyFileCustomizer(this.topologyFile));
 			customizers.add(new CommitLogArchivingFileCustomizer(this.commitLogArchivingFile));
 			customizers.add(new RandomPortConfigurationFileCustomizer());
-			if (OS.get() != OS.WINDOWS) {
+			if (!isWindows()) {
 				customizers.add(new ExecutableFileCustomizer());
 			}
 			for (DirectoryCustomizer customizer : customizers) {
@@ -282,7 +283,7 @@ class LocalCassandra implements Cassandra {
 		log.info("Starts Apache Cassandra ({}) ", version);
 		long start = System.currentTimeMillis();
 		CassandraNode node;
-		if (OS.get() == OS.WINDOWS) {
+		if (isWindows()) {
 			node = new WindowsCassandraNode(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
 		}
 		else {
@@ -335,5 +336,10 @@ class LocalCassandra implements Cassandra {
 			return true;
 		}
 		return ex != null && isClosedByInterruptException(ex.getCause());
+	}
+
+	private static boolean isWindows() {
+		return new SystemProperty("os.name").getRequired()
+				.toLowerCase(Locale.ENGLISH).contains("windows");
 	}
 }

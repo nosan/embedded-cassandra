@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.util;
+package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 
