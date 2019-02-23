@@ -82,7 +82,7 @@ public abstract class ArchiveUtils {
 
 	/**
 	 * Extracts the source archive file into the given destination directory.
-	 * The destination is expected to be a writable directory.
+	 * The destination is expected to be a writable directory. Skips empty directories.
 	 *
 	 * @param archive the archive file to extract
 	 * @param dest the directory to which to extract the files
