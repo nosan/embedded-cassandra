@@ -86,30 +86,34 @@ public abstract class ArchiveUtils {
 	 *
 	 * @param archive the archive file to extract
 	 * @param dest the directory to which to extract the files
+	 * @throws IOException in the case of I/O errors
+	 * @since 1.4.1
+	 */
+	public static void extract(@Nonnull Path archive, @Nonnull Path dest) throws IOException {
+		extract(archive, dest, entry -> true);
+	}
+
+	/**
+	 * Extracts the source archive file into the given destination directory.
+	 * The destination is expected to be a writable directory. Skips empty directories.
+	 *
+	 * @param archive the archive file to extract
+	 * @param dest the directory to which to extract the files
 	 * @param entryFilter the filter to check whether {@code entry file} should be extracted or not
 	 * @throws IOException in the case of I/O errors
 	 */
 	public static void extract(@Nonnull Path archive, @Nonnull Path dest,
-			@Nullable Predicate<? super String> entryFilter)
-			throws IOException {
+			@Nullable Predicate<? super String> entryFilter) throws IOException {
 		Objects.requireNonNull(archive, "Archive must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archive);
 		try (ArchiveInputStream stream = archiveFactory.create(archive)) {
 			Path tempDir = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString());
-			tempDir.toFile().deleteOnExit();
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
-				if (entry.isDirectory()) {
-					Path dir = dest.resolve(entry.getName());
-					Files.createDirectories(dir);
-				}
-				else if (entryFilter == null || entryFilter.test(entry.getName())) {
+				if (!entry.isDirectory() && (entryFilter == null || entryFilter.test(entry.getName()))) {
 					Path tempFile = tempDir.resolve(entry.getName());
 					Files.createDirectories(tempFile.getParent());
-					for (int i = tempDir.getNameCount(); i < tempFile.getNameCount(); i++) {
-						tempDir.resolve(tempFile.getName(i)).toFile().deleteOnExit();
-					}
 					Files.copy(stream, tempFile);
 					FileModeUtils.set(entry, tempFile);
 					Path file = dest.resolve(entry.getName());
@@ -117,6 +121,7 @@ public abstract class ArchiveUtils {
 					Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
 				}
 			}
+			FileUtils.delete(tempDir);
 		}
 	}
 

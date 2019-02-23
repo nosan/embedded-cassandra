@@ -185,13 +185,16 @@ class RemoteArtifact implements Artifact {
 			Path tempFile = this.resource.getFile();
 			try {
 				Files.createDirectories(file.getParent());
-				return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+				if (!Files.exists(file)) {
+					return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+				}
+				return tempFile;
 			}
 			catch (IOException ex) {
 				if (log.isDebugEnabled()) {
 					log.error(String.format("Could not rename (%s) as (%s).", tempFile, file), ex);
 				}
-				return file;
+				return tempFile;
 			}
 		}
 

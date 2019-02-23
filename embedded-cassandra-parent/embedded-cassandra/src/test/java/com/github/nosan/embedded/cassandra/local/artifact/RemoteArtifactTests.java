@@ -42,8 +42,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
-import com.github.nosan.embedded.cassandra.test.support.WebServer;
+import com.github.nosan.embedded.cassandra.test.support.HttpServerRule;
+import com.github.nosan.embedded.cassandra.test.support.OutputRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -56,13 +56,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class RemoteArtifactTests {
 
 	@Rule
-	public final WebServer webServer = new WebServer();
+	public final HttpServerRule httpServerRule = new HttpServerRule();
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Rule
-	public final CaptureOutput output = new CaptureOutput();
+	public final OutputRule output = new OutputRule();
 
 	private RemoteArtifactFactory factory;
 
@@ -71,7 +71,7 @@ public class RemoteArtifactTests {
 		Path directory = this.temporaryFolder.newFolder().toPath().resolve(UUID.randomUUID().toString());
 		this.factory = new RemoteArtifactFactory();
 		this.factory.setUrlFactory(version -> {
-			HttpServer server = this.webServer.get();
+			HttpServer server = this.httpServerRule.get();
 			return new URL[]{
 					new URL(String.format("http:/%s/dist/apache-cassandra-%s.zip", server.getAddress(), version))};
 		});
@@ -81,7 +81,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldDownloadArtifactAndShowProgress() throws Exception {
-		HttpServer server = this.webServer.get();
+		HttpServer server = this.httpServerRule.get();
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
@@ -105,7 +105,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldDownloadArtifact() throws Exception {
-		HttpServer server = this.webServer.get();
+		HttpServer server = this.httpServerRule.get();
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
@@ -125,7 +125,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldDownloadArtifactRedirection() throws Exception {
-		HttpServer server = this.webServer.get();
+		HttpServer server = this.httpServerRule.get();
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
@@ -150,7 +150,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldDownloadArtifactMaxRedirection() {
-		HttpServer server = this.webServer.get();
+		HttpServer server = this.httpServerRule.get();
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.getResponseHeaders()
 					.put("Location", Collections.singletonList("/dist/apache-cassandra-3.1.1.zip"));
@@ -163,7 +163,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldDownloadArtifactURLs() throws Exception {
-		HttpServer server = this.webServer.get();
+		HttpServer server = this.httpServerRule.get();
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
@@ -210,7 +210,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void shouldNotDownloadInvalidStatus() {
-		HttpServer server = this.webServer.get();
+		HttpServer server = this.httpServerRule.get();
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.sendResponseHeaders(400, 0);
 			exchange.close();
@@ -228,7 +228,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void readTimeoutIsExceeded() {
-		HttpServer server = this.webServer.get();
+		HttpServer server = this.httpServerRule.get();
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(600));
 
 		this.factory.setReadTimeout(Duration.ofMillis(200));
@@ -261,7 +261,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void impossibleDetermineFileName() {
-		HttpServer server = this.webServer.get();
+		HttpServer server = this.httpServerRule.get();
 		server.createContext("/", exchange -> exchange.sendResponseHeaders(200, 0));
 		this.factory.setUrlFactory(new UrlFactory() {
 			@Nonnull

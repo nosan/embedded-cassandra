@@ -34,7 +34,7 @@ import org.junit.runners.model.Statement;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-public final class CaptureOutput implements TestRule {
+public final class OutputRule implements TestRule {
 
 	@Nullable
 	private TeeOutputStream out;

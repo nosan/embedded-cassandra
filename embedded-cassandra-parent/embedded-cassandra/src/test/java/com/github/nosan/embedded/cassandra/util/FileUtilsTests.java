@@ -65,7 +65,7 @@ public class FileUtilsTests {
 		File dest = new File(this.temporaryFolder.getRoot(), UUID.randomUUID().toString());
 		assertThat(src).exists();
 		assertThat(dest).doesNotExist();
-		FileUtils.copy(src.toPath(), dest.toPath(), p -> true);
+		FileUtils.copy(src.toPath(), dest.toPath());
 		assertThat(dest).exists();
 	}
 
@@ -83,7 +83,7 @@ public class FileUtilsTests {
 		assertThat(src).exists();
 		assertThat(dest).doesNotExist();
 
-		FileUtils.copy(src.toPath(), dest.toPath(), p -> true);
+		FileUtils.copy(src.toPath(), dest.toPath());
 
 		assertThat(dest).exists();
 		assertThat(dest.toPath().resolve(folder.getName())).exists();
@@ -116,8 +116,8 @@ public class FileUtilsTests {
 
 		FileUtils.copy(src.toPath(), dest.toPath(), p -> false);
 
-		assertThat(dest).exists();
-		assertThat(dest.toPath().resolve(folder.getName())).exists();
+		assertThat(dest).doesNotExist();
+		assertThat(dest.toPath().resolve(folder.getName())).doesNotExist();
 		assertThat(dest.toPath().resolve(folder.getName()).resolve(file.getName())).doesNotExist();
 	}
 

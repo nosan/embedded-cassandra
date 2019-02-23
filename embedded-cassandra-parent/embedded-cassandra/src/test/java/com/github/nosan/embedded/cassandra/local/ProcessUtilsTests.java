@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ProcessUtilsTests {
 
 	@Rule
-	public final OSRule osRule = new OSRule();
+	public final OSRule os = new OSRule();
 
 	@Test
 	@DisableIfOS("windows")

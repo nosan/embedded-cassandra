@@ -18,12 +18,10 @@ package com.github.nosan.embedded.cassandra.test.support;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import com.sun.net.httpserver.HttpServer;
 import org.junit.rules.ExternalResource;
@@ -35,13 +33,22 @@ import org.junit.rules.TestRule;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-public final class WebServer extends ExternalResource implements Supplier<HttpServer> {
+public final class HttpServerRule extends ExternalResource implements Supplier<HttpServer> {
 
-	@Nullable
-	private HttpServer server;
+	@Nonnull
+	private final HttpServer httpServer;
+
+	public HttpServerRule() {
+		try {
+			this.httpServer = HttpServer.create();
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
 
 	@Override
-	protected void before() throws Throwable {
+	protected void before() throws IOException {
 		start();
 	}
 
@@ -54,10 +61,7 @@ public final class WebServer extends ExternalResource implements Supplier<HttpSe
 	 * Stops HTTP server.
 	 */
 	public void stop() {
-		HttpServer server = this.server;
-		if (server != null) {
-			server.stop(0);
-		}
+		this.httpServer.stop(0);
 	}
 
 	/**
@@ -66,12 +70,9 @@ public final class WebServer extends ExternalResource implements Supplier<HttpSe
 	 * @throws IOException in case of I/O errors
 	 */
 	public void start() throws IOException {
-		if (this.server == null) {
-			HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
-			server.setExecutor(Executors.newCachedThreadPool());
-			server.start();
-			this.server = server;
-		}
+		this.httpServer.setExecutor(Executors.newCachedThreadPool());
+		this.httpServer.bind(new InetSocketAddress("localhost", 0), 0);
+		this.httpServer.start();
 	}
 
 	/**
@@ -82,6 +83,6 @@ public final class WebServer extends ExternalResource implements Supplier<HttpSe
 	@Nonnull
 	@Override
 	public HttpServer get() {
-		return Objects.requireNonNull(this.server, "Http Server is not initialized.");
+		return this.httpServer;
 	}
 }

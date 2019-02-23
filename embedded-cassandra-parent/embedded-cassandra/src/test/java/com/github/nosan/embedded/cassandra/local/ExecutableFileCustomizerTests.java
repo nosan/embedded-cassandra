@@ -40,7 +40,7 @@ public class ExecutableFileCustomizerTests {
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Rule
-	public final OSRule osRule = new OSRule();
+	public final OSRule os = new OSRule();
 
 	private final ExecutableFileCustomizer customizer = new ExecutableFileCustomizer();
 

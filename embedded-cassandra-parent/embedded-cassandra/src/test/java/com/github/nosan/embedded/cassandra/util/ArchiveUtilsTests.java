@@ -69,9 +69,20 @@ public class ArchiveUtilsTests {
 		archive(this.archiveFormat, archive, file);
 		compress(this.compression, archive);
 		File destination = this.temporaryFolder.newFolder();
-		ArchiveUtils.extract(archive.toPath(), destination.toPath(), null);
+		ArchiveUtils.extract(archive.toPath(), destination.toPath());
 		assertThat(destination.toPath().resolve("dir/cass.yaml").toFile()).hasSameContentAs(file);
+	}
 
+	@Test
+	public void extractFilter() throws Exception {
+		File archive = this.temporaryFolder.newFile(String.format("%s.%s",
+				UUID.randomUUID(), this.name));
+		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
+		archive(this.archiveFormat, archive, file);
+		compress(this.compression, archive);
+		File destination = this.temporaryFolder.newFolder();
+		ArchiveUtils.extract(archive.toPath(), destination.toPath(), entry -> false);
+		assertThat(destination.toPath().resolve("dir/cass.yaml").toFile()).doesNotExist();
 	}
 
 	@Parameterized.Parameters(name = "{0}")

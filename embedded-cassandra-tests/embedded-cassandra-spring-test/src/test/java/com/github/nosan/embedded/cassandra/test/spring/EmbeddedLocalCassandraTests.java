@@ -34,7 +34,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
-import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
+import com.github.nosan.embedded.cassandra.test.support.OutputRule;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EmbeddedLocalCassandraTests {
 
 	@ClassRule
-	public static final CaptureOutput OUTPUT = new CaptureOutput();
+	public static final OutputRule OUTPUT = new OutputRule();
 
 	@Autowired
 	private TestCassandra cassandra;

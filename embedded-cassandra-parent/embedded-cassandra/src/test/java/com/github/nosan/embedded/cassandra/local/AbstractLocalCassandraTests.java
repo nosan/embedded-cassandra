@@ -53,9 +53,9 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
 import com.github.nosan.embedded.cassandra.test.support.OSRule;
+import com.github.nosan.embedded.cassandra.test.support.OutputRule;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
@@ -72,10 +72,10 @@ import static org.assertj.core.api.Assertions.fail;
 public abstract class AbstractLocalCassandraTests {
 
 	@Rule
-	public final CaptureOutput output = new CaptureOutput();
+	public final OutputRule output = new OutputRule();
 
 	@Rule
-	public final OSRule osRule = new OSRule();
+	public final OSRule os = new OSRule();
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();

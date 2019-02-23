@@ -35,20 +35,25 @@ public final class OSRule implements TestRule {
 	@Override
 	public Statement apply(Statement statement, Description description) {
 		Class<?> testClass = description.getTestClass();
-		if (description.getAnnotation(DisableIfOS.class) != null ||
-				description.getAnnotation(EnableIfOS.class) != null) {
-			evaluate(description, description.getAnnotation(DisableIfOS.class));
-			evaluate(description, description.getAnnotation(EnableIfOS.class));
-		}
-		else if (testClass.getAnnotation(EnableIfOS.class) != null ||
-				testClass.getAnnotation(DisableIfOS.class) != null) {
-			evaluate(description, testClass.getAnnotation(EnableIfOS.class));
-			evaluate(description, testClass.getAnnotation(DisableIfOS.class));
-		}
-		return statement;
+		return new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				if (description.getAnnotation(DisableIfOS.class) != null ||
+						description.getAnnotation(EnableIfOS.class) != null) {
+					check(description, description.getAnnotation(DisableIfOS.class));
+					check(description, description.getAnnotation(EnableIfOS.class));
+				}
+				else if (testClass.getAnnotation(EnableIfOS.class) != null ||
+						testClass.getAnnotation(DisableIfOS.class) != null) {
+					check(description, testClass.getAnnotation(EnableIfOS.class));
+					check(description, testClass.getAnnotation(DisableIfOS.class));
+				}
+				statement.evaluate();
+			}
+		};
 	}
 
-	private static void evaluate(Description description, EnableIfOS enable) {
+	private static void check(Description description, EnableIfOS enable) {
 		if (enable != null) {
 			String os = System.getProperty("os.name");
 			String[] values = enable.value();
@@ -57,7 +62,7 @@ public final class OSRule implements TestRule {
 		}
 	}
 
-	private static void evaluate(Description description, DisableIfOS disable) {
+	private static void check(Description description, DisableIfOS disable) {
 		if (disable != null) {
 			String os = System.getProperty("os.name");
 			String[] values = disable.value();

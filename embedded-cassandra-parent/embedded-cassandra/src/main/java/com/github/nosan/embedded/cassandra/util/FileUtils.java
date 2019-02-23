@@ -109,10 +109,25 @@ public abstract class FileUtils {
 
 	/**
 	 * Recursively copy the contents of the {@code src} file/directory
-	 * to the {@code dest} file/directory.
+	 * to the {@code dest} file/directory. Skips empty directories.
 	 *
-	 * @param src the source directory
-	 * @param dest the destination directory
+	 * @param src the source path
+	 * @param dest the destination path
+	 * @throws IOException in the case of I/O errors
+	 * @since 1.4.1
+	 */
+	public static void copy(@Nonnull Path src, @Nonnull Path dest) throws IOException {
+		Objects.requireNonNull(src, "Source must not be null");
+		Objects.requireNonNull(dest, "Destination must not be null");
+		copy(src, dest, file -> true);
+	}
+
+	/**
+	 * Recursively copy the contents of the {@code src} file/directory
+	 * to the {@code dest} file/directory. Skips empty directories.
+	 *
+	 * @param src the source path
+	 * @param dest the destination path
 	 * @param fileFilter the filter to check whether {@code src file} should be copied or not
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.3.0
@@ -123,17 +138,12 @@ public abstract class FileUtils {
 		Objects.requireNonNull(dest, "Destination must not be null");
 		Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
 			@Override
-			public FileVisitResult preVisitDirectory(@Nonnull Path dir, @Nonnull BasicFileAttributes attributes)
-					throws IOException {
-				Files.createDirectories(dest.resolve(src.relativize(dir)));
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
 			public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attributes)
 					throws IOException {
 				if (fileFilter == null || fileFilter.test(file)) {
-					Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+					Path destFile = dest.resolve(src.relativize(file));
+					Files.createDirectories(destFile.getParent());
+					Files.copy(file, destFile, StandardCopyOption.REPLACE_EXISTING);
 				}
 				return FileVisitResult.CONTINUE;
 			}

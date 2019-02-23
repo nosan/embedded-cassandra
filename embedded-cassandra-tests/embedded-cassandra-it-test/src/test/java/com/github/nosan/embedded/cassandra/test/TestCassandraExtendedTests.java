@@ -23,7 +23,7 @@ import java.util.Set;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
+import com.github.nosan.embedded.cassandra.test.support.OutputRule;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TestCassandraExtendedTests {
 
 	@Rule
-	public final CaptureOutput output = new CaptureOutput();
+	public final OutputRule output = new OutputRule();
 
 	@Test
 	public void shouldRegisterShutdownHookOnlyOnce() throws ClassNotFoundException {
