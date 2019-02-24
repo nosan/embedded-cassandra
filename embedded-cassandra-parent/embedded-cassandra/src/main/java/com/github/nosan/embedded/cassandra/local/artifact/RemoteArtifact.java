@@ -191,9 +191,7 @@ class RemoteArtifact implements Artifact {
 				return tempFile;
 			}
 			catch (IOException ex) {
-				if (log.isDebugEnabled()) {
-					log.error(String.format("Could not rename (%s) as (%s).", tempFile, file), ex);
-				}
+				log.error(String.format("Could not rename (%s) as (%s).", tempFile, file), ex);
 				return tempFile;
 			}
 		}
