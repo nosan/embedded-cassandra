@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 
 import javax.annotation.Nonnull;
 
@@ -131,6 +132,36 @@ public class ArtifactCustomizerTests {
 
 		assertThatThrownBy(() -> customizer.customize(this.workingDirectory, this.version))
 				.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	public void shouldInitializeDirectoryOnlyOnce() throws Exception {
+		Path archive = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
+		Version version = this.version;
+		Path workingDirectory = this.workingDirectory;
+		Path artifactDirectory = this.artifactDirectory;
+
+		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(version, archive),
+				artifactDirectory);
+		customizer.customize(workingDirectory, version);
+
+		assertThat(workingDirectory).exists();
+		assertThat(workingDirectory.resolve("doc")).doesNotExist();
+		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
+		assertThat(workingDirectory.resolve("conf")).exists();
+		assertThat(workingDirectory.resolve("bin")).exists();
+
+		Path workingCassandraFile = workingDirectory.resolve("bin/cassandra");
+		FileTime workingCassandraFileLastModified = Files.getLastModifiedTime(workingCassandraFile);
+
+		Path artifactCassandraFile = artifactDirectory.resolve("bin/cassandra");
+		FileTime artifactCassandraFileLastModified = Files.getLastModifiedTime(artifactCassandraFile);
+
+		customizer.customize(workingDirectory, version);
+
+		assertThat(Files.getLastModifiedTime(workingCassandraFile)).isEqualTo(workingCassandraFileLastModified);
+		assertThat(Files.getLastModifiedTime(artifactCassandraFile)).isEqualTo(artifactCassandraFileLastModified);
+
 	}
 
 	private static long count(Path directory) throws IOException {

@@ -103,7 +103,7 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 			return true;
 		}
 		try {
-			return Files.size(destFile) != Files.size(srcFile);
+			return Files.size(destFile) < Files.size(srcFile);
 		}
 		catch (IOException ex) {
 			return true;
@@ -112,19 +112,25 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 
 	private static boolean shouldExtract(Path destination, ArchiveEntry entry) {
 		String entryName = entry.getName();
-		if (Files.exists(destination.resolve(entryName))) {
-			return false;
-		}
-		int endIndex = entryName.lastIndexOf('/');
-		if (endIndex != -1) {
-			for (String directory : entryName.substring(0, endIndex).split("/")) {
-				String name = directory.toLowerCase(Locale.ENGLISH);
-				if (name.equals("javadoc") || name.equals("doc")) {
-					return false;
+		Path destFile = destination.resolve(entryName);
+		if (!Files.exists(destFile)) {
+			int endIndex = entryName.lastIndexOf('/');
+			if (endIndex != -1) {
+				for (String directory : entryName.substring(0, endIndex).split("/")) {
+					String name = directory.toLowerCase(Locale.ENGLISH);
+					if (name.equals("javadoc") || name.equals("doc")) {
+						return false;
+					}
 				}
 			}
+			return true;
 		}
-		return true;
+		try {
+			return Files.size(destFile) < entry.getSize();
+		}
+		catch (IOException ex) {
+			return true;
+		}
 	}
 
 	private static Path determineBaseDir(Path directory) throws IOException {
