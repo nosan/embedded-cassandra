@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -24,7 +25,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -244,8 +244,7 @@ public abstract class ArchiveUtils {
 		}
 
 		private static boolean isWindows() {
-			return new SystemProperty("os.name").getRequired()
-					.toLowerCase(Locale.ENGLISH).contains("windows");
+			return File.separatorChar == '\\';
 		}
 
 		private static Set<PosixFilePermission> getPermissions(long mode) {

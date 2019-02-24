@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.ClosedByInterruptException;
@@ -23,7 +24,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -38,7 +38,6 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
-import com.github.nosan.embedded.cassandra.util.SystemProperty;
 
 /**
  * This {@link Cassandra} implementation just a wrapper on {@link CassandraNode}.
@@ -339,7 +338,6 @@ class LocalCassandra implements Cassandra {
 	}
 
 	private static boolean isWindows() {
-		return new SystemProperty("os.name").getRequired()
-				.toLowerCase(Locale.ENGLISH).contains("windows");
+		return File.separatorChar == '\\';
 	}
 }
