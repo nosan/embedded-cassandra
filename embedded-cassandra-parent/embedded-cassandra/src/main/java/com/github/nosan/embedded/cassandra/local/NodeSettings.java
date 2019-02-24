@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -193,7 +192,7 @@ class NodeSettings implements Settings {
 	}
 
 	private static Optional<Integer> getInteger(String name, Map<?, ?> source) {
-		return getString(name, source).filter(StringUtils::hasText).map(asInteger());
+		return getString(name, source).filter(StringUtils::hasText).map(Integer::decode);
 	}
 
 	private static Optional<Boolean> getBoolean(String name, Map<?, ?> source) {
@@ -204,14 +203,4 @@ class NodeSettings implements Settings {
 		return Optional.ofNullable(source.get(name)).map(String::valueOf);
 	}
 
-	private static Function<String, Integer> asInteger() {
-		return source -> {
-			try {
-				return Integer.decode(source);
-			}
-			catch (NumberFormatException ex) {
-				return null;
-			}
-		};
-	}
 }
