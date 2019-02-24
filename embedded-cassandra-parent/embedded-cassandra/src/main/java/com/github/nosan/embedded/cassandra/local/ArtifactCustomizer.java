@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,13 +110,14 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 		}
 	}
 
-	private static boolean shouldExtract(Path destination, String entry) {
-		if (Files.exists(destination.resolve(entry))) {
+	private static boolean shouldExtract(Path destination, ArchiveEntry entry) {
+		String entryName = entry.getName();
+		if (Files.exists(destination.resolve(entryName))) {
 			return false;
 		}
-		int endIndex = entry.lastIndexOf('/');
+		int endIndex = entryName.lastIndexOf('/');
 		if (endIndex != -1) {
-			for (String directory : entry.substring(0, endIndex).split("/")) {
+			for (String directory : entryName.substring(0, endIndex).split("/")) {
 				String name = directory.toLowerCase(Locale.ENGLISH);
 				if (name.equals("javadoc") || name.equals("doc")) {
 					return false;

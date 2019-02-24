@@ -103,7 +103,7 @@ public abstract class ArchiveUtils {
 	 * @throws IOException in the case of I/O errors
 	 */
 	public static void extract(@Nonnull Path archive, @Nonnull Path dest,
-			@Nullable Predicate<? super String> entryFilter) throws IOException {
+			@Nullable Predicate<? super ArchiveEntry> entryFilter) throws IOException {
 		Objects.requireNonNull(archive, "Archive must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archive);
@@ -111,7 +111,7 @@ public abstract class ArchiveUtils {
 			Path tempDir = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString());
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
-				if (!entry.isDirectory() && (entryFilter == null || entryFilter.test(entry.getName()))) {
+				if (!entry.isDirectory() && (entryFilter == null || entryFilter.test(entry))) {
 					Path tempFile = tempDir.resolve(entry.getName());
 					Files.createDirectories(tempFile.getParent());
 					Files.copy(stream, tempFile);

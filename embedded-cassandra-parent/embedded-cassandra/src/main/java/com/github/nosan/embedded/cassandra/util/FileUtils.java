@@ -119,7 +119,7 @@ public abstract class FileUtils {
 	public static void copy(@Nonnull Path src, @Nonnull Path dest) throws IOException {
 		Objects.requireNonNull(src, "Source must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
-		copy(src, dest, file -> true);
+		copy(src, dest, path -> true);
 	}
 
 	/**
