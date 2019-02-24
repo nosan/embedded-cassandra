@@ -37,7 +37,7 @@ import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 /**
- * {@link DirectoryCustomizer} to initialize a {@code directory} from an {@link Artifact}.
+ * {@link DirectoryCustomizer} to initialize a {@code directory} with an {@link Artifact}.
  *
  * @author Dmytro Nosan
  * @since 1.3.0
