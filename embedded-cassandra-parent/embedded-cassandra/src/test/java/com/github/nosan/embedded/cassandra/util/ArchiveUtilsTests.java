@@ -74,7 +74,7 @@ public class ArchiveUtilsTests {
 	}
 
 	@Test
-	public void extractFilter() throws Exception {
+	public void applyFilter() throws Exception {
 		File archive = this.temporaryFolder.newFile(String.format("%s.%s",
 				UUID.randomUUID(), this.name));
 		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
