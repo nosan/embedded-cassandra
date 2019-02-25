@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EmbeddedLocalCassandraTests {
 
 	@ClassRule
-	public static final OutputRule OUTPUT = new OutputRule();
+	public static final OutputRule output = new OutputRule();
 
 	@Autowired
 	private TestCassandra cassandra;
@@ -71,7 +71,7 @@ public class EmbeddedLocalCassandraTests {
 
 	@Test
 	public void shouldOverrideVersion() {
-		assertThat(OUTPUT.toString()).contains("Cassandra version: 2.2.12");
+		assertThat(output.toString()).contains("Cassandra version: 2.2.12");
 		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
 		assertThat(this.cluster.connect().execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
 		assertThat(this.cassandraFactory.getArtifactFactory()).isSameAs(this.remoteArtifactFactory);

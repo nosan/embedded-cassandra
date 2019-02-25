@@ -50,14 +50,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EmbeddedCassandraTests {
 
 	@ClassRule
-	public static final OutputRule OUTPUT = new OutputRule();
+	public static final OutputRule output = new OutputRule();
 
 	@Autowired
 	private Cluster cluster;
 
 	@Test
 	public void shouldSelectFromRoles() {
-		assertThat(OUTPUT.toString()).contains("Cassandra version: 2.2.12");
+		assertThat(output.toString()).contains("Cassandra version: 2.2.12");
 		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
 		try (Session session = this.cluster.connect()) {
 			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
