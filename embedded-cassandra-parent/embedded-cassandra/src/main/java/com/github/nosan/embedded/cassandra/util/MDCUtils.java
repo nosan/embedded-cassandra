@@ -52,7 +52,7 @@ public abstract class MDCUtils {
 			return (context != null) ? Collections.unmodifiableMap(context) : Collections.emptyMap();
 		}
 		catch (Throwable ex) {
-			if (log.isTraceEnabled()) {
+			if (log.isDebugEnabled()) {
 				log.error("Could not get MDC context", ex);
 			}
 			return new LinkedHashMap<>();
@@ -74,7 +74,7 @@ public abstract class MDCUtils {
 			MDC.setContextMap(context);
 		}
 		catch (Throwable ex) {
-			if (log.isTraceEnabled()) {
+			if (log.isDebugEnabled()) {
 				log.error("Could not set MDC context", ex);
 			}
 		}

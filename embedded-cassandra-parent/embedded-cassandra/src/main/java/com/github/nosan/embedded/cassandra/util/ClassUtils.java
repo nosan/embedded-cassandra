@@ -54,7 +54,7 @@ public abstract class ClassUtils {
 			cl = Thread.currentThread().getContextClassLoader();
 		}
 		catch (Throwable ex) {
-			if (log.isTraceEnabled()) {
+			if (log.isDebugEnabled()) {
 				log.error(String.format("Could not get (%s) context loader", Thread.currentThread()), ex);
 			}
 		}
@@ -63,7 +63,7 @@ public abstract class ClassUtils {
 				cl = ClassUtils.class.getClassLoader();
 			}
 			catch (Throwable ex) {
-				if (log.isTraceEnabled()) {
+				if (log.isDebugEnabled()) {
 					log.error(String.format("Could not get (%s) class loader", ClassUtils.class), ex);
 				}
 			}
@@ -73,7 +73,7 @@ public abstract class ClassUtils {
 				cl = ClassLoader.getSystemClassLoader();
 			}
 			catch (Throwable ex) {
-				if (log.isTraceEnabled()) {
+				if (log.isDebugEnabled()) {
 					log.error("Could not get a system class loader", ex);
 				}
 			}
