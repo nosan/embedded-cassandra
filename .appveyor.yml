@@ -13,7 +13,9 @@ build_script:
   - mvnw.cmd -Dsurefire.rerunFailingTestsCount=1 -B clean install
 
 on_failure:
-  - cat **/**/target/surefire-reports/*-output.txt
+  - ps: |
+      7z a -r surefire-reports.zip '**\target\surefire-reports\*'
+      Push-AppveyorArtifact surefire-reports.zip -DeploymentName 'Surefire Reports'
 
 cache:
   - C:/Users/appveyor/.m2
