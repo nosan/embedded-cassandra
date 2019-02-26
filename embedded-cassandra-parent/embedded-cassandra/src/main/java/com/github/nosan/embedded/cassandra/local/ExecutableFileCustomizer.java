@@ -16,9 +16,11 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -39,23 +41,21 @@ class ExecutableFileCustomizer implements DirectoryCustomizer {
 
 	@Override
 	public void customize(@Nonnull Path directory, @Nonnull Version version) {
-		setExecutable(directory.resolve("bin/cassandra"));
+		Path file = directory.resolve("bin/cassandra");
+		if (Files.exists(file) && !Files.isExecutable(file)) {
+			try {
+				Set<PosixFilePermission> permissions = new LinkedHashSet<>(Files.getPosixFilePermissions(file));
+				permissions.add(PosixFilePermission.OWNER_EXECUTE);
+				permissions.add(PosixFilePermission.GROUP_EXECUTE);
+				permissions.add(PosixFilePermission.OTHERS_EXECUTE);
+				Files.setPosixFilePermissions(file, permissions);
+			}
+			catch (Exception ex) {
+				if (log.isDebugEnabled()) {
+					log.error(String.format("Could not set 'executable' permission(s) to (%s)", file), ex);
+				}
+			}
+		}
 	}
 
-	private static void setExecutable(Path path) {
-		try {
-			if (!Files.exists(path) || Files.isExecutable(path)) {
-				return;
-			}
-			File file = path.toFile();
-			if (!file.setExecutable(true) || file.setExecutable(true, false)) {
-				log.debug("'executable' permission has been set to ({})", file);
-			}
-		}
-		catch (Exception ex) {
-			if (log.isDebugEnabled()) {
-				log.error(String.format("Could not set 'executable' permission to (%s)", path), ex);
-			}
-		}
-	}
 }

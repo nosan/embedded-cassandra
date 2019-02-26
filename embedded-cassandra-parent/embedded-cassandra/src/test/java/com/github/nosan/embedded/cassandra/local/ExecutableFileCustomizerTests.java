@@ -47,16 +47,15 @@ public class ExecutableFileCustomizerTests {
 	@Test
 	@DisableIfOS("windows")
 	public void setExecutableUnixFile() throws IOException {
-		File file = createFile("cassandra");
+		File file = new File(this.temporaryFolder.newFolder("bin"), "cassandra");
+
+		assertThat(file.createNewFile()).isTrue();
+		assertThat(file.setExecutable(false)).isTrue();
+		assertThat(file.canExecute()).isFalse();
+
 		this.customizer.customize(this.temporaryFolder.getRoot().toPath(), new Version(3, 11, 3));
+
 		assertThat(file.canExecute()).isTrue();
 	}
 
-	private File createFile(String name) throws IOException {
-		TemporaryFolder temporaryFolder = this.temporaryFolder;
-		File file = new File(temporaryFolder.newFolder("bin"), name);
-		assertThat(file.createNewFile()).isTrue();
-		assertThat(file.setExecutable(false)).isTrue();
-		return file;
-	}
 }
