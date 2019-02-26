@@ -57,7 +57,7 @@ class AbstractFileReplacerInitializer extends AbstractFileInitializer {
 		URL url = this.url;
 		if (url != null) {
 			if (this.log.isDebugEnabled()) {
-				this.log.debug("Replaces ({}) with a ({})", file, url);
+				this.log.debug("Replace ({}) with a ({})", file, url);
 			}
 			try (InputStream is = url.openStream()) {
 				Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING);

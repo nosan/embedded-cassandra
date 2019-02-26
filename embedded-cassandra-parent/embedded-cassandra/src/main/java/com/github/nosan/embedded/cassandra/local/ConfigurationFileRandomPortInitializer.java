@@ -77,7 +77,7 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 				InetAddress address = addressSupplier.get();
 				int newPort = PortUtils.getPort(address);
 				if (this.log.isDebugEnabled()) {
-					this.log.debug("Replaces {}: {} as {}: {}", property, originalPort, property, newPort);
+					this.log.debug("Replace {}: {} as {}: {}", property, originalPort, property, newPort);
 				}
 				source.put(property, newPort);
 			}
