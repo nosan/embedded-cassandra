@@ -36,7 +36,7 @@ abstract class BeanDefinitionUtils {
 	private static final Logger log = LoggerFactory.getLogger(BeanDefinitionUtils.class);
 
 	/**
-	 * Register a new bean definition with a registry. Replace existing {@link BeanDefinition} if exists.
+	 * Register a new bean definition with a registry. Replaces existing {@link BeanDefinition} if exists.
 	 *
 	 * @param registry {@link BeanDefinitionRegistry} for registration bean definitions
 	 * @param beanName the name of the bean instance to register
