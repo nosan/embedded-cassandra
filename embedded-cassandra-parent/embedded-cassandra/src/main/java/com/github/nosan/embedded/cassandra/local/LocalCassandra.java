@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -129,11 +128,6 @@ class LocalCassandra implements Cassandra {
 			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
 			@Nullable URL commitLogArchivingFile, @Nonnull List<String> jvmOptions, @Nullable Path javaHome,
 			int jmxPort, boolean allowRoot, boolean registerShutdownHook) {
-		Objects.requireNonNull(artifactFactory, "Artifact Factory must not be null");
-		Objects.requireNonNull(version, "Version must not be null");
-		Objects.requireNonNull(startupTimeout, "Startup timeout must not be null");
-		Objects.requireNonNull(jvmOptions, "JVM Options must not be null");
-		Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
 		this.artifactFactory = artifactFactory;
 		this.workingDirectory = workingDirectory;
 		this.artifactDirectory = artifactDirectory;

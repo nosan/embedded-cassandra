@@ -159,8 +159,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 		Objects.requireNonNull(version, "Version must not be null");
 		Path directory = getDirectory();
 		if (directory == null) {
-			directory = FileUtils.getUserHomeDirectory()
-					.resolve("Downloads");
+			directory = FileUtils.getUserHomeDirectory().resolve("Downloads");
 		}
 		UrlFactory urlFactory = getUrlFactory();
 		if (urlFactory == null) {

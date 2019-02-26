@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -70,11 +69,8 @@ class RunProcess {
 	 * @param arguments the program to execute and its arguments
 	 * @param threadFactory factory for creating process readers.
 	 */
-	RunProcess(@Nullable Path workingDirectory,
-			@Nullable Map<String, String> environment,
-			@Nullable ThreadFactory threadFactory,
-			@Nonnull List<?> arguments) {
-		Objects.requireNonNull(arguments, "Arguments must not be null");
+	RunProcess(@Nullable Path workingDirectory, @Nullable Map<String, String> environment,
+			@Nullable ThreadFactory threadFactory, @Nonnull List<?> arguments) {
 		this.workingDirectory = workingDirectory;
 		this.arguments = Collections.unmodifiableList(new ArrayList<>(arguments));
 		this.environment = Collections.unmodifiableMap((environment != null) ?

@@ -92,9 +92,9 @@ class RemoteArtifact implements Artifact {
 	RemoteArtifact(@Nonnull Version version, @Nonnull Path directory,
 			@Nonnull UrlFactory urlFactory, @Nullable Proxy proxy,
 			@Nullable Duration readTimeout, @Nullable Duration connectTimeout) {
-		this.version = Objects.requireNonNull(version, "Version must not be null");
-		this.directory = Objects.requireNonNull(directory, "Directory must not be null");
-		this.urlFactory = Objects.requireNonNull(urlFactory, "URL Factory must not be null");
+		this.version = version;
+		this.directory = directory;
+		this.urlFactory = urlFactory;
 		this.proxy = proxy;
 		this.readTimeout = readTimeout;
 		this.connectTimeout = connectTimeout;
