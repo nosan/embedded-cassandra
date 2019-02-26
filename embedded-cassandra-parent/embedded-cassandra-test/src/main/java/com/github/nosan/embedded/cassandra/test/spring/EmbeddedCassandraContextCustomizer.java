@@ -79,15 +79,13 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			@Nonnull MergedContextConfiguration mergedConfig) {
 		Class<?> testClass = mergedConfig.getTestClass();
 		BeanDefinitionRegistry registry = BeanDefinitionUtils.getRegistry(context.getBeanFactory());
-		ifAnnotationPresent(testClass, EmbeddedLocalCassandra.class, annotation -> {
-			BeanDefinitionUtils.registerBeanDefinition(registry,
-					LOCAL_CASSANDRA_FACTORY_BEAN_NAME, asPrimary(BeanDefinitionBuilder
-							.rootBeanDefinition(LocalCassandraFactoryBean.class)
-							.addConstructorArgValue(testClass)
-							.addConstructorArgValue(annotation)
-							.getBeanDefinition()));
-
-		});
+		ifAnnotationPresent(testClass, EmbeddedLocalCassandra.class, annotation ->
+				BeanDefinitionUtils.registerBeanDefinition(registry,
+						LOCAL_CASSANDRA_FACTORY_BEAN_NAME, asPrimary(BeanDefinitionBuilder
+								.rootBeanDefinition(LocalCassandraFactoryBean.class)
+								.addConstructorArgValue(testClass)
+								.addConstructorArgValue(annotation)
+								.getBeanDefinition())));
 		ifAnnotationPresent(testClass, EmbeddedCassandra.class, annotation -> {
 			BeanDefinitionUtils.registerBeanDefinition(registry,
 					EMBEDDED_CASSANDRA_BEAN_NAME, asPrimary(BeanDefinitionBuilder
