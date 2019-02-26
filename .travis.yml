@@ -16,8 +16,7 @@ script:
   - java -version
   - ./mvnw -Dsurefire.rerunFailingTestsCount=1 -B clean install
 
-after_failure:
-  - bash -c "find . -type f -name '*-output.txt' -print0 | xargs -0 -t -I {} bash -c 'cat {}; printf \"\n%.0s\" {1..5}'"
+after_failure: surefire-reports.sh
 
 cache:
   directories:
