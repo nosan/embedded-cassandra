@@ -37,14 +37,14 @@ import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 /**
- * {@link DirectoryCustomizer} to initialize a {@code directory} with an {@link Artifact}.
+ * {@link Initializer} to initialize a {@code directory} with an {@link Artifact}.
  *
  * @author Dmytro Nosan
  * @since 1.3.0
  */
-class ArtifactCustomizer implements DirectoryCustomizer {
+class WorkingDirectoryInitializer implements Initializer {
 
-	private static final Logger log = LoggerFactory.getLogger(ArtifactCustomizer.class);
+	private static final Logger log = LoggerFactory.getLogger(WorkingDirectoryInitializer.class);
 
 	@Nonnull
 	private final ArtifactFactory artifactFactory;
@@ -53,23 +53,23 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 	private final Path artifactDirectory;
 
 	/**
-	 * Creates an {@link ArtifactCustomizer}.
+	 * Creates an {@link WorkingDirectoryInitializer}.
 	 *
 	 * @param artifactFactory a factory to create {@link Artifact}
 	 * @param artifactDirectory a directory to extract an {@link Artifact} (must be writable)
 	 */
-	ArtifactCustomizer(@Nonnull ArtifactFactory artifactFactory, @Nonnull Path artifactDirectory) {
+	WorkingDirectoryInitializer(@Nonnull ArtifactFactory artifactFactory, @Nonnull Path artifactDirectory) {
 		this.artifactFactory = artifactFactory;
 		this.artifactDirectory = artifactDirectory;
 	}
 
 	@Override
-	public void customize(@Nonnull Path directory, @Nonnull Version version) throws IOException {
+	public void initialize(@Nonnull Path workingDirectory, @Nonnull Version version) throws IOException {
 		Path artifactDirectory = this.artifactDirectory;
 		Artifact artifact = this.artifactFactory.create(version);
 		Objects.requireNonNull(artifact, "Artifact must not be null");
 		extractArtifact(artifact, artifactDirectory);
-		copyArtifact(directory, artifactDirectory);
+		copyArtifact(workingDirectory, artifactDirectory);
 	}
 
 	private static void extractArtifact(Artifact artifact, Path artifactDirectory) throws IOException {
@@ -140,7 +140,7 @@ class ArtifactCustomizer implements DirectoryCustomizer {
 			Path conf = path.resolve("conf");
 			return Files.exists(bin.resolve("cassandra")) &&
 					Files.exists(bin.resolve("cassandra.ps1")) &&
-					Files.exists(conf.resolve("cassandra.yaml")) &&
+					Files.exists(conf) &&
 					Files.exists(lib);
 		}).collect(Collectors.toSet());
 

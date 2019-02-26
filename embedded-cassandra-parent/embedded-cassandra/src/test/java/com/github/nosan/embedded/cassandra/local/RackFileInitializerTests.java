@@ -29,11 +29,11 @@ import com.github.nosan.embedded.cassandra.Version;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ConfigurationFileCustomizer}.
+ * Tests for {@link RackFileInitializer}.
  *
  * @author Dmytro Nosan
  */
-public class ConfigurationFileCustomizerTests {
+public class RackFileInitializerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -41,13 +41,21 @@ public class ConfigurationFileCustomizerTests {
 	@Test
 	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		ConfigurationFileCustomizer customizer =
-				new ConfigurationFileCustomizer(getClass().getResource("/cassandra.yaml"));
-		customizer.customize(directory.getParent(), new Version(3, 11, 3));
-		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
-			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(
+		RackFileInitializer customizer =
+				new RackFileInitializer(getClass().getResource("/cassandra-rackdc.properties"));
+		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-rackdc.properties")) {
+			assertThat(directory.resolve("cassandra-rackdc.properties")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
 		}
 
+	}
+
+	@Test
+	public void notCustomize() throws Exception {
+		Path directory = this.temporaryFolder.newFolder("conf").toPath();
+		RackFileInitializer customizer = new RackFileInitializer(null);
+		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+		assertThat(directory.resolve("cassandra-rackdc.properties")).doesNotExist();
 	}
 }

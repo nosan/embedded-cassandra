@@ -29,32 +29,32 @@ import com.github.nosan.embedded.cassandra.Version;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CommitLogArchivingFileCustomizer}.
+ * Tests for {@link CommitLogFileInitializer}.
  *
  * @author Dmytro Nosan
  */
-public class CommitLogArchivingFileCustomizerTests {
+public class CommitLogFileInitializerTests {
+
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	@Test
 	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		CommitLogArchivingFileCustomizer customizer =
-				new CommitLogArchivingFileCustomizer(getClass().getResource("/commitlog_archiving.properties"));
-		customizer.customize(directory.getParent(), new Version(3, 11, 3));
+		CommitLogFileInitializer customizer =
+				new CommitLogFileInitializer(getClass().getResource("/commitlog_archiving.properties"));
+		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/commitlog_archiving.properties")) {
 			assertThat(directory.resolve("commitlog_archiving.properties")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
 		}
-
 	}
 
 	@Test
 	public void notCustomize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		CommitLogArchivingFileCustomizer customizer = new CommitLogArchivingFileCustomizer(null);
-		customizer.customize(directory.getParent(), new Version(3, 11, 3));
+		CommitLogFileInitializer customizer = new CommitLogFileInitializer(null);
+		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
 		assertThat(directory.resolve("commitlog_archiving.properties")).doesNotExist();
 	}
 }

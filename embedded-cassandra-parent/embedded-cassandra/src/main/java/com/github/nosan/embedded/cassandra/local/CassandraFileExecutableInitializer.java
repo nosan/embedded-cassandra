@@ -24,24 +24,22 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
- * {@link DirectoryCustomizer} to set 'executable permission' to {@code bin/cassandra} file.
+ * {@link Initializer} to set 'executable permission' to {@code bin/cassandra} file.
  *
  * @author Dmytro Nosan
  * @since 1.2.5
  */
-class ExecutableFileCustomizer implements DirectoryCustomizer {
+class CassandraFileExecutableInitializer extends AbstractFileInitializer {
 
-	private static final Logger log = LoggerFactory.getLogger(ExecutableFileCustomizer.class);
+	CassandraFileExecutableInitializer() {
+		super((workDir, version) -> workDir.resolve("bin/cassandra"));
+	}
 
 	@Override
-	public void customize(@Nonnull Path directory, @Nonnull Version version) {
-		Path file = directory.resolve("bin/cassandra");
+	protected void initialize(@Nonnull Path file, @Nonnull Path workingDirectory, @Nonnull Version version) {
 		if (Files.exists(file) && !Files.isExecutable(file)) {
 			try {
 				Set<PosixFilePermission> permissions = new LinkedHashSet<>(Files.getPosixFilePermissions(file));
@@ -51,8 +49,8 @@ class ExecutableFileCustomizer implements DirectoryCustomizer {
 				Files.setPosixFilePermissions(file, permissions);
 			}
 			catch (Exception ex) {
-				if (log.isDebugEnabled()) {
-					log.error(String.format("Could not set 'executable' permission(s) to (%s)", file), ex);
+				if (this.log.isDebugEnabled()) {
+					this.log.error(String.format("Could not set 'executable' permission(s) to (%s)", file), ex);
 				}
 			}
 		}

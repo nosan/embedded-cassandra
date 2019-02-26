@@ -38,11 +38,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link ArtifactCustomizer}.
+ * Tests for {@link WorkingDirectoryInitializer}.
  *
  * @author Dmytro Nosan
  */
-public class ArtifactCustomizerTests {
+public class WorkingDirectoryInitializerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -66,10 +66,11 @@ public class ArtifactCustomizerTests {
 
 		ArchiveUtils.extract(plain, this.artifactDirectory, ignore -> true);
 
-		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(this.version, root),
+		WorkingDirectoryInitializer
+				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, root),
 				this.artifactDirectory);
 
-		assertThatThrownBy(() -> customizer.customize(this.workingDirectory, this.version))
+		assertThatThrownBy(() -> customizer.initialize(this.workingDirectory, this.version))
 				.hasStackTraceContaining("Impossible to determine a base directory")
 				.isInstanceOf(IllegalStateException.class);
 	}
@@ -79,9 +80,10 @@ public class ArtifactCustomizerTests {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 		Path workingDirectory = this.workingDirectory;
 
-		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(this.version, archive),
+		WorkingDirectoryInitializer
+				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
 				this.artifactDirectory);
-		customizer.customize(workingDirectory, this.version);
+		customizer.initialize(workingDirectory, this.version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
@@ -97,10 +99,11 @@ public class ArtifactCustomizerTests {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 		Path workingDirectory = this.workingDirectory;
 
-		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(this.version, archive),
+		WorkingDirectoryInitializer
+				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
 				this.artifactDirectory);
 
-		customizer.customize(workingDirectory, this.version);
+		customizer.initialize(workingDirectory, this.version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
@@ -115,10 +118,11 @@ public class ArtifactCustomizerTests {
 	public void directoryNotValidNoCassandraExecutable() throws Exception {
 
 		Path archive = Paths.get(getClass().getResource("/empty.zip").toURI());
-		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(this.version, archive),
+		WorkingDirectoryInitializer
+				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
 				this.artifactDirectory);
 
-		assertThatThrownBy(() -> customizer.customize(this.workingDirectory, this.version))
+		assertThatThrownBy(() -> customizer.initialize(this.workingDirectory, this.version))
 				.hasStackTraceContaining("doesn't have one of the ")
 				.isInstanceOf(IllegalStateException.class);
 	}
@@ -127,10 +131,11 @@ public class ArtifactCustomizerTests {
 	public void invalidArchive() throws Exception {
 
 		Path archive = this.temporaryFolder.newFile().toPath();
-		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(this.version, archive),
+		WorkingDirectoryInitializer
+				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
 				this.artifactDirectory);
 
-		assertThatThrownBy(() -> customizer.customize(this.workingDirectory, this.version))
+		assertThatThrownBy(() -> customizer.initialize(this.workingDirectory, this.version))
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
@@ -141,9 +146,10 @@ public class ArtifactCustomizerTests {
 		Path workingDirectory = this.workingDirectory;
 		Path artifactDirectory = this.artifactDirectory;
 
-		ArtifactCustomizer customizer = new ArtifactCustomizer(new StaticArtifactFactory(version, archive),
+		WorkingDirectoryInitializer
+				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive),
 				artifactDirectory);
-		customizer.customize(workingDirectory, version);
+		customizer.initialize(workingDirectory, version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
@@ -157,7 +163,7 @@ public class ArtifactCustomizerTests {
 		Path artifactCassandraFile = artifactDirectory.resolve("bin/cassandra");
 		FileTime artifactCassandraFileLastModified = Files.getLastModifiedTime(artifactCassandraFile);
 
-		customizer.customize(workingDirectory, version);
+		customizer.initialize(workingDirectory, version);
 
 		assertThat(Files.getLastModifiedTime(workingCassandraFile)).isEqualTo(workingCassandraFileLastModified);
 		assertThat(Files.getLastModifiedTime(artifactCassandraFile)).isEqualTo(artifactCassandraFileLastModified);

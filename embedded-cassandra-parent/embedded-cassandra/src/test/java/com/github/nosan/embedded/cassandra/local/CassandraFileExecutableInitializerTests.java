@@ -16,38 +16,46 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.InputStream;
-import java.nio.file.Path;
+import java.io.File;
+import java.io.IOException;
 
-import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
+import com.github.nosan.embedded.cassandra.test.support.OSRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link LogbackFileCustomizer}.
+ * Tests for {@link CassandraFileExecutableInitializer}.
  *
  * @author Dmytro Nosan
  */
-public class LogbackFileCustomizerTests {
+public class CassandraFileExecutableInitializerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-	@Test
-	public void customize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		LogbackFileCustomizer customizer =
-				new LogbackFileCustomizer(getClass().getResource("/logback-test.xml"));
-		customizer.customize(directory.getParent(), new Version(3, 11, 3));
-		try (InputStream inputStream = getClass().getResourceAsStream("/logback-test.xml")) {
-			assertThat(directory.resolve("logback.xml")).hasBinaryContent(
-					IOUtils.toByteArray(inputStream));
-		}
+	@Rule
+	public final OSRule os = new OSRule();
 
+	private final CassandraFileExecutableInitializer customizer = new CassandraFileExecutableInitializer();
+
+	@Test
+	@DisableIfOS("windows")
+	public void setExecutableUnixFile() throws IOException {
+		File file = new File(this.temporaryFolder.newFolder("bin"), "cassandra");
+
+		assertThat(file.createNewFile()).isTrue();
+		assertThat(file.setExecutable(false)).isTrue();
+		assertThat(file.canExecute()).isFalse();
+
+		this.customizer.initialize(this.temporaryFolder.getRoot().toPath(), new Version(3, 11, 3));
+
+		assertThat(file.canExecute()).isTrue();
 	}
+
 }

@@ -240,19 +240,19 @@ class LocalCassandra implements Cassandra {
 			Version version = this.version;
 			log.info("Initialize Apache Cassandra ({}). It takes a while...", version);
 			long start = System.currentTimeMillis();
-			List<DirectoryCustomizer> customizers = new ArrayList<>();
-			customizers.add(new ArtifactCustomizer(this.artifactFactory, this.artifactDirectory));
-			customizers.add(new LogbackFileCustomizer(this.logbackFile));
-			customizers.add(new ConfigurationFileCustomizer(this.configurationFile));
-			customizers.add(new RackFileCustomizer(this.rackFile));
-			customizers.add(new TopologyFileCustomizer(this.topologyFile));
-			customizers.add(new CommitLogArchivingFileCustomizer(this.commitLogArchivingFile));
-			customizers.add(new RandomPortConfigurationFileCustomizer());
+			List<Initializer> initializers = new ArrayList<>();
+			initializers.add(new WorkingDirectoryInitializer(this.artifactFactory, this.artifactDirectory));
+			initializers.add(new LogbackFileInitializer(this.logbackFile));
+			initializers.add(new RackFileInitializer(this.rackFile));
+			initializers.add(new ConfigurationFileInitializer(this.configurationFile));
+			initializers.add(new TopologyFileInitializer(this.topologyFile));
+			initializers.add(new CommitLogFileInitializer(this.commitLogArchivingFile));
+			initializers.add(new ConfigurationFileRandomPortInitializer());
 			if (!isWindows()) {
-				customizers.add(new ExecutableFileCustomizer());
+				initializers.add(new CassandraFileExecutableInitializer());
 			}
-			for (DirectoryCustomizer customizer : customizers) {
-				customizer.customize(this.workingDirectory, version);
+			for (Initializer initializer : initializers) {
+				initializer.initialize(this.workingDirectory, version);
 			}
 			long elapsed = System.currentTimeMillis() - start;
 			log.info("Apache Cassandra ({}) has been initialized ({} ms)", version, elapsed);

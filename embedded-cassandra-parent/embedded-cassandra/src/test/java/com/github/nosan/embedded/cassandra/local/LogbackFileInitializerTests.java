@@ -29,11 +29,11 @@ import com.github.nosan.embedded.cassandra.Version;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link RackFileCustomizer}.
+ * Tests for {@link LogbackFileInitializer}.
  *
  * @author Dmytro Nosan
  */
-public class RackFileCustomizerTests {
+public class LogbackFileInitializerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -41,21 +41,13 @@ public class RackFileCustomizerTests {
 	@Test
 	public void customize() throws Exception {
 		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		RackFileCustomizer customizer =
-				new RackFileCustomizer(getClass().getResource("/cassandra-rackdc.properties"));
-		customizer.customize(directory.getParent(), new Version(3, 11, 3));
-		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-rackdc.properties")) {
-			assertThat(directory.resolve("cassandra-rackdc.properties")).hasBinaryContent(
+		LogbackFileInitializer customizer =
+				new LogbackFileInitializer(getClass().getResource("/logback-test.xml"));
+		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+		try (InputStream inputStream = getClass().getResourceAsStream("/logback-test.xml")) {
+			assertThat(directory.resolve("logback.xml")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
 		}
 
-	}
-
-	@Test
-	public void notCustomize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		RackFileCustomizer customizer = new RackFileCustomizer(null);
-		customizer.customize(directory.getParent(), new Version(3, 11, 3));
-		assertThat(directory.resolve("cassandra-rackdc.properties")).doesNotExist();
 	}
 }

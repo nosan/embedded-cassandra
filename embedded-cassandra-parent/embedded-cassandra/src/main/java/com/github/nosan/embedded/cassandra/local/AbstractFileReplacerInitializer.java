@@ -22,54 +22,49 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.function.BiFunction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
- * {@link DirectoryCustomizer} to initialize {@code cassandra-rackdc.properties}.
+ * Abstract file {@link Initializer} to replace a file within a working directory.
  *
  * @author Dmytro Nosan
- * @since 1.0.9
+ * @since 1.4.2
  */
-class RackFileCustomizer implements DirectoryCustomizer {
-
-	private static final Logger log = LoggerFactory.getLogger(RackFileCustomizer.class);
+class AbstractFileReplacerInitializer extends AbstractFileInitializer {
 
 	@Nullable
-	private final URL rackFile;
+	private final URL url;
 
 	/**
-	 * Creates a {@link RackFileCustomizer}.
+	 * Creates a {@link AbstractFileReplacerInitializer}.
 	 *
-	 * @param rackFile URL to {@code cassandra-rackdc.properties}
+	 * @param url the URL to the resource for the file replacement
+	 * @param fileMapper the function to resolve a file within a directory
 	 */
-	RackFileCustomizer(@Nullable URL rackFile) {
-		this.rackFile = rackFile;
+	AbstractFileReplacerInitializer(@Nullable URL url, @Nonnull BiFunction<Path, Version, Path> fileMapper) {
+		super(fileMapper);
+		this.url = url;
 	}
 
 	@Override
-	public void customize(@Nonnull Path directory, @Nonnull Version version) throws IOException {
-		URL rackFile = this.rackFile;
-		if (rackFile != null) {
-			Path target = directory.resolve("conf/cassandra-rackdc.properties");
-			if (log.isDebugEnabled()) {
-				log.debug("Replace ({}) with ({})", target, rackFile);
+	protected void initialize(@Nonnull Path file, @Nonnull Path workingDirectory, @Nonnull Version version)
+			throws IOException {
+		URL url = this.url;
+		if (url != null) {
+			if (this.log.isDebugEnabled()) {
+				this.log.debug("Replaces ({}) with a ({})", file, url);
 			}
-
-			try (InputStream is = rackFile.openStream()) {
-				Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
+			try (InputStream is = url.openStream()) {
+				Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING);
 			}
 			catch (IOException ex) {
-				throw new IOException(String.format("Rack Properties (%s) could not be saved", rackFile), ex);
+				throw new IOException(String.format("Can not replace (%s) with a (%s)", file, url), ex);
 			}
 		}
-
 	}
 }
-

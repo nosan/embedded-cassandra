@@ -29,68 +29,69 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 /**
- * {@link DirectoryCustomizer} to replace all {@code 0} ports in a {@code cassandra.yaml}.
+ * {@link Initializer} to replace all {@code 0} ports in a {@code cassandra.yaml}.
  *
  * @author Dmytro Nosan
  * @since 1.0.9
  */
-class RandomPortConfigurationFileCustomizer implements DirectoryCustomizer {
+class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 
-	private static final Logger log = LoggerFactory.getLogger(RandomPortConfigurationFileCustomizer.class);
+	ConfigurationFileRandomPortInitializer() {
+		super((workDir, version) -> workDir.resolve("conf/cassandra.yaml"));
+	}
 
 	@Override
-	public void customize(@Nonnull Path directory, @Nonnull Version version) throws IOException {
-		Yaml yaml = new Yaml();
-		Path configurationFile = directory.resolve("conf/cassandra.yaml");
+	protected void initialize(@Nonnull Path file, @Nonnull Path workingDirectory, @Nonnull Version version)
+			throws IOException {
+		if (Files.exists(file)) {
+			Yaml yaml = new Yaml();
+			Map<Object, Object> originalSource = new LinkedHashMap<>(load(yaml, file));
+			Map<Object, Object> newSource = new LinkedHashMap<>(originalSource);
 
-		Map<Object, Object> originalSource = new LinkedHashMap<>(load(yaml, configurationFile));
-		Map<Object, Object> newSource = new LinkedHashMap<>(originalSource);
+			NodeSettings settings = new NodeSettings(version, newSource);
+			setPort(newSource, "native_transport_port", settings::getPort, settings::getRealAddress);
+			setPort(newSource, "native_transport_port_ssl", settings::getSslPort, settings::getRealAddress);
+			setPort(newSource, "rpc_port", settings::getRpcPort, settings::getRealAddress);
+			setPort(newSource, "storage_port", settings::getStoragePort, settings::getRealListenAddress);
+			setPort(newSource, "ssl_storage_port", settings::getSslStoragePort, settings::getRealListenAddress);
 
-		NodeSettings settings = new NodeSettings(version, newSource);
-		setPort(newSource, "native_transport_port", settings::getPort, settings::getRealAddress);
-		setPort(newSource, "native_transport_port_ssl", settings::getSslPort, settings::getRealAddress);
-		setPort(newSource, "rpc_port", settings::getRpcPort, settings::getRealAddress);
-		setPort(newSource, "storage_port", settings::getStoragePort, settings::getRealListenAddress);
-		setPort(newSource, "ssl_storage_port", settings::getSslStoragePort, settings::getRealListenAddress);
-
-		if (!newSource.equals(originalSource)) {
-			try (BufferedWriter writer = Files.newBufferedWriter(configurationFile)) {
-				yaml.dump(newSource, writer);
+			if (!newSource.equals(originalSource)) {
+				try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+					yaml.dump(newSource, writer);
+				}
 			}
 		}
 	}
 
-	private static void setPort(Map<Object, Object> source, String property, Supplier<Integer> portSupplier,
+	private void setPort(Map<Object, Object> source, String property, Supplier<Integer> portSupplier,
 			Supplier<InetAddress> addressSupplier) {
 		if (source.containsKey(property)) {
 			Integer originalPort = portSupplier.get();
 			if (originalPort != null && originalPort == 0) {
 				InetAddress address = addressSupplier.get();
 				int newPort = PortUtils.getPort(address);
-				if (log.isDebugEnabled()) {
-					log.debug("Replace {}: {} as {}: {}", property, originalPort, property, newPort);
+				if (this.log.isDebugEnabled()) {
+					this.log.debug("Replaces {}: {} as {}: {}", property, originalPort, property, newPort);
 				}
 				source.put(property, newPort);
 			}
 		}
 	}
 
-	private static Map<?, ?> load(Yaml yaml, Path source) {
+	private Map<?, ?> load(Yaml yaml, Path source) {
 		try (InputStream is = Files.newInputStream(source)) {
 			Map<?, ?> values = yaml.loadAs(is, Map.class);
 			return (values != null) ? values : Collections.emptyMap();
 		}
 		catch (IOException ex) {
-			if (log.isDebugEnabled()) {
-				log.error(String.format("Could not read properties from (%s)", source), ex);
+			if (this.log.isDebugEnabled()) {
+				this.log.error(String.format("Could not read properties from (%s)", source), ex);
 			}
 			return Collections.emptyMap();
 		}

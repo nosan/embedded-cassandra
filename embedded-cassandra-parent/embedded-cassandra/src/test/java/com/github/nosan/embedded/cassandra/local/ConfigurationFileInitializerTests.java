@@ -16,46 +16,38 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
-import com.github.nosan.embedded.cassandra.test.support.OSRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ExecutableFileCustomizer}.
+ * Tests for {@link ConfigurationFileInitializer}.
  *
  * @author Dmytro Nosan
  */
-public class ExecutableFileCustomizerTests {
+public class ConfigurationFileInitializerTests {
 
 	@Rule
 	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-	@Rule
-	public final OSRule os = new OSRule();
-
-	private final ExecutableFileCustomizer customizer = new ExecutableFileCustomizer();
-
 	@Test
-	@DisableIfOS("windows")
-	public void setExecutableUnixFile() throws IOException {
-		File file = new File(this.temporaryFolder.newFolder("bin"), "cassandra");
+	public void customize() throws Exception {
+		Path directory = this.temporaryFolder.newFolder("conf").toPath();
+		ConfigurationFileInitializer customizer =
+				new ConfigurationFileInitializer(getClass().getResource("/cassandra.yaml"));
+		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
+			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(
+					IOUtils.toByteArray(inputStream));
+		}
 
-		assertThat(file.createNewFile()).isTrue();
-		assertThat(file.setExecutable(false)).isTrue();
-		assertThat(file.canExecute()).isFalse();
-
-		this.customizer.customize(this.temporaryFolder.getRoot().toPath(), new Version(3, 11, 3));
-
-		assertThat(file.canExecute()).isTrue();
 	}
-
 }

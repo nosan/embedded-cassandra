@@ -16,28 +16,24 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import java.net.URL;
 
-import javax.annotation.Nonnull;
-
-import com.github.nosan.embedded.cassandra.Version;
+import javax.annotation.Nullable;
 
 /**
- * Customizer interface used to customize a {@code directory}.
+ * {@link Initializer} to initialize {@code cassandra-topology.properties}.
  *
  * @author Dmytro Nosan
  * @since 1.0.9
  */
-@FunctionalInterface
-interface DirectoryCustomizer {
-
+class TopologyFileInitializer extends AbstractFileReplacerInitializer {
 	/**
-	 * Customize a directory.
+	 * Creates a {@link TopologyFileInitializer}.
 	 *
-	 * @param directory the base directory (CASSANDRA_HOME)
-	 * @param version a version
-	 * @throws IOException in the case of any IO errors
+	 * @param topologyFile URL to {@code cassandra-topology.properties}
 	 */
-	void customize(@Nonnull Path directory, @Nonnull Version version) throws IOException;
+	TopologyFileInitializer(@Nullable URL topologyFile) {
+		super(topologyFile, (workDir, version) -> workDir.resolve("conf/cassandra-topology.properties"));
+	}
+
 }
