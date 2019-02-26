@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -196,7 +197,7 @@ public class RemoteArtifactTests {
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
 		}
-		Files.createDirectories(this.factory.getDirectory());
+		Files.createDirectories(Objects.requireNonNull(this.factory.getDirectory()));
 		Files.copy(new ByteArrayInputStream(content), this.factory.getDirectory().
 				resolve("apache-cassandra-3.1.1.zip"));
 

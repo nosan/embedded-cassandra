@@ -45,10 +45,8 @@ final class CassandraRunner {
 	 * Creates and starts a new {@link Cassandra} based on the factory.
 	 *
 	 * @param consumer the consumer of the created {@link Cassandra}
-	 * @return stopped Cassandra
 	 */
-	@Nonnull
-	Cassandra run(@Nonnull Consumer<? super Cassandra> consumer) {
+	void run(@Nonnull Consumer<? super Cassandra> consumer) {
 		Cassandra cassandra = this.factory.create();
 		cassandra.start();
 		try {
@@ -57,6 +55,5 @@ final class CassandraRunner {
 		finally {
 			cassandra.stop();
 		}
-		return cassandra;
 	}
 }
