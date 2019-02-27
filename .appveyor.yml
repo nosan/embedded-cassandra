@@ -13,7 +13,7 @@ before_build:
   - mvnw.cmd clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 build_script:
-  - mvnw.cmd clean install
+  - mvnw.cmd clean install -Dsurefire.rerunFailingTestsCount=1
 
 on_failure:
   - ps: |
