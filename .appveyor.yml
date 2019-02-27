@@ -8,9 +8,12 @@ environment:
   matrix:
     - JAVA_HOME: C:/Program Files/Java/jdk1.8.0
 
-build_script:
+before_build:
   - java -version
-  - mvnw.cmd -Dsurefire.rerunFailingTestsCount=1 -B clean install
+  - mvnw.cmd clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+build_script:
+  - mvnw.cmd clean install
 
 on_failure:
   - ps: |
