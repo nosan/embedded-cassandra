@@ -24,10 +24,8 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -53,14 +51,10 @@ abstract class BeanFactoryUtils {
 	static <T> T getIfUnique(@Nonnull ApplicationContext applicationContext, @Nonnull Class<T> targetClass)
 			throws BeansException {
 		try {
-			AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
-			if (beanFactory instanceof ListableBeanFactory) {
-				ListableBeanFactory listableBeanFactory = (ListableBeanFactory) beanFactory;
-				Map<String, T> beans = org.springframework.beans.factory.BeanFactoryUtils
-						.beansOfTypeIncludingAncestors(listableBeanFactory, targetClass);
-				if (beans.size() == 1) {
-					return beans.values().iterator().next();
-				}
+			Map<String, T> beans = org.springframework.beans.factory.BeanFactoryUtils
+					.beansOfTypeIncludingAncestors(applicationContext, targetClass);
+			if (beans.size() == 1) {
+				return beans.values().iterator().next();
 			}
 			return applicationContext.getBean(targetClass);
 		}
