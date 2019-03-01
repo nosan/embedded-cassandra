@@ -21,9 +21,7 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.util.Assert;
 
 /**
  * Utility class for dealing with {@link BeanDefinition}.
@@ -50,19 +48,6 @@ abstract class BeanDefinitionUtils {
 		registry.registerBeanDefinition(beanName, beanDefinition);
 		log.info("{} '{}' bean has been registered.",
 				beanDefinition.isPrimary() ? "The @Primary" : "", beanName);
-	}
-
-	/**
-	 * Check that {@link ConfigurableListableBeanFactory} is instance of {@link BeanDefinitionRegistry} and cast it to
-	 * the registry.
-	 *
-	 * @param beanFactory the bean factory
-	 * @return the bean definition registry
-	 */
-	@Nonnull
-	static BeanDefinitionRegistry getRegistry(@Nonnull ConfigurableListableBeanFactory beanFactory) {
-		Assert.isInstanceOf(BeanDefinitionRegistry.class, beanFactory);
-		return (BeanDefinitionRegistry) beanFactory;
 	}
 
 }
