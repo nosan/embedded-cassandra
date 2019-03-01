@@ -32,6 +32,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.datastax.driver.core.Cluster;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -69,6 +71,8 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
+	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraContextCustomizer.class);
+
 	private static final String LOCAL_CASSANDRA_FACTORY_BEAN_NAME = "localCassandraFactory";
 
 	private static final String EMBEDDED_CLUSTER_BEAN_NAME = "embeddedCluster";
@@ -83,24 +87,21 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = ((BeanDefinitionRegistry) beanFactory);
 			ifAnnotationPresent(testClass, EmbeddedLocalCassandra.class, annotation ->
-					BeanDefinitionUtils.registerBeanDefinition(registry,
-							LOCAL_CASSANDRA_FACTORY_BEAN_NAME, asPrimary(BeanDefinitionBuilder
-									.rootBeanDefinition(LocalCassandraFactoryBean.class)
+					registerPrimaryBeanDefinition(registry, LOCAL_CASSANDRA_FACTORY_BEAN_NAME,
+							BeanDefinitionBuilder.rootBeanDefinition(LocalCassandraFactoryBean.class)
 									.addConstructorArgValue(testClass)
 									.addConstructorArgValue(annotation)
-									.getBeanDefinition())));
+									.getBeanDefinition()));
 			ifAnnotationPresent(testClass, EmbeddedCassandra.class, annotation -> {
-				BeanDefinitionUtils.registerBeanDefinition(registry,
-						EMBEDDED_CASSANDRA_BEAN_NAME, asPrimary(BeanDefinitionBuilder
-								.rootBeanDefinition(EmbeddedCassandraFactoryBean.class)
+				registerPrimaryBeanDefinition(registry, EMBEDDED_CASSANDRA_BEAN_NAME,
+						BeanDefinitionBuilder.rootBeanDefinition(EmbeddedCassandraFactoryBean.class)
 								.addConstructorArgValue(testClass)
 								.addConstructorArgValue(annotation)
-								.getBeanDefinition()));
+								.getBeanDefinition());
 				if (annotation.replace() == EmbeddedCassandra.Replace.ANY) {
-					BeanDefinitionUtils.registerBeanDefinition(registry,
-							EMBEDDED_CLUSTER_BEAN_NAME, asPrimary(BeanDefinitionBuilder
-									.rootBeanDefinition(EmbeddedClusterFactoryBean.class)
-									.getBeanDefinition()));
+					registerPrimaryBeanDefinition(registry, EMBEDDED_CLUSTER_BEAN_NAME,
+							BeanDefinitionBuilder.rootBeanDefinition(EmbeddedClusterFactoryBean.class)
+									.getBeanDefinition());
 				}
 			});
 		}
@@ -122,9 +123,14 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 				.ifPresent(consumer);
 	}
 
-	private static BeanDefinition asPrimary(BeanDefinition definition) {
-		definition.setPrimary(true);
-		return definition;
+	private static void registerPrimaryBeanDefinition(BeanDefinitionRegistry registry, String beanName,
+			BeanDefinition beanDefinition) {
+		if (registry.containsBeanDefinition(beanName)) {
+			registry.removeBeanDefinition(beanName);
+		}
+		beanDefinition.setPrimary(true);
+		registry.registerBeanDefinition(beanName, beanDefinition);
+		log.info("The @Primary '{}' bean has been registered.", beanName);
 	}
 
 	/**
