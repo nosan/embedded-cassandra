@@ -120,10 +120,10 @@ class RunProcess {
 		if (log.isDebugEnabled()) {
 			StringBuilder message = new StringBuilder(String.format("Execute %s", command));
 			if (!environment.isEmpty()) {
-				message.append(String.format(" with environment %s", environment));
+				message.append(String.format(" with environment variables %s", environment));
 			}
 			if (workingDirectory != null) {
-				message.append(String.format(" and use a directory (%s)", workingDirectory));
+				message.append(String.format(" and using a directory (%s)", workingDirectory));
 			}
 			log.debug(message.toString());
 		}
