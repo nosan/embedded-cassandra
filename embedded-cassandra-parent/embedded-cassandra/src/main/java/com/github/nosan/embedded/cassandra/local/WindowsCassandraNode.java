@@ -69,8 +69,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	protected Process start(@Nonnull Path workingDirectory, @Nonnull Version version,
 			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
 			@Nonnull RunProcess.Output... outputs) throws IOException {
-		Path pidFile = this.pidFile;
-		Files.deleteIfExists(pidFile);
+		Files.deleteIfExists(this.pidFile);
 		List<Object> arguments = new ArrayList<>();
 		arguments.add("powershell");
 		arguments.add("-ExecutionPolicy");
@@ -81,11 +80,11 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			arguments.add("-a");
 		}
 		arguments.add("-p");
-		arguments.add(pidFile.toAbsolutePath());
+		arguments.add(this.pidFile.toAbsolutePath());
 		Process process = new RunProcess(workingDirectory, environment, threadFactory, arguments)
 				.run(append(line -> {
 					if (this.pid == -1) {
-						this.pid = getPid(pidFile);
+						this.pid = getPid(this.pidFile);
 					}
 				}, outputs));
 		this.pid = ProcessUtils.getPid(process);
