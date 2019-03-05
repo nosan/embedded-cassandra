@@ -90,4 +90,11 @@ class UnixCassandraNode extends AbstractCassandraNode {
 				.run(outputs);
 	}
 
+	@Nonnull
+	@Override
+	protected String getId(@Nonnull Process process) {
+		long pid = ProcessUtils.getPid(process);
+		return (pid != -1) ? Long.toString(pid) : "???";
+	}
+
 }

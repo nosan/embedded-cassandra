@@ -262,18 +262,27 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			@Nonnull Version version, @Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
 			@Nonnull RunProcess.Output... outputs) throws IOException;
 
-	private static int getJmxPort(int jmxPort) {
+	/**
+	 * Returns the ID of the Cassandra node.
+	 *
+	 * @param process the Cassandra process
+	 * @return the ID of the node
+	 */
+	@Nonnull
+	protected abstract String getId(@Nonnull Process process);
+
+	private int getJmxPort(int jmxPort) {
 		return jmxPort != 0 ? jmxPort : PortUtils.getPort();
 	}
 
-	private static String getJavaHome(Path javaHome) {
+	private String getJavaHome(Path javaHome) {
 		if (javaHome != null) {
 			return String.valueOf(javaHome.toAbsolutePath());
 		}
 		return new SystemProperty("java.home").get();
 	}
 
-	private static RuntimeNodeSettings getSettings(Path directory, Version version) throws IOException {
+	private RuntimeNodeSettings getSettings(Path directory, Version version) throws IOException {
 		Path target = directory.resolve("conf/cassandra.yaml");
 		try (InputStream is = Files.newInputStream(target)) {
 			Yaml yaml = new Yaml();
@@ -281,7 +290,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 	}
 
-	private static boolean waitForStarted(Process process, Duration timeout, RuntimeNodeSettings settings,
+	private boolean waitForStarted(Process process, Duration timeout, RuntimeNodeSettings settings,
 			NodeReadiness nodeReadiness) throws Exception {
 		long start = System.currentTimeMillis();
 		return WaitUtils.await(timeout, () -> {
@@ -297,17 +306,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		});
 	}
 
-	private static boolean waitForStopped(Duration timeout, Process process, Settings settings) throws Exception {
+	private boolean waitForStopped(Duration timeout, Process process, Settings settings) throws Exception {
 		return WaitUtils.await(timeout, () -> (settings == null || TransportUtils.isDisabled(settings))
 				&& !process.isAlive());
-	}
-
-	private static String getId(Process process) {
-		if (process == null) {
-			return "???";
-		}
-		long pid = ProcessUtils.getPid(process);
-		return (pid != -1) ? Long.toString(pid) : "???";
 	}
 
 	/**
