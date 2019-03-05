@@ -56,4 +56,5 @@ public class TestCassandraBuilderTests {
 		assertThat(ReflectionUtils.getField(testCassandra, "scripts")).isEqualTo(Collections.singletonList(script));
 		assertThat(ReflectionUtils.getField(testCassandra, "clusterFactory")).isEqualTo(clusterFactory);
 	}
+
 }

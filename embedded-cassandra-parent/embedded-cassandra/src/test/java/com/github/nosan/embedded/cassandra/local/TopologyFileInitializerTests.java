@@ -59,4 +59,5 @@ public class TopologyFileInitializerTests {
 		assertThat(directory.resolve("cassandra-topology.properties")).doesNotExist();
 
 	}
+
 }

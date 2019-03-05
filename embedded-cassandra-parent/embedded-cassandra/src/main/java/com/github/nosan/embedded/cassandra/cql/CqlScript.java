@@ -22,10 +22,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * CQL Script that abstracts from the actual type of underlying source.
@@ -46,12 +45,12 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.STABLE)
 @FunctionalInterface
 public interface CqlScript {
+
 	/**
 	 * Return CQL Statements.
 	 *
 	 * @return CQL statements.
 	 */
-	@Nonnull
 	Collection<String> getStatements();
 
 	/**
@@ -62,7 +61,6 @@ public interface CqlScript {
 	 * @see ClassPathGlobCqlScript
 	 * @since 1.2.6
 	 */
-	@Nonnull
 	static CqlScript classpathGlobs(@Nullable String... patterns) {
 		if (patterns == null || patterns.length == 0) {
 			return new CqlScripts();
@@ -79,7 +77,6 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see ClassPathCqlScript
 	 */
-	@Nonnull
 	static CqlScript classpath(@Nullable String... locations) {
 		return classpath(null, locations);
 	}
@@ -92,7 +89,6 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see ClassPathCqlScript
 	 */
-	@Nonnull
 	static CqlScript classpath(@Nullable Class<?> contextClass, @Nullable String... locations) {
 		if (locations == null || locations.length == 0) {
 			return new CqlScripts();
@@ -109,7 +105,6 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see UrlCqlScript
 	 */
-	@Nonnull
 	static CqlScript urls(@Nullable URL... locations) {
 		if (locations == null || locations.length == 0) {
 			return new CqlScripts();
@@ -126,7 +121,6 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see FileCqlScript
 	 */
-	@Nonnull
 	static CqlScript files(@Nullable File... locations) {
 		if (locations == null || locations.length == 0) {
 			return new CqlScripts();
@@ -143,7 +137,6 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see PathCqlScript
 	 */
-	@Nonnull
 	static CqlScript paths(@Nullable Path... locations) {
 		if (locations == null || locations.length == 0) {
 			return new CqlScripts();
@@ -160,8 +153,8 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see StaticCqlScript
 	 */
-	@Nonnull
 	static CqlScript statements(@Nullable String... statements) {
 		return new StaticCqlScript(statements);
 	}
+
 }

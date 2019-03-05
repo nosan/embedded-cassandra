@@ -33,4 +33,5 @@ public class CompilerFilterTests {
 		assertThat(filter.test("CompilerOracle: dontinline ")).isFalse();
 		assertThat(filter.test("text ")).isTrue();
 	}
+
 }

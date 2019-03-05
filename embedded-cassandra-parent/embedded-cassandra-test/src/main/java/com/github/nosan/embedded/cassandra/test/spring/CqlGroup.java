@@ -45,4 +45,5 @@ public @interface CqlGroup {
 	 * @return CQL scripts to use.
 	 */
 	Cql[] value();
+
 }

@@ -25,12 +25,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 
@@ -43,7 +41,6 @@ import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class LocalCassandraFactoryBuilder {
 
-	@Nonnull
 	private final List<String> jvmOptions = new ArrayList<>();
 
 	@Nullable
@@ -92,7 +89,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.2.1
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setAllowRoot(boolean allowRoot) {
 		this.allowRoot = allowRoot;
 		return this;
@@ -105,7 +101,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.1.1
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setJmxPort(int jmxPort) {
 		this.jmxPort = jmxPort;
 		return this;
@@ -118,7 +113,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.0.9
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setJavaHome(@Nullable Path javaHome) {
 		this.javaHome = javaHome;
 		return this;
@@ -131,7 +125,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.0.9
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setJavaHome(@Nullable File javaHome) {
 		return setJavaHome((javaHome != null) ? javaHome.toPath() : null);
 	}
@@ -142,7 +135,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param startupTimeout The value for startupTimeout
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setStartupTimeout(@Nullable Duration startupTimeout) {
 		this.startupTimeout = startupTimeout;
 		return this;
@@ -154,7 +146,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param version The value for version
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setVersion(@Nullable Version version) {
 		this.version = version;
 		return this;
@@ -167,7 +158,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @see RemoteArtifactFactory
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setArtifactFactory(@Nullable ArtifactFactory artifactFactory) {
 		this.artifactFactory = artifactFactory;
 		return this;
@@ -180,7 +170,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.3.0
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setArtifactDirectory(@Nullable Path artifactDirectory) {
 		this.artifactDirectory = artifactDirectory;
 		return this;
@@ -193,7 +182,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.3.0
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setArtifactDirectory(@Nullable File artifactDirectory) {
 		return setArtifactDirectory((artifactDirectory != null) ? artifactDirectory.toPath() : null);
 	}
@@ -204,7 +192,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param workingDirectory The value for workingDirectory
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setWorkingDirectory(@Nullable Path workingDirectory) {
 		this.workingDirectory = workingDirectory;
 		return this;
@@ -216,7 +203,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param workingDirectory The value for workingDirectory
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setWorkingDirectory(@Nullable File workingDirectory) {
 		return setWorkingDirectory((workingDirectory != null) ? workingDirectory.toPath() : null);
 	}
@@ -227,7 +213,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param configurationFile The value for configurationFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setConfigurationFile(@Nullable Path configurationFile) {
 		try {
 			return setConfigurationFile((configurationFile != null) ? configurationFile.toUri().toURL() : null);
@@ -243,7 +228,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param configurationFile The value for configurationFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setConfigurationFile(@Nullable File configurationFile) {
 		try {
 			return setConfigurationFile((configurationFile != null) ? configurationFile.toURI().toURL() : null);
@@ -259,7 +243,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param configurationFile The value for configurationFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setConfigurationFile(@Nullable URL configurationFile) {
 		this.configurationFile = configurationFile;
 		return this;
@@ -271,7 +254,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param logbackFile The value for logbackFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setLogbackFile(@Nullable Path logbackFile) {
 		try {
 			return setLogbackFile((logbackFile != null) ? logbackFile.toUri().toURL() : null);
@@ -287,7 +269,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param logbackFile The value for logbackFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setLogbackFile(@Nullable File logbackFile) {
 		try {
 			return setLogbackFile((logbackFile != null) ? logbackFile.toURI().toURL() : null);
@@ -303,7 +284,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param logbackFile The value for logbackFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setLogbackFile(@Nullable URL logbackFile) {
 		this.logbackFile = logbackFile;
 		return this;
@@ -315,7 +295,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param jvmOptions The value for jvmOptions
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setJvmOptions(@Nullable String... jvmOptions) {
 		this.jvmOptions.clear();
 		if (jvmOptions != null) {
@@ -331,7 +310,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.0.5
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder addJvmOptions(@Nullable String... jvmOptions) {
 		if (jvmOptions != null) {
 			this.jvmOptions.addAll(Arrays.asList(jvmOptions));
@@ -345,7 +323,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param rackFile The value for rackFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setRackFile(@Nullable Path rackFile) {
 		try {
 			return setRackFile((rackFile != null) ? rackFile.toUri().toURL() : null);
@@ -361,7 +338,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param rackFile The value for rackFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setRackFile(@Nullable File rackFile) {
 		try {
 			return setRackFile((rackFile != null) ? rackFile.toURI().toURL() : null);
@@ -377,7 +353,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param rackFile The value for rackFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setRackFile(@Nullable URL rackFile) {
 		this.rackFile = rackFile;
 		return this;
@@ -389,7 +364,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param topologyFile The value for topologyFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setTopologyFile(@Nullable Path topologyFile) {
 		try {
 			return setTopologyFile((topologyFile != null) ? topologyFile.toUri().toURL() : null);
@@ -405,7 +379,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param topologyFile The value for topologyFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setTopologyFile(@Nullable File topologyFile) {
 		try {
 			return setTopologyFile((topologyFile != null) ? topologyFile.toURI().toURL() : null);
@@ -421,7 +394,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @param topologyFile The value for topologyFile
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setTopologyFile(@Nullable URL topologyFile) {
 		this.topologyFile = topologyFile;
 		return this;
@@ -435,7 +407,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.2.3
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setRegisterShutdownHook(boolean registerShutdownHook) {
 		this.registerShutdownHook = registerShutdownHook;
 		return this;
@@ -449,7 +420,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.2.8
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setCommitLogArchivingFile(@Nullable URL commitLogArchivingFile) {
 		this.commitLogArchivingFile = commitLogArchivingFile;
 		return this;
@@ -463,7 +433,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.2.8
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setCommitLogArchivingFile(@Nullable Path commitLogArchivingFile) {
 		try {
 			return setCommitLogArchivingFile(
@@ -482,7 +451,6 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.2.8
 	 */
-	@Nonnull
 	public LocalCassandraFactoryBuilder setCommitLogArchivingFile(@Nullable File commitLogArchivingFile) {
 		try {
 			return setCommitLogArchivingFile(
@@ -498,7 +466,6 @@ public final class LocalCassandraFactoryBuilder {
 	 *
 	 * @return a new instance
 	 */
-	@Nonnull
 	public LocalCassandraFactory build() {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		factory.setVersion(this.version);
@@ -518,4 +485,5 @@ public final class LocalCassandraFactoryBuilder {
 		factory.setArtifactDirectory(this.artifactDirectory);
 		return factory;
 	}
+
 }

@@ -23,10 +23,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@link CqlScript} implementation for {@link Path}.
@@ -38,7 +37,6 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class PathCqlScript extends AbstractCqlResourceScript {
 
-	@Nonnull
 	private final Path path;
 
 	/**
@@ -46,7 +44,7 @@ public final class PathCqlScript extends AbstractCqlResourceScript {
 	 *
 	 * @param path a Path
 	 */
-	public PathCqlScript(@Nonnull Path path) {
+	public PathCqlScript(Path path) {
 		this(path, null);
 	}
 
@@ -56,12 +54,11 @@ public final class PathCqlScript extends AbstractCqlResourceScript {
 	 * @param path a path
 	 * @param encoding encoding the encoding to use for reading from the resource
 	 */
-	public PathCqlScript(@Nonnull Path path, @Nullable Charset encoding) {
+	public PathCqlScript(Path path, @Nullable Charset encoding) {
 		super(encoding);
 		this.path = Objects.requireNonNull(path, "Path must not be null");
 	}
 
-	@Nonnull
 	@Override
 	protected InputStream getInputStream() throws IOException {
 		return Files.newInputStream(this.path);
@@ -86,8 +83,8 @@ public final class PathCqlScript extends AbstractCqlResourceScript {
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		return String.valueOf(this.path);
 	}
+
 }

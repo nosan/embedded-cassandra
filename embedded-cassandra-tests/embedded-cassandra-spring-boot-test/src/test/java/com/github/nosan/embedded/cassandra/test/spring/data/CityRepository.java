@@ -24,4 +24,5 @@ import org.springframework.data.cassandra.repository.CassandraRepository;
  * @author Dmytro Nosan
  */
 interface CityRepository extends CassandraRepository<City, Long> {
+
 }

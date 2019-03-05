@@ -24,8 +24,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +44,8 @@ class WorkingDirectoryInitializer implements Initializer {
 
 	private static final Logger log = LoggerFactory.getLogger(WorkingDirectoryInitializer.class);
 
-	@Nonnull
 	private final ArtifactFactory artifactFactory;
 
-	@Nonnull
 	private final Path artifactDirectory;
 
 	/**
@@ -58,13 +54,13 @@ class WorkingDirectoryInitializer implements Initializer {
 	 * @param artifactFactory a factory to create {@link Artifact}
 	 * @param artifactDirectory a directory to extract an {@link Artifact} (must be writable)
 	 */
-	WorkingDirectoryInitializer(@Nonnull ArtifactFactory artifactFactory, @Nonnull Path artifactDirectory) {
+	WorkingDirectoryInitializer(ArtifactFactory artifactFactory, Path artifactDirectory) {
 		this.artifactFactory = artifactFactory;
 		this.artifactDirectory = artifactDirectory;
 	}
 
 	@Override
-	public void initialize(@Nonnull Path workingDirectory, @Nonnull Version version) throws IOException {
+	public void initialize(Path workingDirectory, Version version) throws IOException {
 		Path artifactDirectory = this.artifactDirectory;
 		Artifact artifact = this.artifactFactory.create(version);
 		Objects.requireNonNull(artifact, "Artifact must not be null");
@@ -156,4 +152,5 @@ class WorkingDirectoryInitializer implements Initializer {
 		}
 		return directories.iterator().next();
 	}
+
 }

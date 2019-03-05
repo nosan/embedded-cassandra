@@ -18,9 +18,8 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 
-import javax.annotation.Nullable;
-
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Simple interface that allows the Cassandra Node to be {@link #start() started} and {@link #stop()

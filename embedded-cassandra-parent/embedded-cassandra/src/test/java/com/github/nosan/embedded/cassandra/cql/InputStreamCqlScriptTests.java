@@ -54,4 +54,5 @@ public class InputStreamCqlScriptTests {
 		systemResourceAsStream.close();
 		new InputStreamCqlScript(systemResourceAsStream).getStatements();
 	}
+
 }

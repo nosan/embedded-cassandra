@@ -51,4 +51,5 @@ public class EmbeddedCassandraContextCustomizerFactoryTests {
 	private static class NotAnnotated {
 
 	}
+
 }

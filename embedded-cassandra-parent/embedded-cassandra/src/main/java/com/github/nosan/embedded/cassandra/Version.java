@@ -21,11 +21,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import org.apiguardian.api.API;
 
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -40,7 +39,6 @@ public final class Version implements Comparable<Version> {
 
 	private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?(.*)$");
 
-	@Nonnull
 	private final String version;
 
 	private final int major;
@@ -88,7 +86,7 @@ public final class Version implements Comparable<Version> {
 	 * @param patch a patch value
 	 * @param version a string value of the version
 	 */
-	private Version(int major, int minor, int patch, @Nonnull String version) {
+	private Version(int major, int minor, int patch, String version) {
 		this.major = major;
 		this.minor = minor;
 		this.patch = patch;
@@ -139,14 +137,13 @@ public final class Version implements Comparable<Version> {
 		return Objects.hash(this.version);
 	}
 
-	@Nonnull
 	@Override
 	public String toString() {
 		return this.version;
 	}
 
 	@Override
-	public int compareTo(@Nonnull Version other) {
+	public int compareTo(Version other) {
 		Objects.requireNonNull(other, "Version must not be null");
 		int majorCmp = Integer.compare(this.major, other.major);
 		if (majorCmp == 0) {
@@ -169,8 +166,7 @@ public final class Version implements Comparable<Version> {
 	 * @param version a text version (expected format ({@link #VERSION_PATTERN}))
 	 * @return a parsed {@link Version}
 	 */
-	@Nonnull
-	public static Version parse(@Nonnull String version) {
+	public static Version parse(String version) {
 		Objects.requireNonNull(version, "Version must not be null");
 		Matcher matcher = VERSION_PATTERN.matcher(version.trim());
 		if (matcher.find()) {
@@ -197,4 +193,5 @@ public final class Version implements Comparable<Version> {
 		}
 		return value;
 	}
+
 }

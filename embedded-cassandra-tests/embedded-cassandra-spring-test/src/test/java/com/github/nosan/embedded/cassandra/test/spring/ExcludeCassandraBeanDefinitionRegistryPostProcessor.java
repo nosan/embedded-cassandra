@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import javax.annotation.Nonnull;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -33,13 +31,14 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 class ExcludeCassandraBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
 	@Override
-	public void postProcessBeanDefinitionRegistry(@Nonnull BeanDefinitionRegistry registry) throws BeansException {
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 		if (registry.containsBeanDefinition("embeddedCassandra")) {
 			registry.removeBeanDefinition("embeddedCassandra");
 		}
 	}
 
 	@Override
-	public void postProcessBeanFactory(@Nonnull ConfigurableListableBeanFactory beanFactory) throws BeansException {
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 	}
+
 }

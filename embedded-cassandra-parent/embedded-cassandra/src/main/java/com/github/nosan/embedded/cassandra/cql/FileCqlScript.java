@@ -23,10 +23,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@link CqlScript} implementation for {@link File}.
@@ -38,7 +37,6 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class FileCqlScript extends AbstractCqlResourceScript {
 
-	@Nonnull
 	private final File file;
 
 	/**
@@ -46,7 +44,7 @@ public final class FileCqlScript extends AbstractCqlResourceScript {
 	 *
 	 * @param file a File
 	 */
-	public FileCqlScript(@Nonnull File file) {
+	public FileCqlScript(File file) {
 		this(file, null);
 	}
 
@@ -56,12 +54,11 @@ public final class FileCqlScript extends AbstractCqlResourceScript {
 	 * @param file a File
 	 * @param encoding encoding the encoding to use for reading from the resource
 	 */
-	public FileCqlScript(@Nonnull File file, @Nullable Charset encoding) {
+	public FileCqlScript(File file, @Nullable Charset encoding) {
 		super(encoding);
 		this.file = Objects.requireNonNull(file, "File must not be null");
 	}
 
-	@Nonnull
 	@Override
 	protected InputStream getInputStream() throws IOException {
 		return new FileInputStream(this.file);
@@ -86,8 +83,8 @@ public final class FileCqlScript extends AbstractCqlResourceScript {
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		return String.valueOf(this.file);
 	}
+
 }

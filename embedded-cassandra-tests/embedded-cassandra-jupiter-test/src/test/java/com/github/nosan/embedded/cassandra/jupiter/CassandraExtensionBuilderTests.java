@@ -60,4 +60,5 @@ public class CassandraExtensionBuilderTests {
 				.isEqualTo(Collections.singletonList(script));
 		assertThat(ReflectionUtils.getField(cassandraExtension, "clusterFactory")).isEqualTo(clusterFactory);
 	}
+
 }

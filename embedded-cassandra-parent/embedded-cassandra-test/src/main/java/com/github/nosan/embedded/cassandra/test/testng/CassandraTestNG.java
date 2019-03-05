@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.testng;
 
-import javax.annotation.Nullable;
-
 import com.datastax.driver.core.Cluster;
 import org.apiguardian.api.API;
 import org.testng.annotations.AfterClass;
@@ -27,6 +25,7 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
@@ -155,4 +154,5 @@ public class CassandraTestNG extends TestCassandra {
 	public void stop() throws CassandraException {
 		super.stop();
 	}
+
 }

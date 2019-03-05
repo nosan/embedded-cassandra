@@ -51,4 +51,5 @@ public class FileCqlScriptTests {
 	public void invalidResource() {
 		new FileCqlScript(new File("hz.cql")).getStatements();
 	}
+
 }

@@ -30,10 +30,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility methods for dealing with network.
@@ -51,7 +50,6 @@ public abstract class NetworkUtils {
 	 * @return an IP address for the given host name.
 	 * @throws UncheckedIOException if no IP address for the host could be found
 	 */
-	@Nonnull
 	public static InetAddress getInetAddress(@Nullable String address) {
 		try {
 			return InetAddress.getByName(address);
@@ -71,8 +69,7 @@ public abstract class NetworkUtils {
 	 * @throws UncheckedIOException if an I/O error occurs.
 	 * @since 1.2.7
 	 */
-	@Nonnull
-	public static Optional<InetAddress> getAddressByInterface(@Nonnull String interfaceName, boolean useIpv6) {
+	public static Optional<InetAddress> getAddressByInterface(String interfaceName, boolean useIpv6) {
 		Objects.requireNonNull(interfaceName, "Interface name must not be null");
 		Predicate<InetAddress> condition = useIpv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
 		return getAddressesByInterface(interfaceName)
@@ -90,8 +87,7 @@ public abstract class NetworkUtils {
 	 * @throws UncheckedIOException if an I/O error occurs.
 	 * @since 1.2.7
 	 */
-	@Nonnull
-	public static List<InetAddress> getAddressesByInterface(@Nonnull String interfaceName) {
+	public static List<InetAddress> getAddressesByInterface(String interfaceName) {
 		Objects.requireNonNull(interfaceName, "Interface name must not be null");
 		try {
 			NetworkInterface networkInterface = NetworkInterface.getByName(interfaceName);
@@ -112,7 +108,6 @@ public abstract class NetworkUtils {
 	 * @return the localhost
 	 * @throws UncheckedIOException if no IP address for the host could be found
 	 */
-	@Nonnull
 	public static InetAddress getLocalhost() {
 		try {
 			return InetAddress.getLocalHost();
@@ -121,4 +116,5 @@ public abstract class NetworkUtils {
 			throw new UncheckedIOException(ex);
 		}
 	}
+
 }

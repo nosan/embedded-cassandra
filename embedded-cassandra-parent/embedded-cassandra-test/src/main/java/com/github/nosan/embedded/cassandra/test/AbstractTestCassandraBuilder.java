@@ -21,15 +21,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.datastax.driver.core.Cluster;
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.junit.CassandraRuleBuilder;
 import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtensionBuilder;
 
@@ -47,7 +45,6 @@ import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtensionBuilde
 public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 		B extends AbstractTestCassandraBuilder<C, B>> {
 
-	@Nonnull
 	private final List<CqlScript> scripts = new ArrayList<>();
 
 	@Nullable
@@ -64,7 +61,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @param scripts CQL scripts
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public final B addScripts(@Nullable Collection<? extends CqlScript> scripts) {
 		if (scripts != null) {
 			this.scripts.addAll(scripts);
@@ -78,7 +74,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @param scripts CQL scripts
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public final B addScripts(@Nullable CqlScript... scripts) {
 		if (scripts != null) {
 			return addScripts(Arrays.asList(scripts));
@@ -102,7 +97,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @param clusterFactory factory to create a cluster
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public final B setClusterFactory(@Nullable ClusterFactory clusterFactory) {
 		this.clusterFactory = clusterFactory;
 		return (B) this;
@@ -124,7 +118,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @param cassandraFactory factory to create a cassandra
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public final B setCassandraFactory(@Nullable CassandraFactory cassandraFactory) {
 		this.cassandraFactory = cassandraFactory;
 		return (B) this;
@@ -135,7 +128,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 *
 	 * @return the CQL scripts attribute
 	 */
-	@Nonnull
 	protected final CqlScript[] getScripts() {
 		return this.scripts.toArray(new CqlScript[0]);
 	}
@@ -146,7 +138,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @param scripts CQL scripts
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public final B setScripts(@Nullable CqlScript... scripts) {
 		this.scripts.clear();
 		return addScripts(scripts);
@@ -158,7 +149,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @param scripts CQL scripts
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public final B setScripts(@Nullable Collection<? extends CqlScript> scripts) {
 		this.scripts.clear();
 		return addScripts(scripts);
@@ -179,7 +169,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 * @param registerShutdownHook shutdown hook value
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public final B setRegisterShutdownHook(boolean registerShutdownHook) {
 		this.registerShutdownHook = registerShutdownHook;
 		return (B) this;
@@ -190,6 +179,6 @@ public abstract class AbstractTestCassandraBuilder<C extends TestCassandra,
 	 *
 	 * @return a new instance
 	 */
-	@Nonnull
 	public abstract C build();
+
 }

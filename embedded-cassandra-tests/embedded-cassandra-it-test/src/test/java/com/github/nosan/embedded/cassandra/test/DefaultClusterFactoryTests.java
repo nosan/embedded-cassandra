@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import javax.annotation.Nullable;
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.MetricsOptions;
@@ -27,6 +25,7 @@ import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -114,5 +113,7 @@ public class DefaultClusterFactoryTests {
 		public int getPort() {
 			return this.port;
 		}
+
 	}
+
 }

@@ -64,4 +64,5 @@ public class SystemPropertyTests {
 	public void shouldReturnNull() {
 		assertThat(new SystemProperty(UUID.randomUUID().toString()).get()).isNull();
 	}
+
 }

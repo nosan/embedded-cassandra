@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.util.function.Consumer;
 
-import javax.annotation.Nonnull;
-
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 
@@ -30,14 +28,13 @@ import com.github.nosan.embedded.cassandra.CassandraFactory;
  */
 final class CassandraRunner {
 
-	@Nonnull
 	private final CassandraFactory factory;
 
-	CassandraRunner(@Nonnull CassandraFactory factory) {
+	CassandraRunner(CassandraFactory factory) {
 		this.factory = factory;
 	}
 
-	CassandraRunner(@Nonnull Cassandra cassandra) {
+	CassandraRunner(Cassandra cassandra) {
 		this(() -> cassandra);
 	}
 
@@ -46,7 +43,7 @@ final class CassandraRunner {
 	 *
 	 * @param consumer the consumer of the created {@link Cassandra}
 	 */
-	void run(@Nonnull Consumer<? super Cassandra> consumer) {
+	void run(Consumer<? super Cassandra> consumer) {
 		Cassandra cassandra = this.factory.create();
 		cassandra.start();
 		try {
@@ -56,4 +53,5 @@ final class CassandraRunner {
 			cassandra.stop();
 		}
 	}
+
 }

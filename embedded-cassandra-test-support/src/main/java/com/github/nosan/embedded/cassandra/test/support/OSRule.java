@@ -36,6 +36,7 @@ public final class OSRule implements TestRule {
 	public Statement apply(Statement statement, Description description) {
 		Class<?> testClass = description.getTestClass();
 		return new Statement() {
+
 			@Override
 			public void evaluate() throws Throwable {
 				if (description.getAnnotation(DisableIfOS.class) != null ||

@@ -18,15 +18,14 @@ package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility class for dealing with beans.
@@ -48,7 +47,7 @@ abstract class BeanFactoryUtils {
 	 * @throws BeansException if the bean could not be created
 	 */
 	@Nullable
-	static <T> T getIfUnique(@Nonnull ApplicationContext applicationContext, @Nonnull Class<T> targetClass)
+	static <T> T getIfUnique(ApplicationContext applicationContext, Class<T> targetClass)
 			throws BeansException {
 		try {
 			Map<String, T> beans = org.springframework.beans.factory.BeanFactoryUtils
@@ -66,4 +65,5 @@ abstract class BeanFactoryUtils {
 			return null;
 		}
 	}
+
 }

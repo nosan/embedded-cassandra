@@ -38,4 +38,5 @@ public class EmptyArtifactFactoryTests {
 		assertThat(artifact).isInstanceOf(EmptyArtifact.class)
 				.hasFieldOrPropertyWithValue("version", version);
 	}
+
 }

@@ -20,10 +20,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@link CqlScript} implementation for {@link InputStream}.
@@ -34,7 +33,6 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class InputStreamCqlScript extends AbstractCqlResourceScript {
 
-	@Nonnull
 	private final InputStream stream;
 
 	/**
@@ -42,7 +40,7 @@ public final class InputStreamCqlScript extends AbstractCqlResourceScript {
 	 *
 	 * @param stream a InputStream
 	 */
-	public InputStreamCqlScript(@Nonnull InputStream stream) {
+	public InputStreamCqlScript(InputStream stream) {
 		this(stream, null);
 	}
 
@@ -52,12 +50,11 @@ public final class InputStreamCqlScript extends AbstractCqlResourceScript {
 	 * @param stream a InputStream
 	 * @param encoding encoding the encoding to use for reading from the resource
 	 */
-	public InputStreamCqlScript(@Nonnull InputStream stream, @Nullable Charset encoding) {
+	public InputStreamCqlScript(InputStream stream, @Nullable Charset encoding) {
 		super(encoding);
 		this.stream = Objects.requireNonNull(stream, "Stream must not be null");
 	}
 
-	@Nonnull
 	@Override
 	protected InputStream getInputStream() {
 		return this.stream;
@@ -82,8 +79,8 @@ public final class InputStreamCqlScript extends AbstractCqlResourceScript {
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		return "InputStream CQL Statements";
 	}
+
 }

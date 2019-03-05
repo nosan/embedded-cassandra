@@ -19,8 +19,7 @@ package com.github.nosan.embedded.cassandra.local;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility class for dealing with {@link Process}.
@@ -50,7 +49,7 @@ abstract class ProcessUtils {
 	 * @param process a {@link Process}
 	 * @return the pid (or {@code -1})
 	 */
-	static long getPid(@Nonnull Process process) {
+	static long getPid(Process process) {
 		try {
 			if (PID_METHOD != null) {
 				return Long.parseLong(String.valueOf(PID_METHOD.invoke(process)));
@@ -63,4 +62,5 @@ abstract class ProcessUtils {
 			return -1;
 		}
 	}
+
 }

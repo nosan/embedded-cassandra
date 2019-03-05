@@ -19,8 +19,6 @@ package com.github.nosan.embedded.cassandra.local;
 import java.net.InetAddress;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
-
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 
@@ -38,7 +36,7 @@ abstract class TransportUtils {
 	 * @param settings a settings
 	 * @return {@code true} if ready otherwise {@code false}
 	 */
-	static boolean isReady(@Nonnull Settings settings) {
+	static boolean isReady(Settings settings) {
 		Predicate<Settings> condition = TransportUtils::isStorageReady;
 		if (settings.isStartNativeTransport()) {
 			condition = condition.and(TransportUtils::isNativeTransportReady);
@@ -55,7 +53,7 @@ abstract class TransportUtils {
 	 * @param settings a settings
 	 * @return {@code true} if disabled otherwise {@code false}
 	 */
-	static boolean isDisabled(@Nonnull Settings settings) {
+	static boolean isDisabled(Settings settings) {
 		Predicate<Settings> condition = TransportUtils::isStorageReady;
 		if (settings.isStartNativeTransport()) {
 			condition = condition.or(TransportUtils::isNativeTransportReady);
@@ -88,4 +86,5 @@ abstract class TransportUtils {
 		int port = settings.getRpcPort();
 		return PortUtils.isPortBusy(address, port);
 	}
+
 }

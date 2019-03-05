@@ -27,8 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import javax.annotation.Nonnull;
-
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -47,7 +45,7 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 	}
 
 	@Override
-	protected void initialize(@Nonnull Path file, @Nonnull Path workingDirectory, @Nonnull Version version)
+	protected void initialize(Path file, Path workingDirectory, Version version)
 			throws IOException {
 		if (Files.exists(file)) {
 			Yaml yaml = new Yaml();
@@ -96,4 +94,5 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 			return Collections.emptyMap();
 		}
 	}
+
 }

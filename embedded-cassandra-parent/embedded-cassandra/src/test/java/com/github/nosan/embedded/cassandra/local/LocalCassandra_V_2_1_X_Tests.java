@@ -45,4 +45,5 @@ public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
 	public void shouldRunOnInterfaceIPV6() throws Exception {
 		super.shouldRunOnInterfaceIPV6();
 	}
+
 }

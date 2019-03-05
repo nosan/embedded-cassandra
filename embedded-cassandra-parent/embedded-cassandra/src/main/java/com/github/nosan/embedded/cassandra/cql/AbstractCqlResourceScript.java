@@ -21,11 +21,10 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apache.commons.compress.utils.IOUtils;
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Base class for {@link AbstractCqlScript} implementations,
@@ -37,7 +36,6 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 
-	@Nonnull
 	private final Charset encoding;
 
 	/**
@@ -54,7 +52,6 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 	 *
 	 * @throws UncheckedIOException if an I/O error occurs
 	 */
-	@Nonnull
 	@Override
 	protected final String getScript() {
 		try (InputStream is = getInputStream()) {
@@ -73,7 +70,6 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 	 * @return the input stream for the underlying resource
 	 * @throws IOException if the content stream could not be opened
 	 */
-	@Nonnull
 	protected abstract InputStream getInputStream() throws IOException;
 
 	/**
@@ -81,8 +77,8 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 	 *
 	 * @return encoding to use.
 	 */
-	@Nonnull
 	protected final Charset getEncoding() {
 		return this.encoding;
 	}
+
 }

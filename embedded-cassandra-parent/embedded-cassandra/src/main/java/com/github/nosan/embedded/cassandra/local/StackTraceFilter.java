@@ -19,8 +19,6 @@ package com.github.nosan.embedded.cassandra.local;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
-
 /**
  * Filter to avoid 'stacktrace' output.
  *
@@ -32,7 +30,8 @@ class StackTraceFilter implements Predicate<String> {
 	private static final Pattern STACKTRACE_PATTERN = Pattern.compile("\\s+(at|\\.{3})\\s+.*");
 
 	@Override
-	public boolean test(@Nonnull String line) {
+	public boolean test(String line) {
 		return !STACKTRACE_PATTERN.matcher(line).matches();
 	}
+
 }

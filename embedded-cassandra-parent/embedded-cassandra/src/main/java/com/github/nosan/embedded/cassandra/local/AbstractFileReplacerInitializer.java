@@ -24,10 +24,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.function.BiFunction;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Abstract file {@link Initializer} to replace a file within a working directory.
@@ -46,13 +44,13 @@ class AbstractFileReplacerInitializer extends AbstractFileInitializer {
 	 * @param url the URL to the resource for the file replacement
 	 * @param fileMapper the function to resolve a file within a directory
 	 */
-	AbstractFileReplacerInitializer(@Nullable URL url, @Nonnull BiFunction<Path, Version, Path> fileMapper) {
+	AbstractFileReplacerInitializer(@Nullable URL url, BiFunction<Path, Version, Path> fileMapper) {
 		super(fileMapper);
 		this.url = url;
 	}
 
 	@Override
-	protected void initialize(@Nonnull Path file, @Nonnull Path workingDirectory, @Nonnull Version version)
+	protected void initialize(Path file, Path workingDirectory, Version version)
 			throws IOException {
 		URL url = this.url;
 		if (url != null) {
@@ -67,4 +65,5 @@ class AbstractFileReplacerInitializer extends AbstractFileInitializer {
 			}
 		}
 	}
+
 }

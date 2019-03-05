@@ -53,4 +53,5 @@ public class MDCUtilsTests {
 		assertThat(MDCUtils.getContext()).isEmpty();
 
 	}
+
 }

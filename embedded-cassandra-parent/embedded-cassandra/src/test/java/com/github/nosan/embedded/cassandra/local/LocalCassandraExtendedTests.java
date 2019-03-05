@@ -88,4 +88,5 @@ public class LocalCassandraExtendedTests {
 				.getStaticField(Class.forName("java.lang.ApplicationShutdownHooks"), "hooks"))
 				.keySet());
 	}
+
 }

@@ -21,10 +21,9 @@ import java.security.PrivilegedAction;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility class for dealing with {@code System and Environment Properties}.
@@ -42,7 +41,7 @@ public final class SystemProperty implements Supplier<String> {
 	 *
 	 * @param name key to lookup.
 	 */
-	public SystemProperty(@Nonnull String name) {
+	public SystemProperty(String name) {
 		this.name = Objects.requireNonNull(name, "Name must not be null");
 	}
 
@@ -66,12 +65,12 @@ public final class SystemProperty implements Supplier<String> {
 	 *
 	 * @return a nonnull-value, or throw a {@code NullPointerException}
 	 */
-	@Nonnull
 	public String getRequired() {
 		return Objects.requireNonNull(get(), () -> String.format("Both System and Environment Properties" +
 				" are not present for a key (%s)", this.name));
 	}
 
+	@Nullable
 	private static String getSystemProperty(String key) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
@@ -80,6 +79,7 @@ public final class SystemProperty implements Supplier<String> {
 		return System.getProperty(key);
 	}
 
+	@Nullable
 	private static String getEnvironmentProperty(String key) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
@@ -87,4 +87,5 @@ public final class SystemProperty implements Supplier<String> {
 		}
 		return System.getenv(key);
 	}
+
 }

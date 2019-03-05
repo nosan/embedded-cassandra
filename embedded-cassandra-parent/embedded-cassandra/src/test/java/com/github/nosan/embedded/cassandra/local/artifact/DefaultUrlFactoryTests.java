@@ -44,4 +44,5 @@ public class DefaultUrlFactoryTests {
 								"apache-cassandra-3.11.3-bin.tar.gz")});
 
 	}
+
 }

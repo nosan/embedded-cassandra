@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Objects;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.DefaultUrlFactory;
@@ -65,12 +67,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
 
 	@Autowired
+	@Nullable
 	private LocalCassandraFactory factory;
 
 	@Test
 	public void shouldRegisterLocalFactoryBean() {
 		LocalCassandraFactory factory = this.factory;
-		ArtifactFactory artifactFactory = factory.getArtifactFactory();
+		ArtifactFactory artifactFactory = Objects.requireNonNull(factory).getArtifactFactory();
 		assertThat(artifactFactory).isInstanceOf(RemoteArtifactFactory.class);
 		RemoteArtifactFactory af = (RemoteArtifactFactory) artifactFactory;
 		assertThat(af).isNotNull();

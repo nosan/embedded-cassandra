@@ -37,13 +37,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
@@ -61,13 +59,10 @@ class RemoteArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(Artifact.class);
 
-	@Nonnull
 	private final Version version;
 
-	@Nonnull
 	private final Path directory;
 
-	@Nonnull
 	private final UrlFactory urlFactory;
 
 	@Nullable
@@ -89,8 +84,8 @@ class RemoteArtifact implements Artifact {
 	 * @param connectTimeout connect timeout for {@code connection}
 	 * @param readTimeout read timeout for {@code connection}
 	 */
-	RemoteArtifact(@Nonnull Version version, @Nonnull Path directory,
-			@Nonnull UrlFactory urlFactory, @Nullable Proxy proxy,
+	RemoteArtifact(Version version, Path directory,
+			UrlFactory urlFactory, @Nullable Proxy proxy,
 			@Nullable Duration readTimeout, @Nullable Duration connectTimeout) {
 		this.version = version;
 		this.directory = directory;
@@ -101,7 +96,6 @@ class RemoteArtifact implements Artifact {
 	}
 
 	@Override
-	@Nonnull
 	public Path get() throws IOException {
 		Version version = this.version;
 		Proxy proxy = this.proxy;
@@ -141,7 +135,6 @@ class RemoteArtifact implements Artifact {
 		 * @return the file
 		 * @throws IOException in case of any I/O errors
 		 */
-		@Nonnull
 		Path getFile() throws IOException;
 
 		/**
@@ -149,8 +142,8 @@ class RemoteArtifact implements Artifact {
 		 *
 		 * @return a resource name
 		 */
-		@Nonnull
 		String getName();
+
 	}
 
 	/**
@@ -158,10 +151,8 @@ class RemoteArtifact implements Artifact {
 	 */
 	private static final class LocalResource implements Resource {
 
-		@Nonnull
 		private final Path directory;
 
-		@Nonnull
 		private final Resource resource;
 
 		/**
@@ -170,12 +161,11 @@ class RemoteArtifact implements Artifact {
 		 * @param directory a directory to store/search an artifact (directory must be writable)
 		 * @param resource a delegated resource
 		 */
-		LocalResource(@Nonnull Path directory, @Nonnull Resource resource) {
+		LocalResource(Path directory, Resource resource) {
 			this.directory = directory;
 			this.resource = resource;
 		}
 
-		@Nonnull
 		@Override
 		public Path getFile() throws IOException {
 			Path file = this.directory.resolve(getName());
@@ -196,7 +186,6 @@ class RemoteArtifact implements Artifact {
 			}
 		}
 
-		@Nonnull
 		@Override
 		public String getName() {
 			return this.resource.getName();
@@ -211,21 +200,17 @@ class RemoteArtifact implements Artifact {
 
 		private static final AtomicLong instanceCounter = new AtomicLong();
 
-		@Nonnull
 		private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("artifact-%d",
 				instanceCounter.incrementAndGet()));
 
-		@Nonnull
 		private final ThreadFactory threadFactory = runnable -> {
 			Thread thread = new Thread(runnable, this.threadNameSupplier.get());
 			thread.setDaemon(true);
 			return thread;
 		};
 
-		@Nonnull
 		private final Version version;
 
-		@Nonnull
 		private final URL url;
 
 		@Nullable
@@ -246,7 +231,7 @@ class RemoteArtifact implements Artifact {
 		 * @param connectTimeout connect timeout for {@code connection}
 		 * @param readTimeout read timeout for {@code connection}
 		 */
-		RemoteResource(@Nonnull Version version, @Nonnull URL url, @Nullable Proxy proxy,
+		RemoteResource(Version version, URL url, @Nullable Proxy proxy,
 				@Nullable Duration readTimeout,
 				@Nullable Duration connectTimeout) {
 			this.version = version;
@@ -256,7 +241,6 @@ class RemoteArtifact implements Artifact {
 			this.connectTimeout = connectTimeout;
 		}
 
-		@Nonnull
 		@Override
 		public Path getFile() throws IOException {
 			int maxRedirects = 20;
@@ -284,7 +268,6 @@ class RemoteArtifact implements Artifact {
 			return file;
 		}
 
-		@Nonnull
 		@Override
 		public String getName() {
 			return getFileName(this.url);
@@ -365,6 +348,7 @@ class RemoteArtifact implements Artifact {
 				}, 0, 1, TimeUnit.SECONDS);
 			}
 		}
+
 	}
 
 }

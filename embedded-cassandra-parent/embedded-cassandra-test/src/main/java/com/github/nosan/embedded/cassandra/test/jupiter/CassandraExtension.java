@@ -16,9 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.jupiter;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.datastax.driver.core.Cluster;
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -29,6 +26,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
@@ -147,12 +145,13 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	}
 
 	@Override
-	public void beforeAll(@Nonnull ExtensionContext context) {
+	public void beforeAll(ExtensionContext context) {
 		start();
 	}
 
 	@Override
-	public void afterAll(@Nonnull ExtensionContext context) {
+	public void afterAll(ExtensionContext context) {
 		stop();
 	}
+
 }

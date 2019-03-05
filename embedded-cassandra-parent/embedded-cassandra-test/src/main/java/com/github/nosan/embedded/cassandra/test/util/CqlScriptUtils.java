@@ -19,8 +19,6 @@ package com.github.nosan.embedded.cassandra.test.util;
 import java.util.Arrays;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import com.datastax.driver.core.Session;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
@@ -46,7 +44,7 @@ public abstract class CqlScriptUtils {
 	 * @param session a session
 	 * @see CqlScript
 	 */
-	public static void executeScripts(@Nonnull Session session, @Nonnull CqlScript... cqlScripts) {
+	public static void executeScripts(Session session, CqlScript... cqlScripts) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(cqlScripts, "CQL Scripts must not be null");
 		if (log.isDebugEnabled()) {
@@ -58,4 +56,5 @@ public abstract class CqlScriptUtils {
 			}
 		}
 	}
+
 }

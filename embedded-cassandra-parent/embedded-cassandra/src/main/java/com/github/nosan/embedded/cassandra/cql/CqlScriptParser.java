@@ -20,11 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
 
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -76,7 +74,6 @@ public abstract class CqlScriptParser {
 	 * @param script CQL script.
 	 * @return CQL statements
 	 */
-	@Nonnull
 	public static List<String> parse(@Nullable String script) {
 		if (!StringUtils.hasText(script)) {
 			return Collections.emptyList();
@@ -155,4 +152,5 @@ public abstract class CqlScriptParser {
 		return Collections.unmodifiableList(statements);
 
 	}
+
 }

@@ -59,4 +59,5 @@ public class CassandraRuleBuilderTests {
 		assertThat(ReflectionUtils.getField(cassandraRule, "scripts")).isEqualTo(Collections.singletonList(script));
 		assertThat(ReflectionUtils.getField(cassandraRule, "clusterFactory")).isEqualTo(clusterFactory);
 	}
+
 }

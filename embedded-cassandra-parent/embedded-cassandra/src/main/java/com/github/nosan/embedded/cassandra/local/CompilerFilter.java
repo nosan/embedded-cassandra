@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
-
 /**
  * Filter to avoid 'compiler inline'.
  *
@@ -29,7 +27,8 @@ import javax.annotation.Nonnull;
 class CompilerFilter implements Predicate<String> {
 
 	@Override
-	public boolean test(@Nonnull String line) {
+	public boolean test(String line) {
 		return !line.startsWith("CompilerOracle");
 	}
+
 }

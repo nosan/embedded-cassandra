@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -41,6 +39,6 @@ public interface ArtifactFactory {
 	 * @param version a version
 	 * @return {@code Artifact} to use
 	 */
-	@Nonnull
-	Artifact create(@Nonnull Version version);
+	Artifact create(Version version);
+
 }

@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.util.Objects;
+
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import org.junit.ClassRule;
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.junit.CassandraRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,20 +48,21 @@ public class CqlExecutionListenerPrimaryBeanTests {
 	public static final CassandraRule cassandra = new CassandraRule();
 
 	@Autowired
+	@Nullable
 	private Cluster cluster;
 
 	@Test
 	@Cql(scripts = {"/init.cql", "/users-data.cql"})
 	@Cql(statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 	public void shouldHaveUser() {
-		ResultSet rs = this.cluster.connect().execute("SELECT COUNT(*) FROM test.users");
+		ResultSet rs = Objects.requireNonNull(this.cluster).connect().execute("SELECT COUNT(*) FROM test.users");
 		assertThat(rs.one().getLong(0)).isEqualTo(1);
 	}
 
 	@Test
 	@Cql(scripts = "/init.cql")
 	public void shouldNotHaveUser() {
-		ResultSet rs = this.cluster.connect().execute("SELECT COUNT(*) FROM test.users");
+		ResultSet rs = Objects.requireNonNull(this.cluster).connect().execute("SELECT COUNT(*) FROM test.users");
 		assertThat(rs.one().getLong(0)).isZero();
 	}
 
@@ -77,4 +81,5 @@ public class CqlExecutionListenerPrimaryBeanTests {
 		}
 
 	}
+
 }

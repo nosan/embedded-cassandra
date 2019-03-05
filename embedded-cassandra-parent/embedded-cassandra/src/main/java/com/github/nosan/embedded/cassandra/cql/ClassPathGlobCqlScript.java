@@ -42,13 +42,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 /**
@@ -95,7 +93,6 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	private static final String WINDOWS = "\\\\";
 
-	@Nonnull
 	private final String pattern;
 
 	@Nullable
@@ -109,7 +106,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	 *
 	 * @param pattern the glob pattern within the class path
 	 */
-	public ClassPathGlobCqlScript(@Nonnull String pattern) {
+	public ClassPathGlobCqlScript(String pattern) {
 		this(pattern, null, null);
 	}
 
@@ -119,7 +116,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	 * @param pattern the glob pattern within the class path
 	 * @param encoding the encoding to use for reading from the resource
 	 */
-	public ClassPathGlobCqlScript(@Nonnull String pattern, @Nullable Charset encoding) {
+	public ClassPathGlobCqlScript(String pattern, @Nullable Charset encoding) {
 		this(pattern, null, encoding);
 	}
 
@@ -129,7 +126,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	 * @param pattern the glob pattern within the class path
 	 * @param classLoader the class loader to load the resource with.
 	 */
-	public ClassPathGlobCqlScript(@Nonnull String pattern, @Nullable ClassLoader classLoader) {
+	public ClassPathGlobCqlScript(String pattern, @Nullable ClassLoader classLoader) {
 		this(pattern, classLoader, null);
 	}
 
@@ -140,7 +137,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	 * @param classLoader the class loader to load the resource with.
 	 * @param encoding the encoding to use for reading from the resource
 	 */
-	public ClassPathGlobCqlScript(@Nonnull String pattern, @Nullable ClassLoader classLoader,
+	public ClassPathGlobCqlScript(String pattern, @Nullable ClassLoader classLoader,
 			@Nullable Charset encoding) {
 		Objects.requireNonNull(pattern, "Pattern must not be null");
 		this.pattern = cleanPattern(pattern);
@@ -153,7 +150,6 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	 *
 	 * @throws UncheckedIOException if an I/O error occurs
 	 */
-	@Nonnull
 	@Override
 	public Collection<String> getStatements() {
 		String pattern = this.pattern;
@@ -187,12 +183,11 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		return this.pattern;
 	}
 
-	private static Set<URL> getResourcesByPattern(ClassLoader cl, String pattern) {
+	private static Set<URL> getResourcesByPattern(@Nullable ClassLoader cl, String pattern) {
 		if (!hasPattern(pattern)) {
 			return getResources(cl, pattern);
 		}
@@ -205,7 +200,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 				.collect(Collectors.toSet());
 	}
 
-	private static Set<URL> getResourcesByPattern(URL url, ClassLoader cl, String pattern) {
+	private static Set<URL> getResourcesByPattern(URL url, @Nullable ClassLoader cl, String pattern) {
 		try {
 			if ("jar".equals(url.getProtocol())) {
 				int index = url.toString().indexOf("!/");
@@ -243,6 +238,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		String globSyntax = cleanLocation(String.format("glob:%s/%s", path.toAbsolutePath(), pattern));
 		PathMatcher matcher = path.getFileSystem().getPathMatcher(globSyntax);
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				if (matcher.matches(file.toAbsolutePath()) && Files.isReadable(file)) {
@@ -254,7 +250,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		return urls;
 	}
 
-	private static Set<URL> getResources(ClassLoader cl, String name) {
+	private static Set<URL> getResources(@Nullable ClassLoader cl, String name) {
 		try {
 			Enumeration<URL> enumeration = (cl != null) ? cl.getResources(name) : ClassLoader.getSystemResources(name);
 			return new LinkedHashSet<>(Collections.list(enumeration));
@@ -288,4 +284,5 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 		return pattern;
 	}
+
 }

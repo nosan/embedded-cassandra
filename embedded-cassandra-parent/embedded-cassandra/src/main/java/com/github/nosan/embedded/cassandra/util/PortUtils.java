@@ -23,9 +23,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ThreadLocalRandom;
 
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility methods for dealing with ports.
@@ -94,7 +94,7 @@ public abstract class PortUtils {
 		}
 	}
 
-	private static boolean isPortAvailable(InetAddress address, int port) {
+	private static boolean isPortAvailable(@Nullable InetAddress address, int port) {
 		try (ServerSocket ss = new ServerSocket()) {
 			ss.bind(new InetSocketAddress(address, port), 1);
 		}
@@ -103,4 +103,5 @@ public abstract class PortUtils {
 		}
 		return !isPortBusy(address, port);
 	}
+
 }

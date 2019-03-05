@@ -22,8 +22,6 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
@@ -39,7 +37,7 @@ class CassandraFileExecutableInitializer extends AbstractFileInitializer {
 	}
 
 	@Override
-	protected void initialize(@Nonnull Path file, @Nonnull Path workingDirectory, @Nonnull Version version) {
+	protected void initialize(Path file, Path workingDirectory, Version version) {
 		if (Files.exists(file) && !Files.isExecutable(file)) {
 			try {
 				Set<PosixFilePermission> permissions = new LinkedHashSet<>(Files.getPosixFilePermissions(file));

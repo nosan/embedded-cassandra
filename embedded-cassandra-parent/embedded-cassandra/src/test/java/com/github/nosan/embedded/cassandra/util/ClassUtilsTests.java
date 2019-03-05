@@ -35,4 +35,5 @@ public class ClassUtilsTests {
 		assertThat(ClassUtils.getPackageName(ClassUtils.class))
 				.isEqualTo("com.github.nosan.embedded.cassandra.util");
 	}
+
 }

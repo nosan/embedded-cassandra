@@ -28,10 +28,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -42,7 +40,6 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class WindowsCassandraNode extends AbstractCassandraNode {
 
-	@Nonnull
 	private final Path pidFile;
 
 	@Nullable
@@ -58,18 +55,17 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	 * @param javaHome java home directory
 	 * @param jmxPort JMX port
 	 */
-	WindowsCassandraNode(@Nonnull Path workingDirectory,
-			@Nonnull Version version, @Nonnull Duration timeout,
-			@Nonnull List<String> jvmOptions, @Nullable Path javaHome, int jmxPort) {
+	WindowsCassandraNode(Path workingDirectory,
+			Version version, Duration timeout,
+			List<String> jvmOptions, @Nullable Path javaHome, int jmxPort) {
 		super(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
 		this.pidFile = workingDirectory.resolve(String.format("%s.pid", UUID.randomUUID()));
 	}
 
-	@Nonnull
 	@Override
-	protected Process start(@Nonnull Path workingDirectory, @Nonnull Version version,
-			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException {
+	protected Process start(Path workingDirectory, Version version,
+			Map<String, String> environment, ThreadFactory threadFactory,
+			RunProcess.Output... outputs) throws IOException {
 		Files.deleteIfExists(this.pidFile);
 		this.pid = null;
 		List<Object> arguments = new ArrayList<>();
@@ -95,20 +91,19 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	protected void stop(@Nonnull Path workingDirectory, @Nonnull Version version,
-			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException {
+	protected void stop(Path workingDirectory, Version version,
+			Map<String, String> environment, ThreadFactory threadFactory,
+			RunProcess.Output... outputs) throws IOException {
 		stop(workingDirectory, environment, threadFactory, false, outputs);
 	}
 
 	@Override
-	protected void forceStop(@Nonnull Path workingDirectory, @Nonnull Version version,
-			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException {
+	protected void forceStop(Path workingDirectory, Version version,
+			Map<String, String> environment, ThreadFactory threadFactory,
+			RunProcess.Output... outputs) throws IOException {
 		stop(workingDirectory, environment, threadFactory, true, outputs);
 	}
 
-	@Nonnull
 	@Override
 	protected Long getId() {
 		Long pid = this.pid;

@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import javax.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@code CqlConfig} encapsulates the
@@ -94,4 +94,5 @@ class CqlConfig {
 	String getEncoding() {
 		return this.encoding;
 	}
+
 }

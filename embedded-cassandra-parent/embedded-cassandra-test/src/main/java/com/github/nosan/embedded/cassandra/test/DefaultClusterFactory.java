@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.SocketOptions;
 import org.apiguardian.api.API;
@@ -36,9 +34,8 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public class DefaultClusterFactory implements ClusterFactory {
 
-	@Nonnull
 	@Override
-	public Cluster create(@Nonnull Settings settings) {
+	public Cluster create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
 		SocketOptions socketOptions = new SocketOptions();
 		socketOptions.setConnectTimeoutMillis(30000);
@@ -64,11 +61,11 @@ public class DefaultClusterFactory implements ClusterFactory {
 	 * @param settings a cassandra settings
 	 * @return a builder
 	 */
-	@Nonnull
-	protected Cluster.Builder configure(@Nonnull Cluster.Builder builder, @Nonnull Settings settings) {
+	protected Cluster.Builder configure(Cluster.Builder builder, Settings settings) {
 		if (settings.getSslPort() != null && settings.getSslPort() == settings.getPort()) {
 			builder = builder.withSSL();
 		}
 		return builder.withoutJMXReporting().withoutMetrics();
 	}
+
 }

@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import javax.annotation.Nonnull;
+import java.util.Objects;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
@@ -31,6 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
@@ -53,12 +54,13 @@ public class EmbeddedCassandraTests {
 	public static final OutputRule output = new OutputRule();
 
 	@Autowired
+	@Nullable
 	private Cluster cluster;
 
 	@Test
 	public void shouldSelectFromRoles() {
 		assertThat(output.toString()).contains("Cassandra version: 2.2.12");
-		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
+		assertThat(Objects.requireNonNull(this.cluster).getClusterName()).isEqualTo("My cluster");
 		try (Session session = this.cluster.connect()) {
 			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
 					.isTrue();
@@ -79,13 +81,14 @@ public class EmbeddedCassandraTests {
 		public ClusterFactory clusterFactory() {
 			return new DefaultClusterFactory() {
 
-				@Nonnull
 				@Override
-				protected Cluster.Builder configure(@Nonnull Cluster.Builder builder, @Nonnull Settings settings) {
+				protected Cluster.Builder configure(Cluster.Builder builder, Settings settings) {
 					return builder.withClusterName("My cluster");
 				}
 
 			};
 		}
+
 	}
+
 }

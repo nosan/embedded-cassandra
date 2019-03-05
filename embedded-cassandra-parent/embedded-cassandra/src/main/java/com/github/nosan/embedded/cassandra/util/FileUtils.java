@@ -27,10 +27,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility methods for dealing with files.
@@ -46,7 +45,6 @@ public abstract class FileUtils {
 	 *
 	 * @return a directory (java.io.tmpdir)
 	 */
-	@Nonnull
 	public static Path getTmpDirectory() {
 		return Paths.get(new SystemProperty("java.io.tmpdir").getRequired());
 	}
@@ -56,7 +54,6 @@ public abstract class FileUtils {
 	 *
 	 * @return a directory (user.home)
 	 */
-	@Nonnull
 	public static Path getUserHomeDirectory() {
 		return Paths.get(new SystemProperty("user.home").getRequired());
 	}
@@ -66,7 +63,6 @@ public abstract class FileUtils {
 	 *
 	 * @return a directory (user.dir)
 	 */
-	@Nonnull
 	public static Path getUserDirectory() {
 		return Paths.get(new SystemProperty("user.dir").getRequired());
 	}
@@ -88,15 +84,16 @@ public abstract class FileUtils {
 			return false;
 		}
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+
 			@Override
-			public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attrs)
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
 					throws IOException {
 				Files.deleteIfExists(file);
 				return FileVisitResult.CONTINUE;
 			}
 
 			@Override
-			public FileVisitResult postVisitDirectory(@Nonnull Path dir, @Nullable IOException ex) throws IOException {
+			public FileVisitResult postVisitDirectory(Path dir, @Nullable IOException ex) throws IOException {
 				if (ex != null) {
 					throw ex;
 				}
@@ -116,7 +113,7 @@ public abstract class FileUtils {
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.4.1
 	 */
-	public static void copy(@Nonnull Path src, @Nonnull Path dest) throws IOException {
+	public static void copy(Path src, Path dest) throws IOException {
 		Objects.requireNonNull(src, "Source must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
 		copy(src, dest, path -> true);
@@ -132,13 +129,14 @@ public abstract class FileUtils {
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.3.0
 	 */
-	public static void copy(@Nonnull Path src, @Nonnull Path dest, @Nullable Predicate<? super Path> fileFilter)
+	public static void copy(Path src, Path dest, @Nullable Predicate<? super Path> fileFilter)
 			throws IOException {
 		Objects.requireNonNull(src, "Source must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
 		Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+
 			@Override
-			public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attributes)
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attributes)
 					throws IOException {
 				if (fileFilter == null || fileFilter.test(file)) {
 					Path destFile = dest.resolve(src.relativize(file));
@@ -149,4 +147,5 @@ public abstract class FileUtils {
 			}
 		});
 	}
+
 }

@@ -19,9 +19,6 @@ package com.github.nosan.embedded.cassandra.test.util;
 import java.util.Arrays;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
@@ -29,6 +26,8 @@ import com.datastax.driver.core.Statement;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility class for dealing with {@code CQL}.
@@ -47,7 +46,7 @@ public abstract class CqlUtils {
 	 * @param session a session
 	 * @param tableNames the names of the tables to delete from
 	 */
-	public static void deleteFromTables(@Nonnull Session session, @Nonnull String... tableNames) {
+	public static void deleteFromTables(Session session, String... tableNames) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableNames, "Tables must not be null");
 		for (String tableName : tableNames) {
@@ -61,7 +60,7 @@ public abstract class CqlUtils {
 	 * @param session a session
 	 * @param tableNames the names of the tables to drop
 	 */
-	public static void dropTables(@Nonnull Session session, @Nonnull String... tableNames) {
+	public static void dropTables(Session session, String... tableNames) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableNames, "Tables must not be null");
 		for (String tableName : tableNames) {
@@ -75,7 +74,7 @@ public abstract class CqlUtils {
 	 * @param session a session
 	 * @param keyspaceNames the names of the keyspaces to drop
 	 */
-	public static void dropKeyspaces(@Nonnull Session session, @Nonnull String... keyspaceNames) {
+	public static void dropKeyspaces(Session session, String... keyspaceNames) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(keyspaceNames, "Keyspaces must not be null");
 		for (String keyspace : keyspaceNames) {
@@ -90,7 +89,7 @@ public abstract class CqlUtils {
 	 * @param session a session
 	 * @return the number of rows in the table
 	 */
-	public static long getRowCount(@Nonnull Session session, @Nonnull String tableName) {
+	public static long getRowCount(Session session, String tableName) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableName, "Table must not be null");
 		return executeStatement(session, String.format("SELECT COUNT(0) FROM %s", tableName)).one().getLong(0);
@@ -104,8 +103,7 @@ public abstract class CqlUtils {
 	 * @return the result of the query. That result will never be null
 	 * but can be empty (and will be for any non SELECT query).
 	 */
-	@Nonnull
-	public static ResultSet executeStatement(@Nonnull Session session, @Nonnull String statement) {
+	public static ResultSet executeStatement(Session session, String statement) {
 		return executeStatement(session, statement, new Object[0]);
 	}
 
@@ -119,8 +117,7 @@ public abstract class CqlUtils {
 	 * @return the result of the query. That result will never be null but
 	 * can be empty (and will be for any non SELECT query).
 	 */
-	@Nonnull
-	public static ResultSet executeStatement(@Nonnull Session session, @Nonnull String statement,
+	public static ResultSet executeStatement(Session session, String statement,
 			@Nullable Object... args) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(statement, "Statement must not be null");
@@ -144,8 +141,7 @@ public abstract class CqlUtils {
 	 * but can be empty (and will be for any non SELECT query).
 	 * @since 1.2.8
 	 */
-	@Nonnull
-	public static ResultSet executeStatement(@Nonnull Session session, @Nonnull Statement statement) {
+	public static ResultSet executeStatement(Session session, Statement statement) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(statement, "Statement must not be null");
 		if (log.isDebugEnabled()) {
@@ -153,4 +149,5 @@ public abstract class CqlUtils {
 		}
 		return session.execute(statement);
 	}
+
 }

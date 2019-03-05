@@ -22,11 +22,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -37,10 +35,8 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class NodeSettings implements Settings {
 
-	@Nonnull
 	private final Version version;
 
-	@Nonnull
 	private final Map<Object, Object> properties;
 
 	/**
@@ -49,19 +45,17 @@ class NodeSettings implements Settings {
 	 * @param version a version
 	 * @param properties a node properties
 	 */
-	NodeSettings(@Nonnull Version version, @Nullable Map<?, ?> properties) {
+	NodeSettings(Version version, @Nullable Map<?, ?> properties) {
 		this.version = version;
 		this.properties = Collections.unmodifiableMap(
 				(properties != null) ? new LinkedHashMap<>(properties) : Collections.emptyMap());
 	}
 
-	@Nonnull
 	@Override
 	public Version getVersion() {
 		return this.version;
 	}
 
-	@Nonnull
 	@Override
 	public Map<Object, Object> getProperties() {
 		return this.properties;
@@ -164,7 +158,6 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		Map<Object, Object> properties = new LinkedHashMap<>(getProperties());
 		properties.put("version", getVersion());

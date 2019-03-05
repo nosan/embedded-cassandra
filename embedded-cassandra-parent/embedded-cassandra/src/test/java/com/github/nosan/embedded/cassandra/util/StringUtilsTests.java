@@ -53,4 +53,5 @@ public class StringUtilsTests {
 		assertThat(StringUtils.isEmpty("")).isTrue();
 		assertThat(StringUtils.isEmpty(null)).isTrue();
 	}
+
 }

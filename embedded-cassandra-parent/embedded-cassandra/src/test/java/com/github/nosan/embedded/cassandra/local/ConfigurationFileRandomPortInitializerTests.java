@@ -96,4 +96,5 @@ public class ConfigurationFileRandomPortInitializerTests {
 		assertThat(settings.getSslStoragePort()).isEqualTo(7001);
 
 	}
+
 }

@@ -104,4 +104,5 @@ public class TestCassandraTests {
 	private static void assertString(Row row, String column, String value) {
 		assertThat(row.get(column, String.class)).isEqualTo(value);
 	}
+
 }

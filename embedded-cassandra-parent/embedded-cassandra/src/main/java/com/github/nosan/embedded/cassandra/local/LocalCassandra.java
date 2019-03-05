@@ -25,9 +25,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +32,7 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 
@@ -55,22 +53,16 @@ class LocalCassandra implements Cassandra {
 
 	private final boolean allowRoot;
 
-	@Nonnull
 	private final Object lock = new Object();
 
-	@Nonnull
 	private final Version version;
 
-	@Nonnull
 	private final ArtifactFactory artifactFactory;
 
-	@Nonnull
 	private final Path workingDirectory;
 
-	@Nonnull
 	private final Path artifactDirectory;
 
-	@Nonnull
 	private final Duration startupTimeout;
 
 	@Nullable
@@ -88,13 +80,11 @@ class LocalCassandra implements Cassandra {
 	@Nullable
 	private final URL commitLogArchivingFile;
 
-	@Nonnull
 	private final List<String> jvmOptions;
 
 	@Nullable
 	private final Path javaHome;
 
-	@Nonnull
 	private volatile State state = State.NEW;
 
 	@Nullable
@@ -122,11 +112,11 @@ class LocalCassandra implements Cassandra {
 	 * @param allowRoot allow running as a root
 	 * @param registerShutdownHook whether shutdown hook should be registered or not
 	 */
-	LocalCassandra(@Nonnull Version version, @Nonnull ArtifactFactory artifactFactory,
-			@Nonnull Path workingDirectory, @Nonnull Path artifactDirectory,
-			@Nonnull Duration startupTimeout, @Nullable URL configurationFile,
+	LocalCassandra(Version version, ArtifactFactory artifactFactory,
+			Path workingDirectory, Path artifactDirectory,
+			Duration startupTimeout, @Nullable URL configurationFile,
 			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
-			@Nullable URL commitLogArchivingFile, @Nonnull List<String> jvmOptions, @Nullable Path javaHome,
+			@Nullable URL commitLogArchivingFile, List<String> jvmOptions, @Nullable Path javaHome,
 			int jmxPort, boolean allowRoot, boolean registerShutdownHook) {
 		this.artifactFactory = artifactFactory;
 		this.workingDirectory = workingDirectory;
@@ -208,7 +198,6 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
-	@Nonnull
 	@Override
 	public Settings getSettings() throws CassandraException {
 		synchronized (this.lock) {
@@ -223,14 +212,12 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
-	@Nonnull
 	@Override
 	public State getState() {
 		return this.state;
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		return String.format("%s [%s]", getClass().getSimpleName(), this.version);
 	}
@@ -324,7 +311,7 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
-	private static boolean isClosedByInterruptException(Throwable ex) {
+	private static boolean isClosedByInterruptException(@Nullable Throwable ex) {
 		if (ex instanceof ClosedByInterruptException) {
 			return true;
 		}
@@ -334,4 +321,5 @@ class LocalCassandra implements Cassandra {
 	private static boolean isWindows() {
 		return File.separatorChar == '\\';
 	}
+
 }

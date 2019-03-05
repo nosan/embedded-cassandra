@@ -42,4 +42,5 @@ public class ProcessUtilsTests {
 		Process process = new ProcessBuilder("echo", "Hello world").start();
 		assertThat(ProcessUtils.getPid(process)).isGreaterThan(0);
 	}
+
 }

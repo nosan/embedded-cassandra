@@ -21,9 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
@@ -38,6 +35,7 @@ import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
 import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
@@ -64,19 +62,14 @@ public class TestCassandra implements Cassandra {
 
 	private final boolean registerShutdownHook;
 
-	@Nonnull
 	private final Object lock = new Object();
 
-	@Nonnull
 	private final List<CqlScript> scripts;
 
-	@Nonnull
 	private final ClusterFactory clusterFactory;
 
-	@Nonnull
 	private final CassandraFactory cassandraFactory;
 
-	@Nonnull
 	private volatile State state = State.NEW;
 
 	@Nullable
@@ -244,13 +237,11 @@ public class TestCassandra implements Cassandra {
 		}
 	}
 
-	@Nonnull
 	@Override
 	public Settings getSettings() throws CassandraException {
 		return getCassandra().getSettings();
 	}
 
-	@Nonnull
 	@Override
 	public State getState() {
 		return this.state;
@@ -262,7 +253,6 @@ public class TestCassandra implements Cassandra {
 	 *
 	 * @return a cluster
 	 */
-	@Nonnull
 	public Cluster getCluster() {
 		Cluster cluster = this.cluster;
 		if (cluster == null) {
@@ -284,7 +274,6 @@ public class TestCassandra implements Cassandra {
 	 *
 	 * @return a session
 	 */
-	@Nonnull
 	public Session getSession() {
 		Session session = this.session;
 		if (session == null) {
@@ -305,7 +294,6 @@ public class TestCassandra implements Cassandra {
 	 * @return the underlying {@link Cassandra}.
 	 * @since 1.4.1
 	 */
-	@Nonnull
 	@API(since = "1.4.1", status = API.Status.EXPERIMENTAL)
 	public Cassandra getCassandra() {
 		Cassandra cassandra = this.cassandra;
@@ -328,7 +316,7 @@ public class TestCassandra implements Cassandra {
 	 * @param tableNames the names of the tables to delete from
 	 * @since 1.0.6
 	 */
-	public void deleteFromTables(@Nonnull String... tableNames) {
+	public void deleteFromTables(String... tableNames) {
 		CqlUtils.deleteFromTables(getSession(), tableNames);
 	}
 
@@ -338,7 +326,7 @@ public class TestCassandra implements Cassandra {
 	 * @param tableNames the names of the tables to drop
 	 * @since 1.0.6
 	 */
-	public void dropTables(@Nonnull String... tableNames) {
+	public void dropTables(String... tableNames) {
 		CqlUtils.dropTables(getSession(), tableNames);
 	}
 
@@ -348,7 +336,7 @@ public class TestCassandra implements Cassandra {
 	 * @param keyspaceNames the names of the keyspaces to drop
 	 * @since 1.0.6
 	 */
-	public void dropKeyspaces(@Nonnull String... keyspaceNames) {
+	public void dropKeyspaces(String... keyspaceNames) {
 		CqlUtils.dropKeyspaces(getSession(), keyspaceNames);
 	}
 
@@ -359,7 +347,7 @@ public class TestCassandra implements Cassandra {
 	 * @return the number of rows in the table
 	 * @since 1.0.6
 	 */
-	public long getRowCount(@Nonnull String tableName) {
+	public long getRowCount(String tableName) {
 		return CqlUtils.getRowCount(getSession(), tableName);
 	}
 
@@ -369,7 +357,7 @@ public class TestCassandra implements Cassandra {
 	 * @param scripts the CQL scripts to execute.
 	 * @since 1.0.6
 	 */
-	public void executeScripts(@Nonnull CqlScript... scripts) {
+	public void executeScripts(CqlScript... scripts) {
 		CqlScriptUtils.executeScripts(getSession(), scripts);
 	}
 
@@ -383,8 +371,7 @@ public class TestCassandra implements Cassandra {
 	 * for any non SELECT query).
 	 * @since 1.0.6
 	 */
-	@Nonnull
-	public ResultSet executeStatement(@Nonnull String statement, @Nullable Object... args) {
+	public ResultSet executeStatement(String statement, @Nullable Object... args) {
 		return CqlUtils.executeStatement(getSession(), statement, args);
 	}
 
@@ -396,12 +383,10 @@ public class TestCassandra implements Cassandra {
 	 * but can be empty (and will be for any non SELECT query).
 	 * @since 1.2.8
 	 */
-	@Nonnull
-	public ResultSet executeStatement(@Nonnull Statement statement) {
+	public ResultSet executeStatement(Statement statement) {
 		return CqlUtils.executeStatement(getSession(), statement);
 	}
 
-	@Nonnull
 	@Override
 	public String toString() {
 		return String.format("Test Cassandra (%s)", getCassandra());
@@ -488,4 +473,5 @@ public class TestCassandra implements Cassandra {
 			}
 		}
 	}
+
 }

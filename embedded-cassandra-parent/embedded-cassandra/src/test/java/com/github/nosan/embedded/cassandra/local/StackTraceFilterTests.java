@@ -37,4 +37,5 @@ public class StackTraceFilterTests {
 		assertThat(filter.test("text")).isTrue();
 
 	}
+
 }

@@ -42,4 +42,5 @@ public class WaitUtilsTests {
 		assertThat(WaitUtils.await(Duration.ofMillis(1500), () -> true)).isTrue();
 		assertThat(System.currentTimeMillis() - start).isBetween(0L, 1000L);
 	}
+
 }

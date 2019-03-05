@@ -26,9 +26,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -41,6 +38,7 @@ import org.springframework.util.StringUtils;
 import com.github.nosan.embedded.cassandra.cql.AbstractCqlResourceScript;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility class to convert Spring {@link Resource}.
@@ -60,8 +58,7 @@ abstract class CqlResourceUtils {
 	 * @return CQL scripts.
 	 * @throws UncheckedIOException if an I/O error occurs
 	 */
-	@Nonnull
-	static CqlScript[] getScripts(@Nonnull ResourcePatternResolver resourcePatternResolver, @Nonnull CqlConfig config) {
+	static CqlScript[] getScripts(ResourcePatternResolver resourcePatternResolver, CqlConfig config) {
 		List<CqlScript> cqlScripts = new ArrayList<>();
 
 		String[] scripts = config.getScripts();
@@ -94,7 +91,7 @@ abstract class CqlResourceUtils {
 	 * @since 1.0.7
 	 */
 	@Nullable
-	static URL getURL(@Nonnull ResourceLoader resourceLoader, @Nonnull String location, @Nullable Class<?> testClass) {
+	static URL getURL(ResourceLoader resourceLoader, String location, @Nullable Class<?> testClass) {
 		String[] locations = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, location);
 		Resource resource = resourceLoader.getResource(locations[0]);
 		if (resource.exists()) {
@@ -137,7 +134,6 @@ abstract class CqlResourceUtils {
 	 */
 	private static final class SpringCqlScript extends AbstractCqlResourceScript {
 
-		@Nonnull
 		private final Resource resource;
 
 		/**
@@ -146,18 +142,16 @@ abstract class CqlResourceUtils {
 		 * @param resource the spring resource
 		 * @param encoding the encoding to use for reading from the resource
 		 */
-		SpringCqlScript(@Nonnull Resource resource, @Nullable Charset encoding) {
+		SpringCqlScript(Resource resource, @Nullable Charset encoding) {
 			super(encoding);
 			this.resource = resource;
 		}
 
-		@Nonnull
 		@Override
 		protected InputStream getInputStream() throws IOException {
 			return this.resource.getInputStream();
 		}
 
-		@Nonnull
 		@Override
 		public String toString() {
 			return this.resource.toString();
@@ -179,5 +173,7 @@ abstract class CqlResourceUtils {
 		public int hashCode() {
 			return Objects.hash(this.resource);
 		}
+
 	}
+
 }

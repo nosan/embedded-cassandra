@@ -82,4 +82,5 @@ public class ClassPathCqlScriptTests {
 	public void invalidResource() {
 		new ClassPathCqlScript("/hz.cql").getStatements();
 	}
+
 }

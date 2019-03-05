@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 /**
@@ -29,9 +27,9 @@ import org.apiguardian.api.API;
 @API(since = "1.2.10", status = API.Status.MAINTAINED)
 public final class TestCassandraBuilder extends AbstractTestCassandraBuilder<TestCassandra, TestCassandraBuilder> {
 
-	@Nonnull
 	@Override
 	public TestCassandra build() {
 		return new TestCassandra(isRegisterShutdownHook(), getCassandraFactory(), getClusterFactory(), getScripts());
 	}
+
 }

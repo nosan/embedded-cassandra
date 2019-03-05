@@ -18,7 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.net.URL;
 
-import javax.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@link Initializer} to initialize {@code cassandra-rackdc.properties}.

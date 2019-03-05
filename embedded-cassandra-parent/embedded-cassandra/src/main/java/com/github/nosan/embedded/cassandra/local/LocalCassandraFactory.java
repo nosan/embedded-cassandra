@@ -23,14 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
@@ -46,7 +44,6 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class LocalCassandraFactory implements CassandraFactory {
 
-	@Nonnull
 	private final List<String> jvmOptions = new ArrayList<>();
 
 	@Nullable
@@ -181,7 +178,6 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	 *
 	 * @return The value of the {@code jvmOptions} attribute
 	 */
-	@Nonnull
 	public List<String> getJvmOptions() {
 		return this.jvmOptions;
 	}
@@ -389,7 +385,6 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		this.artifactDirectory = artifactDirectory;
 	}
 
-	@Nonnull
 	@Override
 	public Cassandra create() {
 		ArtifactFactory artifactFactory = getArtifactFactory();
@@ -423,4 +418,5 @@ public final class LocalCassandraFactory implements CassandraFactory {
 				getTopologyFile(), getCommitLogArchivingFile(), getJvmOptions(), getJavaHome(), getJmxPort(),
 				isAllowRoot(), isRegisterShutdownHook());
 	}
+
 }

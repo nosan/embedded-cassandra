@@ -38,4 +38,5 @@ public class ThreadNameSupplierTests {
 		ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier("prefix");
 		assertThat(threadNameSupplier.get()).isEqualTo("prefix-thread-1");
 	}
+
 }

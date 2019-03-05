@@ -50,4 +50,5 @@ public class UrlCqlScriptTests {
 	public void invalidResource() throws MalformedURLException {
 		new UrlCqlScript(new URL("http://localhost:111/hz.cql")).getStatements();
 	}
+
 }

@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.jupiter;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.test.AbstractTestCassandraBuilder;
@@ -32,10 +30,10 @@ import com.github.nosan.embedded.cassandra.test.AbstractTestCassandraBuilder;
 public final class CassandraExtensionBuilder
 		extends AbstractTestCassandraBuilder<CassandraExtension, CassandraExtensionBuilder> {
 
-	@Nonnull
 	@Override
 	public CassandraExtension build() {
 		return new CassandraExtension(isRegisterShutdownHook(), getCassandraFactory(), getClusterFactory(),
 				getScripts());
 	}
+
 }
