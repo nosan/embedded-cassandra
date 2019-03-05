@@ -15,7 +15,7 @@
  */
 
 /**
- * Classes which are used for implementing Artifacts.
+ * Artifact's classes.
  */
 
 @NonNullFields
