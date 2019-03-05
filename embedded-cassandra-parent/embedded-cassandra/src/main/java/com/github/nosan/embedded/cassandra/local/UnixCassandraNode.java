@@ -64,6 +64,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	protected Process start(@Nonnull Path workingDirectory, @Nonnull Version version,
 			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
 			@Nonnull RunProcess.Output... outputs) throws IOException {
+		this.pid = -1;
 		List<Object> arguments = new ArrayList<>();
 		arguments.add(workingDirectory.resolve("bin/cassandra").toAbsolutePath());
 		arguments.add("-f");
