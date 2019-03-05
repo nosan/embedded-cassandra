@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -30,6 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
  * Windows implementation of the {@link CassandraNode}.
@@ -92,6 +94,23 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
 			@Nonnull RunProcess.Output... outputs) throws IOException {
 		stop(process, workingDirectory, environment, threadFactory, this.pidFile, true, outputs);
+	}
+
+	@Nonnull
+	@Override
+	protected String getId(@Nonnull Process process) {
+		long pid = ProcessUtils.getPid(process);
+		if (pid != -1) {
+			return Long.toString(pid);
+		}
+		try {
+			String id = new String(Files.readAllBytes(this.pidFile), StandardCharsets.UTF_8)
+					.replaceAll("\\D", "");
+			return StringUtils.hasText(id) ? id : "???";
+		}
+		catch (Exception ex) {
+			return "???";
+		}
 	}
 
 	private static void stop(Process process, Path workingDirectory, Map<String, String> environment,
