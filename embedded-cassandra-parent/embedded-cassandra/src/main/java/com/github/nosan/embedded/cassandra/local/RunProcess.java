@@ -84,22 +84,6 @@ class RunProcess {
 
 	/**
 	 * Starts a new process using the arguments and env variables and delegates output to the {@link Output}.
-	 * Causes the current thread to wait, if necessary, until the process represented by process object has
-	 * terminated.
-	 *
-	 * @param outputs output consumers.
-	 * @return the exit value of the subprocess represented by {@code Process} object. By convention, the value
-	 * {@code 0} indicates normal termination.
-	 * @throws IOException if an I/O error occurs
-	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another
-	 * thread while it is waiting, then the wait is ended and an {@link InterruptedException} is thrown.
-	 */
-	int runAndWait(@Nullable Output... outputs) throws IOException, InterruptedException {
-		return run(outputs).waitFor();
-	}
-
-	/**
-	 * Starts a new process using the arguments and env variables and delegates output to the {@link Output}.
 	 *
 	 * @param outputs output consumers.
 	 * @return a new process object for managing the subprocess
