@@ -49,9 +49,7 @@ abstract class AbstractFileInitializer implements Initializer {
 	@Override
 	public final void initialize(Path workingDirectory, Version version) throws IOException {
 		Path file = this.fileMapper.apply(workingDirectory, version);
-		if (file != null) {
-			initialize(file, workingDirectory, version);
-		}
+		initialize(file, workingDirectory, version);
 	}
 
 	/**
