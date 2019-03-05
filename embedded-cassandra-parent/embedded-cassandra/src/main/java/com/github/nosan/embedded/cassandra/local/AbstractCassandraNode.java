@@ -151,11 +151,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		catch (Exception ex) {
 			throw new IOException(ex);
 		}
+		String id = getId(process);
 		if (!result) {
 			throw new IOException(String.format("Cassandra Node (%s) has not been started," +
-					" seems like (%d) milliseconds is not enough.", getId(process), timeout.toMillis()));
+					" seems like (%d) milliseconds is not enough.", id, timeout.toMillis()));
 		}
-		log.info("Cassandra Node ({}) has been started", getId(process));
+		log.info("Cassandra Node ({}) has been started", id);
 	}
 
 	@Override
@@ -167,6 +168,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		ThreadFactory threadFactory = this.threadFactory;
 		Map<String, String> environment = new LinkedHashMap<>();
 		if (process != null && process.isAlive()) {
+			String id = getId(process);
 			boolean result = false;
 			try {
 				stop(process, workingDirectory, version, environment, threadFactory, log::info);
@@ -176,7 +178,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				throw ex;
 			}
 			catch (Throwable ex) {
-				log.error(String.format("Could not stop Cassandra Node (%s).", getId(process)), ex);
+				log.error(String.format("Could not stop Cassandra Node (%s).", id), ex);
 			}
 			if (!result) {
 				try {
@@ -187,7 +189,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					throw ex;
 				}
 				catch (Throwable ex) {
-					log.error(String.format("Could not <force> stop Cassandra Node (%s).", getId(process)), ex);
+					log.error(String.format("Could not <force> stop Cassandra Node (%s).", id), ex);
 				}
 			}
 			if (!result) {
@@ -198,15 +200,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					throw ex;
 				}
 				catch (Throwable ex) {
-					log.error(String.format("Could not destroy Cassandra Node (%s).", getId(process)), ex);
+					log.error(String.format("Could not destroy Cassandra Node (%s).", id), ex);
 				}
 			}
 			if (!result) {
-				throw new IOException(String.format("Casandra Node (%s) has not been stopped.", getId(process)));
+				throw new IOException(String.format("Casandra Node (%s) has not been stopped.", id));
 			}
 			this.settings = null;
 			this.process = null;
-			log.info("Cassandra Node ({}) has been stopped", getId(process));
+			log.info("Cassandra Node ({}) has been stopped", id);
 		}
 	}
 
@@ -292,11 +294,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean waitForStarted(Process process, Duration timeout, RuntimeNodeSettings settings,
 			NodeReadiness nodeReadiness) throws Exception {
+		String id = getId(process);
 		long start = System.currentTimeMillis();
 		return WaitUtils.await(timeout, () -> {
 			if (!process.isAlive()) {
 				throw new IOException(String.format("Cassandra Node (%s) is not alive. " +
-						"Please see logs for more details.", getId(process)));
+						"Please see logs for more details.", id));
 			}
 			long elapsed = System.currentTimeMillis() - start;
 			if (elapsed > 20000) {
