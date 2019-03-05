@@ -45,7 +45,8 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	@Nonnull
 	private final Path pidFile;
 
-	private volatile long pid = -1;
+	@Nullable
+	private volatile Long pid;
 
 	/**
 	 * Creates a {@link WindowsCassandraNode}.
@@ -70,6 +71,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
 			@Nonnull RunProcess.Output... outputs) throws IOException {
 		Files.deleteIfExists(this.pidFile);
+		this.pid = null;
 		List<Object> arguments = new ArrayList<>();
 		arguments.add("powershell");
 		arguments.add("-ExecutionPolicy");
@@ -83,7 +85,8 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		arguments.add(this.pidFile.toAbsolutePath());
 		Process process = new RunProcess(workingDirectory, environment, threadFactory, arguments)
 				.run(append(line -> {
-					if (this.pid == -1) {
+					Long pid = this.pid;
+					if (pid != null && pid == -1) {
 						this.pid = getPid(this.pidFile);
 					}
 				}, outputs));
@@ -108,7 +111,8 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	@Nonnull
 	@Override
 	protected Long getId() {
-		return this.pid;
+		Long pid = this.pid;
+		return (pid != null) ? pid : -1;
 	}
 
 	private void stop(Path workingDirectory, Map<String, String> environment,
