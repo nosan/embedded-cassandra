@@ -15,7 +15,7 @@
  */
 
 /**
- * Local Cassandra classes, most of them are package private.
+ * Classes which are used for implementing Local Cassandra.
  */
 
 @NonNullFields
