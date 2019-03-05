@@ -40,6 +40,8 @@ class UnixCassandraNode extends AbstractCassandraNode {
 
 	private final boolean allowRoot;
 
+	private long pid;
+
 	/**
 	 * Creates a {@link UnixCassandraNode}.
 	 *
@@ -68,33 +70,32 @@ class UnixCassandraNode extends AbstractCassandraNode {
 		if (this.allowRoot && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
 			arguments.add("-R");
 		}
-		return new RunProcess(workingDirectory, environment, threadFactory, arguments)
+		Process process = new RunProcess(workingDirectory, environment, threadFactory, arguments)
+				.run(outputs);
+		this.pid = ProcessUtils.getPid(process);
+		return process;
+	}
+
+	@Override
+	protected void stop(@Nonnull Path workingDirectory, @Nonnull Version version,
+			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
+			@Nonnull RunProcess.Output... outputs) throws IOException {
+		new RunProcess(workingDirectory, environment, threadFactory, Arrays.asList("kill", "-SIGINT", getId()))
 				.run(outputs);
 	}
 
 	@Override
-	protected void stop(@Nonnull Process process, @Nonnull Path workingDirectory, @Nonnull Version version,
+	protected void forceStop(@Nonnull Path workingDirectory, @Nonnull Version version,
 			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
 			@Nonnull RunProcess.Output... outputs) throws IOException {
-		long pid = ProcessUtils.getPid(process);
-		new RunProcess(workingDirectory, environment, threadFactory, Arrays.asList("kill", "-SIGINT", pid))
-				.run(outputs);
-	}
-
-	@Override
-	protected void forceStop(@Nonnull Process process, @Nonnull Path workingDirectory, @Nonnull Version version,
-			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException {
-		long pid = ProcessUtils.getPid(process);
-		new RunProcess(workingDirectory, environment, threadFactory, Arrays.asList("kill", "-9", pid))
+		new RunProcess(workingDirectory, environment, threadFactory, Arrays.asList("kill", "-9", getId()))
 				.run(outputs);
 	}
 
 	@Nonnull
 	@Override
-	protected String getId(@Nonnull Process process) {
-		long pid = ProcessUtils.getPid(process);
-		return (pid != -1) ? Long.toString(pid) : "???";
+	protected Long getId() {
+		return this.pid;
 	}
 
 }

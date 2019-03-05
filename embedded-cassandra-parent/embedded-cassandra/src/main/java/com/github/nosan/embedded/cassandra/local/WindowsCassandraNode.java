@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -43,6 +44,8 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 
 	@Nonnull
 	private final Path pidFile;
+
+	private volatile long pid = -1;
 
 	/**
 	 * Creates a {@link WindowsCassandraNode}.
@@ -66,7 +69,8 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	protected Process start(@Nonnull Path workingDirectory, @Nonnull Version version,
 			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
 			@Nonnull RunProcess.Output... outputs) throws IOException {
-		Files.deleteIfExists(this.pidFile);
+		Path pidFile = this.pidFile;
+		Files.deleteIfExists(pidFile);
 		List<Object> arguments = new ArrayList<>();
 		arguments.add("powershell");
 		arguments.add("-ExecutionPolicy");
@@ -77,45 +81,40 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			arguments.add("-a");
 		}
 		arguments.add("-p");
-		arguments.add(this.pidFile.toAbsolutePath());
-		return new RunProcess(workingDirectory, environment, threadFactory, arguments)
-				.run(outputs);
+		arguments.add(pidFile.toAbsolutePath());
+		Process process = new RunProcess(workingDirectory, environment, threadFactory, arguments)
+				.run(append(line -> {
+					if (this.pid == -1) {
+						this.pid = getPid(pidFile);
+					}
+				}, outputs));
+		this.pid = ProcessUtils.getPid(process);
+		return process;
 	}
 
 	@Override
-	protected void stop(@Nonnull Process process, @Nonnull Path workingDirectory, @Nonnull Version version,
+	protected void stop(@Nonnull Path workingDirectory, @Nonnull Version version,
 			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
 			@Nonnull RunProcess.Output... outputs) throws IOException {
-		stop(process, workingDirectory, environment, threadFactory, this.pidFile, false, outputs);
+		stop(workingDirectory, environment, threadFactory, false, outputs);
 	}
 
 	@Override
-	protected void forceStop(@Nonnull Process process, @Nonnull Path workingDirectory, @Nonnull Version version,
+	protected void forceStop(@Nonnull Path workingDirectory, @Nonnull Version version,
 			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
 			@Nonnull RunProcess.Output... outputs) throws IOException {
-		stop(process, workingDirectory, environment, threadFactory, this.pidFile, true, outputs);
+		stop(workingDirectory, environment, threadFactory, true, outputs);
 	}
 
 	@Nonnull
 	@Override
-	protected String getId(@Nonnull Process process) {
-		long pid = ProcessUtils.getPid(process);
-		if (pid != -1) {
-			return Long.toString(pid);
-		}
-		try {
-			String id = new String(Files.readAllBytes(this.pidFile), StandardCharsets.UTF_8)
-					.replaceAll("\\D", "");
-			return StringUtils.hasText(id) ? id : "???";
-		}
-		catch (Exception ex) {
-			return "???";
-		}
+	protected Long getId() {
+		return this.pid;
 	}
 
-	private static void stop(Process process, Path workingDirectory, Map<String, String> environment,
-			ThreadFactory threadFactory, Path pidFile, boolean force, RunProcess.Output... outputs) throws IOException {
-		long pid = ProcessUtils.getPid(process);
+	private void stop(Path workingDirectory, Map<String, String> environment,
+			ThreadFactory threadFactory, boolean force, RunProcess.Output... outputs) throws IOException {
+		Path pidFile = this.pidFile;
 		if (Files.exists(pidFile)) {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("powershell");
@@ -129,16 +128,37 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			arguments.add(pidFile.toAbsolutePath());
 			new RunProcess(workingDirectory, environment, threadFactory, arguments).run(outputs);
 		}
-		else if (pid > 0) {
+		else {
 			List<Object> arguments = new ArrayList<>();
 			arguments.add("taskkill");
 			if (force) {
-				arguments.add("/F");
+				arguments.add("/f");
 			}
-			arguments.add("/T");
+			arguments.add("/t");
 			arguments.add("/pid");
-			arguments.add(pid);
+			arguments.add(getId());
 			new RunProcess(workingDirectory, environment, threadFactory, arguments).run(outputs);
+		}
+	}
+
+	private static RunProcess.Output[] append(RunProcess.Output element, RunProcess.Output[] elements) {
+		List<RunProcess.Output> outputs = new ArrayList<>();
+		outputs.add(element);
+		outputs.addAll(Arrays.asList(elements));
+		return outputs.toArray(new RunProcess.Output[0]);
+	}
+
+	private static long getPid(Path pidFile) {
+		if (!Files.exists(pidFile)) {
+			return -1;
+		}
+		try {
+			String id = new String(Files.readAllBytes(pidFile), StandardCharsets.UTF_8)
+					.replaceAll("[^-+\\d]", "");
+			return StringUtils.hasText(id) ? Long.parseLong(id) : -1;
+		}
+		catch (Throwable ex) {
+			return -1;
 		}
 	}
 
