@@ -341,4 +341,5 @@ public @interface EmbeddedLocalCassandra {
 		long connectTimeout() default 30000;
 
 	}
+
 }

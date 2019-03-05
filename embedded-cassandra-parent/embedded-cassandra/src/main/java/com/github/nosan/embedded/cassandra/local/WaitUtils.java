@@ -20,8 +20,6 @@ import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nonnull;
-
 /**
  * Utility class to {@code wait} an action.
  *
@@ -40,7 +38,7 @@ abstract class WaitUtils {
 	 * @throws Exception if callable throw an exception
 	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	static boolean await(@Nonnull Duration timeout, @Nonnull Callable<Boolean> action)
+	static boolean await(Duration timeout, Callable<Boolean> action)
 			throws InterruptedException, Exception {
 		long start = System.nanoTime();
 		long rem = timeout.toNanos();
@@ -57,4 +55,5 @@ abstract class WaitUtils {
 		while (rem > 0);
 		return false;
 	}
+
 }

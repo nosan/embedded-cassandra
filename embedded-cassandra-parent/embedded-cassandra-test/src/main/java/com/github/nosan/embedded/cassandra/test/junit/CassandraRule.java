@@ -16,9 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.junit;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.datastax.driver.core.Cluster;
 import org.apiguardian.api.API;
 import org.junit.rules.TestRule;
@@ -28,6 +25,7 @@ import org.junit.runners.model.Statement;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
@@ -145,10 +143,10 @@ public class CassandraRule extends TestCassandra implements TestRule {
 		super(registerShutdownHook, cassandraFactory, clusterFactory, scripts);
 	}
 
-	@Nonnull
 	@Override
-	public Statement apply(@Nonnull Statement base, @Nonnull Description description) {
+	public Statement apply(Statement base, Description description) {
 		return new Statement() {
+
 			@Override
 			public void evaluate() throws Throwable {
 				start();
@@ -161,4 +159,5 @@ public class CassandraRule extends TestCassandra implements TestRule {
 			}
 		};
 	}
+
 }

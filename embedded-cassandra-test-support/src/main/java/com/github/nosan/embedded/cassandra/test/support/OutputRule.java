@@ -21,9 +21,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -36,18 +33,16 @@ import org.junit.runners.model.Statement;
  */
 public final class OutputRule implements TestRule {
 
-	@Nullable
 	private TeeOutputStream out;
 
-	@Nullable
 	private TeeOutputStream err;
 
-	@Nullable
 	private ByteArrayOutputStream output;
 
 	@Override
 	public Statement apply(Statement base, Description description) {
 		return new Statement() {
+
 			@Override
 			public void evaluate() throws Throwable {
 				capture();
@@ -61,7 +56,6 @@ public final class OutputRule implements TestRule {
 		};
 	}
 
-	@Nonnull
 	@Override
 	public String toString() {
 		flush();
@@ -128,13 +122,11 @@ public final class OutputRule implements TestRule {
 
 	private static final class TeeOutputStream extends OutputStream {
 
-		@Nonnull
 		private final PrintStream original;
 
-		@Nonnull
 		private final OutputStream delegate;
 
-		TeeOutputStream(@Nonnull PrintStream original, @Nonnull OutputStream delegate) {
+		TeeOutputStream(PrintStream original, OutputStream delegate) {
 			this.original = original;
 			this.delegate = delegate;
 		}
@@ -146,12 +138,12 @@ public final class OutputRule implements TestRule {
 		}
 
 		@Override
-		public void write(@Nonnull byte[] b) throws IOException {
+		public void write(byte[] b) throws IOException {
 			write(b, 0, b.length);
 		}
 
 		@Override
-		public void write(@Nonnull byte[] b, int off, int len) throws IOException {
+		public void write(byte[] b, int off, int len) throws IOException {
 			this.delegate.write(b, off, len);
 			this.original.write(b, off, len);
 		}
@@ -162,9 +154,10 @@ public final class OutputRule implements TestRule {
 			this.original.flush();
 		}
 
-		@Nonnull
 		PrintStream getOriginal() {
 			return this.original;
 		}
+
 	}
+
 }

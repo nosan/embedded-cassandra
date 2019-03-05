@@ -52,4 +52,5 @@ public class PathCqlScriptTests {
 	public void invalidResource() {
 		new PathCqlScript(Paths.get("hz.cql")).getStatements();
 	}
+
 }

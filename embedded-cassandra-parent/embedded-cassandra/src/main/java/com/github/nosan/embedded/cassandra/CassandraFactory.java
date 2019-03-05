@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
@@ -39,6 +37,6 @@ public interface CassandraFactory {
 	 *
 	 * @return a configured {@code Cassandra}
 	 */
-	@Nonnull
 	Cassandra create();
+
 }

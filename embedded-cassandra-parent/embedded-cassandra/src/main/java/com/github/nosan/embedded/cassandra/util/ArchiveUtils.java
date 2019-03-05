@@ -32,9 +32,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -50,6 +47,8 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility methods for dealing with archives.
@@ -89,7 +88,7 @@ public abstract class ArchiveUtils {
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.4.1
 	 */
-	public static void extract(@Nonnull Path archive, @Nonnull Path dest) throws IOException {
+	public static void extract(Path archive, Path dest) throws IOException {
 		extract(archive, dest, entry -> true);
 	}
 
@@ -102,8 +101,8 @@ public abstract class ArchiveUtils {
 	 * @param entryFilter the filter to check whether {@code entry file} should be extracted or not
 	 * @throws IOException in the case of I/O errors
 	 */
-	public static void extract(@Nonnull Path archive, @Nonnull Path dest,
-			@Nullable Predicate<? super ArchiveEntry> entryFilter) throws IOException {
+	public static void extract(Path archive, Path dest, @Nullable Predicate<? super ArchiveEntry> entryFilter)
+			throws IOException {
 		Objects.requireNonNull(archive, "Archive must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archive);
@@ -147,8 +146,7 @@ public abstract class ArchiveUtils {
 		 * @return a new archive stream for the given archive
 		 * @throws IOException IOException in the case of I/O errors
 		 */
-		@Nonnull
-		ArchiveInputStream create(@Nonnull Path archive) throws IOException;
+		ArchiveInputStream create(Path archive) throws IOException;
 
 		/**
 		 * Creates a factory for the given archive format.
@@ -156,8 +154,7 @@ public abstract class ArchiveUtils {
 		 * @param archiveFormat the archiveFormat format e.g. "tar" or "zip"
 		 * @return a new Factory instance that also handles compression
 		 */
-		@Nonnull
-		static ArchiveFactory create(@Nonnull String archiveFormat) {
+		static ArchiveFactory create(String archiveFormat) {
 			return create(archiveFormat, null);
 		}
 
@@ -168,8 +165,7 @@ public abstract class ArchiveUtils {
 		 * @param compressionFormat the compression algorithm name e.g. "gz"
 		 * @return a new Factory instance that also handles compression
 		 */
-		@Nonnull
-		static ArchiveFactory create(@Nonnull String archiveFormat, @Nullable String compressionFormat) {
+		static ArchiveFactory create(String archiveFormat, @Nullable String compressionFormat) {
 			return archive -> {
 				CompressorStreamFactory cf = new CompressorStreamFactory();
 				ArchiveStreamFactory af = new ArchiveStreamFactory();
@@ -193,6 +189,7 @@ public abstract class ArchiveUtils {
 				}
 			};
 		}
+
 	}
 
 	/**
@@ -226,7 +223,7 @@ public abstract class ArchiveUtils {
 		 * @param entry the archive entry that holds the mode
 		 * @param file the file to apply the mode onto
 		 */
-		static void set(@Nonnull ArchiveEntry entry, @Nonnull Path file) {
+		static void set(ArchiveEntry entry, Path file) {
 			if (!isWindows()) {
 				long mode = getMode(entry) & MASK;
 				if (mode > 0) {
@@ -270,6 +267,8 @@ public abstract class ArchiveUtils {
 			}
 			return 0;
 		}
+
 	}
+
 }
 

@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import javax.annotation.Nonnull;
+import java.util.Objects;
 
 import com.datastax.driver.core.Cluster;
 import org.junit.ClassRule;
@@ -29,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
@@ -55,26 +56,32 @@ public class EmbeddedLocalCassandraTests {
 	public static final OutputRule output = new OutputRule();
 
 	@Autowired
+	@Nullable
 	private TestCassandra cassandra;
 
 	@Autowired
+	@Nullable
 	private RemoteArtifactFactory remoteArtifactFactory;
 
 	@Autowired
+	@Nullable
 	private LocalCassandraFactory cassandraFactory;
 
 	@Autowired
+	@Nullable
 	private ClusterFactory clusterFactory;
 
 	@Autowired
+	@Nullable
 	private Cluster cluster;
 
 	@Test
 	public void shouldOverrideVersion() {
 		assertThat(output.toString()).contains("Cassandra version: 2.2.12");
-		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
+		assertThat(Objects.requireNonNull(this.cluster).getClusterName()).isEqualTo("My cluster");
 		assertThat(this.cluster.connect().execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
-		assertThat(this.cassandraFactory.getArtifactFactory()).isSameAs(this.remoteArtifactFactory);
+		assertThat(Objects.requireNonNull(this.cassandraFactory).getArtifactFactory())
+				.isSameAs(this.remoteArtifactFactory);
 		assertThat(ReflectionUtils.getField(this.cassandra, "cassandraFactory")).isSameAs(this.cassandraFactory);
 		assertThat(ReflectionUtils.getField(this.cassandra, "clusterFactory")).isSameAs(this.clusterFactory);
 	}
@@ -91,13 +98,14 @@ public class EmbeddedLocalCassandraTests {
 		public ClusterFactory clusterFactory() {
 			return new DefaultClusterFactory() {
 
-				@Nonnull
 				@Override
-				protected Cluster.Builder configure(@Nonnull Cluster.Builder builder, @Nonnull Settings settings) {
+				protected Cluster.Builder configure(Cluster.Builder builder, Settings settings) {
 					return builder.withClusterName("My cluster");
 				}
 
 			};
 		}
+
 	}
+
 }

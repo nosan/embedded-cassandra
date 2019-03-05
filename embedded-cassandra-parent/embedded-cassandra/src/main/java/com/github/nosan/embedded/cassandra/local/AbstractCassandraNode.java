@@ -34,9 +34,6 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -44,6 +41,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
@@ -62,27 +60,21 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
-	@Nonnull
 	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("cassandra-%d",
 			instanceCounter.incrementAndGet()));
 
-	@Nonnull
 	private final ThreadFactory threadFactory = runnable -> {
 		Thread thread = new Thread(runnable, this.threadNameSupplier.get());
 		thread.setDaemon(true);
 		return thread;
 	};
 
-	@Nonnull
 	private final Path workingDirectory;
 
-	@Nonnull
 	private final Version version;
 
-	@Nonnull
 	private final Duration timeout;
 
-	@Nonnull
 	private final List<String> jvmOptions;
 
 	private final int jmxPort;
@@ -106,8 +98,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @param javaHome java home directory
 	 * @param jmxPort JMX port
 	 */
-	AbstractCassandraNode(@Nonnull Path workingDirectory, @Nonnull Version version, @Nonnull Duration timeout,
-			@Nonnull List<String> jvmOptions, @Nullable Path javaHome, int jmxPort) {
+	AbstractCassandraNode(Path workingDirectory, Version version, Duration timeout,
+			List<String> jvmOptions, @Nullable Path javaHome, int jmxPort) {
 		this.workingDirectory = workingDirectory;
 		this.version = version;
 		this.timeout = timeout;
@@ -227,10 +219,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @return the newly created node process
 	 * @throws IOException if an I/O error occurs
 	 */
-	@Nonnull
-	protected abstract Process start(@Nonnull Path workingDirectory, @Nonnull Version version,
-			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException;
+	protected abstract Process start(Path workingDirectory, Version version,
+			Map<String, String> environment, ThreadFactory threadFactory,
+			RunProcess.Output... outputs) throws IOException;
 
 	/**
 	 * Stops a node process.
@@ -242,9 +233,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @param outputs the shutdown process output consumers
 	 * @throws IOException if an I/O error occurs
 	 */
-	protected abstract void stop(@Nonnull Path workingDirectory, @Nonnull Version version,
-			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException;
+	protected abstract void stop(Path workingDirectory, Version version,
+			Map<String, String> environment, ThreadFactory threadFactory,
+			RunProcess.Output... outputs) throws IOException;
 
 	/**
 	 * Stops a node process.
@@ -256,23 +247,23 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @param outputs the shutdown process output consumers
 	 * @throws IOException if an I/O error occurs
 	 */
-	protected abstract void forceStop(@Nonnull Path workingDirectory,
-			@Nonnull Version version, @Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException;
+	protected abstract void forceStop(Path workingDirectory,
+			Version version, Map<String, String> environment, ThreadFactory threadFactory,
+			RunProcess.Output... outputs) throws IOException;
 
 	/**
 	 * Returns the ID of the Cassandra node.
 	 *
 	 * @return the ID of the node
 	 */
-	@Nonnull
 	protected abstract Long getId();
 
 	private int getJmxPort(int jmxPort) {
 		return jmxPort != 0 ? jmxPort : PortUtils.getPort();
 	}
 
-	private String getJavaHome(Path javaHome) {
+	@Nullable
+	private String getJavaHome(@Nullable Path javaHome) {
 		if (javaHome != null) {
 			return String.valueOf(javaHome.toAbsolutePath());
 		}
@@ -303,7 +294,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		});
 	}
 
-	private boolean waitForStopped(Duration timeout, Process process, Settings settings) throws Exception {
+	private boolean waitForStopped(Duration timeout, Process process, @Nullable Settings settings) throws Exception {
 		return WaitUtils.await(timeout, () -> (settings == null || TransportUtils.isDisabled(settings))
 				&& !process.isAlive());
 	}
@@ -314,10 +305,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 */
 	private static final class RpcAddressParser implements RunProcess.Output {
 
-		@Nonnull
 		private final RuntimeNodeSettings settings;
 
-		@Nonnull
 		private final Pattern regex;
 
 		private boolean alreadySet;
@@ -327,14 +316,14 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		 *
 		 * @param settings the node settings
 		 */
-		RpcAddressParser(@Nonnull RuntimeNodeSettings settings) {
+		RpcAddressParser(RuntimeNodeSettings settings) {
 			this.settings = settings;
 			this.regex = Pattern.compile(String.format(".*/(.+):(%d|%d).*", settings.getPort(),
 					settings.getSslPort()));
 		}
 
 		@Override
-		public void accept(@Nonnull String line) {
+		public void accept(String line) {
 			if (this.alreadySet) {
 				return;
 			}
@@ -352,6 +341,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				}
 			}
 		}
+
 	}
 
 	/**
@@ -360,10 +350,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 */
 	private static final class ListenAddressParser implements RunProcess.Output {
 
-		@Nonnull
 		private final RuntimeNodeSettings settings;
 
-		@Nonnull
 		private final Pattern regex;
 
 		private boolean alreadySet;
@@ -373,14 +361,14 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		 *
 		 * @param settings the node settings
 		 */
-		ListenAddressParser(@Nonnull RuntimeNodeSettings settings) {
+		ListenAddressParser(RuntimeNodeSettings settings) {
 			this.settings = settings;
 			this.regex = Pattern.compile(String.format(".*/(.+):(%d|%d).*", settings.getStoragePort(),
 					settings.getSslStoragePort()));
 		}
 
 		@Override
-		public void accept(@Nonnull String line) {
+		public void accept(String line) {
 			if (this.alreadySet) {
 				return;
 			}
@@ -398,6 +386,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				}
 			}
 		}
+
 	}
 
 	/**
@@ -409,7 +398,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		private volatile boolean ready = false;
 
 		@Override
-		public void accept(@Nonnull String line) {
+		public void accept(String line) {
 			if (!this.ready) {
 				this.ready = line.matches("(?i).*listening\\s*for\\s*cql.*") ||
 						line.matches("(?i).*not\\s*starting\\s*native.*");
@@ -424,6 +413,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		boolean isReady() {
 			return this.ready;
 		}
+
 	}
 
 	/**
@@ -444,11 +434,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		 * @param version a version
 		 * @param properties a node properties
 		 */
-		RuntimeNodeSettings(@Nonnull Version version, @Nullable Map<?, ?> properties) {
+		RuntimeNodeSettings(Version version, @Nullable Map<?, ?> properties) {
 			super(version, properties);
 		}
 
-		@Nonnull
 		@Override
 		public InetAddress getRealAddress() {
 			InetAddress address = this.realAddress;
@@ -467,7 +456,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			this.realAddress = address;
 		}
 
-		@Nonnull
 		@Override
 		public InetAddress getRealListenAddress() {
 			InetAddress address = this.realListenAddress;
@@ -485,5 +473,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		void setRealListenAddress(@Nullable InetAddress address) {
 			this.realListenAddress = address;
 		}
+
 	}
+
 }

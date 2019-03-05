@@ -41,4 +41,5 @@ public class StaticCqlScriptTests {
 		assertThat(new StaticCqlScript("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )").toString())
 				.contains("Static CQL Statements (1)");
 	}
+
 }

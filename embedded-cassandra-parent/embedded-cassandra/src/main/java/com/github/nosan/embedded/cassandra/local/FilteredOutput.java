@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
-
 /**
  * {@link RunProcess.Output} to filter lines.
  *
@@ -28,10 +26,8 @@ import javax.annotation.Nonnull;
  */
 class FilteredOutput implements RunProcess.Output {
 
-	@Nonnull
 	private final RunProcess.Output delegate;
 
-	@Nonnull
 	private final Predicate<String> filter;
 
 	/**
@@ -40,15 +36,16 @@ class FilteredOutput implements RunProcess.Output {
 	 * @param delegate the destination output
 	 * @param filter the include filter
 	 */
-	FilteredOutput(@Nonnull RunProcess.Output delegate, @Nonnull Predicate<String> filter) {
+	FilteredOutput(RunProcess.Output delegate, Predicate<String> filter) {
 		this.delegate = delegate;
 		this.filter = filter;
 	}
 
 	@Override
-	public void accept(@Nonnull String line) {
+	public void accept(String line) {
 		if (this.filter.test(line)) {
 			this.delegate.accept(line);
 		}
 	}
+
 }

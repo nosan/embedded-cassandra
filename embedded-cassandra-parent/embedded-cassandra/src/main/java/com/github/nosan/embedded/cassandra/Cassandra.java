@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 /**
@@ -54,7 +52,6 @@ public interface Cassandra {
 	 * @return the settings
 	 * @throws CassandraException if {@code Cassandra} is not started.
 	 */
-	@Nonnull
 	Settings getSettings() throws CassandraException;
 
 	/**
@@ -63,7 +60,6 @@ public interface Cassandra {
 	 * @return the state
 	 * @since 1.4.1
 	 */
-	@Nonnull
 	default State getState() {
 		return State.UNKNOWN;
 	}

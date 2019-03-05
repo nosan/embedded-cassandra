@@ -76,4 +76,5 @@ public class CqlScriptTests {
 		assertThat(script.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
+
 }

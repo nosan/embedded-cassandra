@@ -19,8 +19,6 @@ package com.github.nosan.embedded.cassandra.local.artifact;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 /**
@@ -39,6 +37,6 @@ public interface Artifact {
 	 * @return Cassandra {@code archive} file
 	 * @throws IOException in the case of I/O errors
 	 */
-	@Nonnull
 	Path get() throws IOException;
+
 }

@@ -30,12 +30,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
@@ -52,13 +50,10 @@ class RunProcess {
 	@Nullable
 	private final Path workingDirectory;
 
-	@Nonnull
 	private final List<Object> arguments;
 
-	@Nonnull
 	private final Map<String, String> environment;
 
-	@Nonnull
 	private final ThreadFactory threadFactory;
 
 	/**
@@ -70,7 +65,7 @@ class RunProcess {
 	 * @param threadFactory factory for creating process readers.
 	 */
 	RunProcess(@Nullable Path workingDirectory, @Nullable Map<String, String> environment,
-			@Nullable ThreadFactory threadFactory, @Nonnull List<?> arguments) {
+			@Nullable ThreadFactory threadFactory, List<?> arguments) {
 		this.workingDirectory = workingDirectory;
 		this.arguments = Collections.unmodifiableList(new ArrayList<>(arguments));
 		this.environment = Collections.unmodifiableMap((environment != null) ?
@@ -114,7 +109,7 @@ class RunProcess {
 		return start(processBuilder, this.threadFactory, outputs);
 	}
 
-	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory, Output[] outputs)
+	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory, @Nullable Output[] outputs)
 			throws IOException {
 		Process process = builder.start();
 		if (outputs != null && outputs.length > 0) {
@@ -151,6 +146,7 @@ class RunProcess {
 		}
 	}
 
+	@Nullable
 	private static String readline(BufferedReader reader) {
 		try {
 			return reader.readLine();
@@ -173,6 +169,8 @@ class RunProcess {
 		 * @param line a source line (never empty)
 		 */
 		@Override
-		void accept(@Nonnull String line);
+		void accept(String line);
+
 	}
+
 }

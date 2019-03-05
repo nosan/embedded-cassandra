@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.file.Files;
@@ -33,8 +32,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-
 import com.sun.net.httpserver.HttpServer;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Before;
@@ -43,6 +40,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.support.HttpServerRule;
 import com.github.nosan.embedded.cassandra.test.support.OutputRule;
 
@@ -65,6 +63,7 @@ public class RemoteArtifactTests {
 	@Rule
 	public final OutputRule output = new OutputRule();
 
+	@Nullable
 	private RemoteArtifactFactory factory;
 
 	@Before
@@ -95,7 +94,7 @@ public class RemoteArtifactTests {
 			}
 			exchange.close();
 		});
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
+		Artifact artifact = Objects.requireNonNull(this.factory).create(new Version(3, 1, 1));
 		Path archive = artifact.get();
 		assertThat(this.output.toString()).contains("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
@@ -116,7 +115,7 @@ public class RemoteArtifactTests {
 			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
+		Artifact artifact = Objects.requireNonNull(this.factory).create(new Version(3, 1, 1));
 		Path archive = artifact.get();
 		assertThat(this.output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
@@ -141,7 +140,7 @@ public class RemoteArtifactTests {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
 			exchange.close();
 		});
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
+		Artifact artifact = Objects.requireNonNull(this.factory).create(new Version(3, 1, 1));
 		Path archive = artifact.get();
 		assertThat(this.output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
@@ -158,7 +157,7 @@ public class RemoteArtifactTests {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
 			exchange.close();
 		});
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
+		Artifact artifact = Objects.requireNonNull(this.factory).create(new Version(3, 1, 1));
 		assertThatThrownBy(artifact::get).hasStackTraceContaining("Too many redirects for URL");
 	}
 
@@ -174,15 +173,11 @@ public class RemoteArtifactTests {
 			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
-		UrlFactory delegate = this.factory.getUrlFactory();
-		this.factory.setUrlFactory(new UrlFactory() {
-			@Nonnull
-			@Override
-			public URL[] create(@Nonnull Version version) throws MalformedURLException {
-				return Stream.concat(Stream.of(new URL(String.format("http:/%s/cassandra.zip", server.getAddress()))),
-						Arrays.stream(delegate.create(version))).toArray(URL[]::new);
-			}
-		});
+		UrlFactory delegate = Objects.requireNonNull(this.factory).getUrlFactory();
+		this.factory.setUrlFactory(
+				version -> Stream
+						.concat(Stream.of(new URL(String.format("http:/%s/cassandra.zip", server.getAddress()))),
+								Arrays.stream(Objects.requireNonNull(delegate).create(version))).toArray(URL[]::new));
 		Artifact artifact = this.factory.create(new Version(3, 1, 1));
 		Path archive = artifact.get();
 		assertThat(this.output.toString()).doesNotContain("Downloaded");
@@ -197,7 +192,7 @@ public class RemoteArtifactTests {
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
 		}
-		Files.createDirectories(Objects.requireNonNull(this.factory.getDirectory()));
+		Files.createDirectories(Objects.requireNonNull(Objects.requireNonNull(this.factory).getDirectory()));
 		Files.copy(new ByteArrayInputStream(content), this.factory.getDirectory().
 				resolve("apache-cassandra-3.1.1.zip"));
 
@@ -216,13 +211,13 @@ public class RemoteArtifactTests {
 			exchange.sendResponseHeaders(400, 0);
 			exchange.close();
 		});
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+		assertThatThrownBy(() -> Objects.requireNonNull(this.factory).create(new Version(3, 1, 1)).get())
 				.hasStackTraceContaining("HTTP (400 Bad Request) status for URL");
 	}
 
 	@Test
 	public void urlListEmpty() {
-		this.factory.setUrlFactory(version -> new URL[0]);
+		Objects.requireNonNull(this.factory).setUrlFactory(version -> new URL[0]);
 		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
 				.isInstanceOf(IOException.class);
 	}
@@ -232,20 +227,15 @@ public class RemoteArtifactTests {
 		HttpServer server = this.httpServerRule.get();
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(600));
 
-		this.factory.setReadTimeout(Duration.ofMillis(200));
+		Objects.requireNonNull(this.factory).setReadTimeout(Duration.ofMillis(200));
 		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
 				.hasStackTraceContaining("Read timed out");
 	}
 
 	@Test
 	public void connectTimeoutIsExceeded() {
-		this.factory.setUrlFactory(new UrlFactory() {
-			@Nonnull
-			@Override
-			public URL[] create(@Nonnull Version version) throws MalformedURLException {
-				return new URL[]{new URL("http://example.com:81/apache-cassandra-3.1.1.zip")};
-			}
-		});
+		Objects.requireNonNull(this.factory)
+				.setUrlFactory(version -> new URL[]{new URL("http://example.com:81/apache-cassandra-3.1.1.zip")});
 		this.factory.setConnectTimeout(Duration.ofSeconds(1));
 
 		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
@@ -254,7 +244,7 @@ public class RemoteArtifactTests {
 
 	@Test
 	public void proxyIsInvalid() {
-		this.factory.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
+		Objects.requireNonNull(this.factory).setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
 		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
 				.hasStackTraceContaining("Connection refused");
 
@@ -264,15 +254,9 @@ public class RemoteArtifactTests {
 	public void impossibleDetermineFileName() {
 		HttpServer server = this.httpServerRule.get();
 		server.createContext("/", exchange -> exchange.sendResponseHeaders(200, 0));
-		this.factory.setUrlFactory(new UrlFactory() {
-			@Nonnull
-			@Override
-			public URL[] create(@Nonnull Version version) throws MalformedURLException {
-				return new URL[]{new URL(String.format(
-						"http://%s:%d/", server.getAddress().getHostName(), server.getAddress().getPort()
-				))};
-			}
-		});
+		Objects.requireNonNull(this.factory).setUrlFactory(version -> new URL[]{new URL(String.format(
+				"http://%s:%d/", server.getAddress().getHostName(), server.getAddress().getPort()
+		))});
 		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
 				.hasStackTraceContaining("There is no way to determine");
 
@@ -287,4 +271,5 @@ public class RemoteArtifactTests {
 		}
 
 	}
+
 }

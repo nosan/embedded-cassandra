@@ -24,8 +24,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
-
 /**
  * Utility methods for dealing with {@code Reflections}.
  *
@@ -42,7 +40,7 @@ public abstract class ReflectionUtils {
 	 * @param name field name
 	 * @return the value of the represented  field in object
 	 */
-	public static Object getField(@Nonnull Object target, @Nonnull String name) {
+	public static Object getField(Object target, String name) {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		return run(() -> {
@@ -61,8 +59,8 @@ public abstract class ReflectionUtils {
 	 * @param arguments method arguments
 	 * @return the value of the represented  method in object
 	 */
-	public static Object getMethod(@Nonnull Object target, @Nonnull String name, @Nonnull
-			Class<?>[] types, @Nonnull Object[] arguments) {
+	public static Object getMethod(Object target, String name,
+			Class<?>[] types, Object[] arguments) {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		Objects.requireNonNull(types, "Types must not be null");
@@ -81,7 +79,7 @@ public abstract class ReflectionUtils {
 	 * @param name field name
 	 * @return the value of the represented static field in class
 	 */
-	public static Object getStaticField(@Nonnull Class<?> target, @Nonnull String name) {
+	public static Object getStaticField(Class<?> target, String name) {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		return run(() -> {
@@ -100,8 +98,8 @@ public abstract class ReflectionUtils {
 	 * @param arguments method arguments
 	 * @return the value of the represented static method in class
 	 */
-	public static Object getStaticMethod(@Nonnull Class<?> target, @Nonnull String name,
-			@Nonnull Class<?>[] types, @Nonnull Object[] arguments) {
+	public static Object getStaticMethod(Class<?> target, String name,
+			Class<?>[] types, Object[] arguments) {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		Objects.requireNonNull(types, "Types must not be null");
@@ -126,7 +124,8 @@ public abstract class ReflectionUtils {
 		throw new NoSuchFieldException(name);
 	}
 
-	private static Method findMethod(Class<?> clazz, String name, Class<?>[] types, Predicate<? super Method> filter)
+	private static Method findMethod(Class<?> clazz, String name, Class<?>[] types,
+			Predicate<? super Method> filter)
 			throws NoSuchMethodException {
 		for (Class<?> searchType = clazz; searchType != null; searchType = searchType.getSuperclass()) {
 			Method[] methods = searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods();
@@ -149,4 +148,5 @@ public abstract class ReflectionUtils {
 			throw new RuntimeException(ex);
 		}
 	}
+
 }

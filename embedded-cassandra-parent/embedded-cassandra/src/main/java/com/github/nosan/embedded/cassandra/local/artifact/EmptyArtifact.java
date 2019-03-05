@@ -21,8 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 
@@ -34,14 +32,12 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
  */
 class EmptyArtifact implements Artifact {
 
-	@Nonnull
 	private final Version version;
 
-	EmptyArtifact(@Nonnull Version version) {
+	EmptyArtifact(Version version) {
 		this.version = version;
 	}
 
-	@Nonnull
 	@Override
 	public Path get() throws IOException {
 		Path directory = FileUtils.getTmpDirectory();
@@ -52,4 +48,5 @@ class EmptyArtifact implements Artifact {
 		tempFile.toFile().deleteOnExit();
 		return tempFile;
 	}
+
 }

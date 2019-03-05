@@ -21,8 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-
-import javax.annotation.Nonnull;
+import java.util.Objects;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,6 +29,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
@@ -49,8 +49,10 @@ public class WorkingDirectoryInitializerTests {
 
 	private final Version version = new Version(3, 11, 3);
 
+	@Nullable
 	private Path workingDirectory;
 
+	@Nullable
 	private Path artifactDirectory;
 
 	@Before
@@ -64,13 +66,13 @@ public class WorkingDirectoryInitializerTests {
 		Path plain = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 		Path root = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 
-		ArchiveUtils.extract(plain, this.artifactDirectory, ignore -> true);
+		ArchiveUtils.extract(plain, Objects.requireNonNull(this.artifactDirectory), ignore -> true);
 
 		WorkingDirectoryInitializer
 				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, root),
 				this.artifactDirectory);
 
-		assertThatThrownBy(() -> customizer.initialize(this.workingDirectory, this.version))
+		assertThatThrownBy(() -> customizer.initialize(Objects.requireNonNull(this.workingDirectory), this.version))
 				.hasStackTraceContaining("Impossible to determine a base directory")
 				.isInstanceOf(IllegalStateException.class);
 	}
@@ -82,8 +84,8 @@ public class WorkingDirectoryInitializerTests {
 
 		WorkingDirectoryInitializer
 				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
-				this.artifactDirectory);
-		customizer.initialize(workingDirectory, this.version);
+				Objects.requireNonNull(this.artifactDirectory));
+		customizer.initialize(Objects.requireNonNull(workingDirectory), this.version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
@@ -101,9 +103,9 @@ public class WorkingDirectoryInitializerTests {
 
 		WorkingDirectoryInitializer
 				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
-				this.artifactDirectory);
+				Objects.requireNonNull(this.artifactDirectory));
 
-		customizer.initialize(workingDirectory, this.version);
+		customizer.initialize(Objects.requireNonNull(workingDirectory), this.version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
@@ -120,9 +122,9 @@ public class WorkingDirectoryInitializerTests {
 		Path archive = Paths.get(getClass().getResource("/empty.zip").toURI());
 		WorkingDirectoryInitializer
 				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
-				this.artifactDirectory);
+				Objects.requireNonNull(this.artifactDirectory));
 
-		assertThatThrownBy(() -> customizer.initialize(this.workingDirectory, this.version))
+		assertThatThrownBy(() -> customizer.initialize(Objects.requireNonNull(this.workingDirectory), this.version))
 				.hasStackTraceContaining("doesn't have one of the ")
 				.isInstanceOf(IllegalStateException.class);
 	}
@@ -133,9 +135,9 @@ public class WorkingDirectoryInitializerTests {
 		Path archive = this.temporaryFolder.newFile().toPath();
 		WorkingDirectoryInitializer
 				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
-				this.artifactDirectory);
+				Objects.requireNonNull(this.artifactDirectory));
 
-		assertThatThrownBy(() -> customizer.initialize(this.workingDirectory, this.version))
+		assertThatThrownBy(() -> customizer.initialize(Objects.requireNonNull(this.workingDirectory), this.version))
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
@@ -148,8 +150,8 @@ public class WorkingDirectoryInitializerTests {
 
 		WorkingDirectoryInitializer
 				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive),
-				artifactDirectory);
-		customizer.initialize(workingDirectory, version);
+				Objects.requireNonNull(artifactDirectory));
+		customizer.initialize(Objects.requireNonNull(workingDirectory), version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
@@ -176,28 +178,27 @@ public class WorkingDirectoryInitializerTests {
 
 	private static final class StaticArtifactFactory implements ArtifactFactory {
 
-		@Nonnull
 		private final Version version;
 
-		@Nonnull
 		private final Artifact artifact;
 
-		StaticArtifactFactory(@Nonnull Version version, @Nonnull Artifact artifact) {
+		StaticArtifactFactory(Version version, Artifact artifact) {
 			this.version = version;
 			this.artifact = artifact;
 		}
 
-		StaticArtifactFactory(@Nonnull Version version, @Nonnull Path archive) {
+		StaticArtifactFactory(Version version, Path archive) {
 			this(version, () -> archive);
 		}
 
-		@Nonnull
 		@Override
-		public Artifact create(@Nonnull Version version) {
+		public Artifact create(Version version) {
 			if (version.equals(this.version)) {
 				return this.artifact;
 			}
 			throw new UnsupportedOperationException();
 		}
+
 	}
+
 }

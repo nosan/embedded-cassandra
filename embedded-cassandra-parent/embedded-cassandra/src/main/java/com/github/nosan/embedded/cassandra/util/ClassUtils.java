@@ -16,12 +16,11 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility methods for dealing with classes.
@@ -88,7 +87,6 @@ public abstract class ClassUtils {
 	 * @return package name or empty string
 	 * @since 1.2.2
 	 */
-	@Nonnull
 	public static String getPackageName(@Nullable Class<?> source) {
 		while (source != null && source.isArray()) {
 			source = source.getComponentType();
@@ -97,4 +95,5 @@ public abstract class ClassUtils {
 		int i = name.lastIndexOf('.');
 		return (i > 0) ? name.substring(0, i) : "";
 	}
+
 }

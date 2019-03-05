@@ -57,4 +57,5 @@ public class CommitLogFileInitializerTests {
 		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
 		assertThat(directory.resolve("commitlog_archiving.properties")).doesNotExist();
 	}
+
 }

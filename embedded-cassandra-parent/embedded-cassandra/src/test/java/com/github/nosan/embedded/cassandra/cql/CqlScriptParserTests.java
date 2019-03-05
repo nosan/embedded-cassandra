@@ -168,4 +168,5 @@ public class CqlScriptParserTests {
 		List<String> statements = CqlScriptParser.parse("//");
 		assertThat(statements).isEmpty();
 	}
+
 }

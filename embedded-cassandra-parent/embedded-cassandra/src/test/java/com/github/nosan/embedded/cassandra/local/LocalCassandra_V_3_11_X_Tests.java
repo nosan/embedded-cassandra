@@ -28,4 +28,5 @@ public class LocalCassandra_V_3_11_X_Tests extends AbstractLocalCassandraTests {
 	public LocalCassandra_V_3_11_X_Tests() {
 		super(new Version(3, 11, 4));
 	}
+
 }

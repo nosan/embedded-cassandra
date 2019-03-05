@@ -20,13 +20,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility class for dealing with {@link MDC}.
@@ -45,7 +44,6 @@ public abstract class MDCUtils {
 	 *
 	 * @return A copy of the current thread's context map.
 	 */
-	@Nonnull
 	public static Map<String, String> getContext() {
 		try {
 			Map<String, String> context = MDC.getCopyOfContextMap();
@@ -79,4 +77,5 @@ public abstract class MDCUtils {
 			}
 		}
 	}
+
 }

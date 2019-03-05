@@ -23,7 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Test;
@@ -106,7 +106,7 @@ public class TransportUtilsTests {
 			return this.port;
 		}
 
-		@Nullable
+		@Nonnull
 		@Override
 		public Integer getSslPort() {
 			return this.sslPort;
@@ -121,5 +121,7 @@ public class TransportUtilsTests {
 		public int getRpcPort() {
 			return this.rpcPort;
 		}
+
 	}
+
 }

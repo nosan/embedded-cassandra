@@ -86,4 +86,5 @@ public class VersionTests {
 		assertThat(version.getPatch()).isEqualTo(0);
 		assertThat(version.toString()).isEqualTo(text);
 	}
+
 }

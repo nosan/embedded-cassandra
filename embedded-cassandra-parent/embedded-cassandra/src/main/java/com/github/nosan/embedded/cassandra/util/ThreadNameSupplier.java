@@ -19,10 +19,9 @@ package com.github.nosan.embedded.cassandra.util;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@link Supplier} to generate a thread name.
@@ -48,7 +47,6 @@ public final class ThreadNameSupplier implements Supplier<String> {
 	}
 
 	@Override
-	@Nonnull
 	public String get() {
 		StringBuilder name = new StringBuilder();
 		if (StringUtils.hasText(this.prefix)) {
@@ -57,4 +55,5 @@ public final class ThreadNameSupplier implements Supplier<String> {
 		return name.append("thread-").append(this.threadCounter.incrementAndGet())
 				.toString();
 	}
+
 }

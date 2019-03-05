@@ -16,9 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.util.Objects;
+
 import com.datastax.driver.core.Cluster;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Test Service.
@@ -29,11 +33,13 @@ import org.springframework.stereotype.Service;
 class TestService {
 
 	@Autowired
+	@Nullable
 	private Cluster cluster;
 
 	boolean createKeyspace(String keyspace) {
-		return this.cluster.connect().execute(String.format(""
+		return Objects.requireNonNull(this.cluster).connect().execute(String.format(""
 				+ "CREATE KEYSPACE  %s  WITH REPLICATION = { 'class' : 'SimpleStrategy', "
 				+ "'replication_factor' : 1 };", keyspace)).wasApplied();
 	}
+
 }

@@ -16,9 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Utility methods for dealing with strings.
@@ -67,4 +67,5 @@ public abstract class StringUtils {
 		}
 		return false;
 	}
+
 }

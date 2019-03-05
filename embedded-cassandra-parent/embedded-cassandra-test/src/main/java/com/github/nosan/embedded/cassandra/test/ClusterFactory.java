@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import javax.annotation.Nonnull;
-
 import com.datastax.driver.core.Cluster;
 import org.apiguardian.api.API;
 
@@ -40,6 +38,6 @@ public interface ClusterFactory {
 	 * @param settings a settings
 	 * @return a Cluster
 	 */
-	@Nonnull
-	Cluster create(@Nonnull Settings settings);
+	Cluster create(Settings settings);
+
 }

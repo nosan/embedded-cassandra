@@ -20,11 +20,9 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
 
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
@@ -181,7 +179,6 @@ public interface Settings {
 	 * @return The value of the {@code version} attribute
 	 * @since 1.1.0
 	 */
-	@Nonnull
 	default Version getVersion() {
 		throw new UnsupportedOperationException("This method is not implemented");
 	}
@@ -228,7 +225,6 @@ public interface Settings {
 	 * @return The value of the {@code rpcAddress} or determine address from {@code rpcInterface} attribute
 	 * @since 1.1.0
 	 */
-	@Nonnull
 	default InetAddress getRealAddress() {
 		String rpcAddress = getRpcAddress();
 		if (StringUtils.hasText(rpcAddress)) {
@@ -252,7 +248,6 @@ public interface Settings {
 	 * @return The value of the {@code listenAddress} or determine address from {@code listenInterface} attribute
 	 * @since 1.1.0
 	 */
-	@Nonnull
 	default InetAddress getRealListenAddress() {
 		String listenAddress = getListenAddress();
 		if (StringUtils.hasText(listenAddress)) {
@@ -276,8 +271,8 @@ public interface Settings {
 	 * @return the node properties (may be empty)
 	 * @since 1.3.0
 	 */
-	@Nonnull
 	default Map<Object, Object> getProperties() {
 		return Collections.emptyMap();
 	}
+
 }

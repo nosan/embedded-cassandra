@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.local.artifact;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -33,10 +31,10 @@ import com.github.nosan.embedded.cassandra.Version;
 @API(since = "1.2.8", status = API.Status.STABLE)
 public final class EmptyArtifactFactory implements ArtifactFactory {
 
-	@Nonnull
 	@Override
-	public Artifact create(@Nonnull Version version) {
+	public Artifact create(Version version) {
 		Objects.requireNonNull(version, "Version must not be null");
 		return new EmptyArtifact(version);
 	}
+
 }

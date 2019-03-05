@@ -99,7 +99,7 @@ if [ -z "$M2_HOME" ] ; then
 fi
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
-if $cygwin ; then
+if ${cygwin} ; then
   [ -n "$M2_HOME" ] &&
     M2_HOME=`cygpath --unix "$M2_HOME"`
   [ -n "$JAVA_HOME" ] &&
@@ -109,12 +109,11 @@ if $cygwin ; then
 fi
 
 # For Mingw, ensure paths are in UNIX format before anything is touched
-if $mingw ; then
+if ${mingw} ; then
   [ -n "$M2_HOME" ] &&
     M2_HOME="`(cd "$M2_HOME"; pwd)`"
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
-  # TODO classpath?
 fi
 
 if [ -z "$JAVA_HOME" ]; then
@@ -123,7 +122,7 @@ if [ -z "$JAVA_HOME" ]; then
     # readlink(1) is not available as standard on Solaris 10.
     readLink=`which readlink`
     if [ ! `expr "$readLink" : '\([^ ]*\)'` = "no" ]; then
-      if $darwin ; then
+      if ${darwin} ; then
         javaHome="`dirname \"$javaExecutable\"`"
         javaExecutable="`cd \"$javaHome\" && pwd -P`/javac"
       else
@@ -176,7 +175,7 @@ find_maven_basedir() {
   wdir="$1"
   while [ "$wdir" != '/' ] ; do
     if [ -d "$wdir"/.mvn ] ; then
-      basedir=$wdir
+      basedir=${wdir}
       break
     fi
     # workaround for JBEAP-8937 (on Solaris 10/Sparc)
@@ -240,12 +239,12 @@ fi
 
 export MAVEN_PROJECTBASEDIR=${MAVEN_BASEDIR:-"$BASE_DIR"}
 if [ "$MVNW_VERBOSE" = true ]; then
-  echo $MAVEN_PROJECTBASEDIR
+  echo ${MAVEN_PROJECTBASEDIR}
 fi
 MAVEN_OPTS="$(concat_lines "$MAVEN_PROJECTBASEDIR/.mvn/jvm.config") $MAVEN_OPTS"
 
 # For Cygwin, switch paths to Windows format before running java
-if $cygwin; then
+if ${cygwin}; then
   [ -n "$M2_HOME" ] &&
     M2_HOME=`cygpath --path --windows "$M2_HOME"`
   [ -n "$JAVA_HOME" ] &&
@@ -259,7 +258,7 @@ fi
 WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain
 
 exec "$JAVACMD" \
-  $MAVEN_OPTS \
+  ${MAVEN_OPTS} \
   -classpath "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.jar" \
   "-Dmaven.home=${M2_HOME}" "-Dmaven.multiModuleProjectDirectory=${MAVEN_PROJECTBASEDIR}" \
-  ${WRAPPER_LAUNCHER} $MAVEN_CONFIG "$@"
+  ${WRAPPER_LAUNCHER} ${MAVEN_CONFIG} "$@"

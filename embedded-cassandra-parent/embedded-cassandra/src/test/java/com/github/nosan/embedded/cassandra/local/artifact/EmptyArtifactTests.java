@@ -52,4 +52,5 @@ public class EmptyArtifactTests {
 		assertThat(temp.listFiles()).isEmpty();
 
 	}
+
 }

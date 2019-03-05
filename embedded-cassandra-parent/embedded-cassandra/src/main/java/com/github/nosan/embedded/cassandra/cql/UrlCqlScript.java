@@ -22,10 +22,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@link CqlScript} implementation for {@link URL}.
@@ -37,7 +36,6 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class UrlCqlScript extends AbstractCqlResourceScript {
 
-	@Nonnull
 	private final URL url;
 
 	/**
@@ -45,7 +43,7 @@ public final class UrlCqlScript extends AbstractCqlResourceScript {
 	 *
 	 * @param url a URL path
 	 */
-	public UrlCqlScript(@Nonnull URL url) {
+	public UrlCqlScript(URL url) {
 		this(url, null);
 	}
 
@@ -55,12 +53,11 @@ public final class UrlCqlScript extends AbstractCqlResourceScript {
 	 * @param url a URL path
 	 * @param encoding encoding the encoding to use for reading from the resource
 	 */
-	public UrlCqlScript(@Nonnull URL url, @Nullable Charset encoding) {
+	public UrlCqlScript(URL url, @Nullable Charset encoding) {
 		super(encoding);
 		this.url = Objects.requireNonNull(url, "URL must not be null");
 	}
 
-	@Nonnull
 	@Override
 	protected InputStream getInputStream() throws IOException {
 		return this.url.openStream();
@@ -85,8 +82,8 @@ public final class UrlCqlScript extends AbstractCqlResourceScript {
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		return String.valueOf(this.url);
 	}
+
 }

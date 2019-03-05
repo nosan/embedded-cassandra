@@ -16,9 +16,9 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Exceptions thrown by Cassandra.
@@ -56,4 +56,5 @@ public class CassandraException extends RuntimeException {
 	public CassandraException(@Nullable String message, @Nullable Throwable cause) {
 		super(message, cause);
 	}
+
 }

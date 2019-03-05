@@ -20,8 +20,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -35,13 +33,13 @@ import com.github.nosan.embedded.cassandra.Version;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public class DefaultUrlFactory implements UrlFactory {
 
-	@Nonnull
 	@Override
-	public URL[] create(@Nonnull Version version) throws MalformedURLException {
+	public URL[] create(Version version) throws MalformedURLException {
 		Objects.requireNonNull(version, "Version must not be null");
 		return new URL[]{new URL(String.format("https://apache.org/dyn/closer.cgi" +
 				"?action=download&filename=cassandra/%1$s/apache-cassandra-%1$s-bin.tar.gz", version)),
 				new URL(String.format("http://archive.apache.org/dist/cassandra/%1$s/apache-cassandra-%1$s-bin.tar.gz",
 						version))};
 	}
+
 }

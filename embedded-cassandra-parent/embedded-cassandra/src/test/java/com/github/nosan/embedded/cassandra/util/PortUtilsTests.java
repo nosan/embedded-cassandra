@@ -49,4 +49,5 @@ public class PortUtilsTests {
 			assertThat(PortUtils.isPortBusy(NetworkUtils.getLocalhost(), ss.getLocalPort())).isTrue();
 		}
 	}
+
 }

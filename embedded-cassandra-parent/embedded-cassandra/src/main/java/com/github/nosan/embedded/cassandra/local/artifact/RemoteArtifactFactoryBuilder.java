@@ -21,10 +21,9 @@ import java.net.Proxy;
 import java.nio.file.Path;
 import java.time.Duration;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Builder to create a {@link RemoteArtifactFactory}.
@@ -57,7 +56,6 @@ public final class RemoteArtifactFactoryBuilder {
 	 * @param directory The value for directory
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public RemoteArtifactFactoryBuilder setDirectory(@Nullable Path directory) {
 		this.directory = directory;
 		return this;
@@ -69,7 +67,6 @@ public final class RemoteArtifactFactoryBuilder {
 	 * @param directory The value for directory
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public RemoteArtifactFactoryBuilder setDirectory(@Nullable File directory) {
 		return setDirectory((directory != null) ? directory.toPath() : null);
 	}
@@ -81,7 +78,6 @@ public final class RemoteArtifactFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @see DefaultUrlFactory
 	 */
-	@Nonnull
 	public RemoteArtifactFactoryBuilder setUrlFactory(@Nullable UrlFactory urlFactory) {
 		this.urlFactory = urlFactory;
 		return this;
@@ -93,7 +89,6 @@ public final class RemoteArtifactFactoryBuilder {
 	 * @param proxy The value for proxy
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public RemoteArtifactFactoryBuilder setProxy(@Nullable Proxy proxy) {
 		this.proxy = proxy;
 		return this;
@@ -105,7 +100,6 @@ public final class RemoteArtifactFactoryBuilder {
 	 * @param readTimeout The value for readTimeout
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public RemoteArtifactFactoryBuilder setReadTimeout(@Nullable Duration readTimeout) {
 		this.readTimeout = readTimeout;
 		return this;
@@ -117,7 +111,6 @@ public final class RemoteArtifactFactoryBuilder {
 	 * @param connectTimeout The value for connectTimeout
 	 * @return {@code this} builder for use in a chained invocation
 	 */
-	@Nonnull
 	public RemoteArtifactFactoryBuilder setConnectTimeout(@Nullable Duration connectTimeout) {
 		this.connectTimeout = connectTimeout;
 		return this;
@@ -128,7 +121,6 @@ public final class RemoteArtifactFactoryBuilder {
 	 *
 	 * @return a new instance
 	 */
-	@Nonnull
 	public RemoteArtifactFactory build() {
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
 		factory.setConnectTimeout(this.connectTimeout);
@@ -138,4 +130,5 @@ public final class RemoteArtifactFactoryBuilder {
 		factory.setUrlFactory(this.urlFactory);
 		return factory;
 	}
+
 }

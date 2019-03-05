@@ -21,8 +21,6 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
-import javax.annotation.Nonnull;
-
 import com.sun.net.httpserver.HttpServer;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
@@ -35,7 +33,6 @@ import org.junit.rules.TestRule;
  */
 public final class HttpServerRule extends ExternalResource implements Supplier<HttpServer> {
 
-	@Nonnull
 	private final HttpServer httpServer;
 
 	public HttpServerRule() {
@@ -80,9 +77,9 @@ public final class HttpServerRule extends ExternalResource implements Supplier<H
 	 *
 	 * @return a server
 	 */
-	@Nonnull
 	@Override
 	public HttpServer get() {
 		return this.httpServer;
 	}
+
 }

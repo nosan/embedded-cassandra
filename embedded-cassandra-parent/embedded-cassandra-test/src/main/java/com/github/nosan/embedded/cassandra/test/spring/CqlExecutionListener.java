@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import org.apiguardian.api.API;
@@ -55,12 +53,12 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	@Override
-	public void beforeTestMethod(@Nonnull TestContext testContext) {
+	public void beforeTestMethod(TestContext testContext) {
 		executeCqlScripts(testContext, Cql.ExecutionPhase.BEFORE_TEST_METHOD);
 	}
 
 	@Override
-	public void afterTestMethod(@Nonnull TestContext testContext) {
+	public void afterTestMethod(TestContext testContext) {
 		executeCqlScripts(testContext, Cql.ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
@@ -112,4 +110,5 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 		return cluster;
 	}
+
 }

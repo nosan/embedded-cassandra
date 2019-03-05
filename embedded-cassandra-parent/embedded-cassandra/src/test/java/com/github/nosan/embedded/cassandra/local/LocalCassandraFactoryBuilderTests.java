@@ -107,4 +107,5 @@ public class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getStartupTimeout()).isNull();
 
 	}
+
 }

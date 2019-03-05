@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.BiFunction;
 
-import javax.annotation.Nonnull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,6 @@ abstract class AbstractFileInitializer implements Initializer {
 
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 
-	@Nonnull
 	private final BiFunction<Path, Version, Path> fileMapper;
 
 	/**
@@ -45,12 +42,12 @@ abstract class AbstractFileInitializer implements Initializer {
 	 *
 	 * @param fileMapper the function to resolve a file within a directory
 	 */
-	AbstractFileInitializer(@Nonnull BiFunction<Path, Version, Path> fileMapper) {
+	AbstractFileInitializer(BiFunction<Path, Version, Path> fileMapper) {
 		this.fileMapper = fileMapper;
 	}
 
 	@Override
-	public final void initialize(@Nonnull Path workingDirectory, @Nonnull Version version) throws IOException {
+	public final void initialize(Path workingDirectory, Version version) throws IOException {
 		Path file = this.fileMapper.apply(workingDirectory, version);
 		if (file != null) {
 			initialize(file, workingDirectory, version);
@@ -65,6 +62,7 @@ abstract class AbstractFileInitializer implements Initializer {
 	 * @param version a version
 	 * @throws IOException in the case of any IO errors
 	 */
-	protected abstract void initialize(@Nonnull Path file, @Nonnull Path workingDirectory, @Nonnull Version version)
+	protected abstract void initialize(Path file, Path workingDirectory, Version version)
 			throws IOException;
+
 }

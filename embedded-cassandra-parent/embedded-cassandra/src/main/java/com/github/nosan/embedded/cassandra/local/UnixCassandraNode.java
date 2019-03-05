@@ -25,10 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * UNIX implementation of the {@link CassandraNode}.
@@ -53,17 +51,16 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	 * @param jmxPort JMX port
 	 * @param allowRoot allow running as a root
 	 */
-	UnixCassandraNode(@Nonnull Path workingDirectory, @Nonnull Version version, @Nonnull Duration timeout,
-			@Nonnull List<String> jvmOptions, @Nullable Path javaHome, int jmxPort, boolean allowRoot) {
+	UnixCassandraNode(Path workingDirectory, Version version, Duration timeout,
+			List<String> jvmOptions, @Nullable Path javaHome, int jmxPort, boolean allowRoot) {
 		super(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
 		this.allowRoot = allowRoot;
 	}
 
-	@Nonnull
 	@Override
-	protected Process start(@Nonnull Path workingDirectory, @Nonnull Version version,
-			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException {
+	protected Process start(Path workingDirectory, Version version,
+			Map<String, String> environment, ThreadFactory threadFactory,
+			RunProcess.Output... outputs) throws IOException {
 		this.pid = -1;
 		List<Object> arguments = new ArrayList<>();
 		arguments.add(workingDirectory.resolve("bin/cassandra").toAbsolutePath());
@@ -78,22 +75,21 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	protected void stop(@Nonnull Path workingDirectory, @Nonnull Version version,
-			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException {
+	protected void stop(Path workingDirectory, Version version,
+			Map<String, String> environment, ThreadFactory threadFactory,
+			RunProcess.Output... outputs) throws IOException {
 		new RunProcess(workingDirectory, environment, threadFactory, Arrays.asList("kill", "-SIGINT", getId()))
 				.run(outputs);
 	}
 
 	@Override
-	protected void forceStop(@Nonnull Path workingDirectory, @Nonnull Version version,
-			@Nonnull Map<String, String> environment, @Nonnull ThreadFactory threadFactory,
-			@Nonnull RunProcess.Output... outputs) throws IOException {
+	protected void forceStop(Path workingDirectory, Version version,
+			Map<String, String> environment, ThreadFactory threadFactory,
+			RunProcess.Output... outputs) throws IOException {
 		new RunProcess(workingDirectory, environment, threadFactory, Arrays.asList("kill", "-9", getId()))
 				.run(outputs);
 	}
 
-	@Nonnull
 	@Override
 	protected Long getId() {
 		return this.pid;

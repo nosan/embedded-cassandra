@@ -21,11 +21,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
 
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
@@ -43,7 +41,6 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 
 	private static final String WINDOWS = "\\\\";
 
-	@Nonnull
 	private final String location;
 
 	@Nullable
@@ -54,7 +51,7 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	 *
 	 * @param location the absolute path within the class path
 	 */
-	public ClassPathCqlScript(@Nonnull String location) {
+	public ClassPathCqlScript(String location) {
 		this(location, ClassUtils.getClassLoader(), null);
 	}
 
@@ -64,7 +61,7 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	 * @param location the absolute path within the class path
 	 * @param encoding the encoding to use for reading from the resource
 	 */
-	public ClassPathCqlScript(@Nonnull String location, @Nullable Charset encoding) {
+	public ClassPathCqlScript(String location, @Nullable Charset encoding) {
 		this(location, ClassUtils.getClassLoader(), encoding);
 	}
 
@@ -74,7 +71,7 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	 * @param location the absolute path within the class path
 	 * @param classLoader the class loader to load the resource with.
 	 */
-	public ClassPathCqlScript(@Nonnull String location, @Nullable ClassLoader classLoader) {
+	public ClassPathCqlScript(String location, @Nullable ClassLoader classLoader) {
 		this(location, classLoader, null);
 	}
 
@@ -84,7 +81,7 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	 * @param location the absolute path within the class path
 	 * @param contextClass the class to load the resource with.
 	 */
-	public ClassPathCqlScript(@Nonnull String location, @Nullable Class<?> contextClass) {
+	public ClassPathCqlScript(String location, @Nullable Class<?> contextClass) {
 		this(location, contextClass, null);
 	}
 
@@ -95,7 +92,7 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	 * @param contextClass the class to load the resource with.
 	 * @param encoding the encoding to use for reading from the resource
 	 */
-	public ClassPathCqlScript(@Nonnull String location, @Nullable Class<?> contextClass, @Nullable Charset encoding) {
+	public ClassPathCqlScript(String location, @Nullable Class<?> contextClass, @Nullable Charset encoding) {
 		super(encoding);
 		this.location = getLocation(location, contextClass);
 		this.classLoader = getClassLoader(contextClass);
@@ -108,13 +105,12 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	 * @param classLoader the class loader to load the resource with.
 	 * @param encoding the encoding to use for reading from the resource
 	 */
-	public ClassPathCqlScript(@Nonnull String location, @Nullable ClassLoader classLoader, @Nullable Charset encoding) {
+	public ClassPathCqlScript(String location, @Nullable ClassLoader classLoader, @Nullable Charset encoding) {
 		super(encoding);
 		this.location = getLocation(location, null);
 		this.classLoader = getClassLoader(classLoader);
 	}
 
-	@Nonnull
 	@Override
 	protected InputStream getInputStream() throws FileNotFoundException {
 		InputStream stream;
@@ -151,12 +147,11 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		return this.location;
 	}
 
-	private static String getLocation(String location, Class<?> contextClass) {
+	private static String getLocation(String location, @Nullable Class<?> contextClass) {
 		Objects.requireNonNull(location, "Location must not be null");
 		String name = location.replaceAll(WINDOWS, "/").replaceAll("/+", "/").trim();
 		if (contextClass != null && !name.startsWith("/")) {
@@ -171,11 +166,14 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 		return name;
 	}
 
-	private static ClassLoader getClassLoader(Class<?> contextClass) {
+	@Nullable
+	private static ClassLoader getClassLoader(@Nullable Class<?> contextClass) {
 		return getClassLoader((contextClass != null) ? contextClass.getClassLoader() : null);
 	}
 
-	private static ClassLoader getClassLoader(ClassLoader classLoader) {
+	@Nullable
+	private static ClassLoader getClassLoader(@Nullable ClassLoader classLoader) {
 		return (classLoader != null) ? classLoader : ClassUtils.getClassLoader();
 	}
+
 }

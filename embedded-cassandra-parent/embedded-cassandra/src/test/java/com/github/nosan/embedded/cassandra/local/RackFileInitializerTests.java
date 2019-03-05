@@ -58,4 +58,5 @@ public class RackFileInitializerTests {
 		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
 		assertThat(directory.resolve("cassandra-rackdc.properties")).doesNotExist();
 	}
+
 }

@@ -39,4 +39,5 @@ public class CassandraExtensionTests {
 		assertThat(cassandra.executeStatement("SELECT * FROM  test.roles").all())
 				.isEmpty();
 	}
+
 }

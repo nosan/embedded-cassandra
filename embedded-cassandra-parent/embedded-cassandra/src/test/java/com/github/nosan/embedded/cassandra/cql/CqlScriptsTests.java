@@ -52,4 +52,5 @@ public class CqlScriptsTests {
 				"roles.cql")).toString()).contains("keyspace.cql").contains("roles.cql");
 
 	}
+
 }

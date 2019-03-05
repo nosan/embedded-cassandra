@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.util.Objects;
+
 import com.datastax.driver.core.Cluster;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +27,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,11 +43,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EmbeddedCassandraConfigurationReplaceAnyTests {
 
 	@Autowired
+	@Nullable
 	private TestService testService;
 
 	@Test
 	public void shouldReplacePrimaryClusterBean() {
-		assertThat(this.testService.createKeyspace("test")).isTrue();
+		assertThat(Objects.requireNonNull(this.testService).createKeyspace("test")).isTrue();
 	}
 
 	@Configuration
@@ -63,4 +68,5 @@ public class EmbeddedCassandraConfigurationReplaceAnyTests {
 		}
 
 	}
+
 }

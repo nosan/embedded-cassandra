@@ -21,8 +21,6 @@ import java.net.Proxy;
 import java.net.URL;
 import java.time.Duration;
 
-import javax.annotation.Nonnull;
-
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -42,13 +40,7 @@ public class RemoteArtifactFactoryTests {
 	public void createConfigureRemoteArtifact() {
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
 		Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("locahost", 8080));
-		UrlFactory urlFactory = new UrlFactory() {
-			@Nonnull
-			@Override
-			public URL[] create(@Nonnull Version version) {
-				return new URL[0];
-			}
-		};
+		UrlFactory urlFactory = version -> new URL[0];
 		factory.setUrlFactory(urlFactory);
 		factory.setProxy(proxy);
 		factory.setDirectory(FileUtils.getTmpDirectory());
@@ -76,4 +68,5 @@ public class RemoteArtifactFactoryTests {
 		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isEqualTo(Duration.ofSeconds(30));
 		assertThat(ReflectionUtils.getField(artifact, "connectTimeout")).isEqualTo(Duration.ofSeconds(30));
 	}
+
 }

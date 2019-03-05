@@ -22,12 +22,10 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 /**
@@ -153,9 +151,8 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 		this.connectTimeout = connectTimeout;
 	}
 
-	@Nonnull
 	@Override
-	public Artifact create(@Nonnull Version version) {
+	public Artifact create(Version version) {
 		Objects.requireNonNull(version, "Version must not be null");
 		Path directory = getDirectory();
 		if (directory == null) {
@@ -175,4 +172,5 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 		}
 		return new RemoteArtifact(version, directory, urlFactory, getProxy(), readTimeout, connectTimeout);
 	}
+
 }

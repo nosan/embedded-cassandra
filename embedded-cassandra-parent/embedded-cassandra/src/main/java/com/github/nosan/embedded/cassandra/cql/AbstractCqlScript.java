@@ -19,10 +19,9 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * Convenience base class for {@link CqlScript} implementations,
@@ -34,7 +33,6 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public abstract class AbstractCqlScript implements CqlScript {
 
-	@Nonnull
 	@Override
 	public final Collection<String> getStatements() {
 		String script = getScript();
@@ -48,4 +46,5 @@ public abstract class AbstractCqlScript implements CqlScript {
 	 */
 	@Nullable
 	protected abstract String getScript();
+
 }

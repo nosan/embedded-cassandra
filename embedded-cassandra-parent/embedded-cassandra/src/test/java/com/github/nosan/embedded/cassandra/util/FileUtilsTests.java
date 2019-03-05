@@ -144,4 +144,5 @@ public class FileUtilsTests {
 		assertThat(FileUtils.getTmpDirectory())
 				.isEqualTo(Paths.get(new SystemProperty("java.io.tmpdir").getRequired()));
 	}
+
 }

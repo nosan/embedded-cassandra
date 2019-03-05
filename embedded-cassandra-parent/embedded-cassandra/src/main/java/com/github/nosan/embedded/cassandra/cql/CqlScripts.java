@@ -23,10 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@link CqlScript} implementation for a given CQL {@code scripts}.
@@ -59,7 +58,6 @@ public final class CqlScripts implements CqlScript {
 				Collections.emptyList()));
 	}
 
-	@Nonnull
 	@Override
 	public Collection<String> getStatements() {
 		List<String> statements = new ArrayList<>();
@@ -87,8 +85,8 @@ public final class CqlScripts implements CqlScript {
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		return String.format("CQL Scripts %s", this.scripts);
 	}
+
 }

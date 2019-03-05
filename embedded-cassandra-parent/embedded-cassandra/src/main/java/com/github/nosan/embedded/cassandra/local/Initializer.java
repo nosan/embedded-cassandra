@@ -19,8 +19,6 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import javax.annotation.Nonnull;
-
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
@@ -39,5 +37,6 @@ interface Initializer {
 	 * @param version a version
 	 * @throws IOException in the case of any IO errors
 	 */
-	void initialize(@Nonnull Path workingDirectory, @Nonnull Version version) throws IOException;
+	void initialize(Path workingDirectory, Version version) throws IOException;
+
 }

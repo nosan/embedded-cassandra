@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test.junit;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.test.AbstractTestCassandraBuilder;
@@ -31,9 +29,9 @@ import com.github.nosan.embedded.cassandra.test.AbstractTestCassandraBuilder;
 @API(since = "1.2.10", status = API.Status.MAINTAINED)
 public final class CassandraRuleBuilder extends AbstractTestCassandraBuilder<CassandraRule, CassandraRuleBuilder> {
 
-	@Nonnull
 	@Override
 	public CassandraRule build() {
 		return new CassandraRule(isRegisterShutdownHook(), getCassandraFactory(), getClusterFactory(), getScripts());
 	}
+
 }

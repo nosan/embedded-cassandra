@@ -19,8 +19,6 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -40,13 +38,10 @@ public class ClassPathGlobCqlScriptTests {
 	private static final String KEYSPACE =
 			"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}";
 
-	@Nonnull
 	private final String pattern;
 
-	@Nonnull
 	private final String name;
 
-	@Nonnull
 	private final String[] statements;
 
 	public ClassPathGlobCqlScriptTests(AssertData assertData) {
@@ -90,37 +85,35 @@ public class ClassPathGlobCqlScriptTests {
 
 	private static final class AssertData {
 
-		@Nonnull
 		private final String[] statements;
 
-		@Nonnull
 		private final String pattern;
 
-		@Nonnull
 		private final String name;
 
-		AssertData(@Nonnull String pattern, @Nonnull String name, @Nonnull String[] statements) {
+		AssertData(String pattern, String name, String[] statements) {
 			this.pattern = pattern;
 			this.name = name;
 			this.statements = statements;
 		}
 
-		AssertData(@Nonnull String pattern, @Nonnull String name) {
+		AssertData(String pattern, String name) {
 			this(pattern, name, new String[0]);
 		}
 
-		AssertData(@Nonnull String pattern, @Nonnull String[] statements) {
+		AssertData(String pattern, String[] statements) {
 			this(pattern, pattern, statements);
 		}
 
-		AssertData(@Nonnull String pattern) {
+		AssertData(String pattern) {
 			this(pattern, pattern, new String[0]);
 		}
 
 		@Override
-		@Nonnull
 		public String toString() {
 			return String.format("(%s) (%s) (%s) statements", this.pattern, this.name, this.statements.length);
 		}
+
 	}
+
 }

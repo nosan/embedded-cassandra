@@ -39,8 +39,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.annotation.Nonnull;
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SocketOptions;
@@ -82,7 +80,7 @@ public abstract class AbstractLocalCassandraTests {
 
 	protected final LocalCassandraFactory factory;
 
-	AbstractLocalCassandraTests(@Nonnull Version version) {
+	AbstractLocalCassandraTests(Version version) {
 		this.factory = new LocalCassandraFactory();
 		this.factory.setVersion(version);
 	}
@@ -330,15 +328,14 @@ public abstract class AbstractLocalCassandraTests {
 
 	private static final class CqlAssert implements Consumer<Cassandra> {
 
-		@Nonnull
 		private final String statement;
 
-		CqlAssert(@Nonnull String statement) {
+		CqlAssert(String statement) {
 			this.statement = Objects.requireNonNull(statement);
 		}
 
 		@Override
-		public void accept(@Nonnull Cassandra cassandra) {
+		public void accept(Cassandra cassandra) {
 			try (Cluster cluster = cluster(cassandra)) {
 				Session session = cluster.connect();
 				assertThat(session.execute(this.statement).wasApplied())
@@ -359,24 +356,23 @@ public abstract class AbstractLocalCassandraTests {
 					.addContactPoints(settings.getRealAddress())
 					.build();
 		}
+
 	}
 
 	private static final class PortBusyAssert implements Consumer<Cassandra> {
 
-		@Nonnull
 		private final Function<Settings, InetAddress> addressMapper;
 
-		@Nonnull
 		private final Function<Settings, Integer> portMapper;
 
-		PortBusyAssert(@Nonnull Function<Settings, InetAddress> addressMapper,
-				@Nonnull Function<Settings, Integer> portMapper) {
+		PortBusyAssert(Function<Settings, InetAddress> addressMapper,
+				Function<Settings, Integer> portMapper) {
 			this.addressMapper = addressMapper;
 			this.portMapper = portMapper;
 		}
 
 		@Override
-		public void accept(@Nonnull Cassandra cassandra) {
+		public void accept(Cassandra cassandra) {
 			Settings settings = cassandra.getSettings();
 			InetAddress address = this.addressMapper.apply(settings);
 			Integer port = this.portMapper.apply(settings);
@@ -384,6 +380,7 @@ public abstract class AbstractLocalCassandraTests {
 					.describedAs("Port (%s) is not busy", port)
 					.isTrue();
 		}
+
 	}
 
 	private static final class NotReachable implements Consumer<Cassandra> {
@@ -392,5 +389,7 @@ public abstract class AbstractLocalCassandraTests {
 		public void accept(Cassandra cassandra) {
 			fail("This consumer must not be called.");
 		}
+
 	}
+
 }

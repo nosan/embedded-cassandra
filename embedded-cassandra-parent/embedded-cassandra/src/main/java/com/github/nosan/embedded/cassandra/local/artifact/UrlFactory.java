@@ -19,8 +19,6 @@ package com.github.nosan.embedded.cassandra.local.artifact;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.annotation.Nonnull;
-
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -44,6 +42,6 @@ public interface UrlFactory {
 	 * @throws MalformedURLException if no protocol is specified, or an unknown protocol is found, or {@code spec}
 	 * is {@code null}.
 	 */
-	@Nonnull
-	URL[] create(@Nonnull Version version) throws MalformedURLException;
+	URL[] create(Version version) throws MalformedURLException;
+
 }

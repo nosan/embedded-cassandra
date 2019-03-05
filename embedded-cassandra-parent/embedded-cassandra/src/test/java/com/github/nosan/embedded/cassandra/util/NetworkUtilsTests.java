@@ -68,4 +68,5 @@ public class NetworkUtilsTests {
 				.findFirst()
 				.orElseThrow(IllegalStateException::new);
 	}
+
 }

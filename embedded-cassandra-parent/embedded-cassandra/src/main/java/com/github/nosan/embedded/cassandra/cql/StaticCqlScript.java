@@ -23,10 +23,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apiguardian.api.API;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@link CqlScript} implementation for a given CQL {@code statements}.
@@ -38,7 +37,6 @@ import org.apiguardian.api.API;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class StaticCqlScript implements CqlScript {
 
-	@Nonnull
 	private final List<String> statements;
 
 	/**
@@ -61,7 +59,6 @@ public final class StaticCqlScript implements CqlScript {
 				Collections.emptyList()));
 	}
 
-	@Nonnull
 	@Override
 	public Collection<String> getStatements() {
 		return this.statements;
@@ -85,8 +82,8 @@ public final class StaticCqlScript implements CqlScript {
 	}
 
 	@Override
-	@Nonnull
 	public String toString() {
 		return String.format("Static CQL Statements (%s)", this.statements.size());
 	}
+
 }

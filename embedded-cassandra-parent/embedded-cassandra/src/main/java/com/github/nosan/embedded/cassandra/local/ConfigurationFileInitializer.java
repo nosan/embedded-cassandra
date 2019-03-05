@@ -18,7 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.net.URL;
 
-import javax.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 /**
  * {@link Initializer} to initialize {@code cassandra.yaml}.
@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
  * @since 1.0.9
  */
 class ConfigurationFileInitializer extends AbstractFileReplacerInitializer {
+
 	/**
 	 * Creates a {@link ConfigurationFileInitializer}.
 	 *
@@ -35,4 +36,5 @@ class ConfigurationFileInitializer extends AbstractFileReplacerInitializer {
 	ConfigurationFileInitializer(@Nullable URL configurationFile) {
 		super(configurationFile, (workDir, version) -> workDir.resolve("conf/cassandra.yaml"));
 	}
+
 }
