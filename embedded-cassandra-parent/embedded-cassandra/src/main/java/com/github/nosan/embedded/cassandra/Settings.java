@@ -184,8 +184,8 @@ public interface Settings {
 	}
 
 	/**
-	 * When using multiple physical network interfaces, set this to true to listen on broadcast_address in addition
-	 * to the {@code listen_address}, allowing nodes to communicate in both interfaces.
+	 * When using multiple physical network interfaces, set this to true to listen on {@code broadcast_address} in
+	 * addition to the {@code listen_address}, allowing nodes to communicate in both interfaces.
 	 *
 	 * @return The value of the {@code listenOnBroadcastAddress} attribute
 	 * @since 1.1.0
@@ -219,8 +219,7 @@ public interface Settings {
 	}
 
 	/**
-	 * The {@code real} address to bind the native/rpc transport server to.
-	 * If both {@code rpcAddress} and {@code rpcInterface} are null, then {@link #getRealListenAddress()} will be used.
+	 * The {@code real} address to listen the native/rpc transport.
 	 *
 	 * @return The value of the {@code rpcAddress} or determine address from {@code rpcInterface} attribute
 	 * @since 1.1.0
@@ -243,7 +242,7 @@ public interface Settings {
 	}
 
 	/**
-	 * The {@code real} address to bind to and tell other Cassandra nodes to connect to.
+	 * The {@code real} address to listen and tell other Cassandra nodes to connect to.
 	 *
 	 * @return The value of the {@code listenAddress} or determine address from {@code listenInterface} attribute
 	 * @since 1.1.0
