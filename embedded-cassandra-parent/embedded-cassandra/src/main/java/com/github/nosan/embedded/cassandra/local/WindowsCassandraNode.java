@@ -152,7 +152,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		}
 		try {
 			String id = new String(Files.readAllBytes(pidFile), StandardCharsets.UTF_8)
-					.replaceAll("[^-+\\d]", "");
+					.replaceAll("[^\\d]", "");
 			return StringUtils.hasText(id) ? Long.parseLong(id) : -1;
 		}
 		catch (Throwable ex) {
