@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.apiguardian.api.API;
@@ -62,12 +61,7 @@ public interface CqlScript {
 	 * @since 1.2.6
 	 */
 	static CqlScript classpathGlobs(@Nullable String... patterns) {
-		if (patterns == null || patterns.length == 0) {
-			return new CqlScripts();
-		}
-		return new CqlScripts(Arrays.stream(patterns)
-				.map(ClassPathGlobCqlScript::new)
-				.toArray(CqlScript[]::new));
+		return CqlScriptConstructor.create(patterns, ClassPathGlobCqlScript::new);
 	}
 
 	/**
@@ -78,7 +72,7 @@ public interface CqlScript {
 	 * @see ClassPathCqlScript
 	 */
 	static CqlScript classpath(@Nullable String... locations) {
-		return classpath(null, locations);
+		return CqlScriptConstructor.create(locations, ClassPathCqlScript::new);
 	}
 
 	/**
@@ -90,12 +84,7 @@ public interface CqlScript {
 	 * @see ClassPathCqlScript
 	 */
 	static CqlScript classpath(@Nullable Class<?> contextClass, @Nullable String... locations) {
-		if (locations == null || locations.length == 0) {
-			return new CqlScripts();
-		}
-		return new CqlScripts(Arrays.stream(locations)
-				.map(l -> new ClassPathCqlScript(l, contextClass))
-				.toArray(CqlScript[]::new));
+		return CqlScriptConstructor.create(locations, element -> new ClassPathCqlScript(element, contextClass));
 	}
 
 	/**
@@ -106,12 +95,7 @@ public interface CqlScript {
 	 * @see UrlCqlScript
 	 */
 	static CqlScript urls(@Nullable URL... locations) {
-		if (locations == null || locations.length == 0) {
-			return new CqlScripts();
-		}
-		return new CqlScripts(Arrays.stream(locations)
-				.map(UrlCqlScript::new)
-				.toArray(CqlScript[]::new));
+		return CqlScriptConstructor.create(locations, UrlCqlScript::new);
 	}
 
 	/**
@@ -122,12 +106,7 @@ public interface CqlScript {
 	 * @see FileCqlScript
 	 */
 	static CqlScript files(@Nullable File... locations) {
-		if (locations == null || locations.length == 0) {
-			return new CqlScripts();
-		}
-		return new CqlScripts(Arrays.stream(locations)
-				.map(FileCqlScript::new)
-				.toArray(CqlScript[]::new));
+		return CqlScriptConstructor.create(locations, FileCqlScript::new);
 	}
 
 	/**
@@ -138,12 +117,7 @@ public interface CqlScript {
 	 * @see PathCqlScript
 	 */
 	static CqlScript paths(@Nullable Path... locations) {
-		if (locations == null || locations.length == 0) {
-			return new CqlScripts();
-		}
-		return new CqlScripts(Arrays.stream(locations)
-				.map(PathCqlScript::new)
-				.toArray(CqlScript[]::new));
+		return CqlScriptConstructor.create(locations, PathCqlScript::new);
 	}
 
 	/**

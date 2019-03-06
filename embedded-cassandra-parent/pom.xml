@@ -13,14 +13,6 @@
     <artifactId>embedded-cassandra-parent</artifactId>
     <packaging>pom</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
-
     <modules>
         <module>embedded-cassandra</module>
         <module>embedded-cassandra-test</module>
