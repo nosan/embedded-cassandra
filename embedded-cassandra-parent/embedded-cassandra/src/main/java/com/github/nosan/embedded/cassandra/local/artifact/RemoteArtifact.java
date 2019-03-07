@@ -45,7 +45,6 @@ import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
-import com.github.nosan.embedded.cassandra.util.ThreadNameSupplier;
 
 /**
  * {@link Artifact} implementation, that downloads {@code archive} from the internet, if {@code archive} doesn't exist
@@ -200,11 +199,8 @@ class RemoteArtifact implements Artifact {
 
 		private static final AtomicLong instanceCounter = new AtomicLong();
 
-		private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("artifact-%d",
-				instanceCounter.incrementAndGet()));
-
 		private final ThreadFactory threadFactory = runnable -> {
-			Thread thread = new Thread(runnable, this.threadNameSupplier.get());
+			Thread thread = new Thread(runnable, String.format("artifact-%d", instanceCounter.incrementAndGet()));
 			thread.setDaemon(true);
 			return thread;
 		};

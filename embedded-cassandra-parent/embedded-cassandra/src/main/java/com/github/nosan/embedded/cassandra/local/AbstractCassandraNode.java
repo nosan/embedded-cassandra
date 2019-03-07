@@ -46,7 +46,6 @@ import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.SystemProperty;
-import com.github.nosan.embedded.cassandra.util.ThreadNameSupplier;
 
 /**
  * The common implementation of the {@link CassandraNode}.
@@ -60,11 +59,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
-	private final ThreadNameSupplier threadNameSupplier = new ThreadNameSupplier(String.format("cassandra-%d",
-			instanceCounter.incrementAndGet()));
-
 	private final ThreadFactory threadFactory = runnable -> {
-		Thread thread = new Thread(runnable, this.threadNameSupplier.get());
+		Thread thread = new Thread(runnable, String.format("cassandra-%d", instanceCounter.incrementAndGet()));
 		thread.setDaemon(true);
 		return thread;
 	};
@@ -324,19 +320,18 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		@Override
 		public void accept(String line) {
-			if (this.alreadySet) {
-				return;
-			}
-			Matcher matcher = this.regex.matcher(line);
-			if (matcher.matches()) {
-				String address = matcher.group(1).trim();
-				try {
-					this.settings.setRealAddress(NetworkUtils.getInetAddress(address.trim()));
-					this.alreadySet = true;
-				}
-				catch (Throwable ex) {
-					if (log.isDebugEnabled()) {
-						log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
+			if (!this.alreadySet) {
+				Matcher matcher = this.regex.matcher(line);
+				if (matcher.matches()) {
+					String address = matcher.group(1).trim();
+					try {
+						this.settings.setRealAddress(NetworkUtils.getInetAddress(address.trim()));
+						this.alreadySet = true;
+					}
+					catch (Throwable ex) {
+						if (log.isDebugEnabled()) {
+							log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
+						}
 					}
 				}
 			}
@@ -369,19 +364,18 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		@Override
 		public void accept(String line) {
-			if (this.alreadySet) {
-				return;
-			}
-			Matcher matcher = this.regex.matcher(line);
-			if (matcher.matches()) {
-				String address = matcher.group(1).trim();
-				try {
-					this.settings.setRealListenAddress(NetworkUtils.getInetAddress(address.trim()));
-					this.alreadySet = true;
-				}
-				catch (Throwable ex) {
-					if (log.isDebugEnabled()) {
-						log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
+			if (!this.alreadySet) {
+				Matcher matcher = this.regex.matcher(line);
+				if (matcher.matches()) {
+					String address = matcher.group(1).trim();
+					try {
+						this.settings.setRealListenAddress(NetworkUtils.getInetAddress(address.trim()));
+						this.alreadySet = true;
+					}
+					catch (Throwable ex) {
+						if (log.isDebugEnabled()) {
+							log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
+						}
 					}
 				}
 			}
