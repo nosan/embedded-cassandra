@@ -133,11 +133,8 @@ class WorkingDirectoryInitializer implements Initializer {
 		Set<Path> directories = Files.find(directory, 1, (path, attributes) -> {
 			Path bin = path.resolve("bin");
 			Path lib = path.resolve("lib");
-			Path conf = path.resolve("conf");
-			return Files.exists(bin.resolve("cassandra")) &&
-					Files.exists(bin.resolve("cassandra.ps1")) &&
-					Files.exists(conf) &&
-					Files.exists(lib);
+			Path conf = path.resolve("conf/cassandra.yaml");
+			return Files.exists(bin) && Files.exists(conf) && Files.exists(lib);
 		}).collect(Collectors.toSet());
 
 		if (directories.isEmpty()) {

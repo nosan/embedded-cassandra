@@ -400,8 +400,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		@Override
 		public void accept(String line) {
 			if (!this.ready) {
-				this.ready = line.matches("(?i).*listening\\s*for\\s*cql.*") ||
-						line.matches("(?i).*not\\s*starting\\s*native.*");
+				this.ready = line.matches("(?i).*listening.*clients.*") ||
+						line.matches("(?i).*not\\s*starting.*as\\s*requested.*");
 			}
 		}
 
