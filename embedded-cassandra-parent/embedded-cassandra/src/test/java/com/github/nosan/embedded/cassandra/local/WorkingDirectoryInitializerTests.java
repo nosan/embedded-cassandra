@@ -125,7 +125,7 @@ public class WorkingDirectoryInitializerTests {
 				Objects.requireNonNull(this.artifactDirectory));
 
 		assertThatThrownBy(() -> customizer.initialize(Objects.requireNonNull(this.workingDirectory), this.version))
-				.hasStackTraceContaining("doesn't have one of the ")
+				.hasStackTraceContaining("must have at least ")
 				.isInstanceOf(IllegalStateException.class);
 	}
 

@@ -139,7 +139,8 @@ class WorkingDirectoryInitializer implements Initializer {
 
 		if (directories.isEmpty()) {
 			throw new IllegalStateException(
-					String.format("(%s) doesn't have one of the 'bin', lib', 'conf' folders", directory));
+					String.format("(%s) must have at least 'bin', lib' folders and 'conf/cassandra.yaml' file",
+							directory));
 		}
 		if (directories.size() > 1) {
 			throw new IllegalStateException(String.format(
