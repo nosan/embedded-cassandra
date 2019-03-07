@@ -43,7 +43,7 @@
         <logback-classic.version>1.2.3</logback-classic.version>
         <spring.version>5.1.5.RELEASE</spring.version>
         <jsr305.version>3.0.2</jsr305.version>
-        <snakeyaml.version>1.23</snakeyaml.version>
+        <snakeyaml.version>1.24</snakeyaml.version>
         <commons-compress.version>1.18</commons-compress.version>
         <xz.version>1.8</xz.version>
         <apiguardian-api.version>1.0.0</apiguardian-api.version>
