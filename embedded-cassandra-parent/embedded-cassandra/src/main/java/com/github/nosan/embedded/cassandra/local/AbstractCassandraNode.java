@@ -59,8 +59,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
 
+	private final long instance = instanceCounter.incrementAndGet();
+
 	private final ThreadFactory threadFactory = runnable -> {
-		Thread thread = new Thread(runnable, String.format("cassandra-%d", instanceCounter.incrementAndGet()));
+		Thread thread = new Thread(runnable, String.format("cassandra-%d", this.instance));
 		thread.setDaemon(true);
 		return thread;
 	};

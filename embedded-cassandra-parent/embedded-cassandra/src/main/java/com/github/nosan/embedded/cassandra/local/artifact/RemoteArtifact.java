@@ -199,8 +199,10 @@ class RemoteArtifact implements Artifact {
 
 		private static final AtomicLong instanceCounter = new AtomicLong();
 
+		private final long instance = instanceCounter.incrementAndGet();
+
 		private final ThreadFactory threadFactory = runnable -> {
-			Thread thread = new Thread(runnable, String.format("artifact-%d", instanceCounter.incrementAndGet()));
+			Thread thread = new Thread(runnable, String.format("artifact-%d", this.instance));
 			thread.setDaemon(true);
 			return thread;
 		};
