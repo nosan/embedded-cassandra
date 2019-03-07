@@ -318,7 +318,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		 */
 		RpcAddressParser(RuntimeNodeSettings settings) {
 			this.settings = settings;
-			this.regex = Pattern.compile(String.format(".*/(.+):(%d|%d).*", settings.getPort(),
+			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getPort(),
 					settings.getSslPort()));
 		}
 
@@ -363,7 +363,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		 */
 		ListenAddressParser(RuntimeNodeSettings settings) {
 			this.settings = settings;
-			this.regex = Pattern.compile(String.format(".*/(.+):(%d|%d).*", settings.getStoragePort(),
+			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getStoragePort(),
 					settings.getSslStoragePort()));
 		}
 
