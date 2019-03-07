@@ -39,16 +39,14 @@ public final class OSRule implements TestRule {
 
 			@Override
 			public void evaluate() throws Throwable {
-				if (description.getAnnotation(DisableIfOS.class) != null ||
-						description.getAnnotation(EnableIfOS.class) != null) {
-					check(description, description.getAnnotation(DisableIfOS.class));
+				if (description.getAnnotation(EnableIfOS.class) != null) {
 					check(description, description.getAnnotation(EnableIfOS.class));
 				}
-				else if (testClass.getAnnotation(EnableIfOS.class) != null ||
-						testClass.getAnnotation(DisableIfOS.class) != null) {
+				else {
 					check(description, testClass.getAnnotation(EnableIfOS.class));
-					check(description, testClass.getAnnotation(DisableIfOS.class));
 				}
+				check(description, description.getAnnotation(DisableIfOS.class));
+				check(description, testClass.getAnnotation(DisableIfOS.class));
 				statement.evaluate();
 			}
 		};
