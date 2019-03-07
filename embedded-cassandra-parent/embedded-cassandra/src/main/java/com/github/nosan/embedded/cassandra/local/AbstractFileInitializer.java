@@ -60,7 +60,6 @@ abstract class AbstractFileInitializer implements Initializer {
 	 * @param version a version
 	 * @throws IOException in the case of any IO errors
 	 */
-	protected abstract void initialize(Path file, Path workingDirectory, Version version)
-			throws IOException;
+	protected abstract void initialize(Path file, Path workingDirectory, Version version) throws IOException;
 
 }
