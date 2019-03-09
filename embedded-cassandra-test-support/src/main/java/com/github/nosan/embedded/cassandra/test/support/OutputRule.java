@@ -20,10 +20,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 
+import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 /**
  * {@link TestRule} to capture output from {@code System.out} and {@code System.err}.
@@ -31,7 +31,7 @@ import org.junit.runners.model.Statement;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-public final class OutputRule implements TestRule {
+public final class OutputRule extends ExternalResource {
 
 	private TeeOutputStream out;
 
@@ -40,20 +40,26 @@ public final class OutputRule implements TestRule {
 	private ByteArrayOutputStream output;
 
 	@Override
-	public Statement apply(Statement base, Description description) {
-		return new Statement() {
+	protected void before() {
+		this.output = new ByteArrayOutputStream();
+		this.out = new TeeOutputStream(System.out, this.output);
+		this.err = new TeeOutputStream(System.err, this.output);
+		System.setOut(new PrintStream(this.out));
+		System.setErr(new PrintStream(this.err));
+	}
 
-			@Override
-			public void evaluate() throws Throwable {
-				capture();
-				try {
-					base.evaluate();
-				}
-				finally {
-					release();
-				}
-			}
-		};
+	@Override
+	protected void after() {
+		flush();
+		TeeOutputStream out = this.out;
+		if (out != null) {
+			System.setOut(out.getOriginal());
+		}
+		TeeOutputStream err = this.err;
+		if (err != null) {
+			System.setErr(err.getOriginal());
+		}
+		this.output = null;
 	}
 
 	@Override
@@ -77,36 +83,8 @@ public final class OutputRule implements TestRule {
 		}
 	}
 
-	/**
-	 * Capture {@code System.out} and {@code System.err}.
-	 */
-	public void capture() {
-		this.output = new ByteArrayOutputStream();
-		this.out = new TeeOutputStream(System.out, this.output);
-		this.err = new TeeOutputStream(System.err, this.output);
-		System.setOut(new PrintStream(this.out));
-		System.setErr(new PrintStream(this.err));
-	}
-
-	/**
-	 * Release {@code System.out} and {@code System.err}.
-	 */
-	public void release() {
-		flush();
-		TeeOutputStream out = this.out;
-		if (out != null) {
-			System.setOut(out.getOriginal());
-		}
-		TeeOutputStream err = this.err;
-		if (err != null) {
-			System.setErr(err.getOriginal());
-		}
-		this.output = null;
-	}
-
 	private void flush() {
 		try {
-
 			TeeOutputStream out = this.out;
 			if (out != null) {
 				out.flush();
@@ -116,7 +94,8 @@ public final class OutputRule implements TestRule {
 				err.flush();
 			}
 		}
-		catch (IOException ignore) {
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
 		}
 	}
 

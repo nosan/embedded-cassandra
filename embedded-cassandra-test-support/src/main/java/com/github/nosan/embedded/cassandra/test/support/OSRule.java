@@ -40,39 +40,39 @@ public final class OSRule implements TestRule {
 			@Override
 			public void evaluate() throws Throwable {
 				if (description.getAnnotation(EnableIfOS.class) != null) {
-					check(description, description.getAnnotation(EnableIfOS.class));
+					verify(description, description.getAnnotation(EnableIfOS.class));
 				}
 				else {
-					check(description, testClass.getAnnotation(EnableIfOS.class));
+					verify(description, testClass.getAnnotation(EnableIfOS.class));
 				}
-				check(description, description.getAnnotation(DisableIfOS.class));
-				check(description, testClass.getAnnotation(DisableIfOS.class));
+				verify(description, description.getAnnotation(DisableIfOS.class));
+				verify(description, testClass.getAnnotation(DisableIfOS.class));
 				statement.evaluate();
 			}
 		};
 	}
 
-	private static void check(Description description, EnableIfOS enable) {
-		if (enable != null) {
+	private static void verify(Description description, EnableIfOS annotation) {
+		if (annotation != null) {
 			String os = System.getProperty("os.name");
-			String[] values = enable.value();
+			String[] values = annotation.value();
 			Assume.assumeTrue(String.format("%s is enabled only for %s. Current OS is '%s'",
 					description, Arrays.toString(values), os), match(os, values));
 		}
 	}
 
-	private static void check(Description description, DisableIfOS disable) {
-		if (disable != null) {
+	private static void verify(Description description, DisableIfOS annotation) {
+		if (annotation != null) {
 			String os = System.getProperty("os.name");
-			String[] values = disable.value();
+			String[] values = annotation.value();
 			Assume.assumeFalse(String.format("%s is disabled. Current OS '%s' is on the list %s",
 					description, os, Arrays.toString(values)), match(os, values));
 		}
 	}
 
 	private static boolean match(String os, String[] systems) {
-		for (String s : systems) {
-			if (os.toLowerCase(Locale.ENGLISH).contains(s.toLowerCase(Locale.ENGLISH))) {
+		for (String system : systems) {
+			if (os.toLowerCase(Locale.ENGLISH).contains(system.toLowerCase(Locale.ENGLISH))) {
 				return true;
 			}
 		}
