@@ -98,11 +98,11 @@ public abstract class ArchiveUtils {
 	 *
 	 * @param archiveFile the archive file to extract
 	 * @param destination the directory to which to extract the files
-	 * @param entryFilter the filter to check whether {@code entry} should be extracted or not
+	 * @param entryFileFilter the filter to check whether {@code entry file} should be extracted or not
 	 * @throws IOException in the case of I/O errors
 	 */
 	public static void extract(Path archiveFile, Path destination,
-			@Nullable Predicate<? super ArchiveEntry> entryFilter) throws IOException {
+			@Nullable Predicate<? super ArchiveEntry> entryFileFilter) throws IOException {
 		Objects.requireNonNull(archiveFile, "Archive must not be null");
 		Objects.requireNonNull(destination, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
@@ -116,7 +116,7 @@ public abstract class ArchiveUtils {
 					Files.createDirectories(tempDir.resolve(entry.getName()));
 					Files.createDirectories(destination.resolve(entry.getName()));
 				}
-				else if (entryFilter == null || entryFilter.test(entry)) {
+				else if (entryFileFilter == null || entryFileFilter.test(entry)) {
 					Path tempFile = tempDir.resolve(entry.getName());
 					Files.copy(stream, tempFile);
 					FileModeUtils.set(entry, tempFile);
