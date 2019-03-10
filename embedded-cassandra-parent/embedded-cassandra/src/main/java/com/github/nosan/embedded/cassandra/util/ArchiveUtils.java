@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -83,13 +82,13 @@ public abstract class ArchiveUtils {
 	 * Extracts the source archive file into the given destination directory.
 	 * The destination is expected to be a writable directory.
 	 *
-	 * @param archive the archive file to extract
-	 * @param dest the directory to which to extract the files
+	 * @param archiveFile the archive file to extract
+	 * @param destDirectory the directory to which to extract the files
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.4.1
 	 */
-	public static void extract(Path archive, Path dest) throws IOException {
-		extract(archive, dest, entry -> true);
+	public static void extract(Path archiveFile, Path destDirectory) throws IOException {
+		extract(archiveFile, destDirectory, entry -> true);
 	}
 
 	/**
@@ -97,34 +96,37 @@ public abstract class ArchiveUtils {
 	 * writable directory.
 	 *
 	 * @param archiveFile the archive file to extract
-	 * @param destination the directory to which to extract the files
+	 * @param destDirectory the directory to which to extract the files
 	 * @param entryFileFilter the filter to check whether {@code entry file} should be extracted or not
 	 * @throws IOException in the case of I/O errors
 	 */
-	public static void extract(Path archiveFile, Path destination,
+	public static void extract(Path archiveFile, Path destDirectory,
 			@Nullable Predicate<? super ArchiveEntry> entryFileFilter) throws IOException {
 		Objects.requireNonNull(archiveFile, "Archive must not be null");
-		Objects.requireNonNull(destination, "Destination must not be null");
+		Objects.requireNonNull(destDirectory, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
 		try (ArchiveInputStream stream = archiveFactory.create(archiveFile)) {
-			Path tempDir = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString());
-			Files.createDirectories(destination);
-			Files.createDirectories(tempDir);
+			Files.createDirectories(destDirectory);
+			Path tempDir = Files.createTempDirectory(null);
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
 				if (entry.isDirectory()) {
 					Files.createDirectories(tempDir.resolve(entry.getName()));
-					Files.createDirectories(destination.resolve(entry.getName()));
+					Files.createDirectories(destDirectory.resolve(entry.getName()));
 				}
 				else if (entryFileFilter == null || entryFileFilter.test(entry)) {
 					Path tempFile = tempDir.resolve(entry.getName());
+					Path destFile = destDirectory.resolve(entry.getName());
 					Files.copy(stream, tempFile);
 					FileModeUtils.set(entry, tempFile);
-					Path file = destination.resolve(entry.getName());
-					Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+					Files.move(tempFile, destFile, StandardCopyOption.REPLACE_EXISTING);
 				}
 			}
-			FileUtils.delete(tempDir);
+			try {
+				FileUtils.delete(tempDir);
+			}
+			catch (IOException ignore) {
+			}
 		}
 
 	}

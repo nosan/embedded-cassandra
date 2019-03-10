@@ -19,10 +19,8 @@ package com.github.nosan.embedded.cassandra.local.artifact;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 /**
  * {@link Artifact} which always returns an empty {@code zip} archive.
@@ -40,12 +38,12 @@ class EmptyArtifact implements Artifact {
 
 	@Override
 	public Path get() throws IOException {
-		Path directory = FileUtils.getTmpDirectory();
-		Path tempFile = directory.resolve(UUID.randomUUID().toString())
-				.resolve(String.format("apache-cassandra-%s.zip", this.version));
-		Files.createDirectories(tempFile.getParent());
-		Files.createFile(tempFile);
-		tempFile.toFile().deleteOnExit();
+		Path tempFile = Files.createTempFile(null, String.format("-apache-cassandra-%s.zip", this.version));
+		try {
+			tempFile.toFile().deleteOnExit();
+		}
+		catch (UnsupportedOperationException ignore) {
+		}
 		return tempFile;
 	}
 

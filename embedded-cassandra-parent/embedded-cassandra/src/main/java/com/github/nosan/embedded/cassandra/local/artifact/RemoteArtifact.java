@@ -16,12 +16,15 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -29,7 +32,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -42,7 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.Nullable;
-import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
@@ -104,8 +105,8 @@ class RemoteArtifact implements Artifact {
 		URL[] urls = this.urlFactory.create(version);
 		Objects.requireNonNull(urls, "URLs must not be null");
 
-		IOException exceptions = new IOException(String.format("Could not download a resource from URLs %s",
-				Arrays.toString(urls)));
+		IOException exceptions = new IOException(String.format("Could not download a resource from URLs %s. " +
+				"See suppressed exceptions for details", Arrays.toString(urls)));
 
 		for (URL url : urls) {
 			try {
@@ -247,16 +248,20 @@ class RemoteArtifact implements Artifact {
 
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
 
-			Path file = FileUtils.getTmpDirectory()
-					.resolve(UUID.randomUUID().toString()).resolve(getFileName(this.url));
-			file.toFile().deleteOnExit();
+			Path file = Files.createTempFile(null, String.format("-%s", getFileName(this.url)));
 
-			try (InputStream inputStream = urlConnection.getInputStream()) {
+			try {
+				file.toFile().deleteOnExit();
+			}
+			catch (UnsupportedOperationException ignore) {
+			}
+
+			try (FileChannel fileChannel = new FileOutputStream(file.toFile()).getChannel();
+					ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
 				log.info("Downloading Apache Cassandra ({}) from ({}).", this.version, urlConnection.getURL());
 				long start = System.currentTimeMillis();
-				Files.createDirectories(file.getParent());
 				showProgress(file, size, executorService);
-				Files.copy(inputStream, file);
+				fileChannel.transferFrom(urlChannel, 0, Long.MAX_VALUE);
 				long elapsed = System.currentTimeMillis() - start;
 				log.info("Apache Cassandra ({}) has been downloaded ({} ms)", this.version, elapsed);
 			}
