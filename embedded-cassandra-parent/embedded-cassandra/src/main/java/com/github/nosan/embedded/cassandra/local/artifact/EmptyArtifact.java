@@ -38,7 +38,7 @@ class EmptyArtifact implements Artifact {
 
 	@Override
 	public Path get() throws IOException {
-		Path tempFile = Files.createTempFile(null, String.format("-apache-cassandra-%s.zip", this.version));
+		Path tempFile = Files.createTempFile("empty-", String.format("-apache-cassandra-%s.zip", this.version));
 		tempFile.toFile().deleteOnExit();
 		return tempFile;
 	}

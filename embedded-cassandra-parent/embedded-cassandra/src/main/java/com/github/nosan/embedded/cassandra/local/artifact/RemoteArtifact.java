@@ -175,10 +175,7 @@ class RemoteArtifact implements Artifact {
 			Path tempFile = this.resource.getFile();
 			try {
 				Files.createDirectories(file.getParent());
-				if (!Files.exists(file)) {
-					return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
-				}
-				return tempFile;
+				return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
 			}
 			catch (IOException ex) {
 				log.error(String.format("Could not rename (%s) as (%s).", tempFile, file), ex);
@@ -248,15 +245,15 @@ class RemoteArtifact implements Artifact {
 
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
 
-			Path file = Files.createTempFile(null, String.format("-%s", getFileName(this.url)));
+			Path file = Files.createTempFile("download-", String.format("-%s", getFileName(this.url)));
 			file.toFile().deleteOnExit();
 
 			try (FileChannel fileChannel = new FileOutputStream(file.toFile()).getChannel();
-					ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {
+					ReadableByteChannel channel = Channels.newChannel(urlConnection.getInputStream())) {
 				log.info("Downloading Apache Cassandra ({}) from ({}).", this.version, urlConnection.getURL());
 				long start = System.currentTimeMillis();
 				showProgress(file, size, executorService);
-				fileChannel.transferFrom(urlChannel, 0, Long.MAX_VALUE);
+				fileChannel.transferFrom(channel, 0, Long.MAX_VALUE);
 				long elapsed = System.currentTimeMillis() - start;
 				log.info("Apache Cassandra ({}) has been downloaded ({} ms)", this.version, elapsed);
 			}
