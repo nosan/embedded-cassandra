@@ -100,7 +100,7 @@ public abstract class ArchiveUtils {
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
 				Path dest = destination.resolve(entry.getName());
-				if (entry.isDirectory() && !Files.exists(dest)) {
+				if (entry.isDirectory()) {
 					Files.createDirectories(dest);
 					FileModeUtils.set(entry, dest);
 				}

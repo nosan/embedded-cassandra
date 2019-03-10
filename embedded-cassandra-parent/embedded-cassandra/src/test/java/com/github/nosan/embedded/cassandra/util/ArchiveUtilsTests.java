@@ -89,7 +89,7 @@ public class ArchiveUtilsTests {
 		compress(this.compression, archive);
 		File destination = this.temporaryFolder.newFolder();
 		ArchiveUtils.extract(archive.toPath(), destination.toPath());
-		assertThat(destination.toPath().resolve("cass.yaml").toFile()).hasSameContentAs(file);
+		assertThat(destination.toPath().resolve("cassandra.yaml").toFile()).hasSameContentAs(file);
 	}
 
 	private static void archive(String archiveFormat, File archive, File file) throws Exception {
