@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -84,12 +85,12 @@ public abstract class ArchiveUtils {
 	 * The destination is expected to be a writable directory.
 	 *
 	 * @param archiveFile the archive file to extract
-	 * @param destDirectory the directory to which to extract the files
+	 * @param destination the directory to which to extract the files
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.4.1
 	 */
-	public static void extract(Path archiveFile, Path destDirectory) throws IOException {
-		extract(archiveFile, destDirectory, entry -> true);
+	public static void extract(Path archiveFile, Path destination) throws IOException {
+		extract(archiveFile, destination, entry -> true);
 	}
 
 	/**
@@ -97,39 +98,34 @@ public abstract class ArchiveUtils {
 	 * writable directory.
 	 *
 	 * @param archiveFile the archive file to extract
-	 * @param destDirectory the directory to which to extract the files
+	 * @param destination the directory to which to extract the files
 	 * @param entryFileFilter the filter to check whether {@code entry file} should be extracted or not
 	 * @throws IOException in the case of I/O errors
 	 */
-	public static void extract(Path archiveFile, Path destDirectory,
+	public static void extract(Path archiveFile, Path destination,
 			@Nullable Predicate<? super ArchiveEntry> entryFileFilter) throws IOException {
 		Objects.requireNonNull(archiveFile, "Archive must not be null");
-		Objects.requireNonNull(destDirectory, "Destination must not be null");
+		Objects.requireNonNull(destination, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
 		try (ArchiveInputStream stream = archiveFactory.create(archiveFile)) {
-			Files.createDirectories(destDirectory);
-			Path tempDir = Files.createTempDirectory(null);
+			Files.createDirectories(destination);
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
 				if (entry.isDirectory()) {
-					Files.createDirectories(tempDir.resolve(entry.getName()));
-					Files.createDirectories(destDirectory.resolve(entry.getName()));
+					Path directory = destination.resolve(entry.getName());
+					Files.createDirectories(directory);
+					FileModeUtils.set(entry, directory);
 				}
 				else if (entryFileFilter == null || entryFileFilter.test(entry)) {
-					Path tempFile = tempDir.resolve(entry.getName());
-					Path destFile = destDirectory.resolve(entry.getName());
-					Files.copy(stream, tempFile);
+					Path file = destination.resolve(entry.getName());
+					Path tempFile = destination.resolve(String.format("%s.%s.tmp", entry.getName(), UUID.randomUUID()));
+					tempFile.toFile().deleteOnExit();
+					Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
 					FileModeUtils.set(entry, tempFile);
-					Files.move(tempFile, destFile, StandardCopyOption.REPLACE_EXISTING);
+					Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
 				}
 			}
-			try {
-				FileUtils.delete(tempDir);
-			}
-			catch (IOException ignore) {
-			}
 		}
-
 	}
 
 	private static ArchiveFactory createArchiveFactory(Path source) {
@@ -250,8 +246,8 @@ public abstract class ArchiveUtils {
 
 		private static boolean isWindows() {
 			String os = new SystemProperty("os.name").get();
-			return StringUtils.hasText(os) ? os.toLowerCase(Locale.ENGLISH).contains("windows")
-					: File.separatorChar == '\\';
+			return StringUtils.hasText(os) ? os.toLowerCase(Locale.ENGLISH).contains("windows") :
+					File.separatorChar == '\\';
 		}
 
 		private static Set<PosixFilePermission> getPermissions(long mode) {
