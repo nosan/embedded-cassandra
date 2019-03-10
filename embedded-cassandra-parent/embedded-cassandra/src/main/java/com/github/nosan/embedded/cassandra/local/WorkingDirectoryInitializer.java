@@ -101,7 +101,7 @@ class WorkingDirectoryInitializer implements Initializer {
 			return !name.equals("javadoc") && !name.equals("doc");
 		}
 		try {
-			return !Files.exists(dest) || Files.size(destPath) < Files.size(srcPath);
+			return !Files.exists(destPath) || Files.size(destPath) < Files.size(srcPath);
 		}
 		catch (IOException ex) {
 			return true;
