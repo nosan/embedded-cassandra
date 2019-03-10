@@ -17,8 +17,12 @@
 package com.github.nosan.embedded.cassandra.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -29,7 +33,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -107,7 +110,8 @@ public abstract class ArchiveUtils {
 		Objects.requireNonNull(archiveFile, "Archive must not be null");
 		Objects.requireNonNull(destination, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
-		try (ArchiveInputStream stream = archiveFactory.create(archiveFile)) {
+		try (ArchiveInputStream stream = archiveFactory.create(archiveFile);
+				ReadableByteChannel channel = Channels.newChannel(stream)) {
 			Files.createDirectories(destination);
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
@@ -117,11 +121,12 @@ public abstract class ArchiveUtils {
 					FileModeUtils.set(entry, directory);
 				}
 				else if (entryFileFilter == null || entryFileFilter.test(entry)) {
-					Path file = destination.resolve(entry.getName());
-					Path tempFile = destination.resolve(String.format("%s.%s.tmp", entry.getName(), UUID.randomUUID()));
-					tempFile.toFile().deleteOnExit();
-					Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+					Path tempFile = Files.createTempFile(null, null);
+					try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel()) {
+						fileChannel.transferFrom(channel, 0, Long.MAX_VALUE);
+					}
 					FileModeUtils.set(entry, tempFile);
+					Path file = destination.resolve(entry.getName());
 					Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
 				}
 			}
