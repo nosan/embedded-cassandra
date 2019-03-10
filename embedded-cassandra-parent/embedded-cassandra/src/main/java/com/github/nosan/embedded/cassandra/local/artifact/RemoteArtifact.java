@@ -249,12 +249,7 @@ class RemoteArtifact implements Artifact {
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
 
 			Path file = Files.createTempFile(null, String.format("-%s", getFileName(this.url)));
-
-			try {
-				file.toFile().deleteOnExit();
-			}
-			catch (UnsupportedOperationException ignore) {
-			}
+			file.toFile().deleteOnExit();
 
 			try (FileChannel fileChannel = new FileOutputStream(file.toFile()).getChannel();
 					ReadableByteChannel urlChannel = Channels.newChannel(urlConnection.getInputStream())) {

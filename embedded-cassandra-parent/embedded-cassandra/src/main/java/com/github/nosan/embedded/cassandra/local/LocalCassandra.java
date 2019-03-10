@@ -323,8 +323,8 @@ class LocalCassandra implements Cassandra {
 
 	private static boolean isWindows() {
 		String os = new SystemProperty("os.name").get();
-		return StringUtils.hasText(os) ? os.toLowerCase(Locale.ENGLISH).contains("windows")
-				: File.separatorChar == '\\';
+		return StringUtils.hasText(os) ? os.toLowerCase(Locale.ENGLISH).contains("windows") :
+				File.separatorChar == '\\';
 	}
 
 }
