@@ -72,7 +72,7 @@ class WorkingDirectoryInitializer implements Initializer {
 		Path archive = artifact.get();
 		log.info("Extract ({}) into ({}).", archive, artifactDirectory);
 		try {
-			ArchiveUtils.extract(archive, artifactDirectory, entryFile -> shouldExtract(artifactDirectory, entryFile));
+			ArchiveUtils.extract(archive, artifactDirectory, entry -> shouldExtract(artifactDirectory, entry));
 		}
 		catch (IOException ex) {
 			throw new IOException(String.format("Artifact (%s) could not be extracted into (%s)",
@@ -82,17 +82,16 @@ class WorkingDirectoryInitializer implements Initializer {
 	}
 
 	private static void copyArtifact(Path workingDirectory, Path artifactDirectory) throws IOException {
-		Path baseDirectory = getBaseDirectory(artifactDirectory);
-		log.info("Copy ({}) folder into ({}).", baseDirectory, workingDirectory);
+		Path directory = getDirectory(artifactDirectory);
+		log.info("Copy ({}) folder into ({}).", directory, workingDirectory);
 		try {
-			FileUtils.copy(baseDirectory, workingDirectory,
-					srcFile -> shouldCopy(baseDirectory, workingDirectory, srcFile));
+			FileUtils.copy(directory, workingDirectory, file -> shouldCopy(directory, workingDirectory, file));
 		}
 		catch (IOException ex) {
-			throw new IOException(
-					String.format("Could not copy folder (%s) into (%s)", baseDirectory, workingDirectory), ex);
+			throw new IOException(String.format("Could not copy folder (%s) into (%s)", directory, workingDirectory),
+					ex);
 		}
-		log.info("({}) Folder has been copied into ({})", baseDirectory, workingDirectory);
+		log.info("({}) Folder has been copied into ({})", directory, workingDirectory);
 	}
 
 	private static boolean shouldCopy(Path srcDir, Path destDir, Path srcFile) {
@@ -110,8 +109,8 @@ class WorkingDirectoryInitializer implements Initializer {
 
 	private static boolean shouldExtract(Path destination, ArchiveEntry entryFile) {
 		String entryName = entryFile.getName();
-		Path dest = destination.resolve(entryName);
-		if (!Files.exists(dest)) {
+		Path destFile = destination.resolve(entryName);
+		if (!Files.exists(destFile)) {
 			int endIndex = entryName.lastIndexOf('/');
 			if (endIndex != -1) {
 				for (String directory : entryName.substring(0, endIndex).split("/")) {
@@ -124,14 +123,14 @@ class WorkingDirectoryInitializer implements Initializer {
 			return true;
 		}
 		try {
-			return Files.size(dest) < entryFile.getSize();
+			return Files.size(destFile) < entryFile.getSize();
 		}
 		catch (IOException ex) {
 			return true;
 		}
 	}
 
-	private static Path getBaseDirectory(Path directory) throws IOException {
+	private static Path getDirectory(Path directory) throws IOException {
 		Set<Path> directories = Files.find(directory, 1, (path, attributes) -> {
 			Path bin = path.resolve("bin");
 			Path lib = path.resolve("lib");
