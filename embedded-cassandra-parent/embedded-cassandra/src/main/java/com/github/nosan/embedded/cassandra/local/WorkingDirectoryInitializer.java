@@ -96,15 +96,12 @@ class WorkingDirectoryInitializer implements Initializer {
 	private static boolean shouldCopy(Path src, Path dest, Path srcPath) {
 		Path relativize = src.relativize(srcPath);
 		Path destPath = dest.resolve(relativize);
-		if (Files.exists(destPath)) {
-			return false;
-		}
-		if (Files.isDirectory(srcPath)) {
+		if (Files.isDirectory(srcPath) && !Files.exists(destPath)) {
 			String name = relativize.getName(0).toString().toLowerCase(Locale.ENGLISH);
 			return !name.equals("javadoc") && !name.equals("doc");
 		}
 		try {
-			return Files.size(destPath) < Files.size(srcPath);
+			return !Files.exists(dest) || Files.size(destPath) < Files.size(srcPath);
 		}
 		catch (IOException ex) {
 			return true;

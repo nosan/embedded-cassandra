@@ -100,14 +100,11 @@ public abstract class ArchiveUtils {
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
 				Path dest = destination.resolve(entry.getName());
-				if (Files.exists(dest)) {
-					continue;
-				}
-				if (entry.isDirectory()) {
+				if (entry.isDirectory() && !Files.exists(dest)) {
 					Files.createDirectories(dest);
 					FileModeUtils.set(entry, dest);
 				}
-				else {
+				else if (!Files.exists(dest) || Files.size(dest) < entry.getSize()) {
 					Path tempFile = Files.createTempFile(null, null);
 					try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel()) {
 						fileChannel.transferFrom(channel, 0, Long.MAX_VALUE);
