@@ -81,7 +81,7 @@ public abstract class ArchiveUtils {
 
 	/**
 	 * Extracts the source archive file into the given destination directory.
-	 * The destination is expected to be a writable directory. Skips empty directories.
+	 * The destination is expected to be a writable directory.
 	 *
 	 * @param archive the archive file to extract
 	 * @param dest the directory to which to extract the files
@@ -93,35 +93,40 @@ public abstract class ArchiveUtils {
 	}
 
 	/**
-	 * Extracts the source archive file into the given destination directory.
-	 * The destination is expected to be a writable directory. Skips empty directories.
+	 * Extracts the source archive file into the given destination directory. The destination is expected to be a
+	 * writable directory.
 	 *
-	 * @param archive the archive file to extract
-	 * @param dest the directory to which to extract the files
-	 * @param entryFilter the filter to check whether {@code entry file} should be extracted or not
+	 * @param archiveFile the archive file to extract
+	 * @param destination the directory to which to extract the files
+	 * @param entryFilter the filter to check whether {@code entry} should be extracted or not
 	 * @throws IOException in the case of I/O errors
 	 */
-	public static void extract(Path archive, Path dest, @Nullable Predicate<? super ArchiveEntry> entryFilter)
-			throws IOException {
-		Objects.requireNonNull(archive, "Archive must not be null");
-		Objects.requireNonNull(dest, "Destination must not be null");
-		ArchiveFactory archiveFactory = createArchiveFactory(archive);
-		try (ArchiveInputStream stream = archiveFactory.create(archive)) {
+	public static void extract(Path archiveFile, Path destination,
+			@Nullable Predicate<? super ArchiveEntry> entryFilter) throws IOException {
+		Objects.requireNonNull(archiveFile, "Archive must not be null");
+		Objects.requireNonNull(destination, "Destination must not be null");
+		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
+		try (ArchiveInputStream stream = archiveFactory.create(archiveFile)) {
 			Path tempDir = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString());
+			Files.createDirectories(destination);
+			Files.createDirectories(tempDir);
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
-				if (!entry.isDirectory() && (entryFilter == null || entryFilter.test(entry))) {
+				if (entry.isDirectory()) {
+					Files.createDirectories(tempDir.resolve(entry.getName()));
+					Files.createDirectories(destination.resolve(entry.getName()));
+				}
+				else if (entryFilter == null || entryFilter.test(entry)) {
 					Path tempFile = tempDir.resolve(entry.getName());
-					Files.createDirectories(tempFile.getParent());
 					Files.copy(stream, tempFile);
 					FileModeUtils.set(entry, tempFile);
-					Path file = dest.resolve(entry.getName());
-					Files.createDirectories(file.getParent());
+					Path file = destination.resolve(entry.getName());
 					Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
 				}
 			}
 			FileUtils.delete(tempDir);
 		}
+
 	}
 
 	private static ArchiveFactory createArchiveFactory(Path source) {
@@ -137,16 +142,6 @@ public abstract class ArchiveUtils {
 	 * Factory for creating {@link ArchiveInputStream} instances by a given archive.
 	 */
 	private interface ArchiveFactory {
-
-		/**
-		 * Reads the given archive file as an {@link ArchiveInputStream} which is used to access individual
-		 * {@link ArchiveEntry} objects within the archive without extracting the archive onto the file system.
-		 *
-		 * @param archive the archive file to stream
-		 * @return a new archive stream for the given archive
-		 * @throws IOException IOException in the case of I/O errors
-		 */
-		ArchiveInputStream create(Path archive) throws IOException;
 
 		/**
 		 * Creates a factory for the given archive format.
@@ -189,6 +184,16 @@ public abstract class ArchiveUtils {
 				}
 			};
 		}
+
+		/**
+		 * Reads the given archive file as an {@link ArchiveInputStream} which is used to access individual
+		 * {@link ArchiveEntry} objects within the archive without extracting the archive onto the file system.
+		 *
+		 * @param archive the archive file to stream
+		 * @return a new archive stream for the given archive
+		 * @throws IOException IOException in the case of I/O errors
+		 */
+		ArchiveInputStream create(Path archive) throws IOException;
 
 	}
 

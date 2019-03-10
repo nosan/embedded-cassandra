@@ -61,30 +61,6 @@ public class ArchiveUtilsTests {
 		this.compression = compression;
 	}
 
-	@Test
-	public void extract() throws Exception {
-		File archive = this.temporaryFolder.newFile(String.format("%s.%s",
-				UUID.randomUUID(), this.name));
-		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
-		archive(this.archiveFormat, archive, file);
-		compress(this.compression, archive);
-		File destination = this.temporaryFolder.newFolder();
-		ArchiveUtils.extract(archive.toPath(), destination.toPath());
-		assertThat(destination.toPath().resolve("dir/cass.yaml").toFile()).hasSameContentAs(file);
-	}
-
-	@Test
-	public void applyFilter() throws Exception {
-		File archive = this.temporaryFolder.newFile(String.format("%s.%s",
-				UUID.randomUUID(), this.name));
-		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
-		archive(this.archiveFormat, archive, file);
-		compress(this.compression, archive);
-		File destination = this.temporaryFolder.newFolder();
-		ArchiveUtils.extract(archive.toPath(), destination.toPath(), entry -> false);
-		assertThat(destination.toPath().resolve("dir/cass.yaml").toFile()).doesNotExist();
-	}
-
 	@Parameterized.Parameters(name = "{0}")
 	public static Iterable<Object[]> archives() {
 		List<Object[]> parameters = new ArrayList<>();
@@ -104,11 +80,35 @@ public class ArchiveUtilsTests {
 		return parameters;
 	}
 
+	@Test
+	public void extract() throws Exception {
+		File archive = this.temporaryFolder.newFile(String.format("%s.%s",
+				UUID.randomUUID(), this.name));
+		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
+		archive(this.archiveFormat, archive, file);
+		compress(this.compression, archive);
+		File destination = this.temporaryFolder.newFolder();
+		ArchiveUtils.extract(archive.toPath(), destination.toPath());
+		assertThat(destination.toPath().resolve("cass.yaml").toFile()).hasSameContentAs(file);
+	}
+
+	@Test
+	public void applyFilter() throws Exception {
+		File archive = this.temporaryFolder.newFile(String.format("%s.%s",
+				UUID.randomUUID(), this.name));
+		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
+		archive(this.archiveFormat, archive, file);
+		compress(this.compression, archive);
+		File destination = this.temporaryFolder.newFolder();
+		ArchiveUtils.extract(archive.toPath(), destination.toPath(), entry -> false);
+		assertThat(destination.toPath().resolve("cass.yaml").toFile()).doesNotExist();
+	}
+
 	private static void archive(String archiveFormat, File archive, File file) throws Exception {
 		ArchiveStreamFactory af = new ArchiveStreamFactory();
 		try (ArchiveOutputStream os = af.createArchiveOutputStream(archiveFormat,
 				Files.newOutputStream(archive.toPath()))) {
-			ArchiveEntry archiveEntry = os.createArchiveEntry(file, "dir/cass.yaml");
+			ArchiveEntry archiveEntry = os.createArchiveEntry(file, "cass.yaml");
 			os.putArchiveEntry(archiveEntry);
 			try (InputStream is = Files.newInputStream(file.toPath())) {
 				os.write(IOUtils.toByteArray(is));

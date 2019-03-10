@@ -88,8 +88,8 @@ public class WorkingDirectoryInitializerTests {
 		customizer.initialize(Objects.requireNonNull(workingDirectory), this.version);
 
 		assertThat(workingDirectory).exists();
-		assertThat(workingDirectory.resolve("doc")).doesNotExist();
-		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
+		assertThat(count(workingDirectory.resolve("doc"))).isZero();
+		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
 		assertThat(count(workingDirectory.resolve("bin"))).isGreaterThan(0);
@@ -108,8 +108,8 @@ public class WorkingDirectoryInitializerTests {
 		customizer.initialize(Objects.requireNonNull(workingDirectory), this.version);
 
 		assertThat(workingDirectory).exists();
-		assertThat(workingDirectory.resolve("doc")).doesNotExist();
-		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
+		assertThat(count(workingDirectory.resolve("doc"))).isZero();
+		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
 		assertThat(count(workingDirectory.resolve("bin"))).isGreaterThan(0);
@@ -154,8 +154,8 @@ public class WorkingDirectoryInitializerTests {
 		customizer.initialize(Objects.requireNonNull(workingDirectory), version);
 
 		assertThat(workingDirectory).exists();
-		assertThat(workingDirectory.resolve("doc")).doesNotExist();
-		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
+		assertThat(count(workingDirectory.resolve("doc"))).isZero();
+		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
 
