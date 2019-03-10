@@ -18,12 +18,10 @@ package com.github.nosan.embedded.cassandra.test.spring.data;
 
 import java.time.Duration;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.cassandra.core.ReactiveCassandraTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
 
@@ -34,10 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@RunWith(SpringRunner.class)
 @EmbeddedCassandra(scripts = "/setup.cql")
 @SpringBootTest
-public class CassandraCityReactiveRepositoryTests {
+class CassandraCityReactiveRepositoryTests {
 
 	@Autowired
 	private ReactiveCassandraTemplate cassandraTemplate;
@@ -46,7 +43,7 @@ public class CassandraCityReactiveRepositoryTests {
 	private CityReactiveRepository cityReactiveRepository;
 
 	@Test
-	public void testRepository() {
+	void testRepository() {
 		City city = new City();
 		city.setId(Long.MAX_VALUE);
 		city.setName("Lviv");

@@ -22,77 +22,73 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
 
-import org.junit.rules.ExternalResource;
-import org.junit.rules.TestRule;
-
 /**
- * {@link TestRule} to capture output from {@code System.out} and {@code System.err}.
+ * {@code CaptureOutput} captures output to {@code System.out} and {@code System.err}.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 1.4.2
  */
-public final class OutputRule extends ExternalResource {
+public final class CaptureOutput {
 
-	private TeeOutputStream out;
+	private final TeeOutputStream systemOut;
 
-	private TeeOutputStream err;
+	private final TeeOutputStream systemErr;
 
-	private ByteArrayOutputStream output;
+	private final ByteArrayOutputStream output;
 
-	@Override
-	protected void before() {
-		this.output = new ByteArrayOutputStream();
-		this.out = new TeeOutputStream(System.out, this.output);
-		this.err = new TeeOutputStream(System.err, this.output);
-		System.setOut(new PrintStream(this.out));
-		System.setErr(new PrintStream(this.err));
-	}
-
-	@Override
-	protected void after() {
-		flush();
-		TeeOutputStream out = this.out;
-		if (out != null) {
-			System.setOut(out.getOriginal());
-		}
-		TeeOutputStream err = this.err;
-		if (err != null) {
-			System.setErr(err.getOriginal());
-		}
-		this.output = null;
-	}
-
-	@Override
-	public String toString() {
-		flush();
-		ByteArrayOutputStream output = this.output;
-		if (output == null) {
-			return "";
-		}
-		return output.toString();
+	private CaptureOutput(TeeOutputStream systemOut,
+			TeeOutputStream systemErr, ByteArrayOutputStream output) {
+		this.systemOut = systemOut;
+		this.systemErr = systemErr;
+		this.output = output;
 	}
 
 	/**
-	 * Reset the current output.
+	 * Capture the  {@code System.out} and {@code System.err} outputs.
+	 *
+	 * @return the capture
+	 */
+	public static CaptureOutput capture() {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		TeeOutputStream systemOut = new TeeOutputStream(System.out, output);
+		TeeOutputStream systemErr = new TeeOutputStream(System.err, output);
+		System.setOut(new PrintStream(systemOut));
+		System.setErr(new PrintStream(systemErr));
+		return new CaptureOutput(systemOut, systemErr, output);
+	}
+
+	/**
+	 * Release the  {@code System.out} and {@code System.err} outputs.
+	 */
+	public void release() {
+		flush();
+		System.setOut(this.systemOut.getOriginal());
+		System.setErr(this.systemErr.getOriginal());
+		this.output.reset();
+	}
+
+	/**
+	 * Return all captured output to {@code System.out} and {@code System.err}
+	 * as a single string.
+	 */
+	@Override
+	public String toString() {
+		flush();
+		return this.output.toString();
+	}
+
+	/**
+	 * Clean the current captured output.
 	 */
 	public void reset() {
 		flush();
-		ByteArrayOutputStream output = this.output;
-		if (output != null) {
-			output.reset();
-		}
+		this.output.reset();
 	}
 
 	private void flush() {
 		try {
-			TeeOutputStream out = this.out;
-			if (out != null) {
-				out.flush();
-			}
-			TeeOutputStream err = this.err;
-			if (err != null) {
-				err.flush();
-			}
+			this.systemOut.flush();
+			this.systemErr.flush();
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(ex);

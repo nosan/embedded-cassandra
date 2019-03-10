@@ -18,79 +18,81 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link CqlScriptParser}.
  *
  * @author Dmytro Nosan
  */
-public class CqlScriptParserTests {
+class CqlScriptParserTests {
 
 	@Test
-	public void skipSpaces() {
+	void skipSpaces() {
 		List<String> statements = CqlScriptParser.parse("   ");
 		assertThat(statements).isEmpty();
 	}
 
 	@Test
-	public void oneStatements() {
+	void oneStatements() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE '\"test\"'");
 		assertThat(statements).containsExactly("USE KEYSPACE '\"test\"'");
 	}
 
 	@Test
-	public void multiStatements() {
+	void multiStatements() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE \n\t test; DROP KEYSPACE \n\n   test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "DROP KEYSPACE test");
 	}
 
 	@Test
-	public void blockComment() {
+	void blockComment() {
 		List<String> statements = CqlScriptParser.parse(
 				"USE KEYSPACE test; /*DROP     KEYSPACE test*/USE KEYSPACE test;");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void blockCommentInvalid() {
-		CqlScriptParser.parse("USE KEYSPACE test; /*DROP KEYSPACE test");
+	@Test
+	void blockCommentInvalid() {
+		assertThatThrownBy(() -> CqlScriptParser.parse("USE KEYSPACE test; /*DROP KEYSPACE test"))
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
-	public void singleSlashCommentWithNewLine() {
+	void singleSlashCommentWithNewLine() {
 		List<String> statements = CqlScriptParser.parse(
 				"USE KEYSPACE test; //DROP KEYSPACE test\nUSE KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
 	@Test
-	public void singleDashCommentWithNewLine() {
+	void singleDashCommentWithNewLine() {
 		List<String> statements = CqlScriptParser.parse(
 				"USE KEYSPACE test; --DROP KEYSPACE test\nUSE KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
 	@Test
-	public void singleDashComment() {
+	void singleDashComment() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE test; --DROP KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test");
 	}
 
 	@Test
-	public void singleSlashComment() {
+	void singleSlashComment() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE test; //DROP KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test");
 	}
 
 	@Test
-	public void ignoreCommentSingleQuotes() {
+	void ignoreCommentSingleQuotes() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE test; DROP KEYSPACE '//test'");
 		assertThat(statements).containsExactly("USE KEYSPACE test",
@@ -98,7 +100,7 @@ public class CqlScriptParserTests {
 	}
 
 	@Test
-	public void ignoreCommentDoubleQuotes() {
+	void ignoreCommentDoubleQuotes() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE test; DROP KEYSPACE \"//test\"");
 		assertThat(statements).containsExactly("USE KEYSPACE test",
@@ -106,7 +108,7 @@ public class CqlScriptParserTests {
 	}
 
 	@Test
-	public void ignoreStatementQuotes() {
+	void ignoreStatementQuotes() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE 'test;' DROP KEYSPACE 'test'");
 		assertThat(statements)
@@ -114,7 +116,7 @@ public class CqlScriptParserTests {
 	}
 
 	@Test
-	public void ignoreStatementDoubleQuotes() {
+	void ignoreStatementDoubleQuotes() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE \"test;\" DROP KEYSPACE 'test'");
 		assertThat(statements)
@@ -122,7 +124,7 @@ public class CqlScriptParserTests {
 	}
 
 	@Test
-	public void ignoreStatementDoubleDollars() {
+	void ignoreStatementDoubleDollars() {
 		List<String> statements = CqlScriptParser
 				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES " +
 						"  (201, '2015-02-18', '2015-02-22', $$Women's Tour of New Zealand; New England$$);");
@@ -132,7 +134,7 @@ public class CqlScriptParserTests {
 	}
 
 	@Test
-	public void ignoreDollarsInSingleQuote() {
+	void ignoreDollarsInSingleQuote() {
 		List<String> statements = CqlScriptParser
 				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES " +
 						"  (201, '2015-02-18', '2015-02-22', '$$Womens Tour of New Zealand$$');");
@@ -142,7 +144,7 @@ public class CqlScriptParserTests {
 	}
 
 	@Test
-	public void ignoreDollarsInDoubleQuote() {
+	void ignoreDollarsInDoubleQuote() {
 		List<String> statements = CqlScriptParser
 				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES " +
 						"  (201, '2015-02-18', '2015-02-22', \"$$Womens Tour of New Zealand$$\");");
@@ -152,19 +154,19 @@ public class CqlScriptParserTests {
 	}
 
 	@Test
-	public void blockCommentEmpty() {
+	void blockCommentEmpty() {
 		List<String> statements = CqlScriptParser.parse("/**/");
 		assertThat(statements).isEmpty();
 	}
 
 	@Test
-	public void singleDashCommentEmpty() {
+	void singleDashCommentEmpty() {
 		List<String> statements = CqlScriptParser.parse("--");
 		assertThat(statements).isEmpty();
 	}
 
 	@Test
-	public void singleSlashCommentEmpty() {
+	void singleSlashCommentEmpty() {
 		List<String> statements = CqlScriptParser.parse("//");
 		assertThat(statements).isEmpty();
 	}

@@ -17,12 +17,12 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.compress.utils.IOUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Version;
 
@@ -33,17 +33,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class TopologyFileInitializerTests {
-
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+class TopologyFileInitializerTests {
 
 	@Test
-	public void customize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		TopologyFileInitializer customizer =
+	void customize(@TempDir Path temporaryFolder) throws Exception {
+		Path directory = temporaryFolder.resolve("conf");
+		Files.createDirectories(directory);
+		TopologyFileInitializer initializer =
 				new TopologyFileInitializer(getClass().getResource("/cassandra-topology.properties"));
-		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-topology.properties")) {
 			assertThat(directory.resolve("cassandra-topology.properties")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
@@ -52,10 +50,11 @@ public class TopologyFileInitializerTests {
 	}
 
 	@Test
-	public void notCustomize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		TopologyFileInitializer customizer = new TopologyFileInitializer(null);
-		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+	void notCustomize(@TempDir Path temporaryFolder) throws Exception {
+		Path directory = temporaryFolder.resolve("conf");
+		Files.createDirectories(directory);
+		TopologyFileInitializer initializer = new TopologyFileInitializer(null);
+		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		assertThat(directory.resolve("cassandra-topology.properties")).doesNotExist();
 
 	}

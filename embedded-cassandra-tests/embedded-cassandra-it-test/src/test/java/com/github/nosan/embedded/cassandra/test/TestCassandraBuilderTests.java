@@ -18,7 +18,7 @@ package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class TestCassandraBuilderTests {
+class TestCassandraBuilderTests {
 
 	@Test
-	public void shouldBuildTestCassandra() {
+	void shouldBuildTestCassandra() {
 		ClusterFactory clusterFactory = (settings) -> {
 			throw new UnsupportedOperationException();
 		};

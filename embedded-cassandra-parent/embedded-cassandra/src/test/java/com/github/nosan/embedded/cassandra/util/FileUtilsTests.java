@@ -16,14 +16,17 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import com.github.nosan.embedded.cassandra.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,117 +35,134 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class FileUtilsTests {
+@SuppressWarnings("ConstantConditions")
+class FileUtilsTests {
 
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+	@Nullable
+	private Path temporaryFolder;
+
+	@BeforeEach
+	void setUp(@TempDir Path temporaryFolder) {
+		this.temporaryFolder = temporaryFolder;
+	}
 
 	@Test
-	public void deleteFile() throws IOException {
-		File file = this.temporaryFolder.newFile();
+	void deleteFile() throws IOException {
+		Path file = newFile(UUID.randomUUID().toString());
+
 		assertThat(file).exists();
-		assertThat(FileUtils.delete(file.toPath())).isTrue();
+		assertThat(FileUtils.delete(file)).isTrue();
 		assertThat(file).doesNotExist();
 	}
 
 	@Test
-	public void deleteRecursivelyFolder() throws IOException {
-		File newFolder = this.temporaryFolder.newFolder();
-		File dir = new File(newFolder, "dir");
-		File file = new File(dir, "file.txt");
-
-		assertThat(dir.mkdir()).isTrue();
-		assertThat(file.createNewFile()).isTrue();
-
-		assertThat(FileUtils.delete(newFolder.toPath())).isTrue();
-		assertThat(dir).doesNotExist();
-		assertThat(file).doesNotExist();
-	}
-
-	@Test
-	public void copyFile() throws IOException {
-		File src = this.temporaryFolder.newFile();
-		File dest = new File(this.temporaryFolder.getRoot(), UUID.randomUUID().toString());
-		assertThat(src).exists();
-		assertThat(dest).doesNotExist();
-		FileUtils.copy(src.toPath(), dest.toPath());
-		assertThat(dest).exists();
-	}
-
-	@Test
-	public void copyDir() throws IOException {
-		File src = this.temporaryFolder.newFolder();
-		File folder = new File(src, UUID.randomUUID().toString());
-		File file = new File(folder, UUID.randomUUID().toString());
-
-		assertThat(folder.mkdir()).isTrue();
-		assertThat(file.createNewFile()).isTrue();
-
-		File dest = new File(this.temporaryFolder.getRoot(), UUID.randomUUID().toString());
-
-		assertThat(src).exists();
-		assertThat(dest).doesNotExist();
-
-		FileUtils.copy(src.toPath(), dest.toPath());
-
-		assertThat(dest).exists();
-		assertThat(dest.toPath().resolve(folder.getName())).exists();
-		assertThat(dest.toPath().resolve(folder.getName()).resolve(file.getName())).exists();
-	}
-
-	@Test
-	public void shouldNotCopyFile() throws IOException {
-		File src = this.temporaryFolder.newFile();
-		File dest = new File(this.temporaryFolder.getRoot(), UUID.randomUUID().toString());
-		assertThat(src).exists();
-		assertThat(dest).doesNotExist();
-		FileUtils.copy(src.toPath(), dest.toPath(), p -> false);
-		assertThat(dest).doesNotExist();
-	}
-
-	@Test
-	public void shouldNotCopyNestedFiles() throws IOException {
-		File src = this.temporaryFolder.newFolder();
-		File folder = new File(src, UUID.randomUUID().toString());
-		File file = new File(folder, UUID.randomUUID().toString());
-
-		assertThat(folder.mkdir()).isTrue();
-		assertThat(file.createNewFile()).isTrue();
-
-		File dest = new File(this.temporaryFolder.getRoot(), UUID.randomUUID().toString());
-
-		assertThat(src).exists();
-		assertThat(dest).doesNotExist();
-
-		FileUtils.copy(src.toPath(), dest.toPath(), p -> false);
-
-		assertThat(dest).doesNotExist();
-		assertThat(dest.toPath().resolve(folder.getName())).doesNotExist();
-		assertThat(dest.toPath().resolve(folder.getName()).resolve(file.getName())).doesNotExist();
-	}
-
-	@Test
-	public void shouldNotDelete() throws IOException {
+	void shouldNotDelete() throws IOException {
 		assertThat(FileUtils.delete(Paths.get(UUID.randomUUID().toString()))).isFalse();
 		assertThat(FileUtils.delete(null)).isFalse();
 	}
 
 	@Test
-	public void userDirectory() {
+	void deleteRecursivelyFolder() throws IOException {
+		Path root = newFolder(UUID.randomUUID().toString());
+		Path dir = newFolder(root, UUID.randomUUID().toString());
+		Path file = newFile(dir, UUID.randomUUID().toString());
+
+		assertThat(FileUtils.delete(root)).isTrue();
+		assertThat(dir).doesNotExist();
+		assertThat(file).doesNotExist();
+	}
+
+	@Test
+	void copyFile() throws IOException {
+		Path src = newFile(UUID.randomUUID().toString());
+		Path dest = this.temporaryFolder.resolve(UUID.randomUUID().toString());
+
+		assertThat(src).exists();
+		assertThat(dest).doesNotExist();
+		FileUtils.copy(src, dest);
+		assertThat(dest).exists();
+	}
+
+	@Test
+	void copyDir() throws IOException {
+		Path src = newFolder(UUID.randomUUID().toString());
+		Path folder = newFolder(src, UUID.randomUUID().toString());
+		Path file = newFile(folder, UUID.randomUUID().toString());
+
+		Path dest = this.temporaryFolder.resolve(UUID.randomUUID().toString());
+
+		assertThat(src).exists();
+		assertThat(dest).doesNotExist();
+
+		FileUtils.copy(src, dest);
+
+		assertThat(dest).exists();
+		assertThat(dest.resolve(folder.getFileName())).exists();
+		assertThat(dest.resolve(folder.getFileName()).resolve(file.getFileName())).exists();
+	}
+
+	@Test
+	void shouldNotCopyFile() throws IOException {
+		Path src = newFile(UUID.randomUUID().toString());
+
+		Path dest = this.temporaryFolder.resolve(UUID.randomUUID().toString());
+
+		assertThat(src).exists();
+		assertThat(dest).doesNotExist();
+		FileUtils.copy(src, dest, p -> false);
+		assertThat(dest).doesNotExist();
+	}
+
+	@Test
+	void shouldNotCopyNestedFiles() throws IOException {
+		Path src = newFolder(UUID.randomUUID().toString());
+		Path folder = newFolder(src, UUID.randomUUID().toString());
+		Path file = newFile(folder, UUID.randomUUID().toString());
+
+		Path dest = this.temporaryFolder.resolve(UUID.randomUUID().toString());
+
+		assertThat(src).exists();
+		assertThat(dest).doesNotExist();
+
+		FileUtils.copy(src, dest, p -> false);
+
+		assertThat(dest).doesNotExist();
+		assertThat(dest.resolve(folder.getFileName())).doesNotExist();
+		assertThat(dest.resolve(folder.getFileName()).resolve(file.getFileName())).doesNotExist();
+	}
+
+	@Test
+	void userDirectory() {
 		assertThat(FileUtils.getUserDirectory())
 				.isEqualTo(Paths.get(new SystemProperty("user.dir").getRequired()));
 	}
 
 	@Test
-	public void userHomeDirectory() {
+	void userHomeDirectory() {
 		assertThat(FileUtils.getUserHomeDirectory())
 				.isEqualTo(Paths.get(new SystemProperty("user.home").getRequired()));
 	}
 
 	@Test
-	public void tmpDirectory() {
+	void tmpDirectory() {
 		assertThat(FileUtils.getTmpDirectory())
 				.isEqualTo(Paths.get(new SystemProperty("java.io.tmpdir").getRequired()));
+	}
+
+	private Path newFolder(String name) throws IOException {
+		return newFolder(this.temporaryFolder, name);
+	}
+
+	private Path newFile(String name) throws IOException {
+		return newFile(this.temporaryFolder, name);
+	}
+
+	private Path newFolder(Path folder, String name) throws IOException {
+		return Files.createDirectories(folder.resolve(name));
+	}
+
+	private Path newFile(Path folder, String name) throws IOException {
+		return Files.createFile(folder.resolve(name));
 	}
 
 }

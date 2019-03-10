@@ -26,7 +26,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.compress.utils.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
@@ -38,10 +38,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class TransportUtilsTests {
+class TransportUtilsTests {
 
 	@Test
-	public void testPorts() throws Exception {
+	void testPorts() throws Exception {
 		Set<Integer> ports = new LinkedHashSet<>();
 		int attempts = 0;
 		while (ports.size() != 5) {

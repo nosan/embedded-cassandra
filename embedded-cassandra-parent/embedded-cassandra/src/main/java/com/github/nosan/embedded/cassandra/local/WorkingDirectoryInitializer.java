@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,8 +147,8 @@ class WorkingDirectoryInitializer implements Initializer {
 	}
 
 	private static long getCount(Path path) {
-		try {
-			return Files.list(path).count();
+		try (Stream<Path> list = Files.list(path)) {
+			return list.count();
 		}
 		catch (IOException ex) {
 			return 0;

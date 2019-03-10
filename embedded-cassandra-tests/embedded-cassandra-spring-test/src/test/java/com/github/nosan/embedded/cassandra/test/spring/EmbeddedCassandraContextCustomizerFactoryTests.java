@@ -18,7 +18,7 @@ package com.github.nosan.embedded.cassandra.test.spring;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,18 +27,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class EmbeddedCassandraContextCustomizerFactoryTests {
+class EmbeddedCassandraContextCustomizerFactoryTests {
 
 	private final EmbeddedCassandraContextCustomizerFactory factory = new EmbeddedCassandraContextCustomizerFactory();
 
 	@Test
-	public void shouldCreateContextCustomizer() {
+	void shouldCreateContextCustomizer() {
 		assertThat(this.factory.createContextCustomizer(Annotated.class, Collections.emptyList()))
 				.isNotNull();
 	}
 
 	@Test
-	public void shouldNotCreateContextCustomizer() {
+	void shouldNotCreateContextCustomizer() {
 		assertThat(this.factory.createContextCustomizer(NotAnnotated.class, Collections.emptyList()))
 				.isNull();
 	}

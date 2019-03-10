@@ -17,38 +17,39 @@
 package com.github.nosan.embedded.cassandra.cql;
 
 import java.io.UncheckedIOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link UrlCqlScript}.
  *
  * @author Dmytro Nosan
  */
-public class UrlCqlScriptTests {
+class UrlCqlScriptTests {
 
 	@Test
-	public void getStatements() {
+	void getStatements() {
 		UrlCqlScript urlCqlScript = new UrlCqlScript(getClass().getResource("/roles.cql"));
 		assertThat(urlCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
-	public void helpers() {
+	void helpers() {
 		assertThat(new UrlCqlScript(getClass().getResource("/roles.cql")))
 				.isEqualTo(new UrlCqlScript(getClass().getResource("/roles.cql")));
 		assertThat(new UrlCqlScript(getClass().getResource("/roles.cql")).toString())
 				.contains("roles.cql");
 	}
 
-	@Test(expected = UncheckedIOException.class)
-	public void invalidResource() throws MalformedURLException {
-		new UrlCqlScript(new URL("http://localhost:111/hz.cql")).getStatements();
+	@Test
+	void invalidResource() {
+		assertThatThrownBy(() -> new UrlCqlScript(new URL("http://localhost:111/hz.cql")).getStatements())
+				.isInstanceOf(UncheckedIOException.class);
 	}
 
 }

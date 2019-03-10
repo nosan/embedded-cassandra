@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * @author Dmytro Nosan
  */
-public class SystemPropertyTests {
+class SystemPropertyTests {
 
 	@Test
-	public void shouldGetSystemProperty() {
+	void shouldGetSystemProperty() {
 		Properties properties = System.getProperties();
 		assertThat(properties).isNotEmpty();
 		Object key = properties.keySet().iterator().next();
@@ -43,7 +43,7 @@ public class SystemPropertyTests {
 	}
 
 	@Test
-	public void shouldGetEnvironmentProperty() {
+	void shouldGetEnvironmentProperty() {
 		Map<String, String> environment = System.getenv();
 		assertThat(environment).isNotEmpty();
 		String key = environment.keySet().iterator().next();
@@ -53,7 +53,7 @@ public class SystemPropertyTests {
 	}
 
 	@Test
-	public void shouldThrowException() {
+	void shouldThrowException() {
 		String name = UUID.randomUUID().toString();
 		assertThatThrownBy(() -> new SystemProperty(name).getRequired()).isInstanceOf(NullPointerException.class)
 				.hasStackTraceContaining("Both System and Environment Properties " +
@@ -61,7 +61,7 @@ public class SystemPropertyTests {
 	}
 
 	@Test
-	public void shouldReturnNull() {
+	void shouldReturnNull() {
 		assertThat(new SystemProperty(UUID.randomUUID().toString()).get()).isNull();
 	}
 

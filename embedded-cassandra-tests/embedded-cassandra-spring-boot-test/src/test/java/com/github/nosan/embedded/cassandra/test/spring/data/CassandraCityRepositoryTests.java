@@ -16,12 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.test.spring.data;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.cassandra.core.CassandraTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
 
@@ -32,10 +30,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @EmbeddedCassandra(scripts = "/setup.cql")
-public class CassandraCityRepositoryTests {
+class CassandraCityRepositoryTests {
 
 	@Autowired
 	private CassandraTemplate cassandraTemplate;
@@ -44,9 +41,9 @@ public class CassandraCityRepositoryTests {
 	private CityRepository cityRepository;
 
 	@Test
-	public void testRepository() {
+	void testRepository() {
 		City city = new City();
-		city.setId(Long.MAX_VALUE);
+		city.setId(Long.MAX_VALUE - 1);
 		city.setName("Lviv");
 		city = this.cityRepository.save(city);
 		assertThat(city.getId()).isNotNull();

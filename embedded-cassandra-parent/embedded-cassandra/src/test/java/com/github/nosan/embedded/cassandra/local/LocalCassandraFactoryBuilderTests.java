@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
@@ -33,10 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class LocalCassandraFactoryBuilderTests {
+class LocalCassandraFactoryBuilderTests {
 
 	@Test
-	public void buildFactory() throws Exception {
+	void buildFactory() throws Exception {
 		String[] jvmOptions = {"1", "2"};
 		RemoteArtifactFactory artifactFactory = new RemoteArtifactFactory();
 		Path config = Paths.get("config");
@@ -87,7 +87,7 @@ public class LocalCassandraFactoryBuilderTests {
 	}
 
 	@Test
-	public void defaultBuild() {
+	void defaultBuild() {
 		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder()
 				.build();
 		assertThat(factory.getJvmOptions()).isEmpty();

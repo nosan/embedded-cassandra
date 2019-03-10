@@ -16,21 +16,18 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import java.util.Objects;
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
-import com.github.nosan.embedded.cassandra.test.junit.CassandraRule;
+import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,30 +36,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@RunWith(SpringRunner.class)
+@SuppressWarnings("NullableProblems")
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @Cql(cluster = "customCluster", scripts = "/init.cql")
 @Cql(cluster = "customCluster", statements = "DROP KEYSPACE test",
 		executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-public class CqlExecutionListenerCustomNameTests {
+class CqlExecutionListenerCustomNameTests {
 
-	@ClassRule
-	public static final CassandraRule cassandra = new CassandraRule();
+	@RegisterExtension
+	static final CassandraExtension cassandra = new CassandraExtension();
 
 	@Autowired
-	@Nullable
 	private Cluster customCluster;
 
 	@Test
 	@Cql(cluster = "customCluster", scripts = "/users-data.cql")
-	public void shouldHaveUser() {
-		ResultSet rs = Objects.requireNonNull(this.customCluster).connect().execute("SELECT COUNT(*) FROM test.users");
+	void shouldHaveUser() {
+		ResultSet rs = this.customCluster.connect().execute("SELECT COUNT(*) FROM test.users");
 		assertThat(rs.one().getLong(0)).isEqualTo(1);
 	}
 
 	@Test
-	public void shouldNotHaveUser() {
-		ResultSet rs = Objects.requireNonNull(this.customCluster).connect().execute("SELECT COUNT(*) FROM test.users");
+	void shouldNotHaveUser() {
+		ResultSet rs = this.customCluster.connect().execute("SELECT COUNT(*) FROM test.users");
 		assertThat(rs.one().getLong(0)).isZero();
 	}
 

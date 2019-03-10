@@ -29,13 +29,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CassandraExtensionTests {
+class CassandraExtensionTests {
 
 	@RegisterExtension
-	public static final CassandraExtension cassandra = new CassandraExtension(CqlScript.classpath("init.cql"));
+	static final CassandraExtension cassandra = new CassandraExtension(CqlScript.classpath("init.cql"));
 
 	@Test
-	public void selectRoles() {
+	void selectRoles() {
 		assertThat(cassandra.executeStatement("SELECT * FROM  test.roles").all())
 				.isEmpty();
 	}

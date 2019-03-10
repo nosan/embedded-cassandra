@@ -23,7 +23,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Version;
@@ -39,10 +39,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class LocalCassandraFactoryTests {
+class LocalCassandraFactoryTests {
 
 	@Test
-	public void createConfigureLocalCassandra() throws Exception {
+	void createConfigureLocalCassandra() throws Exception {
 
 		Version version = new Version(3, 11, 5);
 		Path workingDirectory = Paths.get(UUID.randomUUID().toString());
@@ -93,7 +93,7 @@ public class LocalCassandraFactoryTests {
 	}
 
 	@Test
-	public void createDefaultLocalCassandra() {
+	void createDefaultLocalCassandra() {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		Cassandra cassandra = factory.create();
 

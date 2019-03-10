@@ -20,19 +20,20 @@ import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link PathCqlScript}.
  *
  * @author Dmytro Nosan
  */
-public class PathCqlScriptTests {
+class PathCqlScriptTests {
 
 	@Test
-	public void getStatements() throws URISyntaxException {
+	void getStatements() throws URISyntaxException {
 		PathCqlScript pathCqlScript = new PathCqlScript(Paths.get(
 				getClass().getResource("/roles.cql").toURI()));
 		assertThat(pathCqlScript.getStatements())
@@ -40,7 +41,7 @@ public class PathCqlScriptTests {
 	}
 
 	@Test
-	public void helpers() throws Exception {
+	void helpers() throws Exception {
 		assertThat(new PathCqlScript(Paths.get(getClass().getResource("/roles.cql").toURI())))
 				.isEqualTo(new PathCqlScript(Paths.get(getClass().getResource("/roles.cql").toURI())));
 		assertThat(
@@ -48,9 +49,10 @@ public class PathCqlScriptTests {
 				.contains("roles.cql");
 	}
 
-	@Test(expected = UncheckedIOException.class)
-	public void invalidResource() {
-		new PathCqlScript(Paths.get("hz.cql")).getStatements();
+	@Test
+	void invalidResource() {
+		assertThatThrownBy(() -> new PathCqlScript(Paths.get("hz.cql")).getStatements())
+				.isInstanceOf(UncheckedIOException.class);
 	}
 
 }

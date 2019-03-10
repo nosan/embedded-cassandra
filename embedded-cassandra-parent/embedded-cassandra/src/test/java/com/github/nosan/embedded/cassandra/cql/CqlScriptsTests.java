@@ -18,7 +18,7 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,10 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CqlScriptsTests {
+class CqlScriptsTests {
 
 	@Test
-	public void getStatements() {
+	void getStatements() {
 		CqlScripts cqlScripts =
 				new CqlScripts(new ClassPathCqlScript("keyspace.cql", getClass()), new ClassPathCqlScript("roles.cql"));
 
@@ -42,7 +42,7 @@ public class CqlScriptsTests {
 	}
 
 	@Test
-	public void helpers() {
+	void helpers() {
 		assertThat(new CqlScripts(new ClassPathCqlScript("keyspace.cql", getClass()), new ClassPathCqlScript(
 				"roles.cql")))
 				.isEqualTo(new CqlScripts(Arrays.asList(new ClassPathCqlScript("keyspace.cql", getClass()),

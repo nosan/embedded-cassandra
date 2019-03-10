@@ -17,12 +17,12 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.compress.utils.IOUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Version;
 
@@ -33,17 +33,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class ConfigurationFileInitializerTests {
-
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+class ConfigurationFileInitializerTests {
 
 	@Test
-	public void customize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		ConfigurationFileInitializer customizer =
+	void customize(@TempDir Path temporaryFolder) throws Exception {
+		Path directory = temporaryFolder.resolve("conf");
+		Files.createDirectories(directory);
+		ConfigurationFileInitializer initializer =
 				new ConfigurationFileInitializer(getClass().getResource("/cassandra.yaml"));
-		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
 			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));

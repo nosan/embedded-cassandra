@@ -20,17 +20,15 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.Objects;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.DefaultUrlFactory;
@@ -43,7 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@RunWith(SpringRunner.class)
+@SuppressWarnings("NullableProblems")
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = ExcludeCassandraBeanDefinitionRegistryPostProcessor.class)
 @TestPropertySource("classpath:application.properties")
 @EmbeddedLocalCassandra(version = "${version}", configurationFile = "${configurationFile}",
@@ -64,16 +63,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000,
 				proxyType = Proxy.Type.SOCKS,
 				urlFactory = DefaultUrlFactory.class))
-public class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
+class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
 
 	@Autowired
-	@Nullable
 	private LocalCassandraFactory factory;
 
 	@Test
-	public void shouldRegisterLocalFactoryBean() {
+	void shouldRegisterLocalFactoryBean() {
 		LocalCassandraFactory factory = this.factory;
-		ArtifactFactory artifactFactory = Objects.requireNonNull(factory).getArtifactFactory();
+		ArtifactFactory artifactFactory = factory.getArtifactFactory();
 		assertThat(artifactFactory).isInstanceOf(RemoteArtifactFactory.class);
 		RemoteArtifactFactory af = (RemoteArtifactFactory) artifactFactory;
 		assertThat(af).isNotNull();

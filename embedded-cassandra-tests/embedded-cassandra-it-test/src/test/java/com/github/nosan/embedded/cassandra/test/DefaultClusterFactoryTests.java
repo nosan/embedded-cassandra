@@ -22,7 +22,7 @@ import com.datastax.driver.core.MetricsOptions;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.lang.Nullable;
@@ -36,12 +36,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * @author Dmytro Nosan
  */
-public class DefaultClusterFactoryTests {
+class DefaultClusterFactoryTests {
 
 	private final DefaultClusterFactory factory = new DefaultClusterFactory();
 
 	@Test
-	public void defaultSettings() {
+	void defaultSettings() {
 		Cluster cluster = this.factory.create(new TestSettings(9042, null, null));
 
 		Configuration configuration = cluster.getConfiguration();
@@ -50,7 +50,7 @@ public class DefaultClusterFactoryTests {
 		assertThat(protocolOptions.getPort()).isEqualTo(9042);
 		assertThat(ReflectionUtils.getField(protocolOptions.getAuthProvider(), "username")).isEqualTo("cassandra");
 		assertThat(ReflectionUtils.getField(protocolOptions.getAuthProvider(), "password")).isEqualTo("cassandra");
-		assertThat(cluster.getClusterName()).isEqualTo("cluster1");
+		assertThat(cluster.getClusterName()).isNotNull();
 
 		SocketOptions socketOptions = configuration.getSocketOptions();
 		assertThat(socketOptions.getConnectTimeoutMillis()).isEqualTo(30000);
@@ -63,7 +63,7 @@ public class DefaultClusterFactoryTests {
 	}
 
 	@Test
-	public void customSettings() {
+	void customSettings() {
 		Cluster cluster = this.factory.create(new TestSettings(9000, "google.com", "my name"));
 
 		Configuration configuration = cluster.getConfiguration();

@@ -21,24 +21,25 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.regex.PatternSyntaxException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link ClassPathGlobCqlScript}.
  *
  * @author Dmytro Nosan
  */
-public class ClassPathGlobCqlScriptExtendTests {
+class ClassPathGlobCqlScriptExtendTests {
 
 	private static final String KEYSPACE =
 			"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}";
 
 	@Test
-	public void jar() {
+	void jar() {
 		URL url = getClass().getResource("/test.jar");
 		String pattern = "nosan/**/*.cql";
 		Collection<String> statements = getStatements(url, pattern);
@@ -46,7 +47,7 @@ public class ClassPathGlobCqlScriptExtendTests {
 	}
 
 	@Test
-	public void war() {
+	void war() {
 		URL url = getClass().getResource("/test.war");
 		String pattern = "nosan/**/*.cql";
 		Collection<String> statements = getStatements(url, pattern);
@@ -54,18 +55,19 @@ public class ClassPathGlobCqlScriptExtendTests {
 	}
 
 	@Test
-	public void zip() {
+	void zip() {
 		URL url = getClass().getResource("/test.zip");
 		String pattern = "nosan/**/*.cql";
 		Collection<String> statements = getStatements(url, pattern);
 		assertThat(statements).containsExactly(KEYSPACE);
 	}
 
-	@Test(expected = PatternSyntaxException.class)
-	public void invalidSyntax() {
+	@Test
+	void invalidSyntax() {
 		URL url = getClass().getResource("/test.zip");
 		String pattern = "{";
-		getStatements(url, pattern);
+		assertThatThrownBy(() -> getStatements(url, pattern))
+				.isInstanceOf(PatternSyntaxException.class);
 	}
 
 	private static Collection<String> getStatements(URL url, String pattern) {

@@ -19,7 +19,7 @@ package com.github.nosan.embedded.cassandra.local.artifact;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.Version;
 
@@ -30,12 +30,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class DefaultUrlFactoryTests {
+class DefaultUrlFactoryTests {
 
 	private final DefaultUrlFactory urlFactory = new DefaultUrlFactory();
 
 	@Test
-	public void shouldCreateURL() throws MalformedURLException {
+	void shouldCreateURL() throws MalformedURLException {
 		assertThat(this.urlFactory.create(new Version(3, 11, 3)))
 				.isEqualTo(new URL[]{
 						new URL("https://apache.org/dyn/closer.cgi?action=download&filename=cassandra/3.11.3/" +

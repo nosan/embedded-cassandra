@@ -34,10 +34,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CassandraExtensionBuilderTests {
+class CassandraExtensionBuilderTests {
 
 	@Test
-	public void shouldBuildCassandraExtension() {
+	void shouldBuildCassandraExtension() {
 		ClusterFactory clusterFactory = (settings) -> {
 			throw new UnsupportedOperationException();
 		};

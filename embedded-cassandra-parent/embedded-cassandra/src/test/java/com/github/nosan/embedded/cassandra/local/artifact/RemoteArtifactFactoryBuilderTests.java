@@ -21,7 +21,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.time.Duration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 
@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class RemoteArtifactFactoryBuilderTests {
+class RemoteArtifactFactoryBuilderTests {
 
 	@Test
-	public void buildFactory() {
+	void buildFactory() {
 
 		Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("locahost", 8080));
 		UrlFactory urlFactory = version -> new URL[0];
@@ -56,7 +56,7 @@ public class RemoteArtifactFactoryBuilderTests {
 	}
 
 	@Test
-	public void defaultBuildFactory() {
+	void defaultBuildFactory() {
 		RemoteArtifactFactory factory = new RemoteArtifactFactoryBuilder()
 				.build();
 

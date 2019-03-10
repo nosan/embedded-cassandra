@@ -1,6 +1,6 @@
 language: java
-sudo: true
 dist: trusty
+sudo: true
 
 matrix:
   include:
