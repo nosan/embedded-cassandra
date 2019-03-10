@@ -33,7 +33,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -90,23 +89,8 @@ public abstract class ArchiveUtils {
 	 * @param archiveFile the archive file to extract
 	 * @param destination the directory to which to extract the files
 	 * @throws IOException in the case of I/O errors
-	 * @since 1.4.1
 	 */
 	public static void extract(Path archiveFile, Path destination) throws IOException {
-		extract(archiveFile, destination, entry -> true);
-	}
-
-	/**
-	 * Extracts the source archive file into the given destination directory. The destination is expected to be a
-	 * writable directory.
-	 *
-	 * @param archiveFile the archive file to extract
-	 * @param destination the directory to which to extract the files
-	 * @param entryFileFilter the filter to check whether {@code entry file} should be extracted or not
-	 * @throws IOException in the case of I/O errors
-	 */
-	public static void extract(Path archiveFile, Path destination,
-			@Nullable Predicate<? super ArchiveEntry> entryFileFilter) throws IOException {
 		Objects.requireNonNull(archiveFile, "Archive must not be null");
 		Objects.requireNonNull(destination, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
@@ -115,19 +99,21 @@ public abstract class ArchiveUtils {
 			Files.createDirectories(destination);
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
-				if (entry.isDirectory()) {
-					Path directory = destination.resolve(entry.getName());
-					Files.createDirectories(directory);
-					FileModeUtils.set(entry, directory);
+				Path dest = destination.resolve(entry.getName());
+				if (Files.exists(dest)) {
+					continue;
 				}
-				else if (entryFileFilter == null || entryFileFilter.test(entry)) {
+				if (entry.isDirectory()) {
+					Files.createDirectories(dest);
+					FileModeUtils.set(entry, dest);
+				}
+				else {
 					Path tempFile = Files.createTempFile(null, null);
 					try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel()) {
 						fileChannel.transferFrom(channel, 0, Long.MAX_VALUE);
 					}
 					FileModeUtils.set(entry, tempFile);
-					Path file = destination.resolve(entry.getName());
-					Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+					Files.move(tempFile, dest, StandardCopyOption.REPLACE_EXISTING);
 				}
 			}
 		}

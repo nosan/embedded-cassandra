@@ -46,7 +46,7 @@ public class EmptyArtifactTests {
 		Path archive = this.artifact.get();
 		File temp = this.temporaryFolder.newFolder("temp");
 
-		ArchiveUtils.extract(archive, temp.toPath(), p -> true);
+		ArchiveUtils.extract(archive, temp.toPath());
 
 		assertThat(temp).isDirectory();
 		assertThat(temp.listFiles()).isEmpty();

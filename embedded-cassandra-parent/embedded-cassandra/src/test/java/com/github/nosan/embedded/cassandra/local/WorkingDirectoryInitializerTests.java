@@ -66,7 +66,7 @@ public class WorkingDirectoryInitializerTests {
 		Path plain = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 		Path root = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 
-		ArchiveUtils.extract(plain, Objects.requireNonNull(this.artifactDirectory), ignore -> true);
+		ArchiveUtils.extract(plain, Objects.requireNonNull(this.artifactDirectory));
 
 		WorkingDirectoryInitializer
 				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, root),
@@ -88,8 +88,8 @@ public class WorkingDirectoryInitializerTests {
 		customizer.initialize(Objects.requireNonNull(workingDirectory), this.version);
 
 		assertThat(workingDirectory).exists();
-		assertThat(count(workingDirectory.resolve("doc"))).isZero();
-		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
+		assertThat(workingDirectory.resolve("doc")).doesNotExist();
+		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
 		assertThat(count(workingDirectory.resolve("bin"))).isGreaterThan(0);
@@ -108,8 +108,8 @@ public class WorkingDirectoryInitializerTests {
 		customizer.initialize(Objects.requireNonNull(workingDirectory), this.version);
 
 		assertThat(workingDirectory).exists();
-		assertThat(count(workingDirectory.resolve("doc"))).isZero();
-		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
+		assertThat(workingDirectory.resolve("doc")).doesNotExist();
+		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
 		assertThat(count(workingDirectory.resolve("bin"))).isGreaterThan(0);
@@ -154,8 +154,8 @@ public class WorkingDirectoryInitializerTests {
 		customizer.initialize(Objects.requireNonNull(workingDirectory), version);
 
 		assertThat(workingDirectory).exists();
-		assertThat(count(workingDirectory.resolve("doc"))).isZero();
-		assertThat(count(workingDirectory.resolve("javadoc"))).isZero();
+		assertThat(workingDirectory.resolve("doc")).doesNotExist();
+		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
 

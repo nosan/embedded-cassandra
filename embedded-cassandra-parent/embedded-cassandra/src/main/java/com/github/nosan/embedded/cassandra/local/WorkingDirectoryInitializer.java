@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +71,7 @@ class WorkingDirectoryInitializer implements Initializer {
 		Path archive = artifact.get();
 		log.info("Extract ({}) into ({}).", archive, artifactDirectory);
 		try {
-			ArchiveUtils.extract(archive, artifactDirectory, entry -> shouldExtract(artifactDirectory, entry));
+			ArchiveUtils.extract(archive, artifactDirectory);
 		}
 		catch (IOException ex) {
 			throw new IOException(String.format("Artifact (%s) could not be extracted into (%s)",
@@ -85,7 +84,7 @@ class WorkingDirectoryInitializer implements Initializer {
 		Path directory = getDirectory(artifactDirectory);
 		log.info("Copy ({}) folder into ({}).", directory, workingDirectory);
 		try {
-			FileUtils.copy(directory, workingDirectory, file -> shouldCopy(directory, workingDirectory, file));
+			FileUtils.copy(directory, workingDirectory, path -> shouldCopy(directory, workingDirectory, path));
 		}
 		catch (IOException ex) {
 			throw new IOException(String.format("Could not copy folder (%s) into (%s)", directory, workingDirectory),
@@ -94,36 +93,18 @@ class WorkingDirectoryInitializer implements Initializer {
 		log.info("({}) Folder has been copied into ({})", directory, workingDirectory);
 	}
 
-	private static boolean shouldCopy(Path srcDir, Path destDir, Path srcFile) {
-		Path destFile = destDir.resolve(srcDir.relativize(srcFile));
-		if (!Files.exists(destFile)) {
-			return true;
+	private static boolean shouldCopy(Path src, Path dest, Path srcPath) {
+		Path relativize = src.relativize(srcPath);
+		Path destPath = dest.resolve(relativize);
+		if (Files.exists(destPath)) {
+			return false;
+		}
+		if (Files.isDirectory(srcPath)) {
+			String name = relativize.getName(0).toString().toLowerCase(Locale.ENGLISH);
+			return !name.equals("javadoc") && !name.equals("doc");
 		}
 		try {
-			return Files.size(destFile) < Files.size(srcFile);
-		}
-		catch (IOException ex) {
-			return true;
-		}
-	}
-
-	private static boolean shouldExtract(Path destination, ArchiveEntry entryFile) {
-		String entryName = entryFile.getName();
-		Path destFile = destination.resolve(entryName);
-		if (!Files.exists(destFile)) {
-			int endIndex = entryName.lastIndexOf('/');
-			if (endIndex != -1) {
-				for (String directory : entryName.substring(0, endIndex).split("/")) {
-					String name = directory.toLowerCase(Locale.ENGLISH);
-					if (name.equals("javadoc") || name.equals("doc")) {
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-		try {
-			return Files.size(destFile) < entryFile.getSize();
+			return Files.size(destPath) < Files.size(srcPath);
 		}
 		catch (IOException ex) {
 			return true;
