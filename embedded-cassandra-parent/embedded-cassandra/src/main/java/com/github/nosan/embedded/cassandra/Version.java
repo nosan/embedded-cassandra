@@ -94,6 +94,33 @@ public final class Version implements Comparable<Version> {
 	}
 
 	/**
+	 * Parses a {@code version}.
+	 *
+	 * @param version a text version (expected format ({@link #VERSION_PATTERN}))
+	 * @return a parsed {@link Version}
+	 */
+	public static Version parse(String version) {
+		Objects.requireNonNull(version, "Version must not be null");
+		Matcher matcher = VERSION_PATTERN.matcher(version.trim());
+		if (matcher.find()) {
+			int major = Integer.parseInt(matcher.group(1));
+			int minor = -1;
+			int patch = -1;
+			String minorGroup = matcher.group(3);
+			if (StringUtils.hasText(minorGroup)) {
+				minor = Integer.parseInt(minorGroup);
+			}
+			String patchGroup = matcher.group(5);
+			if (StringUtils.hasText(patchGroup)) {
+				patch = Integer.parseInt(patchGroup);
+			}
+			return new Version(major, minor, patch, matcher.group());
+		}
+		throw new IllegalArgumentException(
+				String.format("Version (%s) is invalid. Expected format is %s", version, VERSION_PATTERN));
+	}
+
+	/**
 	 * Returns a major value.
 	 *
 	 * @return The value of the {@code major} attribute
@@ -158,33 +185,6 @@ public final class Version implements Comparable<Version> {
 			return minCmp;
 		}
 		return majorCmp;
-	}
-
-	/**
-	 * Parses a {@code version}.
-	 *
-	 * @param version a text version (expected format ({@link #VERSION_PATTERN}))
-	 * @return a parsed {@link Version}
-	 */
-	public static Version parse(String version) {
-		Objects.requireNonNull(version, "Version must not be null");
-		Matcher matcher = VERSION_PATTERN.matcher(version.trim());
-		if (matcher.find()) {
-			int major = Integer.parseInt(matcher.group(1));
-			int minor = -1;
-			int patch = -1;
-			String minorGroup = matcher.group(3);
-			if (StringUtils.hasText(minorGroup)) {
-				minor = Integer.parseInt(minorGroup);
-			}
-			String patchGroup = matcher.group(5);
-			if (StringUtils.hasText(patchGroup)) {
-				patch = Integer.parseInt(patchGroup);
-			}
-			return new Version(major, minor, patch, matcher.group());
-		}
-		throw new IllegalArgumentException(
-				String.format("Version (%s) is invalid. Expected format is %s", version, VERSION_PATTERN));
 	}
 
 	private static int nonNegative(int value) {

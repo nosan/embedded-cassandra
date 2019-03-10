@@ -45,6 +45,16 @@ public class TestCassandraTests {
 
 	private static final String KEYSPACE_NAME = "test";
 
+	@BeforeClass
+	public static void startCassandra() {
+		cassandra.start();
+	}
+
+	@AfterClass
+	public static void stopCassandra() {
+		cassandra.stop();
+	}
+
 	@After
 	public void deleteKeyspace() {
 		cassandra.dropKeyspaces(KEYSPACE_NAME);
@@ -85,16 +95,6 @@ public class TestCassandraTests {
 		Row row1 = cassandra.executeStatement(QueryBuilder.select("first_name").from("test", "users").limit(1))
 				.one();
 		assertString(row1, "first_name", "$'Frodo;'");
-	}
-
-	@BeforeClass
-	public static void startCassandra() {
-		cassandra.start();
-	}
-
-	@AfterClass
-	public static void stopCassandra() {
-		cassandra.stop();
 	}
 
 	private static KeyspaceMetadata getKeyspace(String name) {

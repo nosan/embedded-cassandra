@@ -50,15 +50,6 @@ public class ClassPathGlobCqlScriptTests {
 		this.statements = assertData.statements;
 	}
 
-	@Test
-	public void test() {
-		ClassPathGlobCqlScript script = new ClassPathGlobCqlScript(this.pattern);
-		assertThat(script.toString()).isEqualTo(this.name);
-		assertThat(script).isNotEqualTo(new ClassPathGlobCqlScript("sometext"));
-		assertThat(script).isEqualTo(script);
-		assertThat(script.getStatements()).containsExactly(this.statements);
-	}
-
 	@Parameterized.Parameters(name = "{index} {0}")
 	public static Iterable<AssertData> patterns() {
 		List<AssertData> parameters = new ArrayList<>();
@@ -81,6 +72,15 @@ public class ClassPathGlobCqlScriptTests {
 		parameters.add(new AssertData("*.cql", new String[]{ROLE}));
 		parameters.add(new AssertData("rol?s.cql", new String[]{ROLE}));
 		return parameters;
+	}
+
+	@Test
+	public void test() {
+		ClassPathGlobCqlScript script = new ClassPathGlobCqlScript(this.pattern);
+		assertThat(script.toString()).isEqualTo(this.name);
+		assertThat(script).isNotEqualTo(new ClassPathGlobCqlScript("sometext"));
+		assertThat(script).isEqualTo(script);
+		assertThat(script.getStatements()).containsExactly(this.statements);
 	}
 
 	private static final class AssertData {

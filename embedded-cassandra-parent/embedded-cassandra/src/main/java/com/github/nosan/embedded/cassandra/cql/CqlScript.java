@@ -46,13 +46,6 @@ import com.github.nosan.embedded.cassandra.lang.Nullable;
 public interface CqlScript {
 
 	/**
-	 * Return CQL Statements.
-	 *
-	 * @return CQL statements.
-	 */
-	Collection<String> getStatements();
-
-	/**
 	 * Factory method to create {@link CqlScripts} based on classpath {@code 'glob'} patterns.
 	 *
 	 * @param patterns classpath glob patterns
@@ -130,5 +123,12 @@ public interface CqlScript {
 	static CqlScript statements(@Nullable String... statements) {
 		return new StaticCqlScript(statements);
 	}
+
+	/**
+	 * Return CQL Statements.
+	 *
+	 * @return CQL statements.
+	 */
+	Collection<String> getStatements();
 
 }
