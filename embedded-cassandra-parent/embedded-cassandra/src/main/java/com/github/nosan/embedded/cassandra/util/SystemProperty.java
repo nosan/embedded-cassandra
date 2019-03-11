@@ -39,7 +39,7 @@ public final class SystemProperty implements Supplier<String> {
 	/**
 	 * Creates a {@link SystemProperty}.
 	 *
-	 * @param name key to lookup.
+	 * @param name name to lookup.
 	 */
 	public SystemProperty(String name) {
 		this.name = Objects.requireNonNull(name, "Name must not be null");
@@ -67,25 +67,25 @@ public final class SystemProperty implements Supplier<String> {
 	 */
 	public String getRequired() {
 		return Objects.requireNonNull(get(), () -> String.format("Both System and Environment Properties" +
-				" are not present for a key (%s)", this.name));
+				" are not present for a name (%s)", this.name));
 	}
 
 	@Nullable
-	private static String getSystemProperty(String key) {
+	private static String getSystemProperty(String name) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
-			return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(key));
+			return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(name));
 		}
-		return System.getProperty(key);
+		return System.getProperty(name);
 	}
 
 	@Nullable
-	private static String getEnvironmentProperty(String key) {
+	private static String getEnvironmentProperty(String name) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null) {
-			return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getenv(key));
+			return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getenv(name));
 		}
-		return System.getenv(key);
+		return System.getenv(name);
 	}
 
 }
