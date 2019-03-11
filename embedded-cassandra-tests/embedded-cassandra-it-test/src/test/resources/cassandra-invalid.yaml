@@ -1,0 +1,17 @@
+cluster_name: "Test Cluster"
+num_tokens: 256
+commitlog_sync: periodic
+commitlog_sync_period_in_ms: 5000
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "127.0.0.1"
+listen_address: localhost
+rpc_address: localhost
+start_native_transport: true
+endpoint_snitch: SimpleSnitch
+partitioner: org.apache.cassandra.dht.Murmur3Partitioner
+authenticator: PasswordAuthenticator
+role_manager: CassandraRoleManager
+authorizer: CassandraAuthorizer
+invalid_property:

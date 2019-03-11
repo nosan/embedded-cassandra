@@ -63,7 +63,6 @@ import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Abstract test-class for {@link LocalCassandra}.
@@ -94,10 +93,17 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
+	void shouldCatchCassandraError() {
+		this.factory.setConfigurationFile(getClass().getResource("/cassandra-invalid.yaml"));
+		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class)
+				.hasMessageNotContaining("invalid_property");
+	}
+
+	@Test
 	void shouldFailCassandraUseSamePorts() {
 		CassandraRunner runner = new CassandraRunner(this.factory);
-		runner.run(cassandra -> assertThatThrownBy(() ->
-				runner.run(new NotReachable())).isInstanceOf(CassandraException.class)
+		runner.run(cassandra -> assertThatThrownBy(new CassandraRunner(this.factory)::run)
+				.isInstanceOf(CassandraException.class)
 				.hasCauseInstanceOf(IOException.class));
 		assertCassandraHasBeenStopped();
 	}
@@ -137,17 +143,14 @@ abstract class AbstractLocalCassandraTests {
 	@Test
 	void notEnoughTime() {
 		this.factory.setStartupTimeout(Duration.ofSeconds(2L));
-
-		assertThatThrownBy(() -> new CassandraRunner(this.factory).run(new NotReachable()))
-				.isInstanceOf(CassandraException.class)
-				.hasStackTraceContaining(
-						"has not been started, seems like (2000) milliseconds is not enough");
+		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class)
+				.hasStackTraceContaining("has not been started, seems like (2000) milliseconds is not enough");
 	}
 
 	@Test
 	void shouldOverrideJavaHome() {
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
-		assertThatThrownBy(() -> new CassandraRunner(this.factory).run(new NotReachable()))
+		assertThatThrownBy(new CassandraRunner(this.factory)::run)
 				.isInstanceOf(CassandraException.class);
 	}
 
@@ -379,15 +382,6 @@ abstract class AbstractLocalCassandraTests {
 			assertThat(PortUtils.isPortBusy(address, port))
 					.describedAs("Port '%s' is not busy", port)
 					.isTrue();
-		}
-
-	}
-
-	private static final class NotReachable implements Consumer<Cassandra> {
-
-		@Override
-		public void accept(Cassandra cassandra) {
-			fail("This consumer must not be called.");
 		}
 
 	}

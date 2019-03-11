@@ -125,15 +125,17 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
 		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
 		NodeReadiness nodeReadiness = new NodeReadiness();
+		BufferedOutput bufferedOutput = new BufferedOutput(5);
 		Process process = start(workingDirectory, version, environment, threadFactory,
 				new FilteredOutput(nodeReadiness, outputFilter),
+				new FilteredOutput(bufferedOutput, outputFilter),
 				new FilteredOutput(new RpcAddressParser(settings), outputFilter),
 				new FilteredOutput(new ListenAddressParser(settings), outputFilter),
 				new FilteredOutput(log::info, outputFilter));
 		this.process = process;
 		boolean result;
 		try {
-			result = waitForStarted(process, timeout, settings, nodeReadiness);
+			result = waitForStarted(process, timeout, settings, nodeReadiness, bufferedOutput);
 		}
 		catch (InterruptedException | IOException ex) {
 			throw ex;
@@ -277,12 +279,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	private boolean waitForStarted(Process process, Duration timeout, RuntimeNodeSettings settings,
-			NodeReadiness nodeReadiness) throws Exception {
+			NodeReadiness nodeReadiness, BufferedOutput bufferedOutput) throws Exception {
 		long start = System.currentTimeMillis();
 		return WaitUtils.await(timeout, () -> {
 			if (!process.isAlive()) {
 				throw new IOException(String.format("Cassandra Node '%s' is not alive. " +
-						"Please see logs for more details.", getId()));
+						"Please see logs for more details.%n%s", getId(), bufferedOutput));
 			}
 			long elapsed = System.currentTimeMillis() - start;
 			if (elapsed > 20000) {
