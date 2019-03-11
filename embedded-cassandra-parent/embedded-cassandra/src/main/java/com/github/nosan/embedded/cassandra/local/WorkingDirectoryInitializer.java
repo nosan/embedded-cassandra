@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
@@ -43,8 +42,6 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
  * @since 1.3.0
  */
 class WorkingDirectoryInitializer implements Initializer {
-
-	private static final String CASSANDRA_FILE = String.format(".%s", Cassandra.class.getName());
 
 	private static final String ARTIFACT_FILE = String.format(".%s", Artifact.class.getName());
 
@@ -71,9 +68,7 @@ class WorkingDirectoryInitializer implements Initializer {
 		if (!hasExtracted(artifactDirectory)) {
 			extract(this.artifactFactory.create(version), artifactDirectory);
 		}
-		if (!hasCopied(workingDirectory)) {
-			copy(getSingleCandidate(artifactDirectory), workingDirectory);
-		}
+		copy(getSingleCandidate(artifactDirectory), workingDirectory);
 	}
 
 	private static void extract(Artifact artifact, Path dest) throws IOException {
@@ -86,7 +81,7 @@ class WorkingDirectoryInitializer implements Initializer {
 		catch (IOException ex) {
 			throw new IOException(String.format("Artifact (%s) could not be extracted into the (%s)", src, dest), ex);
 		}
-		createHiddenFile(getSingleCandidate(dest), ARTIFACT_FILE);
+		createHiddenFile(getSingleCandidate(dest).resolve(ARTIFACT_FILE));
 		log.info("({}) archive has been extracted into the ({})", src, dest);
 	}
 
@@ -98,12 +93,10 @@ class WorkingDirectoryInitializer implements Initializer {
 		catch (IOException ex) {
 			throw new IOException(String.format("Could not copy folder (%s) into the (%s)", src, dest), ex);
 		}
-		createHiddenFile(getSingleCandidate(dest), CASSANDRA_FILE);
 		log.info("({}) folder has been copied into the ({})", src, dest);
 	}
 
-	private static void createHiddenFile(Path directory, String name) throws IOException {
-		Path file = directory.resolve(name);
+	private static void createHiddenFile(Path file) throws IOException {
 		try {
 			Files.createFile(file);
 			if (isWindows()) {
@@ -125,15 +118,6 @@ class WorkingDirectoryInitializer implements Initializer {
 	private static boolean hasExtracted(Path directory) {
 		try {
 			return Files.exists(getSingleCandidate(directory).resolve(ARTIFACT_FILE));
-		}
-		catch (Exception ex) {
-			return false;
-		}
-	}
-
-	private static boolean hasCopied(Path directory) {
-		try {
-			return Files.exists(getSingleCandidate(directory).resolve(CASSANDRA_FILE));
 		}
 		catch (Exception ex) {
 			return false;
