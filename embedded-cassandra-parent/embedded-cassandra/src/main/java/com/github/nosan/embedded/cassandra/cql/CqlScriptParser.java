@@ -122,7 +122,7 @@ public abstract class CqlScriptParser {
 				// block comment
 				else if (script.startsWith(BLOCK_START_COMMENT, index)) {
 					if (script.indexOf(BLOCK_END_COMMENT, index) < 0) {
-						throw new IllegalArgumentException(String.format("Missing block comment (%s)",
+						throw new IllegalArgumentException(String.format("Missing block comment '%s'",
 								BLOCK_END_COMMENT));
 					}
 					index = script.indexOf(BLOCK_END_COMMENT, index) + 1;

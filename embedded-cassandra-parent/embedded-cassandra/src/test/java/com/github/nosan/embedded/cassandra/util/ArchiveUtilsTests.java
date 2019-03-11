@@ -38,6 +38,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Tests for {@link ArchiveUtils}.
@@ -62,19 +63,19 @@ class ArchiveUtilsTests {
 
 	static Stream<Arguments> archives() {
 		List<Arguments> parameters = new ArrayList<>();
-		parameters.add(Arguments.arguments("tar.gz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
-		parameters.add(Arguments.arguments("tgz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
-		parameters.add(Arguments.arguments("tar.bz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
-		parameters.add(Arguments.arguments("tar.xz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
-		parameters.add(Arguments.arguments("txz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
-		parameters.add(Arguments.arguments("tbz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
-		parameters.add(Arguments.arguments("a", ArchiveStreamFactory.AR, null));
-		parameters.add(Arguments.arguments("ar", ArchiveStreamFactory.AR, null));
-		parameters.add(Arguments.arguments("cpio", ArchiveStreamFactory.CPIO, null));
-		parameters.add(Arguments.arguments("jar", ArchiveStreamFactory.JAR, null));
-		parameters.add(Arguments.arguments("tar", ArchiveStreamFactory.TAR, null));
-		parameters.add(Arguments.arguments("zip", ArchiveStreamFactory.ZIP, null));
-		parameters.add(Arguments.arguments("zipx", ArchiveStreamFactory.ZIP, null));
+		parameters.add(arguments("tar.gz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
+		parameters.add(arguments("tgz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
+		parameters.add(arguments("tar.bz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
+		parameters.add(arguments("tar.xz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
+		parameters.add(arguments("txz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
+		parameters.add(arguments("tbz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
+		parameters.add(arguments("a", ArchiveStreamFactory.AR, null));
+		parameters.add(arguments("ar", ArchiveStreamFactory.AR, null));
+		parameters.add(arguments("cpio", ArchiveStreamFactory.CPIO, null));
+		parameters.add(arguments("jar", ArchiveStreamFactory.JAR, null));
+		parameters.add(arguments("tar", ArchiveStreamFactory.TAR, null));
+		parameters.add(arguments("zip", ArchiveStreamFactory.ZIP, null));
+		parameters.add(arguments("zipx", ArchiveStreamFactory.ZIP, null));
 		return parameters.stream();
 	}
 

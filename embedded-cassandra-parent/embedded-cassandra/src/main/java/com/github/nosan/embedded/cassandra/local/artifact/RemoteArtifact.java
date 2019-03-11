@@ -178,7 +178,7 @@ class RemoteArtifact implements Artifact {
 				return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
 			}
 			catch (IOException ex) {
-				log.error(String.format("Could not rename (%s) as (%s).", tempFile, file), ex);
+				log.error(String.format("Could not rename '%s' as '%s'.", tempFile, file), ex);
 				return tempFile;
 			}
 		}
@@ -250,12 +250,12 @@ class RemoteArtifact implements Artifact {
 
 			try (FileChannel fileChannel = new FileOutputStream(file.toFile()).getChannel();
 					ReadableByteChannel channel = Channels.newChannel(urlConnection.getInputStream())) {
-				log.info("Downloading Apache Cassandra ({}) from ({}).", this.version, urlConnection.getURL());
+				log.info("Downloading Apache Cassandra '{}' from '{}'.", this.version, urlConnection.getURL());
 				long start = System.currentTimeMillis();
 				showProgress(file, size, executorService);
 				fileChannel.transferFrom(channel, 0, Long.MAX_VALUE);
 				long elapsed = System.currentTimeMillis() - start;
-				log.info("Apache Cassandra ({}) has been downloaded ({} ms)", this.version, elapsed);
+				log.info("Apache Cassandra '{}' has been downloaded ({} ms)", this.version, elapsed);
 			}
 			finally {
 				executorService.shutdown();
@@ -292,11 +292,11 @@ class RemoteArtifact implements Artifact {
 						}
 					}
 					else {
-						throw new IOException(String.format("Too many redirects for URL (%s)", url));
+						throw new IOException(String.format("Too many redirects for URL '%s'", url));
 					}
 				}
 				else if (status >= 400) {
-					throw new IOException(String.format("HTTP (%d %s) status for URL (%s) is invalid", status,
+					throw new IOException(String.format("HTTP (%d %s) status for URL '%s' is invalid", status,
 							httpConnection.getResponseMessage(), url));
 				}
 				return httpConnection;
@@ -312,7 +312,7 @@ class RemoteArtifact implements Artifact {
 			}
 			if (!StringUtils.hasText(name)) {
 				throw new IllegalArgumentException(
-						String.format("There is no way to determine a file name from (%s)", url));
+						String.format("There is no way to determine a file name from '%s'", url));
 			}
 			return name;
 		}
@@ -331,13 +331,13 @@ class RemoteArtifact implements Artifact {
 							long percent = Math.max(current * 100, 1) / size;
 							if (percent - prevPercent[0] >= minPercentStep) {
 								prevPercent[0] = percent;
-								log.info("Downloaded {} / {}  {}% ", current, size, percent);
+								log.info("Downloaded {} / {}  {}%", current, size, percent);
 							}
 						}
 					}
 					catch (Throwable ex) {
 						if (logOnlyOnce.compareAndSet(false, true)) {
-							log.error(String.format("Could not show progress for a file (%s)", file), ex);
+							log.error(String.format("Could not show progress for a file '%s'", file), ex);
 						}
 					}
 				}, 0, 1, TimeUnit.SECONDS);

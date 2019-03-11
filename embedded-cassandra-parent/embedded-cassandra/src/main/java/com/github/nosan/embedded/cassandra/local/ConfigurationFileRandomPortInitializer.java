@@ -89,7 +89,7 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 		}
 		catch (IOException ex) {
 			if (this.log.isDebugEnabled()) {
-				this.log.error(String.format("Could not read properties from (%s)", source), ex);
+				this.log.error(String.format("Could not read properties from '%s'", source), ex);
 			}
 			return Collections.emptyMap();
 		}

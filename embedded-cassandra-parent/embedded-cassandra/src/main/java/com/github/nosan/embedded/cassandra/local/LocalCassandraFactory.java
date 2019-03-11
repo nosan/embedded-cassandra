@@ -410,8 +410,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
 		}
 		if (artifactDirectory.equals(workingDirectory)) {
-			throw new IllegalArgumentException(String.format("Artifact Directory (%s) must not be the same" +
-					" as Working Directory (%s)", artifactDirectory, workingDirectory));
+			throw new IllegalArgumentException(String.format("Artifact Directory '%s' must not be the same" +
+					" as Working Directory '%s'", artifactDirectory, workingDirectory));
 		}
 		return new LocalCassandra(version, artifactFactory, workingDirectory,
 				artifactDirectory, startupTimeout, getConfigurationFile(), getLogbackFile(), getRackFile(),

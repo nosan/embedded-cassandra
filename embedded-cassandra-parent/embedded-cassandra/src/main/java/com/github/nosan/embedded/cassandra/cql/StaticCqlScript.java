@@ -83,7 +83,7 @@ public final class StaticCqlScript implements CqlScript {
 
 	@Override
 	public String toString() {
-		return String.format("Static CQL Statements (%s)", this.statements.size());
+		return String.format("Static CQL Statements '%s'", this.statements.size());
 	}
 
 }

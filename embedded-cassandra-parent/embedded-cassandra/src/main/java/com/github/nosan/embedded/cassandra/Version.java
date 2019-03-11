@@ -117,7 +117,7 @@ public final class Version implements Comparable<Version> {
 			return new Version(major, minor, patch, matcher.group());
 		}
 		throw new IllegalArgumentException(
-				String.format("Version (%s) is invalid. Expected format is %s", version, VERSION_PATTERN));
+				String.format("Version '%s' is invalid. Expected format is %s", version, VERSION_PATTERN));
 	}
 
 	/**
@@ -189,7 +189,7 @@ public final class Version implements Comparable<Version> {
 
 	private static int nonNegative(int value) {
 		if (value < 0) {
-			throw new IllegalArgumentException(String.format("Value (%s) must be positive or zero", value));
+			throw new IllegalArgumentException(String.format("Value '%s' must be positive or zero", value));
 		}
 		return value;
 	}

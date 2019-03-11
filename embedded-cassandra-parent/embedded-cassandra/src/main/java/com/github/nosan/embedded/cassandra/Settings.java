@@ -236,7 +236,7 @@ public interface Settings {
 							.stream()
 							.findFirst()
 							.orElseThrow(() -> new IllegalStateException(
-									String.format("There is no address for interface (%s)", rpcInterface))));
+									String.format("There is no address for interface '%s'", rpcInterface))));
 		}
 		return getRealListenAddress();
 	}
@@ -259,7 +259,7 @@ public interface Settings {
 							.stream()
 							.findFirst()
 							.orElseThrow(() -> new IllegalStateException(
-									String.format("There is no address for interface (%s)", listenInterface))));
+									String.format("There is no address for interface '%s'", listenInterface))));
 		}
 		return NetworkUtils.getLocalhost();
 	}

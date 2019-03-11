@@ -105,7 +105,7 @@ public abstract class ArchiveUtils {
 			}
 		}
 		catch (ArchiveException | CompressorException ex) {
-			throw new IOException(String.format("Could not create a stream for archive (%s)", archiveFile), ex);
+			throw new IOException(String.format("Could not create a stream for archive '%s'", archiveFile), ex);
 		}
 	}
 
@@ -115,7 +115,7 @@ public abstract class ArchiveUtils {
 				return candidate.getValue();
 			}
 		}
-		throw new IllegalArgumentException(String.format("Archive (%s) is not supported", source));
+		throw new IllegalArgumentException(String.format("Archive '%s' is not supported", source));
 	}
 
 	/**
@@ -208,7 +208,7 @@ public abstract class ArchiveUtils {
 					}
 					catch (Throwable ex) {
 						if (log.isDebugEnabled()) {
-							log.error(String.format("Could not set permission(s) (%s) to (%s)", permissions, file), ex);
+							log.error(String.format("Could not set permission(s) '%s' to '%s'", permissions, file), ex);
 						}
 					}
 				}

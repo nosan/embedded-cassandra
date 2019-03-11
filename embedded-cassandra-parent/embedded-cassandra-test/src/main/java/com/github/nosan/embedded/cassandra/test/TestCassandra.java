@@ -389,13 +389,13 @@ public class TestCassandra implements Cassandra {
 
 	@Override
 	public String toString() {
-		return String.format("Test Cassandra (%s)", getCassandra());
+		return String.format("Test Cassandra '%s'", getCassandra());
 	}
 
 	private void start0() throws InterruptedException {
 		Cassandra cassandra = getCassandra();
 		if (log.isDebugEnabled()) {
-			log.debug("Starts Test Cassandra ({})", cassandra);
+			log.debug("Starts Test Cassandra '{}'", cassandra);
 		}
 		cassandra.start();
 		if (cassandra.getState() == State.START_INTERRUPTED || Thread.interrupted()) {
@@ -405,7 +405,7 @@ public class TestCassandra implements Cassandra {
 			executeScripts(this.scripts.toArray(new CqlScript[0]));
 		}
 		if (log.isDebugEnabled()) {
-			log.debug("Test Cassandra ({}) has been started", cassandra);
+			log.debug("Test Cassandra '{}' has been started", cassandra);
 		}
 	}
 
@@ -414,13 +414,13 @@ public class TestCassandra implements Cassandra {
 			Session session = this.session;
 			if (session != null) {
 				if (log.isDebugEnabled()) {
-					log.debug("Closes a session ({})", session);
+					log.debug("Closes a session '{}'", session);
 				}
 				session.close();
 			}
 		}
 		catch (Throwable ex) {
-			log.error(String.format("Session (%s) has not been closed", this.session), ex);
+			log.error(String.format("Session '%s' has not been closed", this.session), ex);
 		}
 		this.session = null;
 
@@ -428,13 +428,13 @@ public class TestCassandra implements Cassandra {
 			Cluster cluster = this.cluster;
 			if (cluster != null) {
 				if (log.isDebugEnabled()) {
-					log.debug("Closes a cluster ({})", cluster);
+					log.debug("Closes a cluster '{}'", cluster);
 				}
 				cluster.close();
 			}
 		}
 		catch (Throwable ex) {
-			log.error(String.format("Cluster (%s) has not been closed", this.cluster), ex);
+			log.error(String.format("Cluster '%s' has not been closed", this.cluster), ex);
 		}
 		this.cluster = null;
 
@@ -445,7 +445,7 @@ public class TestCassandra implements Cassandra {
 				throw new InterruptedException();
 			}
 			if (log.isDebugEnabled()) {
-				log.debug("Test Cassandra ({}) has been stopped", cassandra);
+				log.debug("Test Cassandra '{}' has been stopped", cassandra);
 			}
 			this.cassandra = null;
 		}

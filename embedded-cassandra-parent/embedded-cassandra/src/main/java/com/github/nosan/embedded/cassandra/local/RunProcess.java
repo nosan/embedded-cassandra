@@ -102,7 +102,7 @@ class RunProcess {
 				message.append(String.format(" with environment variables %s", environment));
 			}
 			if (workingDirectory != null) {
-				message.append(String.format(" and using a directory (%s)", workingDirectory));
+				message.append(String.format(" and using a directory '%s'", workingDirectory));
 			}
 			log.debug(message.toString());
 		}
@@ -134,7 +134,7 @@ class RunProcess {
 						}
 						catch (Throwable ex) {
 							if (log.isDebugEnabled()) {
-								log.error(String.format("Output (%s) did not handle a line (%s)", output, line), ex);
+								log.error(String.format("Output '%s' did not handle a line '%s'", output, line), ex);
 							}
 						}
 					}
@@ -142,7 +142,7 @@ class RunProcess {
 			}
 		}
 		catch (IOException ex) {
-			log.error(String.format("Could not create a stream for (%s)", process), ex);
+			log.error(String.format("Could not create a stream for '%s'", process), ex);
 		}
 	}
 

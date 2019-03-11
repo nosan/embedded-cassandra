@@ -122,7 +122,7 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 			stream = ClassLoader.getSystemResourceAsStream(location);
 		}
 		if (stream == null) {
-			throw new FileNotFoundException(String.format("(%s) doesn't exist", location));
+			throw new FileNotFoundException(String.format("'%s' doesn't exist", location));
 		}
 		return stream;
 	}

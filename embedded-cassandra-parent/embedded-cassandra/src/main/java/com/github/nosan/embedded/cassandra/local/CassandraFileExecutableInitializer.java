@@ -48,7 +48,7 @@ class CassandraFileExecutableInitializer extends AbstractFileInitializer {
 			}
 			catch (Exception ex) {
 				if (this.log.isDebugEnabled()) {
-					this.log.error(String.format("Could not set 'executable' permission(s) to (%s)", file), ex);
+					this.log.error(String.format("Could not set 'executable' permission(s) to '%s'", file), ex);
 				}
 			}
 		}

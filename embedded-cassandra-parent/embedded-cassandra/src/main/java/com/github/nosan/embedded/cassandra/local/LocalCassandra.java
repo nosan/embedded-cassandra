@@ -225,7 +225,7 @@ class LocalCassandra implements Cassandra {
 	private void initialize() throws IOException, InterruptedException {
 		try {
 			Version version = this.version;
-			log.info("Initialize Apache Cassandra ({}). It takes a while...", version);
+			log.info("Initialize Apache Cassandra '{}'. It takes a while...", version);
 			long start = System.currentTimeMillis();
 			List<Initializer> initializers = new ArrayList<>();
 			initializers.add(new WorkingDirectoryInitializer(this.artifactFactory, this.artifactDirectory));
@@ -242,7 +242,7 @@ class LocalCassandra implements Cassandra {
 				initializer.initialize(this.workingDirectory, version);
 			}
 			long elapsed = System.currentTimeMillis() - start;
-			log.info("Apache Cassandra ({}) has been initialized ({} ms)", version, elapsed);
+			log.info("Apache Cassandra '{}' has been initialized ({} ms)", version, elapsed);
 		}
 		catch (IOException ex) {
 			if (isClosedByInterruptException(ex)) {
@@ -260,7 +260,7 @@ class LocalCassandra implements Cassandra {
 		Path javaHome = this.javaHome;
 		int jmxPort = this.jmxPort;
 		boolean allowRoot = this.allowRoot;
-		log.info("Starts Apache Cassandra ({}) ", version);
+		log.info("Starts Apache Cassandra '{}'", version);
 		long start = System.currentTimeMillis();
 		CassandraNode node;
 		if (isWindows()) {
@@ -272,7 +272,7 @@ class LocalCassandra implements Cassandra {
 		this.node = node;
 		node.start();
 		long elapsed = System.currentTimeMillis() - start;
-		log.info("Apache Cassandra ({}) has been started ({} ms)", version, elapsed);
+		log.info("Apache Cassandra '{}' has been started ({} ms)", version, elapsed);
 	}
 
 	private void stop0() throws IOException, InterruptedException {
@@ -280,11 +280,11 @@ class LocalCassandra implements Cassandra {
 		CassandraNode node = this.node;
 		if (node != null) {
 			long start = System.currentTimeMillis();
-			log.info("Stops Apache Cassandra ({}) ", version);
+			log.info("Stops Apache Cassandra '{}'", version);
 			node.stop();
 			this.node = null;
 			long elapsed = System.currentTimeMillis() - start;
-			log.info("Apache Cassandra ({}) has been stopped ({} ms)", version, elapsed);
+			log.info("Apache Cassandra '{}' has been stopped ({} ms)", version, elapsed);
 		}
 	}
 

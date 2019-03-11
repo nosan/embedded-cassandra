@@ -58,7 +58,7 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 			return new String(IOUtils.toByteArray(is), getEncoding());
 		}
 		catch (IOException ex) {
-			throw new UncheckedIOException(String.format("Could not open a stream for CQL Script (%s)", toString()),
+			throw new UncheckedIOException(String.format("Could not open a stream for CQL Script '%s'", toString()),
 					ex);
 		}
 	}

@@ -27,19 +27,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class StaticCqlScriptTests {
 
+	private static final String STATEMENT = "CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )";
+
 	@Test
 	void getStatements() {
-		assertThat(
-				new StaticCqlScript("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )").getStatements())
-				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )");
+		assertThat(new StaticCqlScript(STATEMENT).getStatements()).containsExactly(STATEMENT);
 	}
 
 	@Test
 	void helpers() {
-		assertThat(new StaticCqlScript("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )"))
-				.isEqualTo(new StaticCqlScript("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )"));
-		assertThat(new StaticCqlScript("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )").toString())
-				.contains("Static CQL Statements (1)");
+		assertThat(new StaticCqlScript(STATEMENT)).isEqualTo(new StaticCqlScript(STATEMENT));
+		assertThat(new StaticCqlScript(STATEMENT).toString()).contains("Static CQL Statements '1'");
 	}
 
 }

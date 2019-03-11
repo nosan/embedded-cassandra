@@ -92,7 +92,7 @@ public abstract class NetworkUtils {
 		try {
 			NetworkInterface networkInterface = NetworkInterface.getByName(interfaceName);
 			if (networkInterface == null) {
-				throw new SocketException(String.format("(%s) interface is not valid", interfaceName));
+				throw new SocketException(String.format("'%s' interface is not valid", interfaceName));
 			}
 			Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
 			return Collections.unmodifiableList(Collections.list(addresses));

@@ -82,7 +82,7 @@
         <module name="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStarImportCheck"/>
         <module name="com.puppycrawl.tools.checkstyle.checks.imports.AvoidStaticImportCheck">
             <property name="excludes"
-                      value="org.assertj.core.api.Assertions.*, org.junit.Assert.*, org.junit.Assume.*, org.junit.internal.matchers.ThrowableMessageMatcher.*, org.hamcrest.CoreMatchers.*, org.hamcrest.Matchers.*, org.mockito.Mockito.*, org.mockito.BDDMockito.*, org.mockito.Matchers.*, org.mockito.ArgumentMatchers.*"/>
+                      value="org.assertj.core.api.Assertions.*, org.junit.jupiter.params.provider.Arguments.*"/>
         </module>
         <module name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck"/>
         <module name="com.puppycrawl.tools.checkstyle.checks.imports.RedundantImportCheck"/>

@@ -75,28 +75,28 @@ class WorkingDirectoryInitializer implements Initializer {
 	private static void extract(Artifact artifact, Path artifactDirectory) throws IOException {
 		Objects.requireNonNull(artifact, "Artifact must not be null");
 		Path archiveFile = artifact.get();
-		log.debug("Extract ({}) into the ({}).", archiveFile, artifactDirectory);
+		log.debug("Extract '{}' into the '{}'.", archiveFile, artifactDirectory);
 		try {
 			ArchiveUtils.extract(archiveFile, artifactDirectory);
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Artifact (%s) could not be extracted into the (%s)",
+			throw new IOException(String.format("Artifact '%s' could not be extracted into the '%s'",
 					archiveFile, artifactDirectory), ex);
 		}
 		createHiddenFile(getSingleCandidate(artifactDirectory).resolve(ARTIFACT_FILE));
-		log.debug("({}) archive has been extracted into the ({})", archiveFile, artifactDirectory);
+		log.debug("'{}' archive has been extracted into the '{}'", archiveFile, artifactDirectory);
 	}
 
 	private static void copy(Path artifactDirectory, Path workingDirectory) throws IOException {
-		log.debug("Copy ({}) folder into the ({}).", artifactDirectory, workingDirectory);
+		log.debug("Copy '{}' folder into the '{}'.", artifactDirectory, workingDirectory);
 		try {
 			FileUtils.copy(artifactDirectory, workingDirectory, path -> shouldCopy(artifactDirectory, path));
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Could not copy folder (%s) into the (%s)",
+			throw new IOException(String.format("Could not copy folder '%s' into the '%s'",
 					artifactDirectory, workingDirectory), ex);
 		}
-		log.debug("({}) folder has been copied into the ({})", artifactDirectory, workingDirectory);
+		log.debug("'{}' folder has been copied into the '{}'", artifactDirectory, workingDirectory);
 	}
 
 	private static void createHiddenFile(Path file) throws IOException {
@@ -140,13 +140,13 @@ class WorkingDirectoryInitializer implements Initializer {
 
 			if (directories.isEmpty()) {
 				throw new IllegalStateException(
-						String.format("(%s) does not have the Apache Cassandra files.", directory));
+						String.format("'%s' does not have the Apache Cassandra files.", directory));
 			}
 
 			if (directories.size() > 1) {
 				throw new IllegalStateException(
 						String.format("Impossible to determine the Apache Cassandra directory." +
-								" There are (%s) candidates : (%s)", directories.size(), directories));
+								" There are '%s' candidates : '%s'", directories.size(), directories));
 			}
 
 			return directories.iterator().next();

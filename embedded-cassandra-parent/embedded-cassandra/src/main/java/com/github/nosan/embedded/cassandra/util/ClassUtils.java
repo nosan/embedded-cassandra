@@ -54,7 +54,7 @@ public abstract class ClassUtils {
 		}
 		catch (Throwable ex) {
 			if (log.isDebugEnabled()) {
-				log.error(String.format("Could not get (%s) context loader", Thread.currentThread()), ex);
+				log.error(String.format("Could not get '%s' context loader", Thread.currentThread()), ex);
 			}
 		}
 		if (cl == null) {
@@ -63,7 +63,7 @@ public abstract class ClassUtils {
 			}
 			catch (Throwable ex) {
 				if (log.isDebugEnabled()) {
-					log.error(String.format("Could not get (%s) class loader", ClassUtils.class), ex);
+					log.error(String.format("Could not get '%s' class loader", ClassUtils.class), ex);
 				}
 			}
 		}

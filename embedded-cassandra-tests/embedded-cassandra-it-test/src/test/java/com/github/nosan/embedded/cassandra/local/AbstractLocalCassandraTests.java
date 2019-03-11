@@ -348,7 +348,7 @@ abstract class AbstractLocalCassandraTests {
 			try (Cluster cluster = cluster(cassandra)) {
 				Session session = cluster.connect();
 				assertThat(session.execute(this.statement).wasApplied())
-						.describedAs("Statement (%s) is not applied", this.statement).isTrue();
+						.describedAs("Statement '%s' is not applied", this.statement).isTrue();
 			}
 		}
 
@@ -377,7 +377,7 @@ abstract class AbstractLocalCassandraTests {
 			InetAddress address = this.addressMapper.apply(settings);
 			Integer port = this.portMapper.apply(settings);
 			assertThat(PortUtils.isPortBusy(address, port))
-					.describedAs("Port (%s) is not busy", port)
+					.describedAs("Port '%s' is not busy", port)
 					.isTrue();
 		}
 

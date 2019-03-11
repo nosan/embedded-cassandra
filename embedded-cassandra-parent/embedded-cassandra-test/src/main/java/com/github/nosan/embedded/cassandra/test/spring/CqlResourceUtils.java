@@ -106,7 +106,7 @@ abstract class CqlResourceUtils {
 			return resource.getURL();
 		}
 		catch (IOException ex) {
-			throw new UncheckedIOException(String.format("Could not get URL for (%s)", resource), ex);
+			throw new UncheckedIOException(String.format("Could not get URL for '%s'", resource), ex);
 		}
 	}
 

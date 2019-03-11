@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Tests for {@link ClassPathGlobCqlScript}.
@@ -49,24 +50,24 @@ class ClassPathGlobCqlScriptTests {
 
 	static Stream<Arguments> patterns() {
 		List<Arguments> parameters = new ArrayList<>();
-		parameters.add(Arguments.arguments("/.cql", new String[0]));
-		parameters.add(Arguments.arguments("/*.cql", new String[]{ROLE}));
-		parameters.add(Arguments.arguments("**/**.cql", new String[]{KEYSPACE}));
-		parameters.add(Arguments.arguments("**/*.cql", new String[]{KEYSPACE}));
-		parameters.add(Arguments.arguments("**.cql", new String[]{KEYSPACE, ROLE}));
-		parameters.add(Arguments.arguments("**{roles,keyspace}.cql", new String[]{KEYSPACE, ROLE}));
-		parameters.add(Arguments.arguments("{roles,keyspace}.cql", new String[]{ROLE}));
-		parameters.add(Arguments.arguments("**/{roles,keyspace}.cql", new String[]{KEYSPACE}));
-		parameters.add(Arguments.arguments("**{keyspace}.cql", new String[]{KEYSPACE}));
-		parameters.add(Arguments.arguments("*/*.cql", new String[0]));
-		parameters.add(Arguments.arguments("**/key*.cql", new String[]{KEYSPACE}));
-		parameters.add(Arguments.arguments("**\\key*.cql", new String[]{KEYSPACE}));
-		parameters.add(Arguments.arguments("com/*/*/embe*ed/**/keyspa?e.cql", new String[]{KEYSPACE}));
-		parameters.add(Arguments.arguments("roles.cql", new String[]{ROLE}));
-		parameters.add(Arguments.arguments("/roles.cql", new String[]{ROLE}));
-		parameters.add(Arguments.arguments("\\roles.cql", new String[]{ROLE}));
-		parameters.add(Arguments.arguments("*.cql", new String[]{ROLE}));
-		parameters.add(Arguments.arguments("rol?s.cql", new String[]{ROLE}));
+		parameters.add(arguments("/.cql", new String[0]));
+		parameters.add(arguments("/*.cql", new String[]{ROLE}));
+		parameters.add(arguments("**/**.cql", new String[]{KEYSPACE}));
+		parameters.add(arguments("**/*.cql", new String[]{KEYSPACE}));
+		parameters.add(arguments("**.cql", new String[]{KEYSPACE, ROLE}));
+		parameters.add(arguments("**{roles,keyspace}.cql", new String[]{KEYSPACE, ROLE}));
+		parameters.add(arguments("{roles,keyspace}.cql", new String[]{ROLE}));
+		parameters.add(arguments("**/{roles,keyspace}.cql", new String[]{KEYSPACE}));
+		parameters.add(arguments("**{keyspace}.cql", new String[]{KEYSPACE}));
+		parameters.add(arguments("*/*.cql", new String[0]));
+		parameters.add(arguments("**/key*.cql", new String[]{KEYSPACE}));
+		parameters.add(arguments("**\\key*.cql", new String[]{KEYSPACE}));
+		parameters.add(arguments("com/*/*/embe*ed/**/keyspa?e.cql", new String[]{KEYSPACE}));
+		parameters.add(arguments("roles.cql", new String[]{ROLE}));
+		parameters.add(arguments("/roles.cql", new String[]{ROLE}));
+		parameters.add(arguments("\\roles.cql", new String[]{ROLE}));
+		parameters.add(arguments("*.cql", new String[]{ROLE}));
+		parameters.add(arguments("rol?s.cql", new String[]{ROLE}));
 		return parameters.stream();
 	}
 

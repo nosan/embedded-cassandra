@@ -67,7 +67,7 @@ public final class SystemProperty implements Supplier<String> {
 	 */
 	public String getRequired() {
 		return Objects.requireNonNull(get(), () -> String.format("Both System and Environment Properties" +
-				" are not present for a name (%s)", this.name));
+				" are not present for a name '%s'", this.name));
 	}
 
 	@Nullable

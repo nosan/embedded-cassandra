@@ -142,10 +142,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			throw new IOException(ex);
 		}
 		if (!result) {
-			throw new IOException(String.format("Cassandra Node (%s) has not been started," +
+			throw new IOException(String.format("Cassandra Node '%s' has not been started," +
 					" seems like (%d) milliseconds is not enough.", getId(), timeout.toMillis()));
 		}
-		log.info("Cassandra Node ({}) has been started", getId());
+		log.info("Cassandra Node '{}' has been started", getId());
 	}
 
 	@Override
@@ -166,7 +166,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				throw ex;
 			}
 			catch (Throwable ex) {
-				log.error(String.format("Could not stop Cassandra Node (%s).", getId()), ex);
+				log.error(String.format("Could not stop Cassandra Node '%s'.", getId()), ex);
 			}
 			if (!result) {
 				try {
@@ -177,7 +177,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					throw ex;
 				}
 				catch (Throwable ex) {
-					log.error(String.format("Could not <force> stop Cassandra Node (%s).", getId()), ex);
+					log.error(String.format("Could not <force> stop Cassandra Node '%s'.", getId()), ex);
 				}
 			}
 			if (!result) {
@@ -188,15 +188,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					throw ex;
 				}
 				catch (Throwable ex) {
-					log.error(String.format("Could not destroy Cassandra Node (%s).", getId()), ex);
+					log.error(String.format("Could not destroy Cassandra Node '%s'.", getId()), ex);
 				}
 			}
 			if (!result) {
-				throw new IOException(String.format("Casandra Node (%s) has not been stopped.", getId()));
+				throw new IOException(String.format("Casandra Node '%s' has not been stopped.", getId()));
 			}
 			this.settings = null;
 			this.process = null;
-			log.info("Cassandra Node ({}) has been stopped", getId());
+			log.info("Cassandra Node '{}' has been stopped", getId());
 		}
 	}
 
@@ -281,7 +281,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		long start = System.currentTimeMillis();
 		return WaitUtils.await(timeout, () -> {
 			if (!process.isAlive()) {
-				throw new IOException(String.format("Cassandra Node (%s) is not alive. " +
+				throw new IOException(String.format("Cassandra Node '%s' is not alive. " +
 						"Please see logs for more details.", getId()));
 			}
 			long elapsed = System.currentTimeMillis() - start;
@@ -332,7 +332,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					}
 					catch (Throwable ex) {
 						if (log.isDebugEnabled()) {
-							log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
+							log.error(String.format("Could not parse an InetAddress '%s'", address), ex);
 						}
 					}
 				}
@@ -376,7 +376,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					}
 					catch (Throwable ex) {
 						if (log.isDebugEnabled()) {
-							log.error(String.format("Could not parse an InetAddress (%s)", address), ex);
+							log.error(String.format("Could not parse an InetAddress '%s'", address), ex);
 						}
 					}
 				}

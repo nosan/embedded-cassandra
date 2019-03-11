@@ -48,7 +48,7 @@ public abstract class CqlScriptUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(cqlScripts, "CQL Scripts must not be null");
 		if (log.isDebugEnabled()) {
-			log.debug("Executing CQL Scripts: ({})", Arrays.toString(cqlScripts));
+			log.debug("Executing CQL Scripts: '{}'", Arrays.toString(cqlScripts));
 		}
 		for (CqlScript cqlScript : cqlScripts) {
 			for (String statement : cqlScript.getStatements()) {
