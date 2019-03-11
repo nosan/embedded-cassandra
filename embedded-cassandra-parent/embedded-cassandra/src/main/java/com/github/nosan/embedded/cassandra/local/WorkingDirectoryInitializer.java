@@ -126,24 +126,29 @@ class WorkingDirectoryInitializer implements Initializer {
 	}
 
 	private static Path getSingleCandidate(Path directory) throws IOException {
-		Set<Path> directories = Files.find(directory, 1, (path, attributes) -> {
+		try (Stream<Path> stream = Files.find(directory, 1, (path, attributes) -> {
 			Path bin = path.resolve("bin");
 			Path lib = path.resolve("lib");
 			Path conf = path.resolve("conf");
 			Path configuration = conf.resolve("cassandra.yaml");
 			return getCount(bin) > 0 && getCount(lib) > 0 && getCount(conf) > 0 && Files.exists(configuration);
-		}).collect(Collectors.toSet());
+		})) {
 
-		if (directories.isEmpty()) {
-			throw new IllegalStateException(String.format("(%s) does not have the Apache Cassandra files.", directory));
+			Set<Path> directories = stream.collect(Collectors.toSet());
+
+			if (directories.isEmpty()) {
+				throw new IllegalStateException(
+						String.format("(%s) does not have the Apache Cassandra files.", directory));
+			}
+
+			if (directories.size() > 1) {
+				throw new IllegalStateException(
+						String.format("Impossible to determine the Apache Cassandra directory." +
+								" There are (%s) candidates : (%s)", directories.size(), directories));
+			}
+
+			return directories.iterator().next();
 		}
-
-		if (directories.size() > 1) {
-			throw new IllegalStateException(String.format("Impossible to determine the Apache Cassandra directory." +
-					" There are (%s) candidates : (%s)", directories.size(), directories));
-		}
-
-		return directories.iterator().next();
 	}
 
 	private static long getCount(Path path) {
