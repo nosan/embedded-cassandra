@@ -21,7 +21,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.time.Duration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
@@ -34,10 +34,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class RemoteArtifactFactoryTests {
+class RemoteArtifactFactoryTests {
 
 	@Test
-	public void createConfigureRemoteArtifact() {
+	void createConfigureRemoteArtifact() {
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
 		Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("locahost", 8080));
 		UrlFactory urlFactory = version -> new URL[0];
@@ -57,7 +57,7 @@ public class RemoteArtifactFactoryTests {
 	}
 
 	@Test
-	public void createDefaultRemoteArtifact() {
+	void createDefaultRemoteArtifact() {
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
 		RemoteArtifact artifact = (RemoteArtifact) factory.create(new Version(3, 11, 3));
 		assertThat(ReflectionUtils.getField(artifact, "version")).isEqualTo(new Version(3, 11, 3));

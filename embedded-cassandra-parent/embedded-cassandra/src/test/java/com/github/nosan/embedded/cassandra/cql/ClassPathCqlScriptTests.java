@@ -19,33 +19,34 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link ClassPathCqlScript}.
  *
  * @author Dmytro Nosan
  */
-public class ClassPathCqlScriptTests {
+class ClassPathCqlScriptTests {
 
 	@Test
-	public void getStatementsWithClassloader() {
+	void getStatementsWithClassloader() {
 		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("roles.cql");
 		assertThat(classPathCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
-	public void getStatementsWithClassLoaderAndLeadingSlash() {
+	void getStatementsWithClassLoaderAndLeadingSlash() {
 		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("/roles.cql");
 		assertThat(classPathCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
-	public void getStatementsWithClass() {
+	void getStatementsWithClass() {
 		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("keyspace.cql", getClass());
 		assertThat(classPathCqlScript.getStatements()).containsExactly(
 				"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', " +
@@ -53,14 +54,14 @@ public class ClassPathCqlScriptTests {
 	}
 
 	@Test
-	public void getStatementsWithLeadingClass() {
+	void getStatementsWithLeadingClass() {
 		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("/roles.cql", getClass());
 		assertThat(classPathCqlScript.getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
-	public void helpers() {
+	void helpers() {
 		assertThat(new ClassPathCqlScript("\\roles.cql", getClass()))
 				.isEqualTo(new ClassPathCqlScript("/roles.cql"));
 
@@ -78,9 +79,10 @@ public class ClassPathCqlScriptTests {
 				.isEqualTo("roles.cql");
 	}
 
-	@Test(expected = UncheckedIOException.class)
-	public void invalidResource() {
-		new ClassPathCqlScript("/hz.cql").getStatements();
+	@Test
+	void invalidResource() {
+		assertThatThrownBy(() -> new ClassPathCqlScript("/hz.cql").getStatements())
+				.isInstanceOf(UncheckedIOException.class);
 	}
 
 }

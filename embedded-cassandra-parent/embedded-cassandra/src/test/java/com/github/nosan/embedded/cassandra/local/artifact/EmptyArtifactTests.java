@@ -16,13 +16,12 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
@@ -34,23 +33,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class EmptyArtifactTests {
-
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+class EmptyArtifactTests {
 
 	private final EmptyArtifact artifact = new EmptyArtifact(new Version(3, 11, 3));
 
 	@Test
-	public void shouldReturnAnEmptyArchive() throws IOException {
+	void shouldReturnAnEmptyArchive(@TempDir Path temporaryFolder) throws IOException {
 		Path archive = this.artifact.get();
-		File temp = this.temporaryFolder.newFolder("temp");
-
-		ArchiveUtils.extract(archive, temp.toPath());
-
+		Path temp = temporaryFolder.resolve("temp");
+		Files.createDirectories(temp);
+		ArchiveUtils.extract(archive, temp);
 		assertThat(temp).isDirectory();
-		assertThat(temp.listFiles()).isEmpty();
-
 	}
 
 }

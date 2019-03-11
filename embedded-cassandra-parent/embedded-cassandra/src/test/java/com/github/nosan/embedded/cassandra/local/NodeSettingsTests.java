@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -32,20 +32,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class NodeSettingsTests {
+class NodeSettingsTests {
 
 	@Test
-	public void shouldParseCassandraYamlUtf8() throws Exception {
+	void shouldParseCassandraYamlUtf8() throws Exception {
 		assertSettings(load("/cassandra.yaml"));
 	}
 
 	@Test
-	public void shouldParseCassandraYamlUtf16() throws Exception {
+	void shouldParseCassandraYamlUtf16() throws Exception {
 		assertSettings(load("/cassandra-utf16.yaml"));
 	}
 
 	@Test
-	public void defaultSettingsV3() {
+	void defaultSettingsV3() {
 		NodeSettings settings = new NodeSettings(new Version(3, 11, 3), null);
 		assertThat(settings.getClusterName()).isNull();
 		assertThat(settings.getPort()).isEqualTo(9042);
@@ -69,7 +69,7 @@ public class NodeSettingsTests {
 	}
 
 	@Test
-	public void defaultSettingsV4() {
+	void defaultSettingsV4() {
 		NodeSettings settings = new NodeSettings(new Version(4, 0, 0), null);
 		assertThat(settings.getClusterName()).isNull();
 		assertThat(settings.getPort()).isEqualTo(9042);

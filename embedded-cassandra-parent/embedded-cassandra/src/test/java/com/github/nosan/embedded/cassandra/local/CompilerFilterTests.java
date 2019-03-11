@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,10 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CompilerFilterTests {
+class CompilerFilterTests {
 
 	@Test
-	public void filterCompiler() {
+	void filterCompiler() {
 		CompilerFilter filter = new CompilerFilter();
 		assertThat(filter.test("CompilerOracle: dontinline ")).isFalse();
 		assertThat(filter.test("text ")).isTrue();

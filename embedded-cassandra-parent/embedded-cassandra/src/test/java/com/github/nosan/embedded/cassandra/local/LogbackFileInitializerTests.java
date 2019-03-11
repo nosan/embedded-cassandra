@@ -17,12 +17,12 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.compress.utils.IOUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Version;
 
@@ -33,17 +33,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class LogbackFileInitializerTests {
-
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+class LogbackFileInitializerTests {
 
 	@Test
-	public void customize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		LogbackFileInitializer customizer =
+	void customize(@TempDir Path temporaryFolder) throws Exception {
+		Path directory = temporaryFolder.resolve("conf");
+		Files.createDirectories(directory);
+		LogbackFileInitializer initializer =
 				new LogbackFileInitializer(getClass().getResource("/logback-test.xml"));
-		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/logback-test.xml")) {
 			assertThat(directory.resolve("logback.xml")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));

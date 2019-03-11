@@ -23,9 +23,9 @@ import com.github.nosan.embedded.cassandra.Version;
  *
  * @author Dmytro Nosan
  */
-public class LocalCassandra_V_2_2_X_Tests extends AbstractLocalCassandraTests {
+class LocalCassandra_V_2_2_X_Tests extends AbstractLocalCassandraTests {
 
-	public LocalCassandra_V_2_2_X_Tests() {
+	LocalCassandra_V_2_2_X_Tests() {
 		super(new Version(2, 2, 14));
 	}
 

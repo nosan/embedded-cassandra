@@ -17,12 +17,12 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.compress.utils.IOUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Version;
 
@@ -33,17 +33,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class RackFileInitializerTests {
-
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+class RackFileInitializerTests {
 
 	@Test
-	public void customize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		RackFileInitializer customizer =
+	void customize(@TempDir Path temporaryFolder) throws Exception {
+		Path directory = temporaryFolder.resolve("conf");
+		Files.createDirectories(directory);
+		RackFileInitializer initializer =
 				new RackFileInitializer(getClass().getResource("/cassandra-rackdc.properties"));
-		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-rackdc.properties")) {
 			assertThat(directory.resolve("cassandra-rackdc.properties")).hasBinaryContent(
 					IOUtils.toByteArray(inputStream));
@@ -52,10 +50,11 @@ public class RackFileInitializerTests {
 	}
 
 	@Test
-	public void notCustomize() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
-		RackFileInitializer customizer = new RackFileInitializer(null);
-		customizer.initialize(directory.getParent(), new Version(3, 11, 3));
+	void notCustomize(@TempDir Path temporaryFolder) throws Exception {
+		Path directory = temporaryFolder.resolve("conf");
+		Files.createDirectories(directory);
+		RackFileInitializer initializer = new RackFileInitializer(null);
+		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		assertThat(directory.resolve("cassandra-rackdc.properties")).doesNotExist();
 	}
 

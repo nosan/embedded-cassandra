@@ -19,11 +19,11 @@ package com.github.nosan.embedded.cassandra.test;
 import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class TestCassandraTests {
+class TestCassandraTests {
 
 	private static final TestCassandra cassandra = new TestCassandra(
 			new LocalCassandraFactoryBuilder()
@@ -45,29 +45,19 @@ public class TestCassandraTests {
 
 	private static final String KEYSPACE_NAME = "test";
 
-	@BeforeClass
-	public static void startCassandra() {
-		cassandra.start();
-	}
-
-	@AfterClass
-	public static void stopCassandra() {
-		cassandra.stop();
-	}
-
-	@After
-	public void deleteKeyspace() {
+	@AfterEach
+	void deleteKeyspace() {
 		cassandra.dropKeyspaces(KEYSPACE_NAME);
 	}
 
-	@Before
-	public void createKeyspace() {
+	@BeforeEach
+	void createKeyspace() {
 		cassandra.executeScripts(CqlScript.classpath("init.cql"));
 	}
 
 	@Test
-	public void dropTables() {
-		KeyspaceMetadata keyspace = getKeyspace(KEYSPACE_NAME);
+	void dropTables() {
+		KeyspaceMetadata keyspace = getKeyspace();
 		assertThat(keyspace).isNotNull();
 		assertThat(keyspace.getTable("users")).isNotNull();
 		cassandra.dropTables("test.users");
@@ -75,19 +65,19 @@ public class TestCassandraTests {
 	}
 
 	@Test
-	public void getCount() {
+	void getCount() {
 		assertThat(cassandra.getRowCount("test.users")).isEqualTo(1);
 	}
 
 	@Test
-	public void deleteFromTables() {
+	void deleteFromTables() {
 		assertThat(cassandra.getRowCount("test.users")).isEqualTo(1);
 		cassandra.deleteFromTables("test.users");
 		assertThat(cassandra.getRowCount("test.users")).isEqualTo(0);
 	}
 
 	@Test
-	public void executeStatement() {
+	void executeStatement() {
 		Row row = cassandra.executeStatement("SELECT * FROM test.users WHERE user_id = ?", "frodo").one();
 		assertString(row, "first_name", "$'Frodo;'");
 		assertString(row, "last_name", "'$$Baggins");
@@ -97,8 +87,18 @@ public class TestCassandraTests {
 		assertString(row1, "first_name", "$'Frodo;'");
 	}
 
-	private static KeyspaceMetadata getKeyspace(String name) {
-		return cassandra.getCluster().getMetadata().getKeyspace(name);
+	@BeforeAll
+	static void startCassandra() {
+		cassandra.start();
+	}
+
+	@AfterAll
+	static void stopCassandra() {
+		cassandra.stop();
+	}
+
+	private static KeyspaceMetadata getKeyspace() {
+		return cassandra.getCluster().getMetadata().getKeyspace(TestCassandraTests.KEYSPACE_NAME);
 	}
 
 	private static void assertString(Row row, String column, String value) {

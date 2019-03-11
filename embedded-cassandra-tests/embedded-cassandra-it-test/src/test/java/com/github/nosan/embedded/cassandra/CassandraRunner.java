@@ -14,36 +14,43 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.local;
+package com.github.nosan.embedded.cassandra;
 
 import java.util.function.Consumer;
-
-import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraFactory;
 
 /**
  * Utility class to test {@link Cassandra}.
  *
  * @author Dmytro Nosan
  */
-final class CassandraRunner {
+public final class CassandraRunner {
 
 	private final CassandraFactory factory;
 
-	CassandraRunner(CassandraFactory factory) {
+	/**
+	 * Creates a {@link CassandraRunner}.
+	 *
+	 * @param factory the factory to create a new instance.
+	 */
+	public CassandraRunner(CassandraFactory factory) {
 		this.factory = factory;
 	}
 
-	CassandraRunner(Cassandra cassandra) {
+	/**
+	 * Creates a {@link CassandraRunner}.
+	 *
+	 * @param cassandra the newly created instance
+	 */
+	public CassandraRunner(Cassandra cassandra) {
 		this(() -> cassandra);
 	}
 
 	/**
-	 * Creates and starts a new {@link Cassandra} based on the factory.
+	 * Starts and stops {@link Cassandra} based on the factory.
 	 *
 	 * @param consumer the consumer of the created {@link Cassandra}
 	 */
-	void run(Consumer<? super Cassandra> consumer) {
+	public void run(Consumer<? super Cassandra> consumer) {
 		Cassandra cassandra = this.factory.create();
 		cassandra.start();
 		try {
@@ -52,6 +59,14 @@ final class CassandraRunner {
 		finally {
 			cassandra.stop();
 		}
+	}
+
+	/**
+	 * Starts and stops {@link Cassandra}.
+	 */
+	public void run() {
+		run(cassandra -> {
+		});
 	}
 
 }

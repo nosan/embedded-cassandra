@@ -16,26 +16,22 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import java.util.Objects;
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
-import com.github.nosan.embedded.cassandra.test.support.OutputRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,23 +40,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@RunWith(SpringRunner.class)
+@SuppressWarnings("NullableProblems")
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @EmbeddedCassandra(scripts = "/init.cql", statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
 		"  KEY );", replace = EmbeddedCassandra.Replace.ANY)
-public class EmbeddedCassandraTests {
-
-	@ClassRule
-	public static final OutputRule output = new OutputRule();
+class EmbeddedCassandraTests {
 
 	@Autowired
-	@Nullable
 	private Cluster cluster;
 
+	@Autowired
+	private Cassandra cassandra;
+
 	@Test
-	public void shouldSelectFromRoles() {
-		assertThat(output.toString()).contains("Cassandra version: 2.2.12");
-		assertThat(Objects.requireNonNull(this.cluster).getClusterName()).isEqualTo("My cluster");
+	void shouldSelectFromRoles() {
+		assertThat(this.cassandra.getSettings().getVersion()).isEqualTo(Version.parse("2.2.12"));
+		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
 		try (Session session = this.cluster.connect()) {
 			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
 					.isTrue();

@@ -16,22 +16,20 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
+import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
+import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -41,10 +39,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * @author Dmytro Nosan
  */
-public class WorkingDirectoryInitializerTests {
-
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+@SuppressWarnings("ConstantConditions")
+class WorkingDirectoryInitializerTests {
 
 	private final Version version = new Version(3, 11, 3);
 
@@ -54,93 +50,95 @@ public class WorkingDirectoryInitializerTests {
 	@Nullable
 	private Path artifactDirectory;
 
-	@Before
-	public void setUp() throws Exception {
-		this.workingDirectory = this.temporaryFolder.newFolder().toPath();
-		this.artifactDirectory = this.temporaryFolder.newFolder().toPath();
+	@BeforeEach
+	void setUp(@TempDir Path temporaryFolder) {
+		this.workingDirectory = temporaryFolder.resolve(UUID.randomUUID().toString());
+		this.artifactDirectory = temporaryFolder.resolve(UUID.randomUUID().toString());
 	}
 
 	@Test
-	public void impossibleToDetermineBaseDirectory() throws Exception {
+	void impossibleToDetermineDirectory() throws Exception {
 		Path plain = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 		Path root = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
+		Path workingDirectory = this.workingDirectory;
+		Path artifactDirectory = this.artifactDirectory;
+		Version version = this.version;
 
-		ArchiveUtils.extract(plain, Objects.requireNonNull(this.artifactDirectory));
+		ArchiveUtils.extract(plain, artifactDirectory);
 
-		WorkingDirectoryInitializer
-				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, root),
-				this.artifactDirectory);
+		WorkingDirectoryInitializer initializer =
+				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, root), artifactDirectory);
 
-		assertThatThrownBy(() -> customizer.initialize(Objects.requireNonNull(this.workingDirectory), this.version))
+		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version))
 				.hasStackTraceContaining("Impossible to determine the Apache Cassandra directory")
 				.isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
-	public void shouldInitializeDirectoryFolderArchive() throws Exception {
+	void shouldInitializeDirectoryFolder() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-3.11.3.zip").toURI());
 		Path workingDirectory = this.workingDirectory;
+		Path artifactDirectory = this.artifactDirectory;
+		Version version = this.version;
 
-		WorkingDirectoryInitializer
-				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
-				Objects.requireNonNull(this.artifactDirectory));
-		customizer.initialize(Objects.requireNonNull(workingDirectory), this.version);
+		WorkingDirectoryInitializer initializer =
+				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive),
+						artifactDirectory);
+		initializer.initialize(workingDirectory, version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
 		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
-		assertThat(count(workingDirectory.resolve("bin"))).isGreaterThan(0);
-		assertThat(count(workingDirectory.resolve("conf"))).isGreaterThan(0);
 	}
 
 	@Test
-	public void shouldInitializeDirectoryFlatArchive() throws Exception {
+	void shouldInitializeDirectoryFlat() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/apache-cassandra-plain-3.11.3.zip").toURI());
 		Path workingDirectory = this.workingDirectory;
+		Path artifactDirectory = this.artifactDirectory;
+		Version version = this.version;
 
-		WorkingDirectoryInitializer
-				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
-				Objects.requireNonNull(this.artifactDirectory));
+		WorkingDirectoryInitializer initializer =
+				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive), artifactDirectory);
 
-		customizer.initialize(Objects.requireNonNull(workingDirectory), this.version);
+		initializer.initialize(workingDirectory, version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
 		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
 		assertThat(workingDirectory.resolve("conf")).exists();
 		assertThat(workingDirectory.resolve("bin")).exists();
-		assertThat(count(workingDirectory.resolve("bin"))).isGreaterThan(0);
-		assertThat(count(workingDirectory.resolve("conf"))).isGreaterThan(0);
 	}
 
 	@Test
-	public void directoryNotValidNoCassandraExecutable() throws Exception {
-
+	void shouldNotInitializeInvalidDirectory() throws Exception {
 		Path archive = Paths.get(getClass().getResource("/empty.zip").toURI());
-		WorkingDirectoryInitializer
-				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
-				Objects.requireNonNull(this.artifactDirectory));
+		Path workingDirectory = this.workingDirectory;
+		Path artifactDirectory = this.artifactDirectory;
+		Version version = this.version;
 
-		assertThatThrownBy(() -> customizer.initialize(Objects.requireNonNull(this.workingDirectory), this.version))
+		WorkingDirectoryInitializer initializer =
+				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive), artifactDirectory);
+
+		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version))
 				.hasStackTraceContaining("does not have the Apache Cassandra files")
 				.isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
-	public void invalidArchive() throws Exception {
-		Path archive = this.temporaryFolder.newFile().toPath();
-		WorkingDirectoryInitializer
-				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),
-				Objects.requireNonNull(this.artifactDirectory));
+	void shouldNotInitializeInvalidArchive() {
+		Path archive = FileUtils.getTmpDirectory().resolve(UUID.randomUUID().toString());
+		Path workingDirectory = this.workingDirectory;
+		Path artifactDirectory = this.artifactDirectory;
+		Version version = this.version;
 
-		assertThatThrownBy(() -> customizer.initialize(Objects.requireNonNull(this.workingDirectory), this.version))
+		WorkingDirectoryInitializer initializer =
+				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive), artifactDirectory);
+
+		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version))
 				.isInstanceOf(IllegalArgumentException.class);
-	}
-
-	private static long count(Path directory) throws IOException {
-		return Files.list(directory).count();
 	}
 
 	private static final class StaticArtifactFactory implements ArtifactFactory {

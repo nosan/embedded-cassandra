@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,10 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class StringUtilsTests {
+class StringUtilsTests {
 
 	@Test
-	public void hasText() {
+	void hasText() {
 		assertThat(StringUtils.hasText(" ")).isFalse();
 		assertThat(StringUtils.hasText("\t")).isFalse();
 		assertThat(StringUtils.hasText(" a ")).isTrue();
@@ -37,7 +37,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void hasLength() {
+	void hasLength() {
 		assertThat(StringUtils.hasLength(" ")).isTrue();
 		assertThat(StringUtils.hasLength("\t")).isTrue();
 		assertThat(StringUtils.hasLength("\n")).isTrue();
@@ -46,7 +46,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void isEmpty() {
+	void isEmpty() {
 		assertThat(StringUtils.isEmpty(" ")).isFalse();
 		assertThat(StringUtils.isEmpty("\t")).isFalse();
 		assertThat(StringUtils.isEmpty("\n")).isFalse();

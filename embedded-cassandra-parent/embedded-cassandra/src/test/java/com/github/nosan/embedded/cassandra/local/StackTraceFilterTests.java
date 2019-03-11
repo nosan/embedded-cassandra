@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,10 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class StackTraceFilterTests {
+class StackTraceFilterTests {
 
 	@Test
-	public void shouldFilter() {
+	void shouldFilter() {
 		StackTraceFilter filter = new StackTraceFilter();
 		assertThat(filter.test("\tat 55")).isFalse();
 		assertThat(filter.test("at 55")).isTrue();

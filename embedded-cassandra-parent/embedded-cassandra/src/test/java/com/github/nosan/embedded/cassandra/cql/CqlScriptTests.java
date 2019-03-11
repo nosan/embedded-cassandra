@@ -22,7 +22,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,43 +31,43 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CqlScriptTests {
+class CqlScriptTests {
 
 	@Test
-	public void classpathsGlobs() {
+	void classpathsGlobs() {
 		assertThat(CqlScript.classpathGlobs((String[]) null)).isNotNull();
 		assertStatements(CqlScript.classpathGlobs("roles.cql"));
 		assertStatements(CqlScript.classpathGlobs("*.cql"));
 	}
 
 	@Test
-	public void classpaths() {
+	void classpaths() {
 		assertThat(CqlScript.classpath((String[]) null)).isNotNull();
 		assertStatements(CqlScript.classpath("roles.cql"));
 		assertStatements(CqlScript.classpath(getClass(), "/roles.cql"));
 	}
 
 	@Test
-	public void urls() {
+	void urls() {
 		assertThat(CqlScript.urls((URL[]) null)).isNotNull();
 		assertStatements(CqlScript.urls(getClass().getResource("/roles.cql")));
 	}
 
 	@Test
-	public void files() throws URISyntaxException {
+	void files() throws URISyntaxException {
 		assertThat(CqlScript.files((File[]) null)).isNotNull();
 		assertStatements(CqlScript.files(new File(getClass().getResource("/roles.cql").toURI())));
 	}
 
 	@Test
-	public void paths() throws URISyntaxException {
+	void paths() throws URISyntaxException {
 		assertThat(CqlScript.paths((Path[]) null)).isNotNull();
 		assertStatements(CqlScript.paths(Paths.get(getClass().getResource("/roles.cql").toURI())));
 
 	}
 
 	@Test
-	public void statements() {
+	void statements() {
 		assertThat(CqlScript.statements((String[]) null)).isNotNull();
 		assertStatements(CqlScript.statements("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)"));
 	}

@@ -23,9 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -37,21 +36,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class ConfigurationFileRandomPortInitializerTests {
-
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+class ConfigurationFileRandomPortInitializerTests {
 
 	@Test
-	public void shouldReplaceWithRandomPorts() throws Exception {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
+	void shouldReplaceWithRandomPorts(@TempDir Path temporaryFolder) throws Exception {
+		Path directory = temporaryFolder.resolve("conf");
+		Files.createDirectories(directory);
 		Version version = new Version(3, 11, 3);
-		ConfigurationFileRandomPortInitializer customizer = new ConfigurationFileRandomPortInitializer();
+		ConfigurationFileRandomPortInitializer initializer = new ConfigurationFileRandomPortInitializer();
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-all-ports.yaml")) {
 			Files.copy(inputStream, directory.resolve("cassandra.yaml"));
 		}
 
-		customizer.initialize(directory.getParent(), version);
+		initializer.initialize(directory.getParent(), version);
 
 		assertThat(directory.resolve("cassandra.yaml")).exists();
 		NodeSettings settings;
@@ -67,10 +64,11 @@ public class ConfigurationFileRandomPortInitializerTests {
 	}
 
 	@Test
-	public void shouldNotReplaceAndShouldNotModify() throws IOException {
-		Path directory = this.temporaryFolder.newFolder("conf").toPath();
+	void shouldNotReplaceAndShouldNotModify(@TempDir Path temporaryFolder) throws IOException {
+		Path directory = temporaryFolder.resolve("conf");
+		Files.createDirectories(directory);
 		Version version = new Version(3, 11, 3);
-		ConfigurationFileRandomPortInitializer customizer = new ConfigurationFileRandomPortInitializer();
+		ConfigurationFileRandomPortInitializer initializer = new ConfigurationFileRandomPortInitializer();
 		Path configurationFile = directory.resolve("cassandra.yaml");
 
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
@@ -79,7 +77,7 @@ public class ConfigurationFileRandomPortInitializerTests {
 
 		FileTime lastModifiedTime = Files.getLastModifiedTime(configurationFile);
 
-		customizer.initialize(directory.getParent(), version);
+		initializer.initialize(directory.getParent(), version);
 
 		assertThat(configurationFile).exists();
 		assertThat(Files.getLastModifiedTime(configurationFile))

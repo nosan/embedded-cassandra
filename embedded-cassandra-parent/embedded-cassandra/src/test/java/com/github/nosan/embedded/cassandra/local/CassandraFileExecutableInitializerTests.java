@@ -16,16 +16,17 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
-import com.github.nosan.embedded.cassandra.test.support.OSRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,28 +35,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CassandraFileExecutableInitializerTests {
+class CassandraFileExecutableInitializerTests {
 
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-	@Rule
-	public final OSRule os = new OSRule();
-
-	private final CassandraFileExecutableInitializer customizer = new CassandraFileExecutableInitializer();
+	private final CassandraFileExecutableInitializer initializer = new CassandraFileExecutableInitializer();
 
 	@Test
-	@DisableIfOS("windows")
-	public void setExecutableUnixFile() throws IOException {
-		File file = new File(this.temporaryFolder.newFolder("bin"), "cassandra");
-
-		assertThat(file.createNewFile()).isTrue();
-		assertThat(file.setExecutable(false)).isTrue();
-		assertThat(file.canExecute()).isFalse();
-
-		this.customizer.initialize(this.temporaryFolder.getRoot().toPath(), new Version(3, 11, 3));
-
-		assertThat(file.canExecute()).isTrue();
+	@DisabledOnOs(OS.WINDOWS)
+	void setExecutableUnixFile(@TempDir Path temporaryFolder) throws IOException {
+		Path file = temporaryFolder.resolve("bin/cassandra");
+		Files.createDirectories(file.getParent());
+		Files.createFile(file);
+		this.initializer.initialize(temporaryFolder, new Version(3, 11, 3));
+		assertThat(Files.getPosixFilePermissions(file)).
+				contains(PosixFilePermission.GROUP_EXECUTE, PosixFilePermission.OWNER_EXECUTE,
+						PosixFilePermission.OTHERS_EXECUTE);
 	}
 
 }

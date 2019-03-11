@@ -20,10 +20,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import com.github.nosan.embedded.cassandra.test.support.OutputRule;
+import com.github.nosan.embedded.cassandra.CassandraRunner;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,55 +32,33 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class TestCassandraExtendedTests {
-
-	@Rule
-	public final OutputRule output = new OutputRule();
+class TestCassandraExtendedTests {
 
 	@Test
-	public void shouldRegisterShutdownHookOnlyOnce() throws ClassNotFoundException {
+	void shouldRegisterShutdownHookOnlyOnce() throws ClassNotFoundException {
 		Set<Thread> beforeHooks = getHooks();
 		TestCassandra testCassandra = new TestCassandra(true);
-		try {
-			testCassandra.start();
-		}
-		finally {
-			testCassandra.stop();
-		}
-		try {
-			testCassandra.start();
-		}
-		finally {
-			testCassandra.stop();
-		}
+		new CassandraRunner(testCassandra).run();
+		new CassandraRunner(testCassandra).run();
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
-		assertThat(afterHooks).filteredOn(
-				thread -> thread.getName().startsWith("TestCassandraHook"))
-				.hasSize(1);
+		assertThat(afterHooks).filteredOn(thread -> thread.getName().startsWith("TestCassandraHook")).hasSize(1);
 	}
 
 	@Test
-	public void shouldNotRegisterShutdownHook() throws ClassNotFoundException {
+	void shouldNotRegisterShutdownHook() throws ClassNotFoundException {
 		Set<Thread> beforeHooks = getHooks();
 		TestCassandra testCassandra = new TestCassandra(false);
-		try {
-			testCassandra.start();
-		}
-		finally {
-			testCassandra.stop();
-		}
+		new CassandraRunner(testCassandra).run();
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
-		assertThat(afterHooks)
-				.noneMatch(thread -> thread.getName().startsWith("TestCassandraHook"));
+		assertThat(afterHooks).noneMatch(thread -> thread.getName().startsWith("TestCassandraHook"));
 	}
 
 	@SuppressWarnings("unchecked")
 	private static Set<Thread> getHooks() throws ClassNotFoundException {
 		return new LinkedHashSet<>(((Map<Thread, Thread>) ReflectionUtils
-				.getStaticField(Class.forName("java.lang.ApplicationShutdownHooks"), "hooks"))
-				.keySet());
+				.getStaticField(Class.forName("java.lang.ApplicationShutdownHooks"), "hooks")).keySet());
 	}
 
 }

@@ -16,34 +16,17 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.Test;
-
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
 
 /**
  * Tests for {@link LocalCassandra}.
  *
  * @author Dmytro Nosan
  */
-public class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
+class LocalCassandra_V_3_11_X_Tests extends AbstractLocalCassandraTests {
 
-	public LocalCassandra_V_2_1_X_Tests() {
-		super(new Version(2, 1, 21));
-	}
-
-	@Override
-	@Test
-	@DisableIfOS("windows")
-	public void shouldRunOnInterfaceIPV4() throws Exception {
-		super.shouldRunOnInterfaceIPV4();
-	}
-
-	@Override
-	@Test
-	@DisableIfOS("windows")
-	public void shouldRunOnInterfaceIPV6() throws Exception {
-		super.shouldRunOnInterfaceIPV6();
+	LocalCassandra_V_3_11_X_Tests() {
+		super(new Version(3, 11, 4));
 	}
 
 }

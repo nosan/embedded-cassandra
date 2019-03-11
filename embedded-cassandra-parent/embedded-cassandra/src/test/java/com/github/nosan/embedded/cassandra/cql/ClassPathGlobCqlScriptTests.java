@@ -18,10 +18,11 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,90 +31,43 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@RunWith(Parameterized.class)
-public class ClassPathGlobCqlScriptTests {
+class ClassPathGlobCqlScriptTests {
 
 	private static final String ROLE = "CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)";
 
 	private static final String KEYSPACE =
 			"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}";
 
-	private final String pattern;
-
-	private final String name;
-
-	private final String[] statements;
-
-	public ClassPathGlobCqlScriptTests(AssertData assertData) {
-		this.pattern = assertData.pattern;
-		this.name = assertData.name;
-		this.statements = assertData.statements;
-	}
-
-	@Parameterized.Parameters(name = "{index} {0}")
-	public static Iterable<AssertData> patterns() {
-		List<AssertData> parameters = new ArrayList<>();
-		parameters.add(new AssertData("/.cql", ".cql"));
-		parameters.add(new AssertData("/*.cql", "*.cql", new String[]{ROLE}));
-		parameters.add(new AssertData("**/**.cql", new String[]{KEYSPACE}));
-		parameters.add(new AssertData("**/*.cql", new String[]{KEYSPACE}));
-		parameters.add(new AssertData("**.cql", new String[]{KEYSPACE, ROLE}));
-		parameters.add(new AssertData("**{roles,keyspace}.cql", new String[]{KEYSPACE, ROLE}));
-		parameters.add(new AssertData("{roles,keyspace}.cql", new String[]{ROLE}));
-		parameters.add(new AssertData("**/{roles,keyspace}.cql", new String[]{KEYSPACE}));
-		parameters.add(new AssertData("**{keyspace}.cql", new String[]{KEYSPACE}));
-		parameters.add(new AssertData("*/*.cql"));
-		parameters.add(new AssertData("**/key*.cql", new String[]{KEYSPACE}));
-		parameters.add(new AssertData("**\\key*.cql", "**/key*.cql", new String[]{KEYSPACE}));
-		parameters.add(new AssertData("com/*/*/embe*ed/**/keyspa?e.cql", new String[]{KEYSPACE}));
-		parameters.add(new AssertData("roles.cql", new String[]{ROLE}));
-		parameters.add(new AssertData("/roles.cql", "roles.cql", new String[]{ROLE}));
-		parameters.add(new AssertData("\\roles.cql", "roles.cql", new String[]{ROLE}));
-		parameters.add(new AssertData("*.cql", new String[]{ROLE}));
-		parameters.add(new AssertData("rol?s.cql", new String[]{ROLE}));
-		return parameters;
-	}
-
-	@Test
-	public void test() {
-		ClassPathGlobCqlScript script = new ClassPathGlobCqlScript(this.pattern);
-		assertThat(script.toString()).isEqualTo(this.name);
+	@ParameterizedTest
+	@MethodSource("patterns")
+	void test(String pattern, String[] statements) {
+		ClassPathGlobCqlScript script = new ClassPathGlobCqlScript(pattern);
 		assertThat(script).isNotEqualTo(new ClassPathGlobCqlScript("sometext"));
 		assertThat(script).isEqualTo(script);
-		assertThat(script.getStatements()).containsExactly(this.statements);
+		assertThat(script.getStatements()).containsExactly(statements);
 	}
 
-	private static final class AssertData {
-
-		private final String[] statements;
-
-		private final String pattern;
-
-		private final String name;
-
-		AssertData(String pattern, String name, String[] statements) {
-			this.pattern = pattern;
-			this.name = name;
-			this.statements = statements;
-		}
-
-		AssertData(String pattern, String name) {
-			this(pattern, name, new String[0]);
-		}
-
-		AssertData(String pattern, String[] statements) {
-			this(pattern, pattern, statements);
-		}
-
-		AssertData(String pattern) {
-			this(pattern, pattern, new String[0]);
-		}
-
-		@Override
-		public String toString() {
-			return String.format("(%s) (%s) (%s) statements", this.pattern, this.name, this.statements.length);
-		}
-
+	static Stream<Arguments> patterns() {
+		List<Arguments> parameters = new ArrayList<>();
+		parameters.add(Arguments.arguments("/.cql", new String[0]));
+		parameters.add(Arguments.arguments("/*.cql", new String[]{ROLE}));
+		parameters.add(Arguments.arguments("**/**.cql", new String[]{KEYSPACE}));
+		parameters.add(Arguments.arguments("**/*.cql", new String[]{KEYSPACE}));
+		parameters.add(Arguments.arguments("**.cql", new String[]{KEYSPACE, ROLE}));
+		parameters.add(Arguments.arguments("**{roles,keyspace}.cql", new String[]{KEYSPACE, ROLE}));
+		parameters.add(Arguments.arguments("{roles,keyspace}.cql", new String[]{ROLE}));
+		parameters.add(Arguments.arguments("**/{roles,keyspace}.cql", new String[]{KEYSPACE}));
+		parameters.add(Arguments.arguments("**{keyspace}.cql", new String[]{KEYSPACE}));
+		parameters.add(Arguments.arguments("*/*.cql", new String[0]));
+		parameters.add(Arguments.arguments("**/key*.cql", new String[]{KEYSPACE}));
+		parameters.add(Arguments.arguments("**\\key*.cql", new String[]{KEYSPACE}));
+		parameters.add(Arguments.arguments("com/*/*/embe*ed/**/keyspa?e.cql", new String[]{KEYSPACE}));
+		parameters.add(Arguments.arguments("roles.cql", new String[]{ROLE}));
+		parameters.add(Arguments.arguments("/roles.cql", new String[]{ROLE}));
+		parameters.add(Arguments.arguments("\\roles.cql", new String[]{ROLE}));
+		parameters.add(Arguments.arguments("*.cql", new String[]{ROLE}));
+		parameters.add(Arguments.arguments("rol?s.cql", new String[]{ROLE}));
+		return parameters.stream();
 	}
 
 }

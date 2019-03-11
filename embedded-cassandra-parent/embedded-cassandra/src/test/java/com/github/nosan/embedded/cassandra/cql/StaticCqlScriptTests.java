@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,17 +25,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class StaticCqlScriptTests {
+class StaticCqlScriptTests {
 
 	@Test
-	public void getStatements() {
+	void getStatements() {
 		assertThat(
 				new StaticCqlScript("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )").getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )");
 	}
 
 	@Test
-	public void helpers() {
+	void helpers() {
 		assertThat(new StaticCqlScript("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )"))
 				.isEqualTo(new StaticCqlScript("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )"));
 		assertThat(new StaticCqlScript("CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )").toString())

@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * @author Dmytro Nosan
  */
-public class VersionTests {
+class VersionTests {
 
 	@Test
-	public void shouldParseMajorMinorPatch() {
+	void shouldParseMajorMinorPatch() {
 		Version version = Version.parse("3.11.3");
 		assertThat(version)
 				.isEqualTo(new Version(3, 11, 3));
@@ -42,7 +42,7 @@ public class VersionTests {
 	}
 
 	@Test
-	public void shouldParseMajorMinor() {
+	void shouldParseMajorMinor() {
 		Version version = Version.parse("3.11");
 		assertThat(version).isEqualTo(new Version(3, 11));
 		assertThat(version).isEqualByComparingTo(new Version(3, 11));
@@ -55,7 +55,7 @@ public class VersionTests {
 	}
 
 	@Test
-	public void shouldParseMajor() {
+	void shouldParseMajor() {
 		Version version = Version.parse("3");
 		assertThat(version).isEqualTo(new Version(3));
 		assertThat(version).isEqualByComparingTo(new Version(3));
@@ -67,14 +67,14 @@ public class VersionTests {
 	}
 
 	@Test
-	public void shouldNotParse() {
+	void shouldNotParse() {
 		assertThatThrownBy(() -> Version.parse("q"))
 				.hasStackTraceContaining("Expected format is ")
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
-	public void shouldParseBetaVersion() {
+	void shouldParseBetaVersion() {
 		String text = "1.1.0-beta1";
 		Version version = Version.parse(text);
 		assertThat(version).isEqualTo(Version.parse(text));

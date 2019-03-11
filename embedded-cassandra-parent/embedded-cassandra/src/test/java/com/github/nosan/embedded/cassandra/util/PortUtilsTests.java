@@ -21,7 +21,7 @@ import java.net.ServerSocket;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class PortUtilsTests {
+class PortUtilsTests {
 
 	@Test
-	public void shouldGet100Ports() {
+	void shouldGet100Ports() {
 		Set<Integer> ports = new LinkedHashSet<>();
 		for (int i = 0; i < 100; i++) {
 			ports.add(PortUtils.getPort());
@@ -42,7 +42,7 @@ public class PortUtilsTests {
 	}
 
 	@Test
-	public void shouldBeBusy() throws IOException {
+	void shouldBeBusy() throws IOException {
 		int port = PortUtils.getPort();
 		assertThat(PortUtils.isPortBusy(null, port)).isFalse();
 		try (ServerSocket ss = new ServerSocket(port)) {

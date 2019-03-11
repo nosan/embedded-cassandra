@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.Version;
 
@@ -27,12 +27,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class EmptyArtifactFactoryTests {
+class EmptyArtifactFactoryTests {
 
 	private final EmptyArtifactFactory factory = new EmptyArtifactFactory();
 
 	@Test
-	public void shouldCreateAnEmptyArchive() {
+	void shouldCreateAnEmptyArchive() {
 		Version version = new Version(2, 10, 20);
 		Artifact artifact = this.factory.create(version);
 		assertThat(artifact).isInstanceOf(EmptyArtifact.class)

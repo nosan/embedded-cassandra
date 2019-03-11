@@ -20,19 +20,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link InputStreamCqlScript}.
  *
  * @author Dmytro Nosan
  */
-public class InputStreamCqlScriptTests {
+class InputStreamCqlScriptTests {
 
 	@Test
-	public void getStatements() {
+	void getStatements() {
 		InputStreamCqlScript inputStreamCqlScript =
 				new InputStreamCqlScript(getClass().getResourceAsStream("/roles.cql"));
 		assertThat(inputStreamCqlScript.getStatements())
@@ -40,7 +41,7 @@ public class InputStreamCqlScriptTests {
 	}
 
 	@Test
-	public void helpers() {
+	void helpers() {
 		InputStreamCqlScript actual =
 				new InputStreamCqlScript(getClass().getResourceAsStream("/roles.cql"));
 		assertThat(actual).isEqualTo(actual);
@@ -48,11 +49,12 @@ public class InputStreamCqlScriptTests {
 				.contains("InputStream CQL Statements");
 	}
 
-	@Test(expected = UncheckedIOException.class)
-	public void invalidResource() throws IOException {
+	@Test
+	void invalidResource() throws IOException {
 		InputStream systemResourceAsStream = getClass().getResourceAsStream("/roles.cql");
 		systemResourceAsStream.close();
-		new InputStreamCqlScript(systemResourceAsStream).getStatements();
+		assertThatThrownBy(() -> new InputStreamCqlScript(systemResourceAsStream).getStatements())
+				.isInstanceOf(UncheckedIOException.class);
 	}
 
 }

@@ -18,7 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.time.Duration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,17 +27,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class WaitUtilsTests {
+class WaitUtilsTests {
 
 	@Test
-	public void shouldAwaitFalse() throws Exception {
+	void shouldAwaitFalse() throws Exception {
 		long start = System.currentTimeMillis();
 		assertThat(WaitUtils.await(Duration.ofMillis(1500), () -> false)).isFalse();
 		assertThat(System.currentTimeMillis() - start).isBetween(1500L, 2000L);
 	}
 
 	@Test
-	public void shouldAwaitTrue() throws Exception {
+	void shouldAwaitTrue() throws Exception {
 		long start = System.currentTimeMillis();
 		assertThat(WaitUtils.await(Duration.ofMillis(1500), () -> true)).isTrue();
 		assertThat(System.currentTimeMillis() - start).isBetween(0L, 1000L);

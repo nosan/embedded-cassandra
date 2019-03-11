@@ -18,11 +18,9 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 
-import org.junit.Rule;
-import org.junit.Test;
-
-import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
-import com.github.nosan.embedded.cassandra.test.support.OSRule;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,14 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class ProcessUtilsTests {
-
-	@Rule
-	public final OSRule os = new OSRule();
+class ProcessUtilsTests {
 
 	@Test
-	@DisableIfOS("windows")
-	public void getPid() throws IOException {
+	@DisabledOnOs(OS.WINDOWS)
+	void getPid() throws IOException {
 		Process process = new ProcessBuilder("echo", "Hello world").start();
 		assertThat(ProcessUtils.getPid(process)).isGreaterThan(0);
 	}

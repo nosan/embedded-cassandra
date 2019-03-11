@@ -32,7 +32,6 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
@@ -41,19 +40,23 @@ import java.util.function.Predicate;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SocketOptions;
 import org.apache.commons.compress.utils.IOUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
+import com.github.nosan.embedded.cassandra.CassandraRunner;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.test.support.DisableIfOS;
-import com.github.nosan.embedded.cassandra.test.support.OSRule;
-import com.github.nosan.embedded.cassandra.test.support.OutputRule;
+import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
+import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
+import com.github.nosan.embedded.cassandra.test.support.CaptureOutputExtension;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
@@ -67,26 +70,31 @@ import static org.assertj.core.api.Assertions.fail;
  *
  * @author Dmytro Nosan
  */
-public abstract class AbstractLocalCassandraTests {
+@SuppressWarnings("ConstantConditions")
+@ExtendWith(CaptureOutputExtension.class)
+abstract class AbstractLocalCassandraTests {
 
-	@Rule
-	public final OutputRule output = new OutputRule();
+	private final LocalCassandraFactory factory;
 
-	@Rule
-	public final OSRule os = new OSRule();
+	@Nullable
+	private Path temporaryFolder;
 
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-	protected final LocalCassandraFactory factory;
+	@Nullable
+	private CaptureOutput output;
 
 	AbstractLocalCassandraTests(Version version) {
 		this.factory = new LocalCassandraFactory();
 		this.factory.setVersion(version);
 	}
 
+	@BeforeEach
+	void setUp(@TempDir Path temporaryFolder, CaptureOutput captureOutput) {
+		this.temporaryFolder = temporaryFolder;
+		this.output = captureOutput;
+	}
+
 	@Test
-	public void shouldFailCassandraUseSamePorts() {
+	void shouldFailCassandraUseSamePorts() {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(cassandra -> assertThatThrownBy(() ->
 				runner.run(new NotReachable())).isInstanceOf(CassandraException.class)
@@ -95,14 +103,14 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldStartCassandraNoOutput() {
+	void shouldStartCassandraNoOutput() {
 		this.factory.setLogbackFile(getClass().getResource("/logback-empty.xml"));
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(assertCreateKeyspace());
 	}
 
 	@Test
-	public void shouldStartCassandraNoOutputAndNotTransportWorseCase() {
+	void shouldStartCassandraNoOutputAndNotTransportWorseCase() {
 		this.factory.setLogbackFile(getClass().getResource("/logback-empty.xml"));
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
 		CassandraRunner runner = new CassandraRunner(this.factory);
@@ -110,24 +118,24 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldStartIfTransportDisabled() {
+	void shouldStartIfTransportDisabled() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
 		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort));
 		assertCassandraHasBeenStopped();
 	}
 
 	@Test
-	public void shouldRunOnInterfaceIPV4() throws Exception {
+	void shouldRunOnInterfaceIPV4() throws Exception {
 		runAndAssertCassandraListenInterface("/cassandra-interface.yaml", false);
 	}
 
 	@Test
-	public void shouldRunOnInterfaceIPV6() throws Exception {
+	void shouldRunOnInterfaceIPV6() throws Exception {
 		runAndAssertCassandraListenInterface("/cassandra-interface-ipv6.yaml", true);
 	}
 
 	@Test
-	public void notEnoughTime() {
+	void notEnoughTime() {
 		this.factory.setStartupTimeout(Duration.ofSeconds(2L));
 
 		assertThatThrownBy(() -> new CassandraRunner(this.factory).run(new NotReachable()))
@@ -137,14 +145,14 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldOverrideJavaHome() {
+	void shouldOverrideJavaHome() {
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
 		assertThatThrownBy(() -> new CassandraRunner(this.factory).run(new NotReachable()))
 				.isInstanceOf(CassandraException.class);
 	}
 
 	@Test
-	public void shouldStartStopOnlyOnce() {
+	void shouldStartStopOnlyOnce() {
 		Cassandra cassandra = this.factory.create();
 		assertThat(cassandra.getState()).isEqualTo(Cassandra.State.NEW);
 		CassandraRunner runner = new CassandraRunner(cassandra);
@@ -164,14 +172,14 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldNotGetSettings() {
+	void shouldNotGetSettings() {
 		assertThatThrownBy(() -> this.factory.create().getSettings())
 				.hasStackTraceContaining("Please start it before calling this method")
 				.isInstanceOf(CassandraException.class);
 	}
 
 	@Test
-	public void shouldRunMoreThanOneCassandra() throws Throwable {
+	void shouldRunMoreThanOneCassandra() throws Throwable {
 		this.factory.setJmxPort(0);
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-random.yaml"));
 		List<Throwable> exceptions = new CopyOnWriteArrayList<>();
@@ -203,8 +211,8 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldReInitializedCassandra() throws IOException {
-		Path path = this.temporaryFolder.newFolder(UUID.randomUUID().toString()).toPath();
+	void shouldReInitializedCassandra() throws IOException {
+		Path path = this.temporaryFolder.resolve(UUID.randomUUID().toString());
 		this.factory.setWorkingDirectory(path);
 		Cassandra cassandra = this.factory.create();
 		try {
@@ -228,8 +236,8 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	public void shouldInitializedOnlyOnce() throws IOException {
-		Path path = this.temporaryFolder.newFolder(UUID.randomUUID().toString()).toPath();
+	void shouldInitializedOnlyOnce() {
+		Path path = this.temporaryFolder.resolve(UUID.randomUUID().toString());
 		this.factory.setWorkingDirectory(path);
 		Cassandra cassandra = this.factory.create();
 		try {
@@ -252,10 +260,10 @@ public abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	@DisableIfOS("windows")
-	public void shouldPassAllowRootIfNecessary() {
+	@DisabledOnOs(OS.WINDOWS)
+	void shouldPassAllowRootIfNecessary() {
 		LocalCassandraFactory factory = this.factory;
-		Version version = Objects.requireNonNull(factory.getVersion());
+		Version version = (factory.getVersion());
 		CassandraRunner runner = new CassandraRunner(factory);
 		factory.setAllowRoot(true);
 		runner.run(assertCreateKeyspace());
@@ -268,8 +276,9 @@ public abstract class AbstractLocalCassandraTests {
 		assertCassandraHasBeenStopped();
 	}
 
-	private void runAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
-		Path configurationFile = this.temporaryFolder.newFile("cassandra.yaml").toPath();
+	private void runAndAssertCassandraListenInterface(String location,
+			boolean ipv6) throws IOException {
+		Path configurationFile = this.temporaryFolder.resolve("cassandra.yaml");
 		String interfaceName = getInterface(ipv6);
 		InetAddress address = NetworkUtils.getAddressByInterface(interfaceName, ipv6)
 				.orElseThrow(IllegalStateException::new);
@@ -331,7 +340,7 @@ public abstract class AbstractLocalCassandraTests {
 		private final String statement;
 
 		CqlAssert(String statement) {
-			this.statement = Objects.requireNonNull(statement);
+			this.statement = statement;
 		}
 
 		@Override
@@ -345,16 +354,7 @@ public abstract class AbstractLocalCassandraTests {
 
 		private static Cluster cluster(Cassandra cassandra) {
 			Settings settings = cassandra.getSettings();
-			SocketOptions socketOptions = new SocketOptions();
-			socketOptions.setReadTimeoutMillis(30000);
-			socketOptions.setConnectTimeoutMillis(30000);
-			return Cluster.builder()
-					.withoutMetrics()
-					.withoutJMXReporting()
-					.withPort(settings.getPort())
-					.withSocketOptions(socketOptions)
-					.addContactPoints(settings.getRealAddress())
-					.build();
+			return new DefaultClusterFactory().create(settings);
 		}
 
 	}

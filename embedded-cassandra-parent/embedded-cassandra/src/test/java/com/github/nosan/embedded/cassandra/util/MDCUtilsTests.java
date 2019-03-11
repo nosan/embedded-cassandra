@@ -19,8 +19,8 @@ package com.github.nosan.embedded.cassandra.util;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,15 +30,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class MDCUtilsTests {
+class MDCUtilsTests {
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		MDC.clear();
 	}
 
 	@Test
-	public void getContext() {
+	void getContext() {
 		Map<String, String> context = MDCUtils.getContext();
 		assertThat(context).isEmpty();
 		MDC.put("test", "test");
@@ -46,7 +46,7 @@ public class MDCUtilsTests {
 	}
 
 	@Test
-	public void setContext() {
+	void setContext() {
 		MDCUtils.setContext(Collections.singletonMap("test", "test"));
 		assertThat(MDCUtils.getContext()).containsEntry("test", "test");
 		MDCUtils.setContext(null);

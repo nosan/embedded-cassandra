@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,10 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class ClassUtilsTests {
+class ClassUtilsTests {
 
 	@Test
-	public void getPackageName() {
+	void getPackageName() {
 		assertThat(ClassUtils.getPackageName(null)).isEmpty();
 		assertThat(ClassUtils.getPackageName(Object[].class))
 				.isEqualTo("java.lang");

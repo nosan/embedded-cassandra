@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,17 +34,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class NetworkUtilsTests {
+class NetworkUtilsTests {
 
 	@Test
-	public void shouldResolveAddressV6ByInterfaceName() throws Exception {
+	void shouldResolveAddressV6ByInterfaceName() throws Exception {
 		NetworkInterface iface = getInterface(true);
 		assertThat(NetworkUtils.getAddressByInterface(iface.getName(), true))
 				.isEqualTo(getAddress(iface, true));
 	}
 
 	@Test
-	public void shouldResolveAddressV4ByInterfaceName() throws Exception {
+	void shouldResolveAddressV4ByInterfaceName() throws Exception {
 		NetworkInterface iface = getInterface(false);
 		assertThat(NetworkUtils.getAddressByInterface(iface.getName(), false))
 				.isEqualTo(getAddress(iface, false));

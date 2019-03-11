@@ -20,19 +20,20 @@ import java.io.File;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link FileCqlScript}.
  *
  * @author Dmytro Nosan
  */
-public class FileCqlScriptTests {
+class FileCqlScriptTests {
 
 	@Test
-	public void getStatements() throws URISyntaxException {
+	void getStatements() throws URISyntaxException {
 		FileCqlScript fileCqlScript =
 				new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI()));
 		assertThat(fileCqlScript.getStatements())
@@ -40,16 +41,17 @@ public class FileCqlScriptTests {
 	}
 
 	@Test
-	public void helpers() throws Exception {
+	void helpers() throws Exception {
 		assertThat(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())))
 				.isEqualTo(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())));
 		assertThat(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())).toString())
 				.contains("roles.cql");
 	}
 
-	@Test(expected = UncheckedIOException.class)
-	public void invalidResource() {
-		new FileCqlScript(new File("hz.cql")).getStatements();
+	@Test
+	void invalidResource() {
+		assertThatThrownBy(() -> new FileCqlScript(new File("hz.cql")).getStatements())
+				.isInstanceOf(UncheckedIOException.class);
 	}
 
 }
