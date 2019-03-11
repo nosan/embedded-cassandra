@@ -99,11 +99,8 @@ class WorkingDirectoryInitializer implements Initializer {
 			String name = src.relativize(srcPath).getName(0).toString().toLowerCase(Locale.ENGLISH);
 			return !name.equals("javadoc") && !name.equals("doc");
 		}
-		if (!Files.exists(destPath)) {
-			return true;
-		}
 		try {
-			return Files.size(destPath) < Files.size(srcPath);
+			return !Files.exists(destPath) || Files.size(destPath) < Files.size(srcPath);
 		}
 		catch (IOException ex) {
 			return true;

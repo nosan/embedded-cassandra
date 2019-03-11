@@ -116,8 +116,8 @@ public class FileUtilsTests {
 
 		FileUtils.copy(src.toPath(), dest.toPath(), p -> false);
 
-		assertThat(dest).exists();
-		assertThat(dest.toPath().resolve(folder.getName())).exists();
+		assertThat(dest).doesNotExist();
+		assertThat(dest.toPath().resolve(folder.getName())).doesNotExist();
 		assertThat(dest.toPath().resolve(folder.getName()).resolve(file.getName())).doesNotExist();
 	}
 
