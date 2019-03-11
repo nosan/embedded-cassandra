@@ -17,33 +17,26 @@
 package com.github.nosan.embedded.cassandra.util;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.compress.utils.IOUtils;
@@ -94,24 +87,20 @@ public abstract class ArchiveUtils {
 		Objects.requireNonNull(archiveFile, "Archive must not be null");
 		Objects.requireNonNull(destination, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
-		try (ArchiveInputStream stream = archiveFactory.create(archiveFile);
-				ReadableByteChannel channel = Channels.newChannel(stream)) {
+		try (ArchiveInputStream stream = archiveFactory.create(archiveFile)) {
 			Files.createDirectories(destination);
 			ArchiveEntry entry;
 			while ((entry = stream.getNextEntry()) != null) {
 				Path dest = destination.resolve(entry.getName());
 				if (entry.isDirectory()) {
 					Files.createDirectories(dest);
-					FileModeUtils.set(entry, dest);
 				}
-				else if (!Files.exists(dest) || Files.size(dest) < entry.getSize()) {
+				else {
 					Path tempFile = Files.createTempFile(null, null);
-					try (FileChannel fileChannel = new FileOutputStream(tempFile.toFile()).getChannel()) {
-						fileChannel.transferFrom(channel, 0, Long.MAX_VALUE);
-					}
-					FileModeUtils.set(entry, tempFile);
+					Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
 					Files.move(tempFile, dest, StandardCopyOption.REPLACE_EXISTING);
 				}
+				FileModeUtils.set(entry, dest);
 			}
 		}
 	}
@@ -160,14 +149,13 @@ public abstract class ArchiveUtils {
 					if (StringUtils.hasText(compressionFormat)) {
 						cstream = cf.createCompressorInputStream(compressionFormat, stream);
 					}
-					return (cstream != null) ? af.createArchiveInputStream(archiveFormat, cstream)
-							: af.createArchiveInputStream(archiveFormat, stream);
+					return (cstream != null) ? af.createArchiveInputStream(archiveFormat, cstream) :
+							af.createArchiveInputStream(archiveFormat, stream);
 				}
-				catch (IOException | ArchiveException | CompressorException ex) {
+				catch (Exception ex) {
 					IOUtils.closeQuietly(cstream);
 					IOUtils.closeQuietly(stream);
-					throw new IOException(String.format("Could not create a stream for archive (%s)",
-							archive), ex);
+					throw new IOException(String.format("Could not create a stream for archive (%s)", archive), ex);
 				}
 			};
 		}
@@ -233,9 +221,7 @@ public abstract class ArchiveUtils {
 		}
 
 		private static boolean isWindows() {
-			String os = new SystemProperty("os.name").get();
-			return StringUtils.hasText(os) ? os.toLowerCase(Locale.ENGLISH).contains("windows") :
-					File.separatorChar == '\\';
+			return File.separatorChar == '\\';
 		}
 
 		private static Set<PosixFilePermission> getPermissions(long mode) {

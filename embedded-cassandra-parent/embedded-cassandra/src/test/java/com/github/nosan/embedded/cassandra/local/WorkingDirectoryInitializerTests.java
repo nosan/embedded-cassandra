@@ -73,7 +73,7 @@ public class WorkingDirectoryInitializerTests {
 				this.artifactDirectory);
 
 		assertThatThrownBy(() -> customizer.initialize(Objects.requireNonNull(this.workingDirectory), this.version))
-				.hasStackTraceContaining("Impossible to determine a base directory")
+				.hasStackTraceContaining("Impossible to determine the Apache Cassandra directory")
 				.isInstanceOf(IllegalStateException.class);
 	}
 
@@ -125,13 +125,12 @@ public class WorkingDirectoryInitializerTests {
 				Objects.requireNonNull(this.artifactDirectory));
 
 		assertThatThrownBy(() -> customizer.initialize(Objects.requireNonNull(this.workingDirectory), this.version))
-				.hasStackTraceContaining("must have at least ")
+				.hasStackTraceContaining("does not have the Apache Cassandra files")
 				.isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
 	public void invalidArchive() throws Exception {
-
 		Path archive = this.temporaryFolder.newFile().toPath();
 		WorkingDirectoryInitializer
 				customizer = new WorkingDirectoryInitializer(new StaticArtifactFactory(this.version, archive),

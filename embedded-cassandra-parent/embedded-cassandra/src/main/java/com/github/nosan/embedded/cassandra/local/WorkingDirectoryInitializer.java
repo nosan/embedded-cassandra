@@ -16,7 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
@@ -40,6 +43,10 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
  * @since 1.3.0
  */
 class WorkingDirectoryInitializer implements Initializer {
+
+	private static final String CASSANDRA_FILE = String.format(".%s", Cassandra.class.getName());
+
+	private static final String ARTIFACT_FILE = String.format(".%s", Artifact.class.getName());
 
 	private static final Logger log = LoggerFactory.getLogger(WorkingDirectoryInitializer.class);
 
@@ -61,72 +68,110 @@ class WorkingDirectoryInitializer implements Initializer {
 	@Override
 	public void initialize(Path workingDirectory, Version version) throws IOException {
 		Path artifactDirectory = this.artifactDirectory;
-		Artifact artifact = this.artifactFactory.create(version);
+		if (!hasExtracted(artifactDirectory)) {
+			extract(this.artifactFactory.create(version), artifactDirectory);
+		}
+		if (!hasCopied(workingDirectory)) {
+			copy(getSingleCandidate(artifactDirectory), workingDirectory);
+		}
+	}
+
+	private static void extract(Artifact artifact, Path dest) throws IOException {
 		Objects.requireNonNull(artifact, "Artifact must not be null");
-		extractArtifact(artifact, artifactDirectory);
-		copyArtifact(workingDirectory, artifactDirectory);
-	}
-
-	private static void extractArtifact(Artifact artifact, Path artifactDirectory) throws IOException {
-		Path archive = artifact.get();
-		log.info("Extract ({}) into ({}).", archive, artifactDirectory);
+		Path src = artifact.get();
+		log.info("Extract ({}) into the ({}).", src, dest);
 		try {
-			ArchiveUtils.extract(archive, artifactDirectory);
+			ArchiveUtils.extract(src, dest);
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Artifact (%s) could not be extracted into (%s)",
-					archive, artifactDirectory), ex);
+			throw new IOException(String.format("Artifact (%s) could not be extracted into the (%s)", src, dest), ex);
 		}
-		log.info("({}) Archive has been extracted into ({})", archive, artifactDirectory);
+		createHiddenFile(getSingleCandidate(dest), ARTIFACT_FILE);
+		log.info("({}) archive has been extracted into the ({})", src, dest);
 	}
 
-	private static void copyArtifact(Path workingDirectory, Path artifactDirectory) throws IOException {
-		Path directory = getDirectory(artifactDirectory);
-		log.info("Copy ({}) folder into ({}).", directory, workingDirectory);
+	private static void copy(Path src, Path dest) throws IOException {
+		log.info("Copy ({}) folder into the ({}).", src, dest);
 		try {
-			FileUtils.copy(directory, workingDirectory, path -> shouldCopy(directory, workingDirectory, path));
+			FileUtils.copy(src, dest, path -> shouldCopy(src, path));
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Could not copy folder (%s) into (%s)", directory, workingDirectory),
-					ex);
+			throw new IOException(String.format("Could not copy folder (%s) into the (%s)", src, dest), ex);
 		}
-		log.info("({}) Folder has been copied into ({})", directory, workingDirectory);
+		createHiddenFile(getSingleCandidate(dest), CASSANDRA_FILE);
+		log.info("({}) folder has been copied into the ({})", src, dest);
 	}
 
-	private static boolean shouldCopy(Path src, Path dest, Path srcPath) {
-		Path destPath = dest.resolve(src.relativize(srcPath));
+	private static void createHiddenFile(Path directory, String name) throws IOException {
+		Path file = directory.resolve(name);
+		try {
+			Files.createFile(file);
+			if (isWindows()) {
+				Files.setAttribute(file, "dos:hidden", true);
+			}
+		}
+		catch (FileAlreadyExistsException ignored) {
+		}
+	}
+
+	private static boolean shouldCopy(Path src, Path srcPath) {
 		if (Files.isDirectory(srcPath)) {
 			String name = src.relativize(srcPath).getName(0).toString().toLowerCase(Locale.ENGLISH);
 			return !name.equals("javadoc") && !name.equals("doc");
 		}
+		return true;
+	}
+
+	private static boolean hasExtracted(Path directory) {
 		try {
-			return !Files.exists(destPath) || Files.size(destPath) < Files.size(srcPath);
+			return Files.exists(getSingleCandidate(directory).resolve(ARTIFACT_FILE));
 		}
-		catch (IOException ex) {
-			return true;
+		catch (Exception ex) {
+			return false;
 		}
 	}
 
-	private static Path getDirectory(Path directory) throws IOException {
+	private static boolean hasCopied(Path directory) {
+		try {
+			return Files.exists(getSingleCandidate(directory).resolve(CASSANDRA_FILE));
+		}
+		catch (Exception ex) {
+			return false;
+		}
+	}
+
+	private static Path getSingleCandidate(Path directory) throws IOException {
 		Set<Path> directories = Files.find(directory, 1, (path, attributes) -> {
 			Path bin = path.resolve("bin");
 			Path lib = path.resolve("lib");
-			Path conf = path.resolve("conf/cassandra.yaml");
-			return Files.exists(bin) && Files.exists(conf) && Files.exists(lib);
+			Path conf = path.resolve("conf");
+			Path configuration = conf.resolve("cassandra.yaml");
+			return getCount(bin) > 0 && getCount(lib) > 0 && getCount(conf) > 0 && Files.exists(configuration);
 		}).collect(Collectors.toSet());
 
 		if (directories.isEmpty()) {
-			throw new IllegalStateException(
-					String.format("(%s) must have at least 'bin', lib' folders and 'conf/cassandra.yaml' file",
-							directory));
+			throw new IllegalStateException(String.format("(%s) does not have the Apache Cassandra files.", directory));
 		}
-		if (directories.size() > 1) {
-			throw new IllegalStateException(String.format(
-					"Impossible to determine a base directory. There are (%s) candidates : (%s)",
-					directories.size(), directories));
 
+		if (directories.size() > 1) {
+			throw new IllegalStateException(String.format("Impossible to determine the Apache Cassandra directory." +
+					" There are (%s) candidates : (%s)", directories.size(), directories));
 		}
+
 		return directories.iterator().next();
+	}
+
+	private static long getCount(Path path) {
+		try {
+			return Files.list(path).count();
+		}
+		catch (IOException ex) {
+			return 0;
+		}
+	}
+
+	private static boolean isWindows() {
+		return File.separatorChar == '\\';
 	}
 
 }

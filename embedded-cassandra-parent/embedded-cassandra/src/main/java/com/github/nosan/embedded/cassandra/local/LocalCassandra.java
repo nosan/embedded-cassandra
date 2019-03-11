@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +35,6 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
-import com.github.nosan.embedded.cassandra.util.StringUtils;
-import com.github.nosan.embedded.cassandra.util.SystemProperty;
 
 /**
  * This {@link Cassandra} implementation just a wrapper on {@link CassandraNode}.
@@ -322,9 +319,7 @@ class LocalCassandra implements Cassandra {
 	}
 
 	private static boolean isWindows() {
-		String os = new SystemProperty("os.name").get();
-		return StringUtils.hasText(os) ? os.toLowerCase(Locale.ENGLISH).contains("windows") :
-				File.separatorChar == '\\';
+		return File.separatorChar == '\\';
 	}
 
 }
