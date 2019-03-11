@@ -31,15 +31,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.apache.commons.compress.utils.IOUtils;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,21 +87,25 @@ public abstract class ArchiveUtils {
 		Objects.requireNonNull(archiveFile, "Archive must not be null");
 		Objects.requireNonNull(destination, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
-		try (ArchiveInputStream stream = archiveFactory.create(archiveFile)) {
+		try (InputStream stream = Files.newInputStream(archiveFile);
+				ArchiveInputStream archiveStream = archiveFactory.create(stream)) {
 			Files.createDirectories(destination);
 			ArchiveEntry entry;
-			while ((entry = stream.getNextEntry()) != null) {
+			while ((entry = archiveStream.getNextEntry()) != null) {
 				Path dest = destination.resolve(entry.getName());
 				if (entry.isDirectory()) {
 					Files.createDirectories(dest);
 				}
 				else {
 					Path tempFile = Files.createTempFile(null, null);
-					Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+					Files.copy(archiveStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
 					Files.move(tempFile, dest, StandardCopyOption.REPLACE_EXISTING);
 				}
 				FileModeUtils.set(entry, dest);
 			}
+		}
+		catch (ArchiveException | CompressorException ex) {
+			throw new IOException(String.format("Could not create a stream for archive (%s)", archiveFile), ex);
 		}
 	}
 
@@ -137,26 +141,14 @@ public abstract class ArchiveUtils {
 		 * @return a new Factory instance that also handles compression
 		 */
 		static ArchiveFactory create(String archiveFormat, @Nullable String compressionFormat) {
-			return archive -> {
+			return stream -> {
 				CompressorStreamFactory cf = new CompressorStreamFactory();
 				ArchiveStreamFactory af = new ArchiveStreamFactory();
-
-				InputStream stream = null;
-				CompressorInputStream cstream = null;
-
-				try {
-					stream = Files.newInputStream(archive);
-					if (StringUtils.hasText(compressionFormat)) {
-						cstream = cf.createCompressorInputStream(compressionFormat, stream);
-					}
-					return (cstream != null) ? af.createArchiveInputStream(archiveFormat, cstream) :
-							af.createArchiveInputStream(archiveFormat, stream);
+				if (StringUtils.hasText(compressionFormat)) {
+					return af.createArchiveInputStream(archiveFormat,
+							cf.createCompressorInputStream(compressionFormat, stream));
 				}
-				catch (Exception ex) {
-					IOUtils.closeQuietly(cstream);
-					IOUtils.closeQuietly(stream);
-					throw new IOException(String.format("Could not create a stream for archive (%s)", archive), ex);
-				}
+				return af.createArchiveInputStream(archiveFormat, stream);
 			};
 		}
 
@@ -164,11 +156,14 @@ public abstract class ArchiveUtils {
 		 * Reads the given archive file as an {@link ArchiveInputStream} which is used to access individual
 		 * {@link ArchiveEntry} objects within the archive without extracting the archive onto the file system.
 		 *
-		 * @param archive the archive file to stream
+		 * @param inputStream the file to stream
 		 * @return a new archive stream for the given archive
 		 * @throws IOException IOException in the case of I/O errors
+		 * @throws CompressorException if the compressor name is not known or not available, or if there's an
+		 * IOException or MemoryLimitException thrown during initialization
+		 * @throws ArchiveException if the archive name is not known
 		 */
-		ArchiveInputStream create(Path archive) throws IOException;
+		ArchiveInputStream create(InputStream inputStream) throws IOException, CompressorException, ArchiveException;
 
 	}
 
