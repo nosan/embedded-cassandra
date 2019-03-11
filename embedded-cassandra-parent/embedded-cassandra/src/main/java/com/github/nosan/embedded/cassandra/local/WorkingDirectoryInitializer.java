@@ -72,29 +72,31 @@ class WorkingDirectoryInitializer implements Initializer {
 		copy(getSingleCandidate(artifactDirectory), workingDirectory);
 	}
 
-	private static void extract(Artifact artifact, Path dest) throws IOException {
+	private static void extract(Artifact artifact, Path artifactDirectory) throws IOException {
 		Objects.requireNonNull(artifact, "Artifact must not be null");
-		Path src = artifact.get();
-		log.info("Extract ({}) into the ({}).", src, dest);
+		Path archiveFile = artifact.get();
+		log.debug("Extract ({}) into the ({}).", archiveFile, artifactDirectory);
 		try {
-			ArchiveUtils.extract(src, dest);
+			ArchiveUtils.extract(archiveFile, artifactDirectory);
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Artifact (%s) could not be extracted into the (%s)", src, dest), ex);
+			throw new IOException(String.format("Artifact (%s) could not be extracted into the (%s)",
+					archiveFile, artifactDirectory), ex);
 		}
-		createHiddenFile(getSingleCandidate(dest).resolve(ARTIFACT_FILE));
-		log.info("({}) archive has been extracted into the ({})", src, dest);
+		createHiddenFile(getSingleCandidate(artifactDirectory).resolve(ARTIFACT_FILE));
+		log.debug("({}) archive has been extracted into the ({})", archiveFile, artifactDirectory);
 	}
 
-	private static void copy(Path src, Path dest) throws IOException {
-		log.info("Copy ({}) folder into the ({}).", src, dest);
+	private static void copy(Path artifactDirectory, Path workingDirectory) throws IOException {
+		log.debug("Copy ({}) folder into the ({}).", artifactDirectory, workingDirectory);
 		try {
-			FileUtils.copy(src, dest, path -> shouldCopy(src, path));
+			FileUtils.copy(artifactDirectory, workingDirectory, path -> shouldCopy(artifactDirectory, path));
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Could not copy folder (%s) into the (%s)", src, dest), ex);
+			throw new IOException(String.format("Could not copy folder (%s) into the (%s)",
+					artifactDirectory, workingDirectory), ex);
 		}
-		log.info("({}) folder has been copied into the ({})", src, dest);
+		log.debug("({}) folder has been copied into the ({})", artifactDirectory, workingDirectory);
 	}
 
 	private static void createHiddenFile(Path file) throws IOException {
