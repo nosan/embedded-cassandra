@@ -16,15 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -114,10 +112,11 @@ class RemoteArtifact implements Artifact {
 				Resource localResource = new LocalResource(directory, remoteResource);
 				return localResource.getFile();
 			}
+			catch (ClosedByInterruptException ex) {
+				throw ex;
+			}
 			catch (IOException ex) {
-				if (log.isDebugEnabled()) {
-					log.error(ex.getMessage(), ex);
-				}
+				log.warn(ex.getMessage());
 				exceptions.addSuppressed(ex);
 			}
 		}
@@ -248,12 +247,11 @@ class RemoteArtifact implements Artifact {
 			Path file = Files.createTempFile("download-", String.format("-%s", getFileName(this.url)));
 			file.toFile().deleteOnExit();
 
-			try (FileChannel fileChannel = new FileOutputStream(file.toFile()).getChannel();
-					ReadableByteChannel channel = Channels.newChannel(urlConnection.getInputStream())) {
+			try (InputStream urlInputStream = urlConnection.getInputStream()) {
 				log.info("Downloading Apache Cassandra '{}' from '{}'.", this.version, urlConnection.getURL());
 				long start = System.currentTimeMillis();
 				showProgress(file, size, executorService);
-				fileChannel.transferFrom(channel, 0, Long.MAX_VALUE);
+				Files.copy(urlInputStream, file, StandardCopyOption.REPLACE_EXISTING);
 				long elapsed = System.currentTimeMillis() - start;
 				log.info("Apache Cassandra '{}' has been downloaded ({} ms)", this.version, elapsed);
 			}
