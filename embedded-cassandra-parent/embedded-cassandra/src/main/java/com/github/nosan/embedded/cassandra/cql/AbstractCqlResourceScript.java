@@ -16,12 +16,12 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 
-import org.apache.commons.compress.utils.IOUtils;
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.lang.Nullable;
@@ -55,7 +55,7 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 	@Override
 	protected final String getScript() {
 		try (InputStream is = getInputStream()) {
-			return new String(IOUtils.toByteArray(is), getEncoding());
+			return new String(toByteArray(is), getEncoding());
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(String.format("Could not open a stream for CQL Script '%s'", toString()),
@@ -79,6 +79,16 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 	 */
 	protected final Charset getEncoding() {
 		return this.encoding;
+	}
+
+	private static byte[] toByteArray(InputStream inputStream) throws IOException {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		byte[] buf = new byte[8192];
+		int read;
+		while ((read = inputStream.read(buf)) > 0) {
+			outputStream.write(buf, 0, read);
+		}
+		return outputStream.toByteArray();
 	}
 
 }
