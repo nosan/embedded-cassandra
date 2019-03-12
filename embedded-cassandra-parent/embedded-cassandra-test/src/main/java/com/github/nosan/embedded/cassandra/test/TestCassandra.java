@@ -439,7 +439,7 @@ public class TestCassandra implements Cassandra {
 		this.cluster = null;
 
 		Cassandra cassandra = this.cassandra;
-		if (cassandra != null) {
+		if (cassandra != null && cassandra.getState() != State.STOPPED) {
 			cassandra.stop();
 			if (cassandra.getState() == State.STOP_INTERRUPTED || Thread.interrupted()) {
 				throw new InterruptedException();
@@ -447,8 +447,8 @@ public class TestCassandra implements Cassandra {
 			if (log.isDebugEnabled()) {
 				log.debug("Test Cassandra '{}' has been stopped", cassandra);
 			}
-			this.cassandra = null;
 		}
+		this.cassandra = null;
 	}
 
 	private void registerShutdownHook() {
@@ -459,7 +459,7 @@ public class TestCassandra implements Cassandra {
 					currentThread.interrupt();
 				}
 				stopSilently();
-			}, "TestCassandraHook#" + Integer.toHexString(hashCode())));
+			}, "Test Cassandra Shutdown Hook"));
 		}
 	}
 

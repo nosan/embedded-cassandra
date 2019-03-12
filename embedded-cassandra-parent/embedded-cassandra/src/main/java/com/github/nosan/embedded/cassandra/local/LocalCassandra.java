@@ -88,10 +88,10 @@ class LocalCassandra implements Cassandra {
 	private volatile State state = State.NEW;
 
 	@Nullable
-	private volatile CassandraNode node;
+	private volatile Thread currentThread;
 
 	@Nullable
-	private volatile Thread currentThread;
+	private CassandraNode node;
 
 	/**
 	 * Creates a new {@link LocalCassandra}.
@@ -296,7 +296,7 @@ class LocalCassandra implements Cassandra {
 					currentThread.interrupt();
 				}
 				stopSilently();
-			}, "CassandraHook#" + Integer.toHexString(hashCode())));
+			}, "Cassandra Shutdown Hook"));
 		}
 	}
 

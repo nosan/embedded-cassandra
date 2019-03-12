@@ -42,7 +42,8 @@ class TestCassandraExtendedTests {
 		new CassandraRunner(testCassandra).run();
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
-		assertThat(afterHooks).filteredOn(thread -> thread.getName().startsWith("TestCassandraHook")).hasSize(1);
+		assertThat(afterHooks).filteredOn(thread -> thread.getName().startsWith("Test Cassandra Shutdown Hook"))
+				.hasSize(1);
 	}
 
 	@Test
@@ -52,7 +53,7 @@ class TestCassandraExtendedTests {
 		new CassandraRunner(testCassandra).run();
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
-		assertThat(afterHooks).noneMatch(thread -> thread.getName().startsWith("TestCassandraHook"));
+		assertThat(afterHooks).noneMatch(thread -> thread.getName().startsWith("Test Cassandra Shutdown Hook"));
 	}
 
 	@SuppressWarnings("unchecked")
