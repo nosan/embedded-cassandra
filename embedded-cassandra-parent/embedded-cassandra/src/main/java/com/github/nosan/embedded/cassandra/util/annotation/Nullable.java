@@ -30,6 +30,7 @@ import org.apiguardian.api.API;
 
 /**
  * A common annotation to declare that annotated elements can be {@code null}.
+ * <b>Only for internal purposes.</b>
  *
  * @author Dmytro Nosan
  * @see NonNullApi
@@ -37,7 +38,7 @@ import org.apiguardian.api.API;
  * @see NonNull
  * @since 1.4.2
  */
-@API(since = "1.4.2", status = API.Status.STABLE)
+@API(since = "1.4.2", status = API.Status.INTERNAL)
 @Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

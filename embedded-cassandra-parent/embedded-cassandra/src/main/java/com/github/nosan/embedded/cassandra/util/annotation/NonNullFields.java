@@ -29,7 +29,7 @@ import org.apiguardian.api.API;
 
 /**
  * A common annotation to declare that fields are to be considered as
- * {@code non-nullable} by default for a given package.
+ * {@code non-nullable} by default for a given package. <b>Only for internal purposes.</b>
  *
  * @author Dmytro Nosan
  * @see NonNullApi
@@ -37,7 +37,7 @@ import org.apiguardian.api.API;
  * @see NonNull
  * @since 1.4.2
  */
-@API(since = "1.4.2", status = API.Status.STABLE)
+@API(since = "1.4.2", status = API.Status.INTERNAL)
 @Target(ElementType.PACKAGE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
