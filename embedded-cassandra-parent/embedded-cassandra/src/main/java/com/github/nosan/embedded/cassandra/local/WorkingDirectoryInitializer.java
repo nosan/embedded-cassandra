@@ -103,7 +103,11 @@ class WorkingDirectoryInitializer implements Initializer {
 		try {
 			Files.createFile(file);
 			if (isWindows()) {
-				Files.setAttribute(file, "dos:hidden", true);
+				try {
+					Files.setAttribute(file, "dos:hidden", true);
+				}
+				catch (Exception ignored) {
+				}
 			}
 		}
 		catch (FileAlreadyExistsException ignored) {
