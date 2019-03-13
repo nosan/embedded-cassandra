@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -103,12 +104,15 @@ class RemoteArtifact implements Artifact {
 		URL[] urls = this.urlFactory.create(version);
 		Objects.requireNonNull(urls, "URLs must not be null");
 
+		Files.createDirectories(directory);
+
 		IOException exceptions = new IOException(String.format("Could not download a resource from URLs %s. " +
 				"See suppressed exceptions for details", Arrays.toString(urls)));
 
 		for (URL url : urls) {
 			try {
-				Resource remoteResource = new RemoteResource(version, url, proxy, readTimeout, connectTimeout);
+				Resource remoteResource = new RemoteResource(directory, version, url, proxy,
+						readTimeout, connectTimeout);
 				Resource localResource = new LocalResource(directory, remoteResource);
 				return localResource.getFile();
 			}
@@ -154,12 +158,6 @@ class RemoteArtifact implements Artifact {
 
 		private final Resource resource;
 
-		/**
-		 * Creates a {@link LocalResource}.
-		 *
-		 * @param directory a directory to store/search an artifact (directory must be writable)
-		 * @param resource a delegated resource
-		 */
 		LocalResource(Path directory, Resource resource) {
 			this.directory = directory;
 			this.resource = resource;
@@ -168,18 +166,19 @@ class RemoteArtifact implements Artifact {
 		@Override
 		public Path getFile() throws IOException {
 			Path file = this.directory.resolve(getName());
-			if (Files.exists(file)) {
-				return file;
+			if (!Files.exists(file)) {
+				Path tempFile = this.resource.getFile();
+				try {
+					if (!Files.exists(file)) {
+						return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+					}
+				}
+				catch (IOException ex) {
+					log.error(String.format("Could not rename '%s' as '%s'.", tempFile, file), ex);
+					return tempFile;
+				}
 			}
-			Path tempFile = this.resource.getFile();
-			try {
-				Files.createDirectories(file.getParent());
-				return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
-			}
-			catch (IOException ex) {
-				log.error(String.format("Could not rename '%s' as '%s'.", tempFile, file), ex);
-				return tempFile;
-			}
+			return file;
 		}
 
 		@Override
@@ -204,6 +203,8 @@ class RemoteArtifact implements Artifact {
 			return thread;
 		};
 
+		private final Path directory;
+
 		private final Version version;
 
 		private final URL url;
@@ -217,18 +218,10 @@ class RemoteArtifact implements Artifact {
 		@Nullable
 		private final Duration connectTimeout;
 
-		/**
-		 * Creates a {@link RemoteResource}.
-		 *
-		 * @param version a version
-		 * @param url URL to download a file
-		 * @param proxy proxy for {@code connection}
-		 * @param connectTimeout connect timeout for {@code connection}
-		 * @param readTimeout read timeout for {@code connection}
-		 */
-		RemoteResource(Version version, URL url, @Nullable Proxy proxy,
+		RemoteResource(Path directory, Version version, URL url, @Nullable Proxy proxy,
 				@Nullable Duration readTimeout,
 				@Nullable Duration connectTimeout) {
+			this.directory = directory;
 			this.version = version;
 			this.url = url;
 			this.proxy = proxy;
@@ -244,7 +237,8 @@ class RemoteArtifact implements Artifact {
 
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
 
-			Path file = Files.createTempFile("download-", String.format("-%s", getFileName(this.url)));
+			Path file = this.directory.resolve(String.format("download-%s-%s",
+					UUID.randomUUID(), getFileName(this.url)));
 			file.toFile().deleteOnExit();
 
 			try (InputStream urlInputStream = urlConnection.getInputStream()) {
