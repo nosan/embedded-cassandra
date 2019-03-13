@@ -266,15 +266,15 @@ abstract class AbstractLocalCassandraTests {
 	@DisabledOnOs(OS.WINDOWS)
 	void shouldPassAllowRootIfNecessary() {
 		LocalCassandraFactory factory = this.factory;
-		Version version = (factory.getVersion());
-		CassandraRunner runner = new CassandraRunner(factory);
+		Version version = factory.getVersion();
 		factory.setAllowRoot(true);
+		CassandraRunner runner = new CassandraRunner(factory);
 		runner.run(assertCreateKeyspace());
 		if ((version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
-			assertThat(this.output.toString()).contains(", -R");
+			assertThat(this.output.toString()).contains("-f -R");
 		}
 		else {
-			assertThat(this.output.toString()).doesNotContain(", -R");
+			assertThat(this.output.toString()).doesNotContain("-f -R");
 		}
 		assertCassandraHasBeenStopped();
 	}
