@@ -119,7 +119,7 @@ class WorkingDirectoryInitializer implements Initializer {
 			String name = src.relativize(srcPath).getName(0).toString().toLowerCase(Locale.ENGLISH);
 			return !name.equals("javadoc") && !name.equals("doc");
 		}
-		return true;
+		return !ARTIFACT_FILE.equals(srcPath.getFileName().toString());
 	}
 
 	private static boolean hasExtracted(Path directory) {
