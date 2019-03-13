@@ -97,9 +97,7 @@ public abstract class ArchiveUtils {
 					Files.createDirectories(dest);
 				}
 				else {
-					Path tempFile = Files.createTempFile(null, null);
-					Files.copy(archiveStream, tempFile, StandardCopyOption.REPLACE_EXISTING);
-					Files.move(tempFile, dest, StandardCopyOption.REPLACE_EXISTING);
+					Files.copy(archiveStream, dest, StandardCopyOption.REPLACE_EXISTING);
 				}
 				FileModeUtils.set(entry, dest);
 			}
