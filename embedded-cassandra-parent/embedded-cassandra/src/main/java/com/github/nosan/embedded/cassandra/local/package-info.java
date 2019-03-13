@@ -15,7 +15,7 @@
  */
 
 /**
- * Classes which are used for implementing Local Cassandra.
+ * Local Cassandra implementation.
  */
 
 @NonNullFields

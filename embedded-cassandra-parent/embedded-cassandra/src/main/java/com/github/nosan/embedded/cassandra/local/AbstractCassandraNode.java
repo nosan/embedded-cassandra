@@ -24,15 +24,19 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +61,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final AtomicLong instanceCounter = new AtomicLong();
 
-	private static final Logger log = LoggerFactory.getLogger(Cassandra.class);
+	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	private final long instance = instanceCounter.incrementAndGet();
 
@@ -81,10 +85,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	private final Path javaHome;
 
 	@Nullable
-	private Process process;
-
-	@Nullable
-	private RuntimeNodeSettings settings;
+	private ProcessId processId;
 
 	/**
 	 * Creates a {@link AbstractCassandraNode}.
@@ -107,170 +108,102 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	@Override
-	public final void start() throws IOException, InterruptedException {
-		Path workingDirectory = this.workingDirectory;
-		Version version = this.version;
-		ThreadFactory threadFactory = this.threadFactory;
-		Duration timeout = this.timeout;
-		RuntimeNodeSettings settings = getSettings(workingDirectory, version);
-		this.settings = settings;
-		Map<String, String> environment = new LinkedHashMap<>();
+	public final Settings start() throws IOException, InterruptedException {
+		ProcessBuilder processBuilder = new ProcessBuilder()
+				.directory(this.workingDirectory.toFile())
+				.redirectErrorStream(true);
+		RuntimeNodeSettings settings = getSettings(this.workingDirectory, this.version);
+
 		List<String> jvmOptions = new ArrayList<>();
 		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", getJmxPort(this.jmxPort)));
 		jvmOptions.addAll(this.jvmOptions);
 		String javaHome = getJavaHome(this.javaHome);
 		if (StringUtils.hasText(javaHome)) {
-			environment.put("JAVA_HOME", javaHome);
+			processBuilder.environment().put("JAVA_HOME", javaHome);
 		}
-		environment.put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
-		Predicate<String> outputFilter = new StackTraceFilter().and(new CompilerFilter());
-		NodeReadiness nodeReadiness = new NodeReadiness();
-		BufferedOutput bufferedOutput = new BufferedOutput(5);
-		Process process = start(workingDirectory, version, environment, threadFactory,
-				new FilteredOutput(nodeReadiness, outputFilter),
-				new FilteredOutput(bufferedOutput, outputFilter),
-				new FilteredOutput(new RpcAddressParser(settings), outputFilter),
-				new FilteredOutput(new ListenAddressParser(settings), outputFilter),
-				new FilteredOutput(log::info, outputFilter));
-		this.process = process;
-		boolean result;
-		try {
-			result = waitForStarted(process, timeout, settings, nodeReadiness, bufferedOutput);
+		processBuilder.environment().put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
+
+		CompositeConsumer<String> consumer = new CompositeConsumer<>();
+		NodeReadiness nodeReadiness = new NodeReadiness(consumer);
+		TransportReadiness transportReadiness = new TransportReadiness(settings);
+		BufferedConsumer bufferedConsumer = new BufferedConsumer(5);
+		consumer.add(new LoggerConsumer(LoggerFactory.getLogger(Cassandra.class)));
+		consumer.add(bufferedConsumer);
+		consumer.add(nodeReadiness);
+		consumer.add(new RpcAddressConsumer(settings, consumer));
+		consumer.add(new ListenAddressConsumer(settings, consumer));
+
+		ProcessId processId = start(processBuilder, this.threadFactory,
+				new FilteredConsumer<>(consumer, new StackTraceFilter()));
+		this.processId = processId;
+		Process process = processId.getProcess();
+
+		long start = System.nanoTime();
+		long timeout = this.timeout.toNanos();
+		long rem = timeout;
+		do {
+			if (!process.isAlive()) {
+				throw new IOException(String.format("Cassandra Node '%s' is not alive. " +
+						"Please see logs for more details.%n%s", processId.getPid(), bufferedConsumer));
+			}
+			if (transportReadiness.get() && nodeReadiness.get()) {
+				this.log.info("Cassandra Node '{}' has been started", processId.getPid());
+				consumer.remove(bufferedConsumer);
+				consumer.remove(nodeReadiness);
+				return settings;
+			}
+
+			if (rem > 0) {
+				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
+			}
+			rem = timeout - (System.nanoTime() - start);
 		}
-		catch (InterruptedException | IOException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new IOException(ex);
-		}
-		if (!result) {
-			throw new IOException(String.format("Cassandra Node '%s' has not been started," +
-					" seems like (%d) milliseconds is not enough.", getId(), timeout.toMillis()));
-		}
-		log.info("Cassandra Node '{}' has been started", getId());
+		while (rem > 0);
+		throw new IOException(String.format("Cassandra Node '%s' has not been started," +
+				" seems like (%d) milliseconds is not enough.", processId.getPid(), this.timeout.toMillis()));
 	}
 
 	@Override
 	public final void stop() throws IOException, InterruptedException {
-		Process process = this.process;
-		RuntimeNodeSettings settings = this.settings;
-		Path workingDirectory = this.workingDirectory;
-		Version version = this.version;
-		ThreadFactory threadFactory = this.threadFactory;
-		Map<String, String> environment = new LinkedHashMap<>();
-		if (process != null && process.isAlive()) {
-			boolean result = false;
+		ProcessId processId = this.processId;
+		Process process = (processId != null) ? processId.getProcess() : null;
+		if (processId != null && process.isAlive()) {
 			try {
-				stop(workingDirectory, version, environment, threadFactory, log::info);
-				result = waitForStopped(Duration.ofSeconds(10), process, settings);
+				ProcessBuilder processBuilder = new ProcessBuilder()
+						.directory(this.workingDirectory.toFile())
+						.redirectErrorStream(true);
+				stop(processId, processBuilder, this.threadFactory, new LoggerConsumer(this.log));
 			}
-			catch (InterruptedException ex) {
-				throw ex;
+			catch (IOException ex) {
+				this.log.error(String.format("Could not stop Cassandra Node '%s'.", processId.getPid()), ex);
 			}
-			catch (Throwable ex) {
-				log.error(String.format("Could not stop Cassandra Node '%s'.", getId()), ex);
+			if (!process.waitFor(10, TimeUnit.SECONDS)) {
+				throw new IOException(String.format("Casandra Node '%s' has not been stopped.", processId.getPid()));
 			}
-			if (!result) {
-				try {
-					forceStop(workingDirectory, version, environment, threadFactory, log::info);
-					result = waitForStopped(Duration.ofSeconds(5), process, settings);
-				}
-				catch (InterruptedException ex) {
-					throw ex;
-				}
-				catch (Throwable ex) {
-					log.error(String.format("Could not <force> stop Cassandra Node '%s'.", getId()), ex);
-				}
-			}
-			if (!result) {
-				try {
-					result = process.destroyForcibly().waitFor(3, TimeUnit.SECONDS);
-				}
-				catch (InterruptedException ex) {
-					throw ex;
-				}
-				catch (Throwable ex) {
-					log.error(String.format("Could not destroy Cassandra Node '%s'.", getId()), ex);
-				}
-			}
-			if (!result) {
-				throw new IOException(String.format("Casandra Node '%s' has not been stopped.", getId()));
-			}
-			this.settings = null;
-			this.process = null;
-			log.info("Cassandra Node '{}' has been stopped", getId());
+			this.processId = null;
+			this.log.info("Cassandra Node '{}' has been stopped", processId.getPid());
 		}
 	}
 
-	@Override
-	@Nullable
-	public final Settings getSettings() {
-		return this.settings;
-	}
+	protected abstract ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory,
+			Consumer<? super String> consumer) throws IOException;
 
-	/**
-	 * Creates a new node process.
-	 *
-	 * @param workingDirectory a configured base directory
-	 * @param version a version
-	 * @param threadFactory factory to create a process
-	 * @param environment the environment variables that should be associated with process
-	 * @param outputs the process output consumers
-	 * @return the newly created node process
-	 * @throws IOException if an I/O error occurs
-	 */
-	protected abstract Process start(Path workingDirectory, Version version,
-			Map<String, String> environment, ThreadFactory threadFactory,
-			RunProcess.Output... outputs) throws IOException;
-
-	/**
-	 * Stops a node process.
-	 *
-	 * @param workingDirectory a configured base directory
-	 * @param version a version
-	 * @param threadFactory factory to create a shutdown process
-	 * @param environment the environment variables that should be associated with shutdown process
-	 * @param outputs the shutdown process output consumers
-	 * @throws IOException if an I/O error occurs
-	 */
-	protected abstract void stop(Path workingDirectory, Version version,
-			Map<String, String> environment, ThreadFactory threadFactory,
-			RunProcess.Output... outputs) throws IOException;
-
-	/**
-	 * Stops a node process.
-	 *
-	 * @param workingDirectory a configured base directory
-	 * @param version a version
-	 * @param threadFactory factory to create a shutdown process
-	 * @param environment the environment variables that should be associated with shutdown process
-	 * @param outputs the shutdown process output consumers
-	 * @throws IOException if an I/O error occurs
-	 */
-	protected abstract void forceStop(Path workingDirectory,
-			Version version, Map<String, String> environment, ThreadFactory threadFactory,
-			RunProcess.Output... outputs) throws IOException;
-
-	/**
-	 * Returns the ID of the Cassandra node.
-	 *
-	 * @return the ID of the node
-	 */
-	protected abstract Long getId();
+	protected abstract void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
+			Consumer<? super String> consumer) throws IOException;
 
 	private int getJmxPort(int jmxPort) {
 		return jmxPort != 0 ? jmxPort : PortUtils.getPort();
 	}
 
 	@Nullable
-	private String getJavaHome(@Nullable Path javaHome) {
+	private static String getJavaHome(@Nullable Path javaHome) {
 		if (javaHome != null) {
 			return String.valueOf(javaHome.toAbsolutePath());
 		}
 		return new SystemProperty("java.home").get();
 	}
 
-	private RuntimeNodeSettings getSettings(Path directory, Version version) throws IOException {
+	private static RuntimeNodeSettings getSettings(Path directory, Version version) throws IOException {
 		Path target = directory.resolve("conf/cassandra.yaml");
 		try (InputStream is = Files.newInputStream(target)) {
 			Yaml yaml = new Yaml();
@@ -278,146 +211,168 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 	}
 
-	private boolean waitForStarted(Process process, Duration timeout, RuntimeNodeSettings settings,
-			NodeReadiness nodeReadiness, BufferedOutput bufferedOutput) throws Exception {
-		long start = System.currentTimeMillis();
-		return WaitUtils.await(timeout, () -> {
-			if (!process.isAlive()) {
-				throw new IOException(String.format("Cassandra Node '%s' is not alive. " +
-						"Please see logs for more details.%n%s", getId(), bufferedOutput));
-			}
-			long elapsed = System.currentTimeMillis() - start;
-			if (elapsed > 20000) {
-				return TransportUtils.isReady(settings);
-			}
-			return nodeReadiness.isReady() && TransportUtils.isReady(settings);
-		});
-	}
+	private static final class TransportReadiness implements Supplier<Boolean> {
 
-	private boolean waitForStopped(Duration timeout, Process process, @Nullable Settings settings) throws Exception {
-		return WaitUtils.await(timeout, () -> (settings == null || TransportUtils.isDisabled(settings))
-				&& !process.isAlive());
-	}
+		private final Settings settings;
 
-	/**
-	 * A simple implementation of {@link RunProcess.Output} class to find a {@code rpc_address} and set it into
-	 * the {@link RuntimeNodeSettings}.
-	 */
-	private static final class RpcAddressParser implements RunProcess.Output {
-
-		private final RuntimeNodeSettings settings;
-
-		private final Pattern regex;
-
-		private boolean alreadySet;
-
-		/**
-		 * Creates a new {@link RpcAddressParser}.
-		 *
-		 * @param settings the node settings
-		 */
-		RpcAddressParser(RuntimeNodeSettings settings) {
+		TransportReadiness(Settings settings) {
 			this.settings = settings;
-			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getPort(),
-					settings.getSslPort()));
 		}
 
 		@Override
-		public void accept(String line) {
-			if (!this.alreadySet) {
-				Matcher matcher = this.regex.matcher(line);
-				if (matcher.matches()) {
-					String address = matcher.group(1).trim();
-					try {
-						this.settings.setRealAddress(NetworkUtils.getInetAddress(address.trim()));
-						this.alreadySet = true;
-					}
-					catch (Throwable ex) {
-						if (log.isDebugEnabled()) {
-							log.error(String.format("Could not parse an InetAddress '%s'", address), ex);
-						}
-					}
-				}
+		public Boolean get() {
+			Settings settings = this.settings;
+			Predicate<Settings> condition = (ignore) -> true;
+			if (settings.isStartNativeTransport()) {
+				condition = condition.and(TransportReadiness::isNativeTransportReady);
 			}
+			if (settings.isStartRpc()) {
+				condition = condition.and(TransportReadiness::isRpcTransportReady);
+			}
+			return condition.test(settings);
+		}
+
+		private static boolean isNativeTransportReady(Settings settings) {
+			InetAddress address = settings.getRealAddress();
+			int port = settings.getPort();
+			Integer sslPort = settings.getSslPort();
+			if (sslPort != null) {
+				return PortUtils.isPortBusy(address, port) && PortUtils.isPortBusy(address, sslPort);
+			}
+			return PortUtils.isPortBusy(address, port);
+		}
+
+		private static boolean isRpcTransportReady(Settings settings) {
+			InetAddress address = settings.getRealAddress();
+			int port = settings.getRpcPort();
+			return PortUtils.isPortBusy(address, port);
 		}
 
 	}
 
-	/**
-	 * A simple implementation of {@link RunProcess.Output} class to find a {@code listen_address} and set it into
-	 * the {@link RuntimeNodeSettings}.
-	 */
-	private static final class ListenAddressParser implements RunProcess.Output {
+	private static final class NodeReadiness implements Consumer<String>, Supplier<Boolean> {
 
-		private final RuntimeNodeSettings settings;
+		private static final long DEFAULT_STARTUP_TIMEOUT = 20000L;
 
-		private final Pattern regex;
+		private final CompositeConsumer<? extends String> consumer;
 
-		private boolean alreadySet;
-
-		/**
-		 * Creates a new {@link ListenAddressParser}.
-		 *
-		 * @param settings the node settings
-		 */
-		ListenAddressParser(RuntimeNodeSettings settings) {
-			this.settings = settings;
-			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getStoragePort(),
-					settings.getSslStoragePort()));
-		}
-
-		@Override
-		public void accept(String line) {
-			if (!this.alreadySet) {
-				Matcher matcher = this.regex.matcher(line);
-				if (matcher.matches()) {
-					String address = matcher.group(1).trim();
-					try {
-						this.settings.setRealListenAddress(NetworkUtils.getInetAddress(address.trim()));
-						this.alreadySet = true;
-					}
-					catch (Throwable ex) {
-						if (log.isDebugEnabled()) {
-							log.error(String.format("Could not parse an InetAddress '%s'", address), ex);
-						}
-					}
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * A simple implementation of {@link RunProcess.Output} class to check whether {@code cassandra node} is ready or
-	 * not.
-	 */
-	private static final class NodeReadiness implements RunProcess.Output {
+		private final long start;
 
 		private volatile boolean ready = false;
 
+		NodeReadiness(CompositeConsumer<? extends String> consumer) {
+			this.consumer = consumer;
+			this.start = System.currentTimeMillis();
+		}
+
 		@Override
 		public void accept(String line) {
-			if (!this.ready) {
-				this.ready = line.matches("(?i).*listening.*clients.*") ||
-						line.matches("(?i).*not\\s*starting.*as\\s*requested.*");
+			long elapsed = System.currentTimeMillis() - this.start;
+			if (match(line) || elapsed > DEFAULT_STARTUP_TIMEOUT) {
+				this.ready = true;
+				this.consumer.remove(this);
 			}
 		}
 
-		/**
-		 * Tests whether {@code cassandra} node is ready or not.
-		 *
-		 * @return {@code true} if ready, otherwise {@code false}
-		 */
-		boolean isReady() {
+		@Override
+		public Boolean get() {
 			return this.ready;
+		}
+
+		private static boolean match(String line) {
+			return line.matches("(?i).*listening.*clients.*") ||
+					line.matches("(?i).*not\\s*starting.*as\\s*requested.*");
 		}
 
 	}
 
-	/**
-	 * A basic implementation of the {@link NodeSettings} with a way to set {@code realListenAddress} and
-	 * {@code realAddress}.
-	 */
+	private static final class RpcAddressConsumer implements Consumer<String> {
+
+		private static final Logger log = LoggerFactory.getLogger(RpcAddressConsumer.class);
+
+		private final RuntimeNodeSettings settings;
+
+		private final Pattern regex;
+
+		private final CompositeConsumer<? extends String> consumer;
+
+		RpcAddressConsumer(RuntimeNodeSettings settings, CompositeConsumer<? extends String> consumer) {
+			this.settings = settings;
+			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getPort(),
+					settings.getSslPort()));
+			this.consumer = consumer;
+		}
+
+		@Override
+		public void accept(String line) {
+			Matcher matcher = this.regex.matcher(line);
+			if (matcher.matches()) {
+				String address = matcher.group(1).trim();
+				try {
+					this.settings.setRealAddress(NetworkUtils.getInetAddress(address.trim()));
+					this.consumer.remove(this);
+				}
+				catch (Throwable ex) {
+					if (log.isDebugEnabled()) {
+						log.error(String.format("Could not parse an InetAddress '%s'", address), ex);
+					}
+				}
+			}
+		}
+
+	}
+
+	private static final class ListenAddressConsumer implements Consumer<String> {
+
+		private static final Logger log = LoggerFactory.getLogger(ListenAddressConsumer.class);
+
+		private final RuntimeNodeSettings settings;
+
+		private final Pattern regex;
+
+		private final CompositeConsumer<? extends String> consumer;
+
+		ListenAddressConsumer(RuntimeNodeSettings settings, CompositeConsumer<? extends String> consumer) {
+			this.settings = settings;
+			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getStoragePort(),
+					settings.getSslStoragePort()));
+			this.consumer = consumer;
+		}
+
+		@Override
+		public void accept(String line) {
+			Matcher matcher = this.regex.matcher(line);
+			if (matcher.matches()) {
+				String address = matcher.group(1).trim();
+				try {
+					this.settings.setRealListenAddress(NetworkUtils.getInetAddress(address.trim()));
+					this.consumer.remove(this);
+				}
+				catch (Throwable ex) {
+					if (log.isDebugEnabled()) {
+						log.error(String.format("Could not parse an InetAddress '%s'", address), ex);
+					}
+				}
+			}
+		}
+
+	}
+
+	private static final class LoggerConsumer implements Consumer<String> {
+
+		private final Logger logger;
+
+		LoggerConsumer(Logger logger) {
+			this.logger = logger;
+		}
+
+		@Override
+		public void accept(String line) {
+			this.logger.info(line);
+		}
+
+	}
+
 	private static final class RuntimeNodeSettings extends NodeSettings {
 
 		@Nullable
@@ -426,12 +381,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		@Nullable
 		private volatile InetAddress realAddress;
 
-		/**
-		 * Creates a new {@link RuntimeNodeSettings}.
-		 *
-		 * @param version a version
-		 * @param properties a node properties
-		 */
 		RuntimeNodeSettings(Version version, @Nullable Map<?, ?> properties) {
 			super(version, properties);
 		}
@@ -446,12 +395,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 
 		/**
-		 * Set the rpc address.
+		 * Initializes the value for the {@link #getRealAddress()} attribute.
 		 *
-		 * @param address an IP address
+		 * @param realAddress The value for realAddress
 		 */
-		void setRealAddress(@Nullable InetAddress address) {
-			this.realAddress = address;
+		void setRealAddress(@Nullable InetAddress realAddress) {
+			this.realAddress = realAddress;
 		}
 
 		@Override
@@ -464,12 +413,48 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 
 		/**
-		 * Set the listen address.
+		 * Initializes the value for the {@link #getRealListenAddress()}  attribute.
 		 *
-		 * @param address an IP address
+		 * @param realListenAddress The value for realListenAddress
 		 */
-		void setRealListenAddress(@Nullable InetAddress address) {
-			this.realListenAddress = address;
+		void setRealListenAddress(@Nullable InetAddress realListenAddress) {
+			this.realListenAddress = realListenAddress;
+		}
+
+	}
+
+	private static final class BufferedConsumer implements Consumer<String> {
+
+		private final Deque<String> lines = new ConcurrentLinkedDeque<>();
+
+		private final int count;
+
+		BufferedConsumer(int count) {
+			this.count = count;
+		}
+
+		@Override
+		public void accept(String line) {
+			if (this.lines.size() > this.count) {
+				this.lines.removeFirst();
+			}
+			this.lines.addLast(line);
+		}
+
+		@Override
+		public String toString() {
+			return this.lines.stream().collect(Collectors.joining(System.lineSeparator()));
+		}
+
+	}
+
+	private static final class StackTraceFilter implements Predicate<String> {
+
+		private static final Pattern STACKTRACE_PATTERN = Pattern.compile("\\s+(at|\\.{3})\\s+.*");
+
+		@Override
+		public boolean test(String line) {
+			return !STACKTRACE_PATTERN.matcher(line).matches();
 		}
 
 	}

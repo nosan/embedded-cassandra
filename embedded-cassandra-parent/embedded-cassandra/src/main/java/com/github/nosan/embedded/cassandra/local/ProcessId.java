@@ -16,24 +16,45 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
- * Tests for {@link FilteredOutput}.
+ * Util class that contains {@link Process} and pid.
  *
  * @author Dmytro Nosan
  */
-class FilteredOutputTests {
+class ProcessId {
 
-	@Test
-	void shouldApplyFilter() {
-		BufferedOutput delegate = new BufferedOutput(500);
-		FilteredOutput filteredOutput = new FilteredOutput(delegate, line -> line.equals("text"));
-		filteredOutput.accept("Hello world");
-		filteredOutput.accept("text");
-		assertThat(delegate.toString()).isEqualTo("text");
+	private final Process process;
+
+	private final long pid;
+
+	/**
+	 * Creates {@link ProcessId}.
+	 *
+	 * @param process the process
+	 * @param pid the pid, or (-1)
+	 * @see ProcessUtils#getPid(Process)
+	 */
+	ProcessId(Process process, long pid) {
+		this.process = process;
+		this.pid = pid;
+	}
+
+	/**
+	 * Return the process.
+	 *
+	 * @return the process
+	 */
+	Process getProcess() {
+		return this.process;
+	}
+
+	/**
+	 * Return the pid.
+	 *
+	 * @return the pid (or -1)
+	 */
+	long getPid() {
+		return this.pid;
 	}
 
 }

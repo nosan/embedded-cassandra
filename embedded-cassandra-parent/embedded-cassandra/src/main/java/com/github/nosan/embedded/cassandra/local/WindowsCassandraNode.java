@@ -21,12 +21,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.Nullable;
@@ -40,10 +40,12 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class WindowsCassandraNode extends AbstractCassandraNode {
 
-	private final Path pidFile;
+	private final Path workingDirectory;
+
+	private final Version version;
 
 	@Nullable
-	private volatile Long pid;
+	private Path pidFile;
 
 	/**
 	 * Creates a {@link WindowsCassandraNode}.
@@ -55,95 +57,81 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	 * @param javaHome java home directory
 	 * @param jmxPort JMX port
 	 */
-	WindowsCassandraNode(Path workingDirectory,
-			Version version, Duration timeout,
-			List<String> jvmOptions, @Nullable Path javaHome, int jmxPort) {
+	WindowsCassandraNode(Path workingDirectory, Version version, Duration timeout, List<String> jvmOptions,
+			@Nullable Path javaHome, int jmxPort) {
 		super(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
-		this.pidFile = workingDirectory.resolve(String.format("%s.pid", UUID.randomUUID()));
+		this.workingDirectory = workingDirectory;
+		this.version = version;
 	}
 
 	@Override
-	protected Process start(Path workingDirectory, Version version,
-			Map<String, String> environment, ThreadFactory threadFactory,
-			RunProcess.Output... outputs) throws IOException {
-		Files.deleteIfExists(this.pidFile);
-		this.pid = null;
-		List<Object> arguments = new ArrayList<>();
-		arguments.add("powershell");
-		arguments.add("-ExecutionPolicy");
-		arguments.add("Unrestricted");
-		arguments.add(workingDirectory.resolve("bin/cassandra.ps1").toAbsolutePath());
-		arguments.add("-f");
+	protected ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory,
+			Consumer<? super String> consumer) throws IOException {
+		Path workingDirectory = this.workingDirectory;
+		Version version = this.version;
+		Path pidFile = workingDirectory.resolve(UUID.randomUUID().toString());
+		this.pidFile = pidFile;
+		processBuilder.command("powershell", "-ExecutionPolicy", "Unrestricted");
+		processBuilder.command().add(workingDirectory.resolve("bin/cassandra.ps1").toAbsolutePath().toString());
+		processBuilder.command().add("-f");
 		if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1)) {
-			arguments.add("-a");
+			processBuilder.command().add("-a");
 		}
-		arguments.add("-p");
-		arguments.add(this.pidFile.toAbsolutePath());
-		Process process = new RunProcess(workingDirectory, environment, threadFactory, arguments)
-				.run(append(line -> {
-					Long pid = this.pid;
-					if (pid != null && pid == -1) {
-						this.pid = getPid(this.pidFile);
-					}
-				}, outputs));
-		this.pid = ProcessUtils.getPid(process);
-		return process;
-	}
+		processBuilder.command().add("-p");
+		processBuilder.command().add(pidFile.toAbsolutePath().toString());
 
-	@Override
-	protected void stop(Path workingDirectory, Version version,
-			Map<String, String> environment, ThreadFactory threadFactory,
-			RunProcess.Output... outputs) throws IOException {
-		stop(workingDirectory, environment, threadFactory, false, outputs);
-	}
+		CountDownLatch latch = new CountDownLatch(1);
 
-	@Override
-	protected void forceStop(Path workingDirectory, Version version,
-			Map<String, String> environment, ThreadFactory threadFactory,
-			RunProcess.Output... outputs) throws IOException {
-		stop(workingDirectory, environment, threadFactory, true, outputs);
-	}
+		CompositeConsumer<String> compositeConsumer = new CompositeConsumer<>();
+		compositeConsumer.add(new Consumer<String>() {
 
-	@Override
-	protected Long getId() {
-		Long pid = this.pid;
-		return (pid != null) ? pid : -1;
-	}
-
-	private void stop(Path workingDirectory, Map<String, String> environment,
-			ThreadFactory threadFactory, boolean force, RunProcess.Output... outputs) throws IOException {
-		Path pidFile = this.pidFile;
-		if (Files.exists(pidFile)) {
-			List<Object> arguments = new ArrayList<>();
-			arguments.add("powershell");
-			arguments.add("-ExecutionPolicy");
-			arguments.add("Unrestricted");
-			arguments.add(workingDirectory.resolve("bin/stop-server.ps1").toAbsolutePath());
-			if (force) {
-				arguments.add("-f");
+			@Override
+			public void accept(String line) {
+				latch.countDown();
+				compositeConsumer.remove(this);
 			}
-			arguments.add("-p");
-			arguments.add(pidFile.toAbsolutePath());
-			new RunProcess(workingDirectory, environment, threadFactory, arguments).run(outputs);
+		});
+		compositeConsumer.add(consumer);
+
+		Process process = new RunProcess(processBuilder, threadFactory).run(compositeConsumer);
+		try {
+			latch.await(1, TimeUnit.SECONDS);
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+		return new ProcessId(process, getPid(process, pidFile));
+	}
+
+	@Override
+	protected void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
+			Consumer<? super String> consumer) throws IOException {
+		long id = processId.getPid();
+		Process process = processId.getProcess();
+		Path pidFile = this.pidFile;
+		Path stopServerFile = this.workingDirectory.resolve("bin/stop-server.ps1");
+		if (pidFile != null && Files.exists(pidFile) && Files.exists(stopServerFile)) {
+			processBuilder.command("powershell", "-ExecutionPolicy", "Unrestricted");
+			processBuilder.command().add(stopServerFile.toAbsolutePath().toString());
+			processBuilder.command().add("-p");
+			processBuilder.command().add(pidFile.toAbsolutePath().toString());
+			new RunProcess(processBuilder, threadFactory).run(consumer);
+		}
+		else if (id != -1) {
+			processBuilder.command("taskkill", "/pid", Long.toString(id));
+			new RunProcess(processBuilder, threadFactory).run(consumer);
 		}
 		else {
-			List<Object> arguments = new ArrayList<>();
-			arguments.add("taskkill");
-			if (force) {
-				arguments.add("/f");
-			}
-			arguments.add("/t");
-			arguments.add("/pid");
-			arguments.add(getId());
-			new RunProcess(workingDirectory, environment, threadFactory, arguments).run(outputs);
+			process.destroy();
 		}
 	}
 
-	private static RunProcess.Output[] append(RunProcess.Output element, RunProcess.Output[] elements) {
-		List<RunProcess.Output> outputs = new ArrayList<>();
-		outputs.add(element);
-		outputs.addAll(Arrays.asList(elements));
-		return outputs.toArray(new RunProcess.Output[0]);
+	private static long getPid(Process process, Path pidFile) {
+		long pid = ProcessUtils.getPid(process);
+		if (pid != -1) {
+			return pid;
+		}
+		return getPid(pidFile);
 	}
 
 	private static long getPid(Path pidFile) {

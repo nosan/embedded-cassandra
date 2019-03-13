@@ -19,11 +19,9 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.Nullable;
@@ -36,9 +34,11 @@ import com.github.nosan.embedded.cassandra.lang.Nullable;
  */
 class UnixCassandraNode extends AbstractCassandraNode {
 
-	private final boolean allowRoot;
+	private final Path workingDirectory;
 
-	private long pid;
+	private final Version version;
+
+	private final boolean allowRoot;
 
 	/**
 	 * Creates a {@link UnixCassandraNode}.
@@ -54,45 +54,39 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	UnixCassandraNode(Path workingDirectory, Version version, Duration timeout,
 			List<String> jvmOptions, @Nullable Path javaHome, int jmxPort, boolean allowRoot) {
 		super(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
+		this.workingDirectory = workingDirectory;
+		this.version = version;
 		this.allowRoot = allowRoot;
 	}
 
 	@Override
-	protected Process start(Path workingDirectory, Version version,
-			Map<String, String> environment, ThreadFactory threadFactory,
-			RunProcess.Output... outputs) throws IOException {
-		this.pid = -1;
-		List<Object> arguments = new ArrayList<>();
-		arguments.add(workingDirectory.resolve("bin/cassandra").toAbsolutePath());
-		arguments.add("-f");
+	protected ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory,
+			Consumer<? super String> consumer) throws IOException {
+		Path workingDirectory = this.workingDirectory;
+		Version version = this.version;
+		processBuilder.command().add(workingDirectory.resolve("bin/cassandra").toAbsolutePath()
+				.toString());
+		processBuilder.command().add("-f");
 		if (this.allowRoot && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
-			arguments.add("-R");
+			processBuilder.command().add("-R");
 		}
-		Process process = new RunProcess(workingDirectory, environment, threadFactory, arguments)
-				.run(outputs);
-		this.pid = ProcessUtils.getPid(process);
-		return process;
+		Process process = new RunProcess(processBuilder, threadFactory)
+				.run(consumer);
+		return new ProcessId(process, ProcessUtils.getPid(process));
 	}
 
 	@Override
-	protected void stop(Path workingDirectory, Version version,
-			Map<String, String> environment, ThreadFactory threadFactory,
-			RunProcess.Output... outputs) throws IOException {
-		new RunProcess(workingDirectory, environment, threadFactory, Arrays.asList("kill", "-SIGINT", getId()))
-				.run(outputs);
-	}
-
-	@Override
-	protected void forceStop(Path workingDirectory, Version version,
-			Map<String, String> environment, ThreadFactory threadFactory,
-			RunProcess.Output... outputs) throws IOException {
-		new RunProcess(workingDirectory, environment, threadFactory, Arrays.asList("kill", "-9", getId()))
-				.run(outputs);
-	}
-
-	@Override
-	protected Long getId() {
-		return this.pid;
+	protected void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
+			Consumer<? super String> consumer) throws IOException {
+		long id = processId.getPid();
+		Process process = processId.getProcess();
+		if (id != -1) {
+			new RunProcess(processBuilder.command("kill", "-SIGINT", Long.toString(id)))
+					.run(consumer);
+		}
+		else {
+			process.destroy();
+		}
 	}
 
 }

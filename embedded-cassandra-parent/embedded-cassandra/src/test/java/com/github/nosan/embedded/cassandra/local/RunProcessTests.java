@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,12 +41,12 @@ class RunProcessTests {
 	private Path temporaryFolder;
 
 	@Nullable
-	private BufferedOutput output;
+	private StringBuilder output;
 
 	@BeforeEach
 	void setUp(@TempDir Path temporaryFolder) {
 		this.temporaryFolder = temporaryFolder;
-		this.output = new BufferedOutput(10);
+		this.output = new StringBuilder();
 	}
 
 	@Test
@@ -61,8 +59,11 @@ class RunProcessTests {
 	}
 
 	private Process runProcess(String... arguments) throws IOException {
-		return new RunProcess(this.temporaryFolder, Collections.singletonMap("RUN_PROCESS_TEST", "TEST"),
-				Thread::new, Arrays.asList(arguments)).run(this.output);
+		ProcessBuilder processBuilder = new ProcessBuilder();
+		processBuilder.directory(this.temporaryFolder.toFile());
+		processBuilder.environment().put("RUN_PROCESS_TEST", "TEST");
+		processBuilder.command(arguments);
+		return new RunProcess(processBuilder, Thread::new).run(this.output::append);
 	}
 
 	private String command(String... arguments) {

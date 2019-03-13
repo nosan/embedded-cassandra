@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
- * A basic interface to initialize a {@code CASSANDRA_HOME}.
+ * A basic interface to initialize a working directory.
  *
  * @author Dmytro Nosan
  * @since 1.0.9

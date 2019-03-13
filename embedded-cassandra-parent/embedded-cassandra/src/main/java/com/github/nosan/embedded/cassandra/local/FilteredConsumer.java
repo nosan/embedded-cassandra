@@ -16,26 +16,33 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
- * Tests for {@link BufferedOutput}.
+ * {@link Consumer} implementation that filters the input before delegates it to the underlying {@link
+ * Consumer}.
  *
+ * @param <T> the type
  * @author Dmytro Nosan
+ * @since 1.4.2
  */
-class BufferedOutputTests {
+class FilteredConsumer<T> implements Consumer<T> {
 
-	@Test
-	void shouldKeepLines() {
-		BufferedOutput output = new BufferedOutput(2);
-		output.accept("line1");
-		output.accept("line2");
-		output.accept("line3");
-		output.accept("line4");
-		assertThat(output.toString()).contains("line3").contains("line4")
-				.doesNotContain("line1").doesNotContain("line2");
+	private final Consumer<? super T> consumer;
+
+	private final Predicate<? super T> filter;
+
+	FilteredConsumer(Consumer<? super T> consumer, Predicate<? super T> filter) {
+		this.consumer = consumer;
+		this.filter = filter;
+	}
+
+	@Override
+	public void accept(T object) {
+		if (this.filter.test(object)) {
+			this.consumer.accept(object);
+		}
 	}
 
 }

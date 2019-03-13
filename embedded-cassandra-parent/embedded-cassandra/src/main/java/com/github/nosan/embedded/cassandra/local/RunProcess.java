@@ -20,15 +20,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +32,7 @@ import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
- * Utility class to run a {@code Process}.
+ * Utility class to run a {@link Process}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
@@ -47,29 +41,27 @@ class RunProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
 
-	@Nullable
-	private final Path workingDirectory;
-
-	private final List<Object> arguments;
-
-	private final Map<String, String> environment;
+	private final ProcessBuilder processBuilder;
 
 	private final ThreadFactory threadFactory;
 
 	/**
 	 * Creates a new {@link RunProcess} instance.
 	 *
-	 * @param workingDirectory the working directory of the child process
-	 * @param environment the environment variables
-	 * @param arguments the program to execute and its arguments
-	 * @param threadFactory factory for creating process readers.
+	 * @param processBuilder {@link ProcessBuilder} to create {@link Process}
 	 */
-	RunProcess(@Nullable Path workingDirectory, @Nullable Map<String, String> environment,
-			@Nullable ThreadFactory threadFactory, List<?> arguments) {
-		this.workingDirectory = workingDirectory;
-		this.arguments = Collections.unmodifiableList(new ArrayList<>(arguments));
-		this.environment = Collections.unmodifiableMap((environment != null) ?
-				new LinkedHashMap<>(environment) : Collections.emptyMap());
+	RunProcess(ProcessBuilder processBuilder) {
+		this(processBuilder, null);
+	}
+
+	/**
+	 * Creates a new {@link RunProcess} instance.
+	 *
+	 * @param processBuilder {@link ProcessBuilder} to create a {@link Process}
+	 * @param threadFactory {@link ThreadFactory} to create a {@link Thread}
+	 */
+	RunProcess(ProcessBuilder processBuilder, @Nullable ThreadFactory threadFactory) {
+		this.processBuilder = processBuilder;
 		this.threadFactory = (threadFactory != null) ? threadFactory : (runnable) -> {
 			Thread thread = new Thread(runnable);
 			thread.setDaemon(true);
@@ -78,64 +70,46 @@ class RunProcess {
 	}
 
 	/**
-	 * Starts a new process using the arguments and env variables and delegates output to the {@link Output}.
+	 * Starts a new process.
 	 *
-	 * @param outputs output consumers.
-	 * @return a new process object for managing the subprocess
+	 * @param consumer output consumer.
+	 * @return a new process
 	 * @throws IOException if an I/O error occurs
+	 * @see CompositeConsumer
 	 */
-	Process run(@Nullable Output... outputs) throws IOException {
-		List<String> command = this.arguments.stream().map(String::valueOf).collect(Collectors.toList());
-		ProcessBuilder processBuilder = new ProcessBuilder(command);
-		Path workingDirectory = this.workingDirectory;
-		if (workingDirectory != null) {
-			processBuilder.directory(workingDirectory.toAbsolutePath().toFile());
-		}
-		Map<String, String> environment = this.environment;
-		if (!environment.isEmpty()) {
-			processBuilder.environment().putAll(environment);
-		}
-		processBuilder.redirectErrorStream(true);
+	Process run(Consumer<? super String> consumer) throws IOException {
+		ProcessBuilder builder = this.processBuilder;
 		if (log.isDebugEnabled()) {
-			StringBuilder message = new StringBuilder(String.format("Execute %s", command));
-			if (!environment.isEmpty()) {
-				message.append(String.format(" with environment variables %s", environment));
-			}
-			if (workingDirectory != null) {
-				message.append(String.format(" and using a directory '%s'", workingDirectory));
-			}
-			log.debug(message.toString());
+			String message = String.format("Execute '%s'  with environment variables %s  and using a directory '%s'",
+					String.join(" ", builder.command()), builder.environment(), builder.directory());
+			log.debug(message);
 		}
-		return start(processBuilder, this.threadFactory, outputs);
+		return start(this.processBuilder, this.threadFactory, consumer);
 	}
 
-	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory, @Nullable Output[] outputs)
+	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<? super String> consumer)
 			throws IOException {
 		Process process = builder.start();
-		if (outputs != null && outputs.length > 0) {
-			Map<String, String> context = MDCUtils.getContext();
-			threadFactory.newThread(() -> {
-				MDCUtils.setContext(context);
-				read(process, outputs);
-			}).start();
-		}
+		Map<String, String> context = MDCUtils.getContext();
+		threadFactory.newThread(() -> {
+			MDCUtils.setContext(context);
+			read(process, consumer);
+		}).start();
 		return process;
 	}
 
-	private static void read(Process process, Output[] outputs) {
+	private static void read(Process process, Consumer<? super String> consumer) {
 		try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
 			String line;
 			while ((line = readline(reader)) != null) {
 				if (StringUtils.hasText(line)) {
-					for (Output output : outputs) {
-						try {
-							output.accept(line);
-						}
-						catch (Throwable ex) {
-							if (log.isDebugEnabled()) {
-								log.error(String.format("Output '%s' did not handle a line '%s'", output, line), ex);
-							}
+					try {
+						consumer.accept(line);
+					}
+					catch (Throwable ex) {
+						if (log.isDebugEnabled()) {
+							log.error(String.format("Line '%s' is not handled by consumer '%s'", line, consumer), ex);
 						}
 					}
 				}
@@ -155,22 +129,6 @@ class RunProcess {
 			//stream closed. nothing special
 			return null;
 		}
-	}
-
-	/**
-	 * Output consumer.
-	 */
-	@FunctionalInterface
-	interface Output extends Consumer<String> {
-
-		/**
-		 * Consumes the given line.
-		 *
-		 * @param line a source line (never empty)
-		 */
-		@Override
-		void accept(String line);
-
 	}
 
 }

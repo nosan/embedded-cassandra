@@ -93,6 +93,9 @@ class LocalCassandra implements Cassandra {
 	@Nullable
 	private CassandraNode node;
 
+	@Nullable
+	private Settings settings;
+
 	/**
 	 * Creates a new {@link LocalCassandra}.
 	 *
@@ -202,11 +205,11 @@ class LocalCassandra implements Cassandra {
 	public Settings getSettings() throws CassandraException {
 		synchronized (this.lock) {
 			if (this.state == State.STARTED) {
-				CassandraNode node = this.node;
-				Settings settings = (node != null) ? node.getSettings() : null;
+				Settings settings = this.settings;
 				if (settings != null) {
 					return settings;
 				}
+				throw new IllegalStateException("Settings cannot be null if Cassandra is running.");
 			}
 			throw new CassandraException("Cassandra is not started. Please start it before calling this method.");
 		}
@@ -229,9 +232,9 @@ class LocalCassandra implements Cassandra {
 			long start = System.currentTimeMillis();
 			List<Initializer> initializers = new ArrayList<>();
 			initializers.add(new WorkingDirectoryInitializer(this.artifactFactory, this.artifactDirectory));
+			initializers.add(new ConfigurationFileInitializer(this.configurationFile));
 			initializers.add(new LogbackFileInitializer(this.logbackFile));
 			initializers.add(new RackFileInitializer(this.rackFile));
-			initializers.add(new ConfigurationFileInitializer(this.configurationFile));
 			initializers.add(new TopologyFileInitializer(this.topologyFile));
 			initializers.add(new CommitLogFileInitializer(this.commitLogArchivingFile));
 			initializers.add(new ConfigurationFileRandomPortInitializer());
@@ -254,23 +257,11 @@ class LocalCassandra implements Cassandra {
 
 	private void start0() throws IOException, InterruptedException {
 		Version version = this.version;
-		Path workingDirectory = this.workingDirectory;
-		Duration timeout = this.startupTimeout;
-		List<String> jvmOptions = this.jvmOptions;
-		Path javaHome = this.javaHome;
-		int jmxPort = this.jmxPort;
-		boolean allowRoot = this.allowRoot;
 		log.info("Starts Apache Cassandra '{}'", version);
 		long start = System.currentTimeMillis();
-		CassandraNode node;
-		if (isWindows()) {
-			node = new WindowsCassandraNode(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
-		}
-		else {
-			node = new UnixCassandraNode(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort, allowRoot);
-		}
+		CassandraNode node = createNode();
 		this.node = node;
-		node.start();
+		this.settings = node.start();
 		long elapsed = System.currentTimeMillis() - start;
 		log.info("Apache Cassandra '{}' has been started ({} ms)", version, elapsed);
 	}
@@ -286,6 +277,15 @@ class LocalCassandra implements Cassandra {
 			long elapsed = System.currentTimeMillis() - start;
 			log.info("Apache Cassandra '{}' has been stopped ({} ms)", version, elapsed);
 		}
+	}
+
+	private CassandraNode createNode() {
+		if (isWindows()) {
+			return new WindowsCassandraNode(this.workingDirectory, this.version, this.startupTimeout, this.jvmOptions,
+					this.javaHome, this.jmxPort);
+		}
+		return new UnixCassandraNode(this.workingDirectory, this.version, this.startupTimeout, this.jvmOptions,
+				this.javaHome, this.jmxPort, this.allowRoot);
 	}
 
 	private void registerShutdownHook() {

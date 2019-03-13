@@ -16,41 +16,42 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 /**
- * {@link RunProcess.Output} to keep {@code N} lines from {@code Process} output.
+ * Composite {@link Consumer} implementation that iterates over a given list of {@link Consumer} instances.
  *
+ * @param <T> the type
  * @author Dmytro Nosan
  * @since 1.4.2
  */
-class BufferedOutput implements RunProcess.Output {
+class CompositeConsumer<T> implements Consumer<T> {
 
-	private final ConcurrentLinkedDeque<String> lines = new ConcurrentLinkedDeque<>();
-
-	private final int count;
+	private final List<Consumer<? super T>> consumers = new CopyOnWriteArrayList<>();
 
 	/**
-	 * Creates a new {@link BufferedOutput}.
+	 * Adds a consumer.
 	 *
-	 * @param count lines limit
+	 * @param consumer the consumer
 	 */
-	BufferedOutput(int count) {
-		this.count = count;
+	void add(Consumer<? super T> consumer) {
+		this.consumers.add(consumer);
+	}
+
+	/**
+	 * Removes a consumer.
+	 *
+	 * @param consumer the consumer
+	 */
+	void remove(Consumer<? super T> consumer) {
+		this.consumers.remove(consumer);
 	}
 
 	@Override
-	public void accept(String line) {
-		if (this.lines.size() >= this.count) {
-			this.lines.removeFirst();
-		}
-		this.lines.addLast(line);
-	}
-
-	@Override
-	public String toString() {
-		return this.lines.stream().collect(Collectors.joining(System.lineSeparator()));
+	public void accept(T source) {
+		this.consumers.forEach(consumer -> consumer.accept(source));
 	}
 
 }
