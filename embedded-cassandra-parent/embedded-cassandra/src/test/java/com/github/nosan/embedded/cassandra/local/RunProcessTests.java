@@ -25,7 +25,7 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

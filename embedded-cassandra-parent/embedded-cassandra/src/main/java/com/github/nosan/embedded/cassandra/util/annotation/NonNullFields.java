@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.lang;
+package com.github.nosan.embedded.cassandra.util.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

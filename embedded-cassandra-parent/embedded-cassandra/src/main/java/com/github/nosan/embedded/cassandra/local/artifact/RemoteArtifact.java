@@ -41,9 +41,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * {@link Artifact} implementation, that downloads {@code archive} from the internet, if {@code archive} doesn't exist

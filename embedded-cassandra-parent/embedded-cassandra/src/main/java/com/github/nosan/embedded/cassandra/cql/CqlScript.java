@@ -23,7 +23,7 @@ import java.util.Collection;
 
 import org.apiguardian.api.API;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * CQL Script that abstracts from the actual type of underlying source.

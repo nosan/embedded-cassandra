@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
 import com.github.nosan.embedded.cassandra.cql.AbstractCqlResourceScript;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Utility class to convert Spring {@link Resource}.

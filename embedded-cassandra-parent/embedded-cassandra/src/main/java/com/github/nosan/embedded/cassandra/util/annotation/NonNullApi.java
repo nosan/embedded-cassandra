@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.lang;
+package com.github.nosan.embedded.cassandra.util.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -23,25 +23,26 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import javax.annotation.Nonnull;
-import javax.annotation.meta.TypeQualifierNickname;
+import javax.annotation.meta.TypeQualifierDefault;
 
 import org.apiguardian.api.API;
 
 /**
- * A common annotation to declare that annotated elements cannot be {@code null}.
+ * A common annotation to declare that parameters and return values are to be considered as {@code non-nullable} by
+ * default for a given package.
  *
  * @author Dmytro Nosan
- * @see NonNullApi
  * @see NonNullFields
  * @see Nullable
+ * @see NonNull
  * @since 1.4.2
  */
 @API(since = "1.4.2", status = API.Status.STABLE)
-@Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
+@Target(ElementType.PACKAGE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Nonnull
-@TypeQualifierNickname
-public @interface NonNull {
+@TypeQualifierDefault({ElementType.METHOD, ElementType.PARAMETER})
+public @interface NonNullApi {
 
 }

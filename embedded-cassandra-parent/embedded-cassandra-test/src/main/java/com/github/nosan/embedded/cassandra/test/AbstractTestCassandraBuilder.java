@@ -27,9 +27,9 @@ import org.apiguardian.api.API;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.junit.CassandraRuleBuilder;
 import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtensionBuilder;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Abstract Builder to create a sub-class of the {@link TestCassandra}.

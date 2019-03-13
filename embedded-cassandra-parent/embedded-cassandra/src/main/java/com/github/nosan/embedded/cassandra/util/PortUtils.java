@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apiguardian.api.API;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Utility methods for dealing with ports.

@@ -15,12 +15,12 @@
  */
 
 /**
- * Utility classes, only for internal purposes.
+ * Utility classes and annotations, only for internal purposes.
  */
 
 @NonNullFields
 @NonNullApi
 package com.github.nosan.embedded.cassandra.util;
 
-import com.github.nosan.embedded.cassandra.lang.NonNullApi;
-import com.github.nosan.embedded.cassandra.lang.NonNullFields;
+import com.github.nosan.embedded.cassandra.util.annotation.NonNullApi;
+import com.github.nosan.embedded.cassandra.util.annotation.NonNullFields;

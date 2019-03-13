@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Utility class for dealing with {@link MDC}.

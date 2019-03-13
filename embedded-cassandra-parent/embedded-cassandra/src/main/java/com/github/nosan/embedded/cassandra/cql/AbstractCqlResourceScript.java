@@ -24,7 +24,7 @@ import java.nio.charset.Charset;
 
 import org.apiguardian.api.API;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Base class for {@link AbstractCqlScript} implementations,

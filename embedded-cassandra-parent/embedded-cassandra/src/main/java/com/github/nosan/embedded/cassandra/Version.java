@@ -24,8 +24,8 @@ import javax.annotation.Nonnegative;
 
 import org.apiguardian.api.API;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Simple class to represent {@link Cassandra} version.

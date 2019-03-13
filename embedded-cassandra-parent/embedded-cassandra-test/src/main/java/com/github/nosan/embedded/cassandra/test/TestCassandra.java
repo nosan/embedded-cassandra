@@ -35,10 +35,10 @@ import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
 import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and

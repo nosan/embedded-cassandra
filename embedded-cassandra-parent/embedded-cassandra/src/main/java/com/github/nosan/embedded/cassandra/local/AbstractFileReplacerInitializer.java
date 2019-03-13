@@ -25,7 +25,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.function.BiFunction;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Abstract file {@link Initializer} to replace a file within a working directory.

@@ -45,11 +45,11 @@ import org.yaml.snakeyaml.Yaml;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.SystemProperty;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * The common implementation of the {@link CassandraNode}.

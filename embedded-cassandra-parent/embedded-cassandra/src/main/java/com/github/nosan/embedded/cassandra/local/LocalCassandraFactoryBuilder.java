@@ -28,9 +28,9 @@ import java.util.List;
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Builder to create a {@link LocalCassandraFactory}.

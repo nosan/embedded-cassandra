@@ -18,4 +18,4 @@
  * Common JSR305 annotations, such as {@code @NonNull, etc...}.
  */
 
-package com.github.nosan.embedded.cassandra.lang;
+package com.github.nosan.embedded.cassandra.util.annotation;

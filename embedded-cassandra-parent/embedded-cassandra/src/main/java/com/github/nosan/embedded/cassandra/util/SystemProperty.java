@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 
 import org.apiguardian.api.API;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Utility class for dealing with {@code System and Environment Properties}.

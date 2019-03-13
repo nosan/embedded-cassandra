@@ -51,7 +51,6 @@ import org.springframework.test.context.MergedContextConfiguration;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
@@ -59,6 +58,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * {@link ContextCustomizer} used to create {@link EmbeddedCassandraFactoryBean}, {@link LocalCassandraFactoryBean} and

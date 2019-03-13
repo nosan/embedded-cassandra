@@ -28,11 +28,11 @@ import org.apiguardian.api.API;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * {@link CassandraFactory} to create a local {@link Cassandra}.

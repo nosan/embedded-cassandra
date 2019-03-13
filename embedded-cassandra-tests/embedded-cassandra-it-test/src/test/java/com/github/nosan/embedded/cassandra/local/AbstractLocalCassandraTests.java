@@ -53,13 +53,13 @@ import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraRunner;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutputExtension;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

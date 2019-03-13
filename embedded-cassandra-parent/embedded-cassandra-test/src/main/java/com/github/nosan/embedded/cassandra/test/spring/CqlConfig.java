@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * {@code CqlConfig} encapsulates the

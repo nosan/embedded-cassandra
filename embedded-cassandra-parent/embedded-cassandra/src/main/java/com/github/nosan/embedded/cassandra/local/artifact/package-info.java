@@ -22,5 +22,5 @@
 @NonNullApi
 package com.github.nosan.embedded.cassandra.local.artifact;
 
-import com.github.nosan.embedded.cassandra.lang.NonNullApi;
-import com.github.nosan.embedded.cassandra.lang.NonNullFields;
+import com.github.nosan.embedded.cassandra.util.annotation.NonNullApi;
+import com.github.nosan.embedded.cassandra.util.annotation.NonNullFields;

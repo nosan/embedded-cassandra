@@ -22,8 +22,8 @@ import java.util.List;
 
 import org.apiguardian.api.API;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Utility class for parsing CQL Script into the statements.

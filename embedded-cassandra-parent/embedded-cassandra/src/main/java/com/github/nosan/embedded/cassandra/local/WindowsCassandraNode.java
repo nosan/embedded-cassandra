@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Windows implementation of the {@link CassandraNode}.

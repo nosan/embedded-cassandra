@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * UNIX implementation of the {@link CassandraNode}.

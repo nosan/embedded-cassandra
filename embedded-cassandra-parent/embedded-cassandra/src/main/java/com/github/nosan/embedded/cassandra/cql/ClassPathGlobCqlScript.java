@@ -46,8 +46,8 @@ import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.ClassUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Glob {@link CqlScript} implementation for {@link ClassLoader#getResources(String)}.

@@ -19,7 +19,7 @@ package com.github.nosan.embedded.cassandra.local;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Utility class for dealing with {@link Process}.

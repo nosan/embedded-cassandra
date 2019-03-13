@@ -25,7 +25,7 @@ import java.util.Objects;
 
 import org.apiguardian.api.API;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * {@link CqlScript} implementation for a given CQL {@code statements}.

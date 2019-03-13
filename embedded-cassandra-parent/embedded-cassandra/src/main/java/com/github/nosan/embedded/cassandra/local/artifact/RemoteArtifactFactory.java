@@ -25,8 +25,8 @@ import java.util.Objects;
 import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * {@link ArtifactFactory} to create a {@link RemoteArtifact}.

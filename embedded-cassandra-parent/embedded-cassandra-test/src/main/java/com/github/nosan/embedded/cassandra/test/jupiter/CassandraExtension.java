@@ -26,9 +26,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * JUnit {@link RegisterExtension Extension} that allows the Cassandra to be {@link Cassandra#start() started} and

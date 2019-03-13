@@ -23,7 +23,7 @@ import java.time.Duration;
 
 import org.apiguardian.api.API;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Builder to create a {@link RemoteArtifactFactory}.

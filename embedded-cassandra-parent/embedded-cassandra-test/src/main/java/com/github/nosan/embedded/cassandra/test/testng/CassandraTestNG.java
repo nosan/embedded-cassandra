@@ -25,9 +25,9 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.lang.Nullable;
 import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Base {@code test class} that allows the Cassandra to be {@link Cassandra#start() started} and

@@ -19,7 +19,7 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.util.Arrays;
 import java.util.function.Function;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Utility class to construct a {@link CqlScript}.

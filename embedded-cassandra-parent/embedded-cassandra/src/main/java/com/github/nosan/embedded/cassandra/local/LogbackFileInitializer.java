@@ -18,7 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.net.URL;
 
-import com.github.nosan.embedded.cassandra.lang.Nullable;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * {@link Initializer} to initialize {@code logback.xml}.
