@@ -234,19 +234,16 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 
 		private static boolean isNativeTransportReady(Settings settings) {
-			InetAddress address = settings.getRealAddress();
-			int port = settings.getPort();
-			Integer sslPort = settings.getSslPort();
-			if (sslPort != null) {
-				return PortUtils.isPortBusy(address, port) && PortUtils.isPortBusy(address, sslPort);
-			}
-			return PortUtils.isPortBusy(address, port);
+			return isPortBusy(settings.getRealAddress(), settings.getPort())
+					&& isPortBusy(settings.getRealAddress(), settings.getSslPort());
 		}
 
 		private static boolean isRpcTransportReady(Settings settings) {
-			InetAddress address = settings.getRealAddress();
-			int port = settings.getRpcPort();
-			return PortUtils.isPortBusy(address, port);
+			return isPortBusy(settings.getRealAddress(), settings.getRpcPort());
+		}
+
+		private static boolean isPortBusy(InetAddress address, @Nullable Integer port) {
+			return (port == null || port == -1) || PortUtils.isPortBusy(address, port);
 		}
 
 	}
