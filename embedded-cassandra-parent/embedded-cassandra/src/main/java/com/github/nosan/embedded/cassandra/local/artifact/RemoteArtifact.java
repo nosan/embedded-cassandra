@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.util.FileLock;
 import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
@@ -167,15 +168,19 @@ class RemoteArtifact implements Artifact {
 		public Path getFile() throws IOException {
 			Path file = this.directory.resolve(getName());
 			if (!Files.exists(file)) {
-				Path tempFile = this.resource.getFile();
-				try {
+				Path lockFile = this.directory.resolve(String.format(".%s.lock", getName()));
+				try (FileLock fileLock = new FileLock(lockFile)) {
+					fileLock.lock();
 					if (!Files.exists(file)) {
-						return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+						Path tempFile = this.resource.getFile();
+						try {
+							return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+						}
+						catch (IOException ex) {
+							log.error(String.format("Could not rename '%s' as '%s'.", tempFile, file), ex);
+							return tempFile;
+						}
 					}
-				}
-				catch (IOException ex) {
-					log.error(String.format("Could not rename '%s' as '%s'.", tempFile, file), ex);
-					return tempFile;
 				}
 			}
 			return file;
