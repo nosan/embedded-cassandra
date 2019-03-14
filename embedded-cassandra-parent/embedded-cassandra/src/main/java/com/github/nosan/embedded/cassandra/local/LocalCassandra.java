@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.FileLockInterruptionException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -248,7 +249,7 @@ class LocalCassandra implements Cassandra {
 			log.info("Apache Cassandra '{}' has been initialized ({} ms)", version, elapsed);
 		}
 		catch (IOException ex) {
-			if (isClosedByInterruptException(ex)) {
+			if (isInterruptedException(ex)) {
 				throw new InterruptedException();
 			}
 			throw ex;
@@ -311,11 +312,17 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
-	private static boolean isClosedByInterruptException(@Nullable Throwable ex) {
+	private static boolean isInterruptedException(@Nullable Throwable ex) {
 		if (ex instanceof ClosedByInterruptException) {
 			return true;
 		}
-		return ex != null && isClosedByInterruptException(ex.getCause());
+		if (ex instanceof FileLockInterruptionException) {
+			return true;
+		}
+		if (ex instanceof InterruptedException) {
+			return true;
+		}
+		return ex != null && isInterruptedException(ex.getCause());
 	}
 
 	private static boolean isWindows() {

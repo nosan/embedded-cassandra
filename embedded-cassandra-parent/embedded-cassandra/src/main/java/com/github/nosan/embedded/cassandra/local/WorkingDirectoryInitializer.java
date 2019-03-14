@@ -18,9 +18,14 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.FileLockInterruptionException;
+import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -35,6 +40,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
 import com.github.nosan.embedded.cassandra.util.FileUtils;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * {@link Initializer} to initialize a {@code directory} with an {@link Artifact}.
@@ -45,6 +51,8 @@ import com.github.nosan.embedded.cassandra.util.FileUtils;
 class WorkingDirectoryInitializer implements Initializer {
 
 	private static final String ARTIFACT_FILE = String.format(".%s", Artifact.class.getName());
+
+	private static final String ARTIFACT_LOCK = String.format(".%s.lock", Artifact.class.getName());
 
 	private static final Logger log = LoggerFactory.getLogger(WorkingDirectoryInitializer.class);
 
@@ -66,10 +74,34 @@ class WorkingDirectoryInitializer implements Initializer {
 	@Override
 	public void initialize(Path workingDirectory, Version version) throws IOException {
 		Path artifactDirectory = this.artifactDirectory;
-		if (!hasExtracted(artifactDirectory)) {
-			extract(this.artifactFactory.create(version), artifactDirectory);
+		if (hasNotExtracted(artifactDirectory)) {
+			Files.createDirectories(artifactDirectory);
+			Path lockFile = createHiddenFile(artifactDirectory.resolve(ARTIFACT_LOCK));
+			try (FileChannel fileChannel = FileChannel.open(lockFile, StandardOpenOption.WRITE)) {
+				FileLock fileLock = null;
+				try {
+					log.debug("Acquires a lock to the file '{}' ...", lockFile);
+					while ((fileLock = tryLock(fileChannel)) == null) {
+						try {
+							Thread.sleep(100);
+						}
+						catch (InterruptedException ex) {
+							throw new FileLockInterruptionException();
+						}
+					}
+					log.debug("The lock to the file '%s' has been acquired", lockFile);
+					if (hasNotExtracted(artifactDirectory)) {
+						extract(this.artifactFactory.create(version), artifactDirectory);
+					}
+				}
+				finally {
+					if (fileLock != null) {
+						fileLock.close();
+					}
+				}
+			}
 		}
-		copy(getSingleCandidate(artifactDirectory), workingDirectory);
+		copy(requireSingleDirectory(artifactDirectory), workingDirectory);
 	}
 
 	private static void extract(Artifact artifact, Path artifactDirectory) throws IOException {
@@ -83,12 +115,17 @@ class WorkingDirectoryInitializer implements Initializer {
 			throw new IOException(String.format("Artifact '%s' could not be extracted into the '%s'",
 					archiveFile, artifactDirectory), ex);
 		}
-		createHiddenFile(getSingleCandidate(artifactDirectory).resolve(ARTIFACT_FILE));
+
+		requireSingleDirectory(artifactDirectory);
+
+		createHiddenFile(artifactDirectory.resolve(ARTIFACT_FILE));
+
 		log.debug("'{}' archive has been extracted into the '{}'", archiveFile, artifactDirectory);
 	}
 
 	private static void copy(Path artifactDirectory, Path workingDirectory) throws IOException {
 		log.debug("Copy '{}' folder into the '{}'.", artifactDirectory, workingDirectory);
+		Files.createDirectories(workingDirectory);
 		try {
 			FileUtils.copy(artifactDirectory, workingDirectory, path -> shouldCopy(artifactDirectory, path));
 		}
@@ -99,7 +136,7 @@ class WorkingDirectoryInitializer implements Initializer {
 		log.debug("'{}' folder has been copied into the '{}'", artifactDirectory, workingDirectory);
 	}
 
-	private static void createHiddenFile(Path file) throws IOException {
+	private static Path createHiddenFile(Path file) throws IOException {
 		try {
 			Files.createFile(file);
 			if (isWindows()) {
@@ -112,6 +149,7 @@ class WorkingDirectoryInitializer implements Initializer {
 		}
 		catch (FileAlreadyExistsException ignored) {
 		}
+		return file;
 	}
 
 	private static boolean shouldCopy(Path src, Path srcPath) {
@@ -119,19 +157,20 @@ class WorkingDirectoryInitializer implements Initializer {
 			String name = src.relativize(srcPath).getName(0).toString().toLowerCase(Locale.ENGLISH);
 			return !name.equals("javadoc") && !name.equals("doc");
 		}
-		return !ARTIFACT_FILE.equals(srcPath.getFileName().toString());
+		String filename = srcPath.getFileName().toString();
+		return !ARTIFACT_FILE.equals(filename) && !ARTIFACT_LOCK.equals(filename);
 	}
 
-	private static boolean hasExtracted(Path directory) {
+	private static boolean hasNotExtracted(Path directory) {
 		try {
-			return Files.exists(getSingleCandidate(directory).resolve(ARTIFACT_FILE));
+			return !Files.exists(directory.resolve(ARTIFACT_FILE));
 		}
 		catch (Exception ex) {
-			return false;
+			return true;
 		}
 	}
 
-	private static Path getSingleCandidate(Path directory) throws IOException {
+	private static Path requireSingleDirectory(Path directory) throws IOException {
 		try (Stream<Path> stream = Files.find(directory, 1, (path, attributes) -> {
 			Path bin = path.resolve("bin");
 			Path lib = path.resolve("lib");
@@ -163,6 +202,16 @@ class WorkingDirectoryInitializer implements Initializer {
 		}
 		catch (IOException ex) {
 			return 0;
+		}
+	}
+
+	@Nullable
+	private static FileLock tryLock(FileChannel fileChannel) throws IOException {
+		try {
+			return fileChannel.lock();
+		}
+		catch (OverlappingFileLockException ex) {
+			return null;
 		}
 	}
 
