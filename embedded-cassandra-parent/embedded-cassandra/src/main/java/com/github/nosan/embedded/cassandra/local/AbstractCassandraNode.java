@@ -127,7 +127,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		NodeReadiness nodeReadiness = new NodeReadiness(consumer);
 		TransportReadiness transportReadiness = new TransportReadiness(settings);
 		BufferedConsumer bufferedConsumer = new BufferedConsumer(5);
-		consumer.add(new LoggerConsumer(LoggerFactory.getLogger(Cassandra.class)));
+		consumer.add(LoggerFactory.getLogger(Cassandra.class)::info);
 		consumer.add(bufferedConsumer);
 		consumer.add(nodeReadiness);
 		consumer.add(new RpcAddressConsumer(settings, consumer));
@@ -173,7 +173,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				ProcessBuilder processBuilder = new ProcessBuilder()
 						.directory(this.workingDirectory.toFile())
 						.redirectErrorStream(true);
-				stop(processId, processBuilder, this.threadFactory, new LoggerConsumer(this.log));
+				stop(processId, processBuilder, this.threadFactory, this.log::info);
 			}
 			catch (IOException ex) {
 				this.log.error(String.format("Could not stop Cassandra Node '%s'.", processId.getPid()), ex);
@@ -352,21 +352,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					}
 				}
 			}
-		}
-
-	}
-
-	private static final class LoggerConsumer implements Consumer<String> {
-
-		private final Logger logger;
-
-		LoggerConsumer(Logger logger) {
-			this.logger = logger;
-		}
-
-		@Override
-		public void accept(String line) {
-			this.logger.info(line);
 		}
 
 	}
