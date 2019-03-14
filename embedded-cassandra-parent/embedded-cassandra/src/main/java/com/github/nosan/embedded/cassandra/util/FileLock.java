@@ -117,7 +117,10 @@ public final class FileLock implements AutoCloseable {
 			try {
 				closeable.close();
 			}
-			catch (Throwable ignore) {
+			catch (Throwable ex) {
+				if (log.isDebugEnabled()) {
+					log.error(ex.getMessage(), ex);
+				}
 			}
 		}
 	}
