@@ -34,7 +34,7 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  * @author Dmytro Nosan
  * @since 1.4.2
  */
-class AbstractFileReplacerInitializer extends AbstractFileInitializer {
+abstract class AbstractFileReplacerInitializer extends AbstractFileInitializer {
 
 	@Nullable
 	private final URL url;
