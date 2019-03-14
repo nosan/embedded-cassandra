@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLockInterruptionException;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
@@ -53,7 +54,7 @@ public final class FileLock implements AutoCloseable {
 	/**
 	 * Creates a new {@link FileLock}.
 	 *
-	 * @param file the lock file. (the file will be automatically created and deleted on the JVM shutdown)
+	 * @param file the lock file.
 	 */
 	public FileLock(Path file) {
 		this.file = Objects.requireNonNull(file, "File must not be null");
@@ -68,7 +69,6 @@ public final class FileLock implements AutoCloseable {
 	 */
 	public void lock() throws IOException, FileLockInterruptionException {
 		Path file = this.file;
-		file.toFile().deleteOnExit();
 		FileChannel fileChannel = FileChannel.open(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 		this.fileChannel = fileChannel;
 		java.nio.channels.FileLock fileLock;
@@ -89,6 +89,7 @@ public final class FileLock implements AutoCloseable {
 	 * Releases this lock.
 	 */
 	public void release() {
+		close(() -> Files.deleteIfExists(this.file));
 		close(this.fileLock);
 		close(this.fileChannel);
 	}
