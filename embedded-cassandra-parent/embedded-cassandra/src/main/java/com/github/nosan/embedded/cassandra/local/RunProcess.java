@@ -80,8 +80,8 @@ class RunProcess {
 	Process run(Consumer<? super String> consumer) throws IOException {
 		ProcessBuilder builder = this.processBuilder;
 		if (log.isDebugEnabled()) {
-			String message = String.format("Execute '%s'  with environment variables %s  and using a directory '%s'",
-					String.join(" ", builder.command()), builder.environment(), builder.directory());
+			String message = String.format("Execute '%s' within a directory '%s'", String.join(" ", builder.command()),
+					builder.directory());
 			log.debug(message);
 		}
 		return start(this.processBuilder, this.threadFactory, consumer);
