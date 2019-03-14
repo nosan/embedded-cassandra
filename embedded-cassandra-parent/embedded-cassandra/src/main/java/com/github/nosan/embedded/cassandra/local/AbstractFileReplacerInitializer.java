@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -59,6 +60,9 @@ class AbstractFileReplacerInitializer extends AbstractFileInitializer {
 			}
 			try (InputStream is = url.openStream()) {
 				Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING);
+			}
+			catch (ClosedByInterruptException ex) {
+				throw ex;
 			}
 			catch (IOException ex) {
 				throw new IOException(String.format("Can not replace '%s' with a '%s'", file, url), ex);

@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -84,6 +85,9 @@ class WorkingDirectoryInitializer implements Initializer {
 		try {
 			ArchiveUtils.extract(archiveFile, artifactDirectory);
 		}
+		catch (ClosedByInterruptException ex) {
+			throw ex;
+		}
 		catch (IOException ex) {
 			throw new IOException(String.format("Artifact '%s' could not be extracted into the '%s'",
 					archiveFile, artifactDirectory), ex);
@@ -98,6 +102,9 @@ class WorkingDirectoryInitializer implements Initializer {
 		Files.createDirectories(workingDirectory);
 		try {
 			FileUtils.copy(artifactDirectory, workingDirectory, path -> shouldCopy(artifactDirectory, path, version));
+		}
+		catch (ClosedByInterruptException ex) {
+			throw ex;
 		}
 		catch (IOException ex) {
 			throw new IOException(String.format("Could not copy folder '%s' into the '%s'",

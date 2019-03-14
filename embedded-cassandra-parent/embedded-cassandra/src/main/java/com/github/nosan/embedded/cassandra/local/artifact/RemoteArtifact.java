@@ -23,6 +23,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.FileLockInterruptionException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -117,7 +118,7 @@ class RemoteArtifact implements Artifact {
 				Resource localResource = new LocalResource(directory, remoteResource);
 				return localResource.getFile();
 			}
-			catch (ClosedByInterruptException ex) {
+			catch (ClosedByInterruptException | FileLockInterruptionException ex) {
 				throw ex;
 			}
 			catch (IOException ex) {
