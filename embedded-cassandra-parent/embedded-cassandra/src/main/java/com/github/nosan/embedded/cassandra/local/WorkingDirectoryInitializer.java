@@ -89,7 +89,7 @@ class WorkingDirectoryInitializer implements Initializer {
 							throw new FileLockInterruptionException();
 						}
 					}
-					log.debug("The lock to the file '%s' has been acquired", lockFile);
+					log.debug("The lock to the file '{}' has been acquired", lockFile);
 					if (hasNotExtracted(artifactDirectory)) {
 						extract(this.artifactFactory.create(version), artifactDirectory);
 					}
