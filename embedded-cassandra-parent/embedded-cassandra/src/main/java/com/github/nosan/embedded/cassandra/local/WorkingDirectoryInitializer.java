@@ -65,20 +65,21 @@ class WorkingDirectoryInitializer implements Initializer {
 	@Override
 	public void initialize(Path workingDirectory, Version version) throws IOException {
 		Path artifactDirectory = this.artifactDirectory;
-		if (hasNotExtracted(artifactDirectory, version)) {
+		String artifactName = getArtifactName(version);
+		if (hasNotExtracted(artifactDirectory, artifactName)) {
 			Files.createDirectories(artifactDirectory);
-			Path lockFile = artifactDirectory.resolve(String.format("%s.lock", getArtifactName(version)));
+			Path lockFile = artifactDirectory.resolve(String.format("%s.lock", artifactName));
 			try (FileLock fileLock = new FileLock(lockFile)) {
 				fileLock.lock();
-				if (hasNotExtracted(artifactDirectory, version)) {
-					extract(this.artifactFactory.create(version), artifactDirectory, version);
+				if (hasNotExtracted(artifactDirectory, artifactName)) {
+					extract(this.artifactFactory.create(version), artifactDirectory, artifactName);
 				}
 			}
 		}
-		copy(requireSingleDirectory(artifactDirectory), workingDirectory, version);
+		copy(requireSingleDirectory(artifactDirectory), workingDirectory, artifactName);
 	}
 
-	private static void extract(Artifact artifact, Path artifactDirectory, Version version) throws IOException {
+	private static void extract(Artifact artifact, Path artifactDirectory, String artifactName) throws IOException {
 		Objects.requireNonNull(artifact, "Artifact must not be null");
 		Path archiveFile = artifact.get();
 		log.debug("Extract '{}' into the '{}'.", archiveFile, artifactDirectory);
@@ -93,15 +94,16 @@ class WorkingDirectoryInitializer implements Initializer {
 					archiveFile, artifactDirectory), ex);
 		}
 		requireSingleDirectory(artifactDirectory);
-		createFile(artifactDirectory.resolve(getArtifactName(version)));
+		createFile(artifactDirectory.resolve(artifactName));
 		log.debug("'{}' archive has been extracted into the '{}'", archiveFile, artifactDirectory);
 	}
 
-	private static void copy(Path artifactDirectory, Path workingDirectory, Version version) throws IOException {
+	private static void copy(Path artifactDirectory, Path workingDirectory, String artifactName) throws IOException {
 		log.debug("Copy '{}' folder into the '{}'.", artifactDirectory, workingDirectory);
 		Files.createDirectories(workingDirectory);
 		try {
-			FileUtils.copy(artifactDirectory, workingDirectory, path -> shouldCopy(artifactDirectory, path, version));
+			FileUtils.copy(artifactDirectory, workingDirectory,
+					path -> shouldCopy(artifactDirectory, path, artifactName));
 		}
 		catch (ClosedByInterruptException ex) {
 			throw ex;
@@ -113,17 +115,17 @@ class WorkingDirectoryInitializer implements Initializer {
 		log.debug("'{}' folder has been copied into the '{}'", artifactDirectory, workingDirectory);
 	}
 
-	private static boolean shouldCopy(Path src, Path srcPath, Version version) {
+	private static boolean shouldCopy(Path src, Path srcPath, String artifactName) {
 		if (Files.isDirectory(srcPath)) {
 			String name = src.relativize(srcPath).getName(0).toString().toLowerCase(Locale.ENGLISH);
 			return !name.equals("javadoc") && !name.equals("doc");
 		}
-		return !getArtifactName(version).equals(srcPath.getFileName().toString());
+		return !artifactName.equals(srcPath.getFileName().toString());
 	}
 
-	private static boolean hasNotExtracted(Path directory, Version version) {
+	private static boolean hasNotExtracted(Path directory, String artifactName) {
 		try {
-			return !Files.exists(directory.resolve(getArtifactName(version)));
+			return !Files.exists(directory.resolve(artifactName));
 		}
 		catch (Exception ex) {
 			return true;
