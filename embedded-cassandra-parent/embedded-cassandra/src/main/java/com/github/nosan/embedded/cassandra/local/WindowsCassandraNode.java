@@ -95,7 +95,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 
 		Process process = new RunProcess(processBuilder, threadFactory).run(compositeConsumer);
 		try {
-			latch.await(1, TimeUnit.SECONDS);
+			latch.await(5, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
