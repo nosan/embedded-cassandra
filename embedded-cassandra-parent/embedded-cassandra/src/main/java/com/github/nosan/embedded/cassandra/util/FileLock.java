@@ -61,7 +61,7 @@ public final class FileLock implements AutoCloseable {
 	}
 
 	/**
-	 * Acquires an exclusive lock on file.
+	 * Acquires an exclusive lock on the file.
 	 *
 	 * @throws java.nio.channels.FileLockInterruptionException If the invoking thread is interrupted while blocked in
 	 * this method
