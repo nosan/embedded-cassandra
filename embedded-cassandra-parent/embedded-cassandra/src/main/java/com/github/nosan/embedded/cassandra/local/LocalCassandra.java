@@ -38,7 +38,7 @@ import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * This {@link Cassandra} implementation just a wrapper on {@link CassandraNode}.
+ * This {@link Cassandra} implementation just a wrapper on the {@link CassandraNode}.
  *
  * @author Dmytro Nosan
  * @see LocalCassandraFactory
