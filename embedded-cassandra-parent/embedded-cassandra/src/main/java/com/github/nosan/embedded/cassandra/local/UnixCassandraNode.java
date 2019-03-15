@@ -64,8 +64,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 			throws IOException {
 		Path workingDirectory = this.workingDirectory;
 		Version version = this.version;
-		builder.command().add(workingDirectory.resolve("bin/cassandra").toString());
-		builder.command().add("-f");
+		builder.command(workingDirectory.resolve("bin/cassandra").toString(), "-f");
 		if (this.allowRoot && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
 			builder.command().add("-R");
 		}

@@ -70,9 +70,8 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		Version version = this.version;
 		Path pidFile = workingDirectory.resolve(UUID.randomUUID().toString());
 		this.pidFile = pidFile;
-		builder.command("powershell", "-ExecutionPolicy", "Unrestricted");
-		builder.command().add(workingDirectory.resolve("bin/cassandra.ps1").toString());
-		builder.command().add("-f");
+		builder.command("powershell", "-ExecutionPolicy", "Unrestricted",
+				workingDirectory.resolve("bin/cassandra.ps1").toString(), "-f");
 		if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1)) {
 			builder.command().add("-a");
 		}

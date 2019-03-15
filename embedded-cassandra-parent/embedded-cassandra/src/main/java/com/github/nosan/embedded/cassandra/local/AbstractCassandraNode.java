@@ -201,13 +201,43 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 	}
 
+	/**
+	 * Starts the Apache Cassandra.
+	 *
+	 * @param builder the almost configured builder (does not have command)
+	 * @param threadFactory thread factory to create a process reader.
+	 * @param consumer the output consumer
+	 * @return the process
+	 * @throws IOException in the case of I/O errors
+	 */
 	protected abstract ProcessId start(ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException;
 
-	protected abstract boolean terminate(long pid, ProcessBuilder builder,
-			ThreadFactory threadFactory,
+	/**
+	 * Terminates the Apache Cassandra.
+	 *
+	 * @param pid the pid
+	 * @param builder the almost configured builder (does not have command)
+	 * @param threadFactory thread factory to create a process reader.
+	 * @param consumer the output consumer
+	 * @return {@code true} if termination signal has been sent, otherwise {@code false}
+	 * @throws IOException in the case of I/O errors
+	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
+	 */
+	protected abstract boolean terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException;
 
+	/**
+	 * Destroys the Apache Cassandra.
+	 *
+	 * @param pid the pid
+	 * @param builder the almost configured builder (does not have command)
+	 * @param threadFactory thread factory to create a process reader.
+	 * @param consumer the output consumer
+	 * @return {@code true} if kill signal has been sent, otherwise {@code false}
+	 * @throws IOException in the case of I/O errors
+	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
+	 */
 	protected abstract boolean destroy(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException;
 
