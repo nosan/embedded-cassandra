@@ -190,7 +190,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					process.destroyForcibly();
 				}
 			}
-			if (!process.waitFor(3, TimeUnit.SECONDS)) {
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
 				process.destroyForcibly();
 			}
 			if (process.isAlive()) {
