@@ -64,20 +64,20 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	protected ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory,
-			Consumer<? super String> consumer) throws IOException {
+	protected ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory, Consumer<String> consumer)
+			throws IOException {
 		Path workingDirectory = this.workingDirectory;
 		Version version = this.version;
 		Path pidFile = workingDirectory.resolve(UUID.randomUUID().toString());
 		this.pidFile = pidFile;
 		processBuilder.command("powershell", "-ExecutionPolicy", "Unrestricted");
-		processBuilder.command().add(workingDirectory.resolve("bin/cassandra.ps1").toAbsolutePath().toString());
+		processBuilder.command().add(workingDirectory.resolve("bin/cassandra.ps1").toString());
 		processBuilder.command().add("-f");
 		if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1)) {
 			processBuilder.command().add("-a");
 		}
 		processBuilder.command().add("-p");
-		processBuilder.command().add(pidFile.toAbsolutePath().toString());
+		processBuilder.command().add(pidFile.toString());
 		CompositeConsumer<String> compositeConsumer = new CompositeConsumer<>();
 		PidFileSupplier pidFileSupplier = new PidFileSupplier(pidFile, compositeConsumer);
 		compositeConsumer.add(pidFileSupplier);
@@ -88,16 +88,16 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 
 	@Override
 	protected void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
-			Consumer<? super String> consumer) throws IOException {
+			Consumer<String> consumer) throws IOException {
 		long pid = processId.getPid().get();
 		Process process = processId.getProcess();
 		Path pidFile = this.pidFile;
 		Path stopServerFile = this.workingDirectory.resolve("bin/stop-server.ps1");
 		if (pidFile != null && Files.exists(pidFile) && Files.exists(stopServerFile)) {
 			processBuilder.command("powershell", "-ExecutionPolicy", "Unrestricted");
-			processBuilder.command().add(stopServerFile.toAbsolutePath().toString());
+			processBuilder.command().add(stopServerFile.toString());
 			processBuilder.command().add("-p");
-			processBuilder.command().add(pidFile.toAbsolutePath().toString());
+			processBuilder.command().add(pidFile.toString());
 			new RunProcess(processBuilder, threadFactory).run(consumer);
 		}
 		else if (pid != -1) {

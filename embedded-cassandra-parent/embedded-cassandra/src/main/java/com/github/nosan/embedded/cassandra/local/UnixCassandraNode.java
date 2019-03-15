@@ -60,12 +60,11 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	protected ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory,
-			Consumer<? super String> consumer) throws IOException {
+	protected ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory, Consumer<String> consumer)
+			throws IOException {
 		Path workingDirectory = this.workingDirectory;
 		Version version = this.version;
-		processBuilder.command().add(workingDirectory.resolve("bin/cassandra").toAbsolutePath()
-				.toString());
+		processBuilder.command().add(workingDirectory.resolve("bin/cassandra").toString());
 		processBuilder.command().add("-f");
 		if (this.allowRoot && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
 			processBuilder.command().add("-R");
@@ -77,7 +76,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 
 	@Override
 	protected void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
-			Consumer<? super String> consumer) throws IOException {
+			Consumer<String> consumer) throws IOException {
 		long pid = processId.getPid().get();
 		Process process = processId.getProcess();
 		if (pid != -1) {

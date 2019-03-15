@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -193,10 +194,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	protected abstract ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory,
-			Consumer<? super String> consumer) throws IOException;
+			Consumer<String> consumer) throws IOException;
 
 	protected abstract void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
-			Consumer<? super String> consumer) throws IOException;
+			Consumer<String> consumer) throws IOException;
 
 	private static int getJmxPort(int jmxPort) {
 		return jmxPort != 0 ? jmxPort : PortUtils.getPort();
@@ -204,15 +205,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	@Nullable
 	private static String getJavaHome(@Nullable Path javaHome) {
-		if (javaHome != null) {
-			return String.valueOf(javaHome.toAbsolutePath());
-		}
-		return new SystemProperty("java.home").get();
+		return Optional.ofNullable(javaHome).map(Path::toString).orElseGet(new SystemProperty("java.home"));
 	}
 
 	private static RuntimeNodeSettings getSettings(Path directory, Version version) throws IOException {
-		Path target = directory.resolve("conf/cassandra.yaml");
-		try (InputStream is = Files.newInputStream(target)) {
+		try (InputStream is = Files.newInputStream(directory.resolve("conf/cassandra.yaml"))) {
 			Yaml yaml = new Yaml();
 			return new RuntimeNodeSettings(version, yaml.loadAs(is, Map.class));
 		}
@@ -258,13 +255,13 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		private static final long DEFAULT_STARTUP_TIMEOUT = 20000L;
 
-		private final CompositeConsumer<? extends String> consumer;
+		private final CompositeConsumer<String> consumer;
 
 		private final long start;
 
 		private volatile boolean ready = false;
 
-		NodeReadiness(CompositeConsumer<? extends String> consumer) {
+		NodeReadiness(CompositeConsumer<String> consumer) {
 			this.consumer = consumer;
 			this.start = System.currentTimeMillis();
 		}
@@ -298,9 +295,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		private final Pattern regex;
 
-		private final CompositeConsumer<? extends String> consumer;
+		private final CompositeConsumer<String> consumer;
 
-		RpcAddressConsumer(RuntimeNodeSettings settings, CompositeConsumer<? extends String> consumer) {
+		RpcAddressConsumer(RuntimeNodeSettings settings, CompositeConsumer<String> consumer) {
 			this.settings = settings;
 			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getPort(),
 					settings.getSslPort()));
@@ -334,9 +331,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		private final Pattern regex;
 
-		private final CompositeConsumer<? extends String> consumer;
+		private final CompositeConsumer<String> consumer;
 
-		ListenAddressConsumer(RuntimeNodeSettings settings, CompositeConsumer<? extends String> consumer) {
+		ListenAddressConsumer(RuntimeNodeSettings settings, CompositeConsumer<String> consumer) {
 			this.settings = settings;
 			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getStoragePort(),
 					settings.getSslStoragePort()));
