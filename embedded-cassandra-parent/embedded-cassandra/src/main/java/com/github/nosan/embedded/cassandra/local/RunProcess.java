@@ -20,14 +20,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
@@ -44,15 +42,6 @@ class RunProcess {
 	private final ProcessBuilder processBuilder;
 
 	private final ThreadFactory threadFactory;
-
-	/**
-	 * Creates a new {@link RunProcess} instance.
-	 *
-	 * @param processBuilder {@link ProcessBuilder} to create {@link Process}
-	 */
-	RunProcess(ProcessBuilder processBuilder) {
-		this(processBuilder, null);
-	}
 
 	/**
 	 * Creates a new {@link RunProcess} instance.
@@ -90,11 +79,7 @@ class RunProcess {
 	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<? super String> consumer)
 			throws IOException {
 		Process process = builder.start();
-		Map<String, String> context = MDCUtils.getContext();
-		threadFactory.newThread(() -> {
-			MDCUtils.setContext(context);
-			read(process, consumer);
-		}).start();
+		threadFactory.newThread(() -> read(process, consumer)).start();
 		return process;
 	}
 
@@ -126,7 +111,6 @@ class RunProcess {
 			return reader.readLine();
 		}
 		catch (IOException ex) {
-			//stream closed. nothing special
 			return null;
 		}
 	}

@@ -204,7 +204,11 @@ class RemoteArtifact implements Artifact {
 		private final long instance = instanceCounter.incrementAndGet();
 
 		private final ThreadFactory threadFactory = runnable -> {
-			Thread thread = new Thread(runnable, String.format("artifact-%d", this.instance));
+			Map<String, String> context = MDCUtils.getContext();
+			Thread thread = new Thread(() -> {
+				MDCUtils.setContext(context);
+				runnable.run();
+			}, String.format("artifact-%d", this.instance));
 			thread.setDaemon(true);
 			return thread;
 		};
@@ -317,12 +321,10 @@ class RemoteArtifact implements Artifact {
 
 		private static void showProgress(Path file, long size, ScheduledExecutorService executorService) {
 			if (size > 0) {
-				Map<String, String> context = MDCUtils.getContext();
 				long[] prevPercent = new long[1];
 				int minPercentStep = 5;
 				AtomicBoolean logOnlyOnce = new AtomicBoolean(false);
 				executorService.scheduleAtFixedRate(() -> {
-					MDCUtils.setContext(context);
 					try {
 						if (Files.exists(file)) {
 							long current = Files.size(file);

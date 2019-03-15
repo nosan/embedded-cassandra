@@ -81,7 +81,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 		long pid = processId.getPid().get();
 		Process process = processId.getProcess();
 		if (pid != -1) {
-			new RunProcess(processBuilder.command("kill", "-SIGINT", Long.toString(pid)))
+			new RunProcess(processBuilder.command("kill", "-SIGINT", Long.toString(pid)), threadFactory)
 					.run(consumer);
 		}
 		else {

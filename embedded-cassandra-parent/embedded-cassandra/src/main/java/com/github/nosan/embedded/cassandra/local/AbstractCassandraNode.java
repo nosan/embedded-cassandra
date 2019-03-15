@@ -45,6 +45,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.util.MDCUtils;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
@@ -66,7 +67,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	private final long instance = instanceCounter.incrementAndGet();
 
 	private final ThreadFactory threadFactory = runnable -> {
-		Thread thread = new Thread(runnable, String.format("cassandra-%d", this.instance));
+		Map<String, String> context = MDCUtils.getContext();
+		Thread thread = new Thread(() -> {
+			MDCUtils.setContext(context);
+			runnable.run();
+		}, String.format("cassandra-%d", this.instance));
 		thread.setDaemon(true);
 		return thread;
 	};
