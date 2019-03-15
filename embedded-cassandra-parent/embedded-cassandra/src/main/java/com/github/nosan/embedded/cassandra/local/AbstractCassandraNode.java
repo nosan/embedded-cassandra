@@ -144,11 +144,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		do {
 			if (!process.isAlive()) {
 				throw new IOException(String.format("Cassandra Node '%s' is not alive. Exit code is '%s'. " +
-								"Please see logs for more details.%n%s", processId.getPid(), process.exitValue(),
+								"Please see logs for more details.%n%s", processId.getPid().get(), process.exitValue(),
 						bufferedConsumer));
 			}
 			if (transportReadiness.get() && nodeReadiness.get()) {
-				this.log.info("Cassandra Node '{}' has been started", processId.getPid());
+				this.log.info("Cassandra Node '{}' has been started", processId.getPid().get());
 				consumer.remove(bufferedConsumer);
 				consumer.remove(nodeReadiness);
 				return settings;
@@ -161,7 +161,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 		while (rem > 0);
 		throw new IOException(String.format("Cassandra Node '%s' has not been started," +
-				" seems like (%d) milliseconds is not enough.", processId.getPid(), this.timeout.toMillis()));
+				" seems like (%d) milliseconds is not enough.", processId.getPid().get(), this.timeout.toMillis()));
 	}
 
 	@Override
@@ -176,13 +176,14 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				stop(processId, processBuilder, this.threadFactory, this.log::info);
 			}
 			catch (IOException ex) {
-				this.log.error(String.format("Could not stop Cassandra Node '%s'.", processId.getPid()), ex);
+				this.log.error(String.format("Could not stop Cassandra Node '%s'.", processId.getPid().get()), ex);
 			}
 			if (!process.waitFor(10, TimeUnit.SECONDS)) {
-				throw new IOException(String.format("Casandra Node '%s' has not been stopped.", processId.getPid()));
+				throw new IOException(
+						String.format("Casandra Node '%s' has not been stopped.", processId.getPid().get()));
 			}
 			this.processId = null;
-			this.log.info("Cassandra Node '{}' has been stopped", processId.getPid());
+			this.log.info("Cassandra Node '{}' has been stopped", processId.getPid().get());
 		}
 	}
 
