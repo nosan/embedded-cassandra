@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.util.function.Supplier;
+
 /**
  * Util class that contains {@link Process} and pid.
  *
@@ -25,7 +27,7 @@ class ProcessId {
 
 	private final Process process;
 
-	private final long pid;
+	private final Supplier<Long> pid;
 
 	/**
 	 * Creates {@link ProcessId}.
@@ -35,6 +37,17 @@ class ProcessId {
 	 * @see ProcessUtils#getPid(Process)
 	 */
 	ProcessId(Process process, long pid) {
+		this(process, () -> pid);
+	}
+
+	/**
+	 * Creates {@link ProcessId}.
+	 *
+	 * @param process the process
+	 * @param pid the pid supplier
+	 * @see ProcessUtils#getPid(Process)
+	 */
+	ProcessId(Process process, Supplier<Long> pid) {
 		this.process = process;
 		this.pid = pid;
 	}
@@ -53,7 +66,7 @@ class ProcessId {
 	 *
 	 * @return the pid (or -1)
 	 */
-	long getPid() {
+	Supplier<Long> getPid() {
 		return this.pid;
 	}
 

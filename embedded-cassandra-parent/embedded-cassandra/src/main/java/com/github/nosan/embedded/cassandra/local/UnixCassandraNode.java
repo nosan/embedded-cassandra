@@ -78,10 +78,10 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	@Override
 	protected void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
 			Consumer<? super String> consumer) throws IOException {
-		long id = processId.getPid();
+		long pid = processId.getPid().get();
 		Process process = processId.getProcess();
-		if (id != -1) {
-			new RunProcess(processBuilder.command("kill", "-SIGINT", Long.toString(id)))
+		if (pid != -1) {
+			new RunProcess(processBuilder.command("kill", "-SIGINT", Long.toString(pid)))
 					.run(consumer);
 		}
 		else {
