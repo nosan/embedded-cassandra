@@ -47,6 +47,8 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
@@ -72,6 +74,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SuppressWarnings("ConstantConditions")
 @ExtendWith(CaptureOutputExtension.class)
 abstract class AbstractLocalCassandraTests {
+
+	private final Logger log = LoggerFactory.getLogger(getClass());
 
 	private final LocalCassandraFactory factory;
 
@@ -202,15 +206,9 @@ abstract class AbstractLocalCassandraTests {
 		t.join();
 		t1.join();
 
-		try {
-			assertThat(exceptions).isEmpty();
-		}
-		catch (Throwable ex) {
-			for (Throwable exception : exceptions) {
-				ex.addSuppressed(exception);
-			}
-			throw ex;
-		}
+		exceptions.forEach(exception -> this.log.error(exception.getMessage(), exception));
+		assertThat(exceptions).isEmpty();
+
 	}
 
 	@Test
