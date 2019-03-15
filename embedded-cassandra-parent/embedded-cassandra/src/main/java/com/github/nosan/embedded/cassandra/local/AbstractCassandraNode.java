@@ -175,29 +175,67 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		ProcessId processId = this.processId;
 		Process process = (processId != null) ? processId.getProcess() : null;
 		if (processId != null && process.isAlive()) {
-			try {
-				ProcessBuilder processBuilder = new ProcessBuilder()
-						.directory(this.workingDirectory.toFile())
-						.redirectErrorStream(true);
-				stop(processId, processBuilder, this.threadFactory, this.log::info);
+			Long pid = processId.getPid().get();
+			this.log.info("Stops Cassandra Node '{}'", pid);
+			if (!terminate(pid)) {
+				process.destroy();
 			}
-			catch (IOException ex) {
-				this.log.error(String.format("Could not stop Cassandra Node '%s'.", processId.getPid().get()), ex);
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
+				if (!terminate(pid)) {
+					process.destroy();
+				}
 			}
-			if (!process.waitFor(10, TimeUnit.SECONDS)) {
-				throw new IOException(
-						String.format("Casandra Node '%s' has not been stopped.", processId.getPid().get()));
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
+				if (!destroy(pid)) {
+					process.destroyForcibly();
+				}
+			}
+			if (!process.waitFor(3, TimeUnit.SECONDS)) {
+				process.destroyForcibly();
+			}
+			if (process.isAlive()) {
+				throw new IOException(String.format("Casandra Node '%s' has not been stopped.", pid));
 			}
 			this.processId = null;
-			this.log.info("Cassandra Node '{}' has been stopped", processId.getPid().get());
+			this.log.info("Cassandra Node '{}' has been stopped", pid);
 		}
 	}
 
-	protected abstract ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory,
+	protected abstract ProcessId start(ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException;
 
-	protected abstract void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
-			Consumer<String> consumer) throws IOException;
+	protected abstract boolean terminate(long pid, ProcessBuilder builder,
+			ThreadFactory threadFactory,
+			Consumer<String> consumer) throws IOException, InterruptedException;
+
+	protected abstract boolean destroy(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+			Consumer<String> consumer) throws IOException, InterruptedException;
+
+	private boolean terminate(long pid) throws InterruptedException {
+		try {
+			ProcessBuilder builder = new ProcessBuilder()
+					.directory(this.workingDirectory.toFile())
+					.redirectErrorStream(true);
+			return terminate(pid, builder, this.threadFactory, this.log::info);
+		}
+		catch (IOException ex) {
+			this.log.error(String.format("Cassandra Node '%s' is not terminated.", pid), ex);
+			return false;
+		}
+	}
+
+	private boolean destroy(long pid) throws InterruptedException {
+		try {
+			ProcessBuilder builder = new ProcessBuilder()
+					.directory(this.workingDirectory.toFile())
+					.redirectErrorStream(true);
+			return destroy(pid, builder, this.threadFactory, this.log::info);
+		}
+		catch (IOException ex) {
+			this.log.error(String.format("Cassandra Node '%s' is not destroyed.", pid), ex);
+			return false;
+		}
+	}
 
 	private static int getJmxPort(int jmxPort) {
 		return jmxPort != 0 ? jmxPort : PortUtils.getPort();

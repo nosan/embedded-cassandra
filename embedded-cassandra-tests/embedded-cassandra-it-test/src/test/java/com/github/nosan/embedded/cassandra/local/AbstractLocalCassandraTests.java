@@ -109,7 +109,6 @@ abstract class AbstractLocalCassandraTests {
 		runner.run(cassandra -> assertThatThrownBy(new CassandraRunner(this.factory)::run)
 				.isInstanceOf(CassandraException.class)
 				.hasCauseInstanceOf(IOException.class));
-		assertCassandraHasBeenStopped();
 	}
 
 	@Test
@@ -131,7 +130,6 @@ abstract class AbstractLocalCassandraTests {
 	void shouldStartIfTransportDisabled() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
 		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort));
-		assertCassandraHasBeenStopped();
 	}
 
 	@Test
@@ -172,7 +170,6 @@ abstract class AbstractLocalCassandraTests {
 		}));
 		assertThat(cassandra.getState()).isEqualTo(Cassandra.State.STOPPED);
 		assertThat(this.output.toString()).contains("Stops Apache Cassandra");
-		assertCassandraHasBeenStopped();
 		this.output.reset();
 		cassandra.stop();
 		assertThat(this.output.toString()).doesNotContain("Stops Apache Cassandra");
@@ -223,7 +220,6 @@ abstract class AbstractLocalCassandraTests {
 		finally {
 			cassandra.stop();
 		}
-		assertCassandraHasBeenStopped();
 		FileUtils.delete(path);
 		this.output.reset();
 		try {
@@ -233,7 +229,6 @@ abstract class AbstractLocalCassandraTests {
 		finally {
 			cassandra.stop();
 		}
-		assertCassandraHasBeenStopped();
 	}
 
 	@Test
@@ -248,7 +243,6 @@ abstract class AbstractLocalCassandraTests {
 		finally {
 			cassandra.stop();
 		}
-		assertCassandraHasBeenStopped();
 		this.output.reset();
 		try {
 			cassandra.start();
@@ -257,7 +251,6 @@ abstract class AbstractLocalCassandraTests {
 		finally {
 			cassandra.stop();
 		}
-		assertCassandraHasBeenStopped();
 	}
 
 	@Test
@@ -274,7 +267,6 @@ abstract class AbstractLocalCassandraTests {
 		else {
 			assertThat(this.output.toString()).doesNotContain("-f -R");
 		}
-		assertCassandraHasBeenStopped();
 	}
 
 	private void runAndAssertCassandraListenInterface(String location,
@@ -298,15 +290,6 @@ abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(assertCreateKeyspace()
 				.andThen(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort)));
-		assertCassandraHasBeenStopped();
-	}
-
-	private void assertCassandraHasBeenStopped() {
-		assertThat(this.output.toString()).contains("has been stopped");
-		assertThat(this.output.toString()).doesNotContain("Unable to stop Cassandra");
-		if (!new Version(2, 2, 14).equals(this.factory.getVersion())) {
-			assertThat(this.output.toString()).contains("Announcing shutdown");
-		}
 	}
 
 	private Consumer<Cassandra> assertDeleteKeyspace() {

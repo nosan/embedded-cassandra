@@ -64,49 +64,65 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	protected ProcessId start(ProcessBuilder processBuilder, ThreadFactory threadFactory, Consumer<String> consumer)
+	protected ProcessId start(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
 			throws IOException {
 		Path workingDirectory = this.workingDirectory;
 		Version version = this.version;
 		Path pidFile = workingDirectory.resolve(UUID.randomUUID().toString());
 		this.pidFile = pidFile;
-		processBuilder.command("powershell", "-ExecutionPolicy", "Unrestricted");
-		processBuilder.command().add(workingDirectory.resolve("bin/cassandra.ps1").toString());
-		processBuilder.command().add("-f");
+		builder.command("powershell", "-ExecutionPolicy", "Unrestricted");
+		builder.command().add(workingDirectory.resolve("bin/cassandra.ps1").toString());
+		builder.command().add("-f");
 		if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1)) {
-			processBuilder.command().add("-a");
+			builder.command().add("-a");
 		}
-		processBuilder.command().add("-p");
-		processBuilder.command().add(pidFile.toString());
+		builder.command().add("-p");
+		builder.command().add(pidFile.toString());
 		CompositeConsumer<String> compositeConsumer = new CompositeConsumer<>();
 		PidFileSupplier pidFileSupplier = new PidFileSupplier(pidFile, compositeConsumer);
 		compositeConsumer.add(pidFileSupplier);
 		compositeConsumer.add(consumer);
-		Process process = new RunProcess(processBuilder, threadFactory).run(compositeConsumer);
+		Process process = new RunProcess(builder, threadFactory).run(compositeConsumer);
 		return new ProcessId(process, new PidSupplier(ProcessUtils.getPid(process), pidFileSupplier));
 	}
 
 	@Override
-	protected void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
-			Consumer<String> consumer) throws IOException {
-		long pid = processId.getPid().get();
-		Process process = processId.getProcess();
+	protected boolean terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+			Consumer<String> consumer) throws IOException, InterruptedException {
 		Path pidFile = this.pidFile;
 		Path stopServerFile = this.workingDirectory.resolve("bin/stop-server.ps1");
 		if (pidFile != null && Files.exists(pidFile) && Files.exists(stopServerFile)) {
-			processBuilder.command("powershell", "-ExecutionPolicy", "Unrestricted");
-			processBuilder.command().add(stopServerFile.toString());
-			processBuilder.command().add("-p");
-			processBuilder.command().add(pidFile.toString());
-			new RunProcess(processBuilder, threadFactory).run(consumer);
+			builder.command("powershell", "-ExecutionPolicy", "Unrestricted");
+			builder.command().add(stopServerFile.toString());
+			builder.command().add("-p");
+			builder.command().add(pidFile.toString());
+			return new RunProcess(builder, threadFactory).run(consumer).waitFor() == 0;
 		}
 		else if (pid != -1) {
-			processBuilder.command("taskkill", "/pid", Long.toString(pid));
-			new RunProcess(processBuilder, threadFactory).run(consumer);
+			builder.command("taskkill", "/pid", Long.toString(pid));
+			return new RunProcess(builder, threadFactory).run(consumer).waitFor() == 0;
 		}
-		else {
-			process.destroy();
+		return false;
+	}
+
+	@Override
+	protected boolean destroy(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+			Consumer<String> consumer) throws IOException, InterruptedException {
+		Path pidFile = this.pidFile;
+		Path stopServerFile = this.workingDirectory.resolve("bin/stop-server.ps1");
+		if (pidFile != null && Files.exists(pidFile) && Files.exists(stopServerFile)) {
+			builder.command("powershell", "-ExecutionPolicy", "Unrestricted");
+			builder.command().add(stopServerFile.toString());
+			builder.command().add("-p");
+			builder.command().add(pidFile.toString());
+			builder.command().add("-f");
+			return new RunProcess(builder, threadFactory).run(consumer).waitFor() == 0;
 		}
+		else if (pid != -1) {
+			builder.command("taskkill", "/f", "/pid", Long.toString(pid));
+			return new RunProcess(builder, threadFactory).run(consumer).waitFor() == 0;
+		}
+		return false;
 	}
 
 	private static final class PidSupplier implements Supplier<Long> {
