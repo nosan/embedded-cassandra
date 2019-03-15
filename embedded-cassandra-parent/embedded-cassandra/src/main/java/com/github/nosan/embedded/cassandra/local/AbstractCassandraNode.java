@@ -131,7 +131,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		CompositeConsumer<String> consumer = new CompositeConsumer<>();
 		NodeReadiness nodeReadiness = new NodeReadiness(consumer);
 		TransportReadiness transportReadiness = new TransportReadiness(settings);
-		BufferedConsumer bufferedConsumer = new BufferedConsumer(5);
+		BufferedConsumer bufferedConsumer = new BufferedConsumer(10);
 		consumer.add(LoggerFactory.getLogger(Cassandra.class)::info);
 		consumer.add(bufferedConsumer);
 		consumer.add(nodeReadiness);
@@ -198,7 +198,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	protected abstract void stop(ProcessId processId, ProcessBuilder processBuilder, ThreadFactory threadFactory,
 			Consumer<? super String> consumer) throws IOException;
 
-	private int getJmxPort(int jmxPort) {
+	private static int getJmxPort(int jmxPort) {
 		return jmxPort != 0 ? jmxPort : PortUtils.getPort();
 	}
 
