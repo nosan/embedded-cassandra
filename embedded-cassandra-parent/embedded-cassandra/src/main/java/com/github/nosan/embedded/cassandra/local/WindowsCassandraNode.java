@@ -88,40 +88,40 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	@Override
 	protected boolean terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException {
-		return terminatePidFile(builder, threadFactory, consumer) ||
-				terminatePid(pid, builder, threadFactory, consumer);
+		return terminateByPidFile(builder, threadFactory, consumer) ||
+				terminateByPid(pid, builder, threadFactory, consumer);
 	}
 
 	@Override
-	protected boolean destroy(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	protected boolean kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException {
-		return destroyPidFile(builder, threadFactory, consumer) ||
-				destroyPid(pid, builder, threadFactory, consumer);
+		return killByPidFile(builder, threadFactory, consumer) ||
+				killByPid(pid, builder, threadFactory, consumer);
 	}
 
-	private boolean terminatePidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
+	private boolean terminateByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
 			throws IOException, InterruptedException {
-		return killPidFile(builder, threadFactory, consumer, false);
+		return killByPidFile(builder, threadFactory, consumer, false);
 	}
 
-	private boolean terminatePid(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	private boolean terminateByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException {
-		return killPid(pid, builder, threadFactory, consumer, false);
+		return killByPid(pid, builder, threadFactory, consumer, false);
 	}
 
-	private boolean destroyPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	private boolean killByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException {
-		return killPid(pid, builder, threadFactory, consumer, true);
+		return killByPid(pid, builder, threadFactory, consumer, true);
 
 	}
 
-	private boolean destroyPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
+	private boolean killByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
 			throws IOException, InterruptedException {
-		return killPidFile(builder, threadFactory, consumer, true);
+		return killByPidFile(builder, threadFactory, consumer, true);
 
 	}
 
-	private boolean killPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer,
+	private boolean killByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer,
 			boolean force) throws IOException, InterruptedException {
 		Path pidFile = this.pidFile;
 		Path stopServerFile = this.workingDirectory.resolve("bin/stop-server.ps1");
@@ -138,7 +138,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		return false;
 	}
 
-	private boolean killPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	private boolean killByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer, boolean force) throws IOException, InterruptedException {
 		if (pid != -1) {
 			builder.command("taskkill");

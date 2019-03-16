@@ -84,7 +84,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	protected boolean destroy(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	protected boolean kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException {
 		if (pid != -1) {
 			return new RunProcess(builder.command("kill", "-SIGKILL", Long.toString(pid)), threadFactory)

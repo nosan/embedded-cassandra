@@ -186,7 +186,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				}
 			}
 			if (!process.waitFor(5, TimeUnit.SECONDS)) {
-				if (!destroy(pid)) {
+				if (!kill(pid)) {
 					process.destroyForcibly();
 				}
 			}
@@ -228,7 +228,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			Consumer<String> consumer) throws IOException, InterruptedException;
 
 	/**
-	 * Destroys the Apache Cassandra.
+	 * Kills the Apache Cassandra.
 	 *
 	 * @param pid the pid
 	 * @param builder the almost configured builder (does not have command)
@@ -238,7 +238,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @throws IOException in the case of I/O errors
 	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	protected abstract boolean destroy(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	protected abstract boolean kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException;
 
 	private boolean terminate(long pid) throws InterruptedException {
@@ -249,20 +249,20 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			return terminate(pid, builder, this.threadFactory, this.log::info);
 		}
 		catch (IOException ex) {
-			this.log.error(String.format("Cassandra Node '%s' is not terminated.", pid), ex);
+			this.log.error(String.format("The terminated signal has not been sent to Cassandra Node '%s'.", pid), ex);
 			return false;
 		}
 	}
 
-	private boolean destroy(long pid) throws InterruptedException {
+	private boolean kill(long pid) throws InterruptedException {
 		try {
 			ProcessBuilder builder = new ProcessBuilder()
 					.directory(this.workingDirectory.toFile())
 					.redirectErrorStream(true);
-			return destroy(pid, builder, this.threadFactory, this.log::info);
+			return kill(pid, builder, this.threadFactory, this.log::info);
 		}
 		catch (IOException ex) {
-			this.log.error(String.format("Cassandra Node '%s' is not destroyed.", pid), ex);
+			this.log.error(String.format("The kill signal has not been sent to Cassandra Node '%s'.", pid), ex);
 			return false;
 		}
 	}
