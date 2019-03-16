@@ -64,97 +64,97 @@ class NodeSettings implements Settings {
 	@Nullable
 	@Override
 	public String getClusterName() {
-		return getString("cluster_name", this.properties).orElse(Settings.super.getClusterName());
+		return getString("cluster_name", this.properties).orElseGet(Settings.super::getClusterName);
 	}
 
 	@Override
 	public int getStoragePort() {
-		return getInteger("storage_port", this.properties).orElse(Settings.super.getStoragePort());
+		return getInteger("storage_port", this.properties).orElseGet(Settings.super::getStoragePort);
 	}
 
 	@Override
 	public int getSslStoragePort() {
-		return getInteger("ssl_storage_port", this.properties).orElse(Settings.super.getSslStoragePort());
+		return getInteger("ssl_storage_port", this.properties).orElseGet(Settings.super::getSslStoragePort);
 	}
 
 	@Nullable
 	@Override
 	public String getListenAddress() {
-		return getString("listen_address", this.properties).orElse(Settings.super.getListenAddress());
+		return getString("listen_address", this.properties).orElseGet(Settings.super::getListenAddress);
 	}
 
 	@Nullable
 	@Override
 	public String getListenInterface() {
-		return getString("listen_interface", this.properties).orElse(Settings.super.getListenInterface());
+		return getString("listen_interface", this.properties).orElseGet(Settings.super::getListenInterface);
 	}
 
 	@Nullable
 	@Override
 	public String getBroadcastAddress() {
-		return getString("broadcast_address", this.properties).orElse(Settings.super.getBroadcastAddress());
+		return getString("broadcast_address", this.properties).orElseGet(Settings.super::getBroadcastAddress);
 	}
 
 	@Nullable
 	@Override
 	public String getRpcAddress() {
-		return getString("rpc_address", this.properties).orElse(Settings.super.getRpcAddress());
+		return getString("rpc_address", this.properties).orElseGet(Settings.super::getRpcAddress);
 	}
 
 	@Nullable
 	@Override
 	public String getRpcInterface() {
-		return getString("rpc_interface", this.properties).orElse(Settings.super.getRpcInterface());
+		return getString("rpc_interface", this.properties).orElseGet(Settings.super::getRpcInterface);
 	}
 
 	@Nullable
 	@Override
 	public String getBroadcastRpcAddress() {
-		return getString("broadcast_rpc_address", this.properties).orElse(Settings.super.getBroadcastRpcAddress());
+		return getString("broadcast_rpc_address", this.properties).orElseGet(Settings.super::getBroadcastRpcAddress);
 	}
 
 	@Override
 	public boolean isStartNativeTransport() {
-		return getBoolean("start_native_transport", this.properties).orElse(Settings.super.isStartNativeTransport());
+		return getBoolean("start_native_transport", this.properties).orElseGet(Settings.super::isStartNativeTransport);
 	}
 
 	@Override
 	public int getPort() {
-		return getInteger("native_transport_port", this.properties).orElse(Settings.super.getPort());
+		return getInteger("native_transport_port", this.properties).orElseGet(Settings.super::getPort);
 	}
 
 	@Nullable
 	@Override
 	public Integer getSslPort() {
-		return getInteger("native_transport_port_ssl", this.properties).orElse(Settings.super.getSslPort());
+		return getInteger("native_transport_port_ssl", this.properties).orElseGet(Settings.super::getSslPort);
 	}
 
 	@Override
 	public boolean isStartRpc() {
-		return getBoolean("start_rpc", this.properties).orElse(Settings.super.isStartRpc());
+		return getBoolean("start_rpc", this.properties).orElseGet(Settings.super::isStartRpc);
 	}
 
 	@Override
 	public int getRpcPort() {
-		return getInteger("rpc_port", this.properties).orElse(Settings.super.getRpcPort());
+		return getInteger("rpc_port", this.properties).orElseGet(Settings.super::getRpcPort);
 	}
 
 	@Override
 	public boolean isListenOnBroadcastAddress() {
 		return getBoolean("listen_on_broadcast_address", this.properties)
-				.orElse(Settings.super.isListenOnBroadcastAddress());
+				.orElseGet(Settings.super::isListenOnBroadcastAddress);
 	}
 
 	@Override
 	public boolean isListenInterfacePreferIpv6() {
 		return getBoolean("listen_interface_prefer_ipv6", this.properties)
-				.orElse(Settings.super.isListenInterfacePreferIpv6());
+				.orElseGet(Settings.super::isListenInterfacePreferIpv6);
 	}
 
 	@Override
 	public boolean isRpcInterfacePreferIpv6() {
 		return getBoolean("rpc_interface_prefer_ipv6", this.properties)
-				.orElse(Settings.super.isRpcInterfacePreferIpv6());
+				.orElseGet(Settings.super::isRpcInterfacePreferIpv6);
 	}
 
 	@Override
@@ -184,15 +184,15 @@ class NodeSettings implements Settings {
 				.map(String::valueOf).collect(Collectors.joining(",", "{", "}"));
 	}
 
-	private static Optional<Integer> getInteger(String name, Map<?, ?> source) {
+	static Optional<Integer> getInteger(String name, Map<?, ?> source) {
 		return getString(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
 	}
 
-	private static Optional<Boolean> getBoolean(String name, Map<?, ?> source) {
+	static Optional<Boolean> getBoolean(String name, Map<?, ?> source) {
 		return getString(name, source).filter(StringUtils::hasText).map(Boolean::parseBoolean);
 	}
 
-	private static Optional<String> getString(String name, Map<?, ?> source) {
+	static Optional<String> getString(String name, Map<?, ?> source) {
 		return Optional.ofNullable(source.get(name)).map(String::valueOf);
 	}
 

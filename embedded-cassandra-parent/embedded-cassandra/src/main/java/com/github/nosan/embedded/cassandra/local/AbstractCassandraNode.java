@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +82,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private final Duration timeout;
 
-	private final List<String> jvmOptions;
+	private final JvmOptions jvmOptions;
 
 	private final int jmxPort;
 
@@ -110,7 +109,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		this.timeout = timeout;
 		this.javaHome = javaHome;
 		this.jmxPort = jmxPort;
-		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
+		this.jvmOptions = new JvmOptions(jvmOptions);
 	}
 
 	@Override
@@ -118,11 +117,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		ProcessBuilder processBuilder = new ProcessBuilder()
 				.directory(this.workingDirectory.toFile())
 				.redirectErrorStream(true);
-		RuntimeNodeSettings settings = getSettings(this.workingDirectory, this.version);
+		RuntimeNodeSettings settings = getSettings(this.workingDirectory, this.version, this.jvmOptions);
 
 		List<String> jvmOptions = new ArrayList<>();
 		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", getJmxPort(this.jmxPort)));
-		jvmOptions.addAll(this.jvmOptions);
+		jvmOptions.addAll(this.jvmOptions.getJvmOptions());
 		String javaHome = getJavaHome(this.javaHome);
 		if (StringUtils.hasText(javaHome)) {
 			processBuilder.environment().put("JAVA_HOME", javaHome);
@@ -204,7 +203,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	/**
 	 * Starts the Apache Cassandra.
 	 *
-	 * @param builder the almost configured builder (does not have command)
+	 * @param builder the almost configured builder (does not have a command)
 	 * @param threadFactory thread factory to create a process reader.
 	 * @param consumer the output consumer
 	 * @return the process
@@ -217,7 +216,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * Terminates the Apache Cassandra.
 	 *
 	 * @param pid the pid
-	 * @param builder the almost configured builder (does not have command)
+	 * @param builder the almost configured builder (does not have a command)
 	 * @param threadFactory thread factory to create a process reader.
 	 * @param consumer the output consumer
 	 * @return {@code true} if termination signal has been sent, otherwise {@code false}
@@ -276,10 +275,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		return Optional.ofNullable(javaHome).map(Path::toString).orElseGet(new SystemProperty("java.home"));
 	}
 
-	private static RuntimeNodeSettings getSettings(Path directory, Version version) throws IOException {
+	private static RuntimeNodeSettings getSettings(Path directory, Version version, JvmOptions jvmOptions)
+			throws IOException {
 		try (InputStream is = Files.newInputStream(directory.resolve("conf/cassandra.yaml"))) {
 			Yaml yaml = new Yaml();
-			return new RuntimeNodeSettings(version, yaml.loadAs(is, Map.class));
+			return new RuntimeNodeSettings(version, yaml.loadAs(is, Map.class), jvmOptions);
 		}
 	}
 
@@ -429,14 +429,59 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final class RuntimeNodeSettings extends NodeSettings {
 
+		private final JvmOptions jvmOptions;
+
 		@Nullable
 		private volatile InetAddress realListenAddress;
 
 		@Nullable
 		private volatile InetAddress realAddress;
 
-		RuntimeNodeSettings(Version version, @Nullable Map<?, ?> properties) {
+		RuntimeNodeSettings(Version version, @Nullable Map<?, ?> properties, JvmOptions jvmOptions) {
 			super(version, properties);
+			this.jvmOptions = jvmOptions;
+		}
+
+		@Override
+		public int getStoragePort() {
+			return getInteger("cassandra.storage_port", this.jvmOptions.getSystemProperties())
+					.orElseGet(super::getStoragePort);
+		}
+
+		@Override
+		public int getSslStoragePort() {
+			return getInteger("cassandra.ssl_storage_port", this.jvmOptions.getSystemProperties())
+					.orElseGet(super::getSslStoragePort);
+		}
+
+		@Override
+		public boolean isStartNativeTransport() {
+			return getBoolean("cassandra.start_native_transport", this.jvmOptions.getSystemProperties())
+					.orElseGet(super::isStartNativeTransport);
+		}
+
+		@Override
+		public int getPort() {
+			return getInteger("cassandra.native_transport_port", this.jvmOptions.getSystemProperties())
+					.orElseGet(super::getPort);
+		}
+
+		@Override
+		public boolean isStartRpc() {
+			if (getVersion().getMajor() < 4) {
+				return getBoolean("cassandra.start_rpc", this.jvmOptions.getSystemProperties())
+						.orElseGet(super::isStartRpc);
+			}
+			return super.isStartRpc();
+		}
+
+		@Override
+		public int getRpcPort() {
+			if (getVersion().getMajor() < 4) {
+				return getInteger("cassandra.rpc_port", this.jvmOptions.getSystemProperties())
+						.orElseGet(super::getRpcPort);
+			}
+			return super.getRpcPort();
 		}
 
 		@Override
