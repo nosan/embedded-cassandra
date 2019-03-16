@@ -61,7 +61,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000,
 				proxyType = Proxy.Type.SOCKS,
 				urlFactory = DefaultUrlFactory.class))
-public class EmbeddedLocalCassandraAnnotationTests {
+class EmbeddedLocalCassandraAnnotationTests {
 
 	@Autowired
 	private LocalCassandraFactory factory;

@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 @Cql(scripts = "/init.cql")
 @Cql(statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-public class CqlExecutionListenerDefaultNameTests {
+class CqlExecutionListenerDefaultNameTests {
 
 	@RegisterExtension
 	static final CassandraExtension cassandra = new CassandraExtension();
