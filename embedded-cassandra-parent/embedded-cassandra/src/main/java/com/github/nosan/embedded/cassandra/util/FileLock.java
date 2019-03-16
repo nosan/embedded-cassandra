@@ -72,7 +72,9 @@ public final class FileLock implements AutoCloseable {
 		FileChannel fileChannel = FileChannel.open(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 		this.fileChannel = fileChannel;
 		java.nio.channels.FileLock fileLock;
-		log.debug("Acquires a lock to the file '{}' ...", file);
+		if (log.isDebugEnabled()) {
+			log.debug("Acquires a lock to the file '{}' ...", file);
+		}
 		while ((fileLock = tryLock(fileChannel)) == null) {
 			try {
 				Thread.sleep(100);
@@ -82,7 +84,9 @@ public final class FileLock implements AutoCloseable {
 			}
 		}
 		this.fileLock = fileLock;
-		log.debug("The lock to the file '{}' has been acquired", file);
+		if (log.isDebugEnabled()) {
+			log.debug("The lock to the file '{}' has been acquired", file);
+		}
 	}
 
 	/**

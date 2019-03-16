@@ -82,7 +82,9 @@ class WorkingDirectoryInitializer implements Initializer {
 	private static void extract(Artifact artifact, Path artifactDirectory, String artifactName) throws IOException {
 		Objects.requireNonNull(artifact, "Artifact must not be null");
 		Path archiveFile = artifact.get();
-		log.debug("Extract '{}' into the '{}'.", archiveFile, artifactDirectory);
+		if (log.isDebugEnabled()) {
+			log.debug("Extract '{}' into the '{}'.", archiveFile, artifactDirectory);
+		}
 		try {
 			ArchiveUtils.extract(archiveFile, artifactDirectory);
 		}
@@ -95,11 +97,15 @@ class WorkingDirectoryInitializer implements Initializer {
 		}
 		requireSingleDirectory(artifactDirectory);
 		createFile(artifactDirectory.resolve(artifactName));
-		log.debug("'{}' archive has been extracted into the '{}'", archiveFile, artifactDirectory);
+		if (log.isDebugEnabled()) {
+			log.debug("'{}' archive has been extracted into the '{}'", archiveFile, artifactDirectory);
+		}
 	}
 
 	private static void copy(Path artifactDirectory, Path workingDirectory, String artifactName) throws IOException {
-		log.debug("Copy '{}' folder into the '{}'.", artifactDirectory, workingDirectory);
+		if (log.isDebugEnabled()) {
+			log.debug("Copy '{}' folder into the '{}'.", artifactDirectory, workingDirectory);
+		}
 		Files.createDirectories(workingDirectory);
 		try {
 			FileUtils.copy(artifactDirectory, workingDirectory,
@@ -112,7 +118,9 @@ class WorkingDirectoryInitializer implements Initializer {
 			throw new IOException(String.format("Could not copy folder '%s' into the '%s'",
 					artifactDirectory, workingDirectory), ex);
 		}
-		log.debug("'{}' folder has been copied into the '{}'", artifactDirectory, workingDirectory);
+		if (log.isDebugEnabled()) {
+			log.debug("'{}' folder has been copied into the '{}'", artifactDirectory, workingDirectory);
+		}
 	}
 
 	private static boolean shouldCopy(Path src, Path srcPath, String artifactName) {
