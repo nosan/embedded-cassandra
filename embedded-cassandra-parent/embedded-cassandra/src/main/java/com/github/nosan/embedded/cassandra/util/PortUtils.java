@@ -86,7 +86,8 @@ public abstract class PortUtils {
 	 */
 	public static boolean isPortBusy(@Nullable InetAddress address, int port) {
 		try (Socket s = new Socket()) {
-			s.connect(new InetSocketAddress(address, port), 100);
+			s.setReuseAddress(true);
+			s.connect(new InetSocketAddress(address, port), 1000);
 			return true;
 		}
 		catch (IOException ex) {
@@ -96,6 +97,7 @@ public abstract class PortUtils {
 
 	private static boolean isPortAvailable(@Nullable InetAddress address, int port) {
 		try (ServerSocket ss = new ServerSocket()) {
+			ss.setReuseAddress(true);
 			ss.bind(new InetSocketAddress(address, port), 1);
 		}
 		catch (IOException ex) {
