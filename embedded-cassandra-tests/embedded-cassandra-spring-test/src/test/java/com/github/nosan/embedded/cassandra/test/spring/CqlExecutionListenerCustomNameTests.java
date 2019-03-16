@@ -40,7 +40,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @Cql(cluster = "customCluster", scripts = "/init.cql")
-@Cql(cluster = "customCluster", statements = "DROP KEYSPACE test", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+@Cql(cluster = "customCluster", statements = "DROP KEYSPACE test",
+		executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 class CqlExecutionListenerCustomNameTests {
 
 	@RegisterExtension
