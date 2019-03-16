@@ -67,8 +67,9 @@ public abstract class PortUtils {
 	 * @since 1.1.0
 	 */
 	public static int getPort(@Nullable InetAddress address) {
+		ThreadLocalRandom random = ThreadLocalRandom.current();
 		for (int i = 0; i <= MAX - MIN; i++) {
-			int port = MIN + ThreadLocalRandom.current().nextInt(MAX - MIN + 1);
+			int port = MIN + random.nextInt(MAX - MIN + 1);
 			if (isPortAvailable(address, port)) {
 				return port;
 			}
