@@ -7,10 +7,10 @@ environment:
 
 before_build:
   - java -version
-  - mvnw.cmd clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - mvnw.cmd clean install -DskipTests=true -B -V
 
 build_script:
-  - mvnw.cmd clean install -Dsurefire.rerunFailingTestsCount=1
+  - mvnw.cmd clean install
 
 on_failure:
   - ps: |

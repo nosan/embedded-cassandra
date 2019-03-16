@@ -14,10 +14,10 @@ matrix:
 
 before_install:
   - java -version
-  - ./mvnw clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - ./mvnw clean install -DskipTests=true -B -V
 
 script:
-  - ./mvnw clean install -Dsurefire.rerunFailingTestsCount=1
+  - ./mvnw clean install
 
 after_failure:
   - ./surefire-reports.sh
