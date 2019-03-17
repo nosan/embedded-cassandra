@@ -25,12 +25,14 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
+import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
  * {@link Initializer} to replace all {@code 0} ports in a {@code cassandra.yaml}.
@@ -53,11 +55,11 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 			Map<Object, Object> newSource = new LinkedHashMap<>(originalSource);
 
 			NodeSettings settings = new NodeSettings(version, newSource);
-			setPort(newSource, "native_transport_port", settings::getPort, settings::getRealAddress);
-			setPort(newSource, "native_transport_port_ssl", settings::getSslPort, settings::getRealAddress);
-			setPort(newSource, "rpc_port", settings::getRpcPort, settings::getRealAddress);
-			setPort(newSource, "storage_port", settings::getStoragePort, settings::getRealListenAddress);
-			setPort(newSource, "ssl_storage_port", settings::getSslStoragePort, settings::getRealListenAddress);
+			setPort("native_transport_port", newSource, settings::getRealAddress);
+			setPort("native_transport_port_ssl", newSource, settings::getRealAddress);
+			setPort("rpc_port", newSource, settings::getRealAddress);
+			setPort("storage_port", newSource, settings::getRealListenAddress);
+			setPort("ssl_storage_port", newSource, settings::getRealListenAddress);
 
 			if (!newSource.equals(originalSource)) {
 				try (BufferedWriter writer = Files.newBufferedWriter(file)) {
@@ -67,19 +69,17 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 		}
 	}
 
-	private void setPort(Map<Object, Object> source, String property, Supplier<Integer> portSupplier,
-			Supplier<InetAddress> addressSupplier) {
-		if (source.containsKey(property)) {
-			Integer originalPort = portSupplier.get();
-			if (originalPort != null && originalPort == 0) {
+	private void setPort(String name, Map<Object, Object> source, Supplier<InetAddress> addressSupplier) {
+		getInteger(name, source).ifPresent(originalPort -> {
+			if (originalPort == 0) {
 				InetAddress address = addressSupplier.get();
 				int newPort = PortUtils.getPort(address);
 				if (this.log.isDebugEnabled()) {
-					this.log.debug("Replace {}: {} as {}: {}", property, originalPort, property, newPort);
+					this.log.debug("Replace {}: {} as {}: {}", name, originalPort, name, newPort);
 				}
-				source.put(property, newPort);
+				source.put(name, newPort);
 			}
-		}
+		});
 	}
 
 	private Map<?, ?> load(Yaml yaml, Path source) {
@@ -93,6 +93,14 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 			}
 			return Collections.emptyMap();
 		}
+	}
+
+	private static Optional<Integer> getInteger(String name, Map<?, ?> source) {
+		return getString(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
+	}
+
+	private static Optional<String> getString(String name, Map<?, ?> source) {
+		return Optional.ofNullable(source.get(name)).map(String::valueOf);
 	}
 
 }

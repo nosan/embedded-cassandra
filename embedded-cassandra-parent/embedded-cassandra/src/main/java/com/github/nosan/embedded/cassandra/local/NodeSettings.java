@@ -184,15 +184,15 @@ class NodeSettings implements Settings {
 				.map(String::valueOf).collect(Collectors.joining(",", "{", "}"));
 	}
 
-	static Optional<Integer> getInteger(String name, Map<?, ?> source) {
+	private static Optional<Integer> getInteger(String name, Map<?, ?> source) {
 		return getString(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
 	}
 
-	static Optional<Boolean> getBoolean(String name, Map<?, ?> source) {
+	private static Optional<Boolean> getBoolean(String name, Map<?, ?> source) {
 		return getString(name, source).filter(StringUtils::hasText).map(Boolean::parseBoolean);
 	}
 
-	static Optional<String> getString(String name, Map<?, ?> source) {
+	private static Optional<String> getString(String name, Map<?, ?> source) {
 		return Optional.ofNullable(source.get(name)).map(String::valueOf);
 	}
 
