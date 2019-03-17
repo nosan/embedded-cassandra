@@ -153,14 +153,9 @@ class JvmOptions implements Supplier<List<String>> {
 	private static Map<String, String> parse(List<String> options) {
 		Map<String, String> result = new LinkedHashMap<>();
 		for (String option : options) {
-			if (option.startsWith("-D")) {
+			if (option.startsWith("-D") && option.contains("=")) {
 				int index = option.indexOf("=");
-				if (index != -1) {
-					result.put(option.substring(0, index), option.substring(index + 1));
-				}
-				else {
-					result.put(option, "");
-				}
+				result.put(option.substring(0, index), option.substring(index + 1));
 			}
 			else {
 				result.put(option, null);
