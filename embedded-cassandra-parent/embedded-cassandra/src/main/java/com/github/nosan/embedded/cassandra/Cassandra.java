@@ -47,7 +47,8 @@ public interface Cassandra {
 	void stop() throws CassandraException;
 
 	/**
-	 * Returns the settings this {@code Cassandra} is running on.
+	 * Returns the settings this {@code Cassandra} is running on. These settings can be retrieved only if {@code
+	 * Cassandra} state is {@link State#STARTED started}.
 	 *
 	 * @return the settings
 	 * @throws CassandraException if {@code Cassandra} is not started.
