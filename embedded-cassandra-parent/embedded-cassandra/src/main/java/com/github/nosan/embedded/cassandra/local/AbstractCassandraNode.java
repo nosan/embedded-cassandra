@@ -152,7 +152,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 								"Please see logs for more details.%n%s", processId.getPid().get(), process.exitValue(),
 						bufferedConsumer));
 			}
-			if (transportReadiness.get() && nodeReadiness.get()) {
+			long elapsed = System.nanoTime() - start;
+			if ((nodeReadiness.get() || TimeUnit.NANOSECONDS.toSeconds(elapsed) > 20) && transportReadiness.get()) {
 				this.log.info("Cassandra Node '{}' has been started", processId.getPid().get());
 				consumer.remove(bufferedConsumer);
 				consumer.remove(nodeReadiness);
@@ -325,23 +326,17 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final class NodeReadiness implements Consumer<String>, Supplier<Boolean> {
 
-		private static final long DEFAULT_STARTUP_TIMEOUT = 20000L;
-
 		private final CompositeConsumer<String> consumer;
-
-		private final long start;
 
 		private volatile boolean ready = false;
 
 		NodeReadiness(CompositeConsumer<String> consumer) {
 			this.consumer = consumer;
-			this.start = System.currentTimeMillis();
 		}
 
 		@Override
 		public void accept(String line) {
-			long elapsed = System.currentTimeMillis() - this.start;
-			if (match(line) || elapsed > DEFAULT_STARTUP_TIMEOUT) {
+			if (match(line)) {
 				this.ready = true;
 				this.consumer.remove(this);
 			}
