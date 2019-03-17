@@ -256,12 +256,19 @@ class RemoteArtifact implements Artifact {
 				long start = System.currentTimeMillis();
 				showProgress(file, size, executorService);
 				Files.copy(urlInputStream, file, StandardCopyOption.REPLACE_EXISTING);
+				long fileSize = Files.size(file);
+				if (fileSize < size) {
+					throw new IOException(
+							String.format("The size '%d' of the file '%s' is not valid. Expected size is '%d'",
+									fileSize, file, size));
+				}
 				long elapsed = System.currentTimeMillis() - start;
 				log.info("Apache Cassandra '{}' has been downloaded ({} ms)", this.version, elapsed);
 			}
 			finally {
 				executorService.shutdown();
 			}
+
 			return file;
 		}
 
@@ -322,7 +329,7 @@ class RemoteArtifact implements Artifact {
 		private static void showProgress(Path file, long size, ScheduledExecutorService executorService) {
 			if (size > 0) {
 				long[] prevPercent = new long[1];
-				int minPercentStep = 5;
+				int minPercentStep = 10;
 				AtomicBoolean logOnlyOnce = new AtomicBoolean(false);
 				executorService.scheduleAtFixedRate(() -> {
 					try {
@@ -340,7 +347,7 @@ class RemoteArtifact implements Artifact {
 							log.error(String.format("Could not show progress for a file '%s'", file), ex);
 						}
 					}
-				}, 0, 1, TimeUnit.SECONDS);
+				}, 0, 250, TimeUnit.MILLISECONDS);
 			}
 		}
 
