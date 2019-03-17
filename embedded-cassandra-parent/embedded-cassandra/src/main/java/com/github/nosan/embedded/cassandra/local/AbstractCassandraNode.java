@@ -120,7 +120,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				.redirectErrorStream(true);
 		Map<?, ?> properties = getProperties();
 		JvmOptions jvmOptions = getJvmOptions(properties);
-		RuntimeNodeSettings settings = getSettings(jvmOptions, properties);
+		RuntimeNodeSettings settings = getSettings(properties, jvmOptions);
 
 		String javaHome = getJavaHome(this.javaHome);
 		if (StringUtils.hasText(javaHome)) {
@@ -266,7 +266,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 	}
 
-	private RuntimeNodeSettings getSettings(JvmOptions jvmOptions, @Nullable Map<?, ?> properties) {
+	private RuntimeNodeSettings getSettings(@Nullable Map<?, ?> properties, JvmOptions jvmOptions) {
 		return new RuntimeNodeSettings(this.version, properties, jvmOptions);
 	}
 

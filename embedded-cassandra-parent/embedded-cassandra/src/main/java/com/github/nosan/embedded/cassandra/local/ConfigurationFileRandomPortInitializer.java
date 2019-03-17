@@ -70,12 +70,12 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 	}
 
 	private void setPort(String name, Map<Object, Object> source, Supplier<InetAddress> addressSupplier) {
-		getInteger(name, source).ifPresent(originalPort -> {
-			if (originalPort == 0) {
+		getInteger(name, source).ifPresent(port -> {
+			if (port == 0) {
 				InetAddress address = addressSupplier.get();
 				int newPort = PortUtils.getPort(address);
 				if (this.log.isDebugEnabled()) {
-					this.log.debug("Replace {}: {} as {}: {}", name, originalPort, name, newPort);
+					this.log.debug("Replace {}: {} as {}: {}", name, port, name, newPort);
 				}
 				source.put(name, newPort);
 			}
