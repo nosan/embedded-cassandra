@@ -36,41 +36,19 @@ import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
- * Utility class for working with JVM Options.
+ * Utility class for working with the Apache Cassandra JVM parameters.
  *
  * @author Dmytro Nosan
  * @since 1.4.2
  */
-class JvmOptions implements Supplier<List<String>> {
+class JvmParameters {
 
-	private static final Logger log = LoggerFactory.getLogger(JvmOptions.class);
+	private static final Logger log = LoggerFactory.getLogger(JvmParameters.class);
 
 	private final Map<String, String> jvmOptions;
 
-	JvmOptions(List<String> jvmOptions, int jmxPort, Settings settings) {
+	JvmParameters(List<String> jvmOptions, int jmxPort, Settings settings) {
 		this.jvmOptions = Collections.unmodifiableMap(setPorts(parse(normalize(jvmOptions, jmxPort)), settings));
-	}
-
-	/**
-	 * Return the jvm options.
-	 *
-	 * @return the jvm options
-	 */
-	@Override
-	public List<String> get() {
-		List<String> result = new ArrayList<>();
-		for (Map.Entry<String, String> entry : this.jvmOptions.entrySet()) {
-			String name = entry.getKey();
-			String value = entry.getValue();
-			if (value == null) {
-				result.add(name);
-			}
-			else {
-				result.add(name + "=" + value);
-			}
-		}
-
-		return Collections.unmodifiableList(result);
 	}
 
 	/**
@@ -143,6 +121,23 @@ class JvmOptions implements Supplier<List<String>> {
 	 */
 	Optional<Integer> getRpcPort() {
 		return getInteger("-Dcassandra.rpc_port", this.jvmOptions);
+	}
+
+	@Override
+	public String toString() {
+		List<String> result = new ArrayList<>();
+		for (Map.Entry<String, String> entry : this.jvmOptions.entrySet()) {
+			String name = entry.getKey();
+			String value = entry.getValue();
+			if (value == null) {
+				result.add(name);
+			}
+			else {
+				result.add(name + "=" + value);
+			}
+		}
+
+		return String.join(" ", result);
 	}
 
 	private static List<String> normalize(List<String> options, int jmxPort) {

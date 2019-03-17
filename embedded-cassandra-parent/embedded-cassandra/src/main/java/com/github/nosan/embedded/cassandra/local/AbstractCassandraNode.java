@@ -119,14 +119,14 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				.directory(this.workingDirectory.toFile())
 				.redirectErrorStream(true);
 		Map<?, ?> properties = getProperties();
-		JvmOptions jvmOptions = getJvmOptions(properties);
-		RuntimeNodeSettings settings = getSettings(properties, jvmOptions);
+		JvmParameters jvmParameters = getJvmOptions(properties);
+		RuntimeNodeSettings settings = getSettings(properties, jvmParameters);
 
 		String javaHome = getJavaHome(this.javaHome);
 		if (StringUtils.hasText(javaHome)) {
 			processBuilder.environment().put("JAVA_HOME", javaHome);
 		}
-		processBuilder.environment().put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions.get()));
+		processBuilder.environment().put("JVM_EXTRA_OPTS", jvmParameters.toString());
 
 		CompositeConsumer<String> consumer = new CompositeConsumer<>();
 		NodeReadiness nodeReadiness = new NodeReadiness(consumer);
@@ -266,12 +266,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 	}
 
-	private RuntimeNodeSettings getSettings(@Nullable Map<?, ?> properties, JvmOptions jvmOptions) {
-		return new RuntimeNodeSettings(this.version, properties, jvmOptions);
+	private RuntimeNodeSettings getSettings(@Nullable Map<?, ?> properties, JvmParameters jvmParameters) {
+		return new RuntimeNodeSettings(this.version, properties, jvmParameters);
 	}
 
-	private JvmOptions getJvmOptions(@Nullable Map<?, ?> properties) {
-		return new JvmOptions(this.jvmOptions, this.jmxPort, new NodeSettings(this.version, properties));
+	private JvmParameters getJvmOptions(@Nullable Map<?, ?> properties) {
+		return new JvmParameters(this.jvmOptions, this.jmxPort, new NodeSettings(this.version, properties));
 	}
 
 	@Nullable
@@ -433,7 +433,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final class RuntimeNodeSettings extends NodeSettings {
 
-		private final JvmOptions jvmOptions;
+		private final JvmParameters jvmParameters;
 
 		@Nullable
 		private volatile InetAddress realListenAddress;
@@ -441,35 +441,35 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		@Nullable
 		private volatile InetAddress realAddress;
 
-		RuntimeNodeSettings(Version version, @Nullable Map<?, ?> properties, JvmOptions jvmOptions) {
+		RuntimeNodeSettings(Version version, @Nullable Map<?, ?> properties, JvmParameters jvmParameters) {
 			super(version, properties);
-			this.jvmOptions = jvmOptions;
+			this.jvmParameters = jvmParameters;
 		}
 
 		@Override
 		public int getStoragePort() {
-			return this.jvmOptions.getStoragePort().orElseGet(super::getStoragePort);
+			return this.jvmParameters.getStoragePort().orElseGet(super::getStoragePort);
 		}
 
 		@Override
 		public int getSslStoragePort() {
-			return this.jvmOptions.getSslStoragePort().orElseGet(super::getSslStoragePort);
+			return this.jvmParameters.getSslStoragePort().orElseGet(super::getSslStoragePort);
 		}
 
 		@Override
 		public boolean isStartNativeTransport() {
-			return this.jvmOptions.isStartNativeTransport().orElseGet(super::isStartNativeTransport);
+			return this.jvmParameters.isStartNativeTransport().orElseGet(super::isStartNativeTransport);
 		}
 
 		@Override
 		public int getPort() {
-			return this.jvmOptions.getPort().orElseGet(super::getPort);
+			return this.jvmParameters.getPort().orElseGet(super::getPort);
 		}
 
 		@Override
 		public boolean isStartRpc() {
 			if (getVersion().getMajor() < 4) {
-				return this.jvmOptions.isStartRpc().orElseGet(super::isStartRpc);
+				return this.jvmParameters.isStartRpc().orElseGet(super::isStartRpc);
 			}
 			return super.isStartRpc();
 		}
@@ -477,7 +477,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		@Override
 		public int getRpcPort() {
 			if (getVersion().getMajor() < 4) {
-				return this.jvmOptions.getRpcPort().orElseGet(super::getRpcPort);
+				return this.jvmParameters.getRpcPort().orElseGet(super::getRpcPort);
 			}
 			return super.getRpcPort();
 		}

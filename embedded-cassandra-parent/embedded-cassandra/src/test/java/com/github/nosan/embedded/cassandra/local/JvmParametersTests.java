@@ -31,11 +31,11 @@ import com.github.nosan.embedded.cassandra.Version;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link JvmOptions}.
+ * Tests for {@link JvmParameters}.
  *
  * @author Dmytro Nosan
  */
-class JvmOptionsTests {
+class JvmParametersTests {
 
 	@Test
 	void randomizePorts() throws IOException {
@@ -47,13 +47,13 @@ class JvmOptionsTests {
 		options.add("-Dcassandra.ssl_storage_port=0");
 		options.add("-Dcassandra.jmx.local.port=0");
 		options.add("-Dcassandra.jmx.remote.port=0");
-		JvmOptions jvmOptions = new JvmOptions(options, 0, settings());
-		assertThat(jvmOptions.getPort()).isNotEqualTo(zero());
-		assertThat(jvmOptions.getSslStoragePort()).isNotEqualTo(zero());
-		assertThat(jvmOptions.getRpcPort()).isNotEqualTo(zero());
-		assertThat(jvmOptions.getStoragePort()).isNotEqualTo(zero());
-		assertThat(jvmOptions.getJmxRemotePort()).isNotEqualTo(zero());
-		assertThat(jvmOptions.getJmxLocalPort()).isNotEqualTo(zero());
+		JvmParameters jvmParameters = new JvmParameters(options, 0, settings());
+		assertThat(jvmParameters.getPort()).isNotEqualTo(zero());
+		assertThat(jvmParameters.getSslStoragePort()).isNotEqualTo(zero());
+		assertThat(jvmParameters.getRpcPort()).isNotEqualTo(zero());
+		assertThat(jvmParameters.getStoragePort()).isNotEqualTo(zero());
+		assertThat(jvmParameters.getJmxRemotePort()).isNotEqualTo(zero());
+		assertThat(jvmParameters.getJmxLocalPort()).isNotEqualTo(zero());
 	}
 
 	@Test
@@ -68,22 +68,21 @@ class JvmOptionsTests {
 		options.add("-Dcassandra.start_rpc=true");
 		options.add("-Dcassandra.start_native_transport=true");
 		options.add("-X512m");
-		JvmOptions jvmOptions = new JvmOptions(options, 0, settings());
-		assertThat(jvmOptions.getPort()).hasValue(9042);
-		assertThat(jvmOptions.getRpcPort()).hasValue(9160);
-		assertThat(jvmOptions.getSslStoragePort()).hasValue(7001);
-		assertThat(jvmOptions.getStoragePort()).hasValue(7000);
-		assertThat(jvmOptions.getJmxRemotePort()).hasValue(8000);
-		assertThat(jvmOptions.getJmxLocalPort()).hasValue(7199);
-		assertThat(jvmOptions.getJmxLocalPort()).hasValue(7199);
-		assertThat(jvmOptions.isStartRpc()).hasValue(true);
-		assertThat(jvmOptions.isStartNativeTransport()).hasValue(true);
+		JvmParameters jvmParameters = new JvmParameters(options, 0, settings());
+		assertThat(jvmParameters.getPort()).hasValue(9042);
+		assertThat(jvmParameters.getRpcPort()).hasValue(9160);
+		assertThat(jvmParameters.getSslStoragePort()).hasValue(7001);
+		assertThat(jvmParameters.getStoragePort()).hasValue(7000);
+		assertThat(jvmParameters.getJmxRemotePort()).hasValue(8000);
+		assertThat(jvmParameters.getJmxLocalPort()).hasValue(7199);
+		assertThat(jvmParameters.isStartRpc()).hasValue(true);
+		assertThat(jvmParameters.isStartNativeTransport()).hasValue(true);
 
-		assertThat(jvmOptions.get())
-				.contains("-Dcassandra.jmx.local.port=7199", "-Dcassandra.native_transport_port=9042",
-						"-Dcassandra.rpc_port=9160", "-Dcassandra.storage_port=7000",
-						"-Dcassandra.ssl_storage_port=7001", "-Dcassandra.jmx.remote.port=8000",
-						"-Dcassandra.start_rpc=true", "-Dcassandra.start_native_transport=true", "-X512m");
+		assertThat(jvmParameters.toString()).isEqualTo("-Dcassandra.jmx.local.port=7199" +
+				" -Dcassandra.native_transport_port=9042 -Dcassandra.rpc_port=9160" +
+				" -Dcassandra.storage_port=7000 -Dcassandra.ssl_storage_port=7001" +
+				" -Dcassandra.jmx.remote.port=8000 -Dcassandra.start_rpc=true" +
+				" -Dcassandra.start_native_transport=true -X512m");
 	}
 
 	private NodeSettings settings() throws IOException {
