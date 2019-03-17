@@ -101,14 +101,13 @@ abstract class AbstractLocalCassandraTests {
 		LocalCassandraFactory factory = this.factory;
 		List<String> jvmOptions = factory.getJvmOptions();
 		factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
-		jvmOptions.add("-Dcassandra.native_transport_port=9142");
+		jvmOptions.add("-Dcassandra.native_transport_port=0");
 		jvmOptions.add("-Dcassandra.rpc_port=9155");
 		jvmOptions.add("-Dcassandra.storage_port=7003");
 		jvmOptions.add("-Dcassandra.start_rpc=true");
 		jvmOptions.add("-Dcassandra.start_native_transport=true");
 		CassandraRunner runner = new CassandraRunner(factory);
-		runner.run(assertBusyPort(Settings::getRealAddress, (settings -> 9142))
-				.andThen(assertBusyPort(Settings::getRealAddress, (settings -> 9155)))
+		runner.run(assertBusyPort(Settings::getRealAddress, (settings -> 9155))
 				.andThen(assertBusyPort(Settings::getRealListenAddress, (settings -> 7003))
 						.andThen(assertCreateKeyspace())));
 	}

@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +83,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private final Duration timeout;
 
-	private final JvmOptions jvmOptions;
+	private final List<String> jvmOptions;
 
 	private final int jmxPort;
 
@@ -109,7 +110,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		this.timeout = timeout;
 		this.javaHome = javaHome;
 		this.jmxPort = jmxPort;
-		this.jvmOptions = new JvmOptions(jvmOptions);
+		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 	}
 
 	@Override
@@ -117,16 +118,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		ProcessBuilder processBuilder = new ProcessBuilder()
 				.directory(this.workingDirectory.toFile())
 				.redirectErrorStream(true);
-		RuntimeNodeSettings settings = getSettings(this.workingDirectory, this.version, this.jvmOptions);
+		Map<?, ?> properties = getProperties();
+		JvmOptions jvmOptions = getJvmOptions(properties);
+		RuntimeNodeSettings settings = getSettings(jvmOptions, properties);
 
-		List<String> jvmOptions = new ArrayList<>();
-		jvmOptions.add(String.format("-Dcassandra.jmx.local.port=%d", getJmxPort(this.jmxPort)));
-		jvmOptions.addAll(this.jvmOptions.getJvmOptions());
 		String javaHome = getJavaHome(this.javaHome);
 		if (StringUtils.hasText(javaHome)) {
 			processBuilder.environment().put("JAVA_HOME", javaHome);
 		}
-		processBuilder.environment().put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions));
+		processBuilder.environment().put("JVM_EXTRA_OPTS", String.join(" ", jvmOptions.get()));
 
 		CompositeConsumer<String> consumer = new CompositeConsumer<>();
 		NodeReadiness nodeReadiness = new NodeReadiness(consumer);
@@ -266,21 +266,25 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 	}
 
-	private static int getJmxPort(int jmxPort) {
-		return jmxPort != 0 ? jmxPort : PortUtils.getPort();
+	private RuntimeNodeSettings getSettings(JvmOptions jvmOptions, @Nullable Map<?, ?> properties) {
+		return new RuntimeNodeSettings(this.version, properties, jvmOptions);
+	}
+
+	private JvmOptions getJvmOptions(@Nullable Map<?, ?> properties) {
+		return new JvmOptions(this.jvmOptions, this.jmxPort, new NodeSettings(this.version, properties));
+	}
+
+	@Nullable
+	private Map<?, ?> getProperties() throws IOException {
+		try (InputStream is = Files.newInputStream(this.workingDirectory.resolve("conf/cassandra.yaml"))) {
+			Yaml yaml = new Yaml();
+			return yaml.loadAs(is, Map.class);
+		}
 	}
 
 	@Nullable
 	private static String getJavaHome(@Nullable Path javaHome) {
 		return Optional.ofNullable(javaHome).map(Path::toString).orElseGet(new SystemProperty("java.home"));
-	}
-
-	private static RuntimeNodeSettings getSettings(Path directory, Version version, JvmOptions jvmOptions)
-			throws IOException {
-		try (InputStream is = Files.newInputStream(directory.resolve("conf/cassandra.yaml"))) {
-			Yaml yaml = new Yaml();
-			return new RuntimeNodeSettings(version, yaml.loadAs(is, Map.class), jvmOptions);
-		}
 	}
 
 	private static final class TransportReadiness implements Supplier<Boolean> {
@@ -444,33 +448,28 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		@Override
 		public int getStoragePort() {
-			return getInteger("cassandra.storage_port", this.jvmOptions.getSystemProperties())
-					.orElseGet(super::getStoragePort);
+			return this.jvmOptions.getStoragePort().orElseGet(super::getStoragePort);
 		}
 
 		@Override
 		public int getSslStoragePort() {
-			return getInteger("cassandra.ssl_storage_port", this.jvmOptions.getSystemProperties())
-					.orElseGet(super::getSslStoragePort);
+			return this.jvmOptions.getSslStoragePort().orElseGet(super::getSslStoragePort);
 		}
 
 		@Override
 		public boolean isStartNativeTransport() {
-			return getBoolean("cassandra.start_native_transport", this.jvmOptions.getSystemProperties())
-					.orElseGet(super::isStartNativeTransport);
+			return this.jvmOptions.isStartNativeTransport().orElseGet(super::isStartNativeTransport);
 		}
 
 		@Override
 		public int getPort() {
-			return getInteger("cassandra.native_transport_port", this.jvmOptions.getSystemProperties())
-					.orElseGet(super::getPort);
+			return this.jvmOptions.getPort().orElseGet(super::getPort);
 		}
 
 		@Override
 		public boolean isStartRpc() {
 			if (getVersion().getMajor() < 4) {
-				return getBoolean("cassandra.start_rpc", this.jvmOptions.getSystemProperties())
-						.orElseGet(super::isStartRpc);
+				return this.jvmOptions.isStartRpc().orElseGet(super::isStartRpc);
 			}
 			return super.isStartRpc();
 		}
@@ -478,8 +477,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		@Override
 		public int getRpcPort() {
 			if (getVersion().getMajor() < 4) {
-				return getInteger("cassandra.rpc_port", this.jvmOptions.getSystemProperties())
-						.orElseGet(super::getRpcPort);
+				return this.jvmOptions.getRpcPort().orElseGet(super::getRpcPort);
 			}
 			return super.getRpcPort();
 		}
