@@ -113,7 +113,7 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	void shouldCatchCassandraError() {
+	void shouldFailAndCatchError() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-invalid.yaml"));
 		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class)
 				.hasMessageNotContaining("invalid_property");
@@ -149,17 +149,17 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	void shouldRunOnInterfaceIPV4() throws Exception {
-		runAndAssertCassandraListenInterface("/cassandra-interface.yaml", false);
+	void shouldStartOnInterfaceIPV4() throws Exception {
+		startAndAssertCassandraListenInterface("/cassandra-interface.yaml", false);
 	}
 
 	@Test
-	void shouldRunOnInterfaceIPV6() throws Exception {
-		runAndAssertCassandraListenInterface("/cassandra-interface-ipv6.yaml", true);
+	void shouldStartOnInterfaceIPV6() throws Exception {
+		startAndAssertCassandraListenInterface("/cassandra-interface-ipv6.yaml", true);
 	}
 
 	@Test
-	void notEnoughTime() {
+	void shouldFailNotEnoughTime() {
 		this.factory.setStartupTimeout(Duration.ofSeconds(2L));
 		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class)
 				.hasStackTraceContaining("has not been started, seems like (2000) milliseconds is not enough");
@@ -199,7 +199,7 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	void shouldRunMoreThanOneCassandra() throws Throwable {
+	void shouldStartMoreThanOneCassandra() throws Throwable {
 		this.factory.setJmxPort(0);
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-random.yaml"));
 		List<Throwable> exceptions = new CopyOnWriteArrayList<>();
@@ -285,8 +285,7 @@ abstract class AbstractLocalCassandraTests {
 		}
 	}
 
-	private void runAndAssertCassandraListenInterface(String location,
-			boolean ipv6) throws IOException {
+	private void startAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
 		Path configurationFile = this.temporaryFolder.resolve("cassandra.yaml");
 		String interfaceName = getInterface(ipv6);
 		InetAddress address = NetworkUtils.getAddressByInterface(interfaceName, ipv6)

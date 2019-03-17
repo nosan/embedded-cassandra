@@ -36,15 +36,15 @@ class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
 	@Test
 	@Override
 	@DisabledOnOs(OS.WINDOWS)
-	void shouldRunOnInterfaceIPV6() throws Exception {
-		super.shouldRunOnInterfaceIPV6();
+	void shouldStartOnInterfaceIPV6() throws Exception {
+		super.shouldStartOnInterfaceIPV6();
 	}
 
 	@Test
 	@Override
 	@DisabledOnOs(OS.WINDOWS)
-	void shouldRunOnInterfaceIPV4() throws Exception {
-		super.shouldRunOnInterfaceIPV4();
+	void shouldStartOnInterfaceIPV4() throws Exception {
+		super.shouldStartOnInterfaceIPV4();
 	}
 
 }
