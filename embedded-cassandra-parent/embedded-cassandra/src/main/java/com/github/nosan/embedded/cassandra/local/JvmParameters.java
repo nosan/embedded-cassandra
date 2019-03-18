@@ -173,15 +173,13 @@ class JvmParameters {
 	}
 
 	private static void setPort(String name, Map<String, String> source, Supplier<InetAddress> addressSupplier) {
-		getInteger(name, source).ifPresent(port -> {
-			if (port == 0) {
-				InetAddress address = addressSupplier.get();
-				int newPort = PortUtils.getPort(address);
-				if (log.isDebugEnabled()) {
-					log.debug("Replace {}: {} as {}: {}", name, port, name, newPort);
-				}
-				source.put(name, String.valueOf(newPort));
+		getInteger(name, source).filter(port -> port == 0).ifPresent(port -> {
+			InetAddress address = addressSupplier.get();
+			int newPort = PortUtils.getPort(address);
+			if (log.isDebugEnabled()) {
+				log.debug("Replace {}: {} as {}: {}", name, port, name, newPort);
 			}
+			source.put(name, String.valueOf(newPort));
 		});
 	}
 
