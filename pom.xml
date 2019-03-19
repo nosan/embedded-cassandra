@@ -266,7 +266,7 @@
                         <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
                         <failIfNoTests>false</failIfNoTests>
                         <trimStackTrace>false</trimStackTrace>
-                        <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+                        <argLine>-Xms256m -Xmx1024m</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
