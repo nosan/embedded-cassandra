@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ class LocalCassandra implements Cassandra {
 	private volatile State state = State.NEW;
 
 	@Nullable
-	private volatile Thread currentThread;
+	private volatile Thread startThread;
 
 	@Nullable
 	private CassandraNode node;
@@ -144,7 +145,7 @@ class LocalCassandra implements Cassandra {
 		synchronized (this.lock) {
 			if (this.state != State.STARTED) {
 				try {
-					this.currentThread = Thread.currentThread();
+					this.startThread = Thread.currentThread();
 					try {
 						registerShutdownHook();
 					}
@@ -169,7 +170,7 @@ class LocalCassandra implements Cassandra {
 					}
 				}
 				finally {
-					this.currentThread = null;
+					this.startThread = null;
 				}
 			}
 		}
@@ -180,23 +181,17 @@ class LocalCassandra implements Cassandra {
 		synchronized (this.lock) {
 			if (this.state != State.STOPPED) {
 				try {
-					this.currentThread = Thread.currentThread();
-					try {
-						this.state = State.STOPPING;
-						stop0();
-						this.state = State.STOPPED;
-					}
-					catch (InterruptedException ex) {
-						this.state = State.STOP_INTERRUPTED;
-						Thread.currentThread().interrupt();
-					}
-					catch (Throwable ex) {
-						this.state = State.STOP_FAILED;
-						throw new CassandraException("Unable to stop Cassandra", ex);
-					}
+					this.state = State.STOPPING;
+					stop0();
+					this.state = State.STOPPED;
 				}
-				finally {
-					this.currentThread = null;
+				catch (InterruptedException ex) {
+					this.state = State.STOP_INTERRUPTED;
+					Thread.currentThread().interrupt();
+				}
+				catch (Throwable ex) {
+					this.state = State.STOP_FAILED;
+					throw new CassandraException("Unable to stop Cassandra", ex);
 				}
 			}
 		}
@@ -309,10 +304,7 @@ class LocalCassandra implements Cassandra {
 	private void registerShutdownHook() {
 		if (this.registerShutdownHook && this.state == State.NEW) {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				Thread currentThread = this.currentThread;
-				if (currentThread != null) {
-					currentThread.interrupt();
-				}
+				Optional.ofNullable(this.startThread).ifPresent(Thread::interrupt);
 				stopSilently();
 			}, "Cassandra Shutdown Hook"));
 		}

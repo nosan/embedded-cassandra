@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
@@ -82,7 +83,7 @@ public class TestCassandra implements Cassandra {
 	private volatile Session session;
 
 	@Nullable
-	private volatile Thread currentThread;
+	private volatile Thread startThread;
 
 	/**
 	 * Creates a {@link TestCassandra}.
@@ -180,7 +181,7 @@ public class TestCassandra implements Cassandra {
 		synchronized (this.lock) {
 			if (this.state != State.STARTED) {
 				try {
-					this.currentThread = Thread.currentThread();
+					this.startThread = Thread.currentThread();
 					try {
 						registerShutdownHook();
 					}
@@ -204,7 +205,7 @@ public class TestCassandra implements Cassandra {
 					}
 				}
 				finally {
-					this.currentThread = null;
+					this.startThread = null;
 				}
 			}
 		}
@@ -215,23 +216,17 @@ public class TestCassandra implements Cassandra {
 		synchronized (this.lock) {
 			if (this.state != State.STOPPED) {
 				try {
-					this.currentThread = Thread.currentThread();
-					try {
-						this.state = State.STOPPING;
-						stop0();
-						this.state = State.STOPPED;
-					}
-					catch (InterruptedException ex) {
-						this.state = State.STOP_INTERRUPTED;
-						Thread.currentThread().interrupt();
-					}
-					catch (Throwable ex) {
-						this.state = State.STOP_FAILED;
-						throw new CassandraException("Unable to stop Test Cassandra", ex);
-					}
+					this.state = State.STOPPING;
+					stop0();
+					this.state = State.STOPPED;
 				}
-				finally {
-					this.currentThread = null;
+				catch (InterruptedException ex) {
+					this.state = State.STOP_INTERRUPTED;
+					Thread.currentThread().interrupt();
+				}
+				catch (Throwable ex) {
+					this.state = State.STOP_FAILED;
+					throw new CassandraException("Unable to stop Test Cassandra", ex);
 				}
 			}
 		}
@@ -454,10 +449,7 @@ public class TestCassandra implements Cassandra {
 	private void registerShutdownHook() {
 		if (this.registerShutdownHook && this.state == State.NEW) {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				Thread currentThread = this.currentThread;
-				if (currentThread != null) {
-					currentThread.interrupt();
-				}
+				Optional.ofNullable(this.startThread).ifPresent(Thread::interrupt);
 				stopSilently();
 			}, "Test Cassandra Shutdown Hook"));
 		}
