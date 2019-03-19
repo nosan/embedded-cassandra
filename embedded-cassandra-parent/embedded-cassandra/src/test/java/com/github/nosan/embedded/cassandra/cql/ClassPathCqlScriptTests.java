@@ -17,9 +17,12 @@
 package com.github.nosan.embedded.cassandra.cql;
 
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
+
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,58 +34,58 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class ClassPathCqlScriptTests {
 
-	@Test
-	void getStatementsWithClassloader() {
-		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("roles.cql");
-		assertThat(classPathCqlScript.getStatements())
-				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
-	}
+	private static final String ROLES = "/roles.cql";
+
+	private static final String KEYSPACE = "keyspace.cql";
 
 	@Test
-	void getStatementsWithClassLoaderAndLeadingSlash() {
-		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("/roles.cql");
-		assertThat(classPathCqlScript.getStatements())
+	void assertStatements() {
+		assertThat(classpath(ROLES).getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
-	}
-
-	@Test
-	void getStatementsWithClass() {
-		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("keyspace.cql", getClass());
-		assertThat(classPathCqlScript.getStatements()).containsExactly(
-				"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', " +
+		assertThat(classpath(KEYSPACE).getStatements())
+				.containsExactly("CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', " +
 						"'replication_factor':1}");
 	}
 
 	@Test
-	void getStatementsWithLeadingClass() {
-		ClassPathCqlScript classPathCqlScript = new ClassPathCqlScript("/roles.cql", getClass());
-		assertThat(classPathCqlScript.getStatements())
-				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
+	void assertHashCode() {
+		assertThat(classpath(ROLES)).hasSameHashCodeAs(classpath(ROLES));
+		assertThat(classpath(ROLES).hashCode()).isNotEqualTo(classpath(KEYSPACE).hashCode());
 	}
 
 	@Test
-	void helpers() {
-		assertThat(new ClassPathCqlScript("\\roles.cql", getClass()))
-				.isEqualTo(new ClassPathCqlScript("/roles.cql"));
-
-		assertThat(new ClassPathCqlScript("/hz.cql", getClass()))
-				.isEqualTo(new ClassPathCqlScript("/hz.cql"));
-
-		assertThat(new ClassPathCqlScript("/roles.cql", getClass(), StandardCharsets.UTF_16LE))
-				.isNotEqualTo(new ClassPathCqlScript("/roles.cql", getClass()));
-
-		assertThat(new ClassPathCqlScript("roles.cql", getClass()).toString())
-				.isEqualTo("com/github/nosan/embedded/cassandra/cql/roles.cql");
-		assertThat(new ClassPathCqlScript("/roles.cql", getClass()).toString())
-				.isEqualTo("roles.cql");
-		assertThat(new ClassPathCqlScript("/roles.cql").toString())
-				.isEqualTo("roles.cql");
+	void assertEquals() {
+		ClassLoader classLoader = getClass().getClassLoader();
+		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES, StandardCharsets.UTF_16))
+				.isNotEqualTo(classpath(KEYSPACE));
+		assertThat(classpath(KEYSPACE))
+				.isEqualTo(classpath("com/github/nosan/embedded/cassandra/cql/keyspace.cql", classLoader));
 	}
 
 	@Test
-	void invalidResource() {
-		assertThatThrownBy(() -> new ClassPathCqlScript("/hz.cql").getStatements())
-				.isInstanceOf(UncheckedIOException.class);
+	void assertToString() {
+		assertThat(classpath(ROLES).toString()).contains("roles.cql");
+	}
+
+	@Test
+	void assertExceptionThrown() {
+		assertThatThrownBy(classpath("/invalid.cql")::getStatements).isInstanceOf(UncheckedIOException.class);
+	}
+
+	private ClassPathCqlScript classpath(String location, @Nullable Charset charset) {
+		return new ClassPathCqlScript(location, getClass(), charset);
+	}
+
+	private ClassPathCqlScript classpath(String location) {
+		return new ClassPathCqlScript(location, getClass());
+	}
+
+	private ClassPathCqlScript classpath(String location, ClassLoader classLoader) {
+		return new ClassPathCqlScript(location, classLoader);
+	}
+
+	private ClassPathCqlScript classpath(String location, ClassLoader classLoader, @Nullable Charset charset) {
+		return new ClassPathCqlScript(location, classLoader, charset);
 	}
 
 }

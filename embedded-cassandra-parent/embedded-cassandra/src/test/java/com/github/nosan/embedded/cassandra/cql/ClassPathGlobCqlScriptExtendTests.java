@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.regex.PatternSyntaxException;
 
@@ -39,7 +40,7 @@ class ClassPathGlobCqlScriptExtendTests {
 			"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}";
 
 	@Test
-	void jar() {
+	void findResourcesInJar() {
 		URL url = getClass().getResource("/test.jar");
 		String pattern = "nosan/**/*.cql";
 		Collection<String> statements = getStatements(url, pattern);
@@ -47,7 +48,7 @@ class ClassPathGlobCqlScriptExtendTests {
 	}
 
 	@Test
-	void war() {
+	void findResourcesInWar() {
 		URL url = getClass().getResource("/test.war");
 		String pattern = "nosan/**/*.cql";
 		Collection<String> statements = getStatements(url, pattern);
@@ -55,7 +56,7 @@ class ClassPathGlobCqlScriptExtendTests {
 	}
 
 	@Test
-	void zip() {
+	void findResourcesInZip() {
 		URL url = getClass().getResource("/test.zip");
 		String pattern = "nosan/**/*.cql";
 		Collection<String> statements = getStatements(url, pattern);
@@ -63,11 +64,32 @@ class ClassPathGlobCqlScriptExtendTests {
 	}
 
 	@Test
-	void invalidSyntax() {
+	void invalidGlobPatternSyntax() {
 		URL url = getClass().getResource("/test.zip");
 		String pattern = "{";
-		assertThatThrownBy(() -> getStatements(url, pattern))
-				.isInstanceOf(PatternSyntaxException.class);
+		assertThatThrownBy(() -> getStatements(url, pattern)).isInstanceOf(PatternSyntaxException.class);
+	}
+
+	@Test
+	void assertHashCode() {
+		assertThat(new ClassPathGlobCqlScript("**.cql")).hasSameHashCodeAs(new ClassPathGlobCqlScript("**.cql"));
+		assertThat(new ClassPathGlobCqlScript("**.cql").hashCode())
+				.isNotEqualTo(new ClassPathGlobCqlScript("*.cql").hashCode());
+	}
+
+	@Test
+	void assertEquals() {
+		assertThat(new ClassPathGlobCqlScript("**.cql"))
+				.isEqualTo(new ClassPathGlobCqlScript("**.cql"))
+				.isNotEqualTo(new ClassPathGlobCqlScript("**.cql", StandardCharsets.UTF_8))
+				.isNotEqualTo(new ClassPathGlobCqlScript("**.cql", new URLClassLoader(new URL[0])))
+				.isNotEqualTo(new ClassPathGlobCqlScript("*.cql"));
+	}
+
+	@Test
+	void assertToString() {
+		String pattern = "nosan/**/*.cql";
+		assertThat(new ClassPathGlobCqlScript(pattern).toString()).contains(pattern);
 	}
 
 	private static Collection<String> getStatements(URL url, String pattern) {

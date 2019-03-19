@@ -17,10 +17,12 @@
 package com.github.nosan.embedded.cassandra.cql;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 
 import org.junit.jupiter.api.Test;
+
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -32,29 +34,42 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class InputStreamCqlScriptTests {
 
+	private static final String ROLES = "/roles.cql";
+
 	@Test
-	void getStatements() {
-		InputStreamCqlScript inputStreamCqlScript =
-				new InputStreamCqlScript(getClass().getResourceAsStream("/roles.cql"));
-		assertThat(inputStreamCqlScript.getStatements())
+	void assertStatements() {
+		assertThat(classpath(ROLES).getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
-	void helpers() {
-		InputStreamCqlScript actual =
-				new InputStreamCqlScript(getClass().getResourceAsStream("/roles.cql"));
-		assertThat(actual).isEqualTo(actual);
-		assertThat(actual.toString())
-				.contains("InputStream CQL Statements");
+	void assertHashCode() {
+		assertThat(classpath(ROLES).hashCode()).isNotEqualTo(classpath(ROLES).hashCode());
 	}
 
 	@Test
-	void invalidResource() throws IOException {
-		InputStream systemResourceAsStream = getClass().getResourceAsStream("/roles.cql");
-		systemResourceAsStream.close();
-		assertThatThrownBy(() -> new InputStreamCqlScript(systemResourceAsStream).getStatements())
-				.isInstanceOf(UncheckedIOException.class);
+	void assertEquals() {
+		assertThat(classpath(ROLES)).isNotEqualTo(classpath(ROLES));
+	}
+
+	@Test
+	void assertToString() {
+		assertThat(classpath(ROLES).toString()).contains("InputStream CQL Statements");
+	}
+
+	@Test
+	void assertExceptionThrown() throws IOException {
+		InputStreamCqlScript script = classpath(ROLES);
+		script.getInputStream().close();
+		assertThatThrownBy(script::getStatements).isInstanceOf(UncheckedIOException.class);
+	}
+
+	private InputStreamCqlScript classpath(String url, @Nullable Charset charset) {
+		return new InputStreamCqlScript(getClass().getResourceAsStream(url), charset);
+	}
+
+	private InputStreamCqlScript classpath(String url) {
+		return new InputStreamCqlScript(getClass().getResourceAsStream(url));
 	}
 
 }

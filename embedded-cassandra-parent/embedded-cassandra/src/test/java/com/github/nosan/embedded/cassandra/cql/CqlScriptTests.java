@@ -34,40 +34,40 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CqlScriptTests {
 
 	@Test
-	void classpathsGlobs() {
+	void assertClasspathsGlobs() {
 		assertThat(CqlScript.classpathGlobs((String[]) null)).isNotNull();
 		assertStatements(CqlScript.classpathGlobs("roles.cql"));
 		assertStatements(CqlScript.classpathGlobs("*.cql"));
 	}
 
 	@Test
-	void classpaths() {
+	void assertClasspaths() {
 		assertThat(CqlScript.classpath((String[]) null)).isNotNull();
 		assertStatements(CqlScript.classpath("roles.cql"));
 		assertStatements(CqlScript.classpath(getClass(), "/roles.cql"));
 	}
 
 	@Test
-	void urls() {
+	void assertUrls() {
 		assertThat(CqlScript.urls((URL[]) null)).isNotNull();
 		assertStatements(CqlScript.urls(getClass().getResource("/roles.cql")));
 	}
 
 	@Test
-	void files() throws URISyntaxException {
+	void assertFiles() throws URISyntaxException {
 		assertThat(CqlScript.files((File[]) null)).isNotNull();
 		assertStatements(CqlScript.files(new File(getClass().getResource("/roles.cql").toURI())));
 	}
 
 	@Test
-	void paths() throws URISyntaxException {
+	void assertPaths() throws URISyntaxException {
 		assertThat(CqlScript.paths((Path[]) null)).isNotNull();
 		assertStatements(CqlScript.paths(Paths.get(getClass().getResource("/roles.cql").toURI())));
 
 	}
 
 	@Test
-	void statements() {
+	void assertStatements() {
 		assertThat(CqlScript.statements((String[]) null)).isNotNull();
 		assertStatements(CqlScript.statements("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)"));
 	}

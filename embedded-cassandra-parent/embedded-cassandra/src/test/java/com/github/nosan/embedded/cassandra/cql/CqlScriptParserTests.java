@@ -31,34 +31,34 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CqlScriptParserTests {
 
 	@Test
-	void skipSpaces() {
+	void ignoreSpaces() {
 		List<String> statements = CqlScriptParser.parse("   ");
 		assertThat(statements).isEmpty();
 	}
 
 	@Test
-	void oneStatements() {
+	void parseStatement() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE '\"test\"'");
 		assertThat(statements).containsExactly("USE KEYSPACE '\"test\"'");
 	}
 
 	@Test
-	void multiStatements() {
+	void parseStatements() {
 		List<String> statements = CqlScriptParser
 				.parse("USE KEYSPACE \n\t test; DROP KEYSPACE \n\n   test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "DROP KEYSPACE test");
 	}
 
 	@Test
-	void blockComment() {
+	void properlyHandlesBlockComment() {
 		List<String> statements = CqlScriptParser.parse(
 				"USE KEYSPACE test; /*DROP     KEYSPACE test*/USE KEYSPACE test;");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
 	@Test
-	void blockCommentInvalid() {
+	void blockCommentNotClosed() {
 		assertThatThrownBy(() -> CqlScriptParser.parse("USE KEYSPACE test; /*DROP KEYSPACE test"))
 				.isInstanceOf(IllegalArgumentException.class);
 	}
@@ -154,19 +154,19 @@ class CqlScriptParserTests {
 	}
 
 	@Test
-	void blockCommentEmpty() {
+	void blockCommentNoStatements() {
 		List<String> statements = CqlScriptParser.parse("/**/");
 		assertThat(statements).isEmpty();
 	}
 
 	@Test
-	void singleDashCommentEmpty() {
+	void dashCommentNoStatements() {
 		List<String> statements = CqlScriptParser.parse("--");
 		assertThat(statements).isEmpty();
 	}
 
 	@Test
-	void singleSlashCommentEmpty() {
+	void slashCommentNoStatements() {
 		List<String> statements = CqlScriptParser.parse("//");
 		assertThat(statements).isEmpty();
 	}

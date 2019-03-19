@@ -42,10 +42,7 @@ class ClassPathGlobCqlScriptTests {
 	@ParameterizedTest
 	@MethodSource("patterns")
 	void test(String pattern, String[] statements) {
-		ClassPathGlobCqlScript script = new ClassPathGlobCqlScript(pattern);
-		assertThat(script).isNotEqualTo(new ClassPathGlobCqlScript("sometext"));
-		assertThat(script).isEqualTo(script);
-		assertThat(script.getStatements()).containsExactly(statements);
+		assertThat(new ClassPathGlobCqlScript(pattern).getStatements()).containsExactly(statements);
 	}
 
 	static Stream<Arguments> patterns() {

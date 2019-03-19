@@ -19,8 +19,13 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.io.File;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
+
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -32,26 +37,46 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class FileCqlScriptTests {
 
+	private static final String ROLES = "/roles.cql";
+
+	private static final String KEYSPACE = "keyspace.cql";
+
 	@Test
-	void getStatements() throws URISyntaxException {
-		FileCqlScript fileCqlScript =
-				new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI()));
-		assertThat(fileCqlScript.getStatements())
+	void assertStatements() throws URISyntaxException {
+		assertThat(classpath(ROLES).getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
-	void helpers() throws Exception {
-		assertThat(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())))
-				.isEqualTo(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())));
-		assertThat(new FileCqlScript(new File(getClass().getResource("/roles.cql").toURI())).toString())
-				.contains("roles.cql");
+	void assertHashCode() throws URISyntaxException {
+		assertThat(classpath(ROLES)).hasSameHashCodeAs(classpath(ROLES));
+		assertThat(classpath(ROLES).hashCode()).isNotEqualTo(classpath(KEYSPACE).hashCode());
 	}
 
 	@Test
-	void invalidResource() {
-		assertThatThrownBy(() -> new FileCqlScript(new File("hz.cql")).getStatements())
+	void assertEquals() throws URISyntaxException {
+		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES, StandardCharsets.UTF_16))
+				.isNotEqualTo(classpath(KEYSPACE));
+	}
+
+	@Test
+	void assertToString() throws URISyntaxException {
+		assertThat(classpath(ROLES).toString()).contains(ROLES);
+	}
+
+	@Test
+	void assertExceptionThrown() throws Exception {
+		File file = new File(new URL("file:///localhost.unknown.net:8080").toURI());
+		assertThatThrownBy(new FileCqlScript(file)::getStatements)
 				.isInstanceOf(UncheckedIOException.class);
+	}
+
+	private FileCqlScript classpath(String url, @Nullable Charset charset) throws URISyntaxException {
+		return new FileCqlScript(new File(getClass().getResource(url).toURI()), charset);
+	}
+
+	private FileCqlScript classpath(String url) throws URISyntaxException {
+		return new FileCqlScript(new File(getClass().getResource(url).toURI()));
 	}
 
 }

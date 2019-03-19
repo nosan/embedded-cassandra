@@ -16,10 +16,15 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
+
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,25 +36,45 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class UrlCqlScriptTests {
 
+	private static final String ROLES = "/roles.cql";
+
+	private static final String KEYSPACE = "keyspace.cql";
+
 	@Test
-	void getStatements() {
-		UrlCqlScript urlCqlScript = new UrlCqlScript(getClass().getResource("/roles.cql"));
-		assertThat(urlCqlScript.getStatements())
+	void assertStatements() {
+		assertThat(classpath(ROLES).getStatements())
 				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
-	void helpers() {
-		assertThat(new UrlCqlScript(getClass().getResource("/roles.cql")))
-				.isEqualTo(new UrlCqlScript(getClass().getResource("/roles.cql")));
-		assertThat(new UrlCqlScript(getClass().getResource("/roles.cql")).toString())
-				.contains("roles.cql");
+	void assertHashCode() {
+		assertThat(classpath(ROLES)).hasSameHashCodeAs(classpath(ROLES));
+		assertThat(classpath(ROLES).hashCode()).isNotEqualTo(classpath(KEYSPACE).hashCode());
 	}
 
 	@Test
-	void invalidResource() {
-		assertThatThrownBy(() -> new UrlCqlScript(new URL("http://localhost:111/hz.cql")).getStatements())
+	void assertEquals() {
+		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES, StandardCharsets.UTF_16))
+				.isNotEqualTo(classpath(KEYSPACE));
+	}
+
+	@Test
+	void assertToString() {
+		assertThat(classpath(ROLES).toString()).contains(ROLES);
+	}
+
+	@Test
+	void assertExceptionThrown() throws IOException {
+		assertThatThrownBy(new UrlCqlScript(new URL("http://localhost.unknown.net:8080"))::getStatements)
 				.isInstanceOf(UncheckedIOException.class);
+	}
+
+	private UrlCqlScript classpath(String url, @Nullable Charset charset) {
+		return new UrlCqlScript(getClass().getResource(url), charset);
+	}
+
+	private UrlCqlScript classpath(String url) {
+		return new UrlCqlScript(getClass().getResource(url));
 	}
 
 }
