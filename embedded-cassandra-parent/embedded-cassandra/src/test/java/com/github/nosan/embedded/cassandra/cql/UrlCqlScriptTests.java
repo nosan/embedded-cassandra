@@ -60,7 +60,7 @@ class UrlCqlScriptTests {
 
 	@Test
 	void assertToString() {
-		assertThat(classpath(ROLES).toString()).contains(ROLES);
+		assertThat(classpath(ROLES).toString()).contains("roles.cql");
 	}
 
 	@Test

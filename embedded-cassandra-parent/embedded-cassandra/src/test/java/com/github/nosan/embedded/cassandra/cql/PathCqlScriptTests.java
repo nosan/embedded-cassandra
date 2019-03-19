@@ -62,7 +62,7 @@ class PathCqlScriptTests {
 
 	@Test
 	void assertToString() throws URISyntaxException {
-		assertThat(classpath(ROLES).toString()).contains(ROLES);
+		assertThat(classpath(ROLES).toString()).contains("roles.cql");
 	}
 
 	@Test
