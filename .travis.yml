@@ -17,7 +17,7 @@ before_install:
   - ./mvnw clean install -DskipTests=true -B -V
 
 script:
-  - ./mvnw clean install
+  - ./mvnw clean install -e
 
 after_failure:
   - ./surefire-reports.sh
