@@ -85,14 +85,14 @@ class JvmParametersTests {
 				" -Dcassandra.start_native_transport=true -X512m");
 	}
 
+	private static Optional<Integer> zero() {
+		return Optional.of(0);
+	}
+
 	private NodeSettings settings() throws IOException {
 		try (InputStream is = getClass().getResourceAsStream("/cassandra.yaml")) {
 			return new NodeSettings(new Version(3, 11, 3), new Yaml().loadAs(is, Map.class));
 		}
-	}
-
-	private static Optional<Integer> zero() {
-		return Optional.of(0);
 	}
 
 }

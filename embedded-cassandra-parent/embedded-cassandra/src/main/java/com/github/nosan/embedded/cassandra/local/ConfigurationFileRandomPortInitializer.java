@@ -69,6 +69,14 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 		}
 	}
 
+	private static Optional<Integer> getInteger(String name, Map<?, ?> source) {
+		return getString(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
+	}
+
+	private static Optional<String> getString(String name, Map<?, ?> source) {
+		return Optional.ofNullable(source.get(name)).map(String::valueOf);
+	}
+
 	private void setPort(String name, Map<Object, Object> source, Supplier<InetAddress> addressSupplier) {
 		getInteger(name, source).filter(port -> port == 0).ifPresent(port -> {
 			InetAddress address = addressSupplier.get();
@@ -91,14 +99,6 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 			}
 			return Collections.emptyMap();
 		}
-	}
-
-	private static Optional<Integer> getInteger(String name, Map<?, ?> source) {
-		return getString(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
-	}
-
-	private static Optional<String> getString(String name, Map<?, ?> source) {
-		return Optional.ofNullable(source.get(name)).map(String::valueOf);
 	}
 
 }

@@ -47,20 +47,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
  */
 class ArchiveUtilsTests {
 
-	@ParameterizedTest
-	@MethodSource("archives")
-	void extract(String name, String archiveFormat, String compression, @TempDir Path temporaryFolder)
-			throws Exception {
-		Path archive = temporaryFolder.resolve(String.format("%s.%s",
-				UUID.randomUUID(), name));
-		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
-		archive(archiveFormat, archive, file);
-		compress(compression, archive);
-		Path destination = temporaryFolder.resolve(UUID.randomUUID().toString());
-		ArchiveUtils.extract(archive, destination);
-		assertThat(destination.resolve("cassandra.yaml").toFile()).hasSameContentAs(file);
-	}
-
 	static Stream<Arguments> archives() {
 		List<Arguments> parameters = new ArrayList<>();
 		parameters.add(arguments("tar.gz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
@@ -77,6 +63,20 @@ class ArchiveUtilsTests {
 		parameters.add(arguments("zip", ArchiveStreamFactory.ZIP, null));
 		parameters.add(arguments("zipx", ArchiveStreamFactory.ZIP, null));
 		return parameters.stream();
+	}
+
+	@ParameterizedTest
+	@MethodSource("archives")
+	void extract(String name, String archiveFormat, String compression, @TempDir Path temporaryFolder)
+			throws Exception {
+		Path archive = temporaryFolder.resolve(String.format("%s.%s",
+				UUID.randomUUID(), name));
+		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
+		archive(archiveFormat, archive, file);
+		compress(compression, archive);
+		Path destination = temporaryFolder.resolve(UUID.randomUUID().toString());
+		ArchiveUtils.extract(archive, destination);
+		assertThat(destination.resolve("cassandra.yaml").toFile()).hasSameContentAs(file);
 	}
 
 	private static void archive(String archiveFormat, Path archive, File file) throws Exception {

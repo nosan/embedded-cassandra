@@ -226,6 +226,23 @@ class LocalCassandra implements Cassandra {
 		return String.format("%s [%s]", getClass().getSimpleName(), this.version);
 	}
 
+	private static boolean isInterruptedException(@Nullable Throwable ex) {
+		if (ex instanceof ClosedByInterruptException) {
+			return true;
+		}
+		if (ex instanceof FileLockInterruptionException) {
+			return true;
+		}
+		if (ex instanceof InterruptedException) {
+			return true;
+		}
+		return ex != null && isInterruptedException(ex.getCause());
+	}
+
+	private static boolean isWindows() {
+		return File.separatorChar == '\\';
+	}
+
 	private void initialize() throws IOException, InterruptedException {
 		try {
 			Version version = this.version;
@@ -310,23 +327,6 @@ class LocalCassandra implements Cassandra {
 				log.error("Unable to stop Cassandra", ex);
 			}
 		}
-	}
-
-	private static boolean isInterruptedException(@Nullable Throwable ex) {
-		if (ex instanceof ClosedByInterruptException) {
-			return true;
-		}
-		if (ex instanceof FileLockInterruptionException) {
-			return true;
-		}
-		if (ex instanceof InterruptedException) {
-			return true;
-		}
-		return ex != null && isInterruptedException(ex.getCause());
-	}
-
-	private static boolean isWindows() {
-		return File.separatorChar == '\\';
 	}
 
 }

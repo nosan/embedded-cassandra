@@ -31,6 +31,11 @@ class CompositeConsumer<T> implements Consumer<T> {
 
 	private final List<Consumer<? super T>> consumers = new CopyOnWriteArrayList<>();
 
+	@Override
+	public void accept(T source) {
+		this.consumers.forEach(consumer -> consumer.accept(source));
+	}
+
 	/**
 	 * Adds a consumer.
 	 *
@@ -47,11 +52,6 @@ class CompositeConsumer<T> implements Consumer<T> {
 	 */
 	void remove(Consumer<? super T> consumer) {
 		this.consumers.remove(consumer);
-	}
-
-	@Override
-	public void accept(T source) {
-		this.consumers.forEach(consumer -> consumer.accept(source));
 	}
 
 }

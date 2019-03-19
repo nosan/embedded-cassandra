@@ -51,6 +51,23 @@ class JvmParameters {
 		this.jvmOptions = Collections.unmodifiableMap(setPorts(parse(normalize(jvmOptions, jmxPort)), settings));
 	}
 
+	@Override
+	public String toString() {
+		List<String> result = new ArrayList<>();
+		for (Map.Entry<String, String> entry : this.jvmOptions.entrySet()) {
+			String name = entry.getKey();
+			String value = entry.getValue();
+			if (value == null) {
+				result.add(name);
+			}
+			else {
+				result.add(name + "=" + value);
+			}
+		}
+
+		return String.join(" ", result);
+	}
+
 	/**
 	 * Return the value of {@code -Dcassandra.jmx.local.port}.
 	 *
@@ -121,23 +138,6 @@ class JvmParameters {
 	 */
 	Optional<Integer> getRpcPort() {
 		return getInteger("-Dcassandra.rpc_port", this.jvmOptions);
-	}
-
-	@Override
-	public String toString() {
-		List<String> result = new ArrayList<>();
-		for (Map.Entry<String, String> entry : this.jvmOptions.entrySet()) {
-			String name = entry.getKey();
-			String value = entry.getValue();
-			if (value == null) {
-				result.add(name);
-			}
-			else {
-				result.add(name + "=" + value);
-			}
-		}
-
-		return String.join(" ", result);
 	}
 
 	private static List<String> normalize(List<String> options, int jmxPort) {

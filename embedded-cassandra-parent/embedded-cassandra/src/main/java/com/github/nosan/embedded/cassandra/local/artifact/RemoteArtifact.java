@@ -277,43 +277,6 @@ class RemoteArtifact implements Artifact {
 			return getFileName(this.url);
 		}
 
-		private URLConnection getUrlConnection(URL url, int maxRedirects, int redirectCount) throws IOException {
-			URLConnection connection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
-			if (this.connectTimeout != null) {
-				connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
-			}
-			if (this.readTimeout != null) {
-				connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
-			}
-			if (connection instanceof HttpURLConnection) {
-				HttpURLConnection httpConnection = (HttpURLConnection) connection;
-				httpConnection.setInstanceFollowRedirects(false);
-				int status = httpConnection.getResponseCode();
-				if (status >= 200 && status < 300) {
-					return httpConnection;
-				}
-				else if (status >= 300 && status <= 307 && status != 306 && status != 304) {
-					if (redirectCount <= maxRedirects) {
-						String location = httpConnection.getHeaderField("Location");
-						if (StringUtils.hasText(location)) {
-							return getUrlConnection(new URL(httpConnection.getURL(), location),
-									maxRedirects, redirectCount + 1);
-						}
-					}
-					else {
-						throw new IOException(String.format("Too many redirects for URL '%s'", url));
-					}
-				}
-				else if (status >= 400) {
-					throw new IOException(String.format("HTTP (%d %s) status for URL '%s' is invalid", status,
-							httpConnection.getResponseMessage(), url));
-				}
-				return httpConnection;
-			}
-
-			return connection;
-		}
-
 		private static String getFileName(URL url) {
 			String name = url.getFile();
 			if (StringUtils.hasText(name) && name.contains("/")) {
@@ -349,6 +312,43 @@ class RemoteArtifact implements Artifact {
 					}
 				}, 0, 100, TimeUnit.MILLISECONDS);
 			}
+		}
+
+		private URLConnection getUrlConnection(URL url, int maxRedirects, int redirectCount) throws IOException {
+			URLConnection connection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
+			if (this.connectTimeout != null) {
+				connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
+			}
+			if (this.readTimeout != null) {
+				connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
+			}
+			if (connection instanceof HttpURLConnection) {
+				HttpURLConnection httpConnection = (HttpURLConnection) connection;
+				httpConnection.setInstanceFollowRedirects(false);
+				int status = httpConnection.getResponseCode();
+				if (status >= 200 && status < 300) {
+					return httpConnection;
+				}
+				else if (status >= 300 && status <= 307 && status != 306 && status != 304) {
+					if (redirectCount <= maxRedirects) {
+						String location = httpConnection.getHeaderField("Location");
+						if (StringUtils.hasText(location)) {
+							return getUrlConnection(new URL(httpConnection.getURL(), location),
+									maxRedirects, redirectCount + 1);
+						}
+					}
+					else {
+						throw new IOException(String.format("Too many redirects for URL '%s'", url));
+					}
+				}
+				else if (status >= 400) {
+					throw new IOException(String.format("HTTP (%d %s) status for URL '%s' is invalid", status,
+							httpConnection.getResponseMessage(), url));
+				}
+				return httpConnection;
+			}
+
+			return connection;
 		}
 
 	}

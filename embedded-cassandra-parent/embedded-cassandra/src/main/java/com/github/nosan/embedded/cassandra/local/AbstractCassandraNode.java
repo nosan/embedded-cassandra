@@ -241,6 +241,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	protected abstract boolean kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException;
 
+	@Nullable
+	private static String getJavaHome(@Nullable Path javaHome) {
+		return Optional.ofNullable(javaHome).map(Path::toString).orElseGet(new SystemProperty("java.home"));
+	}
+
 	private boolean terminate(long pid) throws InterruptedException {
 		try {
 			ProcessBuilder builder = new ProcessBuilder()
@@ -281,11 +286,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			Yaml yaml = new Yaml();
 			return yaml.loadAs(is, Map.class);
 		}
-	}
-
-	@Nullable
-	private static String getJavaHome(@Nullable Path javaHome) {
-		return Optional.ofNullable(javaHome).map(Path::toString).orElseGet(new SystemProperty("java.home"));
 	}
 
 	private static final class TransportReadiness implements Supplier<Boolean> {

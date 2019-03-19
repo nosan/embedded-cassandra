@@ -39,12 +39,6 @@ class ClassPathGlobCqlScriptTests {
 	private static final String KEYSPACE =
 			"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}";
 
-	@ParameterizedTest
-	@MethodSource("patterns")
-	void test(String pattern, String[] statements) {
-		assertThat(new ClassPathGlobCqlScript(pattern).getStatements()).containsExactly(statements);
-	}
-
 	static Stream<Arguments> patterns() {
 		List<Arguments> parameters = new ArrayList<>();
 		parameters.add(arguments("/.cql", new String[0]));
@@ -66,6 +60,12 @@ class ClassPathGlobCqlScriptTests {
 		parameters.add(arguments("*.cql", new String[]{ROLE}));
 		parameters.add(arguments("rol?s.cql", new String[]{ROLE}));
 		return parameters.stream();
+	}
+
+	@ParameterizedTest
+	@MethodSource("patterns")
+	void test(String pattern, String[] statements) {
+		assertThat(new ClassPathGlobCqlScript(pattern).getStatements()).containsExactly(statements);
 	}
 
 }
