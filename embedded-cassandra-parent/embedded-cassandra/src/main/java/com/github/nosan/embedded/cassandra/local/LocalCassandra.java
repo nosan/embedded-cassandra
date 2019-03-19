@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -36,6 +37,7 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
+import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
@@ -50,6 +52,8 @@ class LocalCassandra implements Cassandra {
 	private static final Logger log = LoggerFactory.getLogger(LocalCassandra.class);
 
 	private final boolean registerShutdownHook;
+
+	private final boolean deleteWorkingDirectory;
 
 	private final int jmxPort;
 
@@ -116,13 +120,14 @@ class LocalCassandra implements Cassandra {
 	 * @param jmxPort JMX port
 	 * @param allowRoot allow running as a root
 	 * @param registerShutdownHook whether shutdown hook should be registered or not
+	 * @param deleteWorkingDirectory delete the working directory after success Cassandra stop
 	 */
 	LocalCassandra(Version version, ArtifactFactory artifactFactory,
 			Path workingDirectory, Path artifactDirectory,
 			Duration startupTimeout, @Nullable URL configurationFile,
 			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
 			@Nullable URL commitLogArchivingFile, List<String> jvmOptions, @Nullable Path javaHome,
-			int jmxPort, boolean allowRoot, boolean registerShutdownHook) {
+			int jmxPort, boolean allowRoot, boolean registerShutdownHook, boolean deleteWorkingDirectory) {
 		this.artifactFactory = artifactFactory;
 		this.workingDirectory = workingDirectory;
 		this.artifactDirectory = artifactDirectory;
@@ -138,6 +143,7 @@ class LocalCassandra implements Cassandra {
 		this.allowRoot = allowRoot;
 		this.version = version;
 		this.registerShutdownHook = registerShutdownHook;
+		this.deleteWorkingDirectory = deleteWorkingDirectory;
 	}
 
 	@Override
@@ -158,14 +164,15 @@ class LocalCassandra implements Cassandra {
 						start0();
 						this.state = State.STARTED;
 					}
-					catch (InterruptedException ex) {
-						stopSilently();
-						this.state = State.START_INTERRUPTED;
-						Thread.currentThread().interrupt();
-					}
 					catch (Throwable ex) {
 						stopSilently();
-						this.state = State.START_FAILED;
+						if (isInterruptedException(ex)) {
+							this.state = State.START_INTERRUPTED;
+							Thread.currentThread().interrupt();
+						}
+						else {
+							this.state = State.START_FAILED;
+						}
 						throw new CassandraException("Unable to start Cassandra", ex);
 					}
 				}
@@ -185,12 +192,14 @@ class LocalCassandra implements Cassandra {
 					stop0();
 					this.state = State.STOPPED;
 				}
-				catch (InterruptedException ex) {
-					this.state = State.STOP_INTERRUPTED;
-					Thread.currentThread().interrupt();
-				}
 				catch (Throwable ex) {
-					this.state = State.STOP_FAILED;
+					if (isInterruptedException(ex)) {
+						this.state = State.STOP_INTERRUPTED;
+						Thread.currentThread().interrupt();
+					}
+					else {
+						this.state = State.STOP_FAILED;
+					}
 					throw new CassandraException("Unable to stop Cassandra", ex);
 				}
 			}
@@ -238,34 +247,26 @@ class LocalCassandra implements Cassandra {
 		return File.separatorChar == '\\';
 	}
 
-	private void initialize() throws IOException, InterruptedException {
-		try {
-			Version version = this.version;
-			log.info("Initialize Apache Cassandra '{}'. It takes a while...", version);
-			long start = System.currentTimeMillis();
-			List<Initializer> initializers = new ArrayList<>();
-			initializers.add(new WorkingDirectoryInitializer(this.artifactFactory, this.artifactDirectory));
-			initializers.add(new ConfigurationFileInitializer(this.configurationFile));
-			initializers.add(new LogbackFileInitializer(this.logbackFile));
-			initializers.add(new RackFileInitializer(this.rackFile));
-			initializers.add(new TopologyFileInitializer(this.topologyFile));
-			initializers.add(new CommitLogFileInitializer(this.commitLogArchivingFile));
-			initializers.add(new ConfigurationFileRandomPortInitializer());
-			if (!isWindows()) {
-				initializers.add(new CassandraFileExecutableInitializer());
-			}
-			for (Initializer initializer : initializers) {
-				initializer.initialize(this.workingDirectory, version);
-			}
-			long elapsed = System.currentTimeMillis() - start;
-			log.info("Apache Cassandra '{}' has been initialized ({} ms)", version, elapsed);
+	private void initialize() throws IOException {
+		Version version = this.version;
+		log.info("Initialize Apache Cassandra '{}'. It takes a while...", version);
+		long start = System.currentTimeMillis();
+		List<Initializer> initializers = new ArrayList<>();
+		initializers.add(new WorkingDirectoryInitializer(this.artifactFactory, this.artifactDirectory));
+		initializers.add(new ConfigurationFileInitializer(this.configurationFile));
+		initializers.add(new LogbackFileInitializer(this.logbackFile));
+		initializers.add(new RackFileInitializer(this.rackFile));
+		initializers.add(new TopologyFileInitializer(this.topologyFile));
+		initializers.add(new CommitLogFileInitializer(this.commitLogArchivingFile));
+		initializers.add(new ConfigurationFileRandomPortInitializer());
+		if (!isWindows()) {
+			initializers.add(new CassandraFileExecutableInitializer());
 		}
-		catch (IOException ex) {
-			if (isInterruptedException(ex)) {
-				throw new InterruptedException();
-			}
-			throw ex;
+		for (Initializer initializer : initializers) {
+			initializer.initialize(this.workingDirectory, version);
 		}
+		long elapsed = System.currentTimeMillis() - start;
+		log.info("Apache Cassandra '{}' has been initialized ({} ms)", version, elapsed);
 	}
 
 	private void start0() throws IOException, InterruptedException {
@@ -287,6 +288,11 @@ class LocalCassandra implements Cassandra {
 			log.info("Stops Apache Cassandra '{}'", version);
 			node.stop();
 			this.node = null;
+			if (this.deleteWorkingDirectory) {
+				Path workingDirectory = this.workingDirectory;
+				new RetryCloseable(5, () -> FileUtils.delete(workingDirectory)).close();
+				log.info("The '{}' directory has been deleted.", workingDirectory);
+			}
 			long elapsed = System.currentTimeMillis() - start;
 			log.info("Apache Cassandra '{}' has been stopped ({} ms)", version, elapsed);
 		}
@@ -319,6 +325,36 @@ class LocalCassandra implements Cassandra {
 				log.error("Unable to stop Cassandra", ex);
 			}
 		}
+	}
+
+	private static final class RetryCloseable implements AutoCloseable {
+
+		private final int retry;
+
+		private final Closeable closeable;
+
+		RetryCloseable(int retry, Closeable closeable) {
+			this.retry = retry;
+			this.closeable = closeable;
+		}
+
+		@Override
+		public void close() throws IOException, InterruptedException {
+			IOException exceptions = new IOException("Can not close the underlying resource." +
+					" See suppressed exceptions for details.");
+			for (int i = 0; i < this.retry; i++) {
+				try {
+					this.closeable.close();
+					return;
+				}
+				catch (IOException ex) {
+					exceptions.addSuppressed(ex);
+				}
+				Thread.sleep(500);
+			}
+			throw exceptions;
+		}
+
 	}
 
 }

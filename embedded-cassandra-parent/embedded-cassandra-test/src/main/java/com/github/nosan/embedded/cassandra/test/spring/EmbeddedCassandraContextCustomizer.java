@@ -299,6 +299,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			int jmxPort = annotation.jmxPort();
 			boolean allowRoot = annotation.allowRoot();
 			boolean registerShutdownHook = annotation.registerShutdownHook();
+			boolean deleteWorkingDirectory = annotation.deleteWorkingDirectory();
 			List<String> jvmOptions = Arrays.stream(annotation.jvmOptions())
 					.map(environment::resolvePlaceholders)
 					.filter(StringUtils::hasText)
@@ -338,6 +339,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			factory.setJmxPort(jmxPort);
 			factory.setAllowRoot(allowRoot);
 			factory.setRegisterShutdownHook(registerShutdownHook);
+			factory.setDeleteWorkingDirectory(deleteWorkingDirectory);
 			ArtifactFactory artifactFactory = BeanFactoryUtils.getIfUnique(applicationContext, ArtifactFactory.class);
 			if (artifactFactory != null) {
 				factory.setArtifactFactory(artifactFactory);

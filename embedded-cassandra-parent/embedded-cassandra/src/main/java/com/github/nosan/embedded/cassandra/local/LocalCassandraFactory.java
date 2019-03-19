@@ -85,6 +85,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	private boolean registerShutdownHook = true;
 
+	private boolean deleteWorkingDirectory = false;
+
 	/**
 	 * Whether to allow running Cassandra as a {@code root} or not.
 	 * <p>
@@ -385,8 +387,30 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		this.artifactDirectory = artifactDirectory;
 	}
 
+	/**
+	 * Whether to delete the working directory after success {@code Cassandra} stop or not.
+	 *
+	 * @return The value of the {@code deleteWorkingDirectory} attribute
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	public boolean isDeleteWorkingDirectory() {
+		return this.deleteWorkingDirectory;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#isDeleteWorkingDirectory} attribute.
+	 *
+	 * @param deleteWorkingDirectory The value for deleteWorkingDirectory
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	public void setDeleteWorkingDirectory(boolean deleteWorkingDirectory) {
+		this.deleteWorkingDirectory = deleteWorkingDirectory;
+	}
+
 	@Override
-	public Cassandra create() {
+	public LocalCassandra create() {
 		ArtifactFactory artifactFactory = getArtifactFactory();
 		if (artifactFactory == null) {
 			artifactFactory = new RemoteArtifactFactory();
@@ -416,7 +440,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		return new LocalCassandra(version, artifactFactory, workingDirectory,
 				artifactDirectory, startupTimeout, getConfigurationFile(), getLogbackFile(), getRackFile(),
 				getTopologyFile(), getCommitLogArchivingFile(), getJvmOptions(), getJavaHome(), getJmxPort(),
-				isAllowRoot(), isRegisterShutdownHook());
+				isAllowRoot(), isRegisterShutdownHook(), isDeleteWorkingDirectory());
 	}
 
 }

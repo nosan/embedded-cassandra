@@ -82,6 +82,8 @@ public final class LocalCassandraFactoryBuilder {
 
 	private boolean registerShutdownHook = true;
 
+	private boolean deleteWorkingDirectory = false;
+
 	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#isAllowRoot() allowRoot} attribute.
 	 *
@@ -462,6 +464,19 @@ public final class LocalCassandraFactoryBuilder {
 	}
 
 	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#isDeleteWorkingDirectory} attribute.
+	 *
+	 * @param deleteWorkingDirectory The value for deleteWorkingDirectory
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	public LocalCassandraFactoryBuilder setDeleteWorkingDirectory(boolean deleteWorkingDirectory) {
+		this.deleteWorkingDirectory = deleteWorkingDirectory;
+		return this;
+	}
+
+	/**
 	 * Builds a new {@link LocalCassandraFactory}.
 	 *
 	 * @return a new instance
@@ -483,6 +498,7 @@ public final class LocalCassandraFactoryBuilder {
 		factory.setRegisterShutdownHook(this.registerShutdownHook);
 		factory.setCommitLogArchivingFile(this.commitLogArchivingFile);
 		factory.setArtifactDirectory(this.artifactDirectory);
+		factory.setDeleteWorkingDirectory(this.deleteWorkingDirectory);
 		return factory;
 	}
 
