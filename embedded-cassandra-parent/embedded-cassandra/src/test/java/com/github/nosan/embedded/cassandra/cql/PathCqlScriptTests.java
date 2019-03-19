@@ -16,11 +16,11 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.io.File;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
@@ -66,8 +66,7 @@ class PathCqlScriptTests {
 
 	@Test
 	void assertExceptionThrown() {
-		Path path = Paths.get("localhost.unknown.net:8080");
-		assertThatThrownBy(new PathCqlScript(path)::getStatements)
+		assertThatThrownBy(new PathCqlScript(new File("invalid.txt").toPath())::getStatements)
 				.isInstanceOf(UncheckedIOException.class);
 	}
 

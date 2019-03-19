@@ -65,7 +65,7 @@ class FileCqlScriptTests {
 
 	@Test
 	void assertExceptionThrown() {
-		File file = new File("localhost.unknown.net:8080");
+		File file = new File("invalid.txt");
 		assertThatThrownBy(new FileCqlScript(file)::getStatements)
 				.isInstanceOf(UncheckedIOException.class);
 	}
