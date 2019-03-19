@@ -202,14 +202,18 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 
 	private static Set<URL> getResourcesByPattern(URL url, @Nullable ClassLoader cl, String pattern) {
 		try {
-			if ("jar".equals(url.getProtocol())) {
+			String protocol = url.getProtocol();
+			if ("jar".equals(protocol) || "war".equals(protocol)) {
 				int index = url.toString().indexOf("!/");
+				if (index == -1) {
+					index = url.toString().indexOf("*/");
+				}
 				if (index != -1) {
-					String jarUri = url.toString().substring(0, index);
-					String jarEntry = url.toString().substring(index + 1);
+					String uri = url.toString().substring(protocol.length() + 1, index);
+					String entry = url.toString().substring(index + 1);
 					try (FileSystem fileSystem = FileSystems
-							.newFileSystem(URI.create(jarUri), Collections.emptyMap(), cl)) {
-						return getResourcesByPattern(fileSystem.getPath(jarEntry), pattern);
+							.newFileSystem(URI.create(String.format("jar:%s", uri)), Collections.emptyMap(), cl)) {
+						return getResourcesByPattern(fileSystem.getPath(entry), pattern);
 					}
 				}
 			}
