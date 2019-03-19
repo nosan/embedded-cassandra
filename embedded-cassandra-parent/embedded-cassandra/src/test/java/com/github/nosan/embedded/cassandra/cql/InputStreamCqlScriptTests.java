@@ -18,11 +18,8 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
 
 import org.junit.jupiter.api.Test;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -62,10 +59,6 @@ class InputStreamCqlScriptTests {
 		InputStreamCqlScript script = classpath(ROLES);
 		script.getInputStream().close();
 		assertThatThrownBy(script::getStatements).isInstanceOf(UncheckedIOException.class);
-	}
-
-	private InputStreamCqlScript classpath(String url, @Nullable Charset charset) {
-		return new InputStreamCqlScript(getClass().getResourceAsStream(url), charset);
 	}
 
 	private InputStreamCqlScript classpath(String url) {

@@ -84,8 +84,4 @@ class ClassPathCqlScriptTests {
 		return new ClassPathCqlScript(location, classLoader);
 	}
 
-	private ClassPathCqlScript classpath(String location, ClassLoader classLoader, @Nullable Charset charset) {
-		return new ClassPathCqlScript(location, classLoader, charset);
-	}
-
 }
