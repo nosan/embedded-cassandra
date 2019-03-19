@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -66,8 +65,8 @@ class PathCqlScriptTests {
 	}
 
 	@Test
-	void assertExceptionThrown() throws Exception {
-		Path path = Paths.get(new URL("file:///localhost.unknown.net:8080").toURI());
+	void assertExceptionThrown() {
+		Path path = Paths.get("localhost.unknown.net:8080");
 		assertThatThrownBy(new PathCqlScript(path)::getStatements)
 				.isInstanceOf(UncheckedIOException.class);
 	}

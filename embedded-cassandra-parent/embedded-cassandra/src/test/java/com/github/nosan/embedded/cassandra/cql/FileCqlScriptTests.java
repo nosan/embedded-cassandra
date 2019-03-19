@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.io.File;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -65,8 +64,8 @@ class FileCqlScriptTests {
 	}
 
 	@Test
-	void assertExceptionThrown() throws Exception {
-		File file = new File(new URL("file:///localhost.unknown.net:8080").toURI());
+	void assertExceptionThrown() {
+		File file = new File("localhost.unknown.net:8080");
 		assertThatThrownBy(new FileCqlScript(file)::getStatements)
 				.isInstanceOf(UncheckedIOException.class);
 	}
