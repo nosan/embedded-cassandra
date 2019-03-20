@@ -59,6 +59,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		registerTestShutdownHook = false,
 		allowRoot = true,
 		registerShutdownHook = false,
+		deleteWorkingDirectory = true,
 		artifact = @EmbeddedLocalCassandra.Artifact(directory = "${artifactDirectory}", proxyHost = "${proxyHost}",
 				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000,
 				proxyType = Proxy.Type.SOCKS,
@@ -97,6 +98,7 @@ class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
 		assertThat(factory.getJmxPort()).isEqualTo(8000);
 		assertThat(factory.isAllowRoot()).isTrue();
 		assertThat(factory.isRegisterShutdownHook()).isFalse();
+		assertThat(factory.isDeleteWorkingDirectory()).isTrue();
 	}
 
 }

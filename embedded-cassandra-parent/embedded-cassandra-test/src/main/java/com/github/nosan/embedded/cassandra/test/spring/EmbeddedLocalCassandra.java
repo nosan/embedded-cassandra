@@ -215,6 +215,15 @@ public @interface EmbeddedLocalCassandra {
 	boolean registerShutdownHook() default true;
 
 	/**
+	 * Sets attribute for {@link LocalCassandraFactory#isDeleteWorkingDirectory()}.
+	 *
+	 * @return The value of the {@code deleteWorkingDirectory} attribute
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	boolean deleteWorkingDirectory() default false;
+
+	/**
 	 * Sets attribute for {@link LocalCassandraFactory#getArtifactFactory()}.
 	 *
 	 * @return The value of the {@code artifactFactory} attribute

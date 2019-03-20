@@ -58,7 +58,6 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.DefaultClusterFactory;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutputExtension;
-import com.github.nosan.embedded.cassandra.util.FileUtils;
 import com.github.nosan.embedded.cassandra.util.NetworkUtils;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
@@ -88,6 +87,7 @@ abstract class AbstractLocalCassandraTests {
 	AbstractLocalCassandraTests(Version version) {
 		this.factory = new LocalCassandraFactory();
 		this.factory.setVersion(version);
+		this.factory.setDeleteWorkingDirectory(true);
 	}
 
 	@BeforeEach
@@ -225,48 +225,20 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	void shouldReInitializedCassandra() throws IOException {
-		Path path = this.temporaryFolder.resolve(UUID.randomUUID().toString());
-		this.factory.setWorkingDirectory(path);
-		Cassandra cassandra = this.factory.create();
-		try {
-			cassandra.start();
-			assertCreateKeyspace().accept(cassandra);
-		}
-		finally {
-			cassandra.stop();
-		}
-		FileUtils.delete(path);
-		this.output.reset();
-		try {
-			cassandra.start();
-			assertCreateKeyspace().accept(cassandra);
-		}
-		finally {
-			cassandra.stop();
-		}
+	void shouldReInitializedCassandra() {
+		CassandraRunner runner = new CassandraRunner(this.factory.create());
+		runner.run(assertCreateKeyspace());
+		runner.run(assertCreateKeyspace());
 	}
 
 	@Test
 	void shouldInitializedOnlyOnce() {
 		Path path = this.temporaryFolder.resolve(UUID.randomUUID().toString());
 		this.factory.setWorkingDirectory(path);
-		Cassandra cassandra = this.factory.create();
-		try {
-			cassandra.start();
-			assertCreateKeyspace().accept(cassandra);
-		}
-		finally {
-			cassandra.stop();
-		}
-		this.output.reset();
-		try {
-			cassandra.start();
-			assertDeleteKeyspace().accept(cassandra);
-		}
-		finally {
-			cassandra.stop();
-		}
+		this.factory.setDeleteWorkingDirectory(false);
+		CassandraRunner runner = new CassandraRunner(this.factory.create());
+		runner.run(assertCreateKeyspace());
+		runner.run(assertDeleteKeyspace());
 	}
 
 	@Test

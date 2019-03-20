@@ -67,6 +67,7 @@ class LocalCassandraFactoryBuilderTests {
 				.setAllowRoot(true)
 				.setArtifactDirectory(artifactDirectory)
 				.setRegisterShutdownHook(false)
+				.setDeleteWorkingDirectory(true)
 				.build();
 
 		assertThat(factory.getJvmOptions()).containsExactly("1", "2", "3");
@@ -82,7 +83,8 @@ class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getJavaHome()).isEqualTo(javaDirectory);
 		assertThat(factory.getJmxPort()).isEqualTo(jmxPort);
 		assertThat(factory.isAllowRoot()).isEqualTo(true);
-		assertThat(factory.isRegisterShutdownHook()).isEqualTo(false);
+		assertThat(factory.isRegisterShutdownHook()).isFalse();
+		assertThat(factory.isDeleteWorkingDirectory()).isTrue();
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(1));
 	}
 
@@ -103,6 +105,7 @@ class LocalCassandraFactoryBuilderTests {
 		assertThat(factory.getJavaHome()).isNull();
 		assertThat(factory.getJmxPort()).isEqualTo(7199);
 		assertThat(factory.isAllowRoot()).isFalse();
+		assertThat(factory.isDeleteWorkingDirectory()).isFalse();
 		assertThat(factory.isRegisterShutdownHook()).isTrue();
 		assertThat(factory.getStartupTimeout()).isNull();
 

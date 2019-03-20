@@ -73,6 +73,7 @@ class LocalCassandraFactoryTests {
 		factory.setRegisterShutdownHook(false);
 		factory.setCommitLogArchivingFile(commitLogArchivingFile);
 		factory.setArtifactDirectory(artifactDirectory);
+		factory.setDeleteWorkingDirectory(true);
 
 		Cassandra cassandra = factory.create();
 		assertThat(ReflectionUtils.getField(cassandra, "registerShutdownHook")).isEqualTo(false);
@@ -90,6 +91,7 @@ class LocalCassandraFactoryTests {
 		assertThat(ReflectionUtils.getField(cassandra, "rackFile")).isEqualTo(rackFile);
 		assertThat(ReflectionUtils.getField(cassandra, "topologyFile")).isEqualTo(topologyFile);
 		assertThat(ReflectionUtils.getField(cassandra, "commitLogArchivingFile")).isEqualTo(commitLogArchivingFile);
+		assertThat(ReflectionUtils.getField(cassandra, "deleteWorkingDirectory")).isEqualTo(true);
 	}
 
 	@Test
@@ -115,6 +117,7 @@ class LocalCassandraFactoryTests {
 		assertThat(ReflectionUtils.getField(cassandra, "rackFile")).isNull();
 		assertThat(ReflectionUtils.getField(cassandra, "topologyFile")).isNull();
 		assertThat(ReflectionUtils.getField(cassandra, "commitLogArchivingFile")).isNull();
+		assertThat(ReflectionUtils.getField(cassandra, "deleteWorkingDirectory")).isEqualTo(false);
 	}
 
 }
