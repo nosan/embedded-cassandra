@@ -43,12 +43,12 @@ class FileLockTests {
 	private static final Logger log = LoggerFactory.getLogger(FileLockTests.class);
 
 	@Test
-	void sequenceAccess(@TempDir Path temporaryFolder) throws Exception {
+	void shouldLockUsingFile(@TempDir Path temporaryFolder) throws Exception {
 		long start = System.currentTimeMillis();
 		Path fileLock = temporaryFolder.resolve(String.format("%s.lock", UUID.randomUUID()));
 		List<Process> processes = new ArrayList<>();
 		for (int i = 0; i < 3; i++) {
-			processes.add(forkAndLock(fileLock));
+			processes.add(forkJvm(fileLock));
 		}
 		for (Process process : processes) {
 			assertThat(process.waitFor()).isZero();
@@ -58,7 +58,7 @@ class FileLockTests {
 
 	}
 
-	private static Process forkAndLock(Path fileLock) throws IOException {
+	private static Process forkJvm(Path fileLock) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder();
 		Path home = Paths.get(new SystemProperty("java.home").getRequired());
 		if (Files.exists(home.resolve("bin/java"))) {
