@@ -16,14 +16,20 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,30 +40,48 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class FileLockTests {
 
+	private static final Logger log = LoggerFactory.getLogger(FileLockTests.class);
+
 	@Test
-	void sequenceAccess(@TempDir Path temporaryFolder) throws InterruptedException {
+	void sequenceAccess(@TempDir Path temporaryFolder) throws Exception {
 		long start = System.currentTimeMillis();
-		Path lockFile = temporaryFolder.resolve(String.format("%s.lock", UUID.randomUUID()));
-		CountDownLatch latch = new CountDownLatch(2);
-		List<Exception> exceptions = new ArrayList<>();
-		Runnable runnable = () -> {
-			try (FileLock fileLock = new FileLock(lockFile)) {
-				fileLock.lock();
-				Thread.sleep(1500);
-			}
-			catch (Exception ex) {
-				exceptions.add(ex);
-			}
-			finally {
-				latch.countDown();
-			}
-		};
-		new Thread(runnable).start();
-		new Thread(runnable).start();
-		latch.await();
+		Path fileLock = temporaryFolder.resolve(String.format("%s.lock", UUID.randomUUID()));
+		List<Process> processes = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			processes.add(forkAndLock(fileLock));
+		}
+		for (Process process : processes) {
+			assertThat(process.waitFor()).isZero();
+		}
 		long elapsed = System.currentTimeMillis() - start;
-		assertThat(exceptions).isEmpty();
-		assertThat(elapsed).isGreaterThan(3000);
+		assertThat(elapsed).describedAs("Seems like 'FileLock' does not work correctly.").isGreaterThan(6000);
+
+	}
+
+	private static Process forkAndLock(Path fileLock) throws IOException {
+		ProcessBuilder builder = new ProcessBuilder();
+		Path home = Paths.get(new SystemProperty("java.home").getRequired());
+		if (Files.exists(home.resolve("bin/java"))) {
+			builder.command(home.resolve("bin/java").toString());
+		}
+		else {
+			builder.command(home.resolve("bin/java.exe").toString());
+		}
+		builder.command().add("-cp");
+		builder.command().add(new SystemProperty("java.class.path").getRequired());
+		builder.command().add(FileLockSuite.class.getCanonicalName());
+		builder.command().add(fileLock.toAbsolutePath().toString());
+		Process process = builder.start();
+		new Thread(() -> {
+			try (BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(process.getInputStream()))) {
+				bufferedReader.lines().forEach(log::info);
+			}
+			catch (IOException ex) {
+				log.error(ex.getMessage(), ex);
+			}
+		}).start();
+		return process;
 
 	}
 
