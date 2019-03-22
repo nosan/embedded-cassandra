@@ -48,17 +48,18 @@ class FileLockTests {
 		Path fileLock = temporaryFolder.resolve(String.format("%s.lock", UUID.randomUUID()));
 		List<Process> processes = new ArrayList<>();
 		for (int i = 0; i < 3; i++) {
-			processes.add(forkJvm(fileLock));
+			processes.add(fork(fileLock));
 		}
 		for (Process process : processes) {
 			assertThat(process.waitFor()).isZero();
 		}
 		long elapsed = System.currentTimeMillis() - start;
-		assertThat(elapsed).describedAs("Seems like 'FileLock' does not work correctly.").isGreaterThan(6000);
+		assertThat(elapsed).describedAs("Seems like 'FileLock' does not work correctly.").isGreaterThan(1500)
+				.isLessThan(3000);
 
 	}
 
-	private static Process forkJvm(Path fileLock) throws IOException {
+	private static Process fork(Path fileLock) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder();
 		Path home = Paths.get(new SystemProperty("java.home").getRequired());
 		if (Files.exists(home.resolve("bin/java"))) {

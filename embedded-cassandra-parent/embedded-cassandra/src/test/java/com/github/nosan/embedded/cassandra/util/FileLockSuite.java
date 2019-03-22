@@ -28,7 +28,7 @@ public abstract class FileLockSuite {
 	public static void main(String[] args) throws Exception {
 		try (FileLock fileLock = new FileLock(Paths.get(args[0]))) {
 			fileLock.lock();
-			Thread.sleep(2000);
+			Thread.sleep(500);
 		}
 	}
 
