@@ -55,7 +55,7 @@ class FileLockTests {
 		}
 		long elapsed = System.currentTimeMillis() - start;
 		assertThat(elapsed).describedAs("Seems like 'FileLock' does not work correctly.").isGreaterThan(1500)
-				.isLessThan(3000);
+				.isLessThan(5000);
 
 	}
 
