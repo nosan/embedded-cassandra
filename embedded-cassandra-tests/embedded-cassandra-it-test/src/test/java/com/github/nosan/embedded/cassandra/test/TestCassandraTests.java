@@ -40,7 +40,7 @@ class TestCassandraTests {
 	private static final TestCassandra cassandra = new TestCassandra(
 			new LocalCassandraFactoryBuilder()
 					.setConfigurationFile(TestCassandraTests.class.getResource("/cassandra.yaml"))
-					.setJvmOptions("-Dcassandra.superuser_setup_delay_ms=0")
+					.setJvmOptions("-Dcassandra.superuser_setup_delay_ms=1000")
 					.build());
 
 	private static final String KEYSPACE_NAME = "test";

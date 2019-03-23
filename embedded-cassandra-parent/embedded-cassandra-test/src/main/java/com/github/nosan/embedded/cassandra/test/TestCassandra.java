@@ -245,8 +245,7 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Lazy initialize a {@link Cluster}.
-	 * This {@link Cluster} will be closed by this {@code Cassandra}.
+	 * Initializes a {@link Cluster}. This {@link Cluster} will be closed by this {@code Cassandra}.
 	 *
 	 * @return a cluster
 	 */
@@ -256,8 +255,8 @@ public class TestCassandra implements Cassandra {
 			synchronized (this.lock) {
 				cluster = this.cluster;
 				if (cluster == null) {
-					cluster = this.clusterFactory.create(getSettings());
-					Objects.requireNonNull(cluster, "Cluster is not initialized");
+					cluster = new RetryClusterFactory(5, this.clusterFactory)
+							.create(getSettings());
 					this.cluster = cluster;
 				}
 			}
@@ -266,8 +265,8 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Lazy initialize a {@link Session} using a {@link #getCluster() Cluster}.
-	 * This {@link Session} will be closed by this {@code Cassandra}.
+	 * Initializes a {@link Session} using a {@link #getCluster() Cluster}. This {@link Session} will be closed by this
+	 * {@code Cassandra}.
 	 *
 	 * @return a session
 	 */
@@ -277,7 +276,7 @@ public class TestCassandra implements Cassandra {
 			synchronized (this.lock) {
 				session = this.session;
 				if (session == null) {
-					session = new RetryConnection(5, getCluster()).connect();
+					session = getCluster().connect();
 					this.session = session;
 				}
 			}
@@ -468,21 +467,22 @@ public class TestCassandra implements Cassandra {
 		}
 	}
 
-	private static final class RetryConnection {
+	private static final class RetryClusterFactory implements ClusterFactory {
 
 		private final int retry;
 
-		private final Cluster cluster;
+		private final ClusterFactory clusterFactory;
 
-		RetryConnection(int retry, Cluster cluster) {
+		RetryClusterFactory(int retry, ClusterFactory clusterFactory) {
 			this.retry = retry;
-			this.cluster = cluster;
+			this.clusterFactory = clusterFactory;
 		}
 
-		Session connect() {
+		@Override
+		public Cluster create(Settings settings) {
 			for (int i = 0; i < this.retry - 1; i++) {
 				try {
-					return this.cluster.connect();
+					return getCluster(settings);
 				}
 				catch (NoHostAvailableException | AuthenticationException ex) {
 					try {
@@ -493,7 +493,12 @@ public class TestCassandra implements Cassandra {
 					}
 				}
 			}
-			return this.cluster.connect();
+			return getCluster(settings);
+		}
+
+		private Cluster getCluster(Settings settings) {
+			Cluster cluster = Objects.requireNonNull(this.clusterFactory.create(settings), "Cluster must not be null");
+			return cluster.init();
 		}
 
 	}
