@@ -497,7 +497,8 @@ public class TestCassandra implements Cassandra {
 		}
 
 		private Cluster getCluster(Settings settings) {
-			Cluster cluster = Objects.requireNonNull(this.clusterFactory.create(settings), "Cluster must not be null");
+			Cluster cluster = this.clusterFactory.create(settings);
+			Objects.requireNonNull(cluster, "Cluster must not be null");
 			return cluster.init();
 		}
 
