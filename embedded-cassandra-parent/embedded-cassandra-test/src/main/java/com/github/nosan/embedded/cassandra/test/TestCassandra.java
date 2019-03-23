@@ -27,6 +27,8 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.exceptions.AuthenticationException;
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -275,7 +277,7 @@ public class TestCassandra implements Cassandra {
 			synchronized (this.lock) {
 				session = this.session;
 				if (session == null) {
-					session = getCluster().connect();
+					session = new RetryConnection(5, getCluster()).connect();
 					this.session = session;
 				}
 			}
@@ -464,6 +466,36 @@ public class TestCassandra implements Cassandra {
 				log.error("Unable to stop Test Cassandra", ex);
 			}
 		}
+	}
+
+	private static final class RetryConnection {
+
+		private final int retry;
+
+		private final Cluster cluster;
+
+		RetryConnection(int retry, Cluster cluster) {
+			this.retry = retry;
+			this.cluster = cluster;
+		}
+
+		Session connect() {
+			for (int i = 0; i < this.retry - 1; i++) {
+				try {
+					return this.cluster.connect();
+				}
+				catch (NoHostAvailableException | AuthenticationException ex) {
+					try {
+						Thread.sleep(500);
+					}
+					catch (InterruptedException ie) {
+						Thread.currentThread().interrupt();
+					}
+				}
+			}
+			return this.cluster.connect();
+		}
+
 	}
 
 }
