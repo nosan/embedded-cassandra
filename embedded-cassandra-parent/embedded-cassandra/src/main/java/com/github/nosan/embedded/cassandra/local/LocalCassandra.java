@@ -340,19 +340,16 @@ class LocalCassandra implements Cassandra {
 
 		@Override
 		public void close() throws IOException, InterruptedException {
-			IOException exceptions = new IOException("Can not close the underlying resource." +
-					" See suppressed exceptions for details.");
-			for (int i = 0; i < this.retry; i++) {
+			for (int i = 0; i < this.retry - 1; i++) {
 				try {
 					this.closeable.close();
 					return;
 				}
 				catch (IOException ex) {
-					exceptions.addSuppressed(ex);
+					Thread.sleep(500);
 				}
-				Thread.sleep(500);
 			}
-			throw exceptions;
+			this.closeable.close();
 		}
 
 	}
