@@ -39,6 +39,7 @@ class TestCassandraTests {
 
 	private static final TestCassandra cassandra = new TestCassandra(
 			new LocalCassandraFactoryBuilder()
+					.setDeleteWorkingDirectory(true)
 					.setConfigurationFile(TestCassandraTests.class.getResource("/cassandra.yaml"))
 					.setJvmOptions("-Dcassandra.superuser_setup_delay_ms=1850")
 					.build());
@@ -89,19 +90,19 @@ class TestCassandraTests {
 	@Test
 	void executeStatement() {
 		Row row = cassandra.executeStatement("SELECT * FROM test.users WHERE user_id = ?", "frodo").one();
-		assertString(row, "first_name", "$'Frodo;'");
-		assertString(row, "last_name", "'$$Baggins");
+		assertColumnValue(row, "first_name", "$'Frodo;'");
+		assertColumnValue(row, "last_name", "'$$Baggins");
 
 		Row row1 = cassandra.executeStatement(QueryBuilder.select("first_name").from("test", "users").limit(1))
 				.one();
-		assertString(row1, "first_name", "$'Frodo;'");
+		assertColumnValue(row1, "first_name", "$'Frodo;'");
 	}
 
 	private static KeyspaceMetadata getKeyspace() {
 		return cassandra.getCluster().getMetadata().getKeyspace(TestCassandraTests.KEYSPACE_NAME);
 	}
 
-	private static void assertString(Row row, String column, String value) {
+	private static void assertColumnValue(Row row, String column, String value) {
 		assertThat(row.get(column, String.class)).isEqualTo(value);
 	}
 
