@@ -247,7 +247,7 @@ public class TestCassandra implements Cassandra {
 	/**
 	 * Initializes a {@link Cluster}. This {@link Cluster} will be closed by this {@code Cassandra}.
 	 *
-	 * @return a cluster
+	 * @return an initialized cluster
 	 */
 	public Cluster getCluster() {
 		Cluster cluster = this.cluster;
@@ -268,7 +268,7 @@ public class TestCassandra implements Cassandra {
 	 * Initializes a {@link Session} using a {@link #getCluster() Cluster}. This {@link Session} will be closed by this
 	 * {@code Cassandra}.
 	 *
-	 * @return a session
+	 * @return an initialized session
 	 */
 	public Session getSession() {
 		Session session = this.session;
