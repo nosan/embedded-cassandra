@@ -388,7 +388,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Whether to delete the working directory after success {@code Cassandra} stop or not.
+	 * Delete the working directory after success {@code Cassandra} stop or not.
 	 *
 	 * @return The value of the {@code deleteWorkingDirectory} attribute
 	 * @since 1.4.3
