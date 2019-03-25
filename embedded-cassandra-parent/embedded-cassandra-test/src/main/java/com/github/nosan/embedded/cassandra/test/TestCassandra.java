@@ -310,6 +310,7 @@ public class TestCassandra implements Cassandra {
 	 * Delete all rows from the specified tables.
 	 *
 	 * @param tableNames the names of the tables to delete from
+	 * @see CqlUtils#deleteFromTables(Session, String...)
 	 * @since 1.0.6
 	 */
 	public void deleteFromTables(String... tableNames) {
@@ -317,9 +318,21 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
+	 * Delete all rows from the non system tables.
+	 *
+	 * @see CqlUtils#deleteFromAllNonSystemTables(Session)
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	public void deleteFromAllNonSystemTables() {
+		CqlUtils.deleteFromAllNonSystemTables(getSession());
+	}
+
+	/**
 	 * Drop the specified tables.
 	 *
 	 * @param tableNames the names of the tables to drop
+	 * @see CqlUtils#dropTables(Session, String...)
 	 * @since 1.0.6
 	 */
 	public void dropTables(String... tableNames) {
@@ -327,9 +340,21 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
+	 * Drop all non system tables.
+	 *
+	 * @see CqlUtils#dropAllNonSystemTables(Session)
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	public void dropAllNonSystemTables() {
+		CqlUtils.dropAllNonSystemTables(getSession());
+	}
+
+	/**
 	 * Drop the specified keyspaces.
 	 *
 	 * @param keyspaceNames the names of the keyspaces to drop
+	 * @see CqlUtils#dropKeyspaces(Session, String...)
 	 * @since 1.0.6
 	 */
 	public void dropKeyspaces(String... keyspaceNames) {
@@ -337,10 +362,22 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
+	 * Drop all non system keyspaces.
+	 *
+	 * @see CqlUtils#dropAllNonSystemKeyspaces(Session)
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	public void dropAllNonSystemKeyspaces() {
+		CqlUtils.dropAllNonSystemKeyspaces(getSession());
+	}
+
+	/**
 	 * Count the rows in the given table.
 	 *
 	 * @param tableName name of the table to count rows in
 	 * @return the number of rows in the table
+	 * @see CqlUtils#getRowCount(Session, String)
 	 * @since 1.0.6
 	 */
 	public long getRowCount(String tableName) {
@@ -351,6 +388,7 @@ public class TestCassandra implements Cassandra {
 	 * Executes the given scripts.
 	 *
 	 * @param scripts the CQL scripts to execute.
+	 * @see CqlScriptUtils#executeScripts(Session, CqlScript...)
 	 * @since 1.0.6
 	 */
 	public void executeScripts(CqlScript... scripts) {
@@ -365,6 +403,7 @@ public class TestCassandra implements Cassandra {
 	 * SimpleStatement#SimpleStatement(String, Object...)} for more details.
 	 * @return the result of the query. That result will never be null but can be empty (and will be
 	 * for any non SELECT query).
+	 * @see CqlUtils#executeStatement(Session, String, Object...)
 	 * @since 1.0.6
 	 */
 	public ResultSet executeStatement(String statement, @Nullable Object... args) {
@@ -377,6 +416,7 @@ public class TestCassandra implements Cassandra {
 	 * @param statement the CQL statement to execute
 	 * @return the result of the query. That result will never be null
 	 * but can be empty (and will be for any non SELECT query).
+	 * @see CqlUtils#executeStatement(Session, Statement)
 	 * @since 1.2.8
 	 */
 	public ResultSet executeStatement(Statement statement) {

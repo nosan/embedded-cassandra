@@ -16,13 +16,17 @@
 
 package com.github.nosan.embedded.cassandra.test.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.exceptions.InvalidQueryException;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +59,17 @@ public abstract class CqlUtils {
 	}
 
 	/**
+	 * Delete all rows from the non system tables.
+	 *
+	 * @param session a session
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	public static void deleteFromAllNonSystemTables(Session session) {
+		deleteFromTables(session, getNonSystemTables(session));
+	}
+
+	/**
 	 * Drop the specified tables.
 	 *
 	 * @param session a session
@@ -66,6 +81,17 @@ public abstract class CqlUtils {
 		for (String tableName : tableNames) {
 			executeStatement(session, String.format("DROP TABLE IF EXISTS %s", tableName));
 		}
+	}
+
+	/**
+	 * Drop all non system tables.
+	 *
+	 * @param session a session
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	public static void dropAllNonSystemTables(Session session) {
+		dropTables(session, getNonSystemTables(session));
 	}
 
 	/**
@@ -83,6 +109,17 @@ public abstract class CqlUtils {
 	}
 
 	/**
+	 * Drop all non system keyspaces.
+	 *
+	 * @param session a session
+	 * @since 1.4.3
+	 */
+	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	public static void dropAllNonSystemKeyspaces(Session session) {
+		dropKeyspaces(session, getNonSystemKeyspaces(session));
+	}
+
+	/**
 	 * Count the rows in the given table.
 	 *
 	 * @param tableName name of the table to count rows in
@@ -92,7 +129,7 @@ public abstract class CqlUtils {
 	public static long getRowCount(Session session, String tableName) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableName, "Table must not be null");
-		return executeStatement(session, String.format("SELECT COUNT(0) FROM %s", tableName)).one().getLong(0);
+		return executeStatement(session, String.format("SELECT COUNT(1) FROM %s", tableName)).one().getLong(0);
 	}
 
 	/**
@@ -148,6 +185,62 @@ public abstract class CqlUtils {
 			log.debug("Execute Statement: {}", statement);
 		}
 		return session.execute(statement);
+	}
+
+	private static String[] getNonSystemTables(Session session) {
+		List<String> tables = new ArrayList<>();
+		for (String keyspace : getNonSystemKeyspaces(session)) {
+			ResultSet rows = getTables(session, keyspace);
+			rows.forEach(row -> tables.add(String.format("%s.%s", row.getString("keyspace_name"),
+					row.getString("table_name"))));
+		}
+		Collections.reverse(tables);
+		return tables.toArray(new String[0]);
+	}
+
+	private static String[] getNonSystemKeyspaces(Session session) {
+		List<String> keyspaces = new ArrayList<>();
+		ResultSet rows = getKeyspaces(session);
+		rows.forEach(row -> {
+			String name = row.getString("keyspace_name");
+			if (!name.equals("system") && !name.startsWith("system_")) {
+				keyspaces.add(name);
+			}
+		});
+		Collections.reverse(keyspaces);
+		return keyspaces.toArray(new String[0]);
+	}
+
+	private static ResultSet getTables(Session session, String keyspace) {
+		try {
+			return executeStatement(session, "SELECT keyspace_name, table_name" +
+					" FROM system_schema.tables WHERE keyspace_name = ?", keyspace);
+		}
+		catch (InvalidQueryException ex) {
+			try {
+				return executeStatement(session, "SELECT keyspace_name, columnfamily_name as table_name" +
+						" FROM system.schema_columnfamilies WHERE keyspace_name = ?", keyspace);
+			}
+			catch (InvalidQueryException ex1) {
+				ex.addSuppressed(ex1);
+				throw ex;
+			}
+		}
+	}
+
+	private static ResultSet getKeyspaces(Session session) {
+		try {
+			return executeStatement(session, "SELECT keyspace_name FROM system_schema.keyspaces");
+		}
+		catch (InvalidQueryException ex) {
+			try {
+				return executeStatement(session, "SELECT keyspace_name FROM system.schema_keyspaces");
+			}
+			catch (InvalidQueryException ex1) {
+				ex.addSuppressed(ex1);
+				throw ex;
+			}
+		}
 	}
 
 }
