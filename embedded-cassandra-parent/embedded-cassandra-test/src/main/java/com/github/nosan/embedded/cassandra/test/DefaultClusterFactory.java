@@ -19,6 +19,8 @@ package com.github.nosan.embedded.cassandra.test;
 import java.util.Objects;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.SocketOptions;
 import org.apiguardian.api.API;
 
@@ -37,12 +39,24 @@ public class DefaultClusterFactory implements ClusterFactory {
 	@Override
 	public Cluster create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
+
+		QueryOptions queryOptions = new QueryOptions();
+		queryOptions.setRefreshNodeIntervalMillis(0);
+		queryOptions.setRefreshNodeListIntervalMillis(0);
+		queryOptions.setRefreshSchemaIntervalMillis(0);
+
+		PoolingOptions poolingOptions = new PoolingOptions();
+		poolingOptions.setPoolTimeoutMillis(10000);
+
 		SocketOptions socketOptions = new SocketOptions();
-		socketOptions.setConnectTimeoutMillis(30000);
-		socketOptions.setReadTimeoutMillis(30000);
+		socketOptions.setConnectTimeoutMillis(10000);
+		socketOptions.setReadTimeoutMillis(10000);
+
 		Cluster.Builder builder = Cluster.builder().addContactPoints(settings.getRealAddress())
 				.withCredentials("cassandra", "cassandra").withPort(settings.getPort())
-				.withSocketOptions(socketOptions);
+				.withSocketOptions(socketOptions)
+				.withQueryOptions(queryOptions)
+				.withPoolingOptions(poolingOptions);
 		if (StringUtils.hasText(settings.getClusterName())) {
 			builder = builder.withClusterName(settings.getClusterName());
 		}

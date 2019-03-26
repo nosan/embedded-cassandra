@@ -19,7 +19,9 @@ package com.github.nosan.embedded.cassandra.test;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Configuration;
 import com.datastax.driver.core.MetricsOptions;
+import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.ProtocolOptions;
+import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import org.junit.jupiter.api.Test;
@@ -53,8 +55,16 @@ class DefaultClusterFactoryTests {
 		assertThat(cluster.getClusterName()).isNotNull();
 
 		SocketOptions socketOptions = configuration.getSocketOptions();
-		assertThat(socketOptions.getConnectTimeoutMillis()).isEqualTo(30000);
-		assertThat(socketOptions.getReadTimeoutMillis()).isEqualTo(30000);
+		assertThat(socketOptions.getConnectTimeoutMillis()).isEqualTo(10000);
+		assertThat(socketOptions.getReadTimeoutMillis()).isEqualTo(10000);
+
+		QueryOptions queryOptions = configuration.getQueryOptions();
+		assertThat(queryOptions.getRefreshNodeIntervalMillis()).isZero();
+		assertThat(queryOptions.getRefreshSchemaIntervalMillis()).isZero();
+		assertThat(queryOptions.getRefreshNodeListIntervalMillis()).isZero();
+
+		PoolingOptions poolingOptions = configuration.getPoolingOptions();
+		assertThat(poolingOptions.getPoolTimeoutMillis()).isEqualTo(10000);
 
 		MetricsOptions metricsOptions = configuration.getMetricsOptions();
 		assertThat(metricsOptions.isEnabled()).isFalse();
