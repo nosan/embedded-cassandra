@@ -37,12 +37,22 @@ class EmbeddedCassandraContextCustomizerFactoryTests {
 	}
 
 	@Test
+	void shouldCreateContextCustomizerMetaAnnotation() {
+		assertThat(this.factory.createContextCustomizer(AnnotatedMeta.class, Collections.emptyList())).isNotNull();
+	}
+
+	@Test
 	void shouldNotCreateContextCustomizer() {
 		assertThat(this.factory.createContextCustomizer(NotAnnotated.class, Collections.emptyList())).isNull();
 	}
 
 	@EmbeddedCassandra
 	private static class Annotated {
+
+	}
+
+	@EmbeddedLocalCassandra
+	private static class AnnotatedMeta {
 
 	}
 

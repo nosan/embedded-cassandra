@@ -21,8 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -35,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration
+@ContextConfiguration(classes = ExcludeCassandraBeanDefinitionRegistryPostProcessor.class)
 @EmbeddedCassandra
 class EmbeddedCassandraConfigurationNoReplaceTests {
 
@@ -45,16 +43,6 @@ class EmbeddedCassandraConfigurationNoReplaceTests {
 	@Test
 	void shouldNotReplace() {
 		assertThat(this.applicationContext.getBeanNamesForType(Cluster.class)).isEmpty();
-	}
-
-	@Configuration
-	static class TestConfiguration {
-
-		@Bean
-		public ExcludeCassandraBeanDefinitionRegistryPostProcessor excludeCassandraProcessor() {
-			return new ExcludeCassandraBeanDefinitionRegistryPostProcessor();
-		}
-
 	}
 
 }
