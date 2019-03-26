@@ -58,8 +58,8 @@ class TestCassandraExtendedTests {
 
 	@SuppressWarnings("unchecked")
 	private static Set<Thread> getHooks() throws ClassNotFoundException {
-		return new LinkedHashSet<>(((Map<Thread, Thread>) ReflectionUtils.getStaticField(
-				Class.forName("java.lang.ApplicationShutdownHooks"), "hooks")).keySet());
+		return new LinkedHashSet<>(((Map<Thread, Thread>) ReflectionUtils
+				.getStaticField(Class.forName("java.lang.ApplicationShutdownHooks"), "hooks")).keySet());
 	}
 
 }

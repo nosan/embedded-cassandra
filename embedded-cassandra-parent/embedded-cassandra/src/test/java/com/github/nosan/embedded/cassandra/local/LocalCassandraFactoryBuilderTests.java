@@ -52,10 +52,11 @@ class LocalCassandraFactoryBuilderTests {
 
 		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder().setJvmOptions(jvmOptions).addJvmOptions("3")
 				.setArtifactFactory(artifactFactory).setConfigurationFile(config).setLogbackFile(logback)
-				.setCommitLogArchivingFile(commitLogArchiving).setVersion(version).setRackFile(rack).setJavaHome(
-						javaDirectory).setTopologyFile(topology).setWorkingDirectory(workingDirectory)
-				.setStartupTimeout(Duration.ofMinutes(1)).setJmxPort(jmxPort).setAllowRoot(true).setArtifactDirectory(
-						artifactDirectory).setRegisterShutdownHook(false).setDeleteWorkingDirectory(true).build();
+				.setCommitLogArchivingFile(commitLogArchiving).setVersion(version).setRackFile(rack)
+				.setJavaHome(javaDirectory).setTopologyFile(topology).setWorkingDirectory(workingDirectory)
+				.setStartupTimeout(Duration.ofMinutes(1)).setJmxPort(jmxPort).setAllowRoot(true)
+				.setArtifactDirectory(artifactDirectory).setRegisterShutdownHook(false).setDeleteWorkingDirectory(true)
+				.build();
 
 		assertThat(factory.getJvmOptions()).containsExactly("1", "2", "3");
 		assertThat(factory.getArtifactFactory()).isEqualTo(artifactFactory);

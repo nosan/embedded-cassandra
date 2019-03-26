@@ -43,8 +43,8 @@ class TopologyFileInitializerTests {
 				getClass().getResource("/cassandra-topology.properties"));
 		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-topology.properties")) {
-			assertThat(directory.resolve("cassandra-topology.properties")).hasBinaryContent(
-					IOUtils.toByteArray(inputStream));
+			assertThat(directory.resolve("cassandra-topology.properties"))
+					.hasBinaryContent(IOUtils.toByteArray(inputStream));
 		}
 
 	}

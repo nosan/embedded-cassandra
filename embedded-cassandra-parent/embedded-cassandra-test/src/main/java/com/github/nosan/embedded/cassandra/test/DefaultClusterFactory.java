@@ -40,8 +40,9 @@ public class DefaultClusterFactory implements ClusterFactory {
 		SocketOptions socketOptions = new SocketOptions();
 		socketOptions.setConnectTimeoutMillis(30000);
 		socketOptions.setReadTimeoutMillis(30000);
-		Cluster.Builder builder = Cluster.builder().addContactPoints(settings.getRealAddress()).withCredentials(
-				"cassandra", "cassandra").withPort(settings.getPort()).withSocketOptions(socketOptions);
+		Cluster.Builder builder = Cluster.builder().addContactPoints(settings.getRealAddress())
+				.withCredentials("cassandra", "cassandra").withPort(settings.getPort())
+				.withSocketOptions(socketOptions);
 		if (StringUtils.hasText(settings.getClusterName())) {
 			builder = builder.withClusterName(settings.getClusterName());
 		}

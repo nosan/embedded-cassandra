@@ -93,8 +93,7 @@ class WorkingDirectoryInitializer implements Initializer {
 		}
 		catch (IOException ex) {
 			throw new IOException(
-					String.format("Artifact '%s' could not be extracted into the '%s'", archiveFile,
-							artifactDirectory),
+					String.format("Artifact '%s' could not be extracted into the '%s'", archiveFile, artifactDirectory),
 					ex);
 		}
 		requireSingleDirectory(artifactDirectory);
@@ -118,8 +117,7 @@ class WorkingDirectoryInitializer implements Initializer {
 		}
 		catch (IOException ex) {
 			throw new IOException(
-					String.format("Could not copy folder '%s' into the '%s'", artifactDirectory, workingDirectory),
-					ex);
+					String.format("Could not copy folder '%s' into the '%s'", artifactDirectory, workingDirectory), ex);
 		}
 		if (log.isDebugEnabled()) {
 			log.debug("'{}' folder has been copied into the '{}'", artifactDirectory, workingDirectory);

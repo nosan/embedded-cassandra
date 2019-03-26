@@ -149,8 +149,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			if (!process.isAlive()) {
 				throw new IOException(String.format("Cassandra Node '%s' is not alive. Exit code is '%s'. "
 								+ "Please see logs for more details.%n%s", processId.getPid().get(),
-						process.exitValue(),
-						bufferedConsumer));
+						process.exitValue(), bufferedConsumer));
 			}
 			long elapsed = System.nanoTime() - start;
 			if ((nodeReadiness.get() || TimeUnit.NANOSECONDS.toSeconds(elapsed) > 20) && transportReadiness.get()) {
@@ -248,9 +247,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean terminate(long pid) throws InterruptedException {
 		try {
-			ProcessBuilder builder =
-					new ProcessBuilder().directory(this.workingDirectory.toFile()).redirectErrorStream(
-					true);
+			ProcessBuilder builder = new ProcessBuilder().directory(this.workingDirectory.toFile())
+					.redirectErrorStream(true);
 			return terminate(pid, builder, this.threadFactory, this.log::info);
 		}
 		catch (IOException ex) {
@@ -261,9 +259,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean kill(long pid) throws InterruptedException {
 		try {
-			ProcessBuilder builder =
-					new ProcessBuilder().directory(this.workingDirectory.toFile()).redirectErrorStream(
-					true);
+			ProcessBuilder builder = new ProcessBuilder().directory(this.workingDirectory.toFile())
+					.redirectErrorStream(true);
 			return kill(pid, builder, this.threadFactory, this.log::info);
 		}
 		catch (IOException ex) {
@@ -348,8 +345,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 
 		private static boolean match(String line) {
-			return line.matches("(?i).*listening.*clients.*") || line.matches(
-					"(?i).*not\\s*starting.*as\\s*requested.*");
+			return line.matches("(?i).*listening.*clients.*") || line
+					.matches("(?i).*not\\s*starting.*as\\s*requested.*");
 		}
 
 	}
@@ -366,8 +363,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		RpcAddressConsumer(RuntimeNodeSettings settings, CompositeConsumer<String> consumer) {
 			this.settings = settings;
-			this.regex = Pattern.compile(
-					String.format(".*/(.+):\\s*(%d|%d).*", settings.getPort(), settings.getSslPort()));
+			this.regex = Pattern
+					.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getPort(), settings.getSslPort()));
 			this.consumer = consumer;
 		}
 

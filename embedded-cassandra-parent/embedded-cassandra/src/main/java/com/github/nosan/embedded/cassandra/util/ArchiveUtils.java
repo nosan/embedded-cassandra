@@ -206,8 +206,7 @@ public abstract class ArchiveUtils {
 					}
 					catch (Throwable ex) {
 						if (log.isDebugEnabled()) {
-							log.error(String.format("Could not set permission(s) '%s' to '%s'", permissions, file),
-									ex);
+							log.error(String.format("Could not set permission(s) '%s' to '%s'", permissions, file), ex);
 						}
 					}
 				}

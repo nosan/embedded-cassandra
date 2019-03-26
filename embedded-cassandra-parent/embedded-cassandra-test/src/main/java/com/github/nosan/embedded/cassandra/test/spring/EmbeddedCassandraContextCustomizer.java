@@ -173,8 +173,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 		@Override
 		public void afterPropertiesSet() {
-			ApplicationContext applicationContext = Objects.requireNonNull(this.applicationContext,
-					"Application Context is not initialized");
+			ApplicationContext applicationContext = Objects
+					.requireNonNull(this.applicationContext, "Application Context is not initialized");
 			EmbeddedCassandra annotation = this.annotation;
 			CqlConfig config = new CqlConfig(this.testClass, annotation.scripts(), annotation.statements(),
 					annotation.encoding());
@@ -196,8 +196,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	/**
 	 * {@link FactoryBean} used to create and configure a {@link Cluster}.
 	 */
-	static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean,
-			ApplicationContextAware {
+	static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean, ApplicationContextAware {
 
 		@Nullable
 		private Cluster cluster;
@@ -227,8 +226,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 		@Override
 		public void afterPropertiesSet() {
-			ApplicationContext applicationContext = Objects.requireNonNull(this.applicationContext,
-					"Application Context is not initialized");
+			ApplicationContext applicationContext = Objects
+					.requireNonNull(this.applicationContext, "Application Context is not initialized");
 			TestCassandra cassandra = applicationContext.getBean(EMBEDDED_CASSANDRA_BEAN_NAME, TestCassandra.class);
 			this.cluster = cassandra.getCluster();
 		}
@@ -278,8 +277,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 		@Override
 		public void afterPropertiesSet() {
-			ApplicationContext applicationContext = Objects.requireNonNull(this.applicationContext,
-					"Application Context is not initialized");
+			ApplicationContext applicationContext = Objects
+					.requireNonNull(this.applicationContext, "Application Context is not initialized");
 			Environment environment = applicationContext.getEnvironment();
 			EmbeddedLocalCassandra annotation = this.annotation;
 			Class<?> testClass = this.testClass;
@@ -314,8 +313,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 				factory.setVersion(Version.parse(version));
 			}
 			if (StringUtils.hasText(configurationFile)) {
-				factory.setConfigurationFile(CqlResourceUtils.getURL(applicationContext, configurationFile,
-						testClass));
+				factory.setConfigurationFile(CqlResourceUtils.getURL(applicationContext, configurationFile, testClass));
 			}
 			if (StringUtils.hasText(logbackFile)) {
 				factory.setLogbackFile(CqlResourceUtils.getURL(applicationContext, logbackFile, testClass));

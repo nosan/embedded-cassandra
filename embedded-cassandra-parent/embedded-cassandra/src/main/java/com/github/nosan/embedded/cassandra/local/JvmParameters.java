@@ -141,8 +141,8 @@ class JvmParameters {
 	}
 
 	private static List<String> normalize(List<String> options, int jmxPort) {
-		return Stream.concat(Stream.of("-Dcassandra.jmx.local.port=" + jmxPort), options.stream()).map(
-				option -> option.replaceAll("\\s+", "")).collect(Collectors.toList());
+		return Stream.concat(Stream.of("-Dcassandra.jmx.local.port=" + jmxPort), options.stream())
+				.map(option -> option.replaceAll("\\s+", "")).collect(Collectors.toList());
 	}
 
 	private static Map<String, String> parse(List<String> options) {
@@ -166,8 +166,9 @@ class JvmParameters {
 		setPort("-Dcassandra.storage_port", jvmOptions, settings::getRealListenAddress);
 		setPort("-Dcassandra.ssl_storage_port", jvmOptions, settings::getRealListenAddress);
 		setPort("-Dcassandra.jmx.local.port", jvmOptions, InetAddress::getLoopbackAddress);
-		setPort("-Dcassandra.jmx.remote.port", jvmOptions, () -> getString("java.rmi.server.hostname", options)
-				.map(NetworkUtils::getInetAddress).orElseGet(InetAddress::getLoopbackAddress));
+		setPort("-Dcassandra.jmx.remote.port", jvmOptions,
+				() -> getString("java.rmi.server.hostname", options).map(NetworkUtils::getInetAddress)
+						.orElseGet(InetAddress::getLoopbackAddress));
 		return jvmOptions;
 	}
 

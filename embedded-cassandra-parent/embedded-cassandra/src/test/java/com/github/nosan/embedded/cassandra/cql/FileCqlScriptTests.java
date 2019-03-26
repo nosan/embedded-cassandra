@@ -42,8 +42,8 @@ class FileCqlScriptTests {
 
 	@Test
 	void assertStatements() throws URISyntaxException {
-		assertThat(classpath(ROLES).getStatements()).containsExactly(
-				"CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
+		assertThat(classpath(ROLES).getStatements())
+				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
@@ -54,8 +54,7 @@ class FileCqlScriptTests {
 
 	@Test
 	void assertEquals() throws URISyntaxException {
-		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES,
-				StandardCharsets.UTF_16))
+		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES, StandardCharsets.UTF_16))
 				.isNotEqualTo(classpath(KEYSPACE));
 	}
 

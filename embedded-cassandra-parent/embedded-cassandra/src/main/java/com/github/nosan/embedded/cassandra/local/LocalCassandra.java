@@ -123,8 +123,7 @@ class LocalCassandra implements Cassandra {
 	 * @param deleteWorkingDirectory delete the working directory after success Cassandra stop
 	 */
 	LocalCassandra(Version version, ArtifactFactory artifactFactory, Path workingDirectory, Path artifactDirectory,
-			Duration startupTimeout, @Nullable URL configurationFile, @Nullable URL logbackFile,
-			@Nullable URL rackFile,
+			Duration startupTimeout, @Nullable URL configurationFile, @Nullable URL logbackFile, @Nullable URL rackFile,
 			@Nullable URL topologyFile, @Nullable URL commitLogArchivingFile, List<String> jvmOptions,
 			@Nullable Path javaHome, int jmxPort, boolean allowRoot, boolean registerShutdownHook,
 			boolean deleteWorkingDirectory) {

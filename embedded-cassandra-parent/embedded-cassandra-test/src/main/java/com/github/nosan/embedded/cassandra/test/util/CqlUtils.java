@@ -133,8 +133,8 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableName, "Table must not be null");
 		long[] count = new long[1];
-		executeStatement(session, String.format("SELECT COUNT(*) as total FROM %s", tableName)).forEach(
-				row -> count[0] += row.getLong("total"));
+		executeStatement(session, String.format("SELECT COUNT(*) as total FROM %s", tableName))
+				.forEach(row -> count[0] += row.getLong("total"));
 		return count[0];
 	}
 

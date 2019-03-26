@@ -143,8 +143,7 @@ abstract class AbstractLocalCassandraTests {
 	@Test
 	void shouldStartIfTransportDisabled() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
-		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getRealListenAddress,
-				Settings::getStoragePort));
+		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort));
 	}
 
 	@Test
@@ -191,8 +190,9 @@ abstract class AbstractLocalCassandraTests {
 
 	@Test
 	void shouldNotGetSettings() {
-		assertThatThrownBy(() -> this.factory.create().getSettings()).hasStackTraceContaining(
-				"Please start it before calling this method").isInstanceOf(CassandraException.class);
+		assertThatThrownBy(() -> this.factory.create().getSettings())
+				.hasStackTraceContaining("Please start it before calling this method")
+				.isInstanceOf(CassandraException.class);
 	}
 
 	@Test
@@ -257,12 +257,12 @@ abstract class AbstractLocalCassandraTests {
 	private void startAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
 		Path configurationFile = this.temporaryFolder.resolve("cassandra.yaml");
 		String interfaceName = getInterface(ipv6);
-		InetAddress address = NetworkUtils.getAddressByInterface(interfaceName, ipv6).orElseThrow(
-				IllegalStateException::new);
+		InetAddress address = NetworkUtils.getAddressByInterface(interfaceName, ipv6)
+				.orElseThrow(IllegalStateException::new);
 		String yaml;
 		try (InputStream stream = getClass().getResourceAsStream(location)) {
-			yaml = new String(IOUtils.toByteArray(stream), StandardCharsets.UTF_8).replaceAll("#seed",
-					address.getHostAddress()).replaceAll("#interface", interfaceName);
+			yaml = new String(IOUtils.toByteArray(stream), StandardCharsets.UTF_8)
+					.replaceAll("#seed", address.getHostAddress()).replaceAll("#interface", interfaceName);
 		}
 		Files.copy(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)), configurationFile,
 				StandardCopyOption.REPLACE_EXISTING);
@@ -291,9 +291,10 @@ abstract class AbstractLocalCassandraTests {
 
 	private String getInterface(boolean ipv6) throws SocketException {
 		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
-		return Collections.list(NetworkInterface.getNetworkInterfaces()).stream().filter(it -> Collections.list(
-				it.getInetAddresses()).stream().filter(InetAddress::isLoopbackAddress).anyMatch(test)).map(
-				NetworkInterface::getName).findFirst().orElseThrow(IllegalStateException::new);
+		return Collections.list(NetworkInterface.getNetworkInterfaces()).stream()
+				.filter(it -> Collections.list(it.getInetAddresses()).stream().filter(InetAddress::isLoopbackAddress)
+						.anyMatch(test)).map(NetworkInterface::getName).findFirst()
+				.orElseThrow(IllegalStateException::new);
 	}
 
 	private static final class CqlAssert implements Consumer<Cassandra> {
@@ -308,8 +309,8 @@ abstract class AbstractLocalCassandraTests {
 		public void accept(Cassandra cassandra) {
 			try (Cluster cluster = cluster(cassandra)) {
 				Session session = cluster.connect();
-				assertThat(session.execute(this.statement).wasApplied()).describedAs("Statement '%s' is not applied",
-						this.statement).isTrue();
+				assertThat(session.execute(this.statement).wasApplied())
+						.describedAs("Statement '%s' is not applied", this.statement).isTrue();
 			}
 		}
 

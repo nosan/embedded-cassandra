@@ -76,8 +76,8 @@ class DefaultClusterFactoryTests {
 		assertThat(protocolOptions.getPort()).isEqualTo(9000);
 		assertThat(cluster.getClusterName()).isEqualTo("my name");
 
-		assertThatThrownBy(cluster::connect).isInstanceOf(NoHostAvailableException.class).hasStackTraceContaining(
-				"google.com");
+		assertThatThrownBy(cluster::connect).isInstanceOf(NoHostAvailableException.class)
+				.hasStackTraceContaining("google.com");
 	}
 
 	private static final class TestSettings implements Settings {

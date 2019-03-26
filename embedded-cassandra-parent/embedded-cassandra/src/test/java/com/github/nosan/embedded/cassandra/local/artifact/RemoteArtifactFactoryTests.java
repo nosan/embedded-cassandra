@@ -61,8 +61,8 @@ class RemoteArtifactFactoryTests {
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
 		RemoteArtifact artifact = (RemoteArtifact) factory.create(new Version(3, 11, 3));
 		assertThat(ReflectionUtils.getField(artifact, "version")).isEqualTo(new Version(3, 11, 3));
-		assertThat(ReflectionUtils.getField(artifact, "directory")).isEqualTo(
-				FileUtils.getUserHomeDirectory().resolve("Downloads"));
+		assertThat(ReflectionUtils.getField(artifact, "directory"))
+				.isEqualTo(FileUtils.getUserHomeDirectory().resolve("Downloads"));
 		assertThat(ReflectionUtils.getField(artifact, "urlFactory")).isInstanceOf(DefaultUrlFactory.class);
 		assertThat(ReflectionUtils.getField(artifact, "proxy")).isNull();
 		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isEqualTo(Duration.ofSeconds(30));

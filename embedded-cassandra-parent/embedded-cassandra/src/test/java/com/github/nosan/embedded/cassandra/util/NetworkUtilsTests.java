@@ -55,8 +55,9 @@ class NetworkUtilsTests {
 
 	private static NetworkInterface getInterface(boolean ipv6) throws SocketException {
 		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
-		return Collections.list(NetworkInterface.getNetworkInterfaces()).stream().filter(it -> Collections.list(
-				it.getInetAddresses()).stream().anyMatch(test)).findFirst().orElseThrow(IllegalStateException::new);
+		return Collections.list(NetworkInterface.getNetworkInterfaces()).stream()
+				.filter(it -> Collections.list(it.getInetAddresses()).stream().anyMatch(test)).findFirst()
+				.orElseThrow(IllegalStateException::new);
 	}
 
 }

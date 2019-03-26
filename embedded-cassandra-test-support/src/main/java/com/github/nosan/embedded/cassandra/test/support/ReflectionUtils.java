@@ -127,8 +127,8 @@ public abstract class ReflectionUtils {
 		for (Class<?> searchType = clazz; searchType != null; searchType = searchType.getSuperclass()) {
 			Method[] methods = searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods();
 			for (Method method : methods) {
-				if (name.equals(method.getName()) && Arrays.equals(types, method.getParameterTypes()) && filter.test(
-						method)) {
+				if (name.equals(method.getName()) && Arrays.equals(types, method.getParameterTypes()) && filter
+						.test(method)) {
 					method.setAccessible(true);
 					return method;
 				}

@@ -73,8 +73,8 @@ class CqlScriptTests {
 	}
 
 	private static void assertStatements(CqlScript script) {
-		assertThat(script.getStatements()).containsExactly(
-				"CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
+		assertThat(script.getStatements())
+				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 }

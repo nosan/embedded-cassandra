@@ -154,9 +154,9 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		String pattern = this.pattern;
 		Charset encoding = this.encoding;
 		ClassLoader classLoader = this.classLoader;
-		List<UrlCqlScript> scripts = getResourcesByPattern(classLoader, pattern).stream().sorted(
-				Comparator.comparing(URL::toString)).map(url -> new UrlCqlScript(url, encoding)).collect(
-				Collectors.toList());
+		List<UrlCqlScript> scripts = getResourcesByPattern(classLoader, pattern).stream()
+				.sorted(Comparator.comparing(URL::toString)).map(url -> new UrlCqlScript(url, encoding))
+				.collect(Collectors.toList());
 		return new CqlScripts(scripts).getStatements();
 	}
 
@@ -189,8 +189,8 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 		String directory = getRootDirectory(pattern);
 		String subPattern = pattern.substring(directory.length());
-		return getResources(cl, directory).stream().map(url -> getResourcesByPattern(url, cl, subPattern)).flatMap(
-				Collection::stream).collect(Collectors.toSet());
+		return getResources(cl, directory).stream().map(url -> getResourcesByPattern(url, cl, subPattern))
+				.flatMap(Collection::stream).collect(Collectors.toSet());
 	}
 
 	private static Set<URL> getResourcesByPattern(URL url, @Nullable ClassLoader cl, String pattern) {
@@ -204,8 +204,8 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 				if (index != -1) {
 					String uri = url.toString().substring(protocol.length() + 1, index);
 					String entry = url.toString().substring(index + 1);
-					try (FileSystem fileSystem = FileSystems.newFileSystem(URI.create(String.format("jar:%s", uri)),
-							Collections.emptyMap(), cl)) {
+					try (FileSystem fileSystem = FileSystems
+							.newFileSystem(URI.create(String.format("jar:%s", uri)), Collections.emptyMap(), cl)) {
 						return getResourcesByPattern(fileSystem.getPath(entry), pattern);
 					}
 				}
@@ -214,8 +214,7 @@ public final class ClassPathGlobCqlScript implements CqlScript {
 		}
 		catch (IOException | URISyntaxException | ProviderNotFoundException ex) {
 			if (log.isDebugEnabled()) {
-				log.error(String.format("Could not find resources for URL '%s' with a glob pattern '%s'", url,
-						pattern),
+				log.error(String.format("Could not find resources for URL '%s' with a glob pattern '%s'", url, pattern),
 						ex);
 			}
 			return Collections.emptySet();

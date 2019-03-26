@@ -43,8 +43,8 @@ class CommitLogFileInitializerTests {
 				getClass().getResource("/commitlog_archiving.properties"));
 		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/commitlog_archiving.properties")) {
-			assertThat(directory.resolve("commitlog_archiving.properties")).hasBinaryContent(
-					IOUtils.toByteArray(inputStream));
+			assertThat(directory.resolve("commitlog_archiving.properties"))
+					.hasBinaryContent(IOUtils.toByteArray(inputStream));
 		}
 	}
 

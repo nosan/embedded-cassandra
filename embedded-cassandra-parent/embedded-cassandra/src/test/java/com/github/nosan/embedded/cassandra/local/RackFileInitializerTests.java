@@ -43,8 +43,8 @@ class RackFileInitializerTests {
 				getClass().getResource("/cassandra-rackdc.properties"));
 		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-rackdc.properties")) {
-			assertThat(directory.resolve("cassandra-rackdc.properties")).hasBinaryContent(
-					IOUtils.toByteArray(inputStream));
+			assertThat(directory.resolve("cassandra-rackdc.properties"))
+					.hasBinaryContent(IOUtils.toByteArray(inputStream));
 		}
 
 	}

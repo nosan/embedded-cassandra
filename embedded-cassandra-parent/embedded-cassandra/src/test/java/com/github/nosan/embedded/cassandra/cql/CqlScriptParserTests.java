@@ -50,15 +50,15 @@ class CqlScriptParserTests {
 
 	@Test
 	void properlyHandlesBlockComment() {
-		List<String> statements = CqlScriptParser.parse(
-				"USE KEYSPACE test; /*DROP     KEYSPACE test*/USE KEYSPACE test;");
+		List<String> statements = CqlScriptParser
+				.parse("USE KEYSPACE test; /*DROP     KEYSPACE test*/USE KEYSPACE test;");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
 	@Test
 	void blockCommentNotClosed() {
-		assertThatThrownBy(() -> CqlScriptParser.parse("USE KEYSPACE test; /*DROP KEYSPACE test")).isInstanceOf(
-				IllegalArgumentException.class);
+		assertThatThrownBy(() -> CqlScriptParser.parse("USE KEYSPACE test; /*DROP KEYSPACE test"))
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -111,8 +111,8 @@ class CqlScriptParserTests {
 
 	@Test
 	void ignoreStatementDoubleDollars() {
-		List<String> statements = CqlScriptParser.parse(
-				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES "
+		List<String> statements = CqlScriptParser
+				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES "
 						+ "  (201, '2015-02-18', '2015-02-22', $$Women's Tour of New Zealand; New England$$);");
 		assertThat(statements).containsExactly(
 				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) "
@@ -121,8 +121,8 @@ class CqlScriptParserTests {
 
 	@Test
 	void ignoreDollarsInSingleQuote() {
-		List<String> statements = CqlScriptParser.parse(
-				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES "
+		List<String> statements = CqlScriptParser
+				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES "
 						+ "  (201, '2015-02-18', '2015-02-22', '$$Womens Tour of New Zealand$$');");
 		assertThat(statements).containsExactly(
 				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) "
@@ -131,8 +131,8 @@ class CqlScriptParserTests {
 
 	@Test
 	void ignoreDollarsInDoubleQuote() {
-		List<String> statements = CqlScriptParser.parse(
-				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES "
+		List<String> statements = CqlScriptParser
+				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES "
 						+ "  (201, '2015-02-18', '2015-02-22', \"$$Womens Tour of New Zealand$$\");");
 		assertThat(statements).containsExactly(
 				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) "

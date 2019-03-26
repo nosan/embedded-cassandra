@@ -426,13 +426,13 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 		Path workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null) {
-			workingDirectory = FileUtils.getTmpDirectory().resolve(
-					String.format("embedded-cassandra/%s/%s", version, UUID.randomUUID()));
+			workingDirectory = FileUtils.getTmpDirectory()
+					.resolve(String.format("embedded-cassandra/%s/%s", version, UUID.randomUUID()));
 		}
 		Path artifactDirectory = getArtifactDirectory();
 		if (artifactDirectory == null) {
-			artifactDirectory = FileUtils.getTmpDirectory().resolve(
-					String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
+			artifactDirectory = FileUtils.getTmpDirectory()
+					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
 		}
 		if (artifactDirectory.equals(workingDirectory)) {
 			throw new IllegalArgumentException(
@@ -440,8 +440,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 							artifactDirectory, workingDirectory));
 		}
 		return new LocalCassandra(version, artifactFactory, workingDirectory, artifactDirectory, startupTimeout,
-				getConfigurationFile(), getLogbackFile(), getRackFile(), getTopologyFile(),
-				getCommitLogArchivingFile(),
+				getConfigurationFile(), getLogbackFile(), getRackFile(), getTopologyFile(), getCommitLogArchivingFile(),
 				getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot(), isRegisterShutdownHook(),
 				isDeleteWorkingDirectory());
 	}

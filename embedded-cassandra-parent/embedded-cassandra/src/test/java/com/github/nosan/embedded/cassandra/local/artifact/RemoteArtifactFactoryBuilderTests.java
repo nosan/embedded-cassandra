@@ -41,8 +41,8 @@ class RemoteArtifactFactoryBuilderTests {
 		UrlFactory urlFactory = version -> new URL[0];
 
 		RemoteArtifactFactory factory = new RemoteArtifactFactoryBuilder().setUrlFactory(urlFactory).setProxy(proxy)
-				.setDirectory(FileUtils.getTmpDirectory()).setReadTimeout(Duration.ofSeconds(100)).setConnectTimeout(
-						Duration.ofMinutes(100)).build();
+				.setDirectory(FileUtils.getTmpDirectory()).setReadTimeout(Duration.ofSeconds(100))
+				.setConnectTimeout(Duration.ofMinutes(100)).build();
 
 		assertThat(factory.getDirectory()).isEqualTo(FileUtils.getTmpDirectory());
 		assertThat(factory.getUrlFactory()).isEqualTo(urlFactory);

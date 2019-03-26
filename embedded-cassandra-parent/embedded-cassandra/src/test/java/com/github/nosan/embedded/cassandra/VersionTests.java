@@ -67,8 +67,8 @@ class VersionTests {
 
 	@Test
 	void shouldNotParse() {
-		assertThatThrownBy(() -> Version.parse("q")).hasStackTraceContaining("Expected format is ").isInstanceOf(
-				IllegalArgumentException.class);
+		assertThatThrownBy(() -> Version.parse("q")).hasStackTraceContaining("Expected format is ")
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test

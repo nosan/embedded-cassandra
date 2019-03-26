@@ -47,8 +47,8 @@ class NodeSettings implements Settings {
 	 */
 	NodeSettings(Version version, @Nullable Map<?, ?> properties) {
 		this.version = version;
-		this.properties = Collections.unmodifiableMap(
-				(properties != null) ? new LinkedHashMap<>(properties) : Collections.emptyMap());
+		this.properties = Collections
+				.unmodifiableMap((properties != null) ? new LinkedHashMap<>(properties) : Collections.emptyMap());
 	}
 
 	@Override
@@ -141,20 +141,20 @@ class NodeSettings implements Settings {
 
 	@Override
 	public boolean isListenOnBroadcastAddress() {
-		return getBoolean("listen_on_broadcast_address", this.properties).orElseGet(
-				Settings.super::isListenOnBroadcastAddress);
+		return getBoolean("listen_on_broadcast_address", this.properties)
+				.orElseGet(Settings.super::isListenOnBroadcastAddress);
 	}
 
 	@Override
 	public boolean isListenInterfacePreferIpv6() {
-		return getBoolean("listen_interface_prefer_ipv6", this.properties).orElseGet(
-				Settings.super::isListenInterfacePreferIpv6);
+		return getBoolean("listen_interface_prefer_ipv6", this.properties)
+				.orElseGet(Settings.super::isListenInterfacePreferIpv6);
 	}
 
 	@Override
 	public boolean isRpcInterfacePreferIpv6() {
-		return getBoolean("rpc_interface_prefer_ipv6", this.properties).orElseGet(
-				Settings.super::isRpcInterfacePreferIpv6);
+		return getBoolean("rpc_interface_prefer_ipv6", this.properties)
+				.orElseGet(Settings.super::isRpcInterfacePreferIpv6);
 	}
 
 	@Override
@@ -180,8 +180,8 @@ class NodeSettings implements Settings {
 		properties.put("listen_on_broadcast_address", isListenOnBroadcastAddress());
 		properties.put("listen_interface_prefer_ipv6", isListenInterfacePreferIpv6());
 		properties.put("rpc_interface_prefer_ipv6", isRpcInterfacePreferIpv6());
-		return properties.entrySet().stream().filter(entry -> entry.getValue() != null).map(String::valueOf).collect(
-				Collectors.joining(",", "{", "}"));
+		return properties.entrySet().stream().filter(entry -> entry.getValue() != null).map(String::valueOf)
+				.collect(Collectors.joining(",", "{", "}"));
 	}
 
 	private static Optional<Integer> getInteger(String name, Map<?, ?> source) {

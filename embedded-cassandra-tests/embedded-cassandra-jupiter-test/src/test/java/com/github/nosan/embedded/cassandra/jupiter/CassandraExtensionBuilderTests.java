@@ -53,8 +53,8 @@ class CassandraExtensionBuilderTests {
 
 		assertThat(ReflectionUtils.getField(cassandraExtension, "cassandraFactory")).isEqualTo(cassandraFactory);
 		assertThat(ReflectionUtils.getField(cassandraExtension, "registerShutdownHook")).isEqualTo(false);
-		assertThat(ReflectionUtils.getField(cassandraExtension, "scripts")).isEqualTo(
-				Collections.singletonList(script));
+		assertThat(ReflectionUtils.getField(cassandraExtension, "scripts"))
+				.isEqualTo(Collections.singletonList(script));
 		assertThat(ReflectionUtils.getField(cassandraExtension, "clusterFactory")).isEqualTo(clusterFactory);
 	}
 

@@ -42,8 +42,8 @@ class UrlCqlScriptTests {
 
 	@Test
 	void assertStatements() {
-		assertThat(classpath(ROLES).getStatements()).containsExactly(
-				"CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
+		assertThat(classpath(ROLES).getStatements())
+				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
@@ -54,8 +54,7 @@ class UrlCqlScriptTests {
 
 	@Test
 	void assertEquals() {
-		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES,
-				StandardCharsets.UTF_16))
+		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES, StandardCharsets.UTF_16))
 				.isNotEqualTo(classpath(KEYSPACE));
 	}
 
@@ -66,8 +65,8 @@ class UrlCqlScriptTests {
 
 	@Test
 	void assertExceptionThrown() throws IOException {
-		assertThatThrownBy(new UrlCqlScript(new URL("http://localhost.unknown.net:8080"))::getStatements).isInstanceOf(
-				UncheckedIOException.class);
+		assertThatThrownBy(new UrlCqlScript(new URL("http://localhost.unknown.net:8080"))::getStatements)
+				.isInstanceOf(UncheckedIOException.class);
 	}
 
 	private UrlCqlScript classpath(String url, @Nullable Charset charset) {

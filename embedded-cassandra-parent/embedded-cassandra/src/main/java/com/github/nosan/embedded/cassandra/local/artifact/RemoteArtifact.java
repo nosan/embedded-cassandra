@@ -246,8 +246,8 @@ class RemoteArtifact implements Artifact {
 
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
 
-			Path file = this.directory.resolve(
-					String.format("download-%s-%s", UUID.randomUUID(), getFileName(this.url)));
+			Path file = this.directory
+					.resolve(String.format("download-%s-%s", UUID.randomUUID(), getFileName(this.url)));
 			file.toFile().deleteOnExit();
 
 			try (InputStream urlInputStream = urlConnection.getInputStream()) {

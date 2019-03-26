@@ -43,8 +43,8 @@ class PathCqlScriptTests {
 
 	@Test
 	void assertStatements() throws URISyntaxException {
-		assertThat(classpath(ROLES).getStatements()).containsExactly(
-				"CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
+		assertThat(classpath(ROLES).getStatements())
+				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test
@@ -55,8 +55,7 @@ class PathCqlScriptTests {
 
 	@Test
 	void assertEquals() throws URISyntaxException {
-		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES,
-				StandardCharsets.UTF_16))
+		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES, StandardCharsets.UTF_16))
 				.isNotEqualTo(classpath(KEYSPACE));
 	}
 
@@ -67,8 +66,8 @@ class PathCqlScriptTests {
 
 	@Test
 	void assertExceptionThrown() {
-		assertThatThrownBy(new PathCqlScript(new File("invalid.txt").toPath())::getStatements).isInstanceOf(
-				UncheckedIOException.class);
+		assertThatThrownBy(new PathCqlScript(new File("invalid.txt").toPath())::getStatements)
+				.isInstanceOf(UncheckedIOException.class);
 	}
 
 	private PathCqlScript classpath(String url, @Nullable Charset charset) throws URISyntaxException {

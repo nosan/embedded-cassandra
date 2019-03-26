@@ -40,8 +40,8 @@ class ClassPathCqlScriptTests {
 
 	@Test
 	void assertStatements() {
-		assertThat(classpath(ROLES).getStatements()).containsExactly(
-				"CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
+		assertThat(classpath(ROLES).getStatements())
+				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 		assertThat(classpath(KEYSPACE).getStatements()).containsExactly(
 				"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', "
 						+ "'replication_factor':1}");
@@ -56,11 +56,10 @@ class ClassPathCqlScriptTests {
 	@Test
 	void assertEquals() {
 		ClassLoader classLoader = getClass().getClassLoader();
-		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES,
-				StandardCharsets.UTF_16))
+		assertThat(classpath(ROLES)).isEqualTo(classpath(ROLES)).isNotEqualTo(classpath(ROLES, StandardCharsets.UTF_16))
 				.isNotEqualTo(classpath(KEYSPACE));
-		assertThat(classpath(KEYSPACE)).isEqualTo(
-				classpath("com/github/nosan/embedded/cassandra/cql/keyspace.cql", classLoader));
+		assertThat(classpath(KEYSPACE))
+				.isEqualTo(classpath("com/github/nosan/embedded/cassandra/cql/keyspace.cql", classLoader));
 	}
 
 	@Test
