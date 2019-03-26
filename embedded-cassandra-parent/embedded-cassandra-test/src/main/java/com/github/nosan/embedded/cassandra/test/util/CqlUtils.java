@@ -133,8 +133,8 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableName, "Table must not be null");
 		long[] count = new long[1];
-		executeStatement(session, String.format("SELECT COUNT(*) as total FROM %s", tableName))
-				.forEach(row -> count[0] += row.getLong("total"));
+		ResultSet resultSet = executeStatement(session, String.format("SELECT COUNT(*) as total FROM %s", tableName));
+		resultSet.forEach(row -> count[0] += row.getLong("total"));
 		return count[0];
 	}
 
@@ -195,7 +195,8 @@ public abstract class CqlUtils {
 	private static String[] getNonSystemTables(Session session) {
 		List<String> tables = new ArrayList<>();
 		for (String keyspace : getNonSystemKeyspaces(session)) {
-			getTables(session, keyspace).forEach(row -> tables
+			ResultSet resultSet = getTables(session, keyspace);
+			resultSet.forEach(row -> tables
 					.add(String.format("%s.%s", row.getString("keyspace_name"), row.getString("table_name"))));
 		}
 		Collections.reverse(tables);
@@ -204,7 +205,8 @@ public abstract class CqlUtils {
 
 	private static String[] getNonSystemKeyspaces(Session session) {
 		List<String> keyspaces = new ArrayList<>();
-		getKeyspaces(session).forEach(row -> {
+		ResultSet resultSet = getKeyspaces(session);
+		resultSet.forEach(row -> {
 			String name = row.getString("keyspace_name");
 			if (!name.equals("system") && !name.startsWith("system_")) {
 				keyspaces.add(name);
