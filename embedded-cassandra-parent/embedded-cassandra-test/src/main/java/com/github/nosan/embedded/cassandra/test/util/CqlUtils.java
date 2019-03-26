@@ -133,8 +133,8 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableName, "Table must not be null");
 		long[] count = new long[1];
-		executeStatement(session, String.format("SELECT COUNT(*) as total FROM %s", tableName))
-				.forEach(row -> count[0] += row.getLong("total"));
+		executeStatement(session, String.format("SELECT COUNT(*) as total FROM %s", tableName)).forEach(
+				row -> count[0] += row.getLong("total"));
 		return count[0];
 	}
 
@@ -160,8 +160,7 @@ public abstract class CqlUtils {
 	 * @return the result of the query. That result will never be null but
 	 * can be empty (and will be for any non SELECT query).
 	 */
-	public static ResultSet executeStatement(Session session, String statement,
-			@Nullable Object... args) {
+	public static ResultSet executeStatement(Session session, String statement, @Nullable Object... args) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(statement, "Statement must not be null");
 		if (log.isDebugEnabled()) {
@@ -196,8 +195,8 @@ public abstract class CqlUtils {
 	private static String[] getNonSystemTables(Session session) {
 		List<String> tables = new ArrayList<>();
 		for (String keyspace : getNonSystemKeyspaces(session)) {
-			getTables(session, keyspace).forEach(row -> tables.add(String.format("%s.%s",
-					row.getString("keyspace_name"), row.getString("table_name"))));
+			getTables(session, keyspace).forEach(row -> tables
+					.add(String.format("%s.%s", row.getString("keyspace_name"), row.getString("table_name"))));
 		}
 		Collections.reverse(tables);
 		return tables.toArray(new String[0]);
@@ -217,13 +216,13 @@ public abstract class CqlUtils {
 
 	private static ResultSet getTables(Session session, String keyspace) {
 		try {
-			return executeStatement(session, "SELECT keyspace_name, table_name" +
-					" FROM system_schema.tables WHERE keyspace_name = ?", keyspace);
+			return executeStatement(session,
+					"SELECT keyspace_name, table_name FROM system_schema.tables WHERE keyspace_name = ?", keyspace);
 		}
 		catch (InvalidQueryException ex) {
 			try {
-				return executeStatement(session, "SELECT keyspace_name, columnfamily_name as table_name" +
-						" FROM system.schema_columnfamilies WHERE keyspace_name = ?", keyspace);
+				return executeStatement(session, "SELECT keyspace_name, columnfamily_name as table_name"
+						+ " FROM system.schema_columnfamilies WHERE keyspace_name = ?", keyspace);
 			}
 			catch (InvalidQueryException ex1) {
 				ex.addSuppressed(ex1);

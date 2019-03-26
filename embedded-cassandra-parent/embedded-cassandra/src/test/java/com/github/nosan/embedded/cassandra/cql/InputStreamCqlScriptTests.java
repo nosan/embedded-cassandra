@@ -35,8 +35,8 @@ class InputStreamCqlScriptTests {
 
 	@Test
 	void assertStatements() {
-		assertThat(classpath(ROLES).getStatements())
-				.containsExactly("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
+		assertThat(classpath(ROLES).getStatements()).containsExactly(
+				"CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)");
 	}
 
 	@Test

@@ -141,9 +141,8 @@ public final class ClassPathCqlScript extends AbstractCqlResourceScript {
 			return false;
 		}
 		ClassPathCqlScript that = (ClassPathCqlScript) other;
-		return Objects.equals(this.location, that.location) &&
-				Objects.equals(this.classLoader, that.classLoader) &&
-				Objects.equals(getEncoding(), that.getEncoding());
+		return Objects.equals(this.location, that.location) && Objects.equals(this.classLoader, that.classLoader)
+				&& Objects.equals(getEncoding(), that.getEncoding());
 	}
 
 	@Override

@@ -33,9 +33,7 @@ abstract class CqlScriptConstructor {
 		if (elements == null || elements.length == 0) {
 			return new CqlScripts();
 		}
-		return new CqlScripts(Arrays.stream(elements)
-				.map(mapper)
-				.toArray(CqlScript[]::new));
+		return new CqlScripts(Arrays.stream(elements).map(mapper).toArray(CqlScript[]::new));
 	}
 
 }

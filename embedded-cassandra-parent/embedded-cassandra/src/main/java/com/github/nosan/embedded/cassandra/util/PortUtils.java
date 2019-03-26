@@ -74,8 +74,8 @@ public abstract class PortUtils {
 				return port;
 			}
 		}
-		throw new IllegalStateException(String.format("Could not find an available port in the range [%d, %d]",
-				MIN, MAX));
+		throw new IllegalStateException(
+				String.format("Could not find an available port in the range [%d, %d]", MIN, MAX));
 	}
 
 	/**

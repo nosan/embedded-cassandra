@@ -112,10 +112,9 @@ class NodeSettingsTests {
 		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
 		assertThat(settings.getBroadcastRpcAddress()).isEqualTo("1.2.3.4");
 		assertThat(settings.getProperties()).containsEntry("authenticator", "AllowAllAuthenticator");
-		assertThat(settings.toString()).contains("authenticator=AllowAllAuthenticator")
-				.contains("version=" + settings.getVersion())
-				.contains("real_address=" + settings.getRealAddress())
-				.contains("real_listen_address=" + settings.getRealListenAddress());
+		assertThat(settings.toString()).contains("authenticator=AllowAllAuthenticator").contains(
+				"version=" + settings.getVersion()).contains("real_address=" + settings.getRealAddress()).contains(
+				"real_listen_address=" + settings.getRealListenAddress());
 	}
 
 	private NodeSettings load(String resource) throws IOException {

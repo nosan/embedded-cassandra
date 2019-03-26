@@ -75,8 +75,7 @@ public final class InputStreamCqlScript extends AbstractCqlResourceScript {
 			return false;
 		}
 		InputStreamCqlScript that = (InputStreamCqlScript) other;
-		return Objects.equals(this.stream, that.stream)
-				&& Objects.equals(getEncoding(), that.getEncoding());
+		return Objects.equals(this.stream, that.stream) && Objects.equals(getEncoding(), that.getEncoding());
 	}
 
 	@Override

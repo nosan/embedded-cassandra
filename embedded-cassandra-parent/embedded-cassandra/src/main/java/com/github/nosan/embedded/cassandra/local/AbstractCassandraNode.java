@@ -103,8 +103,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @param javaHome java home directory
 	 * @param jmxPort JMX port
 	 */
-	AbstractCassandraNode(Path workingDirectory, Version version, Duration timeout,
-			List<String> jvmOptions, @Nullable Path javaHome, int jmxPort) {
+	AbstractCassandraNode(Path workingDirectory, Version version, Duration timeout, List<String> jvmOptions,
+			@Nullable Path javaHome, int jmxPort) {
 		this.workingDirectory = workingDirectory;
 		this.version = version;
 		this.timeout = timeout;
@@ -115,8 +115,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	@Override
 	public final Settings start() throws IOException, InterruptedException {
-		ProcessBuilder processBuilder = new ProcessBuilder()
-				.directory(this.workingDirectory.toFile())
+		ProcessBuilder processBuilder = new ProcessBuilder().directory(this.workingDirectory.toFile())
 				.redirectErrorStream(true);
 		Map<?, ?> properties = getProperties();
 		JvmParameters jvmParameters = getJvmOptions(properties);
@@ -148,8 +147,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		long rem = timeout;
 		do {
 			if (!process.isAlive()) {
-				throw new IOException(String.format("Cassandra Node '%s' is not alive. Exit code is '%s'. " +
-								"Please see logs for more details.%n%s", processId.getPid().get(), process.exitValue(),
+				throw new IOException(String.format("Cassandra Node '%s' is not alive. Exit code is '%s'. "
+								+ "Please see logs for more details.%n%s", processId.getPid().get(),
+						process.exitValue(),
 						bufferedConsumer));
 			}
 			long elapsed = System.nanoTime() - start;
@@ -164,10 +164,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
 			}
 			rem = timeout - (System.nanoTime() - start);
-		}
-		while (rem > 0);
-		throw new IOException(String.format("Cassandra Node '%s' has not been started," +
-				" seems like (%d) milliseconds is not enough.", processId.getPid().get(), this.timeout.toMillis()));
+		} while (rem > 0);
+		throw new IOException(
+				String.format("Cassandra Node '%s' has not been started, seems like (%d) milliseconds is not enough.",
+						processId.getPid().get(), this.timeout.toMillis()));
 	}
 
 	@Override
@@ -210,8 +210,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @return the process
 	 * @throws IOException in the case of I/O errors
 	 */
-	protected abstract ProcessId start(ProcessBuilder builder, ThreadFactory threadFactory,
-			Consumer<String> consumer) throws IOException;
+	protected abstract ProcessId start(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
+			throws IOException;
 
 	/**
 	 * Terminates the Apache Cassandra.
@@ -248,9 +248,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean terminate(long pid) throws InterruptedException {
 		try {
-			ProcessBuilder builder = new ProcessBuilder()
-					.directory(this.workingDirectory.toFile())
-					.redirectErrorStream(true);
+			ProcessBuilder builder =
+					new ProcessBuilder().directory(this.workingDirectory.toFile()).redirectErrorStream(
+					true);
 			return terminate(pid, builder, this.threadFactory, this.log::info);
 		}
 		catch (IOException ex) {
@@ -261,9 +261,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean kill(long pid) throws InterruptedException {
 		try {
-			ProcessBuilder builder = new ProcessBuilder()
-					.directory(this.workingDirectory.toFile())
-					.redirectErrorStream(true);
+			ProcessBuilder builder =
+					new ProcessBuilder().directory(this.workingDirectory.toFile()).redirectErrorStream(
+					true);
 			return kill(pid, builder, this.threadFactory, this.log::info);
 		}
 		catch (IOException ex) {
@@ -310,8 +310,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 
 		private static boolean isNativeTransportReady(Settings settings) {
-			return isPortBusy(settings.getRealAddress(), settings.getPort())
-					&& isPortBusy(settings.getRealAddress(), settings.getSslPort());
+			return isPortBusy(settings.getRealAddress(), settings.getPort()) && isPortBusy(settings.getRealAddress(),
+					settings.getSslPort());
 		}
 
 		private static boolean isRpcTransportReady(Settings settings) {
@@ -348,8 +348,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 
 		private static boolean match(String line) {
-			return line.matches("(?i).*listening.*clients.*") ||
-					line.matches("(?i).*not\\s*starting.*as\\s*requested.*");
+			return line.matches("(?i).*listening.*clients.*") || line.matches(
+					"(?i).*not\\s*starting.*as\\s*requested.*");
 		}
 
 	}
@@ -366,8 +366,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		RpcAddressConsumer(RuntimeNodeSettings settings, CompositeConsumer<String> consumer) {
 			this.settings = settings;
-			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getPort(),
-					settings.getSslPort()));
+			this.regex = Pattern.compile(
+					String.format(".*/(.+):\\s*(%d|%d).*", settings.getPort(), settings.getSslPort()));
 			this.consumer = consumer;
 		}
 
@@ -402,8 +402,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		ListenAddressConsumer(RuntimeNodeSettings settings, CompositeConsumer<String> consumer) {
 			this.settings = settings;
-			this.regex = Pattern.compile(String.format(".*/(.+):\\s*(%d|%d).*", settings.getStoragePort(),
-					settings.getSslStoragePort()));
+			this.regex = Pattern.compile(
+					String.format(".*/(.+):\\s*(%d|%d).*", settings.getStoragePort(), settings.getSslStoragePort()));
 			this.consumer = consumer;
 		}
 

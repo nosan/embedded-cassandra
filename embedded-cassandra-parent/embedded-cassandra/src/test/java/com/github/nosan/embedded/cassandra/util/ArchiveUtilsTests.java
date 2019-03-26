@@ -69,8 +69,7 @@ class ArchiveUtilsTests {
 	@MethodSource("archives")
 	void extract(String name, String archiveFormat, String compression, @TempDir Path temporaryFolder)
 			throws Exception {
-		Path archive = temporaryFolder.resolve(String.format("%s.%s",
-				UUID.randomUUID(), name));
+		Path archive = temporaryFolder.resolve(String.format("%s.%s", UUID.randomUUID(), name));
 		File file = new File(getClass().getResource("/cassandra.yaml").toURI());
 		archive(archiveFormat, archive, file);
 		compress(compression, archive);
@@ -81,8 +80,7 @@ class ArchiveUtilsTests {
 
 	private static void archive(String archiveFormat, Path archive, File file) throws Exception {
 		ArchiveStreamFactory af = new ArchiveStreamFactory();
-		try (ArchiveOutputStream os = af.createArchiveOutputStream(archiveFormat,
-				Files.newOutputStream(archive))) {
+		try (ArchiveOutputStream os = af.createArchiveOutputStream(archiveFormat, Files.newOutputStream(archive))) {
 			ArchiveEntry archiveEntry = os.createArchiveEntry(file, "cassandra.yaml");
 			os.putArchiveEntry(archiveEntry);
 			try (InputStream is = Files.newInputStream(file.toPath())) {
@@ -99,8 +97,7 @@ class ArchiveUtilsTests {
 				content = IOUtils.toByteArray(is);
 			}
 			CompressorStreamFactory cf = new CompressorStreamFactory();
-			try (OutputStream os = cf.createCompressorOutputStream(compression,
-					Files.newOutputStream(archive))) {
+			try (OutputStream os = cf.createCompressorOutputStream(compression, Files.newOutputStream(archive))) {
 				IOUtils.copy(new ByteArrayInputStream(content), os);
 			}
 		}

@@ -35,8 +35,7 @@ class EmptyArtifactFactoryTests {
 	void shouldCreateAnEmptyArchive() {
 		Version version = new Version(2, 10, 20);
 		Artifact artifact = this.factory.create(version);
-		assertThat(artifact).isInstanceOf(EmptyArtifact.class)
-				.hasFieldOrPropertyWithValue("version", version);
+		assertThat(artifact).isInstanceOf(EmptyArtifact.class).hasFieldOrPropertyWithValue("version", version);
 	}
 
 }

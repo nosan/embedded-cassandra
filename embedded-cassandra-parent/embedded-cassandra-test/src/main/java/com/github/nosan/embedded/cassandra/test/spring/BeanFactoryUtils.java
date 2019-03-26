@@ -47,11 +47,10 @@ abstract class BeanFactoryUtils {
 	 * @throws BeansException if the bean could not be created
 	 */
 	@Nullable
-	static <T> T getIfUnique(ApplicationContext applicationContext, Class<T> targetClass)
-			throws BeansException {
+	static <T> T getIfUnique(ApplicationContext applicationContext, Class<T> targetClass) throws BeansException {
 		try {
-			Map<String, T> beans = org.springframework.beans.factory.BeanFactoryUtils
-					.beansOfTypeIncludingAncestors(applicationContext, targetClass);
+			Map<String, T> beans = org.springframework.beans.factory.BeanFactoryUtils.beansOfTypeIncludingAncestors(
+					applicationContext, targetClass);
 			if (beans.size() == 1) {
 				return beans.values().iterator().next();
 			}

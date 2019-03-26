@@ -43,8 +43,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-@EmbeddedCassandra(scripts = "/init.cql", statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
-		"  KEY );", replace = EmbeddedCassandra.Replace.ANY)
+@EmbeddedCassandra(scripts = "/init.cql",
+		statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY  KEY );",
+		replace = EmbeddedCassandra.Replace.ANY)
 class EmbeddedCassandraTests {
 
 	@Autowired
@@ -58,8 +59,7 @@ class EmbeddedCassandraTests {
 		assertThat(this.cassandra.getSettings().getVersion()).isEqualTo(Version.parse("2.2.12"));
 		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
 		try (Session session = this.cluster.connect()) {
-			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied())
-					.isTrue();
+			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
 		}
 	}
 

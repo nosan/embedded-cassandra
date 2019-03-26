@@ -47,17 +47,14 @@ class CassandraExtensionBuilderTests {
 		CqlScript script = () -> {
 			throw new UnsupportedOperationException();
 		};
-		CassandraExtension cassandraExtension = new CassandraExtensionBuilder()
-				.addScripts(script)
-				.setRegisterShutdownHook(false)
-				.setClusterFactory(clusterFactory)
-				.setCassandraFactory(cassandraFactory)
+		CassandraExtension cassandraExtension = new CassandraExtensionBuilder().addScripts(script)
+				.setRegisterShutdownHook(false).setClusterFactory(clusterFactory).setCassandraFactory(cassandraFactory)
 				.build();
 
 		assertThat(ReflectionUtils.getField(cassandraExtension, "cassandraFactory")).isEqualTo(cassandraFactory);
 		assertThat(ReflectionUtils.getField(cassandraExtension, "registerShutdownHook")).isEqualTo(false);
-		assertThat(ReflectionUtils.getField(cassandraExtension, "scripts"))
-				.isEqualTo(Collections.singletonList(script));
+		assertThat(ReflectionUtils.getField(cassandraExtension, "scripts")).isEqualTo(
+				Collections.singletonList(script));
 		assertThat(ReflectionUtils.getField(cassandraExtension, "clusterFactory")).isEqualTo(clusterFactory);
 	}
 

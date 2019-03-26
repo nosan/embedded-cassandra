@@ -107,9 +107,8 @@ abstract class AbstractLocalCassandraTests {
 		jvmOptions.add("-Dcassandra.start_rpc=true");
 		jvmOptions.add("-Dcassandra.start_native_transport=true");
 		CassandraRunner runner = new CassandraRunner(factory);
-		runner.run(assertBusyPort(Settings::getRealAddress, (settings -> 9155))
-				.andThen(assertBusyPort(Settings::getRealListenAddress, (settings -> 7003))
-						.andThen(assertCreateKeyspace())));
+		runner.run(assertBusyPort(Settings::getRealAddress, (settings -> 9155)).andThen(
+				assertBusyPort(Settings::getRealListenAddress, (settings -> 7003)).andThen(assertCreateKeyspace())));
 	}
 
 	@Test
@@ -123,8 +122,7 @@ abstract class AbstractLocalCassandraTests {
 	void shouldFailCassandraUseSamePorts() {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(cassandra -> assertThatThrownBy(new CassandraRunner(this.factory)::run)
-				.isInstanceOf(CassandraException.class)
-				.hasCauseInstanceOf(IOException.class));
+				.isInstanceOf(CassandraException.class).hasCauseInstanceOf(IOException.class));
 	}
 
 	@Test
@@ -145,7 +143,8 @@ abstract class AbstractLocalCassandraTests {
 	@Test
 	void shouldStartIfTransportDisabled() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
-		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getRealListenAddress, Settings::getStoragePort));
+		new CassandraRunner(this.factory).run(assertBusyPort(Settings::getRealListenAddress,
+				Settings::getStoragePort));
 	}
 
 	@Test
@@ -168,8 +167,7 @@ abstract class AbstractLocalCassandraTests {
 	@Test
 	void shouldOverrideJavaHome() {
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
-		assertThatThrownBy(new CassandraRunner(this.factory)::run)
-				.isInstanceOf(CassandraException.class);
+		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class);
 	}
 
 	@Test
@@ -193,9 +191,8 @@ abstract class AbstractLocalCassandraTests {
 
 	@Test
 	void shouldNotGetSettings() {
-		assertThatThrownBy(() -> this.factory.create().getSettings())
-				.hasStackTraceContaining("Please start it before calling this method")
-				.isInstanceOf(CassandraException.class);
+		assertThatThrownBy(() -> this.factory.create().getSettings()).hasStackTraceContaining(
+				"Please start it before calling this method").isInstanceOf(CassandraException.class);
 	}
 
 	@Test
@@ -260,13 +257,12 @@ abstract class AbstractLocalCassandraTests {
 	private void startAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
 		Path configurationFile = this.temporaryFolder.resolve("cassandra.yaml");
 		String interfaceName = getInterface(ipv6);
-		InetAddress address = NetworkUtils.getAddressByInterface(interfaceName, ipv6)
-				.orElseThrow(IllegalStateException::new);
+		InetAddress address = NetworkUtils.getAddressByInterface(interfaceName, ipv6).orElseThrow(
+				IllegalStateException::new);
 		String yaml;
 		try (InputStream stream = getClass().getResourceAsStream(location)) {
-			yaml = new String(IOUtils.toByteArray(stream), StandardCharsets.UTF_8)
-					.replaceAll("#seed", address.getHostAddress())
-					.replaceAll("#interface", interfaceName);
+			yaml = new String(IOUtils.toByteArray(stream), StandardCharsets.UTF_8).replaceAll("#seed",
+					address.getHostAddress()).replaceAll("#interface", interfaceName);
 		}
 		Files.copy(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)), configurationFile,
 				StandardCopyOption.REPLACE_EXISTING);
@@ -284,8 +280,8 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	private Consumer<Cassandra> assertCreateKeyspace() {
-		return new CqlAssert("CREATE KEYSPACE test" +
-				" WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
+		return new CqlAssert(
+				"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
 	}
 
 	private Consumer<Cassandra> assertBusyPort(Function<Settings, InetAddress> addressMapper,
@@ -295,15 +291,9 @@ abstract class AbstractLocalCassandraTests {
 
 	private String getInterface(boolean ipv6) throws SocketException {
 		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
-		return Collections.list(NetworkInterface.getNetworkInterfaces())
-				.stream()
-				.filter(it -> Collections.list(it.getInetAddresses())
-						.stream()
-						.filter(InetAddress::isLoopbackAddress)
-						.anyMatch(test))
-				.map(NetworkInterface::getName)
-				.findFirst()
-				.orElseThrow(IllegalStateException::new);
+		return Collections.list(NetworkInterface.getNetworkInterfaces()).stream().filter(it -> Collections.list(
+				it.getInetAddresses()).stream().filter(InetAddress::isLoopbackAddress).anyMatch(test)).map(
+				NetworkInterface::getName).findFirst().orElseThrow(IllegalStateException::new);
 	}
 
 	private static final class CqlAssert implements Consumer<Cassandra> {
@@ -318,8 +308,8 @@ abstract class AbstractLocalCassandraTests {
 		public void accept(Cassandra cassandra) {
 			try (Cluster cluster = cluster(cassandra)) {
 				Session session = cluster.connect();
-				assertThat(session.execute(this.statement).wasApplied())
-						.describedAs("Statement '%s' is not applied", this.statement).isTrue();
+				assertThat(session.execute(this.statement).wasApplied()).describedAs("Statement '%s' is not applied",
+						this.statement).isTrue();
 			}
 		}
 
@@ -336,8 +326,7 @@ abstract class AbstractLocalCassandraTests {
 
 		private final Function<Settings, Integer> portMapper;
 
-		PortBusyAssert(Function<Settings, InetAddress> addressMapper,
-				Function<Settings, Integer> portMapper) {
+		PortBusyAssert(Function<Settings, InetAddress> addressMapper, Function<Settings, Integer> portMapper) {
 			this.addressMapper = addressMapper;
 			this.portMapper = portMapper;
 		}
@@ -347,9 +336,7 @@ abstract class AbstractLocalCassandraTests {
 			Settings settings = cassandra.getSettings();
 			InetAddress address = this.addressMapper.apply(settings);
 			Integer port = this.portMapper.apply(settings);
-			assertThat(PortUtils.isPortBusy(address, port))
-					.describedAs("Port '%s' is not busy", port)
-					.isTrue();
+			assertThat(PortUtils.isPortBusy(address, port)).describedAs("Port '%s' is not busy", port).isTrue();
 		}
 
 	}

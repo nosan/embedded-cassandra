@@ -34,9 +34,9 @@ class TestService {
 	private Cluster cluster;
 
 	boolean createKeyspace(String keyspace) {
-		return this.cluster.connect().execute(String.format(""
-				+ "CREATE KEYSPACE  %s  WITH REPLICATION = { 'class' : 'SimpleStrategy', "
-				+ "'replication_factor' : 1 };", keyspace)).wasApplied();
+		return this.cluster.connect().execute(String.format(
+				"CREATE KEYSPACE  %s  WITH REPLICATION = { 'class' : 'SimpleStrategy', "
+						+ "'replication_factor' : 1 };", keyspace)).wasApplied();
 	}
 
 }

@@ -40,13 +40,9 @@ class RemoteArtifactFactoryBuilderTests {
 		Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("locahost", 8080));
 		UrlFactory urlFactory = version -> new URL[0];
 
-		RemoteArtifactFactory factory = new RemoteArtifactFactoryBuilder()
-				.setUrlFactory(urlFactory)
-				.setProxy(proxy)
-				.setDirectory(FileUtils.getTmpDirectory())
-				.setReadTimeout(Duration.ofSeconds(100))
-				.setConnectTimeout(Duration.ofMinutes(100))
-				.build();
+		RemoteArtifactFactory factory = new RemoteArtifactFactoryBuilder().setUrlFactory(urlFactory).setProxy(proxy)
+				.setDirectory(FileUtils.getTmpDirectory()).setReadTimeout(Duration.ofSeconds(100)).setConnectTimeout(
+						Duration.ofMinutes(100)).build();
 
 		assertThat(factory.getDirectory()).isEqualTo(FileUtils.getTmpDirectory());
 		assertThat(factory.getUrlFactory()).isEqualTo(urlFactory);
@@ -57,8 +53,7 @@ class RemoteArtifactFactoryBuilderTests {
 
 	@Test
 	void defaultBuildFactory() {
-		RemoteArtifactFactory factory = new RemoteArtifactFactoryBuilder()
-				.build();
+		RemoteArtifactFactory factory = new RemoteArtifactFactoryBuilder().build();
 
 		assertThat(factory.getDirectory()).isNull();
 		assertThat(factory.getUrlFactory()).isNull();

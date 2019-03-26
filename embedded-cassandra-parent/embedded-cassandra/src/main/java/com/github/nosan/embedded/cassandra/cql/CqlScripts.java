@@ -54,8 +54,8 @@ public final class CqlScripts implements CqlScript {
 	 * @param scripts CQL scripts
 	 */
 	public CqlScripts(@Nullable Collection<? extends CqlScript> scripts) {
-		this.scripts = Collections.unmodifiableList(new ArrayList<>((scripts != null) ? scripts :
-				Collections.emptyList()));
+		this.scripts = Collections.unmodifiableList(
+				new ArrayList<>((scripts != null) ? scripts : Collections.emptyList()));
 	}
 
 	@Override

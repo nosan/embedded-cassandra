@@ -76,7 +76,8 @@ class RunProcess {
 		return start(this.processBuilder, this.threadFactory, consumer);
 	}
 
-	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<? super String> consumer)
+	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory,
+			Consumer<? super String> consumer)
 			throws IOException {
 		Process process = builder.start();
 		threadFactory.newThread(() -> read(process, consumer)).start();

@@ -42,8 +42,8 @@ class StaticCqlScriptTests {
 
 	@Test
 	void assertEquals() {
-		assertThat(statements(ROLES).getStatements()).isEqualTo(statements(ROLES).getStatements())
-				.isNotEqualTo(statements());
+		assertThat(statements(ROLES).getStatements()).isEqualTo(statements(ROLES).getStatements()).isNotEqualTo(
+				statements());
 	}
 
 	@Test

@@ -39,12 +39,10 @@ class LogbackFileInitializerTests {
 	void customize(@TempDir Path temporaryFolder) throws Exception {
 		Path directory = temporaryFolder.resolve("conf");
 		Files.createDirectories(directory);
-		LogbackFileInitializer initializer =
-				new LogbackFileInitializer(getClass().getResource("/logback-test.xml"));
+		LogbackFileInitializer initializer = new LogbackFileInitializer(getClass().getResource("/logback-test.xml"));
 		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/logback-test.xml")) {
-			assertThat(directory.resolve("logback.xml")).hasBinaryContent(
-					IOUtils.toByteArray(inputStream));
+			assertThat(directory.resolve("logback.xml")).hasBinaryContent(IOUtils.toByteArray(inputStream));
 		}
 
 	}

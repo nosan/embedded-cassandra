@@ -37,8 +37,7 @@ class EmbeddedCassandraContextCustomizerFactory implements ContextCustomizerFact
 	@Override
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
-		EmbeddedCassandra annotation = AnnotatedElementUtils
-				.findMergedAnnotation(testClass, EmbeddedCassandra.class);
+		EmbeddedCassandra annotation = AnnotatedElementUtils.findMergedAnnotation(testClass, EmbeddedCassandra.class);
 		if (annotation != null) {
 			return new EmbeddedCassandraContextCustomizer();
 		}

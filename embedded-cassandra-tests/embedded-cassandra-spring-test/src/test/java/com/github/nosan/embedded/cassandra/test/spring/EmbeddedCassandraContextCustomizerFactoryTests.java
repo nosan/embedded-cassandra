@@ -33,14 +33,12 @@ class EmbeddedCassandraContextCustomizerFactoryTests {
 
 	@Test
 	void shouldCreateContextCustomizer() {
-		assertThat(this.factory.createContextCustomizer(Annotated.class, Collections.emptyList()))
-				.isNotNull();
+		assertThat(this.factory.createContextCustomizer(Annotated.class, Collections.emptyList())).isNotNull();
 	}
 
 	@Test
 	void shouldNotCreateContextCustomizer() {
-		assertThat(this.factory.createContextCustomizer(NotAnnotated.class, Collections.emptyList()))
-				.isNull();
+		assertThat(this.factory.createContextCustomizer(NotAnnotated.class, Collections.emptyList())).isNull();
 	}
 
 	@EmbeddedCassandra

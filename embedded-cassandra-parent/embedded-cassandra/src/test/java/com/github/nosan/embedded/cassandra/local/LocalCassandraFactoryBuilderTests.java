@@ -50,25 +50,12 @@ class LocalCassandraFactoryBuilderTests {
 		Version version = new Version(3, 11, 0);
 		int jmxPort = 8000;
 
-		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder()
-				.setJvmOptions(jvmOptions)
-				.addJvmOptions("3")
-				.setArtifactFactory(artifactFactory)
-				.setConfigurationFile(config)
-				.setLogbackFile(logback)
-				.setCommitLogArchivingFile(commitLogArchiving)
-				.setVersion(version)
-				.setRackFile(rack)
-				.setJavaHome(javaDirectory)
-				.setTopologyFile(topology)
-				.setWorkingDirectory(workingDirectory)
-				.setStartupTimeout(Duration.ofMinutes(1))
-				.setJmxPort(jmxPort)
-				.setAllowRoot(true)
-				.setArtifactDirectory(artifactDirectory)
-				.setRegisterShutdownHook(false)
-				.setDeleteWorkingDirectory(true)
-				.build();
+		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder().setJvmOptions(jvmOptions).addJvmOptions("3")
+				.setArtifactFactory(artifactFactory).setConfigurationFile(config).setLogbackFile(logback)
+				.setCommitLogArchivingFile(commitLogArchiving).setVersion(version).setRackFile(rack).setJavaHome(
+						javaDirectory).setTopologyFile(topology).setWorkingDirectory(workingDirectory)
+				.setStartupTimeout(Duration.ofMinutes(1)).setJmxPort(jmxPort).setAllowRoot(true).setArtifactDirectory(
+						artifactDirectory).setRegisterShutdownHook(false).setDeleteWorkingDirectory(true).build();
 
 		assertThat(factory.getJvmOptions()).containsExactly("1", "2", "3");
 		assertThat(factory.getArtifactFactory()).isEqualTo(artifactFactory);
@@ -90,8 +77,7 @@ class LocalCassandraFactoryBuilderTests {
 
 	@Test
 	void defaultBuild() {
-		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder()
-				.build();
+		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder().build();
 		assertThat(factory.getJvmOptions()).isEmpty();
 		assertThat(factory.getArtifactFactory()).isNull();
 		assertThat(factory.getConfigurationFile()).isNull();

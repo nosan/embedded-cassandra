@@ -78,8 +78,7 @@ public final class PathCqlScript extends AbstractCqlResourceScript {
 			return false;
 		}
 		PathCqlScript that = (PathCqlScript) other;
-		return Objects.equals(this.path, that.path)
-				&& Objects.equals(getEncoding(), that.getEncoding());
+		return Objects.equals(this.path, that.path) && Objects.equals(getEncoding(), that.getEncoding());
 	}
 
 	@Override

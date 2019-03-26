@@ -36,9 +36,9 @@ public class DefaultUrlFactory implements UrlFactory {
 	@Override
 	public URL[] create(Version version) throws MalformedURLException {
 		Objects.requireNonNull(version, "Version must not be null");
-		return new URL[]{new URL(String.format("https://apache.org/dyn/closer.cgi" +
-				"?action=download&filename=cassandra/%1$s/apache-cassandra-%1$s-bin.tar.gz", version)),
-				new URL(String.format("http://archive.apache.org/dist/cassandra/%1$s/apache-cassandra-%1$s-bin.tar.gz",
+		return new URL[]{new URL(String.format("https://apache.org/dyn/closer.cgi"
+				+ "?action=download&filename=cassandra/%1$s/apache-cassandra-%1$s-bin.tar.gz", version)), new URL(
+				String.format("http://archive.apache.org/dist/cassandra/%1$s/apache-cassandra-%1$s-bin.tar.gz",
 						version))};
 	}
 

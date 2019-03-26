@@ -53,9 +53,8 @@ class EmbeddedCassandraConfigurationReplaceAnyTests {
 
 		@Bean
 		public Cluster cluster1() {
-			return Cluster.builder()
-					.withClusterName("primary cluster")
-					.withPort(9000).addContactPoint("localhost").build();
+			return Cluster.builder().withClusterName("primary cluster").withPort(9000).addContactPoint("localhost")
+					.build();
 		}
 
 		@Bean

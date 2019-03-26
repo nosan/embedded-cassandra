@@ -27,8 +27,7 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 class TestCassandra_V_3_0_X_Tests extends AbstractTestCassandraTests {
 
 	TestCassandra_V_3_0_X_Tests() {
-		super(new TestCassandra(new LocalCassandraFactoryBuilder()
-				.setVersion(new Version(3, 0, 18))
+		super(new TestCassandra(new LocalCassandraFactoryBuilder().setVersion(new Version(3, 0, 18))
 				.setDeleteWorkingDirectory(true).build()));
 	}
 

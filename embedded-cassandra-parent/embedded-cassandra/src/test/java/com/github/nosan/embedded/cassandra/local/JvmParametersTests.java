@@ -78,11 +78,11 @@ class JvmParametersTests {
 		assertThat(jvmParameters.isStartRpc()).hasValue(true);
 		assertThat(jvmParameters.isStartNativeTransport()).hasValue(true);
 
-		assertThat(jvmParameters.toString()).isEqualTo("-Dcassandra.jmx.local.port=7199" +
-				" -Dcassandra.native_transport_port=9042 -Dcassandra.rpc_port=9160" +
-				" -Dcassandra.storage_port=7000 -Dcassandra.ssl_storage_port=7001" +
-				" -Dcassandra.jmx.remote.port=8000 -Dcassandra.start_rpc=true" +
-				" -Dcassandra.start_native_transport=true -X512m");
+		assertThat(jvmParameters.toString()).isEqualTo(
+				"-Dcassandra.jmx.local.port=7199" + " -Dcassandra.native_transport_port=9042 -Dcassandra.rpc_port=9160"
+						+ " -Dcassandra.storage_port=7000 -Dcassandra.ssl_storage_port=7001"
+						+ " -Dcassandra.jmx.remote.port=8000 -Dcassandra.start_rpc=true"
+						+ " -Dcassandra.start_native_transport=true -X512m");
 	}
 
 	private static Optional<Integer> zero() {

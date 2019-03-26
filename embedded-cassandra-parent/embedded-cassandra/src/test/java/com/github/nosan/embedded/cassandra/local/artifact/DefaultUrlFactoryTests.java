@@ -36,12 +36,10 @@ class DefaultUrlFactoryTests {
 
 	@Test
 	void shouldCreateURL() throws MalformedURLException {
-		assertThat(this.urlFactory.create(new Version(3, 11, 3)))
-				.isEqualTo(new URL[]{
-						new URL("https://apache.org/dyn/closer.cgi?action=download&filename=cassandra/3.11.3/" +
-								"apache-cassandra-3.11.3-bin.tar.gz"),
-						new URL("http://archive.apache.org/dist/cassandra/3.11.3/" +
-								"apache-cassandra-3.11.3-bin.tar.gz")});
+		assertThat(this.urlFactory.create(new Version(3, 11, 3))).isEqualTo(new URL[]{
+				new URL("https://apache.org/dyn/closer.cgi?action=download&filename=cassandra/3.11.3/"
+						+ "apache-cassandra-3.11.3-bin.tar.gz"),
+				new URL("http://archive.apache.org/dist/cassandra/3.11.3/apache-cassandra-3.11.3-bin.tar.gz")});
 
 	}
 

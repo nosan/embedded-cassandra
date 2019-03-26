@@ -78,23 +78,20 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	private static final String EMBEDDED_CASSANDRA_BEAN_NAME = "embeddedCassandra";
 
 	@Override
-	public void customizeContext(ConfigurableApplicationContext context,
-			MergedContextConfiguration mergedConfig) {
+	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		Class<?> testClass = mergedConfig.getTestClass();
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = ((BeanDefinitionRegistry) beanFactory);
-			ifAnnotationPresent(testClass, EmbeddedLocalCassandra.class, annotation ->
-					registerPrimaryBeanDefinition(registry, LOCAL_CASSANDRA_FACTORY_BEAN_NAME,
+			ifAnnotationPresent(testClass, EmbeddedLocalCassandra.class,
+					annotation -> registerPrimaryBeanDefinition(registry, LOCAL_CASSANDRA_FACTORY_BEAN_NAME,
 							BeanDefinitionBuilder.rootBeanDefinition(LocalCassandraFactoryBean.class)
-									.addConstructorArgValue(testClass)
-									.addConstructorArgValue(annotation)
+									.addConstructorArgValue(testClass).addConstructorArgValue(annotation)
 									.getBeanDefinition()));
 			ifAnnotationPresent(testClass, EmbeddedCassandra.class, annotation -> {
 				registerPrimaryBeanDefinition(registry, EMBEDDED_CASSANDRA_BEAN_NAME,
 						BeanDefinitionBuilder.rootBeanDefinition(EmbeddedCassandraFactoryBean.class)
-								.addConstructorArgValue(testClass)
-								.addConstructorArgValue(annotation)
+								.addConstructorArgValue(testClass).addConstructorArgValue(annotation)
 								.getBeanDefinition());
 				if (annotation.replace() == EmbeddedCassandra.Replace.ANY) {
 					registerPrimaryBeanDefinition(registry, EMBEDDED_CLUSTER_BEAN_NAME,
@@ -117,8 +114,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	private static <A extends Annotation> void ifAnnotationPresent(Class<?> testClass, Class<A> annotationClass,
 			Consumer<A> consumer) {
-		Optional.ofNullable(AnnotatedElementUtils.findMergedAnnotation(testClass, annotationClass))
-				.ifPresent(consumer);
+		Optional.ofNullable(AnnotatedElementUtils.findMergedAnnotation(testClass, annotationClass)).ifPresent(consumer);
 	}
 
 	private static void registerPrimaryBeanDefinition(BeanDefinitionRegistry registry, String beanName,
@@ -134,8 +130,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	/**
 	 * {@link FactoryBean} used to create and configure a {@link TestCassandra}.
 	 */
-	static class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>,
-			InitializingBean, DisposableBean, ApplicationContextAware {
+	static class EmbeddedCassandraFactoryBean
+			implements FactoryBean<TestCassandra>, InitializingBean, DisposableBean, ApplicationContextAware {
 
 		private final Class<?> testClass;
 
@@ -180,8 +176,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			ApplicationContext applicationContext = Objects.requireNonNull(this.applicationContext,
 					"Application Context is not initialized");
 			EmbeddedCassandra annotation = this.annotation;
-			CqlConfig config = new CqlConfig(this.testClass, annotation.scripts(),
-					annotation.statements(), annotation.encoding());
+			CqlConfig config = new CqlConfig(this.testClass, annotation.scripts(), annotation.statements(),
+					annotation.encoding());
 			CqlScript[] scripts = CqlResourceUtils.getScripts(applicationContext, config);
 			TestCassandra cassandra = new TestCassandra(annotation.registerShutdownHook(),
 					BeanFactoryUtils.getIfUnique(applicationContext, CassandraFactory.class),
@@ -200,7 +196,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	/**
 	 * {@link FactoryBean} used to create and configure a {@link Cluster}.
 	 */
-	static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean, ApplicationContextAware {
+	static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean,
+			ApplicationContextAware {
 
 		@Nullable
 		private Cluster cluster;
@@ -300,10 +297,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			boolean allowRoot = annotation.allowRoot();
 			boolean registerShutdownHook = annotation.registerShutdownHook();
 			boolean deleteWorkingDirectory = annotation.deleteWorkingDirectory();
-			List<String> jvmOptions = Arrays.stream(annotation.jvmOptions())
-					.map(environment::resolvePlaceholders)
-					.filter(StringUtils::hasText)
-					.collect(Collectors.toList());
+			List<String> jvmOptions = Arrays.stream(annotation.jvmOptions()).map(environment::resolvePlaceholders)
+					.filter(StringUtils::hasText).collect(Collectors.toList());
 
 			LocalCassandraFactory factory = new LocalCassandraFactory();
 			if (StringUtils.hasText(workingDirectory)) {
@@ -319,7 +314,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 				factory.setVersion(Version.parse(version));
 			}
 			if (StringUtils.hasText(configurationFile)) {
-				factory.setConfigurationFile(CqlResourceUtils.getURL(applicationContext, configurationFile, testClass));
+				factory.setConfigurationFile(CqlResourceUtils.getURL(applicationContext, configurationFile,
+						testClass));
 			}
 			if (StringUtils.hasText(logbackFile)) {
 				factory.setLogbackFile(CqlResourceUtils.getURL(applicationContext, logbackFile, testClass));
@@ -331,8 +327,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 				factory.setRackFile(CqlResourceUtils.getURL(applicationContext, rackFile, testClass));
 			}
 			if (StringUtils.hasText(commitLogArchivingFile)) {
-				factory.setCommitLogArchivingFile(CqlResourceUtils.getURL(applicationContext,
-						commitLogArchivingFile, testClass));
+				factory.setCommitLogArchivingFile(
+						CqlResourceUtils.getURL(applicationContext, commitLogArchivingFile, testClass));
 			}
 			factory.setStartupTimeout(startupTimeout);
 			factory.getJvmOptions().addAll(jvmOptions);
@@ -350,8 +346,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			this.cassandraFactory = factory;
 		}
 
-		private static ArtifactFactory getArtifactFactory(
-				Environment environment, EmbeddedLocalCassandra.Artifact annotation) {
+		private static ArtifactFactory getArtifactFactory(Environment environment,
+				EmbeddedLocalCassandra.Artifact annotation) {
 			String directory = environment.resolvePlaceholders(annotation.directory());
 			String proxyHost = environment.resolvePlaceholders(annotation.proxyHost());
 			int proxyPort = annotation.proxyPort();

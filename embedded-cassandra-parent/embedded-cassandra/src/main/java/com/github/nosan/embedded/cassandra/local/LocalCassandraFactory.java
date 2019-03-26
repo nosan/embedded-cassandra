@@ -322,7 +322,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Register a shutdown hook with the JVM runtime, stops this {@code cassandra} on JVM shutdown unless it has already
+	 * Register a shutdown hook with the JVM runtime, stops this {@code cassandra} on JVM shutdown unless it has
+	 * already
 	 * been stopped at that time.
 	 *
 	 * @return The value of the {@code registerShutdownHook} attribute
@@ -425,22 +426,24 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 		Path workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null) {
-			workingDirectory = FileUtils.getTmpDirectory()
-					.resolve(String.format("embedded-cassandra/%s/%s", version, UUID.randomUUID()));
+			workingDirectory = FileUtils.getTmpDirectory().resolve(
+					String.format("embedded-cassandra/%s/%s", version, UUID.randomUUID()));
 		}
 		Path artifactDirectory = getArtifactDirectory();
 		if (artifactDirectory == null) {
-			artifactDirectory = FileUtils.getTmpDirectory()
-					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
+			artifactDirectory = FileUtils.getTmpDirectory().resolve(
+					String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
 		}
 		if (artifactDirectory.equals(workingDirectory)) {
-			throw new IllegalArgumentException(String.format("Artifact Directory '%s' must not be the same" +
-					" as Working Directory '%s'", artifactDirectory, workingDirectory));
+			throw new IllegalArgumentException(
+					String.format("Artifact Directory '%s' must not be the same as Working Directory '%s'",
+							artifactDirectory, workingDirectory));
 		}
-		return new LocalCassandra(version, artifactFactory, workingDirectory,
-				artifactDirectory, startupTimeout, getConfigurationFile(), getLogbackFile(), getRackFile(),
-				getTopologyFile(), getCommitLogArchivingFile(), getJvmOptions(), getJavaHome(), getJmxPort(),
-				isAllowRoot(), isRegisterShutdownHook(), isDeleteWorkingDirectory());
+		return new LocalCassandra(version, artifactFactory, workingDirectory, artifactDirectory, startupTimeout,
+				getConfigurationFile(), getLogbackFile(), getRackFile(), getTopologyFile(),
+				getCommitLogArchivingFile(),
+				getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot(), isRegisterShutdownHook(),
+				isDeleteWorkingDirectory());
 	}
 
 }

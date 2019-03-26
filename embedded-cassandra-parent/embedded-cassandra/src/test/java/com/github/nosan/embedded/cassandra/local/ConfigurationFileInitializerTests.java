@@ -39,12 +39,11 @@ class ConfigurationFileInitializerTests {
 	void customize(@TempDir Path temporaryFolder) throws Exception {
 		Path directory = temporaryFolder.resolve("conf");
 		Files.createDirectories(directory);
-		ConfigurationFileInitializer initializer =
-				new ConfigurationFileInitializer(getClass().getResource("/cassandra.yaml"));
+		ConfigurationFileInitializer initializer = new ConfigurationFileInitializer(
+				getClass().getResource("/cassandra.yaml"));
 		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra.yaml")) {
-			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(
-					IOUtils.toByteArray(inputStream));
+			assertThat(directory.resolve("cassandra.yaml")).hasBinaryContent(IOUtils.toByteArray(inputStream));
 		}
 
 	}

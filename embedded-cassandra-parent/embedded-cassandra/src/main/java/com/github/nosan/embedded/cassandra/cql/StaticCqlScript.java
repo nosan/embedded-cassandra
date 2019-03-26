@@ -45,8 +45,8 @@ public final class StaticCqlScript implements CqlScript {
 	 * @param statements CQL statements
 	 */
 	public StaticCqlScript(@Nullable String... statements) {
-		this.statements = Collections.unmodifiableList((statements != null) ? Arrays.asList(statements) :
-				Collections.emptyList());
+		this.statements = Collections.unmodifiableList(
+				(statements != null) ? Arrays.asList(statements) : Collections.emptyList());
 	}
 
 	/**
@@ -55,8 +55,8 @@ public final class StaticCqlScript implements CqlScript {
 	 * @param statements CQL statements
 	 */
 	public StaticCqlScript(@Nullable Collection<String> statements) {
-		this.statements = Collections.unmodifiableList(new ArrayList<>((statements != null) ? statements :
-				Collections.emptyList()));
+		this.statements = Collections.unmodifiableList(
+				new ArrayList<>((statements != null) ? statements : Collections.emptyList()));
 	}
 
 	@Override

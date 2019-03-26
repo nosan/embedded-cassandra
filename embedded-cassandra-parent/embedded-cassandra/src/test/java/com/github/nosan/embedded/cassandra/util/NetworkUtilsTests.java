@@ -39,34 +39,24 @@ class NetworkUtilsTests {
 	@Test
 	void shouldResolveAddressV6ByInterfaceName() throws Exception {
 		NetworkInterface iface = getInterface(true);
-		assertThat(NetworkUtils.getAddressByInterface(iface.getName(), true))
-				.isEqualTo(getAddress(iface, true));
+		assertThat(NetworkUtils.getAddressByInterface(iface.getName(), true)).isEqualTo(getAddress(iface, true));
 	}
 
 	@Test
 	void shouldResolveAddressV4ByInterfaceName() throws Exception {
 		NetworkInterface iface = getInterface(false);
-		assertThat(NetworkUtils.getAddressByInterface(iface.getName(), false))
-				.isEqualTo(getAddress(iface, false));
+		assertThat(NetworkUtils.getAddressByInterface(iface.getName(), false)).isEqualTo(getAddress(iface, false));
 	}
 
 	private static Optional<InetAddress> getAddress(NetworkInterface networkInterface, boolean ipv6) {
 		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
-		return Collections.list(networkInterface.getInetAddresses())
-				.stream()
-				.filter(test)
-				.findFirst();
+		return Collections.list(networkInterface.getInetAddresses()).stream().filter(test).findFirst();
 	}
 
 	private static NetworkInterface getInterface(boolean ipv6) throws SocketException {
 		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
-		return Collections.list(NetworkInterface.getNetworkInterfaces())
-				.stream()
-				.filter(it -> Collections.list(it.getInetAddresses())
-						.stream()
-						.anyMatch(test))
-				.findFirst()
-				.orElseThrow(IllegalStateException::new);
+		return Collections.list(NetworkInterface.getNetworkInterfaces()).stream().filter(it -> Collections.list(
+				it.getInetAddresses()).stream().anyMatch(test)).findFirst().orElseThrow(IllegalStateException::new);
 	}
 
 }

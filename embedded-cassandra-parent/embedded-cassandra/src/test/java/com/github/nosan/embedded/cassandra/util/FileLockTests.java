@@ -74,8 +74,7 @@ class FileLockTests {
 		builder.command().add(fileLock.toAbsolutePath().toString());
 		Process process = builder.start();
 		new Thread(() -> {
-			try (BufferedReader bufferedReader = new BufferedReader(
-					new InputStreamReader(process.getInputStream()))) {
+			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				bufferedReader.lines().forEach(log::info);
 			}
 			catch (IOException ex) {

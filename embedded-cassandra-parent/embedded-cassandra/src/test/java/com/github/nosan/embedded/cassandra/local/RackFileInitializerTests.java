@@ -39,8 +39,8 @@ class RackFileInitializerTests {
 	void customize(@TempDir Path temporaryFolder) throws Exception {
 		Path directory = temporaryFolder.resolve("conf");
 		Files.createDirectories(directory);
-		RackFileInitializer initializer =
-				new RackFileInitializer(getClass().getResource("/cassandra-rackdc.properties"));
+		RackFileInitializer initializer = new RackFileInitializer(
+				getClass().getResource("/cassandra-rackdc.properties"));
 		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-rackdc.properties")) {
 			assertThat(directory.resolve("cassandra-rackdc.properties")).hasBinaryContent(

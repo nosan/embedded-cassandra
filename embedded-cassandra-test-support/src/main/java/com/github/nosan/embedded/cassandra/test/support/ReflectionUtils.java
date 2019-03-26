@@ -59,8 +59,7 @@ public abstract class ReflectionUtils {
 	 * @param arguments method arguments
 	 * @return the value of the represented  method in object
 	 */
-	public static Object getMethod(Object target, String name,
-			Class<?>[] types, Object[] arguments) {
+	public static Object getMethod(Object target, String name, Class<?>[] types, Object[] arguments) {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		Objects.requireNonNull(types, "Types must not be null");
@@ -98,8 +97,7 @@ public abstract class ReflectionUtils {
 	 * @param arguments method arguments
 	 * @return the value of the represented static method in class
 	 */
-	public static Object getStaticMethod(Class<?> target, String name,
-			Class<?>[] types, Object[] arguments) {
+	public static Object getStaticMethod(Class<?> target, String name, Class<?>[] types, Object[] arguments) {
 		Objects.requireNonNull(target, "Target must not be null");
 		Objects.requireNonNull(name, "Name must not be null");
 		Objects.requireNonNull(types, "Types must not be null");
@@ -124,14 +122,13 @@ public abstract class ReflectionUtils {
 		throw new NoSuchFieldException(name);
 	}
 
-	private static Method findMethod(Class<?> clazz, String name, Class<?>[] types,
-			Predicate<? super Method> filter)
+	private static Method findMethod(Class<?> clazz, String name, Class<?>[] types, Predicate<? super Method> filter)
 			throws NoSuchMethodException {
 		for (Class<?> searchType = clazz; searchType != null; searchType = searchType.getSuperclass()) {
 			Method[] methods = searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods();
 			for (Method method : methods) {
-				if (name.equals(method.getName()) && Arrays.equals(types, method.getParameterTypes())
-						&& filter.test(method)) {
+				if (name.equals(method.getName()) && Arrays.equals(types, method.getParameterTypes()) && filter.test(
+						method)) {
 					method.setAccessible(true);
 					return method;
 				}

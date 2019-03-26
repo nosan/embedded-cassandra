@@ -85,8 +85,7 @@ class RemoteArtifact implements Artifact {
 	 * @param connectTimeout connect timeout for {@code connection}
 	 * @param readTimeout read timeout for {@code connection}
 	 */
-	RemoteArtifact(Version version, Path directory,
-			UrlFactory urlFactory, @Nullable Proxy proxy,
+	RemoteArtifact(Version version, Path directory, UrlFactory urlFactory, @Nullable Proxy proxy,
 			@Nullable Duration readTimeout, @Nullable Duration connectTimeout) {
 		this.version = version;
 		this.directory = directory;
@@ -108,13 +107,14 @@ class RemoteArtifact implements Artifact {
 
 		Files.createDirectories(directory);
 
-		IOException exceptions = new IOException(String.format("Could not download a resource from URLs %s. " +
-				"See suppressed exceptions for details", Arrays.toString(urls)));
+		IOException exceptions = new IOException(
+				String.format("Could not download a resource from URLs %s. See suppressed exceptions for details",
+						Arrays.toString(urls)));
 
 		for (URL url : urls) {
 			try {
-				Resource remoteResource = new RemoteResource(directory, version, url, proxy,
-						readTimeout, connectTimeout);
+				Resource remoteResource = new RemoteResource(directory, version, url, proxy, readTimeout,
+						connectTimeout);
 				Resource localResource = new LocalResource(directory, remoteResource);
 				return localResource.getFile();
 			}
@@ -228,8 +228,7 @@ class RemoteArtifact implements Artifact {
 		@Nullable
 		private final Duration connectTimeout;
 
-		RemoteResource(Path directory, Version version, URL url, @Nullable Proxy proxy,
-				@Nullable Duration readTimeout,
+		RemoteResource(Path directory, Version version, URL url, @Nullable Proxy proxy, @Nullable Duration readTimeout,
 				@Nullable Duration connectTimeout) {
 			this.directory = directory;
 			this.version = version;
@@ -247,8 +246,8 @@ class RemoteArtifact implements Artifact {
 
 			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
 
-			Path file = this.directory.resolve(String.format("download-%s-%s",
-					UUID.randomUUID(), getFileName(this.url)));
+			Path file = this.directory.resolve(
+					String.format("download-%s-%s", UUID.randomUUID(), getFileName(this.url)));
 			file.toFile().deleteOnExit();
 
 			try (InputStream urlInputStream = urlConnection.getInputStream()) {
@@ -333,8 +332,8 @@ class RemoteArtifact implements Artifact {
 					if (redirectCount <= maxRedirects) {
 						String location = httpConnection.getHeaderField("Location");
 						if (StringUtils.hasText(location)) {
-							return getUrlConnection(new URL(httpConnection.getURL(), location),
-									maxRedirects, redirectCount + 1);
+							return getUrlConnection(new URL(httpConnection.getURL(), location), maxRedirects,
+									redirectCount + 1);
 						}
 					}
 					else {

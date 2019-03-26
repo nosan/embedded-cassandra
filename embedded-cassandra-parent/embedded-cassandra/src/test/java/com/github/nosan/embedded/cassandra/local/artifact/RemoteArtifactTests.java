@@ -136,8 +136,8 @@ class RemoteArtifactTests {
 	@Test
 	void shouldDownloadArtifactMaxRedirection(HttpServer httpServer) {
 		httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
-			exchange.getResponseHeaders()
-					.put("Location", Collections.singletonList("/dist/apache-cassandra-3.1.1.zip"));
+			exchange.getResponseHeaders().put("Location",
+					Collections.singletonList("/dist/apache-cassandra-3.1.1.zip"));
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
 			exchange.close();
 		});
@@ -157,10 +157,9 @@ class RemoteArtifactTests {
 			exchange.close();
 		});
 		UrlFactory delegate = this.factory.getUrlFactory();
-		this.factory.setUrlFactory(
-				version -> Stream
-						.concat(Stream.of(new URL(String.format("http:/%s/cassandra.zip", httpServer.getAddress()))),
-								Arrays.stream((delegate).create(version))).toArray(URL[]::new));
+		this.factory.setUrlFactory(version -> Stream
+				.concat(Stream.of(new URL(String.format("http:/%s/cassandra.zip", httpServer.getAddress()))),
+						Arrays.stream((delegate).create(version))).toArray(URL[]::new));
 		Artifact artifact = this.factory.create(new Version(3, 1, 1));
 		Path archive = artifact.get();
 		assertThat(output.toString()).doesNotContain("Downloaded");
@@ -193,15 +192,14 @@ class RemoteArtifactTests {
 			exchange.sendResponseHeaders(400, 0);
 			exchange.close();
 		});
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
-				.hasStackTraceContaining("HTTP (400 Bad Request) status for URL");
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get()).hasStackTraceContaining(
+				"HTTP (400 Bad Request) status for URL");
 	}
 
 	@Test
 	void urlListEmpty() {
 		this.factory.setUrlFactory(version -> new URL[0]);
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
-				.isInstanceOf(IOException.class);
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get()).isInstanceOf(IOException.class);
 	}
 
 	@Test
@@ -209,8 +207,8 @@ class RemoteArtifactTests {
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(600));
 
 		this.factory.setReadTimeout(Duration.ofMillis(200));
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
-				.hasStackTraceContaining("Read timed out");
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get()).hasStackTraceContaining(
+				"Read timed out");
 	}
 
 	@Test
@@ -218,26 +216,25 @@ class RemoteArtifactTests {
 		this.factory.setUrlFactory(version -> new URL[]{new URL("http://example.com:81/apache-cassandra-3.1.1.zip")});
 		this.factory.setConnectTimeout(Duration.ofSeconds(1));
 
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
-				.hasStackTraceContaining("connect timed out");
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get()).hasStackTraceContaining(
+				"connect timed out");
 	}
 
 	@Test
 	void proxyIsInvalid() {
 		this.factory.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
-				.hasStackTraceContaining("Connection refused");
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get()).hasStackTraceContaining(
+				"Connection refused");
 
 	}
 
 	@Test
 	void impossibleDetermineFileName(HttpServer httpServer) {
 		httpServer.createContext("/", exchange -> exchange.sendResponseHeaders(200, 0));
-		this.factory.setUrlFactory(version -> new URL[]{new URL(String.format(
-				"http://%s:%d/", httpServer.getAddress().getHostName(), httpServer.getAddress().getPort()
-		))});
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
-				.hasStackTraceContaining("There is no way to determine");
+		this.factory.setUrlFactory(version -> new URL[]{new URL(String
+				.format("http://%s:%d/", httpServer.getAddress().getHostName(), httpServer.getAddress().getPort()))});
+		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get()).hasStackTraceContaining(
+				"There is no way to determine");
 
 	}
 

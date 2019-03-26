@@ -111,8 +111,7 @@ public abstract class CqlScriptParser {
 
 			if (!singleQuote && !doubleQuote && !doubleDollar) {
 				// single comment
-				if (script.startsWith(SINGLE_DASH_COMMENT, index)
-						|| script.startsWith(SINGLE_SLASH_COMMENT, index)) {
+				if (script.startsWith(SINGLE_DASH_COMMENT, index) || script.startsWith(SINGLE_SLASH_COMMENT, index)) {
 					if (script.indexOf(LINE_SEPARATOR, index) < 0) {
 						break;
 					}
@@ -122,8 +121,8 @@ public abstract class CqlScriptParser {
 				// block comment
 				else if (script.startsWith(BLOCK_START_COMMENT, index)) {
 					if (script.indexOf(BLOCK_END_COMMENT, index) < 0) {
-						throw new IllegalArgumentException(String.format("Missing block comment '%s'",
-								BLOCK_END_COMMENT));
+						throw new IllegalArgumentException(
+								String.format("Missing block comment '%s'", BLOCK_END_COMMENT));
 					}
 					index = script.indexOf(BLOCK_END_COMMENT, index) + 1;
 					continue;

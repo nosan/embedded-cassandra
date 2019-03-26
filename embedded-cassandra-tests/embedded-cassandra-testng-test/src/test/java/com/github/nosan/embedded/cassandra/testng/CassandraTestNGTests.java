@@ -36,8 +36,7 @@ public class CassandraTestNGTests extends CassandraTestNG {
 
 	@Test
 	public void selectRoles() {
-		assertThat(executeStatement("SELECT * FROM  test.roles").all())
-				.isEmpty();
+		assertThat(executeStatement("SELECT * FROM  test.roles").all()).isEmpty();
 	}
 
 }

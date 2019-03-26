@@ -136,6 +136,7 @@ public @interface Cql {
 		 * <em>after</em> the corresponding test method.
 		 */
 		AFTER_TEST_METHOD
+
 	}
 
 }

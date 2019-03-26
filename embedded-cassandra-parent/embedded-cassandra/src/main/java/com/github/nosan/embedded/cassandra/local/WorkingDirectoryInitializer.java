@@ -92,8 +92,10 @@ class WorkingDirectoryInitializer implements Initializer {
 			throw ex;
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Artifact '%s' could not be extracted into the '%s'",
-					archiveFile, artifactDirectory), ex);
+			throw new IOException(
+					String.format("Artifact '%s' could not be extracted into the '%s'", archiveFile,
+							artifactDirectory),
+					ex);
 		}
 		requireSingleDirectory(artifactDirectory);
 		createFile(artifactDirectory.resolve(artifactName));
@@ -115,8 +117,9 @@ class WorkingDirectoryInitializer implements Initializer {
 			throw ex;
 		}
 		catch (IOException ex) {
-			throw new IOException(String.format("Could not copy folder '%s' into the '%s'",
-					artifactDirectory, workingDirectory), ex);
+			throw new IOException(
+					String.format("Could not copy folder '%s' into the '%s'", artifactDirectory, workingDirectory),
+					ex);
 		}
 		if (log.isDebugEnabled()) {
 			log.debug("'{}' folder has been copied into the '{}'", artifactDirectory, workingDirectory);
@@ -157,9 +160,9 @@ class WorkingDirectoryInitializer implements Initializer {
 			}
 
 			if (directories.size() > 1) {
-				throw new IllegalStateException(
-						String.format("Impossible to determine the Apache Cassandra directory." +
-								" There are '%s' candidates : '%s'", directories.size(), directories));
+				throw new IllegalStateException(String.format(
+						"Impossible to determine the Apache Cassandra directory. There are '%s' candidates : '%s'",
+						directories.size(), directories));
 			}
 
 			return directories.iterator().next();

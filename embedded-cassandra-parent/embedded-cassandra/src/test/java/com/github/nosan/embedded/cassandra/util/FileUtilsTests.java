@@ -133,20 +133,19 @@ class FileUtilsTests {
 
 	@Test
 	void userDirectory() {
-		assertThat(FileUtils.getUserDirectory())
-				.isEqualTo(Paths.get(new SystemProperty("user.dir").getRequired()));
+		assertThat(FileUtils.getUserDirectory()).isEqualTo(Paths.get(new SystemProperty("user.dir").getRequired()));
 	}
 
 	@Test
 	void userHomeDirectory() {
-		assertThat(FileUtils.getUserHomeDirectory())
-				.isEqualTo(Paths.get(new SystemProperty("user.home").getRequired()));
+		assertThat(FileUtils.getUserHomeDirectory()).isEqualTo(
+				Paths.get(new SystemProperty("user.home").getRequired()));
 	}
 
 	@Test
 	void tmpDirectory() {
-		assertThat(FileUtils.getTmpDirectory())
-				.isEqualTo(Paths.get(new SystemProperty("java.io.tmpdir").getRequired()));
+		assertThat(FileUtils.getTmpDirectory()).isEqualTo(
+				Paths.get(new SystemProperty("java.io.tmpdir").getRequired()));
 	}
 
 	private Path newFolder(String name) throws IOException {

@@ -125,8 +125,8 @@ public class CassandraTestNG extends TestCassandra {
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public CassandraTestNG(@Nullable CassandraFactory cassandraFactory,
-			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
+	public CassandraTestNG(@Nullable CassandraFactory cassandraFactory, @Nullable ClusterFactory clusterFactory,
+			@Nullable CqlScript... scripts) {
 		super(cassandraFactory, clusterFactory, scripts);
 	}
 

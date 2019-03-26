@@ -36,8 +36,7 @@ public final class CaptureOutputExtension implements BeforeEachCallback, AfterEa
 
 	@Override
 	public void beforeEach(ExtensionContext context) {
-		context.getStore(NAMESPACE).put(CaptureOutput.class,
-				CaptureOutput.capture());
+		context.getStore(NAMESPACE).put(CaptureOutput.class, CaptureOutput.capture());
 	}
 
 	@Override

@@ -31,8 +31,7 @@ class VersionTests {
 	@Test
 	void shouldParseMajorMinorPatch() {
 		Version version = Version.parse("3.11.3");
-		assertThat(version)
-				.isEqualTo(new Version(3, 11, 3));
+		assertThat(version).isEqualTo(new Version(3, 11, 3));
 		assertThat(version).isEqualByComparingTo(new Version(3, 11, 3));
 		assertThat(version).isNotEqualByComparingTo(new Version(3, 11, 2));
 		assertThat(version.getMajor()).isEqualTo(3);
@@ -68,9 +67,8 @@ class VersionTests {
 
 	@Test
 	void shouldNotParse() {
-		assertThatThrownBy(() -> Version.parse("q"))
-				.hasStackTraceContaining("Expected format is ")
-				.isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> Version.parse("q")).hasStackTraceContaining("Expected format is ").isInstanceOf(
+				IllegalArgumentException.class);
 	}
 
 	@Test

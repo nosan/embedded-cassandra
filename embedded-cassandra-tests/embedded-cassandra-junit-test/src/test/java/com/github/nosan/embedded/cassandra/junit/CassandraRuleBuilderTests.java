@@ -47,12 +47,8 @@ public class CassandraRuleBuilderTests {
 		CqlScript script = () -> {
 			throw new UnsupportedOperationException();
 		};
-		CassandraRule cassandraRule = new CassandraRuleBuilder()
-				.addScripts(script)
-				.setRegisterShutdownHook(false)
-				.setClusterFactory(clusterFactory)
-				.setCassandraFactory(cassandraFactory)
-				.build();
+		CassandraRule cassandraRule = new CassandraRuleBuilder().addScripts(script).setRegisterShutdownHook(false)
+				.setClusterFactory(clusterFactory).setCassandraFactory(cassandraFactory).build();
 
 		assertThat(ReflectionUtils.getField(cassandraRule, "cassandraFactory")).isEqualTo(cassandraFactory);
 		assertThat(ReflectionUtils.getField(cassandraRule, "registerShutdownHook")).isEqualTo(false);

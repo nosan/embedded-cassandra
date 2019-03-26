@@ -72,10 +72,7 @@ public abstract class NetworkUtils {
 	public static Optional<InetAddress> getAddressByInterface(String interfaceName, boolean useIpv6) {
 		Objects.requireNonNull(interfaceName, "Interface name must not be null");
 		Predicate<InetAddress> condition = useIpv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
-		return getAddressesByInterface(interfaceName)
-				.stream()
-				.filter(condition)
-				.findFirst();
+		return getAddressesByInterface(interfaceName).stream().filter(condition).findFirst();
 	}
 
 	/**

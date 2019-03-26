@@ -122,12 +122,12 @@ class LocalCassandra implements Cassandra {
 	 * @param registerShutdownHook whether shutdown hook should be registered or not
 	 * @param deleteWorkingDirectory delete the working directory after success Cassandra stop
 	 */
-	LocalCassandra(Version version, ArtifactFactory artifactFactory,
-			Path workingDirectory, Path artifactDirectory,
-			Duration startupTimeout, @Nullable URL configurationFile,
-			@Nullable URL logbackFile, @Nullable URL rackFile, @Nullable URL topologyFile,
-			@Nullable URL commitLogArchivingFile, List<String> jvmOptions, @Nullable Path javaHome,
-			int jmxPort, boolean allowRoot, boolean registerShutdownHook, boolean deleteWorkingDirectory) {
+	LocalCassandra(Version version, ArtifactFactory artifactFactory, Path workingDirectory, Path artifactDirectory,
+			Duration startupTimeout, @Nullable URL configurationFile, @Nullable URL logbackFile,
+			@Nullable URL rackFile,
+			@Nullable URL topologyFile, @Nullable URL commitLogArchivingFile, List<String> jvmOptions,
+			@Nullable Path javaHome, int jmxPort, boolean allowRoot, boolean registerShutdownHook,
+			boolean deleteWorkingDirectory) {
 		this.artifactFactory = artifactFactory;
 		this.workingDirectory = workingDirectory;
 		this.artifactDirectory = artifactDirectory;

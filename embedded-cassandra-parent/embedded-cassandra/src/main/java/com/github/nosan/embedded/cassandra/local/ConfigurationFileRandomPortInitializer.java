@@ -47,8 +47,7 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 	}
 
 	@Override
-	protected void initialize(Path file, Path workingDirectory, Version version)
-			throws IOException {
+	protected void initialize(Path file, Path workingDirectory, Version version) throws IOException {
 		if (Files.exists(file)) {
 			Yaml yaml = new Yaml();
 			Map<Object, Object> originalSource = new LinkedHashMap<>(load(yaml, file));

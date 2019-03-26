@@ -36,8 +36,8 @@ class ClassPathGlobCqlScriptTests {
 
 	private static final String ROLE = "CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)";
 
-	private static final String KEYSPACE =
-			"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}";
+	private static final String KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = "
+			+ "{'class':'SimpleStrategy', 'replication_factor':1}";
 
 	static Stream<Arguments> patterns() {
 		List<Arguments> parameters = new ArrayList<>();

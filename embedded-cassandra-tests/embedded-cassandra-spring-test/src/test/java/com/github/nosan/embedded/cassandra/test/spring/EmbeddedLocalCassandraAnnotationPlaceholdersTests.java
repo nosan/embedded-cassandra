@@ -46,23 +46,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = ExcludeCassandraBeanDefinitionRegistryPostProcessor.class)
 @TestPropertySource("classpath:application.properties")
 @EmbeddedLocalCassandra(version = "${version}", configurationFile = "${configurationFile}",
-		logbackFile = "${logbackFile}",
-		rackFile = "${rackFile}",
-		workingDirectory = "${workingDirectory}",
-		artifactDirectory = "${artifactDirectory}",
-		javaHome = "${javaHome}",
-		jvmOptions = {"${jvmOptions}"},
-		topologyFile = "${topologyFile}",
-		commitLogArchivingFile = "${commitLogArchivingFile}",
-		startupTimeout = 240000,
-		jmxPort = 8000,
-		registerTestShutdownHook = false,
-		allowRoot = true,
-		registerShutdownHook = false,
-		deleteWorkingDirectory = true,
+		logbackFile = "${logbackFile}", rackFile = "${rackFile}", workingDirectory = "${workingDirectory}",
+		artifactDirectory = "${artifactDirectory}", javaHome = "${javaHome}", jvmOptions = {"${jvmOptions}"},
+		topologyFile = "${topologyFile}", commitLogArchivingFile = "${commitLogArchivingFile}",
+		startupTimeout = 240000, jmxPort = 8000, registerTestShutdownHook = false, allowRoot = true,
+		registerShutdownHook = false, deleteWorkingDirectory = true,
 		artifact = @EmbeddedLocalCassandra.Artifact(directory = "${artifactDirectory}", proxyHost = "${proxyHost}",
-				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000,
-				proxyType = Proxy.Type.SOCKS,
+				proxyPort = 8080, readTimeout = 15000, connectTimeout = 20000, proxyType = Proxy.Type.SOCKS,
 				urlFactory = DefaultUrlFactory.class))
 class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
 
@@ -90,8 +80,8 @@ class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(4));
 		assertThat(factory.getLogbackFile()).isEqualTo(getClass().getResource("/logback-test.xml"));
 		assertThat(factory.getTopologyFile()).isEqualTo(getClass().getResource("/topology.properties"));
-		assertThat(factory.getCommitLogArchivingFile())
-				.isEqualTo(getClass().getResource("/commit_log_archiving.properties"));
+		assertThat(factory.getCommitLogArchivingFile()).isEqualTo(
+				getClass().getResource("/commit_log_archiving.properties"));
 		assertThat(factory.getRackFile()).isEqualTo(getClass().getResource("/rack.properties"));
 		assertThat(factory.getConfigurationFile()).isEqualTo(getClass().getResource("/cassandra.yaml"));
 		assertThat(factory.getJvmOptions()).containsExactly("-Dtest.property=property");

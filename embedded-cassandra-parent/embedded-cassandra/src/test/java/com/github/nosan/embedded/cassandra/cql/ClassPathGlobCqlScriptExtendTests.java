@@ -36,8 +36,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class ClassPathGlobCqlScriptExtendTests {
 
-	private static final String KEYSPACE =
-			"CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}";
+	private static final String KEYSPACE = "CREATE KEYSPACE IF NOT EXISTS test WITH REPLICATION = "
+			+ "{'class':'SimpleStrategy', 'replication_factor':1}";
 
 	@Test
 	void findResourcesInJar() {
@@ -73,17 +73,16 @@ class ClassPathGlobCqlScriptExtendTests {
 	@Test
 	void assertHashCode() {
 		assertThat(new ClassPathGlobCqlScript("**.cql")).hasSameHashCodeAs(new ClassPathGlobCqlScript("**.cql"));
-		assertThat(new ClassPathGlobCqlScript("**.cql").hashCode())
-				.isNotEqualTo(new ClassPathGlobCqlScript("*.cql").hashCode());
+		assertThat(new ClassPathGlobCqlScript("**.cql").hashCode()).isNotEqualTo(
+				new ClassPathGlobCqlScript("*.cql").hashCode());
 	}
 
 	@Test
 	void assertEquals() {
-		assertThat(new ClassPathGlobCqlScript("**.cql"))
-				.isEqualTo(new ClassPathGlobCqlScript("**.cql"))
-				.isNotEqualTo(new ClassPathGlobCqlScript("**.cql", StandardCharsets.UTF_8))
-				.isNotEqualTo(new ClassPathGlobCqlScript("**.cql", new URLClassLoader(new URL[0])))
-				.isNotEqualTo(new ClassPathGlobCqlScript("*.cql"));
+		assertThat(new ClassPathGlobCqlScript("**.cql")).isEqualTo(new ClassPathGlobCqlScript("**.cql")).isNotEqualTo(
+				new ClassPathGlobCqlScript("**.cql", StandardCharsets.UTF_8)).isNotEqualTo(
+				new ClassPathGlobCqlScript("**.cql", new URLClassLoader(new URL[0]))).isNotEqualTo(
+				new ClassPathGlobCqlScript("*.cql"));
 	}
 
 	@Test

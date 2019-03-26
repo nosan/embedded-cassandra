@@ -50,8 +50,7 @@ class CassandraCityReactiveRepositoryTests {
 		city = this.cityReactiveRepository.save(city).block(Duration.ofSeconds(5));
 		assertThat(city).isNotNull();
 		assertThat(city.getId()).isNotNull();
-		assertThat(this.cassandraTemplate.exists(city.getId(), City.class)
-				.block(Duration.ofSeconds(5))).isTrue();
+		assertThat(this.cassandraTemplate.exists(city.getId(), City.class).block(Duration.ofSeconds(5))).isTrue();
 	}
 
 }

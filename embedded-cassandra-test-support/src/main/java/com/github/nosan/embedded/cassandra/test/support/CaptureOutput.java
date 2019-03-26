@@ -36,8 +36,7 @@ public final class CaptureOutput {
 
 	private final ByteArrayOutputStream output;
 
-	private CaptureOutput(TeeOutputStream systemOut,
-			TeeOutputStream systemErr, ByteArrayOutputStream output) {
+	private CaptureOutput(TeeOutputStream systemOut, TeeOutputStream systemErr, ByteArrayOutputStream output) {
 		this.systemOut = systemOut;
 		this.systemErr = systemErr;
 		this.output = output;

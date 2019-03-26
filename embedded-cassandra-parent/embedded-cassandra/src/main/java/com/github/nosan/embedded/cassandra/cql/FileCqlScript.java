@@ -78,8 +78,7 @@ public final class FileCqlScript extends AbstractCqlResourceScript {
 			return false;
 		}
 		FileCqlScript that = (FileCqlScript) other;
-		return Objects.equals(this.file, that.file)
-				&& Objects.equals(getEncoding(), that.getEncoding());
+		return Objects.equals(this.file, that.file) && Objects.equals(getEncoding(), that.getEncoding());
 	}
 
 	@Override

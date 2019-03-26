@@ -77,8 +77,7 @@ public final class UrlCqlScript extends AbstractCqlResourceScript {
 			return false;
 		}
 		UrlCqlScript that = (UrlCqlScript) other;
-		return Objects.equals(this.url, that.url)
-				&& Objects.equals(getEncoding(), that.getEncoding());
+		return Objects.equals(this.url, that.url) && Objects.equals(getEncoding(), that.getEncoding());
 	}
 
 	@Override

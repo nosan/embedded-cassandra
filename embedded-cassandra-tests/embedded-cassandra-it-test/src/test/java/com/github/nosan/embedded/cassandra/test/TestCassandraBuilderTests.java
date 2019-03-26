@@ -44,12 +44,8 @@ class TestCassandraBuilderTests {
 		CqlScript script = () -> {
 			throw new UnsupportedOperationException();
 		};
-		TestCassandra testCassandra = new TestCassandraBuilder()
-				.addScripts(script)
-				.setRegisterShutdownHook(false)
-				.setClusterFactory(clusterFactory)
-				.setCassandraFactory(cassandraFactory)
-				.build();
+		TestCassandra testCassandra = new TestCassandraBuilder().addScripts(script).setRegisterShutdownHook(false)
+				.setClusterFactory(clusterFactory).setCassandraFactory(cassandraFactory).build();
 
 		assertThat(ReflectionUtils.getField(testCassandra, "cassandraFactory")).isEqualTo(cassandraFactory);
 		assertThat(ReflectionUtils.getField(testCassandra, "registerShutdownHook")).isEqualTo(false);

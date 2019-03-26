@@ -112,6 +112,7 @@ public interface Cassandra {
 		 * The state of the {@code Cassandra} is unknown.
 		 */
 		UNKNOWN
+
 	}
 
 }

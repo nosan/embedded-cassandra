@@ -38,15 +38,13 @@ class CqlScriptParserTests {
 
 	@Test
 	void parseStatement() {
-		List<String> statements = CqlScriptParser
-				.parse("USE KEYSPACE '\"test\"'");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE '\"test\"'");
 		assertThat(statements).containsExactly("USE KEYSPACE '\"test\"'");
 	}
 
 	@Test
 	void parseStatements() {
-		List<String> statements = CqlScriptParser
-				.parse("USE KEYSPACE \n\t test; DROP KEYSPACE \n\n   test");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE \n\t test; DROP KEYSPACE \n\n   test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "DROP KEYSPACE test");
 	}
 
@@ -59,98 +57,86 @@ class CqlScriptParserTests {
 
 	@Test
 	void blockCommentNotClosed() {
-		assertThatThrownBy(() -> CqlScriptParser.parse("USE KEYSPACE test; /*DROP KEYSPACE test"))
-				.isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> CqlScriptParser.parse("USE KEYSPACE test; /*DROP KEYSPACE test")).isInstanceOf(
+				IllegalArgumentException.class);
 	}
 
 	@Test
 	void singleSlashCommentWithNewLine() {
-		List<String> statements = CqlScriptParser.parse(
-				"USE KEYSPACE test; //DROP KEYSPACE test\nUSE KEYSPACE test");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE test; //DROP KEYSPACE test\nUSE KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
 	@Test
 	void singleDashCommentWithNewLine() {
-		List<String> statements = CqlScriptParser.parse(
-				"USE KEYSPACE test; --DROP KEYSPACE test\nUSE KEYSPACE test");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE test; --DROP KEYSPACE test\nUSE KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "USE KEYSPACE test");
 	}
 
 	@Test
 	void singleDashComment() {
-		List<String> statements = CqlScriptParser
-				.parse("USE KEYSPACE test; --DROP KEYSPACE test");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE test; --DROP KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test");
 	}
 
 	@Test
 	void singleSlashComment() {
-		List<String> statements = CqlScriptParser
-				.parse("USE KEYSPACE test; //DROP KEYSPACE test");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE test; //DROP KEYSPACE test");
 		assertThat(statements).containsExactly("USE KEYSPACE test");
 	}
 
 	@Test
 	void ignoreCommentSingleQuotes() {
-		List<String> statements = CqlScriptParser
-				.parse("USE KEYSPACE test; DROP KEYSPACE '//test'");
-		assertThat(statements).containsExactly("USE KEYSPACE test",
-				"DROP KEYSPACE '//test'");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE test; DROP KEYSPACE '//test'");
+		assertThat(statements).containsExactly("USE KEYSPACE test", "DROP KEYSPACE '//test'");
 	}
 
 	@Test
 	void ignoreCommentDoubleQuotes() {
-		List<String> statements = CqlScriptParser
-				.parse("USE KEYSPACE test; DROP KEYSPACE \"//test\"");
-		assertThat(statements).containsExactly("USE KEYSPACE test",
-				"DROP KEYSPACE \"//test\"");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE test; DROP KEYSPACE \"//test\"");
+		assertThat(statements).containsExactly("USE KEYSPACE test", "DROP KEYSPACE \"//test\"");
 	}
 
 	@Test
 	void ignoreStatementQuotes() {
-		List<String> statements = CqlScriptParser
-				.parse("USE KEYSPACE 'test;' DROP KEYSPACE 'test'");
-		assertThat(statements)
-				.containsExactly("USE KEYSPACE 'test;' DROP KEYSPACE 'test'");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE 'test;' DROP KEYSPACE 'test'");
+		assertThat(statements).containsExactly("USE KEYSPACE 'test;' DROP KEYSPACE 'test'");
 	}
 
 	@Test
 	void ignoreStatementDoubleQuotes() {
-		List<String> statements = CqlScriptParser
-				.parse("USE KEYSPACE \"test;\" DROP KEYSPACE 'test'");
-		assertThat(statements)
-				.containsExactly("USE KEYSPACE \"test;\" DROP KEYSPACE 'test'");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE \"test;\" DROP KEYSPACE 'test'");
+		assertThat(statements).containsExactly("USE KEYSPACE \"test;\" DROP KEYSPACE 'test'");
 	}
 
 	@Test
 	void ignoreStatementDoubleDollars() {
-		List<String> statements = CqlScriptParser
-				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES " +
-						"  (201, '2015-02-18', '2015-02-22', $$Women's Tour of New Zealand; New England$$);");
-		assertThat(statements)
-				.containsExactly("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) " +
-						"VALUES (201, '2015-02-18', '2015-02-22', $$Women's Tour of New Zealand; New England$$)");
+		List<String> statements = CqlScriptParser.parse(
+				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES "
+						+ "  (201, '2015-02-18', '2015-02-22', $$Women's Tour of New Zealand; New England$$);");
+		assertThat(statements).containsExactly(
+				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) "
+						+ "VALUES (201, '2015-02-18', '2015-02-22', $$Women's Tour of New Zealand; New England$$)");
 	}
 
 	@Test
 	void ignoreDollarsInSingleQuote() {
-		List<String> statements = CqlScriptParser
-				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES " +
-						"  (201, '2015-02-18', '2015-02-22', '$$Womens Tour of New Zealand$$');");
-		assertThat(statements)
-				.containsExactly("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) " +
-						"VALUES (201, '2015-02-18', '2015-02-22', '$$Womens Tour of New Zealand$$')");
+		List<String> statements = CqlScriptParser.parse(
+				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES "
+						+ "  (201, '2015-02-18', '2015-02-22', '$$Womens Tour of New Zealand$$');");
+		assertThat(statements).containsExactly(
+				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) "
+						+ "VALUES (201, '2015-02-18', '2015-02-22', '$$Womens Tour of New Zealand$$')");
 	}
 
 	@Test
 	void ignoreDollarsInDoubleQuote() {
-		List<String> statements = CqlScriptParser
-				.parse("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES " +
-						"  (201, '2015-02-18', '2015-02-22', \"$$Womens Tour of New Zealand$$\");");
-		assertThat(statements)
-				.containsExactly("INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) " +
-						"VALUES (201, '2015-02-18', '2015-02-22', \"$$Womens Tour of New Zealand$$\")");
+		List<String> statements = CqlScriptParser.parse(
+				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) VALUES "
+						+ "  (201, '2015-02-18', '2015-02-22', \"$$Womens Tour of New Zealand$$\");");
+		assertThat(statements).containsExactly(
+				"INSERT INTO cycling.calendar (race_id, race_start_date, race_end_date, race_name) "
+						+ "VALUES (201, '2015-02-18', '2015-02-22', \"$$Womens Tour of New Zealand$$\")");
 	}
 
 	@Test

@@ -56,8 +56,8 @@ class SystemPropertyTests {
 	void shouldThrowException() {
 		String name = UUID.randomUUID().toString();
 		assertThatThrownBy(() -> new SystemProperty(name).getRequired()).isInstanceOf(NullPointerException.class)
-				.hasStackTraceContaining("Both System and Environment Properties " +
-						"are not present for a name '" + name + "'");
+				.hasStackTraceContaining(
+						"Both System and Environment Properties are not present for a name '" + name + "'");
 	}
 
 	@Test

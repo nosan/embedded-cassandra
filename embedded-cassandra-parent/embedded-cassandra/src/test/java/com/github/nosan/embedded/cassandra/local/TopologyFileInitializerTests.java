@@ -39,8 +39,8 @@ class TopologyFileInitializerTests {
 	void customize(@TempDir Path temporaryFolder) throws Exception {
 		Path directory = temporaryFolder.resolve("conf");
 		Files.createDirectories(directory);
-		TopologyFileInitializer initializer =
-				new TopologyFileInitializer(getClass().getResource("/cassandra-topology.properties"));
+		TopologyFileInitializer initializer = new TopologyFileInitializer(
+				getClass().getResource("/cassandra-topology.properties"));
 		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/cassandra-topology.properties")) {
 			assertThat(directory.resolve("cassandra-topology.properties")).hasBinaryContent(

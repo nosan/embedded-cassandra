@@ -80,8 +80,7 @@ class ConfigurationFileRandomPortInitializerTests {
 		initializer.initialize(directory.getParent(), version);
 
 		assertThat(configurationFile).exists();
-		assertThat(Files.getLastModifiedTime(configurationFile))
-				.isEqualTo(lastModifiedTime);
+		assertThat(Files.getLastModifiedTime(configurationFile)).isEqualTo(lastModifiedTime);
 
 		NodeSettings settings;
 		try (InputStream inputStream = Files.newInputStream(configurationFile)) {

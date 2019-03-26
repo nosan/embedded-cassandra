@@ -157,8 +157,8 @@ public class TestCassandra implements Cassandra {
 	 * @param clusterFactory factory to create a {@link Cluster}
 	 * @param scripts CQL scripts to execute
 	 */
-	public TestCassandra(@Nullable CassandraFactory cassandraFactory,
-			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
+	public TestCassandra(@Nullable CassandraFactory cassandraFactory, @Nullable ClusterFactory clusterFactory,
+			@Nullable CqlScript... scripts) {
 		this(true, cassandraFactory, clusterFactory, scripts);
 	}
 

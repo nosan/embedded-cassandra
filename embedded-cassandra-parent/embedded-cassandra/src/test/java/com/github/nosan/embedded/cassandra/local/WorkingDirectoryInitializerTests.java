@@ -66,12 +66,11 @@ class WorkingDirectoryInitializerTests {
 
 		ArchiveUtils.extract(plain, artifactDirectory);
 
-		WorkingDirectoryInitializer initializer =
-				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, root), artifactDirectory);
+		WorkingDirectoryInitializer initializer = new WorkingDirectoryInitializer(
+				new StaticArtifactFactory(version, root), artifactDirectory);
 
-		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version))
-				.hasStackTraceContaining("Impossible to determine the Apache Cassandra directory")
-				.isInstanceOf(IllegalStateException.class);
+		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version)).hasStackTraceContaining(
+				"Impossible to determine the Apache Cassandra directory").isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -81,9 +80,8 @@ class WorkingDirectoryInitializerTests {
 		Path artifactDirectory = this.artifactDirectory;
 		Version version = this.version;
 
-		WorkingDirectoryInitializer initializer =
-				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive),
-						artifactDirectory);
+		WorkingDirectoryInitializer initializer = new WorkingDirectoryInitializer(
+				new StaticArtifactFactory(version, archive), artifactDirectory);
 		initializer.initialize(workingDirectory, version);
 
 		assertThat(workingDirectory).exists();
@@ -100,8 +98,8 @@ class WorkingDirectoryInitializerTests {
 		Path artifactDirectory = this.artifactDirectory;
 		Version version = this.version;
 
-		WorkingDirectoryInitializer initializer =
-				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive), artifactDirectory);
+		WorkingDirectoryInitializer initializer = new WorkingDirectoryInitializer(
+				new StaticArtifactFactory(version, archive), artifactDirectory);
 
 		initializer.initialize(workingDirectory, version);
 
@@ -119,12 +117,11 @@ class WorkingDirectoryInitializerTests {
 		Path artifactDirectory = this.artifactDirectory;
 		Version version = this.version;
 
-		WorkingDirectoryInitializer initializer =
-				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive), artifactDirectory);
+		WorkingDirectoryInitializer initializer = new WorkingDirectoryInitializer(
+				new StaticArtifactFactory(version, archive), artifactDirectory);
 
-		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version))
-				.hasStackTraceContaining("does not have the Apache Cassandra files")
-				.isInstanceOf(IllegalStateException.class);
+		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version)).hasStackTraceContaining(
+				"does not have the Apache Cassandra files").isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -134,11 +131,11 @@ class WorkingDirectoryInitializerTests {
 		Path artifactDirectory = this.artifactDirectory;
 		Version version = this.version;
 
-		WorkingDirectoryInitializer initializer =
-				new WorkingDirectoryInitializer(new StaticArtifactFactory(version, archive), artifactDirectory);
+		WorkingDirectoryInitializer initializer = new WorkingDirectoryInitializer(
+				new StaticArtifactFactory(version, archive), artifactDirectory);
 
-		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version))
-				.isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version)).isInstanceOf(
+				IllegalArgumentException.class);
 	}
 
 	private static final class StaticArtifactFactory implements ArtifactFactory {

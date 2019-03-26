@@ -44,9 +44,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-@EmbeddedLocalCassandra(version = "2.2.12", scripts = "/init.cql", statements =
-		"CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY" +
-				"  KEY );", replace = EmbeddedCassandra.Replace.ANY, deleteWorkingDirectory = true)
+@EmbeddedLocalCassandra(version = "2.2.12", scripts = "/init.cql",
+		statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY  KEY );",
+		replace = EmbeddedCassandra.Replace.ANY, deleteWorkingDirectory = true)
 class EmbeddedLocalCassandraTests {
 
 	@Autowired

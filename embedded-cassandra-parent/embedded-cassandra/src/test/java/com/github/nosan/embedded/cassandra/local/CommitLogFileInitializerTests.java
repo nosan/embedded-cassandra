@@ -39,8 +39,8 @@ class CommitLogFileInitializerTests {
 	void customize(@TempDir Path temporaryFolder) throws Exception {
 		Path directory = temporaryFolder.resolve("conf");
 		Files.createDirectories(directory);
-		CommitLogFileInitializer initializer =
-				new CommitLogFileInitializer(getClass().getResource("/commitlog_archiving.properties"));
+		CommitLogFileInitializer initializer = new CommitLogFileInitializer(
+				getClass().getResource("/commitlog_archiving.properties"));
 		initializer.initialize(directory.getParent(), new Version(3, 11, 3));
 		try (InputStream inputStream = getClass().getResourceAsStream("/commitlog_archiving.properties")) {
 			assertThat(directory.resolve("commitlog_archiving.properties")).hasBinaryContent(

@@ -86,8 +86,7 @@ public abstract class FileUtils {
 		Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 
 			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-					throws IOException {
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				Files.deleteIfExists(file);
 				return FileVisitResult.CONTINUE;
 			}
@@ -143,8 +142,7 @@ public abstract class FileUtils {
 			}
 
 			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attributes)
-					throws IOException {
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
 				if (filter == null || filter.test(file)) {
 					Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
 				}

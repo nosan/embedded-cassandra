@@ -51,8 +51,8 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	 * @param jmxPort JMX port
 	 * @param allowRoot allow running as a root
 	 */
-	UnixCassandraNode(Path workingDirectory, Version version, Duration timeout,
-			List<String> jvmOptions, @Nullable Path javaHome, int jmxPort, boolean allowRoot) {
+	UnixCassandraNode(Path workingDirectory, Version version, Duration timeout, List<String> jvmOptions,
+			@Nullable Path javaHome, int jmxPort, boolean allowRoot) {
 		super(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
 		this.workingDirectory = workingDirectory;
 		this.version = version;
@@ -68,8 +68,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 		if (this.allowRoot && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
 			builder.command().add("-R");
 		}
-		Process process = new RunProcess(builder, threadFactory)
-				.run(consumer);
+		Process process = new RunProcess(builder, threadFactory).run(consumer);
 		return new ProcessId(process, ProcessUtils.getPid(process));
 	}
 
@@ -77,18 +76,18 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	protected boolean terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException {
 		if (pid != -1) {
-			return new RunProcess(builder.command("kill", Long.toString(pid)), threadFactory)
-					.run(consumer).waitFor() == 0;
+			return new RunProcess(builder.command("kill", Long.toString(pid)), threadFactory).run(consumer).waitFor()
+					== 0;
 		}
 		return false;
 	}
 
 	@Override
-	protected boolean kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
-			Consumer<String> consumer) throws IOException, InterruptedException {
+	protected boolean kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
+			throws IOException, InterruptedException {
 		if (pid != -1) {
-			return new RunProcess(builder.command("kill", "-SIGKILL", Long.toString(pid)), threadFactory)
-					.run(consumer).waitFor() == 0;
+			return new RunProcess(builder.command("kill", "-SIGKILL", Long.toString(pid)), threadFactory).run(consumer)
+					.waitFor() == 0;
 		}
 		return false;
 	}

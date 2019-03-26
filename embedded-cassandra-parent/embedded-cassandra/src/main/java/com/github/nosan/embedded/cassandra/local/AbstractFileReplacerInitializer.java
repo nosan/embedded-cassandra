@@ -51,8 +51,7 @@ abstract class AbstractFileReplacerInitializer extends AbstractFileInitializer {
 	}
 
 	@Override
-	protected void initialize(Path file, Path workingDirectory, Version version)
-			throws IOException {
+	protected void initialize(Path file, Path workingDirectory, Version version) throws IOException {
 		URL url = this.url;
 		if (url != null) {
 			if (this.log.isDebugEnabled()) {
