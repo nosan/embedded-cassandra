@@ -310,7 +310,7 @@ class RemoteArtifact implements Artifact {
 							log.error(String.format("Could not show progress for a file '%s'", file), ex);
 						}
 					}
-				}, 0, 100, TimeUnit.MILLISECONDS);
+				}, 0, 500, TimeUnit.MILLISECONDS);
 			}
 		}
 

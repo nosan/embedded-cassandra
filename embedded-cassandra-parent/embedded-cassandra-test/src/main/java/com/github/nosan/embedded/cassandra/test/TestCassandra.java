@@ -255,8 +255,7 @@ public class TestCassandra implements Cassandra {
 			synchronized (this.lock) {
 				cluster = this.cluster;
 				if (cluster == null) {
-					cluster = new RetryClusterFactory(5, this.clusterFactory)
-							.create(getSettings());
+					cluster = new RetryClusterFactory(5, this.clusterFactory).create(getSettings());
 					this.cluster = cluster;
 				}
 			}

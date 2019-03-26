@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 
 /**
@@ -28,6 +29,7 @@ class TestCassandra_V_3_11_X_Tests extends AbstractTestCassandraTests {
 	TestCassandra_V_3_11_X_Tests() {
 		super(new TestCassandra(new LocalCassandraFactoryBuilder()
 				.setDeleteWorkingDirectory(true)
+				.setVersion(new Version(3, 11, 4))
 				.setConfigurationFile(TestCassandra_V_3_11_X_Tests.class.getResource("/cassandra.yaml"))
 				.setJvmOptions("-Dcassandra.superuser_setup_delay_ms=1850")
 				.build()));
