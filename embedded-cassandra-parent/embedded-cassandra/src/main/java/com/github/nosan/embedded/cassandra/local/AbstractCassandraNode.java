@@ -539,7 +539,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final class LoggerConsumer implements Consumer<String> {
 
-		private static final Pattern LEVEL_REGEX = Pattern.compile(".*(ERROR|WARN|INFO|TRACE|DEBUG).*");
+		private static final String[] LEVELS = {"ERROR", "WARN", "INFO", "TRACE", "DEBUG"};
+
+		private static final Pattern LEVELS_REGEX = Pattern
+				.compile(String.format(".*(( %1$s)|(%1$s )|( %1$s )).*", String.join("|", LEVELS)));
 
 		private final Logger logger;
 
@@ -549,9 +552,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		@Override
 		public void accept(String line) {
-			Matcher matcher = LEVEL_REGEX.matcher(line);
+			Matcher matcher = LEVELS_REGEX.matcher(line);
 			if (matcher.matches()) {
-				switch (matcher.group(1)) {
+				switch (matcher.group(1).trim()) {
 					case "ERROR":
 						this.logger.error(line);
 						break;
