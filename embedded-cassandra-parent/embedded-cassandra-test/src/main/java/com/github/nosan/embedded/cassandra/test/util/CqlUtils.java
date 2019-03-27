@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
@@ -132,10 +133,12 @@ public abstract class CqlUtils {
 	public static long getRowCount(Session session, String tableName) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableName, "Table must not be null");
-		long[] count = new long[1];
+		long count = 0;
 		ResultSet resultSet = executeStatement(session, String.format("SELECT COUNT(*) as total FROM %s", tableName));
-		resultSet.forEach(row -> count[0] += row.getLong("total"));
-		return count[0];
+		for (Row row : resultSet) {
+			count += row.getLong("total");
+		}
+		return count;
 	}
 
 	/**
@@ -196,8 +199,9 @@ public abstract class CqlUtils {
 		List<String> tables = new ArrayList<>();
 		for (String keyspace : getNonSystemKeyspaces(session)) {
 			ResultSet resultSet = getTables(session, keyspace);
-			resultSet.forEach(row -> tables
-					.add(String.format("%s.%s", row.getString("keyspace_name"), row.getString("table_name"))));
+			for (Row row : resultSet) {
+				tables.add(String.format("%s.%s", row.getString("keyspace_name"), row.getString("table_name")));
+			}
 		}
 		Collections.reverse(tables);
 		return tables.toArray(new String[0]);
@@ -206,12 +210,12 @@ public abstract class CqlUtils {
 	private static String[] getNonSystemKeyspaces(Session session) {
 		List<String> keyspaces = new ArrayList<>();
 		ResultSet resultSet = getKeyspaces(session);
-		resultSet.forEach(row -> {
+		for (Row row : resultSet) {
 			String name = row.getString("keyspace_name");
 			if (!name.equals("system") && !name.startsWith("system_")) {
 				keyspaces.add(name);
 			}
-		});
+		}
 		Collections.reverse(keyspaces);
 		return keyspaces.toArray(new String[0]);
 	}
