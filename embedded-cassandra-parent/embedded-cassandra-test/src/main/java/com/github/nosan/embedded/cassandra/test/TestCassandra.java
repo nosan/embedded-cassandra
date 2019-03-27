@@ -44,9 +44,9 @@ import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and
- * {@link #stop() stopped}. {@link TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to
- * the underlying {@link Cassandra}.
+ * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and {@link #stop() stopped}. {@link
+ * TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the underlying {@link
+ * Cassandra}.
  * <p>
  * In addition to the basic functionality includes utility methods to test {@code Cassandra} code.
  *
@@ -245,7 +245,7 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Initializes a {@link Cluster}. This {@link Cluster} will be closed by this {@code Cassandra}.
+	 * Initializes a singleton {@link Cluster}. This {@link Cluster} will be closed by this {@code Cassandra}.
 	 *
 	 * @return an initialized cluster
 	 */
@@ -264,8 +264,8 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Initializes a {@link Session} using a {@link #getCluster() Cluster}. This {@link Session} will be closed by this
-	 * {@code Cassandra}.
+	 * Initializes a singleton {@link Session} using a {@link #getCluster() Cluster}. This {@link Session} will be
+	 * closed by this {@code Cassandra}.
 	 *
 	 * @return an initialized session
 	 */
@@ -398,10 +398,10 @@ public class TestCassandra implements Cassandra {
 	 * Executes the provided query using the provided values.
 	 *
 	 * @param statement the CQL query to execute.
-	 * @param args values required for the execution of {@code query}. See {@link
-	 * SimpleStatement#SimpleStatement(String, Object...)} for more details.
-	 * @return the result of the query. That result will never be null but can be empty (and will be
-	 * for any non SELECT query).
+	 * @param args values required for the execution of {@code query}.
+	 * See {@link SimpleStatement#SimpleStatement(String, Object...)} for more details.
+	 * @return the result of the query. That result will never be null but can be empty (and will be for any non SELECT
+	 * query).
 	 * @see CqlUtils#executeStatement(Session, String, Object...)
 	 * @since 1.0.6
 	 */
@@ -413,8 +413,8 @@ public class TestCassandra implements Cassandra {
 	 * Executes the provided statement.
 	 *
 	 * @param statement the CQL statement to execute
-	 * @return the result of the query. That result will never be null
-	 * but can be empty (and will be for any non SELECT query).
+	 * @return the result of the query. That result will never be null but can be empty (and will be for any non SELECT
+	 * query).
 	 * @see CqlUtils#executeStatement(Session, Statement)
 	 * @since 1.2.8
 	 */
