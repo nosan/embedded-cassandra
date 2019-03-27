@@ -53,8 +53,8 @@ public abstract class StringUtils {
 	 * Check whether the given {@code String} contains actual <em>text</em>.
 	 *
 	 * @param source the {@code String} to check (may be {@code null})
-	 * @return {@code true} if the {@code String} is not {@code null}, its
-	 * length is greater than 0, and it does not contain whitespace only
+	 * @return {@code true} if the {@code String} is not {@code null}, its length is greater than 0, and it does not
+	 * contain whitespace only
 	 */
 	public static boolean hasText(@Nullable CharSequence source) {
 		if (source == null) {

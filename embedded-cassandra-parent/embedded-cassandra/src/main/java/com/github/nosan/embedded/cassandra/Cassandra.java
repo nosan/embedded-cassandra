@@ -19,8 +19,7 @@ package com.github.nosan.embedded.cassandra;
 import org.apiguardian.api.API;
 
 /**
- * Simple interface that allows the {@code Cassandra} to be {@link #start() started} and {@link #stop()
- * stopped}.
+ * Simple interface that allows the {@code Cassandra} to be {@link #start() started} and {@link #stop() stopped}.
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
@@ -30,17 +29,16 @@ import org.apiguardian.api.API;
 public interface Cassandra {
 
 	/**
-	 * Starts the {@code Cassandra}. Calling this method on an already started {@code Cassandra} has no
-	 * effect. Causes the current thread to wait, until the {@code Cassandra} has
-	 * started.
+	 * Starts the {@code Cassandra}. Calling this method on an already started {@code Cassandra} has no effect. Causes
+	 * the current thread to wait, until the {@code Cassandra} has started.
 	 *
 	 * @throws CassandraException if the {@code Cassandra} cannot be started
 	 */
 	void start() throws CassandraException;
 
 	/**
-	 * Stops the {@code Cassandra}. Calling this method on an already stopped {@code Cassandra} has no
-	 * effect. Causes the current thread to wait, until the {@code Cassandra} has stopped.
+	 * Stops the {@code Cassandra}. Calling this method on an already stopped {@code Cassandra} has no effect. Causes
+	 * the current thread to wait, until the {@code Cassandra} has stopped.
 	 *
 	 * @throws CassandraException if the {@code Cassandra} cannot be stopped
 	 */

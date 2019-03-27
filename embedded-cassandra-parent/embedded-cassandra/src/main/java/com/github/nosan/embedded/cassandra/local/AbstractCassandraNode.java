@@ -147,9 +147,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		long rem = timeout;
 		do {
 			if (!process.isAlive()) {
+				int exitValue = process.exitValue();
 				throw new IOException(String.format("Cassandra Node '%s' is not alive. Exit code is '%s'. "
-								+ "Please see logs for more details.%n%s", processId.getPid().get(),
-						process.exitValue(), bufferedConsumer));
+								+ "Please see logs for more details.%n%s", processId.getPid().get(), exitValue,
+						bufferedConsumer));
 			}
 			long elapsed = System.nanoTime() - start;
 			if ((nodeReadiness.get() || TimeUnit.NANOSECONDS.toSeconds(elapsed) > 20) && transportReadiness.get()) {

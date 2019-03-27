@@ -76,8 +76,8 @@ public abstract class ArchiveUtils {
 	}
 
 	/**
-	 * Extracts the source archive file into the given destination directory.
-	 * The destination is expected to be a writable directory.
+	 * Extracts the source archive file into the given destination directory. The destination is expected to be a
+	 * writable directory.
 	 *
 	 * @param archiveFile the archive file to extract
 	 * @param destination the directory to which to extract the files
@@ -151,8 +151,8 @@ public abstract class ArchiveUtils {
 		}
 
 		/**
-		 * Reads the given archive file as an {@link ArchiveInputStream} which is used to access individual
-		 * {@link ArchiveEntry} objects within the archive without extracting the archive onto the file system.
+		 * Reads the given archive file as an {@link ArchiveInputStream} which is used to access individual {@link
+		 * ArchiveEntry} objects within the archive without extracting the archive onto the file system.
 		 *
 		 * @param inputStream the file to stream
 		 * @return a new archive stream for the given archive

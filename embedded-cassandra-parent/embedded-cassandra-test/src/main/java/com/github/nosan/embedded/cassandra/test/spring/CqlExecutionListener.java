@@ -31,13 +31,11 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.util.CqlScriptUtils;
 
 /**
- * {@code TestExecutionListener} that provides support for executing CQL
- * {@link Cql#scripts scripts} and {@link Cql#statements statements}
- * configured via the {@link Cql @Cql} annotation.
+ * {@code TestExecutionListener} that provides support for executing CQL {@link Cql#scripts scripts} and {@link
+ * Cql#statements statements} configured via the {@link Cql @Cql} annotation.
  * <p>Scripts and statements will be executed {@link #beforeTestMethod(TestContext) before}
- * or {@link #afterTestMethod(TestContext) after} execution of the corresponding
- * {@link java.lang.reflect.Method test method}, depending on the configured
- * value of the {@link Cql#executionPhase executionPhase} flag.
+ * or {@link #afterTestMethod(TestContext) after} execution of the corresponding {@link java.lang.reflect.Method test
+ * method}, depending on the configured value of the {@link Cql#executionPhase executionPhase} flag.
  *
  * @author Dmytro Nosan
  * @see Cql

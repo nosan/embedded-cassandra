@@ -36,8 +36,7 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 public interface Settings {
 
 	/**
-	 * The name of the cluster. This is mainly used to prevent machines in
-	 * one logical cluster from joining another.
+	 * The name of the cluster. This is mainly used to prevent machines in one logical cluster from joining another.
 	 *
 	 * @return The value of the {@code clusterName} attribute
 	 */
@@ -195,9 +194,9 @@ public interface Settings {
 	}
 
 	/**
-	 * If you choose to specify the interface by name and the interface has an IPv4 and an IPv6 address you can
-	 * specify which should be chosen using {@code listen_interface_prefer_ipv6}. If {@code false} the first IPv4
-	 * address will be used. If {@code true} the first IPv6 address will be used.
+	 * If you choose to specify the interface by name and the interface has an IPv4 and an IPv6 address you can specify
+	 * which should be chosen using {@code listen_interface_prefer_ipv6}. If {@code false} the first IPv4 address will
+	 * be used. If {@code true} the first IPv6 address will be used.
 	 *
 	 * @return The value of the {@code listenInterfacePreferIpv6} attribute
 	 * @since 1.1.0
@@ -207,9 +206,9 @@ public interface Settings {
 	}
 
 	/**
-	 * If you choose to specify the interface by name and the interface has an IPv4 and an IPv6 address you can
-	 * specify which should be chosen using {@code rpc_interface_prefer_ipv6}. If {@code false} the first IPv4 address
-	 * will be used. If {@code true} the first IPv6 address will be used.
+	 * If you choose to specify the interface by name and the interface has an IPv4 and an IPv6 address you can specify
+	 * which should be chosen using {@code rpc_interface_prefer_ipv6}. If {@code false} the first IPv4 address will be
+	 * used. If {@code true} the first IPv6 address will be used.
 	 *
 	 * @return The value of the {@code rpcInterfacePreferIpv6} attribute
 	 * @since 1.1.0

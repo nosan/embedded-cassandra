@@ -24,8 +24,7 @@ import org.apiguardian.api.API;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * Convenience base class for {@link CqlScript} implementations,
- * pre-implementing CQL script parsing.
+ * Convenience base class for {@link CqlScript} implementations, pre-implementing CQL script parsing.
  *
  * @author Dmytro Nosan
  * @since 1.0.0

@@ -322,8 +322,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Register a shutdown hook with the JVM runtime, stops this {@code cassandra} on JVM shutdown unless it has
-	 * already
+	 * Register a shutdown hook with the JVM runtime, stops this {@code cassandra} on JVM shutdown unless it has already
 	 * been stopped at that time.
 	 *
 	 * @return The value of the {@code registerShutdownHook} attribute
@@ -367,8 +366,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Directory to extract an {@link Artifact} (must be writable). Default value is {@link
-	 * FileUtils#getTmpDirectory() tmp.dir}{@code /embedded-cassandra/{version}/apache-cassandra-{version}}.
+	 * Directory to extract an {@link Artifact} (must be writable). Default value is {@link FileUtils#getTmpDirectory()
+	 * tmp.dir}{@code /embedded-cassandra/{version}/apache-cassandra-{version}}.
 	 *
 	 * @return The value of the {@code artifactDirectory} attribute
 	 * @since 1.3.0

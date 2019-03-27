@@ -37,14 +37,12 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 public abstract class PortUtils {
 
 	/**
-	 * The default minimum value for port ranges used when finding an available
-	 * socket port.
+	 * The default minimum value for port ranges used when finding an available socket port.
 	 */
 	private static final int MIN = 1024;
 
 	/**
-	 * The default maximum value for port ranges used when finding an available
-	 * socket port.
+	 * The default maximum value for port ranges used when finding an available socket port.
 	 */
 	private static final int MAX = 65535;
 

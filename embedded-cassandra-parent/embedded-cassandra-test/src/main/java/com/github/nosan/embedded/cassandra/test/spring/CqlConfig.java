@@ -19,8 +19,7 @@ package com.github.nosan.embedded.cassandra.test.spring;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * {@code CqlConfig} encapsulates the
- * attributes declared via {@link EmbeddedCassandra} or {@link Cql}.
+ * {@code CqlConfig} encapsulates the attributes declared via {@link EmbeddedCassandra} or {@link Cql}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0

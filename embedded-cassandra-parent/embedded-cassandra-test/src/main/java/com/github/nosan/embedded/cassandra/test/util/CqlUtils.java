@@ -146,8 +146,8 @@ public abstract class CqlUtils {
 	 *
 	 * @param session a session
 	 * @param statement the CQL query to execute
-	 * @return the result of the query. That result will never be null
-	 * but can be empty (and will be for any non SELECT query).
+	 * @return the result of the query. That result will never be null but can be empty (and will be for any non SELECT
+	 * query).
 	 */
 	public static ResultSet executeStatement(Session session, String statement) {
 		return executeStatement(session, statement, new Object[0]);
@@ -160,8 +160,8 @@ public abstract class CqlUtils {
 	 * @param statement the CQL query to execute.
 	 * @param args values required for the execution of {@code query}. See {@link
 	 * SimpleStatement#SimpleStatement(String, Object...)} for more details.
-	 * @return the result of the query. That result will never be null but
-	 * can be empty (and will be for any non SELECT query).
+	 * @return the result of the query. That result will never be null but can be empty (and will be for any non
+	 * SELECT query).
 	 */
 	public static ResultSet executeStatement(Session session, String statement, @Nullable Object... args) {
 		Objects.requireNonNull(session, "Session must not be null");
@@ -182,8 +182,8 @@ public abstract class CqlUtils {
 	 *
 	 * @param session a session
 	 * @param statement the CQL statement to execute
-	 * @return the result of the statement. That result will never be null
-	 * but can be empty (and will be for any non SELECT query).
+	 * @return the result of the statement. That result will never be null but can be empty (and will be for any non
+	 * SELECT query).
 	 * @since 1.2.8
 	 */
 	public static ResultSet executeStatement(Session session, Statement statement) {

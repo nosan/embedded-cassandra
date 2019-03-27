@@ -39,8 +39,7 @@ public abstract class MDCUtils {
 	private static final Logger log = LoggerFactory.getLogger(MDCUtils.class);
 
 	/**
-	 * Return a copy of the current thread's context map, with keys and values of
-	 * type String.
+	 * Return a copy of the current thread's context map, with keys and values of type String.
 	 *
 	 * @return A copy of the current thread's context map.
 	 */
@@ -58,9 +57,8 @@ public abstract class MDCUtils {
 	}
 
 	/**
-	 * Set the current thread's context map by first clearing any existing map and
-	 * then copying the map passed as parameter. The context map passed as
-	 * parameter must only contain keys and values of type String.
+	 * Set the current thread's context map by first clearing any existing map and then copying the map passed as
+	 * parameter. The context map passed as parameter must only contain keys and values of type String.
 	 *
 	 * @param context must contain only keys and values of type String
 	 */

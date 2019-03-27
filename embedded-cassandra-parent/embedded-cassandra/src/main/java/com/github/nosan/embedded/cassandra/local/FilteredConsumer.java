@@ -20,8 +20,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * {@link Consumer} implementation that filters the input before delegates it to the underlying {@link
- * Consumer}.
+ * {@link Consumer} implementation that filters the input before delegates it to the underlying {@link Consumer}.
  *
  * @param <T> the type
  * @author Dmytro Nosan

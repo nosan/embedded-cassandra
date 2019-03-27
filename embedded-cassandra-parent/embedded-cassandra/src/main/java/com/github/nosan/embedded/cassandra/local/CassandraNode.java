@@ -21,8 +21,7 @@ import java.io.IOException;
 import com.github.nosan.embedded.cassandra.Settings;
 
 /**
- * Simple interface that allows the Cassandra Node to be {@link #start() started} and {@link #stop()
- * stopped}.
+ * Simple interface that allows the Cassandra Node to be {@link #start() started} and {@link #stop() stopped}.
  *
  * @author Dmytro Nosan
  * @since 1.4.1

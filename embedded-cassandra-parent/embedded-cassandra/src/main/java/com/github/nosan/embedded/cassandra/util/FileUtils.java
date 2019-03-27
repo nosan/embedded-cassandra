@@ -68,12 +68,10 @@ public abstract class FileUtils {
 	}
 
 	/**
-	 * Delete the supplied {@link Path}. For directories,
-	 * recursively delete any nested directories or files as well.
+	 * Delete the supplied {@link Path}. For directories, recursively delete any nested directories or files as well.
 	 *
 	 * @param path the {@code Path} to delete
-	 * @return {@code true} if the {@code Path} existed and was deleted,
-	 * or {@code false} it it did not exist
+	 * @return {@code true} if the {@code Path} existed and was deleted, or {@code false} it it did not exist
 	 * @throws IOException in the case of I/O errors
 	 */
 	public static boolean delete(@Nullable Path path) throws IOException {
@@ -104,8 +102,7 @@ public abstract class FileUtils {
 	}
 
 	/**
-	 * Recursively copy the contents of the {@code src} file/directory
-	 * to the {@code dest} file/directory.
+	 * Recursively copy the contents of the {@code src} file/directory to the {@code dest} file/directory.
 	 *
 	 * @param src the source path
 	 * @param dest the destination path

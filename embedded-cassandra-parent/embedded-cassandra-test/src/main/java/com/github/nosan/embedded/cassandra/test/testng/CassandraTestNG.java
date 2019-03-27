@@ -30,8 +30,8 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * Base {@code test class} that allows the Cassandra to be {@link Cassandra#start() started} and
- * {@link Cassandra#stop() stopped}.
+ * Base {@code test class} that allows the Cassandra to be {@link Cassandra#start() started} and {@link Cassandra#stop()
+ * stopped}.
  * <p>
  * The typical usage is:
  * <pre>

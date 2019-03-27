@@ -57,19 +57,17 @@ public abstract class CqlScriptParser {
 	 * <p>Use the following notation to include comments in CQL code:
 	 * <ol>
 	 * <li>For a single line or end of line put a double hyphen before the text (<b>-- comment here</b>)</li>
-	 * <li>For a single line or end of line put a double forward slash before the text (<b>// comment here</b>)</li>
+	 * <li>For a single line or end of line put a double forward slash before the text (<b>// comment
+	 * here</b>)</li>
 	 * <li>For a block of comments put a forward slash asterisk at the beginning of the comment and then asterisk
 	 * forward slash at the end (<b>/&#42; comment here &#42;/ </b>).</li>
 	 * </ol>
-	 * <p>Column names that contain characters that CQL cannot parse need to be enclosed in double quotation (<b>"</b>)
-	 * marks in
-	 * CQL.
-	 * Dates, IP addresses, and strings need to be enclosed in single quotation (<b>'</b>) marks. To use a single
-	 * quotation mark
-	 * itself in a string literal, escape it using a single quotation mark. An alternative is to use dollar-quoted
-	 * (<b>$$</b>)
-	 * strings. Dollar-quoted string constants can be used to create functions, insert data, and select data when
-	 * complex quoting is needed. Use double dollar signs to enclose the desired string.
+	 * <p>Column names that contain characters that CQL cannot parse need to be enclosed in double quotation
+	 * (<b>"</b>) marks in CQL. Dates, IP addresses, and strings need to be enclosed in single quotation (<b>'</b>)
+	 * marks. To use a single quotation mark itself in a string literal, escape it using a single quotation mark. An
+	 * alternative is to use dollar-quoted (<b>$$</b>) strings. Dollar-quoted string constants can be used to create
+	 * functions, insert data, and select data when complex quoting is needed. Use double dollar signs to enclose the
+	 * desired string.
 	 *
 	 * @param script CQL script.
 	 * @return CQL statements

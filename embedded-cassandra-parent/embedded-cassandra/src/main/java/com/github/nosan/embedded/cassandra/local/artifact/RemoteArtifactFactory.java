@@ -54,8 +54,8 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	private Duration connectTimeout;
 
 	/**
-	 * The directory where a downloaded {@code archive} should be saved. Default directory is
-	 * {@link FileUtils#getTmpDirectory() user.home}{@code /Downloads}
+	 * The directory where a downloaded {@code archive} should be saved. Default directory is {@link
+	 * FileUtils#getTmpDirectory() user.home}{@code /Downloads}
 	 *
 	 * @return The value of the {@code directory} attribute
 	 */
@@ -132,8 +132,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	}
 
 	/**
-	 * Connection timeout to be used when opening a communications link to the resource referenced
-	 * by URLConnection.
+	 * Connection timeout to be used when opening a communications link to the resource referenced by URLConnection.
 	 *
 	 * @return The value of the {@code connectTimeout} attribute
 	 */

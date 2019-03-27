@@ -28,8 +28,8 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * {@link CqlScript} implementation for class path resources. Uses a
- * given {@link ClassLoader} or a given {@link Class} for loading resources.
+ * {@link CqlScript} implementation for class path resources. Uses a given {@link ClassLoader} or a given {@link Class}
+ * for loading resources.
  *
  * @author Dmytro Nosan
  * @see CqlScript#classpath(String...)

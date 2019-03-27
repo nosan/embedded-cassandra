@@ -29,9 +29,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
- * {@code @Cql} is used to annotate a test method to configure
- * CQL {@link #scripts} and {@link #statements} to be executed against a given
- * cluster during integration tests.
+ * {@code @Cql} is used to annotate a test method to configure CQL {@link #scripts} and {@link #statements} to be
+ * executed against a given cluster during integration tests.
  * <p>Script execution is performed by the {@link CqlExecutionListener},
  * which is enabled by default.
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
@@ -54,14 +53,11 @@ public @interface Cql {
 	 * The paths to the CQL scripts to execute.
 	 * <h3>Path Resource Semantics</h3>
 	 * <p>
-	 * Each path will be interpreted as a Spring
-	 * {@link Resource}. A plain path &mdash; for
-	 * example, {@code "schema.cql"} &mdash; will be treated as a classpath resource that
-	 * is <em>relative</em> to the package in which the test class is defined. A path
-	 * starting with a slash will be treated as an <em>absolute</em> classpath resource,
-	 * for example: {@code "/org/example/schema.cql"}. A path which references a URL
-	 * (e.g., a path prefixed with
-	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
+	 * Each path will be interpreted as a Spring {@link Resource}. A plain path &mdash; for example, {@code
+	 * "schema.cql"} &mdash; will be treated as a classpath resource that is <em>relative</em> to the package in which
+	 * the test class is defined. A path starting with a slash will be treated as an <em>absolute</em> classpath
+	 * resource, for example: {@code "/org/example/schema.cql"}. A path which references a URL (e.g., a path prefixed
+	 * with {@code http:}, etc.) will be loaded using the specified resource protocol.
 	 * <p>All resources will be loaded by {@link ResourcePatternResolver}.
 	 * Resources which were loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
 	 * Resource.getURL().toString()}.
@@ -84,8 +80,7 @@ public @interface Cql {
 	String[] statements() default {};
 
 	/**
-	 * The encoding for the supplied CQL scripts, if different from the platform
-	 * encoding.
+	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
 	 * <p>An empty string denotes that the platform encoding should be used.
 	 *
 	 * @return CQL scripts encoding.
@@ -101,11 +96,10 @@ public @interface Cql {
 	ExecutionPhase executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
 
 	/**
-	 * The bean name of the {@link com.datastax.driver.core.Cluster} against which the
-	 * scripts should be executed.
+	 * The bean name of the {@link com.datastax.driver.core.Cluster} against which the scripts should be executed.
 	 * <p>The name is only required if there is more than one bean of type
-	 * {@code Cluster} in the test's {@code ApplicationContext}. If there
-	 * is only one such bean, it is not necessary to specify a bean name.
+	 * {@code Cluster} in the test's {@code ApplicationContext}. If there is only one such bean, it is not necessary to
+	 * specify a bean name.
 	 * <p>Defaults to an empty string, requiring that one of the following is
 	 * true:
 	 * <ol>

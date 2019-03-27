@@ -39,9 +39,9 @@ import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
- * Annotation that can be specified on a test class that runs {@link Cassandra} based tests. This annotation extends
- * {@link EmbeddedCassandra} annotation and allows to customize {@link RemoteArtifactFactory}
- * and {@link LocalCassandraFactory}.
+ * Annotation that can be specified on a test class that runs {@link Cassandra} based tests. This annotation
+ * extends {@link EmbeddedCassandra} annotation and allows to customize {@link RemoteArtifactFactory} and {@link
+ * LocalCassandraFactory}.
  * <p>
  * Customized {@link LocalCassandraFactory} will be registered as a <b>@Primary</b> bean with a name
  * <em>localCassandraFactory</em>.
@@ -59,7 +59,8 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * }
  * </pre>
  * <p>
- * <b>Note!</b> It is possible to define you own {@link ArtifactFactory} bean to control {@link LocalCassandraFactory}
+ * <b>Note!</b> It is possible to define you own {@link ArtifactFactory} bean to control {@link
+ * LocalCassandraFactory}
  * instance, also is still possible to define you own {@link ClusterFactory} bean to control {@link TestCassandra}
  * instance.
  *
@@ -90,8 +91,7 @@ public @interface EmbeddedLocalCassandra {
 	/**
 	 * Sets attribute for {@link LocalCassandraFactory#getConfigurationFile()}.
 	 * <p>
-	 * Path will be interpreted as a Spring
-	 * {@link Resource}.
+	 * Path will be interpreted as a Spring {@link Resource}.
 	 * <p>
 	 * This value can contain a {@code spring} placeholder.
 	 *
@@ -103,8 +103,7 @@ public @interface EmbeddedLocalCassandra {
 	/**
 	 * Sets attribute for {@link LocalCassandraFactory#getLogbackFile()}.
 	 * <p>
-	 * Path will be interpreted as a Spring
-	 * {@link Resource}.
+	 * Path will be interpreted as a Spring {@link Resource}.
 	 * <p>
 	 * This value can contain a {@code spring} placeholder.
 	 *
@@ -116,8 +115,7 @@ public @interface EmbeddedLocalCassandra {
 	/**
 	 * Sets attribute for {@link LocalCassandraFactory#getRackFile()}.
 	 * <p>
-	 * Path will be interpreted as a Spring
-	 * {@link Resource}.
+	 * Path will be interpreted as a Spring {@link Resource}.
 	 * <p>
 	 * This value can contain a {@code spring} placeholder.
 	 *
@@ -129,8 +127,7 @@ public @interface EmbeddedLocalCassandra {
 	/**
 	 * Sets attribute for {@link LocalCassandraFactory#getTopologyFile()}.
 	 * <p>
-	 * Path will be interpreted as a Spring
-	 * {@link Resource}.
+	 * Path will be interpreted as a Spring {@link Resource}.
 	 * <p>
 	 * This value can contain a {@code spring} placeholder.
 	 *
@@ -142,8 +139,7 @@ public @interface EmbeddedLocalCassandra {
 	/**
 	 * Sets attribute for {@link LocalCassandraFactory#getCommitLogArchivingFile()}.
 	 * <p>
-	 * Path will be interpreted as a Spring
-	 * {@link Resource}.
+	 * Path will be interpreted as a Spring {@link Resource}.
 	 * <p>
 	 * This value can contain a {@code spring} placeholder.
 	 *

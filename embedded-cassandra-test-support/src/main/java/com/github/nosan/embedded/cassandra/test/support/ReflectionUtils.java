@@ -35,8 +35,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Returns the value of the field on the specified object.
 	 *
-	 * @param target object from which the represented field's value is
-	 * to be extracted
+	 * @param target object from which the represented field's value is to be extracted
 	 * @param name field name
 	 * @return the value of the represented  field in object
 	 */
@@ -52,8 +51,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Returns the value of the method on the specified object.
 	 *
-	 * @param target object from which the represented method's value is
-	 * to be extracted
+	 * @param target object from which the represented method's value is to be extracted
 	 * @param name method name
 	 * @param types argument types
 	 * @param arguments method arguments
@@ -73,8 +71,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Returns the value of the static field on the specified class.
 	 *
-	 * @param target class from which the represented field's value is
-	 * to be extracted
+	 * @param target class from which the represented field's value is to be extracted
 	 * @param name field name
 	 * @return the value of the represented static field in class
 	 */
@@ -90,8 +87,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Returns the value of the static method on the specified class.
 	 *
-	 * @param target class from which the represented method's value is
-	 * to be extracted
+	 * @param target class from which the represented method's value is to be extracted
 	 * @param name method name
 	 * @param types argument types
 	 * @param arguments method arguments

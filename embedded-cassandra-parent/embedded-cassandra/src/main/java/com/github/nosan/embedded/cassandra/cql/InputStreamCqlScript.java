@@ -25,8 +25,8 @@ import org.apiguardian.api.API;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * {@link CqlScript} implementation for {@link InputStream}. Do not use this script, if you need to read from a
- * stream multiple times.
+ * {@link CqlScript} implementation for {@link InputStream}. Do not use this script, if you need to read from a stream
+ * multiple times.
  *
  * @author Dmytro Nosan
  * @since 1.0.0

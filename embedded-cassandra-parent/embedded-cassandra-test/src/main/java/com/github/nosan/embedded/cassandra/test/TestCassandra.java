@@ -42,9 +42,9 @@ import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and {@link #stop()
- * stopped}. {@link TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the
- * underlying {@link Cassandra}.
+ * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and {@link #stop() stopped}. {@link
+ * TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the underlying {@link
+ * Cassandra}.
  * <p>
  * In addition to the basic functionality includes utility methods to test {@code Cassandra} code.
  *
@@ -171,8 +171,7 @@ public class TestCassandra implements Cassandra {
 	public TestCassandra(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
 			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		this.cassandraFactory = (cassandraFactory != null) ? cassandraFactory : new LocalCassandraFactory();
-		this.scripts = Collections
-				.unmodifiableList(Arrays.asList((scripts != null) ? scripts : new CqlScript[0]));
+		this.scripts = Collections.unmodifiableList(Arrays.asList((scripts != null) ? scripts : new CqlScript[0]));
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
 		this.registerShutdownHook = registerShutdownHook;
 	}
@@ -187,8 +186,7 @@ public class TestCassandra implements Cassandra {
 						registerShutdownHook();
 					}
 					catch (Throwable ex) {
-						throw new CassandraException("Unable to register a shutdown hook for Test Cassandra",
-								ex);
+						throw new CassandraException("Unable to register a shutdown hook for Test Cassandra", ex);
 					}
 					try {
 						this.state = State.STARTING;
@@ -245,8 +243,8 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Initializes a singleton {@link Cluster} via {@link ClusterFactory}. This {@link Cluster} will be closed
-	 * by this {@code Cassandra}.
+	 * Initializes a singleton {@link Cluster} via {@link ClusterFactory}. This {@link Cluster} will be closed by this
+	 * {@code Cassandra}.
 	 *
 	 * @return a {@link Cluster} instance
 	 */
@@ -266,8 +264,8 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Initializes a singleton {@link Session} using a {@link #getCluster() Cluster}. This {@link Session }
-	 * will be closed by this {@code Cassandra}.
+	 * Initializes a singleton {@link Session} using a {@link #getCluster() Cluster}. This {@link Session } will be
+	 * closed by this {@code Cassandra}.
 	 *
 	 * @return a non-initialized {@link Session} on this {@link #getCluster() Cluster}.
 	 */
@@ -402,8 +400,8 @@ public class TestCassandra implements Cassandra {
 	 * @param statement the CQL query to execute.
 	 * @param args values required for the execution of {@code query}. See {@link
 	 * SimpleStatement#SimpleStatement(String, Object...)} for more details.
-	 * @return the result of the query. That result will never be null but can be empty (and will be for any
-	 * non SELECT query).
+	 * @return the result of the query. That result will never be null but can be empty (and will be for any non
+	 * SELECT query).
 	 * @see CqlUtils#executeStatement(Session, String, Object...)
 	 * @since 1.0.6
 	 */
@@ -415,8 +413,8 @@ public class TestCassandra implements Cassandra {
 	 * Executes the provided statement.
 	 *
 	 * @param statement the CQL statement to execute
-	 * @return the result of the query. That result will never be null but can be empty (and will be for any
-	 * non SELECT query).
+	 * @return the result of the query. That result will never be null but can be empty (and will be for any non SELECT
+	 * query).
 	 * @see CqlUtils#executeStatement(Session, Statement)
 	 * @since 1.2.8
 	 */

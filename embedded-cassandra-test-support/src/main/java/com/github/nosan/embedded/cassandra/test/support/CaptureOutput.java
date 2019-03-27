@@ -67,8 +67,7 @@ public final class CaptureOutput {
 	}
 
 	/**
-	 * Return all captured output to {@code System.out} and {@code System.err}
-	 * as a single string.
+	 * Return all captured output to {@code System.out} and {@code System.err} as a single string.
 	 */
 	@Override
 	public String toString() {

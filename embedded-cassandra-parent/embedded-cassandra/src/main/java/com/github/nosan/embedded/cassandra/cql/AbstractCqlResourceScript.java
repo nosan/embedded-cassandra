@@ -27,8 +27,7 @@ import org.apiguardian.api.API;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * Base class for {@link AbstractCqlScript} implementations,
- * pre-implementing {@link #getScript()} method.
+ * Base class for {@link AbstractCqlScript} implementations, pre-implementing {@link #getScript()} method.
  *
  * @author Dmytro Nosan
  * @since 1.0.0

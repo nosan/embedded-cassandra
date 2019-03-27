@@ -41,8 +41,7 @@ public abstract class ClassUtils {
 	 * <li>ClassLoader.getSystemClassLoader()</li>
 	 * </ol>
 	 *
-	 * @return the {@code ClassLoader} (only {@code null} if even the system
-	 * {@code ClassLoader}  isn't accessible)
+	 * @return the {@code ClassLoader} (only {@code null} if even the system {@code ClassLoader}  isn't accessible)
 	 * @see Thread#getContextClassLoader()
 	 * @see ClassLoader#getSystemClassLoader()
 	 */

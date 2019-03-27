@@ -39,8 +39,8 @@ public interface UrlFactory {
 	 *
 	 * @param version a version
 	 * @return URL candidates to use.
-	 * @throws MalformedURLException if no protocol is specified, or an unknown protocol is found, or {@code spec}
-	 * is {@code null}.
+	 * @throws MalformedURLException if no protocol is specified, or an unknown protocol is found, or {@code spec} is
+	 * {@code null}.
 	 */
 	URL[] create(Version version) throws MalformedURLException;
 
