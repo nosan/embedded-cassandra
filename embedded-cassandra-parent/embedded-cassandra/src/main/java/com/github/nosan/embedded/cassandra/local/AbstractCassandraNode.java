@@ -131,7 +131,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		NodeReadiness nodeReadiness = new NodeReadiness(consumer);
 		TransportReadiness transportReadiness = new TransportReadiness(settings);
 		BufferedConsumer bufferedConsumer = new BufferedConsumer(10);
-		consumer.add(LoggerFactory.getLogger(Cassandra.class)::info);
+		consumer.add(new LoggerConsumer(LoggerFactory.getLogger(Cassandra.class)));
 		consumer.add(bufferedConsumer);
 		consumer.add(nodeReadiness);
 		consumer.add(new RpcAddressConsumer(settings, consumer));
@@ -533,6 +533,46 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		@Override
 		public String toString() {
 			return this.lines.stream().collect(Collectors.joining(System.lineSeparator()));
+		}
+
+	}
+
+	private static final class LoggerConsumer implements Consumer<String> {
+
+		private static final Pattern LEVEL_REGEX = Pattern.compile(".*(ERROR|WARN|INFO|TRACE|DEBUG).*");
+
+		private final Logger logger;
+
+		LoggerConsumer(Logger logger) {
+			this.logger = logger;
+		}
+
+		@Override
+		public void accept(String line) {
+			Matcher matcher = LEVEL_REGEX.matcher(line);
+			if (matcher.matches()) {
+				switch (matcher.group(1)) {
+					case "ERROR":
+						this.logger.error(line);
+						break;
+					case "WARN":
+						this.logger.warn(line);
+						break;
+					case "INFO":
+						this.logger.info(line);
+						break;
+					case "DEBUG":
+						this.logger.debug(line);
+						break;
+					case "TRACE":
+						this.logger.trace(line);
+						break;
+				}
+			}
+			else {
+				this.logger.info(line);
+			}
+
 		}
 
 	}
