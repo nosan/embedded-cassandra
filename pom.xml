@@ -285,7 +285,7 @@
                         <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
                         <failIfNoTests>false</failIfNoTests>
                         <trimStackTrace>false</trimStackTrace>
-                        <argLine>-Xms256m -Xmx1024m</argLine>
+                        <argLine>-Xms256m -Xmx512m</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
