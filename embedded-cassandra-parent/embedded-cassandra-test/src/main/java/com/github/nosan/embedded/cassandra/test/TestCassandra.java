@@ -27,8 +27,6 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.exceptions.AuthenticationException;
-import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +42,9 @@ import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and {@link #stop() stopped}. {@link
- * TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the underlying {@link
- * Cassandra}.
+ * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and {@link #stop()
+ * stopped}. {@link TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the
+ * underlying {@link Cassandra}.
  * <p>
  * In addition to the basic functionality includes utility methods to test {@code Cassandra} code.
  *
@@ -173,7 +171,8 @@ public class TestCassandra implements Cassandra {
 	public TestCassandra(boolean registerShutdownHook, @Nullable CassandraFactory cassandraFactory,
 			@Nullable ClusterFactory clusterFactory, @Nullable CqlScript... scripts) {
 		this.cassandraFactory = (cassandraFactory != null) ? cassandraFactory : new LocalCassandraFactory();
-		this.scripts = Collections.unmodifiableList(Arrays.asList((scripts != null) ? scripts : new CqlScript[0]));
+		this.scripts = Collections
+				.unmodifiableList(Arrays.asList((scripts != null) ? scripts : new CqlScript[0]));
 		this.clusterFactory = (clusterFactory != null) ? clusterFactory : new DefaultClusterFactory();
 		this.registerShutdownHook = registerShutdownHook;
 	}
@@ -188,7 +187,8 @@ public class TestCassandra implements Cassandra {
 						registerShutdownHook();
 					}
 					catch (Throwable ex) {
-						throw new CassandraException("Unable to register a shutdown hook for Test Cassandra", ex);
+						throw new CassandraException("Unable to register a shutdown hook for Test Cassandra",
+								ex);
 					}
 					try {
 						this.state = State.STARTING;
@@ -245,9 +245,10 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Initializes a singleton {@link Cluster}. This {@link Cluster} will be closed by this {@code Cassandra}.
+	 * Initializes a singleton {@link Cluster} via {@link ClusterFactory}. This {@link Cluster} will be closed
+	 * by this {@code Cassandra}.
 	 *
-	 * @return an initialized cluster
+	 * @return a {@link Cluster} instance
 	 */
 	public Cluster getCluster() {
 		Cluster cluster = this.cluster;
@@ -255,7 +256,8 @@ public class TestCassandra implements Cassandra {
 			synchronized (this.lock) {
 				cluster = this.cluster;
 				if (cluster == null) {
-					cluster = new RetryClusterFactory(5, this.clusterFactory).create(getSettings());
+					cluster = this.clusterFactory.create(getSettings());
+					Objects.requireNonNull(cluster, "Cluster must not be null.");
 					this.cluster = cluster;
 				}
 			}
@@ -264,10 +266,10 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Initializes a singleton {@link Session} using a {@link #getCluster() Cluster}. This {@link Session} will be
-	 * closed by this {@code Cassandra}.
+	 * Initializes a singleton {@link Session} using a {@link #getCluster() Cluster}. This {@link Session }
+	 * will be closed by this {@code Cassandra}.
 	 *
-	 * @return an initialized session
+	 * @return a non-initialized {@link Session} on this {@link #getCluster() Cluster}.
 	 */
 	public Session getSession() {
 		Session session = this.session;
@@ -275,7 +277,7 @@ public class TestCassandra implements Cassandra {
 			synchronized (this.lock) {
 				session = this.session;
 				if (session == null) {
-					session = getCluster().connect();
+					session = getCluster().newSession();
 					this.session = session;
 				}
 			}
@@ -398,10 +400,10 @@ public class TestCassandra implements Cassandra {
 	 * Executes the provided query using the provided values.
 	 *
 	 * @param statement the CQL query to execute.
-	 * @param args values required for the execution of {@code query}.
-	 * See {@link SimpleStatement#SimpleStatement(String, Object...)} for more details.
-	 * @return the result of the query. That result will never be null but can be empty (and will be for any non SELECT
-	 * query).
+	 * @param args values required for the execution of {@code query}. See {@link
+	 * SimpleStatement#SimpleStatement(String, Object...)} for more details.
+	 * @return the result of the query. That result will never be null but can be empty (and will be for any
+	 * non SELECT query).
 	 * @see CqlUtils#executeStatement(Session, String, Object...)
 	 * @since 1.0.6
 	 */
@@ -413,8 +415,8 @@ public class TestCassandra implements Cassandra {
 	 * Executes the provided statement.
 	 *
 	 * @param statement the CQL statement to execute
-	 * @return the result of the query. That result will never be null but can be empty (and will be for any non SELECT
-	 * query).
+	 * @return the result of the query. That result will never be null but can be empty (and will be for any
+	 * non SELECT query).
 	 * @see CqlUtils#executeStatement(Session, Statement)
 	 * @since 1.2.8
 	 */
@@ -504,43 +506,6 @@ public class TestCassandra implements Cassandra {
 				log.error("Unable to stop Test Cassandra", ex);
 			}
 		}
-	}
-
-	private static final class RetryClusterFactory implements ClusterFactory {
-
-		private final int retry;
-
-		private final ClusterFactory clusterFactory;
-
-		RetryClusterFactory(int retry, ClusterFactory clusterFactory) {
-			this.retry = retry;
-			this.clusterFactory = clusterFactory;
-		}
-
-		@Override
-		public Cluster create(Settings settings) {
-			for (int i = 0; i < this.retry - 1; i++) {
-				try {
-					return getCluster(settings);
-				}
-				catch (NoHostAvailableException | AuthenticationException ex) {
-					try {
-						Thread.sleep(500);
-					}
-					catch (InterruptedException ie) {
-						Thread.currentThread().interrupt();
-					}
-				}
-			}
-			return getCluster(settings);
-		}
-
-		private Cluster getCluster(Settings settings) {
-			Cluster cluster = this.clusterFactory.create(settings);
-			Objects.requireNonNull(cluster, "Cluster must not be null");
-			return cluster.init();
-		}
-
 	}
 
 }
