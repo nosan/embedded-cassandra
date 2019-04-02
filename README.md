@@ -1,5 +1,5 @@
 # Embedded Cassandra [![Build Status OSX/Linux](https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?logo=travis&logoColor=white&style=flat)](https://travis-ci.org/nosan/embedded-cassandra) [![Build Status Windows](https://img.shields.io/appveyor/ci/nosan/embedded-cassandra/master.svg?logo=appveyor&logoColor=white&style=flat)](https://ci.appveyor.com/project/nosan/embedded-cassandra)
-`Embedded Cassandra` provides an easy way to run [Apache Cassandra](http://cassandra.apache.org/).
+`Embedded Cassandra` provides an easy way to run [Apache Cassandra](https://cassandra.apache.org/).
 
 You can find more information [here](https://github.com/nosan/embedded-cassandra/wiki).
 
@@ -21,4 +21,4 @@ $ ./mvnw clean install
 
 #### License
 
-This project uses [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+This project uses [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
