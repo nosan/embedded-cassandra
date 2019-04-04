@@ -37,7 +37,7 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class Version implements Comparable<Version> {
 
-	private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?(.*)$");
+	private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?[^/\\\\]*$");
 
 	private final String version;
 
