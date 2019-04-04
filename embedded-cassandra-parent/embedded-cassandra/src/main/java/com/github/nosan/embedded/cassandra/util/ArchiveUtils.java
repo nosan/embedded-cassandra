@@ -140,9 +140,9 @@ public abstract class ArchiveUtils {
 		 */
 		static ArchiveFactory create(String archiveFormat, @Nullable String compressionFormat) {
 			return stream -> {
-				CompressorStreamFactory cf = new CompressorStreamFactory();
 				ArchiveStreamFactory af = new ArchiveStreamFactory();
 				if (StringUtils.hasText(compressionFormat)) {
+					CompressorStreamFactory cf = new CompressorStreamFactory();
 					return af.createArchiveInputStream(archiveFormat,
 							cf.createCompressorInputStream(compressionFormat, stream));
 				}
@@ -156,12 +156,11 @@ public abstract class ArchiveUtils {
 		 *
 		 * @param inputStream the file to stream
 		 * @return a new archive stream for the given archive
-		 * @throws IOException IOException in the case of I/O errors
 		 * @throws CompressorException if the compressor name is not known or not available, or if there's an
 		 * IOException or MemoryLimitException thrown during initialization
 		 * @throws ArchiveException if the archive name is not known
 		 */
-		ArchiveInputStream create(InputStream inputStream) throws IOException, CompressorException, ArchiveException;
+		ArchiveInputStream create(InputStream inputStream) throws CompressorException, ArchiveException;
 
 	}
 
