@@ -154,6 +154,17 @@ public final class LocalCassandraFactoryBuilder {
 	}
 
 	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getVersion() version} attribute.
+	 *
+	 * @param version The value for version
+	 * @return {@code this} builder for use in a chained invocation
+	 * @since 1.4.3
+	 */
+	public LocalCassandraFactoryBuilder setVersion(@Nullable String version) {
+		return setVersion((version != null) ? Version.parse(version) : null);
+	}
+
+	/**
 	 * Initializes the value for the {@link LocalCassandraFactory#getArtifactFactory() artifactFactory} attribute.
 	 *
 	 * @param artifactFactory The value for artifactFactory

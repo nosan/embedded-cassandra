@@ -52,7 +52,7 @@ class LocalCassandraFactoryBuilderTests {
 
 		LocalCassandraFactory factory = new LocalCassandraFactoryBuilder().setJvmOptions(jvmOptions).addJvmOptions("3")
 				.setArtifactFactory(artifactFactory).setConfigurationFile(config).setLogbackFile(logback)
-				.setCommitLogArchivingFile(commitLogArchiving).setVersion(version).setRackFile(rack)
+				.setCommitLogArchivingFile(commitLogArchiving).setVersion("3.11.0").setRackFile(rack)
 				.setJavaHome(javaDirectory).setTopologyFile(topology).setWorkingDirectory(workingDirectory)
 				.setStartupTimeout(Duration.ofMinutes(1)).setJmxPort(jmxPort).setAllowRoot(true)
 				.setArtifactDirectory(artifactDirectory).setRegisterShutdownHook(false).setDeleteWorkingDirectory(true)
