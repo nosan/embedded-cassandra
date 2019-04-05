@@ -169,9 +169,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					if (!isKilling(pid)) {
 						process.destroyForcibly();
 					}
-				}
-				if (!isShutdown(Duration.ofSeconds(5), process)) {
-					process.destroyForcibly();
+					if (!isShutdown(Duration.ofSeconds(5), process)) {
+						process.destroyForcibly();
+					}
 				}
 			}
 			if (process.isAlive()) {
