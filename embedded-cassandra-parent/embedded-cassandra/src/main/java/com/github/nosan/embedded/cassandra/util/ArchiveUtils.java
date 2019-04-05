@@ -25,6 +25,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -213,6 +214,10 @@ public abstract class ArchiveUtils {
 		}
 
 		private static boolean isWindows() {
+			String os = new SystemProperty("os.name").get();
+			if (StringUtils.hasText(os)) {
+				return os.toLowerCase(Locale.ENGLISH).contains("windows");
+			}
 			return File.separatorChar == '\\';
 		}
 
