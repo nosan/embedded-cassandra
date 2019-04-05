@@ -18,7 +18,11 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
+import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
@@ -49,7 +53,10 @@ abstract class ProcessUtils {
 	 * @param process a {@link Process}
 	 * @return the pid (or {@code -1})
 	 */
-	static long getPid(Process process) {
+	static long getPid(@Nullable Process process) {
+		if (process == null) {
+			return -1;
+		}
 		try {
 			if (PID_METHOD != null) {
 				return Long.parseLong(String.valueOf(PID_METHOD.invoke(process)));
@@ -61,6 +68,27 @@ abstract class ProcessUtils {
 		catch (Throwable ex) {
 			return -1;
 		}
+	}
+
+	/**
+	 * Returns the pid from a file.
+	 *
+	 * @param pidFile a pid file.
+	 * @return the pid (or {@code -1})
+	 * @since 1.4.3
+	 */
+	static long getPid(@Nullable Path pidFile) {
+		if (pidFile != null && Files.exists(pidFile)) {
+			try {
+				String id = new String(Files.readAllBytes(pidFile), StandardCharsets.UTF_8)
+						.replaceAll("\\D", "");
+				return StringUtils.hasText(id) ? Long.parseLong(id) : -1;
+			}
+			catch (Throwable ex) {
+				return -1;
+			}
+		}
+		return -1;
 	}
 
 }

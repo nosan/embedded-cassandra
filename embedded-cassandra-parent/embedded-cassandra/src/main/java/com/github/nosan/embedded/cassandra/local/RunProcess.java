@@ -37,6 +37,8 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  */
 class RunProcess {
 
+	private static final EmptyConsumer EMPTY_CONSUMER = new EmptyConsumer();
+
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
 
 	private final ProcessBuilder processBuilder;
@@ -61,10 +63,23 @@ class RunProcess {
 	/**
 	 * Starts a new process.
 	 *
+	 * @return a new process
+	 * @throws IOException if an I/O error occurs
+	 * @see CompositeConsumer
+	 * @see EmptyConsumer
+	 */
+	Process run() throws IOException {
+		return run(EMPTY_CONSUMER);
+	}
+
+	/**
+	 * Starts a new process.
+	 *
 	 * @param consumer output consumer.
 	 * @return a new process
 	 * @throws IOException if an I/O error occurs
 	 * @see CompositeConsumer
+	 * @see EmptyConsumer
 	 */
 	Process run(Consumer<? super String> consumer) throws IOException {
 		ProcessBuilder builder = this.processBuilder;
@@ -79,7 +94,9 @@ class RunProcess {
 	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<? super String> consumer)
 			throws IOException {
 		Process process = builder.start();
-		threadFactory.newThread(() -> read(process, consumer)).start();
+		if (consumer != EMPTY_CONSUMER) {
+			threadFactory.newThread(() -> read(process, consumer)).start();
+		}
 		return process;
 	}
 
@@ -113,6 +130,15 @@ class RunProcess {
 		catch (IOException ex) {
 			return null;
 		}
+	}
+
+	private static final class EmptyConsumer implements Consumer<String> {
+
+		@Override
+		public void accept(String line) {
+
+		}
+
 	}
 
 }

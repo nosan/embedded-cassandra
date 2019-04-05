@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -150,33 +149,30 @@ class LocalCassandra implements Cassandra {
 		synchronized (this.lock) {
 			if (this.state != State.STARTED) {
 				try {
-					this.startThread = Thread.currentThread();
-					try {
-						registerShutdownHook();
-					}
-					catch (Throwable ex) {
-						throw new CassandraException("Unable to register a shutdown hook for Cassandra", ex);
-					}
-					try {
-						this.state = State.STARTING;
-						initialize();
-						start0();
-						this.state = State.STARTED;
-					}
-					catch (Throwable ex) {
-						stopSilently();
-						if (isInterruptedException(ex)) {
-							this.state = State.START_INTERRUPTED;
-							Thread.currentThread().interrupt();
-						}
-						else {
-							this.state = State.START_FAILED;
-						}
-						throw new CassandraException("Unable to start Cassandra", ex);
-					}
+					registerShutdownHook();
 				}
-				finally {
+				catch (Throwable ex) {
+					throw new CassandraException("Unable to register a shutdown hook for Cassandra", ex);
+				}
+				try {
+					this.startThread = Thread.currentThread();
+					this.state = State.STARTING;
+					initialize();
+					start0();
+					this.state = State.STARTED;
 					this.startThread = null;
+				}
+				catch (Throwable ex) {
+					this.startThread = null;
+					stopSilently();
+					if (isInterruptedException(ex)) {
+						this.state = State.START_INTERRUPTED;
+						Thread.currentThread().interrupt();
+					}
+					else {
+						this.state = State.START_FAILED;
+					}
+					throw new CassandraException("Unable to start Cassandra", ex);
 				}
 			}
 		}
@@ -289,7 +285,7 @@ class LocalCassandra implements Cassandra {
 			this.node = null;
 			if (this.deleteWorkingDirectory) {
 				Path workingDirectory = this.workingDirectory;
-				new RetryCloseable(5, () -> FileUtils.delete(workingDirectory)).close();
+				FileUtils.delete(workingDirectory);
 				log.info("The '{}' directory has been deleted.", workingDirectory);
 			}
 			long elapsed = System.currentTimeMillis() - start;
@@ -324,33 +320,6 @@ class LocalCassandra implements Cassandra {
 				log.error("Unable to stop Cassandra", ex);
 			}
 		}
-	}
-
-	private static final class RetryCloseable implements AutoCloseable {
-
-		private final int retry;
-
-		private final Closeable closeable;
-
-		RetryCloseable(int retry, Closeable closeable) {
-			this.retry = retry;
-			this.closeable = closeable;
-		}
-
-		@Override
-		public void close() throws IOException, InterruptedException {
-			for (int i = 0; i < this.retry - 1; i++) {
-				try {
-					this.closeable.close();
-					return;
-				}
-				catch (IOException ex) {
-					Thread.sleep(500);
-				}
-			}
-			this.closeable.close();
-		}
-
 	}
 
 }

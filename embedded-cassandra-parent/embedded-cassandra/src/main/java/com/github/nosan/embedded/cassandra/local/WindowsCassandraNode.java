@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -25,10 +24,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
@@ -77,50 +74,53 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		}
 		builder.command().add("-p");
 		builder.command().add(pidFile.toString());
-		CompositeConsumer<String> compositeConsumer = new CompositeConsumer<>();
-		PidFileSupplier pidFileSupplier = new PidFileSupplier(pidFile, compositeConsumer);
-		compositeConsumer.add(pidFileSupplier);
-		compositeConsumer.add(consumer);
-		Process process = new RunProcess(builder, threadFactory).run(compositeConsumer);
-		return new ProcessId(process, new PidSupplier(ProcessUtils.getPid(process), pidFileSupplier));
+		Process process = new RunProcess(builder, threadFactory).run(consumer);
+		return new ProcessId(process, pidFile);
 	}
 
 	@Override
-	protected boolean terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	protected int terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException {
-		return terminateByPidFile(builder, threadFactory, consumer) || terminateByPid(pid, builder, threadFactory,
-				consumer);
+		int exitCode = terminateByPidFile(builder, threadFactory, consumer);
+		if (exitCode != 0) {
+			return terminateByPid(pid, builder, threadFactory, consumer);
+		}
+		return exitCode;
 	}
 
 	@Override
-	protected boolean kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
+	protected int kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
 			throws IOException, InterruptedException {
-		return killByPidFile(builder, threadFactory, consumer) || killByPid(pid, builder, threadFactory, consumer);
+		int exitCode = killByPidFile(builder, threadFactory, consumer);
+		if (exitCode != 0) {
+			return killByPid(pid, builder, threadFactory, consumer);
+		}
+		return exitCode;
 	}
 
-	private boolean terminateByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
+	private int terminateByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
 			throws IOException, InterruptedException {
 		return killByPidFile(builder, threadFactory, consumer, false);
 	}
 
-	private boolean terminateByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	private int terminateByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException {
 		return killByPid(pid, builder, threadFactory, consumer, false);
 	}
 
-	private boolean killByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
+	private int killByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
 			throws IOException, InterruptedException {
 		return killByPid(pid, builder, threadFactory, consumer, true);
 
 	}
 
-	private boolean killByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
+	private int killByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
 			throws IOException, InterruptedException {
 		return killByPidFile(builder, threadFactory, consumer, true);
 
 	}
 
-	private boolean killByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer,
+	private int killByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer,
 			boolean force) throws IOException, InterruptedException {
 		Path pidFile = this.pidFile;
 		Path stopServerFile = this.workingDirectory.resolve("bin/stop-server.ps1");
@@ -132,12 +132,12 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			if (force) {
 				builder.command().add("-f");
 			}
-			return new RunProcess(builder, threadFactory).run(consumer).waitFor() == 0;
+			return new RunProcess(builder, threadFactory).run(consumer).waitFor();
 		}
-		return false;
+		return -1;
 	}
 
-	private boolean killByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer,
+	private int killByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer,
 			boolean force) throws IOException, InterruptedException {
 		if (pid != -1) {
 			builder.command("taskkill");
@@ -146,80 +146,9 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			}
 			builder.command().add("/pid");
 			builder.command().add(Long.toString(pid));
-			return new RunProcess(builder, threadFactory).run(consumer).waitFor() == 0;
+			return new RunProcess(builder, threadFactory).run(consumer).waitFor();
 		}
-		return false;
-	}
-
-	private static final class PidSupplier implements Supplier<Long> {
-
-		private final PidFileSupplier supplier;
-
-		private final long pid;
-
-		PidSupplier(long pid, PidFileSupplier supplier) {
-			this.pid = pid;
-			this.supplier = supplier;
-		}
-
-		@Override
-		public Long get() {
-			long pid = this.pid;
-			if (pid == -1) {
-				return this.supplier.get();
-			}
-			return pid;
-		}
-
-	}
-
-	private static final class PidFileSupplier implements Supplier<Long>, Consumer<String> {
-
-		private static final int DEFAULT_STARTUP_TIMEOUT = 20000;
-
-		private final Path pidFile;
-
-		private final CompositeConsumer<String> consumer;
-
-		private final long start;
-
-		private volatile long pid = -1;
-
-		PidFileSupplier(Path pidFile, CompositeConsumer<String> consumer) {
-			this.pidFile = pidFile;
-			this.consumer = consumer;
-			this.start = System.currentTimeMillis();
-		}
-
-		@Override
-		public void accept(String line) {
-			if (this.pid == -1) {
-				this.pid = getPid(this.pidFile);
-			}
-			long elapsed = System.currentTimeMillis() - this.start;
-			if (elapsed > DEFAULT_STARTUP_TIMEOUT || this.pid != -1) {
-				this.consumer.remove(this);
-			}
-		}
-
-		@Override
-		public Long get() {
-			return this.pid;
-		}
-
-		private static long getPid(Path pidFile) {
-			if (Files.exists(pidFile)) {
-				try {
-					String id = new String(Files.readAllBytes(pidFile), StandardCharsets.UTF_8).replaceAll("\\D", "");
-					return StringUtils.hasText(id) ? Long.parseLong(id) : -1;
-				}
-				catch (Throwable ex) {
-					return -1;
-				}
-			}
-			return -1;
-		}
-
+		return -1;
 	}
 
 }

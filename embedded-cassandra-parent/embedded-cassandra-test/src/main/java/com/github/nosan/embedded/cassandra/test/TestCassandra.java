@@ -181,31 +181,29 @@ public class TestCassandra implements Cassandra {
 		synchronized (this.lock) {
 			if (this.state != State.STARTED) {
 				try {
-					this.startThread = Thread.currentThread();
-					try {
-						registerShutdownHook();
-					}
-					catch (Throwable ex) {
-						throw new CassandraException("Unable to register a shutdown hook for Test Cassandra", ex);
-					}
-					try {
-						this.state = State.STARTING;
-						start0();
-						this.state = State.STARTED;
-					}
-					catch (InterruptedException ex) {
-						stopSilently();
-						this.state = State.START_INTERRUPTED;
-						Thread.currentThread().interrupt();
-					}
-					catch (Throwable ex) {
-						stopSilently();
-						this.state = State.START_FAILED;
-						throw new CassandraException("Unable to start Test Cassandra", ex);
-					}
+					registerShutdownHook();
 				}
-				finally {
+				catch (Throwable ex) {
+					throw new CassandraException("Unable to register a shutdown hook for Test Cassandra", ex);
+				}
+				try {
+					this.startThread = Thread.currentThread();
+					this.state = State.STARTING;
+					start0();
+					this.state = State.STARTED;
 					this.startThread = null;
+				}
+				catch (InterruptedException ex) {
+					this.startThread = null;
+					stopSilently();
+					this.state = State.START_INTERRUPTED;
+					Thread.currentThread().interrupt();
+				}
+				catch (Throwable ex) {
+					this.startThread = null;
+					stopSilently();
+					this.state = State.START_FAILED;
+					throw new CassandraException("Unable to start Test Cassandra", ex);
 				}
 			}
 		}

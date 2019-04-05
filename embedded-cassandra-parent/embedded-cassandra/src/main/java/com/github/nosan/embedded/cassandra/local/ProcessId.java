@@ -16,7 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.util.function.Supplier;
+import java.nio.file.Path;
+
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Util class that contains {@link Process} and pid.
@@ -27,29 +29,29 @@ class ProcessId {
 
 	private final Process process;
 
-	private final Supplier<Long> pid;
+	@Nullable
+	private final Path pidFile;
+
+	private long pid = -1;
 
 	/**
 	 * Creates {@link ProcessId}.
 	 *
 	 * @param process the process
-	 * @param pid the pid, or (-1)
-	 * @see ProcessUtils#getPid(Process)
 	 */
-	ProcessId(Process process, long pid) {
-		this(process, () -> pid);
+	ProcessId(Process process) {
+		this(process, null);
 	}
 
 	/**
 	 * Creates {@link ProcessId}.
 	 *
+	 * @param pidFile the pid file
 	 * @param process the process
-	 * @param pid the pid supplier
-	 * @see ProcessUtils#getPid(Process)
 	 */
-	ProcessId(Process process, Supplier<Long> pid) {
+	ProcessId(Process process, @Nullable Path pidFile) {
 		this.process = process;
-		this.pid = pid;
+		this.pidFile = pidFile;
 	}
 
 	/**
@@ -61,12 +63,23 @@ class ProcessId {
 		return this.process;
 	}
 
+	@Override
+	public String toString() {
+		return String.valueOf(getPid());
+	}
+
 	/**
-	 * Return the pid.
+	 * Return the pid of the process.
 	 *
 	 * @return the pid (or -1)
 	 */
-	Supplier<Long> getPid() {
+	long getPid() {
+		if (this.pid == -1) {
+			this.pid = ProcessUtils.getPid(this.process);
+		}
+		if (this.pid == -1) {
+			this.pid = ProcessUtils.getPid(this.pidFile);
+		}
 		return this.pid;
 	}
 

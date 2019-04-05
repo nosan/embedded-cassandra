@@ -17,6 +17,8 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
@@ -36,6 +38,12 @@ class ProcessUtilsTests {
 	void getPid() throws IOException {
 		Process process = new ProcessBuilder("echo", "Hello world").start();
 		assertThat(ProcessUtils.getPid(process)).isGreaterThan(0);
+	}
+
+	@Test
+	void getPidFromFile() throws URISyntaxException {
+		assertThat(ProcessUtils.getPid(Paths.get(getClass().getResource("/pid.file").toURI())))
+				.isEqualTo(5141);
 	}
 
 }

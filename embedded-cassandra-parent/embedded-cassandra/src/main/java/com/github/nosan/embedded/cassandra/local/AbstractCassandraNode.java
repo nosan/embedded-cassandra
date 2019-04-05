@@ -118,7 +118,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		ProcessBuilder processBuilder = new ProcessBuilder().directory(this.workingDirectory.toFile())
 				.redirectErrorStream(true);
 		Map<?, ?> properties = getProperties();
-		JvmParameters jvmParameters = getJvmOptions(properties);
+		JvmParameters jvmParameters = getJvmParameters(properties);
 		RuntimeNodeSettings settings = getSettings(properties, jvmParameters);
 
 		String javaHome = getJavaHome(this.javaHome);
@@ -128,10 +128,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		processBuilder.environment().put("JVM_EXTRA_OPTS", jvmParameters.toString());
 
 		CompositeConsumer<String> consumer = new CompositeConsumer<>();
-		NodeReadiness nodeReadiness = new NodeReadiness(consumer);
+		NodeReadiness nodeReadiness = new NodeReadiness();
 		TransportReadiness transportReadiness = new TransportReadiness(settings);
 		BufferedConsumer bufferedConsumer = new BufferedConsumer(10);
-		consumer.add(new LoggerConsumer(LoggerFactory.getLogger(Cassandra.class)));
+		consumer.add(LoggerFactory.getLogger(Cassandra.class)::info);
 		consumer.add(bufferedConsumer);
 		consumer.add(nodeReadiness);
 		consumer.add(new RpcAddressConsumer(settings, consumer));
@@ -140,34 +140,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		ProcessId processId = start(processBuilder, this.threadFactory,
 				new FilteredConsumer<>(consumer, new StackTraceFilter()));
 		this.processId = processId;
-		Process process = processId.getProcess();
-
-		long start = System.nanoTime();
-		long timeout = this.timeout.toNanos();
-		long rem = timeout;
-		do {
-			if (!process.isAlive()) {
-				int exitValue = process.exitValue();
-				throw new IOException(String.format("Cassandra Node '%s' is not alive. Exit code is '%s'. "
-								+ "Please see logs for more details.%n%s", processId.getPid().get(), exitValue,
-						bufferedConsumer));
-			}
-			long elapsed = System.nanoTime() - start;
-			if ((nodeReadiness.get() || TimeUnit.NANOSECONDS.toSeconds(elapsed) > 20) && transportReadiness.get()) {
-				this.log.info("Cassandra Node '{}' has been started", processId.getPid().get());
-				consumer.remove(bufferedConsumer);
-				consumer.remove(nodeReadiness);
-				return settings;
-			}
-
-			if (rem > 0) {
-				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
-			}
-			rem = timeout - (System.nanoTime() - start);
-		} while (rem > 0);
+		if (isStarted(this.timeout, processId, bufferedConsumer, transportReadiness, nodeReadiness)) {
+			consumer.remove(bufferedConsumer);
+			consumer.remove(nodeReadiness);
+			this.log.info("Cassandra Node '{}' has been started", processId.getPid());
+			return settings;
+		}
 		throw new IOException(
 				String.format("Cassandra Node '%s' has not been started, seems like (%d) milliseconds is not enough.",
-						processId.getPid().get(), this.timeout.toMillis()));
+						processId.getPid(), this.timeout.toMillis()));
 	}
 
 	@Override
@@ -175,23 +156,23 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		ProcessId processId = this.processId;
 		Process process = (processId != null) ? processId.getProcess() : null;
 		if (processId != null && process.isAlive()) {
-			Long pid = processId.getPid().get();
+			long pid = processId.getPid();
 			this.log.info("Stops Cassandra Node '{}'", pid);
-			if (!terminate(pid)) {
+			if (!isTerminating(pid)) {
 				process.destroy();
 			}
-			if (!process.waitFor(5, TimeUnit.SECONDS)) {
-				if (!terminate(pid)) {
+			if (!isShutdown(Duration.ofSeconds(5), process)) {
+				if (!isTerminating(pid)) {
 					process.destroy();
 				}
-			}
-			if (!process.waitFor(5, TimeUnit.SECONDS)) {
-				if (!kill(pid)) {
+				if (!isShutdown(Duration.ofSeconds(5), process)) {
+					if (!isKilling(pid)) {
+						process.destroyForcibly();
+					}
+				}
+				if (!isShutdown(Duration.ofSeconds(5), process)) {
 					process.destroyForcibly();
 				}
-			}
-			if (!process.waitFor(5, TimeUnit.SECONDS)) {
-				process.destroyForcibly();
 			}
 			if (process.isAlive()) {
 				throw new IOException(String.format("Casandra Node '%s' has not been stopped.", pid));
@@ -220,11 +201,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @param builder the almost configured builder (does not have a command)
 	 * @param threadFactory thread factory to create a process reader.
 	 * @param consumer the output consumer
-	 * @return {@code true} if termination signal has been sent, otherwise {@code false}
+	 * @return the exit value of the termination subprocess.
 	 * @throws IOException in the case of I/O errors
 	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	protected abstract boolean terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	protected abstract int terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException;
 
 	/**
@@ -234,23 +215,79 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @param builder the almost configured builder (does not have command)
 	 * @param threadFactory thread factory to create a process reader.
 	 * @param consumer the output consumer
-	 * @return {@code true} if kill signal has been sent, otherwise {@code false}
+	 * @return the exit value of the kill subprocess.
 	 * @throws IOException in the case of I/O errors
 	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	protected abstract boolean kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
+	protected abstract int kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
 			Consumer<String> consumer) throws IOException, InterruptedException;
 
-	@Nullable
-	private static String getJavaHome(@Nullable Path javaHome) {
-		return Optional.ofNullable(javaHome).map(Path::toString).orElseGet(new SystemProperty("java.home"));
+	private Map<?, ?> getProperties() throws IOException {
+		try (InputStream is = Files.newInputStream(this.workingDirectory.resolve("conf/cassandra.yaml"))) {
+			Yaml yaml = new Yaml();
+			Map properties = yaml.loadAs(is, Map.class);
+			return (properties != null) ? properties : Collections.emptyMap();
+		}
 	}
 
-	private boolean terminate(long pid) throws InterruptedException {
+	@Nullable
+	private String getJavaHome(@Nullable Path javaHome) {
+		return Optional.ofNullable(javaHome).map(Path::toString)
+				.orElseGet(new SystemProperty("java.home"));
+	}
+
+	private RuntimeNodeSettings getSettings(Map<?, ?> properties, JvmParameters jvmParameters) {
+		return new RuntimeNodeSettings(this.version, properties, jvmParameters);
+	}
+
+	private JvmParameters getJvmParameters(Map<?, ?> properties) {
+		return new JvmParameters(this.jvmOptions, this.jmxPort, new NodeSettings(this.version, properties));
+	}
+
+	private boolean isStarted(Duration timeout, ProcessId processId, BufferedConsumer bufferedConsumer,
+			TransportReadiness transportReadiness, NodeReadiness nodeReadiness) throws IOException,
+			InterruptedException {
+		Process process = processId.getProcess();
+		long start = System.nanoTime();
+		long rem = timeout.toNanos();
+		do {
+			long pid = processId.getPid();
+			if (!process.isAlive()) {
+				int exitValue = process.exitValue();
+				throw new IOException(String.format("Cassandra Node '%s' is not alive. Exit code is '%s'. "
+						+ "Please see logs for more details.%n%s", pid, exitValue, bufferedConsumer));
+			}
+			if (nodeReadiness.get() && transportReadiness.get()) {
+				return true;
+			}
+			if (rem > 0) {
+				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
+			}
+			rem = timeout.toNanos() - (System.nanoTime() - start);
+		} while (rem > 0);
+		return false;
+	}
+
+	private boolean isShutdown(Duration timeout, Process process) throws InterruptedException {
+		long start = System.nanoTime();
+		long rem = timeout.toNanos();
+		do {
+			if (!process.isAlive()) {
+				return true;
+			}
+			if (rem > 0) {
+				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 250));
+			}
+			rem = timeout.toNanos() - (System.nanoTime() - start);
+		} while (rem > 0);
+		return false;
+	}
+
+	private boolean isTerminating(long pid) throws InterruptedException {
 		try {
 			ProcessBuilder builder = new ProcessBuilder().directory(this.workingDirectory.toFile())
 					.redirectErrorStream(true);
-			return terminate(pid, builder, this.threadFactory, this.log::info);
+			return terminate(pid, builder, this.threadFactory, this.log::info) == 0;
 		}
 		catch (IOException ex) {
 			this.log.error(String.format("The terminated signal has not been sent to Cassandra Node '%s'.", pid), ex);
@@ -258,31 +295,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 	}
 
-	private boolean kill(long pid) throws InterruptedException {
+	private boolean isKilling(long pid) throws InterruptedException {
 		try {
 			ProcessBuilder builder = new ProcessBuilder().directory(this.workingDirectory.toFile())
 					.redirectErrorStream(true);
-			return kill(pid, builder, this.threadFactory, this.log::info);
+			return kill(pid, builder, this.threadFactory, this.log::info) == 0;
 		}
 		catch (IOException ex) {
 			this.log.error(String.format("The kill signal has not been sent to Cassandra Node '%s'.", pid), ex);
 			return false;
-		}
-	}
-
-	private RuntimeNodeSettings getSettings(@Nullable Map<?, ?> properties, JvmParameters jvmParameters) {
-		return new RuntimeNodeSettings(this.version, properties, jvmParameters);
-	}
-
-	private JvmParameters getJvmOptions(@Nullable Map<?, ?> properties) {
-		return new JvmParameters(this.jvmOptions, this.jmxPort, new NodeSettings(this.version, properties));
-	}
-
-	@Nullable
-	private Map<?, ?> getProperties() throws IOException {
-		try (InputStream is = Files.newInputStream(this.workingDirectory.resolve("conf/cassandra.yaml"))) {
-			Yaml yaml = new Yaml();
-			return yaml.loadAs(is, Map.class);
 		}
 	}
 
@@ -324,25 +345,25 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final class NodeReadiness implements Consumer<String>, Supplier<Boolean> {
 
-		private final CompositeConsumer<String> consumer;
-
 		private volatile boolean ready = false;
 
-		NodeReadiness(CompositeConsumer<String> consumer) {
-			this.consumer = consumer;
-		}
+		private long start = System.currentTimeMillis();
 
 		@Override
 		public void accept(String line) {
 			if (match(line)) {
 				this.ready = true;
-				this.consumer.remove(this);
 			}
 		}
 
 		@Override
 		public Boolean get() {
-			return this.ready;
+			boolean ready = this.ready;
+			if (!ready) {
+				long elapsed = System.currentTimeMillis() - this.start;
+				return TimeUnit.MILLISECONDS.toSeconds(elapsed) > 20;
+			}
+			return true;
 		}
 
 		private static boolean match(String line) {
@@ -534,49 +555,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		@Override
 		public String toString() {
 			return this.lines.stream().collect(Collectors.joining(System.lineSeparator()));
-		}
-
-	}
-
-	private static final class LoggerConsumer implements Consumer<String> {
-
-		private static final String[] LEVELS = {"ERROR", "WARN", "INFO", "TRACE", "DEBUG"};
-
-		private static final Pattern LEVELS_REGEX = Pattern
-				.compile(String.format(".*(( %1$s)|(%1$s )|( %1$s )).*", String.join("|", LEVELS)));
-
-		private final Logger logger;
-
-		LoggerConsumer(Logger logger) {
-			this.logger = logger;
-		}
-
-		@Override
-		public void accept(String line) {
-			Matcher matcher = LEVELS_REGEX.matcher(line);
-			if (matcher.matches()) {
-				switch (matcher.group(1).trim()) {
-					case "ERROR":
-						this.logger.error(line);
-						break;
-					case "WARN":
-						this.logger.warn(line);
-						break;
-					case "INFO":
-						this.logger.info(line);
-						break;
-					case "DEBUG":
-						this.logger.debug(line);
-						break;
-					case "TRACE":
-						this.logger.trace(line);
-						break;
-				}
-			}
-			else {
-				this.logger.info(line);
-			}
-
 		}
 
 	}
