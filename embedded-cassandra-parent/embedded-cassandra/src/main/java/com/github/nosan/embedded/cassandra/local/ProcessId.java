@@ -54,6 +54,11 @@ class ProcessId {
 		this.pidFile = pidFile;
 	}
 
+	@Override
+	public String toString() {
+		return String.valueOf(getPid());
+	}
+
 	/**
 	 * Return the process.
 	 *
@@ -61,11 +66,6 @@ class ProcessId {
 	 */
 	Process getProcess() {
 		return this.process;
-	}
-
-	@Override
-	public String toString() {
-		return String.valueOf(getPid());
 	}
 
 	/**
