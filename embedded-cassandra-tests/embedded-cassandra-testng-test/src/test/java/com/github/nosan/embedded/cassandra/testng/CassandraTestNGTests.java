@@ -19,6 +19,8 @@ package com.github.nosan.embedded.cassandra.testng;
 import org.testng.annotations.Test;
 
 import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 import com.github.nosan.embedded.cassandra.test.testng.CassandraTestNG;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,12 +33,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CassandraTestNGTests extends CassandraTestNG {
 
 	public CassandraTestNGTests() {
-		super(new ClassPathCqlScript("init.cql"));
+		super(getFactory(), new ClassPathCqlScript("init.cql"));
 	}
 
 	@Test
 	public void selectRoles() {
 		assertThat(executeStatement("SELECT * FROM  test.roles").all()).isEmpty();
+	}
+
+	private static LocalCassandraFactory getFactory() {
+		return new LocalCassandraFactoryBuilder().setDeleteWorkingDirectory(true).build();
 	}
 
 }

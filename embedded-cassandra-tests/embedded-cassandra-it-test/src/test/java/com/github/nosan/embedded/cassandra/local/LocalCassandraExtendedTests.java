@@ -40,6 +40,7 @@ class LocalCassandraExtendedTests {
 		Set<Thread> beforeHooks = getHooks();
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		factory.setRegisterShutdownHook(true);
+		factory.setDeleteWorkingDirectory(true);
 		Cassandra cassandra = factory.create();
 		new CassandraRunner(cassandra).run();
 		new CassandraRunner(cassandra).run();
@@ -53,6 +54,7 @@ class LocalCassandraExtendedTests {
 		Set<Thread> beforeHooks = getHooks();
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		factory.setRegisterShutdownHook(false);
+		factory.setDeleteWorkingDirectory(true);
 		Cassandra cassandra = factory.create();
 		new CassandraRunner(cassandra).run();
 		Set<Thread> afterHooks = getHooks();

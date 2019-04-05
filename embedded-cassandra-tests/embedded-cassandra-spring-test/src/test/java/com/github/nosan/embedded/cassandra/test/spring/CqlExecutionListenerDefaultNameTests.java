@@ -26,6 +26,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtension;
 import com.github.nosan.embedded.cassandra.test.util.CqlUtils;
 
@@ -44,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CqlExecutionListenerDefaultNameTests {
 
 	@RegisterExtension
-	static final CassandraExtension cassandra = new CassandraExtension();
+	static final CassandraExtension cassandra = new CassandraExtension(getFactory());
 
 	@Autowired
 	private Cluster cluster;
@@ -58,6 +60,10 @@ class CqlExecutionListenerDefaultNameTests {
 	@Test
 	void shouldNotHaveUser() {
 		assertThat(CqlUtils.getRowCount(this.cluster.connect(), "test.users")).isZero();
+	}
+
+	private static LocalCassandraFactory getFactory() {
+		return new LocalCassandraFactoryBuilder().setDeleteWorkingDirectory(true).build();
 	}
 
 	@Configuration

@@ -20,6 +20,8 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 import com.github.nosan.embedded.cassandra.test.junit.CassandraRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,11 +34,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CassandraRuleTests {
 
 	@ClassRule
-	public static final CassandraRule cassandra = new CassandraRule(CqlScript.classpath("init.cql"));
+	public static final CassandraRule cassandra = new CassandraRule(getFactory(), CqlScript.classpath("init.cql"));
 
 	@Test
 	public void selectRoles() {
 		assertThat(cassandra.executeStatement("SELECT * FROM  test.roles").all()).isEmpty();
+	}
+
+	private static LocalCassandraFactory getFactory() {
+		return new LocalCassandraFactoryBuilder().setDeleteWorkingDirectory(true).build();
 	}
 
 }

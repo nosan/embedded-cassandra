@@ -23,6 +23,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.CassandraRunner;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +39,7 @@ class TestCassandraExtendedTests {
 	@Test
 	void shouldRegisterShutdownHookOnlyOnce() throws ClassNotFoundException {
 		Set<Thread> beforeHooks = getHooks();
-		TestCassandra testCassandra = new TestCassandra(true);
+		TestCassandra testCassandra = new TestCassandra(true, getFactory());
 		new CassandraRunner(testCassandra).run();
 		new CassandraRunner(testCassandra).run();
 		Set<Thread> afterHooks = getHooks();
@@ -49,7 +51,7 @@ class TestCassandraExtendedTests {
 	@Test
 	void shouldNotRegisterShutdownHook() throws ClassNotFoundException {
 		Set<Thread> beforeHooks = getHooks();
-		TestCassandra testCassandra = new TestCassandra(false);
+		TestCassandra testCassandra = new TestCassandra(false, getFactory());
 		new CassandraRunner(testCassandra).run();
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
@@ -60,6 +62,10 @@ class TestCassandraExtendedTests {
 	private static Set<Thread> getHooks() throws ClassNotFoundException {
 		return new LinkedHashSet<>(((Map<Thread, Thread>) ReflectionUtils
 				.getStaticField(Class.forName("java.lang.ApplicationShutdownHooks"), "hooks")).keySet());
+	}
+
+	private static LocalCassandraFactory getFactory() {
+		return new LocalCassandraFactoryBuilder().setDeleteWorkingDirectory(true).build();
 	}
 
 }

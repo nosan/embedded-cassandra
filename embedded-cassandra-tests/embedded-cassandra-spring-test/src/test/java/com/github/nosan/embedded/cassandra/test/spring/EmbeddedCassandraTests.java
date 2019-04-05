@@ -70,6 +70,7 @@ class EmbeddedCassandraTests {
 		public LocalCassandraFactory localCassandraFactory() {
 			LocalCassandraFactory factory = new LocalCassandraFactory();
 			factory.setVersion(Version.parse("2.2.12"));
+			factory.setDeleteWorkingDirectory(true);
 			return factory;
 		}
 

@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 
 import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
+import com.github.nosan.embedded.cassandra.test.spring.EmbeddedLocalCassandra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @SpringBootTest
-@EmbeddedCassandra(scripts = "/setup.cql")
+@EmbeddedLocalCassandra(scripts = "/setup.cql", deleteWorkingDirectory = true)
 class CassandraCityRepositoryTests {
 
 	@Autowired

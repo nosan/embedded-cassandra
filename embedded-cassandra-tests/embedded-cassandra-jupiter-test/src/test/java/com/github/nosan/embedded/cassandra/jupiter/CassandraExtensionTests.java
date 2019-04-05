@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 import com.github.nosan.embedded.cassandra.test.jupiter.CassandraExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,11 +34,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CassandraExtensionTests {
 
 	@RegisterExtension
-	static final CassandraExtension cassandra = new CassandraExtension(CqlScript.classpath("init.cql"));
+	static final CassandraExtension cassandra = new CassandraExtension(getFactory(), CqlScript.classpath("init.cql"));
 
 	@Test
 	void selectRoles() {
 		assertThat(cassandra.executeStatement("SELECT * FROM  test.roles").all()).isEmpty();
+	}
+
+	private static LocalCassandraFactory getFactory() {
+		return new LocalCassandraFactoryBuilder().setDeleteWorkingDirectory(true).build();
 	}
 
 }

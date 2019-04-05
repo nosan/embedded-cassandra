@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = ExcludeCassandraBeanDefinitionRegistryPostProcessor.class)
-@EmbeddedCassandra
+@EmbeddedLocalCassandra(deleteWorkingDirectory = true)
 class EmbeddedCassandraConfigurationNoReplaceTests {
 
 	@Autowired

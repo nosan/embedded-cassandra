@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-@EmbeddedCassandra(scripts = "/init.cql", replace = EmbeddedCassandra.Replace.ANY)
+@EmbeddedLocalCassandra(scripts = "/init.cql", replace = EmbeddedCassandra.Replace.ANY, deleteWorkingDirectory = true)
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 class CqlExecutionListenerTests {
 
