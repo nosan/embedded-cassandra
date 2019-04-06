@@ -388,12 +388,12 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Delete the working directory after success {@code Cassandra} stop or not.
+	 * Delete the working directory after success {@code Cassandra} stop.
 	 *
 	 * @return The value of the {@code deleteWorkingDirectory} attribute
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public boolean isDeleteWorkingDirectory() {
 		return this.deleteWorkingDirectory;
 	}
@@ -404,7 +404,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	 * @param deleteWorkingDirectory The value for deleteWorkingDirectory
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public void setDeleteWorkingDirectory(boolean deleteWorkingDirectory) {
 		this.deleteWorkingDirectory = deleteWorkingDirectory;
 	}

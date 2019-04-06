@@ -65,7 +65,7 @@ public abstract class CqlUtils {
 	 * @param session a session
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public static void deleteFromAllNonSystemTables(Session session) {
 		Objects.requireNonNull(session, "Session must not be null");
 		deleteFromTables(session, getNonSystemTables(session));
@@ -91,7 +91,7 @@ public abstract class CqlUtils {
 	 * @param session a session
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public static void dropAllNonSystemTables(Session session) {
 		Objects.requireNonNull(session, "Session must not be null");
 		dropTables(session, getNonSystemTables(session));
@@ -117,7 +117,7 @@ public abstract class CqlUtils {
 	 * @param session a session
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public static void dropAllNonSystemKeyspaces(Session session) {
 		Objects.requireNonNull(session, "Session must not be null");
 		dropKeyspaces(session, getNonSystemKeyspaces(session));

@@ -282,28 +282,6 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Returns the underlying {@link Cassandra}.
-	 *
-	 * @return the underlying {@link Cassandra}.
-	 * @since 1.4.1
-	 */
-	@API(since = "1.4.1", status = API.Status.EXPERIMENTAL)
-	public Cassandra getCassandra() {
-		Cassandra cassandra = this.cassandra;
-		if (cassandra == null) {
-			synchronized (this.lock) {
-				cassandra = this.cassandra;
-				if (cassandra == null) {
-					cassandra = this.cassandraFactory.create();
-					Objects.requireNonNull(cassandra, "Cassandra is not initialized");
-					this.cassandra = cassandra;
-				}
-			}
-		}
-		return cassandra;
-	}
-
-	/**
 	 * Delete all rows from the specified tables.
 	 *
 	 * @param tableNames the names of the tables to delete from
@@ -320,7 +298,7 @@ public class TestCassandra implements Cassandra {
 	 * @see CqlUtils#deleteFromAllNonSystemTables(Session)
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public void deleteFromAllNonSystemTables() {
 		CqlUtils.deleteFromAllNonSystemTables(getSession());
 	}
@@ -342,7 +320,7 @@ public class TestCassandra implements Cassandra {
 	 * @see CqlUtils#dropAllNonSystemTables(Session)
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public void dropAllNonSystemTables() {
 		CqlUtils.dropAllNonSystemTables(getSession());
 	}
@@ -364,7 +342,7 @@ public class TestCassandra implements Cassandra {
 	 * @see CqlUtils#dropAllNonSystemKeyspaces(Session)
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public void dropAllNonSystemKeyspaces() {
 		CqlUtils.dropAllNonSystemKeyspaces(getSession());
 	}
@@ -423,6 +401,21 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public String toString() {
 		return String.format("Test Cassandra '%s'", getCassandra());
+	}
+
+	private Cassandra getCassandra() {
+		Cassandra cassandra = this.cassandra;
+		if (cassandra == null) {
+			synchronized (this.lock) {
+				cassandra = this.cassandra;
+				if (cassandra == null) {
+					cassandra = this.cassandraFactory.create();
+					Objects.requireNonNull(cassandra, "Cassandra is not initialized");
+					this.cassandra = cassandra;
+				}
+			}
+		}
+		return cassandra;
 	}
 
 	private void start0() throws InterruptedException {

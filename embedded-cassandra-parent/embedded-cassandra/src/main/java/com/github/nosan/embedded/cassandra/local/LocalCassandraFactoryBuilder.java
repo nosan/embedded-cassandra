@@ -481,7 +481,7 @@ public final class LocalCassandraFactoryBuilder {
 	 * @return {@code this} builder for use in a chained invocation
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public LocalCassandraFactoryBuilder setDeleteWorkingDirectory(boolean deleteWorkingDirectory) {
 		this.deleteWorkingDirectory = deleteWorkingDirectory;
 		return this;

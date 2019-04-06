@@ -216,7 +216,7 @@ public @interface EmbeddedLocalCassandra {
 	 * @return The value of the {@code deleteWorkingDirectory} attribute
 	 * @since 1.4.3
 	 */
-	@API(since = "1.4.3", status = API.Status.EXPERIMENTAL)
+	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	boolean deleteWorkingDirectory() default false;
 
 	/**
