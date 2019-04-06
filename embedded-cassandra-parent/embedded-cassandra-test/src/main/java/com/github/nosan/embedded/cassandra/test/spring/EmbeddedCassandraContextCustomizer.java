@@ -155,7 +155,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 		@Override
 		public TestCassandra getObject() {
-			return Objects.requireNonNull(this.cassandra, "Cassandra is not initialized");
+			return Objects.requireNonNull(this.cassandra, "Cassandra must not be null");
 		}
 
 		@Override
@@ -174,7 +174,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Override
 		public void afterPropertiesSet() {
 			ApplicationContext applicationContext = Objects
-					.requireNonNull(this.applicationContext, "Application Context is not initialized");
+					.requireNonNull(this.applicationContext, "Application Context must not be null");
 			EmbeddedCassandra annotation = this.annotation;
 			CqlConfig config = new CqlConfig(this.testClass, annotation.scripts(), annotation.statements(),
 					annotation.encoding());
@@ -211,7 +211,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 		@Override
 		public Cluster getObject() {
-			return Objects.requireNonNull(this.cluster, "Cluster is not initialized");
+			return Objects.requireNonNull(this.cluster, "Cluster must not be null");
 		}
 
 		@Override
@@ -227,7 +227,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Override
 		public void afterPropertiesSet() {
 			ApplicationContext applicationContext = Objects
-					.requireNonNull(this.applicationContext, "Application Context is not initialized");
+					.requireNonNull(this.applicationContext, "Application Context must not be null");
 			TestCassandra cassandra = applicationContext.getBean(EMBEDDED_CASSANDRA_BEAN_NAME, TestCassandra.class);
 			this.cluster = cassandra.getCluster();
 		}
@@ -262,7 +262,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 		@Override
 		public LocalCassandraFactory getObject() {
-			return Objects.requireNonNull(this.cassandraFactory, "Cassandra Factory is not initialized");
+			return Objects.requireNonNull(this.cassandraFactory, "Cassandra Factory must not be null");
 		}
 
 		@Override
@@ -278,7 +278,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Override
 		public void afterPropertiesSet() {
 			ApplicationContext applicationContext = Objects
-					.requireNonNull(this.applicationContext, "Application Context is not initialized");
+					.requireNonNull(this.applicationContext, "Application Context must not be null");
 			Environment environment = applicationContext.getEnvironment();
 			EmbeddedLocalCassandra annotation = this.annotation;
 			Class<?> testClass = this.testClass;

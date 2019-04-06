@@ -410,7 +410,7 @@ public class TestCassandra implements Cassandra {
 				cassandra = this.cassandra;
 				if (cassandra == null) {
 					cassandra = this.cassandraFactory.create();
-					Objects.requireNonNull(cassandra, "Cassandra is not initialized");
+					Objects.requireNonNull(cassandra, "Cassandra must not be null");
 					this.cassandra = cassandra;
 				}
 			}
