@@ -56,7 +56,7 @@ class EmbeddedCassandraTests {
 
 	@Test
 	void shouldSelectFromRoles() {
-		assertThat(this.cassandra.getSettings().getVersion()).isEqualTo(Version.parse("2.2.12"));
+		assertThat(this.cassandra.getSettings().getVersion()).isEqualTo(Version.parse("3.11.3"));
 		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
 		try (Session session = this.cluster.connect()) {
 			assertThat(session.execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
@@ -69,7 +69,7 @@ class EmbeddedCassandraTests {
 		@Bean
 		public LocalCassandraFactory localCassandraFactory() {
 			LocalCassandraFactory factory = new LocalCassandraFactory();
-			factory.setVersion(Version.parse("2.2.12"));
+			factory.setVersion(Version.parse("3.11.3"));
 			factory.setDeleteWorkingDirectory(true);
 			return factory;
 		}
