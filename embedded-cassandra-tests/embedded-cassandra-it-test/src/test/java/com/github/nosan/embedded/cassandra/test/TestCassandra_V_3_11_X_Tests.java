@@ -34,11 +34,12 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 class TestCassandra_V_3_11_X_Tests extends AbstractTestCassandraTests {
 
 	TestCassandra_V_3_11_X_Tests() {
-		super(new TestCassandra(
-				new LocalCassandraFactoryBuilder().setDeleteWorkingDirectory(true).setVersion(new Version(3, 11, 4))
+		super(new LocalCassandraFactoryBuilder()
+						.setDeleteWorkingDirectory(true)
+						.setVersion(new Version(3, 11, 4))
 						.setConfigurationFile(TestCassandra_V_3_11_X_Tests.class.getResource("/cassandra.yaml"))
 						.setJvmOptions("-Dcassandra.superuser_setup_delay_ms=2000").build(),
-				new RetryableClusterFactory(5, new DefaultClusterFactory())));
+				new RetryableClusterFactory(5, new DefaultClusterFactory()));
 	}
 
 	private static final class RetryableClusterFactory implements ClusterFactory {

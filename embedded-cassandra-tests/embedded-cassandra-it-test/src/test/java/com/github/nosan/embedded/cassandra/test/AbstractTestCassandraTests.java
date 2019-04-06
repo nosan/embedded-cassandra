@@ -26,7 +26,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,8 +42,8 @@ abstract class AbstractTestCassandraTests {
 
 	private final TestCassandra cassandra;
 
-	AbstractTestCassandraTests(TestCassandra cassandra) {
-		this.cassandra = cassandra;
+	AbstractTestCassandraTests(@Nullable CassandraFactory cassandraFactory, @Nullable ClusterFactory clusterFactory) {
+		this.cassandra = new TestCassandra(cassandraFactory, clusterFactory);
 	}
 
 	@BeforeAll
