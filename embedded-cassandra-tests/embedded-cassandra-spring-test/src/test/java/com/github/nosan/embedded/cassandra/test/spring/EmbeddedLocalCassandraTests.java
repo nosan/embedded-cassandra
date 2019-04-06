@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-@EmbeddedLocalCassandra(version = "2.2.12", scripts = "/init.cql",
+@EmbeddedLocalCassandra(version = "3.11.3", scripts = "/init.cql",
 		statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY  KEY );",
 		replace = EmbeddedCassandra.Replace.ANY, deleteWorkingDirectory = true)
 class EmbeddedLocalCassandraTests {
@@ -66,7 +66,7 @@ class EmbeddedLocalCassandraTests {
 
 	@Test
 	void shouldOverrideVersion() {
-		assertThat(this.cassandra.getSettings().getVersion()).isEqualTo(Version.parse("2.2.12"));
+		assertThat(this.cassandra.getSettings().getVersion()).isEqualTo(Version.parse("3.11.3"));
 		assertThat(this.cluster.getClusterName()).isEqualTo("My cluster");
 		assertThat(this.cluster.connect().execute("SELECT * FROM  test.roles").wasApplied()).isTrue();
 		assertThat(this.cassandraFactory.getArtifactFactory()).isSameAs(this.remoteArtifactFactory);

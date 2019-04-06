@@ -73,7 +73,7 @@ class EmbeddedLocalCassandraAnnotationPlaceholdersTests {
 		assertThat(af.getProxy()).isNotNull();
 		assertThat(af.getProxy().address()).isEqualTo(new InetSocketAddress("localhost", 8080));
 		assertThat(af.getProxy().type()).isEqualTo(Proxy.Type.SOCKS);
-		assertThat(factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
+		assertThat(factory.getVersion()).isEqualTo(Version.parse("3.11.3"));
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
 		assertThat(factory.getArtifactDirectory()).isEqualTo(Paths.get("target/artifact"));
 		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));

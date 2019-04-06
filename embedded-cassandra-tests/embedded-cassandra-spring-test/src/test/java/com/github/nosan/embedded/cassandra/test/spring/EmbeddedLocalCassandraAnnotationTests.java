@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = ExcludeCassandraBeanDefinitionRegistryPostProcessor.class)
-@EmbeddedLocalCassandra(version = "2.2.13", configurationFile = "classpath:/cassandra.yaml",
+@EmbeddedLocalCassandra(version = "3.11.3", configurationFile = "classpath:/cassandra.yaml",
 		logbackFile = "classpath:/logback-test.xml", rackFile = "classpath:/rack.properties",
 		workingDirectory = "target/cassandra", artifactDirectory = "target/artifact", javaHome = "target/java",
 		jvmOptions = {"-Dtest.property=property"}, topologyFile = "classpath:/topology.properties",
@@ -73,7 +73,7 @@ class EmbeddedLocalCassandraAnnotationTests {
 		assertThat(af.getProxy().type()).isEqualTo(Proxy.Type.SOCKS);
 		assertThat(factory.getWorkingDirectory()).isEqualTo(Paths.get("target/cassandra"));
 		assertThat(factory.getArtifactDirectory()).isEqualTo(Paths.get("target/artifact"));
-		assertThat(factory.getVersion()).isEqualTo(Version.parse("2.2.13"));
+		assertThat(factory.getVersion()).isEqualTo(Version.parse("3.11.3"));
 		assertThat(factory.getJavaHome()).isEqualTo(Paths.get("target/java"));
 		assertThat(factory.getStartupTimeout()).isEqualTo(Duration.ofMinutes(4));
 		assertThat(factory.getLogbackFile()).isEqualTo(getClass().getResource("/logback-test.xml"));

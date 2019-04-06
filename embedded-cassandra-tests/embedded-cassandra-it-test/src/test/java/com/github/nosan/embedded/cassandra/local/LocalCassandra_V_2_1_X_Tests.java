@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
@@ -27,24 +26,11 @@ import com.github.nosan.embedded.cassandra.Version;
  *
  * @author Dmytro Nosan
  */
+@DisabledOnOs(OS.WINDOWS)
 class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
 
 	LocalCassandra_V_2_1_X_Tests() {
 		super(new Version(2, 1, 21));
-	}
-
-	@Test
-	@Override
-	@DisabledOnOs(OS.WINDOWS)
-	void shouldStartOnInterfaceIPV6() throws Exception {
-		super.shouldStartOnInterfaceIPV6();
-	}
-
-	@Test
-	@Override
-	@DisabledOnOs(OS.WINDOWS)
-	void shouldStartOnInterfaceIPV4() throws Exception {
-		super.shouldStartOnInterfaceIPV4();
 	}
 
 }

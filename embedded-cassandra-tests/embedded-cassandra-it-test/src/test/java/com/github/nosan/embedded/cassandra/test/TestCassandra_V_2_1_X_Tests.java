@@ -16,6 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 
@@ -24,6 +27,7 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
  *
  * @author Dmytro Nosan
  */
+@DisabledOnOs(OS.WINDOWS)
 class TestCassandra_V_2_1_X_Tests extends AbstractTestCassandraTests {
 
 	TestCassandra_V_2_1_X_Tests() {
