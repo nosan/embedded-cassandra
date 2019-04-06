@@ -55,12 +55,12 @@ abstract class AbstractTestCassandraTests {
 	}
 
 	@BeforeEach
-	void beforeEachInitKeyspaces() throws InterruptedException {
+	void initAllKeyspaces() {
 		this.cassandra.executeScripts(CqlScript.classpath("init.cql"));
 	}
 
 	@AfterEach
-	void afterEachDropKeyspaces() throws InterruptedException {
+	void dropAllKeyspaces() {
 		this.cassandra.dropAllNonSystemKeyspaces();
 	}
 

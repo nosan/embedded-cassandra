@@ -16,9 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 
@@ -33,21 +30,6 @@ class TestCassandra_V_2_1_X_Tests extends AbstractTestCassandraTests {
 		super(new TestCassandra(
 				new LocalCassandraFactoryBuilder().setVersion(new Version(2, 1, 21)).setDeleteWorkingDirectory(true)
 						.build()));
-	}
-
-	@Override
-	@BeforeEach
-	void beforeEachInitKeyspaces() throws InterruptedException {
-		//https://issues.apache.org/jira/browse/CASSANDRA-4857
-		Thread.sleep(1000);
-		super.beforeEachInitKeyspaces();
-	}
-
-	@Override
-	@AfterEach
-	void afterEachDropKeyspaces() throws InterruptedException {
-		Thread.sleep(1000);
-		super.afterEachDropKeyspaces();
 	}
 
 }
