@@ -50,7 +50,7 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 	protected void initialize(Path file, Path workingDirectory, Version version) throws IOException {
 		if (Files.exists(file)) {
 			Yaml yaml = new Yaml();
-			Map<Object, Object> originalSource = new LinkedHashMap<>(load(yaml, file));
+			Map<Object, Object> originalSource = new LinkedHashMap<>(getProperties(yaml, file));
 			Map<Object, Object> newSource = new LinkedHashMap<>(originalSource);
 
 			NodeSettings settings = new NodeSettings(version, newSource);
@@ -87,14 +87,14 @@ class ConfigurationFileRandomPortInitializer extends AbstractFileInitializer {
 		});
 	}
 
-	private Map<?, ?> load(Yaml yaml, Path source) {
-		try (InputStream is = Files.newInputStream(source)) {
+	private Map<?, ?> getProperties(Yaml yaml, Path file) {
+		try (InputStream is = Files.newInputStream(file)) {
 			Map<?, ?> values = yaml.loadAs(is, Map.class);
 			return (values != null) ? values : Collections.emptyMap();
 		}
 		catch (IOException ex) {
 			if (this.log.isDebugEnabled()) {
-				this.log.error(String.format("Could not read properties from '%s'", source), ex);
+				this.log.error(String.format("Could not read properties from '%s'", file), ex);
 			}
 			return Collections.emptyMap();
 		}
