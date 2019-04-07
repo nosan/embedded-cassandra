@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -55,7 +56,8 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableNames, "Tables must not be null");
 		for (String tableName : tableNames) {
-			executeStatement(session, String.format("TRUNCATE TABLE %s", tableName));
+			assertWasApplied(executeStatement(session, String.format("TRUNCATE TABLE %s", tableName)),
+					() -> String.format("Table '%s' is not truncated", tableName));
 		}
 	}
 
@@ -81,7 +83,8 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableNames, "Tables must not be null");
 		for (String tableName : tableNames) {
-			executeStatement(session, String.format("DROP TABLE IF EXISTS %s", tableName));
+			assertWasApplied(executeStatement(session, String.format("DROP TABLE IF EXISTS %s", tableName)),
+					() -> String.format("Table '%s' is not dropped", tableName));
 		}
 	}
 
@@ -106,8 +109,9 @@ public abstract class CqlUtils {
 	public static void dropKeyspaces(Session session, String... keyspaceNames) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(keyspaceNames, "Keyspaces must not be null");
-		for (String keyspace : keyspaceNames) {
-			executeStatement(session, String.format("DROP KEYSPACE IF EXISTS %s", keyspace));
+		for (String keyspaceName : keyspaceNames) {
+			assertWasApplied(executeStatement(session, String.format("DROP KEYSPACE IF EXISTS %s", keyspaceName)),
+					() -> String.format("Keyspace '%s' is not dropped", keyspaceName));
 		}
 	}
 
@@ -249,6 +253,12 @@ public abstract class CqlUtils {
 				ex.addSuppressed(ex1);
 				throw ex;
 			}
+		}
+	}
+
+	private static void assertWasApplied(ResultSet resultSet, Supplier<String> message) {
+		if (!resultSet.wasApplied()) {
+			throw new IllegalStateException(message.get());
 		}
 	}
 
