@@ -177,7 +177,7 @@ class WorkingDirectoryInitializer implements Initializer {
 	}
 
 	private static String getArtifactName(Version version) {
-		return String.format(".artifact.%s", version);
+		return String.format(".artifact.%s", version.toString().replace('/', '-').replace('\\', '-'));
 	}
 
 	private static void createFile(Path file) throws IOException {

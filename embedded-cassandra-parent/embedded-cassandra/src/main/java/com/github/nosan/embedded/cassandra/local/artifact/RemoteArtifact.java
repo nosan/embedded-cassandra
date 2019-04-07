@@ -285,7 +285,7 @@ class RemoteArtifact implements Artifact {
 				throw new IllegalArgumentException(
 						String.format("There is no way to determine a file name from '%s'", url));
 			}
-			return name;
+			return name.replace('/', '-').replace('\\', '-');
 		}
 
 		private static void showProgress(Path file, long size, ScheduledExecutorService executorService) {

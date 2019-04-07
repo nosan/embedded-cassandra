@@ -37,7 +37,7 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 @API(since = "1.0.0", status = API.Status.STABLE)
 public final class Version implements Comparable<Version> {
 
-	private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?[^/\\\\]*$");
+	private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?.*$");
 
 	private final String version;
 
@@ -114,7 +114,7 @@ public final class Version implements Comparable<Version> {
 			if (StringUtils.hasText(patchGroup)) {
 				patch = Integer.parseInt(patchGroup);
 			}
-			return new Version(major, minor, patch, matcher.group());
+			return new Version(major, minor, patch, matcher.group(0));
 		}
 		throw new IllegalArgumentException(
 				String.format("Version '%s' is invalid. Expected format is %s", version, VERSION_PATTERN));
