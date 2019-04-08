@@ -71,6 +71,8 @@ public class TestCassandra implements Cassandra {
 
 	private final CassandraFactory cassandraFactory;
 
+	private boolean shutdownHookRegistered = false;
+
 	private volatile State state = State.NEW;
 
 	@Nullable
@@ -478,11 +480,12 @@ public class TestCassandra implements Cassandra {
 	}
 
 	private void registerShutdownHook() {
-		if (this.registerShutdownHook && this.state == State.NEW) {
+		if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				Optional.ofNullable(this.startThread).ifPresent(Thread::interrupt);
 				stopSilently();
 			}, "Test Cassandra Shutdown Hook"));
+			this.shutdownHookRegistered = true;
 		}
 	}
 

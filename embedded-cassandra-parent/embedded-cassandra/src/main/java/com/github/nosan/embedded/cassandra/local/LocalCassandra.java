@@ -104,6 +104,8 @@ class LocalCassandra implements Cassandra {
 	@Nullable
 	private Settings settings;
 
+	private boolean shutdownHookRegistered = false;
+
 	/**
 	 * Creates a new {@link LocalCassandra}.
 	 *
@@ -310,11 +312,12 @@ class LocalCassandra implements Cassandra {
 	}
 
 	private void registerShutdownHook() {
-		if (this.registerShutdownHook && this.state == State.NEW) {
+		if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				Optional.ofNullable(this.startThread).ifPresent(Thread::interrupt);
 				stopSilently();
 			}, "Cassandra Shutdown Hook"));
+			this.shutdownHookRegistered = true;
 		}
 	}
 
