@@ -64,7 +64,7 @@ class FileLockTests {
 		assertThat(elapsed).describedAs("Seems like 'FileLock' does not work correctly.%n%s",
 				readers.entrySet().stream().map(entry -> String.format("[%s] %s", entry.getKey(), entry.getValue()))
 						.collect(Collectors.joining(System.lineSeparator())))
-				.isGreaterThan(1500).isLessThan(5000);
+				.isGreaterThan(1500);
 
 	}
 
