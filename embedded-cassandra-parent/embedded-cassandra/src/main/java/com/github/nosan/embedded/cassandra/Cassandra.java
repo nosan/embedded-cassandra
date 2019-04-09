@@ -33,16 +33,20 @@ public interface Cassandra {
 	 * the current thread to wait, until the {@code Cassandra} has started.
 	 *
 	 * @throws CassandraException if the {@code Cassandra} cannot be started
+	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another
+	 * thread
 	 */
-	void start() throws CassandraException;
+	void start() throws CassandraException, CassandraInterruptedException;
 
 	/**
 	 * Stops the {@code Cassandra}. Calling this method on an already stopped {@code Cassandra} has no effect. Causes
 	 * the current thread to wait, until the {@code Cassandra} has stopped.
 	 *
 	 * @throws CassandraException if the {@code Cassandra} cannot be stopped
+	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted}
+	 * by another thread
 	 */
-	void stop() throws CassandraException;
+	void stop() throws CassandraException, CassandraInterruptedException;
 
 	/**
 	 * Returns the settings this {@code Cassandra} is running on. These settings can be retrieved only if {@code
@@ -54,7 +58,7 @@ public interface Cassandra {
 	Settings getSettings() throws CassandraException;
 
 	/**
-	 * Returns the {@link State state} of the {@code Cassandra}.
+	 * Returns the {@link State state} of this {@code Cassandra}.
 	 *
 	 * @return the state
 	 * @since 1.4.1

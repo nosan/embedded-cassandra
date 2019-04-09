@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
+import com.github.nosan.embedded.cassandra.CassandraInterruptedException;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
@@ -163,20 +164,20 @@ class LocalCassandra implements Cassandra {
 					this.startThread = Thread.currentThread();
 					this.state = State.STARTING;
 					initialize();
-					start0();
+					startInternal();
 					this.state = State.STARTED;
 					this.startThread = null;
 				}
+				catch (InterruptedException ex) {
+					this.startThread = null;
+					this.state = State.START_INTERRUPTED;
+					stopInternalUninterruptedly();
+					throw new CassandraInterruptedException(ex);
+				}
 				catch (Throwable ex) {
 					this.startThread = null;
-					stopSilently();
-					if (isInterruptedException(ex)) {
-						this.state = State.START_INTERRUPTED;
-						Thread.currentThread().interrupt();
-					}
-					else {
-						this.state = State.START_FAILED;
-					}
+					this.state = State.START_FAILED;
+					stopInternalUninterruptedly();
 					throw new CassandraException("Unable to start Cassandra", ex);
 				}
 			}
@@ -186,20 +187,18 @@ class LocalCassandra implements Cassandra {
 	@Override
 	public void stop() throws CassandraException {
 		synchronized (this.lock) {
-			if (this.state != State.STOPPED) {
+			if (this.state == State.STARTED) {
 				try {
 					this.state = State.STOPPING;
-					stop0();
+					stopInternal();
 					this.state = State.STOPPED;
 				}
+				catch (InterruptedException | ClosedByInterruptException | FileLockInterruptionException ex) {
+					this.state = State.STOP_INTERRUPTED;
+					throw new CassandraInterruptedException(ex);
+				}
 				catch (Throwable ex) {
-					if (isInterruptedException(ex)) {
-						this.state = State.STOP_INTERRUPTED;
-						Thread.currentThread().interrupt();
-					}
-					else {
-						this.state = State.STOP_FAILED;
-					}
+					this.state = State.STOP_FAILED;
 					throw new CassandraException("Unable to stop Cassandra", ex);
 				}
 			}
@@ -228,19 +227,6 @@ class LocalCassandra implements Cassandra {
 	@Override
 	public String toString() {
 		return String.format("%s [%s]", getClass().getSimpleName(), this.version);
-	}
-
-	private static boolean isInterruptedException(@Nullable Throwable ex) {
-		if (ex instanceof ClosedByInterruptException) {
-			return true;
-		}
-		if (ex instanceof FileLockInterruptionException) {
-			return true;
-		}
-		if (ex instanceof InterruptedException) {
-			return true;
-		}
-		return ex != null && isInterruptedException(ex.getCause());
 	}
 
 	private static boolean isWindows() {
@@ -273,7 +259,7 @@ class LocalCassandra implements Cassandra {
 		log.info("Apache Cassandra '{}' has been initialized ({} ms)", version, elapsed);
 	}
 
-	private void start0() throws IOException, InterruptedException {
+	private void startInternal() throws IOException, InterruptedException {
 		Version version = this.version;
 		log.info("Starts Apache Cassandra '{}'", version);
 		long start = System.currentTimeMillis();
@@ -284,7 +270,7 @@ class LocalCassandra implements Cassandra {
 		log.info("Apache Cassandra '{}' has been started ({} ms)", version, elapsed);
 	}
 
-	private void stop0() throws IOException, InterruptedException {
+	private void stopInternal() throws IOException, InterruptedException {
 		Version version = this.version;
 		CassandraNode node = this.node;
 		if (node != null) {
@@ -315,19 +301,28 @@ class LocalCassandra implements Cassandra {
 		if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				Optional.ofNullable(this.startThread).ifPresent(Thread::interrupt);
-				stopSilently();
+				stop();
 			}, "Cassandra Shutdown Hook"));
 			this.shutdownHookRegistered = true;
 		}
 	}
 
-	private void stopSilently() {
+	private void stopInternalUninterruptedly() {
+		boolean interrupted = Thread.interrupted();
 		try {
-			stop();
+			stopInternal();
+		}
+		catch (InterruptedException ex) {
+			interrupted = true;
 		}
 		catch (Throwable ex) {
 			if (log.isDebugEnabled()) {
 				log.error("Unable to stop Cassandra", ex);
+			}
+		}
+		finally {
+			if (interrupted) {
+				Thread.currentThread().interrupt();
 			}
 		}
 	}

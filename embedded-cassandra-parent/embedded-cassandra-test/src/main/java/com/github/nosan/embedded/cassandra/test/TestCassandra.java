@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
+import com.github.nosan.embedded.cassandra.CassandraInterruptedException;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
@@ -71,8 +72,6 @@ public class TestCassandra implements Cassandra {
 
 	private final CassandraFactory cassandraFactory;
 
-	private boolean shutdownHookRegistered = false;
-
 	private volatile State state = State.NEW;
 
 	@Nullable
@@ -86,6 +85,8 @@ public class TestCassandra implements Cassandra {
 
 	@Nullable
 	private volatile Thread startThread;
+
+	private boolean shutdownHookRegistered = false;
 
 	/**
 	 * Creates a {@link TestCassandra}.
@@ -191,20 +192,20 @@ public class TestCassandra implements Cassandra {
 				try {
 					this.startThread = Thread.currentThread();
 					this.state = State.STARTING;
-					start0();
+					startInternal();
 					this.state = State.STARTED;
 					this.startThread = null;
 				}
-				catch (InterruptedException ex) {
+				catch (CassandraInterruptedException ex) {
 					this.startThread = null;
-					stopSilently();
 					this.state = State.START_INTERRUPTED;
-					Thread.currentThread().interrupt();
+					stopInternalUninterruptedly();
+					throw ex;
 				}
 				catch (Throwable ex) {
 					this.startThread = null;
-					stopSilently();
 					this.state = State.START_FAILED;
+					stopInternalUninterruptedly();
 					throw new CassandraException("Unable to start Test Cassandra", ex);
 				}
 			}
@@ -214,15 +215,15 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public void stop() throws CassandraException {
 		synchronized (this.lock) {
-			if (this.state != State.STOPPED) {
+			if (this.state == State.STARTED) {
 				try {
 					this.state = State.STOPPING;
-					stop0();
+					stopInternal();
 					this.state = State.STOPPED;
 				}
-				catch (InterruptedException ex) {
+				catch (CassandraInterruptedException ex) {
 					this.state = State.STOP_INTERRUPTED;
-					Thread.currentThread().interrupt();
+					throw ex;
 				}
 				catch (Throwable ex) {
 					this.state = State.STOP_FAILED;
@@ -420,15 +421,12 @@ public class TestCassandra implements Cassandra {
 		return cassandra;
 	}
 
-	private void start0() throws InterruptedException {
+	private void startInternal() {
 		Cassandra cassandra = getCassandra();
 		if (log.isDebugEnabled()) {
 			log.debug("Starts Test Cassandra '{}'", cassandra);
 		}
 		cassandra.start();
-		if (cassandra.getState() == State.START_INTERRUPTED || Thread.interrupted()) {
-			throw new InterruptedException();
-		}
 		if (!this.scripts.isEmpty()) {
 			executeScripts(this.scripts.toArray(new CqlScript[0]));
 		}
@@ -437,7 +435,7 @@ public class TestCassandra implements Cassandra {
 		}
 	}
 
-	private void stop0() throws InterruptedException {
+	private void stopInternal() {
 		try {
 			Session session = this.session;
 			if (session != null) {
@@ -467,12 +465,9 @@ public class TestCassandra implements Cassandra {
 		this.cluster = null;
 
 		Cassandra cassandra = this.cassandra;
-		if (cassandra != null && cassandra.getState() != State.STOPPED) {
+		if (cassandra != null) {
 			cassandra.stop();
-			if (cassandra.getState() == State.STOP_INTERRUPTED || Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			if (log.isDebugEnabled()) {
+			if (log.isDebugEnabled() && cassandra.getState() == State.STOPPED) {
 				log.debug("Test Cassandra '{}' has been stopped", cassandra);
 			}
 		}
@@ -483,19 +478,28 @@ public class TestCassandra implements Cassandra {
 		if (this.registerShutdownHook && !this.shutdownHookRegistered) {
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				Optional.ofNullable(this.startThread).ifPresent(Thread::interrupt);
-				stopSilently();
+				stop();
 			}, "Test Cassandra Shutdown Hook"));
 			this.shutdownHookRegistered = true;
 		}
 	}
 
-	private void stopSilently() {
+	private void stopInternalUninterruptedly() {
+		boolean interrupted = Thread.interrupted();
 		try {
-			stop();
+			stopInternal();
+		}
+		catch (CassandraInterruptedException ex) {
+			interrupted = true;
 		}
 		catch (Throwable ex) {
 			if (log.isDebugEnabled()) {
 				log.error("Unable to stop Test Cassandra", ex);
+			}
+		}
+		finally {
+			if (interrupted) {
+				Thread.currentThread().interrupt();
 			}
 		}
 	}
