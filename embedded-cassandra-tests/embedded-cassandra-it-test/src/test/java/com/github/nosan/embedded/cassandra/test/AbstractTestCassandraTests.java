@@ -63,33 +63,7 @@ abstract class AbstractTestCassandraTests {
 
 	@AfterEach
 	void dropAllKeyspaces() {
-		this.cassandra.dropAllNonSystemKeyspaces();
-	}
-
-	@Test
-	void deleteFromAllNonSystemTables() {
-		assertThat(this.cassandra.getRowCount("test.users")).isEqualTo(1);
-		assertThat(this.cassandra.getRowCount("test.roles")).isEqualTo(1);
-		this.cassandra.deleteFromAllNonSystemTables();
-		assertThat(this.cassandra.getRowCount("test.users")).isZero();
-		assertThat(this.cassandra.getRowCount("test.roles")).isZero();
-	}
-
-	@Test
-	void dropAllNonSystemTables() {
-		assertThat(this.cassandra.getRowCount("test.users")).isEqualTo(1);
-		assertThat(this.cassandra.getRowCount("test.roles")).isEqualTo(1);
-		this.cassandra.dropAllNonSystemTables();
-		KeyspaceMetadata keyspace = this.cassandra.getCluster().getMetadata().getKeyspace("test");
-		assertThat(keyspace).isNotNull();
-		assertThat(keyspace.getTables()).isEmpty();
-	}
-
-	@Test
-	void dropKeyspaces() {
 		this.cassandra.dropKeyspaces("test");
-		KeyspaceMetadata keyspace = this.cassandra.getCluster().getMetadata().getKeyspace("test");
-		assertThat(keyspace).isNull();
 	}
 
 	@Test

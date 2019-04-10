@@ -16,19 +16,14 @@
 
 package com.github.nosan.embedded.cassandra.test.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.exceptions.InvalidQueryException;
 import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,21 +51,8 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableNames, "Tables must not be null");
 		for (String tableName : tableNames) {
-			assertWasApplied(executeStatement(session, String.format("TRUNCATE TABLE %s", tableName)),
-					() -> String.format("Table '%s' is not truncated", tableName));
+			executeStatement(session, String.format("TRUNCATE TABLE %s", tableName));
 		}
-	}
-
-	/**
-	 * Delete all rows from the non system tables.
-	 *
-	 * @param session a session
-	 * @since 1.4.3
-	 */
-	@API(since = "1.4.3", status = API.Status.MAINTAINED)
-	public static void deleteFromAllNonSystemTables(Session session) {
-		Objects.requireNonNull(session, "Session must not be null");
-		deleteFromTables(session, getNonSystemTables(session));
 	}
 
 	/**
@@ -83,21 +65,8 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(tableNames, "Tables must not be null");
 		for (String tableName : tableNames) {
-			assertWasApplied(executeStatement(session, String.format("DROP TABLE IF EXISTS %s", tableName)),
-					() -> String.format("Table '%s' is not dropped", tableName));
+			executeStatement(session, String.format("DROP TABLE IF EXISTS %s", tableName));
 		}
-	}
-
-	/**
-	 * Drop all non system tables.
-	 *
-	 * @param session a session
-	 * @since 1.4.3
-	 */
-	@API(since = "1.4.3", status = API.Status.MAINTAINED)
-	public static void dropAllNonSystemTables(Session session) {
-		Objects.requireNonNull(session, "Session must not be null");
-		dropTables(session, getNonSystemTables(session));
 	}
 
 	/**
@@ -110,21 +79,8 @@ public abstract class CqlUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(keyspaceNames, "Keyspaces must not be null");
 		for (String keyspaceName : keyspaceNames) {
-			assertWasApplied(executeStatement(session, String.format("DROP KEYSPACE IF EXISTS %s", keyspaceName)),
-					() -> String.format("Keyspace '%s' is not dropped", keyspaceName));
+			executeStatement(session, String.format("DROP KEYSPACE IF EXISTS %s", keyspaceName));
 		}
-	}
-
-	/**
-	 * Drop all non system keyspaces.
-	 *
-	 * @param session a session
-	 * @since 1.4.3
-	 */
-	@API(since = "1.4.3", status = API.Status.MAINTAINED)
-	public static void dropAllNonSystemKeyspaces(Session session) {
-		Objects.requireNonNull(session, "Session must not be null");
-		dropKeyspaces(session, getNonSystemKeyspaces(session));
 	}
 
 	/**
@@ -197,69 +153,6 @@ public abstract class CqlUtils {
 			log.debug("Execute Statement: {}", statement);
 		}
 		return session.execute(statement);
-	}
-
-	private static String[] getNonSystemTables(Session session) {
-		List<String> tables = new ArrayList<>();
-		for (String keyspace : getNonSystemKeyspaces(session)) {
-			ResultSet resultSet = getTables(session, keyspace);
-			for (Row row : resultSet) {
-				tables.add(String.format("%s.%s", row.getString("keyspace_name"), row.getString("table_name")));
-			}
-		}
-		Collections.reverse(tables);
-		return tables.toArray(new String[0]);
-	}
-
-	private static String[] getNonSystemKeyspaces(Session session) {
-		List<String> keyspaces = new ArrayList<>();
-		ResultSet resultSet = getKeyspaces(session);
-		for (Row row : resultSet) {
-			String name = row.getString("keyspace_name");
-			if (!name.equals("system") && !name.startsWith("system_")) {
-				keyspaces.add(name);
-			}
-		}
-		Collections.reverse(keyspaces);
-		return keyspaces.toArray(new String[0]);
-	}
-
-	private static ResultSet getTables(Session session, String keyspace) {
-		try {
-			return executeStatement(session,
-					"SELECT keyspace_name, table_name FROM system_schema.tables WHERE keyspace_name = ?", keyspace);
-		}
-		catch (InvalidQueryException ex) {
-			try {
-				return executeStatement(session, "SELECT keyspace_name, columnfamily_name as table_name"
-						+ " FROM system.schema_columnfamilies WHERE keyspace_name = ?", keyspace);
-			}
-			catch (InvalidQueryException ex1) {
-				ex.addSuppressed(ex1);
-				throw ex;
-			}
-		}
-	}
-
-	private static ResultSet getKeyspaces(Session session) {
-		try {
-			return executeStatement(session, "SELECT keyspace_name FROM system_schema.keyspaces");
-		}
-		catch (InvalidQueryException ex) {
-			try {
-				return executeStatement(session, "SELECT keyspace_name FROM system.schema_keyspaces");
-			}
-			catch (InvalidQueryException ex1) {
-				ex.addSuppressed(ex1);
-				throw ex;
-			}
-		}
-	}
-
-	private static void assertWasApplied(ResultSet resultSet, Supplier<String> message) {
-		if (!resultSet.wasApplied()) {
-			throw new IllegalStateException(message.get());
-		}
 	}
 
 }

@@ -300,17 +300,6 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Delete all rows from the non system tables.
-	 *
-	 * @see CqlUtils#deleteFromAllNonSystemTables(Session)
-	 * @since 1.4.3
-	 */
-	@API(since = "1.4.3", status = API.Status.MAINTAINED)
-	public void deleteFromAllNonSystemTables() {
-		CqlUtils.deleteFromAllNonSystemTables(getSession());
-	}
-
-	/**
 	 * Drop the specified tables.
 	 *
 	 * @param tableNames the names of the tables to drop
@@ -322,17 +311,6 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Drop all non system tables.
-	 *
-	 * @see CqlUtils#dropAllNonSystemTables(Session)
-	 * @since 1.4.3
-	 */
-	@API(since = "1.4.3", status = API.Status.MAINTAINED)
-	public void dropAllNonSystemTables() {
-		CqlUtils.dropAllNonSystemTables(getSession());
-	}
-
-	/**
 	 * Drop the specified keyspaces.
 	 *
 	 * @param keyspaceNames the names of the keyspaces to drop
@@ -341,17 +319,6 @@ public class TestCassandra implements Cassandra {
 	 */
 	public void dropKeyspaces(String... keyspaceNames) {
 		CqlUtils.dropKeyspaces(getSession(), keyspaceNames);
-	}
-
-	/**
-	 * Drop all non system keyspaces.
-	 *
-	 * @see CqlUtils#dropAllNonSystemKeyspaces(Session)
-	 * @since 1.4.3
-	 */
-	@API(since = "1.4.3", status = API.Status.MAINTAINED)
-	public void dropAllNonSystemKeyspaces() {
-		CqlUtils.dropAllNonSystemKeyspaces(getSession());
 	}
 
 	/**
