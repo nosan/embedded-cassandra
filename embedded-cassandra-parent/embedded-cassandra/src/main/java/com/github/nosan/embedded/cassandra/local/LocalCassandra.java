@@ -168,7 +168,7 @@ class LocalCassandra implements Cassandra {
 					this.state = State.STARTED;
 					this.startThread = null;
 				}
-				catch (InterruptedException ex) {
+				catch (InterruptedException | ClosedByInterruptException | FileLockInterruptionException ex) {
 					this.startThread = null;
 					this.state = State.START_INTERRUPTED;
 					boolean interrupted = Thread.interrupted();
