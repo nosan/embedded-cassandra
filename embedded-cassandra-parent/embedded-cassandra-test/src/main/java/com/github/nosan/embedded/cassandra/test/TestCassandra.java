@@ -377,7 +377,14 @@ public class TestCassandra implements Cassandra {
 		return String.format("Test Cassandra '%s'", getCassandra());
 	}
 
-	private Cassandra getCassandra() {
+	/**
+	 * Returns the underlying {@link Cassandra}.
+	 *
+	 * @return the underlying {@link Cassandra}.
+	 * @since 1.4.1
+	 */
+	@API(since = "1.4.1", status = API.Status.EXPERIMENTAL)
+	public Cassandra getCassandra() {
 		Cassandra cassandra = this.cassandra;
 		if (cassandra == null) {
 			synchronized (this.lock) {
