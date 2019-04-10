@@ -199,13 +199,17 @@ public class TestCassandra implements Cassandra {
 				catch (CassandraInterruptedException ex) {
 					this.startThread = null;
 					this.state = State.START_INTERRUPTED;
-					stopInternalUninterruptedly();
+					boolean interrupted = Thread.interrupted();
+					stopInternalSilently();
+					if (interrupted) {
+						Thread.currentThread().interrupt();
+					}
 					throw ex;
 				}
 				catch (Throwable ex) {
 					this.startThread = null;
 					this.state = State.START_FAILED;
-					stopInternalUninterruptedly();
+					stopInternalSilently();
 					throw new CassandraException("Unable to start Test Cassandra", ex);
 				}
 			}
@@ -484,22 +488,16 @@ public class TestCassandra implements Cassandra {
 		}
 	}
 
-	private void stopInternalUninterruptedly() {
-		boolean interrupted = Thread.interrupted();
+	private void stopInternalSilently() {
 		try {
 			stopInternal();
 		}
 		catch (CassandraInterruptedException ex) {
-			interrupted = true;
+			Thread.currentThread().interrupt();
 		}
 		catch (Throwable ex) {
 			if (log.isDebugEnabled()) {
 				log.error("Unable to stop Test Cassandra", ex);
-			}
-		}
-		finally {
-			if (interrupted) {
-				Thread.currentThread().interrupt();
 			}
 		}
 	}
