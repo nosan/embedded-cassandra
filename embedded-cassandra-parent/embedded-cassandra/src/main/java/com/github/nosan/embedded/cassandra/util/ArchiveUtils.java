@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -25,7 +24,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -35,25 +33,21 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
-import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility methods for dealing with archives.
+ * Utility methods for dealing with archives. <b>Only for internal purposes.</b>
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class ArchiveUtils {
 
 	private static final Map<String, ArchiveFactory> ARCHIVES;
@@ -66,9 +60,6 @@ public abstract class ArchiveUtils {
 		candidates.put(".tbz2", ArchiveFactory.create(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
 		candidates.put(".tgz", ArchiveFactory.create(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
 		candidates.put(".txz", ArchiveFactory.create(ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
-		candidates.put(".a", ArchiveFactory.create(ArchiveStreamFactory.AR));
-		candidates.put(".ar", ArchiveFactory.create(ArchiveStreamFactory.AR));
-		candidates.put(".cpio", ArchiveFactory.create(ArchiveStreamFactory.CPIO));
 		candidates.put(".jar", ArchiveFactory.create(ArchiveStreamFactory.JAR));
 		candidates.put(".tar", ArchiveFactory.create(ArchiveStreamFactory.TAR));
 		candidates.put(".zip", ArchiveFactory.create(ArchiveStreamFactory.ZIP));
@@ -104,17 +95,17 @@ public abstract class ArchiveUtils {
 			}
 		}
 		catch (ArchiveException | CompressorException ex) {
-			throw new IOException(String.format("Could not create a stream for archive '%s'", archiveFile), ex);
+			throw new IOException(String.format("Can not create a stream for archive '%s'", archiveFile), ex);
 		}
 	}
 
-	private static ArchiveFactory createArchiveFactory(Path source) {
+	private static ArchiveFactory createArchiveFactory(Path archiveFile) {
 		for (Map.Entry<String, ArchiveFactory> candidate : ARCHIVES.entrySet()) {
-			if (String.valueOf(source.getFileName()).endsWith(candidate.getKey())) {
+			if (String.valueOf(archiveFile.getFileName()).endsWith(candidate.getKey())) {
 				return candidate.getValue();
 			}
 		}
-		throw new IllegalArgumentException(String.format("Archive '%s' is not supported", source));
+		throw new IllegalArgumentException(String.format("Archive '%s' is not supported", archiveFile));
 	}
 
 	/**
@@ -157,8 +148,7 @@ public abstract class ArchiveUtils {
 		 *
 		 * @param inputStream the file to stream
 		 * @return a new archive stream for the given archive
-		 * @throws CompressorException if the compressor name is not known or not available, or if there's an
-		 * IOException or MemoryLimitException thrown during initialization
+		 * @throws CompressorException if the compressor name is not known or not available
 		 * @throws ArchiveException if the archive name is not known
 		 */
 		ArchiveInputStream create(InputStream inputStream) throws CompressorException, ArchiveException;
@@ -197,32 +187,26 @@ public abstract class ArchiveUtils {
 		 * @param file the file to apply the mode onto
 		 */
 		static void set(ArchiveEntry entry, Path file) {
-			if (!isWindows()) {
+			if (!SystemUtils.isWindows()) {
 				long mode = getMode(entry) & MASK;
 				if (mode > 0) {
 					Set<PosixFilePermission> permissions = getPermissions(mode);
 					try {
 						Files.setPosixFilePermissions(file, permissions);
 					}
-					catch (Throwable ex) {
+					catch (Exception ex) {
 						if (log.isDebugEnabled()) {
-							log.error(String.format("Could not set permission(s) '%s' to '%s'", permissions, file), ex);
+							log.error(String.format("Can not set permission(s) '%s' to '%s'", permissions, file), ex);
 						}
 					}
 				}
 			}
 		}
 
-		private static boolean isWindows() {
-			String os = new SystemProperty("os.name").get();
-			if (StringUtils.hasText(os)) {
-				return os.toLowerCase(Locale.ENGLISH).contains("windows");
-			}
-			return File.separatorChar == '\\';
-		}
-
 		private static Set<PosixFilePermission> getPermissions(long mode) {
-			return permissions.entrySet().stream().filter(entry -> (mode & entry.getKey()) > 0).map(Map.Entry::getValue)
+			return permissions.entrySet().stream()
+					.filter(entry -> (mode & entry.getKey()) > 0)
+					.map(Map.Entry::getValue)
 					.collect(Collectors.toSet());
 		}
 
@@ -232,12 +216,6 @@ public abstract class ArchiveUtils {
 			}
 			else if (entry instanceof ZipArchiveEntry) {
 				return ((ZipArchiveEntry) entry).getUnixMode();
-			}
-			else if (entry instanceof CpioArchiveEntry) {
-				return ((CpioArchiveEntry) entry).getMode();
-			}
-			else if (entry instanceof ArArchiveEntry) {
-				return ((ArArchiveEntry) entry).getMode();
 			}
 			return 0;
 		}

@@ -23,7 +23,6 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.ClosedByInterruptException;
-import java.nio.channels.FileLockInterruptionException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -31,6 +30,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,16 +41,15 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.FileLock;
-import com.github.nosan.embedded.cassandra.util.MDCUtils;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * {@link Artifact} implementation, that downloads {@code archive} from the internet, if {@code archive} doesn't exist
- * locally.
+ * {@link Artifact} implementation, that downloads an {@code archive} from the internet, only if an {@code archive}
+ * doesn't exist locally.
  *
  * @author Dmytro Nosan
  * @see RemoteArtifactFactory
@@ -66,27 +65,15 @@ class RemoteArtifact implements Artifact {
 
 	private final UrlFactory urlFactory;
 
+	private final Duration readTimeout;
+
+	private final Duration connectTimeout;
+
 	@Nullable
 	private final Proxy proxy;
 
-	@Nullable
-	private final Duration readTimeout;
-
-	@Nullable
-	private final Duration connectTimeout;
-
-	/**
-	 * Creates a {@link RemoteArtifact}.
-	 *
-	 * @param version a version
-	 * @param directory a directory to store/search an artifact (directory must be writable)
-	 * @param urlFactory factory to create {@code URL}
-	 * @param proxy proxy for {@code connection}
-	 * @param connectTimeout connect timeout for {@code connection}
-	 * @param readTimeout read timeout for {@code connection}
-	 */
-	RemoteArtifact(Version version, Path directory, UrlFactory urlFactory, @Nullable Proxy proxy,
-			@Nullable Duration readTimeout, @Nullable Duration connectTimeout) {
+	RemoteArtifact(Version version, Path directory, UrlFactory urlFactory, @Nullable Proxy proxy, Duration readTimeout,
+			Duration connectTimeout) {
 		this.version = version;
 		this.directory = directory;
 		this.urlFactory = urlFactory;
@@ -96,11 +83,8 @@ class RemoteArtifact implements Artifact {
 	}
 
 	@Override
-	public Path get() throws IOException {
+	public Path getArchive() throws IOException {
 		Version version = this.version;
-		Proxy proxy = this.proxy;
-		Duration readTimeout = this.readTimeout;
-		Duration connectTimeout = this.connectTimeout;
 		Path directory = this.directory;
 		URL[] urls = this.urlFactory.create(version);
 		Objects.requireNonNull(urls, "URLs must not be null");
@@ -108,17 +92,17 @@ class RemoteArtifact implements Artifact {
 		Files.createDirectories(directory);
 
 		IOException exceptions = new IOException(
-				String.format("Could not download a resource from URLs %s. See suppressed exceptions for details",
+				String.format("Can not download a resource from URLs %s. See suppressed exceptions for details",
 						Arrays.toString(urls)));
 
 		for (URL url : urls) {
 			try {
-				Resource remoteResource = new RemoteResource(directory, version, url, proxy, readTimeout,
-						connectTimeout);
+				Resource remoteResource = new RemoteResource(directory, version, url, this.proxy, this.readTimeout,
+						this.connectTimeout);
 				Resource localResource = new LocalResource(directory, remoteResource);
 				return localResource.getFile();
 			}
-			catch (ClosedByInterruptException | FileLockInterruptionException ex) {
+			catch (ClosedByInterruptException ex) {
 				throw ex;
 			}
 			catch (IOException ex) {
@@ -151,9 +135,6 @@ class RemoteArtifact implements Artifact {
 
 	}
 
-	/**
-	 * Local {@link Resource} implementation.
-	 */
 	private static final class LocalResource implements Resource {
 
 		private final Path directory;
@@ -169,19 +150,13 @@ class RemoteArtifact implements Artifact {
 		public Path getFile() throws IOException {
 			Path file = this.directory.resolve(getName());
 			if (!Files.exists(file)) {
-				Path lockFile = this.directory.resolve(String.format(".%s.lock", getName()));
-				try (FileLock fileLock = new FileLock(lockFile)) {
-					fileLock.lock();
-					if (!Files.exists(file)) {
-						Path tempFile = this.resource.getFile();
-						try {
-							return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
-						}
-						catch (IOException ex) {
-							log.error(String.format("Could not rename '%s' as '%s'.", tempFile, file), ex);
-							return tempFile;
-						}
-					}
+				Path tempFile = this.resource.getFile();
+				try {
+					return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+				}
+				catch (IOException ex) {
+					log.error(String.format("Can not rename '%s' as '%s'.", tempFile, file), ex);
+					return tempFile;
 				}
 			}
 			return file;
@@ -194,21 +169,18 @@ class RemoteArtifact implements Artifact {
 
 	}
 
-	/**
-	 * Remote {@link Resource} implementation.
-	 */
 	private static final class RemoteResource implements Resource {
 
-		private static final AtomicLong instanceCounter = new AtomicLong();
+		private static final AtomicLong counter = new AtomicLong();
 
-		private final long instance = instanceCounter.incrementAndGet();
+		private final long id = counter.incrementAndGet();
 
 		private final ThreadFactory threadFactory = runnable -> {
-			Map<String, String> context = MDCUtils.getContext();
+			Map<String, String> context = MDC.getCopyOfContextMap();
 			Thread thread = new Thread(() -> {
-				MDCUtils.setContext(context);
+				Optional.ofNullable(context).ifPresent(MDC::setContextMap);
 				runnable.run();
-			}, String.format("artifact-%d", this.instance));
+			}, String.format("artifact-%d", this.id));
 			thread.setDaemon(true);
 			return thread;
 		};
@@ -222,14 +194,12 @@ class RemoteArtifact implements Artifact {
 		@Nullable
 		private final Proxy proxy;
 
-		@Nullable
 		private final Duration readTimeout;
 
-		@Nullable
 		private final Duration connectTimeout;
 
-		RemoteResource(Path directory, Version version, URL url, @Nullable Proxy proxy, @Nullable Duration readTimeout,
-				@Nullable Duration connectTimeout) {
+		RemoteResource(Path directory, Version version, URL url, @Nullable Proxy proxy, Duration readTimeout,
+				Duration connectTimeout) {
 			this.directory = directory;
 			this.version = version;
 			this.url = url;
@@ -262,7 +232,7 @@ class RemoteArtifact implements Artifact {
 									fileSize, file, size));
 				}
 				long elapsed = System.currentTimeMillis() - start;
-				log.info("Apache Cassandra '{}' has been downloaded ({} ms)", this.version, elapsed);
+				log.info("Apache Cassandra '{}' is downloaded ({} ms)", this.version, elapsed);
 			}
 			finally {
 				executorService.shutdown();
@@ -277,20 +247,20 @@ class RemoteArtifact implements Artifact {
 		}
 
 		private static String getFileName(URL url) {
-			String name = url.getFile();
-			if (StringUtils.hasText(name) && name.contains("/")) {
-				name = name.substring(name.lastIndexOf("/") + 1);
+			String fileName = url.getFile();
+			if (StringUtils.hasText(fileName) && fileName.contains("/")) {
+				fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
 			}
-			if (!StringUtils.hasText(name)) {
+			if (!StringUtils.hasText(fileName)) {
 				throw new IllegalArgumentException(
 						String.format("There is no way to determine a file name from '%s'", url));
 			}
-			return name.replace('/', '-').replace('\\', '-');
+			return fileName;
 		}
 
 		private static void showProgress(Path file, long size, ScheduledExecutorService executorService) {
 			if (size > 0) {
-				long[] prevPercent = new long[1];
+				AtomicLong prevPercent = new AtomicLong(0);
 				int minPercentStep = 10;
 				AtomicBoolean logOnlyOnce = new AtomicBoolean(false);
 				executorService.scheduleAtFixedRate(() -> {
@@ -298,29 +268,25 @@ class RemoteArtifact implements Artifact {
 						if (Files.exists(file)) {
 							long current = Files.size(file);
 							long percent = Math.max(current * 100, 1) / size;
-							if (percent - prevPercent[0] >= minPercentStep) {
-								prevPercent[0] = percent;
+							if (percent - prevPercent.get() >= minPercentStep) {
+								prevPercent.set(percent);
 								log.info("Downloaded {} / {}  {}%", current, size, percent);
 							}
 						}
 					}
-					catch (Throwable ex) {
+					catch (Exception ex) {
 						if (logOnlyOnce.compareAndSet(false, true)) {
-							log.error(String.format("Could not show progress for a file '%s'", file), ex);
+							log.error(String.format("Can not show progress for a file '%s'", file), ex);
 						}
 					}
-				}, 0, 500, TimeUnit.MILLISECONDS);
+				}, 0, 1, TimeUnit.SECONDS);
 			}
 		}
 
 		private URLConnection getUrlConnection(URL url, int maxRedirects, int redirectCount) throws IOException {
 			URLConnection connection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
-			if (this.connectTimeout != null) {
-				connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
-			}
-			if (this.readTimeout != null) {
-				connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
-			}
+			connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
+			connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
 			if (connection instanceof HttpURLConnection) {
 				HttpURLConnection httpConnection = (HttpURLConnection) connection;
 				httpConnection.setInstanceFollowRedirects(false);

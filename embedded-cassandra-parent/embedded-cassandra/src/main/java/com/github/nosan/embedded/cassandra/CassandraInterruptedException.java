@@ -16,18 +16,14 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Thrown when {@link Cassandra} is interrupted.  Before this exception is thrown the {@link Cassandra} will have been
- * {@link Cassandra#stop() stopped} and the interrupt status of the thread will have been set.
+ * Thrown when {@link Cassandra} is interrupted.
  *
  * @author Dmytro Nosan
- * @since 1.4.3
+ * @since 2.0.0
  */
-@API(since = "1.4.3", status = API.Status.STABLE)
 public class CassandraInterruptedException extends CassandraException {
 
 	/**

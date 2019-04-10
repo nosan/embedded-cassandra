@@ -55,6 +55,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith({HttpServerExtension.class, CaptureOutputExtension.class})
 class RemoteArtifactTests {
 
+	private static final Version VERSION = Version.parse("3.1.1");
+
 	private RemoteArtifactFactory factory;
 
 	@BeforeEach
@@ -81,8 +83,8 @@ class RemoteArtifactTests {
 			}
 			exchange.close();
 		});
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
-		Path archive = artifact.get();
+		Artifact artifact = this.factory.create(VERSION);
+		Path archive = artifact.getArchive();
 		assertThat(output.toString()).contains("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
@@ -101,8 +103,8 @@ class RemoteArtifactTests {
 			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
-		Path archive = artifact.get();
+		Artifact artifact = this.factory.create(VERSION);
+		Path archive = artifact.getArchive();
 		assertThat(output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
@@ -125,8 +127,8 @@ class RemoteArtifactTests {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
 			exchange.close();
 		});
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
-		Path archive = artifact.get();
+		Artifact artifact = this.factory.create(VERSION);
+		Path archive = artifact.getArchive();
 		assertThat(output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
@@ -141,8 +143,8 @@ class RemoteArtifactTests {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
 			exchange.close();
 		});
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
-		assertThatThrownBy(artifact::get).hasStackTraceContaining("Too many redirects for URL");
+		Artifact artifact = this.factory.create(VERSION);
+		assertThatThrownBy(artifact::getArchive).hasStackTraceContaining("Too many redirects for URL");
 	}
 
 	@Test
@@ -160,8 +162,8 @@ class RemoteArtifactTests {
 		this.factory.setUrlFactory(version -> Stream
 				.concat(Stream.of(new URL(String.format("http:/%s/cassandra.zip", httpServer.getAddress()))),
 						Arrays.stream((delegate).create(version))).toArray(URL[]::new));
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
-		Path archive = artifact.get();
+		Artifact artifact = this.factory.create(VERSION);
+		Path archive = artifact.getArchive();
 		assertThat(output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
@@ -178,8 +180,8 @@ class RemoteArtifactTests {
 		Files.copy(new ByteArrayInputStream(content), this.factory.getDirectory().
 				resolve("apache-cassandra-3.1.1.zip"));
 
-		Artifact artifact = this.factory.create(new Version(3, 1, 1));
-		Path archive = artifact.get();
+		Artifact artifact = this.factory.create(VERSION);
+		Path archive = artifact.getArchive();
 		assertThat(output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
@@ -192,14 +194,15 @@ class RemoteArtifactTests {
 			exchange.sendResponseHeaders(400, 0);
 			exchange.close();
 		});
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
 				.hasStackTraceContaining("HTTP (400 Bad Request) status for URL");
 	}
 
 	@Test
 	void urlListEmpty() {
 		this.factory.setUrlFactory(version -> new URL[0]);
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get()).isInstanceOf(IOException.class);
+		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
+				.isInstanceOf(IOException.class);
 	}
 
 	@Test
@@ -207,7 +210,7 @@ class RemoteArtifactTests {
 		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(600));
 
 		this.factory.setReadTimeout(Duration.ofMillis(200));
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
 				.hasStackTraceContaining("Read timed out");
 	}
 
@@ -216,14 +219,14 @@ class RemoteArtifactTests {
 		this.factory.setUrlFactory(version -> new URL[]{new URL("http://example.com:81/apache-cassandra-3.1.1.zip")});
 		this.factory.setConnectTimeout(Duration.ofSeconds(1));
 
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
 				.hasStackTraceContaining("connect timed out");
 	}
 
 	@Test
 	void proxyIsInvalid() {
 		this.factory.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
 				.hasStackTraceContaining("Connection refused");
 
 	}
@@ -233,7 +236,7 @@ class RemoteArtifactTests {
 		httpServer.createContext("/", exchange -> exchange.sendResponseHeaders(200, 0));
 		this.factory.setUrlFactory(version -> new URL[]{new URL(String
 				.format("http://%s:%d/", httpServer.getAddress().getHostName(), httpServer.getAddress().getPort()))});
-		assertThatThrownBy(() -> this.factory.create(new Version(3, 1, 1)).get())
+		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
 				.hasStackTraceContaining("There is no way to determine");
 
 	}

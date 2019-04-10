@@ -15,12 +15,12 @@
  */
 
 /**
- * Utility classes for dealing with Cassandra during the testing.
+ * Utility classes for dealing with CqlSession and Session.
  */
 
 @NonNullFields
 @NonNullApi
 package com.github.nosan.embedded.cassandra.test.util;
 
-import com.github.nosan.embedded.cassandra.util.annotation.NonNullApi;
-import com.github.nosan.embedded.cassandra.util.annotation.NonNullFields;
+import com.github.nosan.embedded.cassandra.lang.annotation.NonNullApi;
+import com.github.nosan.embedded.cassandra.lang.annotation.NonNullFields;

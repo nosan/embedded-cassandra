@@ -16,28 +16,24 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
-import org.apiguardian.api.API;
-
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
- * Factory that creates a {@link Artifact}.
+ * Factory that creates an {@link Artifact}.
  *
  * @author Dmytro Nosan
  * @see Artifact
  * @see RemoteArtifactFactory
- * @see EmptyArtifactFactory
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 @FunctionalInterface
 public interface ArtifactFactory {
 
 	/**
-	 * Creates a new  configured {@link Artifact}.
+	 * Creates a new configured {@link Artifact}.
 	 *
 	 * @param version a version
-	 * @return {@code Artifact} to use
+	 * @return an artifact to use
 	 */
 	Artifact create(Version version);
 

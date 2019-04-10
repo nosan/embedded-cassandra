@@ -18,75 +18,79 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * UNIX implementation of the {@link CassandraNode}.
+ * Unix based {@link CassandraNode} implementation.
  *
  * @author Dmytro Nosan
- * @since 1.4.1
+ * @since 2.0.0
  */
 class UnixCassandraNode extends AbstractCassandraNode {
 
-	private final Path workingDirectory;
-
 	private final Version version;
+
+	private final Path workingDirectory;
 
 	private final boolean allowRoot;
 
-	/**
-	 * Creates a {@link UnixCassandraNode}.
-	 *
-	 * @param workingDirectory a configured base directory
-	 * @param version a version
-	 * @param timeout a startup timeout
-	 * @param jvmOptions additional {@code JVM} options
-	 * @param javaHome java home directory
-	 * @param jmxPort JMX port
-	 * @param allowRoot allow running as a root
-	 */
-	UnixCassandraNode(Path workingDirectory, Version version, Duration timeout, List<String> jvmOptions,
-			@Nullable Path javaHome, int jmxPort, boolean allowRoot) {
-		super(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
-		this.workingDirectory = workingDirectory;
+	UnixCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome,
+			Ports ports, List<String> jvmOptions, boolean allowRoot) {
+		super(version, javaHome, ports, jvmOptions);
 		this.version = version;
+		this.workingDirectory = workingDirectory;
 		this.allowRoot = allowRoot;
 	}
 
 	@Override
-	protected ProcessId start(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
-			throws IOException {
+	protected ProcessId start(Map<String, String> environment) throws IOException {
 		Path workingDirectory = this.workingDirectory;
 		Version version = this.version;
+		ProcessBuilder builder = new ProcessBuilder().directory(workingDirectory.toFile())
+				.redirectErrorStream(true);
+		builder.environment().putAll(environment);
 		builder.command(workingDirectory.resolve("bin/cassandra").toString(), "-f");
 		if (this.allowRoot && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
 			builder.command().add("-R");
 		}
-		Process process = new RunProcess(builder, threadFactory).run(consumer);
-		return new ProcessId(process);
+		return new ProcessId(new RunProcess(builder).run());
 	}
 
 	@Override
-	protected int terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
-			Consumer<String> consumer) throws IOException, InterruptedException {
+	protected void stop(ProcessId processId, Map<String, String> environment) throws InterruptedException {
+		ProcessBuilder builder = new ProcessBuilder().directory(this.workingDirectory.toFile())
+				.redirectErrorStream(true);
+		builder.environment().putAll(environment);
+		Process process = processId.getProcess();
+		long pid = processId.getPid();
+		if (terminate(pid, builder) != 0) {
+			process.destroy();
+		}
+		if (!process.waitFor(5, TimeUnit.SECONDS)) {
+			if (kill(pid, builder) != 0) {
+				process.destroy();
+			}
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
+				process.destroyForcibly();
+			}
+		}
+	}
+
+	private int terminate(long pid, ProcessBuilder builder) throws InterruptedException {
 		if (pid != -1) {
-			return new RunProcess(builder.command("kill", Long.toString(pid)), threadFactory).run(consumer).waitFor();
+			return new RunProcess(builder.command("kill", Long.toString(pid))).runAndWait();
 		}
 		return -1;
 	}
 
-	@Override
-	protected int kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
-			throws IOException, InterruptedException {
+	private int kill(long pid, ProcessBuilder builder) throws InterruptedException {
 		if (pid != -1) {
-			return new RunProcess(builder.command("kill", "-SIGKILL", Long.toString(pid)), threadFactory).run(consumer)
-					.waitFor();
+			return new RunProcess(builder.command("kill", "-SIGINT", Long.toString(pid))).runAndWait();
 		}
 		return -1;
 	}

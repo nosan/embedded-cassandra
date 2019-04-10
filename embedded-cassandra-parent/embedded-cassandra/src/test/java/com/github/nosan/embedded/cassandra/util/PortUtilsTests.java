@@ -46,7 +46,7 @@ class PortUtilsTests {
 		int port = PortUtils.getPort();
 		assertThat(PortUtils.isPortBusy(null, port)).isFalse();
 		try (ServerSocket ss = new ServerSocket(port)) {
-			assertThat(PortUtils.isPortBusy(NetworkUtils.getLocalhost(), ss.getLocalPort())).isTrue();
+			assertThat(PortUtils.isPortBusy(ss.getInetAddress(), ss.getLocalPort())).isTrue();
 		}
 	}
 

@@ -19,54 +19,41 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Windows implementation of the {@link CassandraNode}.
+ * Windows based {@link CassandraNode} implementation.
  *
  * @author Dmytro Nosan
- * @since 1.4.1
+ * @since 2.0.0
  */
 class WindowsCassandraNode extends AbstractCassandraNode {
 
-	private final Path workingDirectory;
-
 	private final Version version;
 
-	@Nullable
-	private Path pidFile;
+	private final Path workingDirectory;
 
-	/**
-	 * Creates a {@link WindowsCassandraNode}.
-	 *
-	 * @param workingDirectory a configured base directory
-	 * @param version a version
-	 * @param timeout a startup timeout
-	 * @param jvmOptions additional {@code JVM} options
-	 * @param javaHome java home directory
-	 * @param jmxPort JMX port
-	 */
-	WindowsCassandraNode(Path workingDirectory, Version version, Duration timeout, List<String> jvmOptions,
-			@Nullable Path javaHome, int jmxPort) {
-		super(workingDirectory, version, timeout, jvmOptions, javaHome, jmxPort);
-		this.workingDirectory = workingDirectory;
+	WindowsCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome,
+			Ports ports, List<String> jvmOptions) {
+		super(version, javaHome, ports, jvmOptions);
 		this.version = version;
+		this.workingDirectory = workingDirectory;
 	}
 
 	@Override
-	protected ProcessId start(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
-			throws IOException {
+	ProcessId start(Map<String, String> environment) throws IOException {
 		Path workingDirectory = this.workingDirectory;
 		Version version = this.version;
+		ProcessBuilder builder = new ProcessBuilder().directory(workingDirectory.toFile())
+				.redirectErrorStream(true);
+		builder.environment().putAll(environment);
 		Path pidFile = workingDirectory.resolve(UUID.randomUUID().toString());
-		this.pidFile = pidFile;
 		builder.command("powershell", "-ExecutionPolicy", "Unrestricted",
 				workingDirectory.resolve("bin/cassandra.ps1").toString(), "-f");
 		if (version.getMajor() > 2 || (version.getMajor() == 2 && version.getMinor() > 1)) {
@@ -74,55 +61,51 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		}
 		builder.command().add("-p");
 		builder.command().add(pidFile.toString());
-		Process process = new RunProcess(builder, threadFactory).run(consumer);
-		return new ProcessId(process, pidFile);
+		return new ProcessId(new RunProcess(builder).run(), pidFile);
 	}
 
 	@Override
-	protected int terminate(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
-			Consumer<String> consumer) throws IOException, InterruptedException {
-		int exitCode = terminateByPidFile(builder, threadFactory, consumer);
-		if (exitCode != 0) {
-			return terminateByPid(pid, builder, threadFactory, consumer);
+	void stop(ProcessId processId, Map<String, String> environment) throws InterruptedException {
+		Path workingDirectory = this.workingDirectory;
+		ProcessBuilder builder = new ProcessBuilder().directory(workingDirectory.toFile())
+				.redirectErrorStream(true);
+		builder.environment().putAll(environment);
+		Process process = processId.getProcess();
+		if (terminate(processId, builder) != 0) {
+			process.destroy();
 		}
-		return exitCode;
-	}
-
-	@Override
-	protected int kill(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
-			throws IOException, InterruptedException {
-		int exitCode = killByPidFile(builder, threadFactory, consumer);
-		if (exitCode != 0) {
-			return killByPid(pid, builder, threadFactory, consumer);
+		if (!process.waitFor(5, TimeUnit.SECONDS)) {
+			if (kill(processId, builder) != 0) {
+				process.destroy();
+			}
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
+				process.destroyForcibly();
+			}
 		}
-		return exitCode;
 	}
 
-	private int terminateByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
-			throws IOException, InterruptedException {
-		return killByPidFile(builder, threadFactory, consumer, false);
+	private int terminate(ProcessId processId, ProcessBuilder builder) throws InterruptedException {
+		long pid = processId.getPid();
+		Path pidFile = processId.getPidFile();
+		int exit = killByPidFile(pidFile, builder, false);
+		if (exit != 0 && pid != -1) {
+			return killByPid(pid, builder, false);
+		}
+		return exit;
 	}
 
-	private int terminateByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory,
-			Consumer<String> consumer) throws IOException, InterruptedException {
-		return killByPid(pid, builder, threadFactory, consumer, false);
+	private int kill(ProcessId processId, ProcessBuilder builder) throws InterruptedException {
+		long pid = processId.getPid();
+		Path pidFile = processId.getPidFile();
+		int exit = killByPidFile(pidFile, builder, true);
+		if (exit != 0 && pid != -1) {
+			return killByPid(pid, builder, true);
+		}
+		return exit;
 	}
 
-	private int killByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
-			throws IOException, InterruptedException {
-		return killByPid(pid, builder, threadFactory, consumer, true);
-
-	}
-
-	private int killByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer)
-			throws IOException, InterruptedException {
-		return killByPidFile(builder, threadFactory, consumer, true);
-
-	}
-
-	private int killByPidFile(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer,
-			boolean force) throws IOException, InterruptedException {
-		Path pidFile = this.pidFile;
+	private int killByPidFile(@Nullable Path pidFile, ProcessBuilder builder, boolean force)
+			throws InterruptedException {
 		Path stopServerFile = this.workingDirectory.resolve("bin/stop-server.ps1");
 		if (pidFile != null && Files.exists(pidFile) && Files.exists(stopServerFile)) {
 			builder.command("powershell", "-ExecutionPolicy", "Unrestricted");
@@ -132,23 +115,19 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			if (force) {
 				builder.command().add("-f");
 			}
-			return new RunProcess(builder, threadFactory).run(consumer).waitFor();
+			return new RunProcess(builder).runAndWait();
 		}
 		return -1;
 	}
 
-	private int killByPid(long pid, ProcessBuilder builder, ThreadFactory threadFactory, Consumer<String> consumer,
-			boolean force) throws IOException, InterruptedException {
-		if (pid != -1) {
-			builder.command("taskkill");
-			if (force) {
-				builder.command().add("/f");
-			}
-			builder.command().add("/pid");
-			builder.command().add(Long.toString(pid));
-			return new RunProcess(builder, threadFactory).run(consumer).waitFor();
+	private int killByPid(long pid, ProcessBuilder builder, boolean force) throws InterruptedException {
+		builder.command("taskkill");
+		if (force) {
+			builder.command().add("/f");
 		}
-		return -1;
+		builder.command().add("/pid");
+		builder.command().add(Long.toString(pid));
+		return new RunProcess(builder).runAndWait();
 	}
 
 }

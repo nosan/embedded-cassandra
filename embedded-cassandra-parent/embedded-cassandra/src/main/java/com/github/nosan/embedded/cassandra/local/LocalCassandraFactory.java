@@ -18,42 +18,55 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.net.URL;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import org.apiguardian.api.API;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
-import com.github.nosan.embedded.cassandra.util.FileUtils;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
+import com.github.nosan.embedded.cassandra.util.SystemUtils;
 
 /**
  * {@link CassandraFactory} to create a local {@link Cassandra}.
  *
  * @author Dmytro Nosan
- * @see LocalCassandraFactoryBuilder
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public final class LocalCassandraFactory implements CassandraFactory {
+
+	private static final String SNAKEYAML_YAML_CLASS = "org.yaml.snakeyaml.Yaml";
 
 	private final List<String> jvmOptions = new ArrayList<>();
 
-	@Nullable
-	private Version version;
+	private final List<WorkingDirectoryCustomizer> workingDirectoryCustomizers = new ArrayList<>();
 
 	@Nullable
 	private ArtifactFactory artifactFactory;
 
 	@Nullable
-	private Duration startupTimeout;
+	private Version version;
+
+	@Nullable
+	private Integer port;
+
+	@Nullable
+	private Integer rpcPort;
+
+	@Nullable
+	private Integer storagePort;
+
+	@Nullable
+	private Integer sslStoragePort;
+
+	@Nullable
+	private Integer jmxLocalPort;
 
 	@Nullable
 	private Path artifactDirectory;
@@ -62,10 +75,10 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	private Path workingDirectory;
 
 	@Nullable
-	private URL configurationFile;
+	private Path javaHome;
 
 	@Nullable
-	private URL logbackFile;
+	private URL loggingFile;
 
 	@Nullable
 	private URL rackFile;
@@ -74,18 +87,13 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	private URL topologyFile;
 
 	@Nullable
-	private Path javaHome;
-
-	@Nullable
-	private URL commitLogArchivingFile;
-
-	private int jmxPort = 7199;
+	private URL configurationFile;
 
 	private boolean allowRoot = false;
 
 	private boolean registerShutdownHook = true;
 
-	private boolean deleteWorkingDirectory = false;
+	private boolean deleteWorkingDirectory = true;
 
 	/**
 	 * Whether to allow running Cassandra as a {@code root} or not.
@@ -100,35 +108,13 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#isAllowRoot() allowRoot} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#isAllowRoot()} attribute.
 	 *
 	 * @param allowRoot The value for allowRoot
 	 * @since 1.2.1
 	 */
 	public void setAllowRoot(boolean allowRoot) {
 		this.allowRoot = allowRoot;
-	}
-
-	/**
-	 * JMX port to listen on.
-	 * <p>
-	 * This value will be added as {@code -Dcassandra.jmx.local.port={jmxPort}} system property.
-	 *
-	 * @return The value of the {@code jmxPort} attribute
-	 * @since 1.1.1
-	 */
-	public int getJmxPort() {
-		return this.jmxPort;
-	}
-
-	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getJmxPort() jmxPort} attribute.
-	 *
-	 * @param jmxPort The value for jmxPort
-	 * @since 1.1.1
-	 */
-	public void setJmxPort(int jmxPort) {
-		this.jmxPort = jmxPort;
 	}
 
 	/**
@@ -145,43 +131,13 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome() javaHome} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getJavaHome()} attribute.
 	 *
 	 * @param javaHome The value for javaHome
 	 * @since 1.0.9
 	 */
 	public void setJavaHome(@Nullable Path javaHome) {
 		this.javaHome = javaHome;
-	}
-
-	/**
-	 * Startup timeout.
-	 *
-	 * @return The value of the {@code startupTimeout} attribute
-	 */
-	@Nullable
-	public Duration getStartupTimeout() {
-		return this.startupTimeout;
-	}
-
-	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getStartupTimeout() timeout} attribute.
-	 *
-	 * @param startupTimeout The value for startupTimeout
-	 */
-	public void setStartupTimeout(@Nullable Duration startupTimeout) {
-		this.startupTimeout = startupTimeout;
-	}
-
-	/**
-	 * JVM options that should be associated with Cassandra.
-	 * <p>
-	 * These values will be added as {@code $JVM_EXTRA_OPTS} environment variable.
-	 *
-	 * @return The value of the {@code jvmOptions} attribute
-	 */
-	public List<String> getJvmOptions() {
-		return this.jvmOptions;
 	}
 
 	/**
@@ -196,7 +152,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getRackFile() rackFile} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getRackFile()} attribute.
 	 *
 	 * @param rackFile The value for rackFile
 	 */
@@ -216,7 +172,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getTopologyFile() topologyFile} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getTopologyFile()} attribute.
 	 *
 	 * @param topologyFile The value for topologyFile
 	 */
@@ -235,7 +191,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getVersion() version} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getVersion()} attribute.
 	 *
 	 * @param version The value for version
 	 */
@@ -254,7 +210,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getArtifactFactory() artifactFactory} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getArtifactFactory()} attribute.
 	 *
 	 * @param artifactFactory The value for artifactFactory
 	 * @see RemoteArtifactFactory
@@ -265,7 +221,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	/**
 	 * Cassandra directory. This directory keeps data/logs and other files. Default value is {@link
-	 * FileUtils#getTmpDirectory() tmp.dir}{@code /embedded-cassandra/{version}/{UUID}}.
+	 * SystemUtils#getTmpDirectory() java.io.tmpdir}{@code /embedded-cassandra/{version}/{UUID}}.
 	 *
 	 * @return The value of the {@code workingDirectory} attribute
 	 */
@@ -275,7 +231,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getWorkingDirectory() workingDirectory} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getWorkingDirectory()} attribute.
 	 *
 	 * @param workingDirectory The value for workingDirectory
 	 */
@@ -294,7 +250,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getConfigurationFile() configurationFile} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getConfigurationFile()} attribute.
 	 *
 	 * @param configurationFile The value for configurationFile
 	 */
@@ -303,22 +259,22 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Cassandra logging file ({@code logback.xml}).
+	 * Cassandra logging file.
 	 *
-	 * @return The value of the {@code logbackFile} attribute
+	 * @return The value of the {@code logging file} attribute
 	 */
 	@Nullable
-	public URL getLogbackFile() {
-		return this.logbackFile;
+	public URL getLoggingFile() {
+		return this.loggingFile;
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getLogbackFile() logbackFile} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getLoggingFile()} attribute.
 	 *
-	 * @param logbackFile The value for logbackFile
+	 * @param loggingFile The value for logging file
 	 */
-	public void setLogbackFile(@Nullable URL logbackFile) {
-		this.logbackFile = logbackFile;
+	public void setLoggingFile(@Nullable URL loggingFile) {
+		this.loggingFile = loggingFile;
 	}
 
 	/**
@@ -333,7 +289,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#isRegisterShutdownHook() registerShutdownHook}
+	 * Initializes the value for the {@link LocalCassandraFactory#isRegisterShutdownHook()}
 	 * attribute.
 	 *
 	 * @param registerShutdownHook The value for registerShutdownHook
@@ -344,30 +300,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Commit log archiving configuration file ({@code commitlog_archiving.properties}).
-	 *
-	 * @return The value of the {@code commitLogArchivingFile} attribute
-	 * @since 1.2.8
-	 */
-	@Nullable
-	public URL getCommitLogArchivingFile() {
-		return this.commitLogArchivingFile;
-	}
-
-	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getCommitLogArchivingFile() commitLogArchivingFile}
-	 * attribute.
-	 *
-	 * @param commitLogArchivingFile The value for commitLogArchivingFile
-	 * @since 1.2.8
-	 */
-	public void setCommitLogArchivingFile(@Nullable URL commitLogArchivingFile) {
-		this.commitLogArchivingFile = commitLogArchivingFile;
-	}
-
-	/**
-	 * Directory to extract an {@link Artifact} (must be writable). Default value is {@link FileUtils#getTmpDirectory()
-	 * tmp.dir}{@code /embedded-cassandra/{version}/apache-cassandra-{version}}.
+	 * Directory to extract an {@link Artifact} (must be writable). Default value is {@link
+	 * SystemUtils#getTmpDirectory() java.io.tmpdir}{@code /embedded-cassandra/{version}/apache-cassandra-{version}}.
 	 *
 	 * @return The value of the {@code artifactDirectory} attribute
 	 * @since 1.3.0
@@ -378,7 +312,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#getArtifactDirectory} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#getArtifactDirectory()} attribute.
 	 *
 	 * @param artifactDirectory The value for artifactDirectory
 	 * @since 1.3.0
@@ -391,22 +325,201 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	 * Delete the working directory after success {@code Cassandra} stop.
 	 *
 	 * @return The value of the {@code deleteWorkingDirectory} attribute
-	 * @since 1.4.3
+	 * @since 2.0.0
 	 */
-	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public boolean isDeleteWorkingDirectory() {
 		return this.deleteWorkingDirectory;
 	}
 
 	/**
-	 * Initializes the value for the {@link LocalCassandraFactory#isDeleteWorkingDirectory} attribute.
+	 * Initializes the value for the {@link LocalCassandraFactory#isDeleteWorkingDirectory()} attribute.
 	 *
 	 * @param deleteWorkingDirectory The value for deleteWorkingDirectory
-	 * @since 1.4.3
+	 * @since 2.0.0
 	 */
-	@API(since = "1.4.3", status = API.Status.MAINTAINED)
 	public void setDeleteWorkingDirectory(boolean deleteWorkingDirectory) {
 		this.deleteWorkingDirectory = deleteWorkingDirectory;
+	}
+
+	/**
+	 * The native transport port to listen for the clients on.
+	 * This value will be added as {@code -Dcassandra.native_transport_port} system property.
+	 *
+	 * @return native transport port
+	 * @since 2.0.0
+	 */
+	@Nullable
+	public Integer getPort() {
+		return this.port;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getPort()} attribute.
+	 *
+	 * @param port The value for port
+	 * @since 2.0.0
+	 */
+	public void setPort(@Nullable Integer port) {
+		this.port = port;
+	}
+
+	/**
+	 * Thrift port for client connections.
+	 * This value will be added as {@code -Dcassandra.rpc_port} system property.
+	 *
+	 * @return the thrift port
+	 * @since 2.0.0
+	 */
+	@Nullable
+	public Integer getRpcPort() {
+		return this.rpcPort;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getRpcPort()} attribute.
+	 *
+	 * @param rpcPort The value for rpcPort
+	 * @since 2.0.0
+	 */
+	public void setRpcPort(@Nullable Integer rpcPort) {
+		this.rpcPort = rpcPort;
+	}
+
+	/**
+	 * The port for inter-node communication.
+	 * This value will be added as {@code -Dcassandra.storage_port} system property.
+	 *
+	 * @return storage port
+	 * @since 2.0.0
+	 */
+	@Nullable
+	public Integer getStoragePort() {
+		return this.storagePort;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getStoragePort()} attribute.
+	 *
+	 * @param storagePort The value for storagePort
+	 * @since 2.0.0
+	 */
+	public void setStoragePort(@Nullable Integer storagePort) {
+		this.storagePort = storagePort;
+	}
+
+	/**
+	 * The ssl port for inter-node communication.
+	 * <p>
+	 * This value will be added as {@code -Dcassandra.ssl_storage_port} system property.
+	 *
+	 * @return storage ssl port
+	 * @since 2.0.0
+	 */
+	@Nullable
+	public Integer getSslStoragePort() {
+		return this.sslStoragePort;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getSslStoragePort()} attribute.
+	 *
+	 * @param sslStoragePort The value for sslStoragePort
+	 * @since 2.0.0
+	 */
+	public void setSslStoragePort(@Nullable Integer sslStoragePort) {
+		this.sslStoragePort = sslStoragePort;
+	}
+
+	/**
+	 * JMX port to listen on.
+	 * <p>
+	 * This value will be added as {@code -Dcassandra.jmx.local.port} system property.
+	 *
+	 * @return The value of the {@code jmxPort} attribute
+	 * @since 1.1.1
+	 */
+	@Nullable
+	public Integer getJmxLocalPort() {
+		return this.jmxLocalPort;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getJmxLocalPort()} attribute.
+	 *
+	 * @param jmxLocalPort The value for jmxLocalPort
+	 * @since 1.1.1
+	 */
+	public void setJmxLocalPort(@Nullable Integer jmxLocalPort) {
+		this.jmxLocalPort = jmxLocalPort;
+	}
+
+	/**
+	 * JVM options that should be associated with Cassandra.
+	 * <p>
+	 * These values will be added as {@code $JVM_EXTRA_OPTS} environment variable.
+	 *
+	 * @return The value of the {@code jvmOptions} attribute
+	 */
+	public List<String> getJvmOptions() {
+		return this.jvmOptions;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getJvmOptions()} attribute.
+	 *
+	 * @param jvmOptions the jvm options
+	 * @since 2.0.0
+	 */
+	public void setJvmOptions(String... jvmOptions) {
+		this.jvmOptions.clear();
+		this.jvmOptions.addAll(Arrays.asList(jvmOptions));
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getJvmOptions()} attribute.
+	 *
+	 * @param jvmOptions the jvm options
+	 * @since 2.0.0
+	 */
+	public void setJvmOptions(Iterable<String> jvmOptions) {
+		this.jvmOptions.clear();
+		for (String jvmOption : jvmOptions) {
+			this.jvmOptions.add(jvmOption);
+		}
+	}
+
+	/**
+	 * Customizers that should be applied during working directory initialization.
+	 *
+	 * @return the customizers
+	 * @since 2.0.0
+	 */
+	public List<WorkingDirectoryCustomizer> getWorkingDirectoryCustomizers() {
+		return this.workingDirectoryCustomizers;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getWorkingDirectoryCustomizers()} attribute.
+	 *
+	 * @param workingDirectoryCustomizers the customizers
+	 * @since 2.0.0
+	 */
+	public void setWorkingDirectoryCustomizers(WorkingDirectoryCustomizer... workingDirectoryCustomizers) {
+		this.workingDirectoryCustomizers.clear();
+		this.workingDirectoryCustomizers.addAll(Arrays.asList(workingDirectoryCustomizers));
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getWorkingDirectoryCustomizers()} attribute.
+	 *
+	 * @param customizers the customizers
+	 * @since 2.0.0
+	 */
+	public void setWorkingDirectoryCustomizers(Iterable<? extends WorkingDirectoryCustomizer> customizers) {
+		this.workingDirectoryCustomizers.clear();
+		for (WorkingDirectoryCustomizer customizer : customizers) {
+			this.workingDirectoryCustomizers.add(customizer);
+		}
 	}
 
 	@Override
@@ -417,31 +530,65 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 		Version version = getVersion();
 		if (version == null) {
-			version = new Version(3, 11, 4);
-		}
-		Duration startupTimeout = getStartupTimeout();
-		if (startupTimeout == null || startupTimeout.toMillis() <= 0) {
-			startupTimeout = Duration.ofMinutes(1);
+			version = Version.parse("3.11.4");
 		}
 		Path workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null) {
-			workingDirectory = FileUtils.getTmpDirectory()
+			workingDirectory = getTempDir()
 					.resolve(String.format("embedded-cassandra/%s/%s", version, UUID.randomUUID()));
 		}
 		Path artifactDirectory = getArtifactDirectory();
 		if (artifactDirectory == null) {
-			artifactDirectory = FileUtils.getTmpDirectory()
+			artifactDirectory = getTempDir()
 					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
 		}
-		if (artifactDirectory.equals(workingDirectory)) {
-			throw new IllegalArgumentException(
-					String.format("Artifact Directory '%s' must not be the same as Working Directory '%s'",
-							artifactDirectory, workingDirectory));
+		CassandraNode cassandraNode = createCassandraNode(workingDirectory, version);
+		CassandraDatabase cassandraDatabase = new LocalCassandraDatabase(cassandraNode, workingDirectory,
+				artifactDirectory, artifactFactory, isDeleteWorkingDirectory(), getMergedWorkingDirectoryCustomizers());
+		return new LocalCassandra(isRegisterShutdownHook(), cassandraDatabase);
+	}
+
+	private Path getTempDir() {
+		return SystemUtils.getTmpDirectory()
+				.orElseThrow(() -> new IllegalStateException("java.io.tmpdir is not defined."
+						+ " Please set java.io.tmpdir system property."));
+	}
+
+	private List<WorkingDirectoryCustomizer> getMergedWorkingDirectoryCustomizers() {
+		List<WorkingDirectoryCustomizer> customizers = new ArrayList<>();
+		URL configurationFile = getConfigurationFile();
+		if (configurationFile != null) {
+			customizers.add(new ConfigurationFileCustomizer(configurationFile));
 		}
-		return new LocalCassandra(version, artifactFactory, workingDirectory, artifactDirectory, startupTimeout,
-				getConfigurationFile(), getLogbackFile(), getRackFile(), getTopologyFile(), getCommitLogArchivingFile(),
-				getJvmOptions(), getJavaHome(), getJmxPort(), isAllowRoot(), isRegisterShutdownHook(),
-				isDeleteWorkingDirectory());
+		URL rackFile = getRackFile();
+		if (rackFile != null) {
+			customizers.add(new RackFileCustomizer(rackFile));
+		}
+		URL topologyFile = getTopologyFile();
+		if (topologyFile != null) {
+			customizers.add(new TopologyFileCustomizer(topologyFile));
+		}
+		URL loggingFile = getLoggingFile();
+		if (loggingFile != null) {
+			customizers.add(new LoggingFileCustomizer(loggingFile));
+		}
+		if (ClassUtils.isPresent(SNAKEYAML_YAML_CLASS, getClass().getClassLoader())) {
+			customizers.add(new ConfigurationFileRandomPortCustomizer());
+		}
+		if (!SystemUtils.isWindows()) {
+			customizers.add(new CassandraFileExecutableCustomizer());
+		}
+		customizers.addAll(getWorkingDirectoryCustomizers());
+		return customizers;
+	}
+
+	private CassandraNode createCassandraNode(Path workingDirectory, Version version) {
+		Ports ports = new Ports(getPort(), getRpcPort(), getStoragePort(), getSslStoragePort(), getJmxLocalPort());
+		if (SystemUtils.isWindows()) {
+			return new WindowsCassandraNode(version, workingDirectory, getJavaHome(), ports, getJvmOptions());
+		}
+		return new UnixCassandraNode(version, workingDirectory, getJavaHome(), ports, getJvmOptions(),
+				isAllowRoot());
 	}
 
 }

@@ -22,9 +22,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
  * {@link CqlScript} implementation for {@link URL}.
@@ -33,7 +31,6 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  * @see CqlScript#urls(URL...)
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public final class UrlCqlScript extends AbstractCqlResourceScript {
 
 	private final URL url;

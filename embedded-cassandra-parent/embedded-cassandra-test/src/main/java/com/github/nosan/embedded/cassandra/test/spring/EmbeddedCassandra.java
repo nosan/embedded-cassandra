@@ -23,14 +23,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.datastax.driver.core.Cluster;
-import org.apiguardian.api.API;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.test.annotation.DirtiesContext;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
-import com.github.nosan.embedded.cassandra.test.ClusterFactory;
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -40,23 +38,18 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * &#064;RunWith(SpringRunner.class) //for JUnit4
  * &#064;EmbeddedCassandra
  * public class CassandraTests {
- * &#064;Autowired
- * private TestCassandra cassandra;
- * &#064;Autowired
- * private Cluster cluster; // `replace` attribute is Replace.ANY
+ * 	&#064;Test
+ * 	void testMe(){
+ *    }
  * }
  * </pre>
- * {@link TestCassandra} bean with a name <em>embeddedCassandra</em> will be registered as a <b>@Primary</b> bean.
- * <p>
- * <b>Note!</b> It is possible to define you own {@link ClusterFactory} or {@link CassandraFactory} bean(s) to
- * control {@link TestCassandra} instance.
+ * It is possible to define you own {@link CassandraFactory}, {@link TestCassandraFactory}, {@link
+ * CassandraFactoryTestCustomizer} bean(s) to control {@link TestCassandra} instance.
  *
  * @author Dmytro Nosan
- * @see EmbeddedLocalCassandra
- * @see EmbeddedCassandraContextCustomizer
- * @see ClusterFactory
  * @see CassandraFactory
- * @see TestCassandra
+ * @see TestCassandraFactory
+ * @see CassandraFactoryTestCustomizer
  * @see DirtiesContext
  * @since 1.0.0
  */
@@ -65,8 +58,96 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 @Documented
 @Inherited
 @DirtiesContext
-@API(since = "1.0.0", status = API.Status.STABLE)
 public @interface EmbeddedCassandra {
+
+	/**
+	 * {@link Version} to use.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
+	 *
+	 * @return a version, or {@code empty} to ignore
+	 * @since 2.0.0
+	 */
+	String version() default "";
+
+	/**
+	 * Cassandra configuration file ({@code cassandra.yaml}).
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
+	 *
+	 * @return the configuration file, or {@code empty} to ignore
+	 * @since 2.0.0
+	 */
+	String configurationFile() default "";
+
+	/**
+	 * The native transport port to listen for the clients on.
+	 * This value will be added as {@code -Dcassandra.native_transport_port} system property.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
+	 *
+	 * @return native transport port, or {@code empty} to ignore
+	 * @since 2.0.0
+	 */
+	String port() default "";
+
+	/**
+	 * Thrift port for client connections.
+	 * This value will be added as {@code -Dcassandra.rpc_port} system property.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
+	 *
+	 * @return the thrift port, or {@code empty} to ignore
+	 * @since 2.0.0
+	 */
+	String rpcPort() default "";
+
+	/**
+	 * The port for inter-node communication.
+	 * This value will be added as {@code -Dcassandra.storage_port} system property.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
+	 *
+	 * @return storage port, or {@code empty} to ignore
+	 * @since 2.0.0
+	 */
+	String storagePort() default "";
+
+	/**
+	 * The ssl port for inter-node communication.
+	 * <p>
+	 * This value will be added as {@code -Dcassandra.ssl_storage_port} system property.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
+	 *
+	 * @return storage ssl port, or {@code empty} to ignore
+	 * @since 2.0.0
+	 */
+	String sslStoragePort() default "";
+
+	/**
+	 * JMX port to listen on.
+	 * <p>
+	 * This value will be added as {@code -Dcassandra.jmx.local.port} system property.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
+	 *
+	 * @return jmx local port, or {@code empty} to ignore
+	 * @since 2.0.0
+	 */
+	String jmxLocalPort() default "";
+
+	/**
+	 * JVM options that should be associated with Cassandra.
+	 * <p>
+	 * These values will be added as {@code $JVM_EXTRA_OPTS} environment variable.
+	 * <p>
+	 * Can contain {@code ${...}} placeholders.
+	 *
+	 * @return jvm options
+	 * @since 2.0.0
+	 */
+	String[] jvmOptions() default {};
 
 	/**
 	 * The paths to the CQL scripts to execute.
@@ -79,6 +160,8 @@ public @interface EmbeddedCassandra {
 	 * <p>All resources will be loaded by {@link ResourcePatternResolver}.
 	 * Resources which were loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
 	 * Resource.getURL().toString()}.
+	 * <p>
+	 * Can contain {@code ${...}} placeholders.
 	 *
 	 * @return CQL Scripts
 	 */
@@ -86,8 +169,7 @@ public @interface EmbeddedCassandra {
 
 	/**
 	 * <em>CQL statements</em> to execute.
-	 * <p>This attribute may be used in conjunction with or instead of
-	 * {@link #scripts}.
+	 * <p>This attribute may be used in conjunction with or instead of {@link #scripts}.
 	 * <h3>Ordering</h3>
 	 * <p>Statements declared via this attribute will be executed after
 	 * statements loaded from {@link #scripts}.
@@ -99,44 +181,11 @@ public @interface EmbeddedCassandra {
 
 	/**
 	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
-	 * <p>An empty string denotes that the platform encoding should be used.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
 	 *
 	 * @return CQL scripts encoding.
 	 */
 	String encoding() default "";
-
-	/**
-	 * Determines what type of existing {@link Cluster} beans can be replaced.
-	 *
-	 * @return the type of existing {@link Cluster} to replace
-	 */
-	Replace replace() default Replace.NONE;
-
-	/**
-	 * Register a shutdown hook with the JVM runtime, stops {@link TestCassandra} on JVM shutdown unless it has already
-	 * been stopped at that time.
-	 *
-	 * @return The value of the {@code registerShutdownHook} attribute
-	 * @since 1.2.8
-	 */
-	boolean registerShutdownHook() default true;
-
-	/**
-	 * What the {@link Cluster} should be replaced.
-	 */
-	enum Replace {
-
-		/**
-		 * Replace any {@link Cluster} beans with an embedded <b>@Primary</b> {@link Cluster} bean with a name
-		 * <em>embeddedCluster</em>.
-		 */
-		ANY,
-
-		/**
-		 * Don't replace {@link Cluster} beans.
-		 */
-		NONE
-
-	}
 
 }

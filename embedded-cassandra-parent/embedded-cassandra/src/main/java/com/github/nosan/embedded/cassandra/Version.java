@@ -17,27 +17,23 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnegative;
-
-import org.apiguardian.api.API;
-
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * Simple class to represent {@link Cassandra} version.
+ * A simple class to represent the version.
  *
  * @author Dmytro Nosan
  * @see #parse(String)
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public final class Version implements Comparable<Version> {
 
-	private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)(\\.([0-9]+))?(\\.([0-9]+))?.*$");
+	private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+)(\\.([0-9]+))(\\.([0-9]+))?.*$");
 
 	private final String version;
 
@@ -45,48 +41,10 @@ public final class Version implements Comparable<Version> {
 
 	private final int minor;
 
-	private final int patch;
+	@Nullable
+	private final Integer patch;
 
-	/**
-	 * Creates a {@link Version}.
-	 *
-	 * @param major a major value
-	 */
-	public Version(@Nonnegative int major) {
-		this(nonNegative(major), -1, -1, Integer.toString(major));
-	}
-
-	/**
-	 * Creates a {@link Version}.
-	 *
-	 * @param major a major value
-	 * @param minor a minor value
-	 */
-	public Version(@Nonnegative int major, @Nonnegative int minor) {
-		this(nonNegative(major), nonNegative(minor), -1, String.format("%s.%s", major, minor));
-	}
-
-	/**
-	 * Creates a {@link Version}.
-	 *
-	 * @param major a major value
-	 * @param minor a minor value
-	 * @param patch a patch value
-	 */
-	public Version(@Nonnegative int major, @Nonnegative int minor, @Nonnegative int patch) {
-		this(nonNegative(major), nonNegative(minor), nonNegative(patch),
-				String.format("%s.%s.%s", major, minor, patch));
-	}
-
-	/**
-	 * Creates a {@link Version}.
-	 *
-	 * @param major a major value
-	 * @param minor a minor value
-	 * @param patch a patch value
-	 * @param version a string value of the version
-	 */
-	private Version(int major, int minor, int patch, String version) {
+	private Version(int major, int minor, @Nullable Integer patch, String version) {
 		this.major = major;
 		this.minor = minor;
 		this.patch = patch;
@@ -96,28 +54,23 @@ public final class Version implements Comparable<Version> {
 	/**
 	 * Parses a {@code version}.
 	 *
-	 * @param version a text version (expected format ({@link #VERSION_PATTERN}))
-	 * @return a parsed {@link Version}
+	 * @param version a version
+	 * @return a {@link Version}
 	 */
 	public static Version parse(String version) {
 		Objects.requireNonNull(version, "Version must not be null");
 		Matcher matcher = VERSION_PATTERN.matcher(version.trim());
 		if (matcher.find()) {
 			int major = Integer.parseInt(matcher.group(1));
-			int minor = -1;
-			int patch = -1;
-			String minorGroup = matcher.group(3);
-			if (StringUtils.hasText(minorGroup)) {
-				minor = Integer.parseInt(minorGroup);
-			}
+			int minor = Integer.parseInt(matcher.group(3));
+			Integer patch = null;
 			String patchGroup = matcher.group(5);
 			if (StringUtils.hasText(patchGroup)) {
 				patch = Integer.parseInt(patchGroup);
 			}
 			return new Version(major, minor, patch, matcher.group(0));
 		}
-		throw new IllegalArgumentException(
-				String.format("Version '%s' is invalid. Expected format is %s", version, VERSION_PATTERN));
+		throw new IllegalArgumentException(String.format("Version '%s' is invalid.", version));
 	}
 
 	/**
@@ -132,19 +85,19 @@ public final class Version implements Comparable<Version> {
 	/**
 	 * Returns a minor value.
 	 *
-	 * @return The value of the {@code minor} attribute, or {@code -1}.
+	 * @return The value of the {@code minor} attribute
 	 */
 	public int getMinor() {
 		return this.minor;
 	}
 
 	/**
-	 * Returns a patch value.
+	 * Returns a patch value, or empty.
 	 *
-	 * @return The value of the {@code patch} attribute, or {@code -1}.
+	 * @return The value of the {@code patch} attribute, or empty
 	 */
-	public int getPatch() {
-		return this.patch;
+	public Optional<Integer> getPatch() {
+		return Optional.ofNullable(this.patch);
 	}
 
 	@Override
@@ -172,11 +125,11 @@ public final class Version implements Comparable<Version> {
 	@Override
 	public int compareTo(Version other) {
 		Objects.requireNonNull(other, "Version must not be null");
-		int majorCmp = Integer.compare(this.major, other.major);
+		int majorCmp = Integer.compare(getMajor(), other.getMajor());
 		if (majorCmp == 0) {
-			int minCmp = Integer.compare(this.minor, other.minor);
+			int minCmp = Integer.compare(getMinor(), other.getMinor());
 			if (minCmp == 0) {
-				int patchCmp = Integer.compare(this.patch, other.patch);
+				int patchCmp = Integer.compare(getPatch().orElse(-1), other.getPatch().orElse(-1));
 				if (patchCmp == 0) {
 					return this.version.compareTo(other.version);
 				}
@@ -185,13 +138,6 @@ public final class Version implements Comparable<Version> {
 			return minCmp;
 		}
 		return majorCmp;
-	}
-
-	private static int nonNegative(int value) {
-		if (value < 0) {
-			throw new IllegalArgumentException(String.format("Value '%s' must be positive or zero", value));
-		}
-		return value;
 	}
 
 }

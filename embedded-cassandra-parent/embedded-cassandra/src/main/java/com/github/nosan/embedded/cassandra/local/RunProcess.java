@@ -16,18 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ThreadFactory;
-import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.github.nosan.embedded.cassandra.util.StringUtils;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Utility class to run a {@link Process}.
@@ -37,27 +29,12 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  */
 class RunProcess {
 
-	private static final EmptyConsumer EMPTY_CONSUMER = new EmptyConsumer();
-
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
 
-	private final ProcessBuilder processBuilder;
+	private final ProcessBuilder builder;
 
-	private final ThreadFactory threadFactory;
-
-	/**
-	 * Creates a new {@link RunProcess} instance.
-	 *
-	 * @param processBuilder {@link ProcessBuilder} to create a {@link Process}
-	 * @param threadFactory {@link ThreadFactory} to create a {@link Thread}
-	 */
-	RunProcess(ProcessBuilder processBuilder, @Nullable ThreadFactory threadFactory) {
-		this.processBuilder = processBuilder;
-		this.threadFactory = (threadFactory != null) ? threadFactory : (runnable) -> {
-			Thread thread = new Thread(runnable);
-			thread.setDaemon(true);
-			return thread;
-		};
+	RunProcess(ProcessBuilder builder) {
+		this.builder = builder;
 	}
 
 	/**
@@ -65,80 +42,32 @@ class RunProcess {
 	 *
 	 * @return a new process
 	 * @throws IOException if an I/O error occurs
-	 * @see CompositeConsumer
-	 * @see EmptyConsumer
 	 */
 	Process run() throws IOException {
-		return run(EMPTY_CONSUMER);
-	}
-
-	/**
-	 * Starts a new process.
-	 *
-	 * @param consumer output consumer.
-	 * @return a new process
-	 * @throws IOException if an I/O error occurs
-	 * @see CompositeConsumer
-	 * @see EmptyConsumer
-	 */
-	Process run(Consumer<? super String> consumer) throws IOException {
-		ProcessBuilder builder = this.processBuilder;
+		ProcessBuilder builder = this.builder;
 		if (log.isDebugEnabled()) {
 			String message = String.format("Execute '%s' within a directory '%s'", String.join(" ", builder.command()),
 					builder.directory());
 			log.debug(message);
 		}
-		return start(this.processBuilder, this.threadFactory, consumer);
+		return builder.start();
 	}
 
-	private static Process start(ProcessBuilder builder, ThreadFactory threadFactory, Consumer<? super String> consumer)
-			throws IOException {
-		Process process = builder.start();
-		if (consumer != EMPTY_CONSUMER) {
-			threadFactory.newThread(() -> read(process, consumer)).start();
-		}
-		return process;
-	}
-
-	private static void read(Process process, Consumer<? super String> consumer) {
-		try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-			String line;
-			while ((line = readline(reader)) != null) {
-				if (StringUtils.hasText(line)) {
-					try {
-						consumer.accept(line);
-					}
-					catch (Throwable ex) {
-						if (log.isDebugEnabled()) {
-							log.error(String.format("Line '%s' is not handled by consumer '%s'", line, consumer), ex);
-						}
-					}
-				}
-			}
-		}
-		catch (IOException ex) {
-			log.error(String.format("Could not create a stream for '%s'", process), ex);
-		}
-	}
-
-	@Nullable
-	private static String readline(BufferedReader reader) {
+	/**
+	 * Starts a new process.
+	 *
+	 * @return the exit value
+	 * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting, then the
+	 * wait is ended and an InterruptedException is thrown.
+	 */
+	int runAndWait() throws InterruptedException {
 		try {
-			return reader.readLine();
+			return run().waitFor();
 		}
 		catch (IOException ex) {
-			return null;
+			log.error(String.format("Can not execute '%s'", String.join(" ", this.builder.command())), ex);
+			return -1;
 		}
-	}
-
-	private static final class EmptyConsumer implements Consumer<String> {
-
-		@Override
-		public void accept(String line) {
-
-		}
-
 	}
 
 }

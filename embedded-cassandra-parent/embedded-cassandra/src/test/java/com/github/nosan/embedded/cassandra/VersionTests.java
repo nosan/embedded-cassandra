@@ -31,58 +31,57 @@ class VersionTests {
 	@Test
 	void shouldParseMajorMinorPatch() {
 		Version version = Version.parse("3.11.3");
-		assertThat(version).isEqualTo(new Version(3, 11, 3));
-		assertThat(version).isEqualByComparingTo(new Version(3, 11, 3));
-		assertThat(version).isNotEqualByComparingTo(new Version(3, 11, 2));
+		assertThat(version).isEqualTo(getVersion(3, 11, 3));
+		assertThat(version).isEqualByComparingTo(getVersion(3, 11, 3));
+		assertThat(version).isNotEqualByComparingTo(getVersion(3, 12));
+		assertThat(version).isNotEqualByComparingTo(getVersion(3, 11, 2));
 		assertThat(version.getMajor()).isEqualTo(3);
 		assertThat(version.getMinor()).isEqualTo(11);
-		assertThat(version.getPatch()).isEqualTo(3);
+		assertThat(version.getPatch()).hasValue(3);
 		assertThat(version.toString()).isEqualTo("3.11.3");
 	}
 
 	@Test
 	void shouldParseMajorMinor() {
 		Version version = Version.parse("3.11");
-		assertThat(version).isEqualTo(new Version(3, 11));
-		assertThat(version).isEqualByComparingTo(new Version(3, 11));
-		assertThat(version).isNotEqualByComparingTo(new Version(3, 11, 2));
-		assertThat(version).isNotEqualByComparingTo(new Version(3, 12, 2));
+		assertThat(version).isEqualTo(getVersion(3, 11));
+		assertThat(version).isEqualByComparingTo(getVersion(3, 11));
+		assertThat(version).isNotEqualByComparingTo(getVersion(3, 12));
+		assertThat(version).isNotEqualByComparingTo(getVersion(3, 11, 2));
+		assertThat(version).isNotEqualByComparingTo(getVersion(3, 12, 2));
 		assertThat(version.getMajor()).isEqualTo(3);
 		assertThat(version.getMinor()).isEqualTo(11);
-		assertThat(version.getPatch()).isEqualTo(-1);
+		assertThat(version.getPatch()).isEmpty();
 		assertThat(version.toString()).isEqualTo("3.11");
 	}
 
 	@Test
-	void shouldParseMajor() {
-		Version version = Version.parse("3");
-		assertThat(version).isEqualTo(new Version(3));
-		assertThat(version).isEqualByComparingTo(new Version(3));
-		assertThat(version).isNotEqualByComparingTo(new Version(4, 0));
-		assertThat(version.getMajor()).isEqualTo(3);
-		assertThat(version.getMinor()).isEqualTo(-1);
-		assertThat(version.getPatch()).isEqualTo(-1);
-		assertThat(version.toString()).isEqualTo("3");
-	}
-
-	@Test
-	void shouldNotParse() {
-		assertThatThrownBy(() -> Version.parse("q")).hasStackTraceContaining("Expected format is ")
+	void shouldNotParseInvalidFormat() {
+		assertThatThrownBy(() -> Version.parse("3.")).hasStackTraceContaining("is invalid")
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
 	void shouldParseBetaVersion() {
-		String text = "1.1.0-beta1";
-		Version version = Version.parse(text);
-		assertThat(version).isEqualTo(Version.parse(text));
-		assertThat(version).isEqualByComparingTo(Version.parse(text));
-		assertThat(version).isNotEqualByComparingTo(new Version(1, 1, 0));
-		assertThat(version).isNotEqualByComparingTo(new Version(1, 1, 1));
+		String v = "1.1.0-beta1";
+		Version version = Version.parse(v);
+		assertThat(version).isEqualTo(Version.parse(v));
+		assertThat(version).isEqualByComparingTo(Version.parse(v));
+		assertThat(version).isNotEqualByComparingTo(getVersion(1, 1, 0));
+		assertThat(version).isNotEqualByComparingTo(getVersion(1, 1, 1));
+		assertThat(version).isNotEqualByComparingTo(getVersion(1, 1));
 		assertThat(version.getMajor()).isEqualTo(1);
 		assertThat(version.getMinor()).isEqualTo(1);
-		assertThat(version.getPatch()).isEqualTo(0);
-		assertThat(version.toString()).isEqualTo(text);
+		assertThat(version.getPatch()).hasValue(0);
+		assertThat(version.toString()).isEqualTo(v);
+	}
+
+	private static Version getVersion(int major, int minor, int patch) {
+		return Version.parse(String.format("%d.%d.%d", major, minor, patch));
+	}
+
+	private static Version getVersion(int major, int minor) {
+		return Version.parse(String.format("%d.%d", major, minor));
 	}
 
 }

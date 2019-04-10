@@ -21,19 +21,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.util.List;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Base class for {@link AbstractCqlScript} implementations, pre-implementing {@link #getScript()} method.
+ * Abstract {@link CqlScript} implementation, that pre-implemented {@link #getStatements()}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
-public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
+public abstract class AbstractCqlResourceScript implements CqlScript {
 
 	private final Charset encoding;
 
@@ -46,20 +44,9 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 		this.encoding = (encoding != null) ? encoding : Charset.defaultCharset();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @throws UncheckedIOException if an I/O error occurs
-	 */
 	@Override
-	protected final String getScript() {
-		try (InputStream is = getInputStream()) {
-			return new String(toByteArray(is), getEncoding());
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(String.format("Could not open a stream for CQL Script '%s'", toString()),
-					ex);
-		}
+	public List<String> getStatements() {
+		return CqlScriptParser.parse(getScript());
 	}
 
 	/**
@@ -67,7 +54,7 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 	 * <p>It is expected that each call creates a <i>fresh</i> stream.
 	 *
 	 * @return the input stream for the underlying resource
-	 * @throws IOException if the content stream could not be opened
+	 * @throws IOException if the content stream can not be opened
 	 */
 	protected abstract InputStream getInputStream() throws IOException;
 
@@ -88,6 +75,16 @@ public abstract class AbstractCqlResourceScript extends AbstractCqlScript {
 			outputStream.write(buf, 0, read);
 		}
 		return outputStream.toByteArray();
+	}
+
+	private String getScript() {
+		try (InputStream is = getInputStream()) {
+			return new String(toByteArray(is), getEncoding());
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(String.format("Can not open a stream for CQL Script '%s'", toString()),
+					ex);
+		}
 	}
 
 }

@@ -23,9 +23,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
  * {@link CqlScript} implementation for {@link File}.
@@ -34,7 +32,6 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  * @see CqlScript#files(File...)
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public final class FileCqlScript extends AbstractCqlResourceScript {
 
 	private final File file;

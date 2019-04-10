@@ -22,20 +22,16 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Objects;
 
-import org.apiguardian.api.API;
-
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.FileUtils;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.util.SystemUtils;
 
 /**
  * {@link ArtifactFactory} to create a {@link RemoteArtifact}.
  *
  * @author Dmytro Nosan
- * @see RemoteArtifactFactoryBuilder
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public final class RemoteArtifactFactory implements ArtifactFactory {
 
 	@Nullable
@@ -55,7 +51,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 
 	/**
 	 * The directory where a downloaded {@code archive} should be saved. Default directory is {@link
-	 * FileUtils#getTmpDirectory() user.home}{@code /Downloads}
+	 * SystemUtils#getUserHomeDirectory() user.home}{@code /Downloads}
 	 *
 	 * @return The value of the {@code directory} attribute
 	 */
@@ -65,7 +61,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link RemoteArtifactFactory#getDirectory() directory} attribute.
+	 * Initializes the value for the {@link RemoteArtifactFactory#getDirectory()} attribute.
 	 *
 	 * @param directory The value for directory
 	 */
@@ -84,7 +80,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link RemoteArtifactFactory#getUrlFactory() urlFactory} attribute.
+	 * Initializes the value for the {@link RemoteArtifactFactory#getUrlFactory()} attribute.
 	 *
 	 * @param urlFactory The value for urlFactory
 	 * @see DefaultUrlFactory
@@ -104,7 +100,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link RemoteArtifactFactory#getProxy() proxy} attribute.
+	 * Initializes the value for the {@link RemoteArtifactFactory#getProxy()} attribute.
 	 *
 	 * @param proxy The value for proxy
 	 */
@@ -123,7 +119,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link RemoteArtifactFactory#getReadTimeout() readTimeout} attribute.
+	 * Initializes the value for the {@link RemoteArtifactFactory#getReadTimeout()} attribute.
 	 *
 	 * @param readTimeout The value for readTimeout
 	 */
@@ -142,7 +138,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	}
 
 	/**
-	 * Initializes the value for the {@link RemoteArtifactFactory#getConnectTimeout() connectTimeout} attribute.
+	 * Initializes the value for the {@link RemoteArtifactFactory#getConnectTimeout()} attribute.
 	 *
 	 * @param connectTimeout The value for connectTimeout
 	 */
@@ -155,7 +151,9 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 		Objects.requireNonNull(version, "Version must not be null");
 		Path directory = getDirectory();
 		if (directory == null) {
-			directory = FileUtils.getUserHomeDirectory().resolve("Downloads");
+			directory = SystemUtils.getUserHomeDirectory()
+					.orElseThrow(() -> new IllegalStateException("user.home is not defined."
+							+ " Please set user.home system property.")).resolve("Downloads");
 		}
 		UrlFactory urlFactory = getUrlFactory();
 		if (urlFactory == null) {

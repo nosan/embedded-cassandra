@@ -23,17 +23,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility methods for dealing with ports.
+ * Utility methods for dealing with ports. <b>Only for internal purposes.</b>
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class PortUtils {
 
 	/**
@@ -50,10 +47,10 @@ public abstract class PortUtils {
 	 * Find a free {@code TCP} port.
 	 *
 	 * @return a port
-	 * @throws IllegalStateException if port could not be found
+	 * @throws IllegalStateException if port can not be found
 	 */
 	public static int getPort() {
-		return getPort(NetworkUtils.getLocalhost());
+		return getPort(null);
 	}
 
 	/**
@@ -61,7 +58,7 @@ public abstract class PortUtils {
 	 *
 	 * @param address the address
 	 * @return a port
-	 * @throws IllegalStateException if port could not be found
+	 * @throws IllegalStateException if port can not be found
 	 * @since 1.1.0
 	 */
 	public static int getPort(@Nullable InetAddress address) {
@@ -73,7 +70,7 @@ public abstract class PortUtils {
 			}
 		}
 		throw new IllegalStateException(
-				String.format("Could not find an available port in the range [%d, %d]", MIN, MAX));
+				String.format("Can not find an available port in the range [%d, %d]", MIN, MAX));
 	}
 
 	/**

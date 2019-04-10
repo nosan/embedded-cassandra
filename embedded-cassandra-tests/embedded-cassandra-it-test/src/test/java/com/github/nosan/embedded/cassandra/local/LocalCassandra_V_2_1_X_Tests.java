@@ -30,7 +30,7 @@ import com.github.nosan.embedded.cassandra.Version;
 class LocalCassandra_V_2_1_X_Tests extends AbstractLocalCassandraTests {
 
 	LocalCassandra_V_2_1_X_Tests() {
-		super(new Version(2, 1, 21));
+		super(Version.parse("2.1.21"));
 	}
 
 }

@@ -23,9 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
  * {@link CqlScript} implementation for {@link Path}.
@@ -34,7 +32,6 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  * @see CqlScript#paths(Path...)
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public final class PathCqlScript extends AbstractCqlResourceScript {
 
 	private final Path path;

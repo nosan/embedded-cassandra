@@ -17,27 +17,35 @@
 package com.github.nosan.embedded.cassandra.test;
 
 import com.datastax.driver.core.Cluster;
-import org.apiguardian.api.API;
+import com.datastax.driver.core.SocketOptions;
 
 import com.github.nosan.embedded.cassandra.Settings;
 
 /**
- * Factory that creates a {@link Cluster}.
+ * {@link Cluster} factory with a default strategy.
  *
  * @author Dmytro Nosan
- * @see Cluster
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
-@FunctionalInterface
-public interface ClusterFactory {
+public class ClusterFactory {
 
 	/**
 	 * Creates a new configured {@link Cluster}.
 	 *
-	 * @param settings a settings
-	 * @return a Cluster
+	 * @param settings the settings
+	 * @return a cluster
 	 */
-	Cluster create(Settings settings);
+	public Cluster create(Settings settings) {
+		SocketOptions socketOptions = new SocketOptions();
+		socketOptions.setConnectTimeoutMillis(10000);
+		socketOptions.setReadTimeoutMillis(10000);
+		Cluster.Builder builder = Cluster.builder().
+				addContactPoints(settings.getAddress())
+				.withCredentials("cassandra", "cassandra")
+				.withPort(settings.getPort())
+				.withSocketOptions(socketOptions);
+		return builder.withoutJMXReporting().withoutMetrics().build();
+
+	}
 
 }

@@ -19,11 +19,9 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.apiguardian.api.API;
+import java.util.Objects;
 
 import com.github.nosan.embedded.cassandra.util.StringUtils;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
  * Utility class for parsing CQL Script into the statements.
@@ -31,7 +29,6 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.MAINTAINED)
 public abstract class CqlScriptParser {
 
 	private static final char SINGLE_QUOTE = '\'';
@@ -72,7 +69,8 @@ public abstract class CqlScriptParser {
 	 * @param script CQL script.
 	 * @return CQL statements
 	 */
-	public static List<String> parse(@Nullable String script) {
+	public static List<String> parse(String script) {
+		Objects.requireNonNull(script, "Script must not be null");
 		if (!StringUtils.hasText(script)) {
 			return Collections.emptyList();
 		}

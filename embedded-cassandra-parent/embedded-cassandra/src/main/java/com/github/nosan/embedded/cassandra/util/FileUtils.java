@@ -20,58 +20,27 @@ import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility methods for dealing with files.
+ * Utility methods for dealing with files. <b>Only for internal purposes.</b>
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class FileUtils {
-
-	/**
-	 * Return the temporary directory.
-	 *
-	 * @return a directory (java.io.tmpdir)
-	 */
-	public static Path getTmpDirectory() {
-		return Paths.get(new SystemProperty("java.io.tmpdir").getRequired());
-	}
-
-	/**
-	 * Return the user home directory.
-	 *
-	 * @return a directory (user.home)
-	 */
-	public static Path getUserHomeDirectory() {
-		return Paths.get(new SystemProperty("user.home").getRequired());
-	}
-
-	/**
-	 * Return the user directory.
-	 *
-	 * @return a directory (user.dir)
-	 */
-	public static Path getUserDirectory() {
-		return Paths.get(new SystemProperty("user.dir").getRequired());
-	}
 
 	/**
 	 * Delete the supplied {@link Path}. For directories, recursively delete any nested directories or files as well.
 	 *
-	 * @param path the {@code Path} to delete
-	 * @return {@code true} if the {@code Path} existed and was deleted, or {@code false} it it did not exist
+	 * @param path the {@code path} to delete
+	 * @return {@code true} if the {@code path} existed and was deleted, or {@code false} it it did not exist
 	 * @throws IOException in the case of I/O errors
 	 */
 	public static boolean delete(@Nullable Path path) throws IOException {
@@ -106,32 +75,19 @@ public abstract class FileUtils {
 	 *
 	 * @param src the source path
 	 * @param dest the destination path
-	 * @throws IOException in the case of I/O errors
-	 * @since 1.4.1
-	 */
-	public static void copy(Path src, Path dest) throws IOException {
-		Objects.requireNonNull(src, "Source must not be null");
-		Objects.requireNonNull(dest, "Destination must not be null");
-		copy(src, dest, path -> true);
-	}
-
-	/**
-	 * Recursively copy the contents of the {@code src} file/directory to the {@code dest} file/directory.
-	 *
-	 * @param src the source path
-	 * @param dest the destination path
 	 * @param filter the filter to check whether the {@code path} should be copied or not
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.3.0
 	 */
-	public static void copy(Path src, Path dest, @Nullable Predicate<? super Path> filter) throws IOException {
+	public static void copy(Path src, Path dest, Predicate<? super Path> filter) throws IOException {
 		Objects.requireNonNull(src, "Source must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
+		Objects.requireNonNull(filter, "Filter must not be null");
 		Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
 
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				if (filter == null || filter.test(dir)) {
+				if (filter.test(dir)) {
 					Files.createDirectories(dest.resolve(src.relativize(dir)));
 					return FileVisitResult.CONTINUE;
 				}
@@ -140,7 +96,7 @@ public abstract class FileUtils {
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
-				if (filter == null || filter.test(file)) {
+				if (filter.test(file)) {
 					Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
 				}
 				return FileVisitResult.CONTINUE;

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 
 /**
  * Tests for {@link TestCassandra}.
@@ -31,9 +30,7 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 class TestCassandra_V_2_1_X_Tests extends AbstractTestCassandraTests {
 
 	TestCassandra_V_2_1_X_Tests() {
-		super(new LocalCassandraFactoryBuilder()
-				.setVersion(new Version(2, 1, 21))
-				.setDeleteWorkingDirectory(true).build(), null);
+		super(Version.parse("2.1.21"));
 	}
 
 }

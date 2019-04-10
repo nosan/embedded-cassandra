@@ -19,24 +19,21 @@ package com.github.nosan.embedded.cassandra.local.artifact;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.apiguardian.api.API;
-
 /**
  * The artifact is hidden the underlying {@code archive} file.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 @FunctionalInterface
 public interface Artifact {
 
 	/**
-	 * Returns a {@code Path} to Cassandra {@code archive (tar.gz, .zip, etc...)}.
+	 * Returns a {@code path} to the archive file.
 	 *
-	 * @return Cassandra {@code archive} file
+	 * @return path to the {@code archive} file
 	 * @throws IOException in the case of I/O errors
 	 */
-	Path get() throws IOException;
+	Path getArchive() throws IOException;
 
 }

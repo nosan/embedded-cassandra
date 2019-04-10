@@ -16,27 +16,18 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import java.lang.annotation.Annotation;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.nio.file.Paths;
-import java.time.Duration;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
-import com.datastax.driver.core.Cluster;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -47,58 +38,40 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
+import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
-import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
-import com.github.nosan.embedded.cassandra.local.artifact.RemoteArtifactFactory;
-import com.github.nosan.embedded.cassandra.local.artifact.UrlFactory;
-import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
-import com.github.nosan.embedded.cassandra.util.StringUtils;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 /**
- * {@link ContextCustomizer} used to create {@link EmbeddedCassandraFactoryBean}, {@link LocalCassandraFactoryBean} and
- * {@link EmbeddedClusterFactoryBean} beans.
+ * {@link ContextCustomizer} used to create {@link EmbeddedCassandraFactoryBean}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
 class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraContextCustomizer.class);
-
-	private static final String LOCAL_CASSANDRA_FACTORY_BEAN_NAME = "localCassandraFactory";
-
-	private static final String EMBEDDED_CLUSTER_BEAN_NAME = "embeddedCluster";
-
-	private static final String EMBEDDED_CASSANDRA_BEAN_NAME = "embeddedCassandra";
-
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		Class<?> testClass = mergedConfig.getTestClass();
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
 		if (beanFactory instanceof BeanDefinitionRegistry) {
-			BeanDefinitionRegistry registry = ((BeanDefinitionRegistry) beanFactory);
-			ifAnnotationPresent(testClass, EmbeddedLocalCassandra.class,
-					annotation -> registerPrimaryBeanDefinition(registry, LOCAL_CASSANDRA_FACTORY_BEAN_NAME,
-							BeanDefinitionBuilder.rootBeanDefinition(LocalCassandraFactoryBean.class)
-									.addConstructorArgValue(testClass).addConstructorArgValue(annotation)
-									.getBeanDefinition()));
-			ifAnnotationPresent(testClass, EmbeddedCassandra.class, annotation -> {
-				registerPrimaryBeanDefinition(registry, EMBEDDED_CASSANDRA_BEAN_NAME,
+			Class<?> testClass = mergedConfig.getTestClass();
+			EmbeddedCassandra annotation = AnnotatedElementUtils
+					.findMergedAnnotation(testClass, EmbeddedCassandra.class);
+			if (annotation != null) {
+				BeanDefinitionRegistry registry = ((BeanDefinitionRegistry) beanFactory);
+				registry.registerBeanDefinition(EmbeddedCassandra.class.getName(),
 						BeanDefinitionBuilder.rootBeanDefinition(EmbeddedCassandraFactoryBean.class)
-								.addConstructorArgValue(testClass).addConstructorArgValue(annotation)
+								.addConstructorArgValue(annotation).addConstructorArgValue(testClass)
 								.getBeanDefinition());
-				if (annotation.replace() == EmbeddedCassandra.Replace.ANY) {
-					registerPrimaryBeanDefinition(registry, EMBEDDED_CLUSTER_BEAN_NAME,
-							BeanDefinitionBuilder.rootBeanDefinition(EmbeddedClusterFactoryBean.class)
-									.getBeanDefinition());
-				}
-			});
+			}
 		}
 	}
 
@@ -112,30 +85,15 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		return getClass().hashCode();
 	}
 
-	private static <A extends Annotation> void ifAnnotationPresent(Class<?> testClass, Class<A> annotationClass,
-			Consumer<A> consumer) {
-		Optional.ofNullable(AnnotatedElementUtils.findMergedAnnotation(testClass, annotationClass)).ifPresent(consumer);
-	}
-
-	private static void registerPrimaryBeanDefinition(BeanDefinitionRegistry registry, String beanName,
-			BeanDefinition beanDefinition) {
-		if (registry.containsBeanDefinition(beanName)) {
-			registry.removeBeanDefinition(beanName);
-		}
-		beanDefinition.setPrimary(true);
-		registry.registerBeanDefinition(beanName, beanDefinition);
-		log.info("The @Primary '{}' bean has been registered.", beanName);
-	}
-
 	/**
 	 * {@link FactoryBean} used to create and configure a {@link TestCassandra}.
 	 */
-	static class EmbeddedCassandraFactoryBean
-			implements FactoryBean<TestCassandra>, InitializingBean, DisposableBean, ApplicationContextAware {
-
-		private final Class<?> testClass;
+	static class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>, InitializingBean,
+			DisposableBean, ApplicationContextAware {
 
 		private final EmbeddedCassandra annotation;
+
+		private final Class<?> testClass;
 
 		@Nullable
 		private TestCassandra cassandra;
@@ -143,9 +101,9 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Nullable
 		private ApplicationContext applicationContext;
 
-		EmbeddedCassandraFactoryBean(Class<?> testClass, EmbeddedCassandra annotation) {
-			this.testClass = testClass;
+		EmbeddedCassandraFactoryBean(EmbeddedCassandra annotation, Class<?> testClass) {
 			this.annotation = annotation;
+			this.testClass = testClass;
 		}
 
 		@Override
@@ -168,55 +126,32 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			TestCassandra cassandra = this.cassandra;
 			if (cassandra != null) {
 				cassandra.stop();
+				this.cassandra = null;
 			}
 		}
 
 		@Override
 		public void afterPropertiesSet() {
-			ApplicationContext applicationContext = Objects
-					.requireNonNull(this.applicationContext, "Application Context must not be null");
-			EmbeddedCassandra annotation = this.annotation;
-			CqlConfig config = new CqlConfig(this.testClass, annotation.scripts(), annotation.statements(),
-					annotation.encoding());
-			CqlScript[] scripts = CqlResourceUtils.getScripts(applicationContext, config);
-			TestCassandra cassandra = new TestCassandra(annotation.registerShutdownHook(),
-					BeanFactoryUtils.getIfUnique(applicationContext, CassandraFactory.class),
-					BeanFactoryUtils.getIfUnique(applicationContext, ClusterFactory.class), scripts);
-			this.cassandra = cassandra;
+			ApplicationContext context = getContext();
+			TestCassandraFactory testCassandraFactory = context.getBeanProvider(TestCassandraFactory.class)
+					.getIfUnique(() -> TestCassandra::new);
+			CassandraFactory cassandraFactory = context.getBeanProvider(CassandraFactory.class)
+					.getIfUnique(this::getCassandraFactory);
+			context.getBeanProvider(CassandraFactoryTestCustomizer.class)
+					.forEach(customizer -> customize(cassandraFactory, customizer));
+			TestCassandra cassandra = testCassandraFactory.create(cassandraFactory, getScripts());
+			this.cassandra = Objects.requireNonNull(cassandra, "Test Cassandra must not be null");
 			cassandra.start();
 		}
 
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
-
-	}
-
-	/**
-	 * {@link FactoryBean} used to create and configure a {@link Cluster}.
-	 */
-	static class EmbeddedClusterFactoryBean implements FactoryBean<Cluster>, InitializingBean, ApplicationContextAware {
-
-		@Nullable
-		private Cluster cluster;
-
-		@Nullable
-		private ApplicationContext applicationContext;
-
-		@Override
-		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-			this.applicationContext = applicationContext;
-		}
-
-		@Override
-		public Cluster getObject() {
-			return Objects.requireNonNull(this.cluster, "Cluster must not be null");
-		}
-
-		@Override
-		public Class<?> getObjectType() {
-			return Cluster.class;
+		@SuppressWarnings("unchecked")
+		private void customize(CassandraFactory cassandraFactory, CassandraFactoryTestCustomizer customizer) {
+			try {
+				customizer.customize(cassandraFactory);
+			}
+			catch (ClassCastException ex) {
+				//ignore
+			}
 		}
 
 		@Override
@@ -224,149 +159,76 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			return true;
 		}
 
-		@Override
-		public void afterPropertiesSet() {
-			ApplicationContext applicationContext = Objects
-					.requireNonNull(this.applicationContext, "Application Context must not be null");
-			TestCassandra cassandra = applicationContext.getBean(EMBEDDED_CASSANDRA_BEAN_NAME, TestCassandra.class);
-			this.cluster = cassandra.getCluster();
+		private CassandraFactory getCassandraFactory() {
+			EmbeddedCassandra annotation = this.annotation;
+			LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
+			cassandraFactory.setVersion(asVersion(annotation::version));
+			cassandraFactory.setConfigurationFile(asURL(annotation::configurationFile));
+			cassandraFactory.setJvmOptions(asArray(annotation::jvmOptions));
+			cassandraFactory.setJmxLocalPort(asPort(annotation::jmxLocalPort));
+			cassandraFactory.setPort(asPort(annotation::port));
+			cassandraFactory.setStoragePort(asPort(annotation::storagePort));
+			cassandraFactory.setSslStoragePort(asPort(annotation::sslStoragePort));
+			cassandraFactory.setRpcPort(asPort(annotation::rpcPort));
+			return cassandraFactory;
 		}
 
-	}
-
-	/**
-	 * {@link FactoryBean} used to create and configure a {@link LocalCassandraFactory}.
-	 */
-	static class LocalCassandraFactoryBean
-			implements FactoryBean<LocalCassandraFactory>, InitializingBean, ApplicationContextAware {
-
-		private final Class<?> testClass;
-
-		private final EmbeddedLocalCassandra annotation;
-
-		@Nullable
-		private LocalCassandraFactory cassandraFactory;
-
-		@Nullable
-		private ApplicationContext applicationContext;
-
-		LocalCassandraFactoryBean(Class<?> testClass, EmbeddedLocalCassandra annotation) {
-			this.testClass = testClass;
-			this.annotation = annotation;
-		}
-
-		@Override
-		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-			this.applicationContext = applicationContext;
-		}
-
-		@Override
-		public LocalCassandraFactory getObject() {
-			return Objects.requireNonNull(this.cassandraFactory, "Cassandra Factory must not be null");
-		}
-
-		@Override
-		public Class<?> getObjectType() {
-			return LocalCassandraFactory.class;
-		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
-		}
-
-		@Override
-		public void afterPropertiesSet() {
-			ApplicationContext applicationContext = Objects
-					.requireNonNull(this.applicationContext, "Application Context must not be null");
-			Environment environment = applicationContext.getEnvironment();
-			EmbeddedLocalCassandra annotation = this.annotation;
+		private CqlScript[] getScripts() {
+			EmbeddedCassandra annotation = this.annotation;
 			Class<?> testClass = this.testClass;
-			String configurationFile = environment.resolvePlaceholders(annotation.configurationFile());
-			String logbackFile = environment.resolvePlaceholders(annotation.logbackFile());
-			String topologyFile = environment.resolvePlaceholders(annotation.topologyFile());
-			String rackFile = environment.resolvePlaceholders(annotation.rackFile());
-			String commitLogArchivingFile = environment.resolvePlaceholders(annotation.commitLogArchivingFile());
-			String workingDirectory = environment.resolvePlaceholders(annotation.workingDirectory());
-			String artifactDirectory = environment.resolvePlaceholders(annotation.artifactDirectory());
-			String javaHome = environment.resolvePlaceholders(annotation.javaHome());
-			String version = environment.resolvePlaceholders(annotation.version());
-			Duration startupTimeout = Duration.ofMillis(annotation.startupTimeout());
-			int jmxPort = annotation.jmxPort();
-			boolean allowRoot = annotation.allowRoot();
-			boolean registerShutdownHook = annotation.registerShutdownHook();
-			boolean deleteWorkingDirectory = annotation.deleteWorkingDirectory();
-			List<String> jvmOptions = Arrays.stream(annotation.jvmOptions()).map(environment::resolvePlaceholders)
-					.filter(StringUtils::hasText).collect(Collectors.toList());
-
-			LocalCassandraFactory factory = new LocalCassandraFactory();
-			if (StringUtils.hasText(workingDirectory)) {
-				factory.setWorkingDirectory(Paths.get(workingDirectory));
+			ApplicationContext context = getContext();
+			List<CqlScript> scripts = new ArrayList<>();
+			for (URL url : ResourceUtils.getResources(context, testClass, asArray(annotation::scripts))) {
+				scripts.add(new UrlCqlScript(url, asCharset(annotation::encoding)));
 			}
-			if (StringUtils.hasText(artifactDirectory)) {
-				factory.setArtifactDirectory(Paths.get(artifactDirectory));
+			if (!ObjectUtils.isEmpty(annotation.statements())) {
+				scripts.add(new StaticCqlScript(Arrays.asList(annotation.statements())));
 			}
-			if (StringUtils.hasText(javaHome)) {
-				factory.setJavaHome(Paths.get(javaHome));
-			}
-			if (StringUtils.hasText(version)) {
-				factory.setVersion(Version.parse(version));
-			}
-			if (StringUtils.hasText(configurationFile)) {
-				factory.setConfigurationFile(CqlResourceUtils.getURL(applicationContext, configurationFile, testClass));
-			}
-			if (StringUtils.hasText(logbackFile)) {
-				factory.setLogbackFile(CqlResourceUtils.getURL(applicationContext, logbackFile, testClass));
-			}
-			if (StringUtils.hasText(topologyFile)) {
-				factory.setTopologyFile(CqlResourceUtils.getURL(applicationContext, topologyFile, testClass));
-			}
-			if (StringUtils.hasText(rackFile)) {
-				factory.setRackFile(CqlResourceUtils.getURL(applicationContext, rackFile, testClass));
-			}
-			if (StringUtils.hasText(commitLogArchivingFile)) {
-				factory.setCommitLogArchivingFile(
-						CqlResourceUtils.getURL(applicationContext, commitLogArchivingFile, testClass));
-			}
-			factory.setStartupTimeout(startupTimeout);
-			factory.getJvmOptions().addAll(jvmOptions);
-			factory.setJmxPort(jmxPort);
-			factory.setAllowRoot(allowRoot);
-			factory.setRegisterShutdownHook(registerShutdownHook);
-			factory.setDeleteWorkingDirectory(deleteWorkingDirectory);
-			ArtifactFactory artifactFactory = BeanFactoryUtils.getIfUnique(applicationContext, ArtifactFactory.class);
-			if (artifactFactory != null) {
-				factory.setArtifactFactory(artifactFactory);
-			}
-			else {
-				factory.setArtifactFactory(getArtifactFactory(environment, annotation.artifact()));
-			}
-			this.cassandraFactory = factory;
+			return scripts.toArray(new CqlScript[0]);
 		}
 
-		private static ArtifactFactory getArtifactFactory(Environment environment,
-				EmbeddedLocalCassandra.Artifact annotation) {
-			String directory = environment.resolvePlaceholders(annotation.directory());
-			String proxyHost = environment.resolvePlaceholders(annotation.proxyHost());
-			int proxyPort = annotation.proxyPort();
-			Proxy.Type proxyType = annotation.proxyType();
-			Class<? extends UrlFactory> urlFactory = annotation.urlFactory();
-			Duration readTimeout = Duration.ofMillis(annotation.readTimeout());
-			Duration connectTimeout = Duration.ofMillis(annotation.connectTimeout());
+		private String[] asArray(Supplier<String[]> arraySupplier) {
+			Environment environment = getContext().getEnvironment();
+			return Arrays.stream(arraySupplier.get())
+					.map(environment::resolvePlaceholders)
+					.filter(StringUtils::hasText)
+					.toArray(String[]::new);
+		}
 
-			RemoteArtifactFactory factory = new RemoteArtifactFactory();
-			if (StringUtils.hasText(directory)) {
-				factory.setDirectory(Paths.get(directory));
-			}
-			if (proxyType != Proxy.Type.DIRECT && StringUtils.hasText(proxyHost) && proxyPort != -1) {
-				factory.setProxy(new Proxy(proxyType, new InetSocketAddress(proxyHost, proxyPort)));
-			}
-			if (!UrlFactory.class.equals(urlFactory)) {
-				factory.setUrlFactory(BeanUtils.instantiateClass(urlFactory));
-			}
-			factory.setReadTimeout(readTimeout);
-			factory.setConnectTimeout(connectTimeout);
-			return factory;
+		@Nullable
+		private Version asVersion(Supplier<String> supplier) {
+			Environment environment = getContext().getEnvironment();
+			String version = environment.resolvePlaceholders(supplier.get());
+			return StringUtils.hasText(version) ? Version.parse(version) : null;
+		}
+
+		@Nullable
+		private Charset asCharset(Supplier<String> supplier) {
+			Environment environment = getContext().getEnvironment();
+			String charset = environment.resolvePlaceholders(supplier.get());
+			return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
+		}
+
+		@Nullable
+		private Integer asPort(Supplier<String> supplier) {
+			Environment environment = getContext().getEnvironment();
+			String port = environment.resolvePlaceholders(supplier.get());
+			return StringUtils.hasText(port) ? Integer.parseInt(port) : null;
+		}
+
+		@Nullable
+		private URL asURL(Supplier<String> supplier) {
+			Class<?> testClass = this.testClass;
+			ApplicationContext context = getContext();
+			Environment environment = context.getEnvironment();
+			String location = environment.resolvePlaceholders(supplier.get());
+			return StringUtils.hasText(location) ? ResourceUtils.getResource(context, testClass, location) : null;
+		}
+
+		private ApplicationContext getContext() {
+			ApplicationContext context = this.applicationContext;
+			Objects.requireNonNull(context, "Application Context must not be null");
+			return context;
 		}
 
 	}

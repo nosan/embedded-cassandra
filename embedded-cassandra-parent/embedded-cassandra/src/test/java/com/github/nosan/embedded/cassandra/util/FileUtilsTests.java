@@ -26,7 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -79,7 +79,7 @@ class FileUtilsTests {
 
 		assertThat(src).exists();
 		assertThat(dest).doesNotExist();
-		FileUtils.copy(src, dest);
+		FileUtils.copy(src, dest, path -> true);
 		assertThat(dest).exists();
 	}
 
@@ -94,7 +94,7 @@ class FileUtilsTests {
 		assertThat(src).exists();
 		assertThat(dest).doesNotExist();
 
-		FileUtils.copy(src, dest);
+		FileUtils.copy(src, dest, path -> true);
 
 		assertThat(dest).exists();
 		assertThat(dest.resolve(folder.getFileName())).exists();
@@ -129,23 +129,6 @@ class FileUtilsTests {
 		assertThat(dest).doesNotExist();
 		assertThat(dest.resolve(folder.getFileName())).doesNotExist();
 		assertThat(dest.resolve(folder.getFileName()).resolve(file.getFileName())).doesNotExist();
-	}
-
-	@Test
-	void userDirectory() {
-		assertThat(FileUtils.getUserDirectory()).isEqualTo(Paths.get(new SystemProperty("user.dir").getRequired()));
-	}
-
-	@Test
-	void userHomeDirectory() {
-		assertThat(FileUtils.getUserHomeDirectory())
-				.isEqualTo(Paths.get(new SystemProperty("user.home").getRequired()));
-	}
-
-	@Test
-	void tmpDirectory() {
-		assertThat(FileUtils.getTmpDirectory())
-				.isEqualTo(Paths.get(new SystemProperty("java.io.tmpdir").getRequired()));
 	}
 
 	private Path newFolder(String name) throws IOException {

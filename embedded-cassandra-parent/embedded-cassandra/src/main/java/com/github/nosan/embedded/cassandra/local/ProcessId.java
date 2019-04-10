@@ -18,12 +18,13 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.nio.file.Path;
 
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Util class that contains {@link Process} and pid.
+ * Utility class that contains {@link Process} information.
  *
  * @author Dmytro Nosan
+ * @since 2.0.0
  */
 class ProcessId {
 
@@ -34,21 +35,10 @@ class ProcessId {
 
 	private long pid = -1;
 
-	/**
-	 * Creates {@link ProcessId}.
-	 *
-	 * @param process the process
-	 */
 	ProcessId(Process process) {
 		this(process, null);
 	}
 
-	/**
-	 * Creates {@link ProcessId}.
-	 *
-	 * @param pidFile the pid file
-	 * @param process the process
-	 */
 	ProcessId(Process process, @Nullable Path pidFile) {
 		this.process = process;
 		this.pidFile = pidFile;
@@ -60,7 +50,7 @@ class ProcessId {
 	}
 
 	/**
-	 * Return the process.
+	 * Returns the process.
 	 *
 	 * @return the process
 	 */
@@ -69,7 +59,7 @@ class ProcessId {
 	}
 
 	/**
-	 * Return the pid of the process.
+	 * Returns the pid of the process.
 	 *
 	 * @return the pid (or -1)
 	 */
@@ -77,10 +67,20 @@ class ProcessId {
 		if (this.pid == -1) {
 			this.pid = ProcessUtils.getPid(this.process);
 		}
-		if (this.pid == -1) {
+		if (this.pid == -1 && this.pidFile != null) {
 			this.pid = ProcessUtils.getPid(this.pidFile);
 		}
 		return this.pid;
+	}
+
+	/**
+	 * Returns the pif file.
+	 *
+	 * @return the pid file or null
+	 */
+	@Nullable
+	Path getPidFile() {
+		return this.pidFile;
 	}
 
 }

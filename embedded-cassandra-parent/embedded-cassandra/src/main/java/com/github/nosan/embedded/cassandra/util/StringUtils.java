@@ -16,44 +16,41 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility methods for dealing with strings.
+ * Utility methods for dealing with strings. <b>Only for internal purposes.</b>
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.INTERNAL)
 public abstract class StringUtils {
 
 	/**
-	 * Check whether the given {@code String} is empty.
+	 * Check whether the given {@code string} is empty.
 	 *
 	 * @param source the candidate String
-	 * @return {@code true} if the {@code String} is {@code null} or has no length
+	 * @return {@code true} if the {@code string} is {@code null} or has no length
 	 */
 	public static boolean isEmpty(@Nullable CharSequence source) {
 		return !hasLength(source);
 	}
 
 	/**
-	 * Check that the given {@code String} is neither {@code null} nor of length 0.
+	 * Check that the given {@code string} is neither {@code null} nor of length 0.
 	 *
-	 * @param source the {@code String} to check
-	 * @return {@code true} if the {@code String} is not {@code null} and has length
+	 * @param source the {@code string} to check
+	 * @return {@code true} if the {@code string} is not {@code null} and has length
 	 */
 	public static boolean hasLength(@Nullable CharSequence source) {
 		return (source != null && source.length() > 0);
 	}
 
 	/**
-	 * Check whether the given {@code String} contains actual <em>text</em>.
+	 * Check whether the given {@code string} contains actual <em>text</em>.
 	 *
-	 * @param source the {@code String} to check (may be {@code null})
-	 * @return {@code true} if the {@code String} is not {@code null}, its length is greater than 0, and it does not
+	 * @param source the {@code string} to check (may be {@code null})
+	 * @return {@code true} if the {@code string} is not {@code null}, its length is greater than 0, and it does not
 	 * contain whitespace only
 	 */
 	public static boolean hasText(@Nullable CharSequence source) {

@@ -19,13 +19,15 @@ package com.github.nosan.embedded.cassandra.local.artifact;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.file.Path;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
-import com.github.nosan.embedded.cassandra.util.FileUtils;
+import com.github.nosan.embedded.cassandra.util.SystemUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,19 +39,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RemoteArtifactFactoryTests {
 
 	@Test
-	void createConfigureRemoteArtifact() {
+	void createConfigureRemoteArtifact(@TempDir Path tempDir) {
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
 		Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("locahost", 8080));
 		UrlFactory urlFactory = version -> new URL[0];
 		factory.setUrlFactory(urlFactory);
 		factory.setProxy(proxy);
-		factory.setDirectory(FileUtils.getTmpDirectory());
+		factory.setDirectory(tempDir);
 		factory.setReadTimeout(Duration.ofSeconds(100));
 		factory.setConnectTimeout(Duration.ofMinutes(100));
 
-		RemoteArtifact artifact = (RemoteArtifact) factory.create(new Version(3, 11, 2));
-		assertThat(ReflectionUtils.getField(artifact, "version")).isEqualTo(new Version(3, 11, 2));
-		assertThat(ReflectionUtils.getField(artifact, "directory")).isEqualTo(FileUtils.getTmpDirectory());
+		RemoteArtifact artifact = (RemoteArtifact) factory.create(Version.parse("3.11.2"));
+		assertThat(ReflectionUtils.getField(artifact, "version")).isEqualTo(Version.parse("3.11.2"));
+		assertThat(ReflectionUtils.getField(artifact, "directory")).isEqualTo(tempDir);
 		assertThat(ReflectionUtils.getField(artifact, "urlFactory")).isEqualTo(urlFactory);
 		assertThat(ReflectionUtils.getField(artifact, "proxy")).isEqualTo(proxy);
 		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isEqualTo(Duration.ofSeconds(100));
@@ -59,10 +61,10 @@ class RemoteArtifactFactoryTests {
 	@Test
 	void createDefaultRemoteArtifact() {
 		RemoteArtifactFactory factory = new RemoteArtifactFactory();
-		RemoteArtifact artifact = (RemoteArtifact) factory.create(new Version(3, 11, 3));
-		assertThat(ReflectionUtils.getField(artifact, "version")).isEqualTo(new Version(3, 11, 3));
+		RemoteArtifact artifact = (RemoteArtifact) factory.create(Version.parse("3.11.3"));
+		assertThat(ReflectionUtils.getField(artifact, "version")).isEqualTo(Version.parse("3.11.3"));
 		assertThat(ReflectionUtils.getField(artifact, "directory"))
-				.isEqualTo(FileUtils.getUserHomeDirectory().resolve("Downloads"));
+				.isEqualTo(SystemUtils.getUserHomeDirectory().get().resolve("Downloads"));
 		assertThat(ReflectionUtils.getField(artifact, "urlFactory")).isInstanceOf(DefaultUrlFactory.class);
 		assertThat(ReflectionUtils.getField(artifact, "proxy")).isNull();
 		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isEqualTo(Duration.ofSeconds(30));

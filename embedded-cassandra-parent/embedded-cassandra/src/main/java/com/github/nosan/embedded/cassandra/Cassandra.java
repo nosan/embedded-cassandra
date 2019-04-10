@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import org.apiguardian.api.API;
-
 /**
  * Simple interface that allows the {@code Cassandra} to be {@link #start() started} and {@link #stop() stopped}.
  *
@@ -25,7 +23,6 @@ import org.apiguardian.api.API;
  * @see CassandraFactory
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public interface Cassandra {
 
 	/**
@@ -49,13 +46,20 @@ public interface Cassandra {
 	void stop() throws CassandraException, CassandraInterruptedException;
 
 	/**
-	 * Returns the settings this {@code Cassandra} is running on. These settings can be retrieved only if {@code
-	 * Cassandra} state is {@link State#STARTED started}.
+	 * Returns the settings this {@code Cassandra} is running on.
 	 *
 	 * @return the settings
-	 * @throws CassandraException if {@code Cassandra} is not started.
+	 * @throws IllegalStateException If the {@link Cassandra} is not running
 	 */
-	Settings getSettings() throws CassandraException;
+	Settings getSettings() throws IllegalStateException;
+
+	/**
+	 * Returns the {@link Version version} of this {@code Cassandra}.
+	 *
+	 * @return a version
+	 * @since 2.0.0
+	 */
+	Version getVersion();
 
 	/**
 	 * Returns the {@link State state} of this {@code Cassandra}.
@@ -63,16 +67,13 @@ public interface Cassandra {
 	 * @return the state
 	 * @since 1.4.1
 	 */
-	default State getState() {
-		return State.UNKNOWN;
-	}
+	State getState();
 
 	/**
 	 * Enumeration of <em>states</em> that describes in which state {@code Cassandra} can be.
 	 *
 	 * @since 1.4.1
 	 */
-	@API(since = "1.4.1", status = API.Status.STABLE)
 	enum State {
 		/**
 		 * {@code Cassandra} instance is newly created.
@@ -109,11 +110,7 @@ public interface Cassandra {
 		/**
 		 * {@code Cassandra} has been stopped.
 		 */
-		STOPPED,
-		/**
-		 * The state of the {@code Cassandra} is unknown.
-		 */
-		UNKNOWN
+		STOPPED
 
 	}
 

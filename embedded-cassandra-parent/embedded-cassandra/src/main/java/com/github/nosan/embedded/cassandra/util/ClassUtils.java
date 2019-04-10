@@ -16,34 +16,25 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
-import org.apiguardian.api.API;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility methods for dealing with classes.
+ * Utility methods for dealing with classes. <b>Only for internal purposes.</b>
  *
  * @author Dmytro Nosan
  * @since 1.2.1
  */
-@API(since = "1.2.1", status = API.Status.INTERNAL)
 public abstract class ClassUtils {
 
-	private static final Logger log = LoggerFactory.getLogger(ClassUtils.class);
-
 	/**
-	 * Return the one of the  {@code ClassLoader} to use.
+	 * Returns the one of the {@link ClassLoader} to use.
 	 * <ol>
 	 * <li>Thread.currentThread().getContextClassLoader()</li>
 	 * <li>ClassUtils.class.getClassLoader()</li>
 	 * <li>ClassLoader.getSystemClassLoader()</li>
 	 * </ol>
 	 *
-	 * @return the {@code ClassLoader} (only {@code null} if even the system {@code ClassLoader}  isn't accessible)
-	 * @see Thread#getContextClassLoader()
-	 * @see ClassLoader#getSystemClassLoader()
+	 * @return the class loader to use
 	 */
 	@Nullable
 	public static ClassLoader getClassLoader() {
@@ -52,18 +43,14 @@ public abstract class ClassUtils {
 			cl = Thread.currentThread().getContextClassLoader();
 		}
 		catch (Throwable ex) {
-			if (log.isDebugEnabled()) {
-				log.error(String.format("Could not get '%s' context loader", Thread.currentThread()), ex);
-			}
+			//ignore
 		}
 		if (cl == null) {
 			try {
 				cl = ClassUtils.class.getClassLoader();
 			}
 			catch (Throwable ex) {
-				if (log.isDebugEnabled()) {
-					log.error(String.format("Could not get '%s' class loader", ClassUtils.class), ex);
-				}
+				//ignore
 			}
 		}
 		if (cl == null) {
@@ -71,9 +58,7 @@ public abstract class ClassUtils {
 				cl = ClassLoader.getSystemClassLoader();
 			}
 			catch (Throwable ex) {
-				if (log.isDebugEnabled()) {
-					log.error("Could not get a system class loader", ex);
-				}
+				//ignore
 			}
 		}
 		return cl;
@@ -82,17 +67,35 @@ public abstract class ClassUtils {
 	/**
 	 * Determines the package name for the given class.
 	 *
-	 * @param source a class
+	 * @param clazz a class
 	 * @return package name or empty string
 	 * @since 1.2.2
 	 */
-	public static String getPackageName(@Nullable Class<?> source) {
-		while (source != null && source.isArray()) {
-			source = source.getComponentType();
+	public static String getPackageName(@Nullable Class<?> clazz) {
+		while (clazz != null && clazz.isArray()) {
+			clazz = clazz.getComponentType();
 		}
-		String name = (source != null) ? source.getName() : "";
+		String name = (clazz != null) ? clazz.getName() : "";
 		int i = name.lastIndexOf('.');
 		return (i > 0) ? name.substring(0, i) : "";
+	}
+
+	/**
+	 * Determine whether the {@link Class} is present or not.
+	 *
+	 * @param name the name of the class
+	 * @param classLoader the class loader to use
+	 * @return {@code true} if class is present, otherwise {@code false}
+	 * @since 2.0.0
+	 */
+	public static boolean isPresent(String name, @Nullable ClassLoader classLoader) {
+		try {
+			Class.forName(name, false, (classLoader != null) ? classLoader : getClassLoader());
+			return true;
+		}
+		catch (Throwable ex) {
+			return false;
+		}
 	}
 
 }

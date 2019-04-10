@@ -58,7 +58,7 @@ public final class HttpServerExtension implements BeforeEachCallback, AfterEachC
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
-		return parameterContext.getParameter().getType().isAssignableFrom(HttpServer.class);
+		return parameterContext.getParameter().getType().equals(HttpServer.class);
 	}
 
 	@Override

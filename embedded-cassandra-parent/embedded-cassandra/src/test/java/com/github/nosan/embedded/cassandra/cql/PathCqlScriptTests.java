@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
