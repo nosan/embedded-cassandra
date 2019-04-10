@@ -219,7 +219,7 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public void stop() throws CassandraException {
 		synchronized (this.lock) {
-			if (this.state == State.STARTED) {
+			if (this.state != State.STOPPED) {
 				try {
 					this.state = State.STOPPING;
 					stopInternal();
