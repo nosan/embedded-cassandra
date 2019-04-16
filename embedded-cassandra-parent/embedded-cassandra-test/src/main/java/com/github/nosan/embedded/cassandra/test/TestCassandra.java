@@ -226,9 +226,7 @@ public class TestCassandra {
 			Thread.currentThread().interrupt();
 		}
 		catch (Exception ex) {
-			if (log.isDebugEnabled()) {
-				log.error("Unable to stop Test Cassandra", ex);
-			}
+			log.error("Unable to stop Test Cassandra", ex);
 		}
 	}
 
