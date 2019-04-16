@@ -29,6 +29,10 @@ import com.github.nosan.embedded.cassandra.Settings;
  */
 public class ClusterFactory {
 
+	private static final String USERNAME = "cassandra";
+
+	private static final String PASSWORD = "cassandra";
+
 	/**
 	 * Creates a new configured {@link Cluster}.
 	 *
@@ -41,7 +45,7 @@ public class ClusterFactory {
 		socketOptions.setReadTimeoutMillis(10000);
 		Cluster.Builder builder = Cluster.builder().
 				addContactPoints(settings.getAddress())
-				.withCredentials("cassandra", "cassandra")
+				.withCredentials(USERNAME, PASSWORD)
 				.withPort(settings.getPort())
 				.withSocketOptions(socketOptions);
 		return builder.withoutJMXReporting().withoutMetrics().build();

@@ -28,7 +28,6 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
-import com.github.nosan.embedded.cassandra.test.CqlSessionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -49,7 +48,6 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  *
  * @author Dmytro Nosan
  * @see CqlScript
- * @see CqlSessionFactory
  * @see CassandraFactory
  * @since 1.0.0
  */
