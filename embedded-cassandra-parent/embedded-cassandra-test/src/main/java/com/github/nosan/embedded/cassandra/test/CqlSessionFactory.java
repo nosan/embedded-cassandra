@@ -58,8 +58,8 @@ public class CqlSessionFactory {
 						.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)
 						.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, PASSWORD)
 						.withString(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class.getTypeName())
-						.withDuration(DefaultDriverOption.RECONNECTION_MAX_DELAY, Duration.ofSeconds(15))
-						.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(15))
+						.withDuration(DefaultDriverOption.RECONNECTION_MAX_DELAY, Duration.ofSeconds(30))
+						.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
 						.build())
 				.build();
 	}

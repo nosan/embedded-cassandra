@@ -41,8 +41,8 @@ public class ClusterFactory {
 	 */
 	public Cluster create(Settings settings) {
 		SocketOptions socketOptions = new SocketOptions();
-		socketOptions.setConnectTimeoutMillis(10000);
-		socketOptions.setReadTimeoutMillis(10000);
+		socketOptions.setConnectTimeoutMillis(30000);
+		socketOptions.setReadTimeoutMillis(30000);
 		Cluster.Builder builder = Cluster.builder().
 				addContactPoints(settings.getAddress())
 				.withCredentials(USERNAME, PASSWORD)
