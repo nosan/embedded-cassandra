@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
@@ -50,8 +49,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	ProcessId start(Map<String, String> environment) throws IOException {
 		Path workingDirectory = this.workingDirectory;
 		Version version = this.version;
-		ProcessBuilder builder = new ProcessBuilder().directory(workingDirectory.toFile())
-				.redirectErrorStream(true);
+		ProcessBuilder builder = newBuilder();
 		builder.environment().putAll(environment);
 		Path pidFile = workingDirectory.resolve(UUID.randomUUID().toString());
 		builder.command("powershell", "-ExecutionPolicy", "Unrestricted",
@@ -65,41 +63,23 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	void stop(ProcessId processId, Map<String, String> environment) throws InterruptedException {
-		Path workingDirectory = this.workingDirectory;
-		ProcessBuilder builder = new ProcessBuilder().directory(workingDirectory.toFile())
-				.redirectErrorStream(true);
-		builder.environment().putAll(environment);
-		Process process = processId.getProcess();
-		if (terminate(processId, builder) != 0) {
-			process.destroy();
-		}
-		if (!process.waitFor(5, TimeUnit.SECONDS)) {
-			if (kill(processId, builder) != 0) {
-				process.destroy();
-			}
-			if (!process.waitFor(5, TimeUnit.SECONDS)) {
-				process.destroyForcibly();
-			}
-		}
-	}
-
-	private int terminate(ProcessId processId, ProcessBuilder builder) throws InterruptedException {
+	int terminate(ProcessId processId) throws InterruptedException {
 		long pid = processId.getPid();
 		Path pidFile = processId.getPidFile();
-		int exit = killByPidFile(pidFile, builder, false);
+		int exit = killByPidFile(pidFile, newBuilder(), false);
 		if (exit != 0 && pid != -1) {
-			return killByPid(pid, builder, false);
+			return killByPid(pid, newBuilder(), false);
 		}
 		return exit;
 	}
 
-	private int kill(ProcessId processId, ProcessBuilder builder) throws InterruptedException {
+	@Override
+	int kill(ProcessId processId) throws InterruptedException {
 		long pid = processId.getPid();
 		Path pidFile = processId.getPidFile();
-		int exit = killByPidFile(pidFile, builder, true);
+		int exit = killByPidFile(pidFile, newBuilder(), true);
 		if (exit != 0 && pid != -1) {
-			return killByPid(pid, builder, true);
+			return killByPid(pid, newBuilder(), true);
 		}
 		return exit;
 	}
@@ -115,7 +95,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			if (force) {
 				builder.command().add("-f");
 			}
-			return new RunProcess(builder).runAndWait();
+			return new RunProcess(builder).runAndWait(this.log::info);
 		}
 		return -1;
 	}
@@ -127,7 +107,13 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		}
 		builder.command().add("/pid");
 		builder.command().add(Long.toString(pid));
-		return new RunProcess(builder).runAndWait();
+		return new RunProcess(builder).runAndWait(this.log::info);
+	}
+
+	private ProcessBuilder newBuilder() {
+		return new ProcessBuilder()
+				.directory(this.workingDirectory.toFile())
+				.redirectErrorStream(true);
 	}
 
 }

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
@@ -51,8 +50,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	protected ProcessId start(Map<String, String> environment) throws IOException {
 		Path workingDirectory = this.workingDirectory;
 		Version version = this.version;
-		ProcessBuilder builder = new ProcessBuilder().directory(workingDirectory.toFile())
-				.redirectErrorStream(true);
+		ProcessBuilder builder = newBuilder();
 		builder.environment().putAll(environment);
 		builder.command(workingDirectory.resolve("bin/cassandra").toString(), "-f");
 		if (this.allowRoot && (version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
@@ -62,37 +60,28 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	protected void stop(ProcessId processId, Map<String, String> environment) throws InterruptedException {
-		ProcessBuilder builder = new ProcessBuilder().directory(this.workingDirectory.toFile())
-				.redirectErrorStream(true);
-		builder.environment().putAll(environment);
-		Process process = processId.getProcess();
+	int terminate(ProcessId processId) throws InterruptedException {
 		long pid = processId.getPid();
-		if (terminate(pid, builder) != 0) {
-			process.destroy();
-		}
-		if (!process.waitFor(5, TimeUnit.SECONDS)) {
-			if (kill(pid, builder) != 0) {
-				process.destroy();
-			}
-			if (!process.waitFor(5, TimeUnit.SECONDS)) {
-				process.destroyForcibly();
-			}
-		}
-	}
-
-	private int terminate(long pid, ProcessBuilder builder) throws InterruptedException {
 		if (pid != -1) {
-			return new RunProcess(builder.command("kill", Long.toString(pid))).runAndWait();
+			return new RunProcess(newBuilder()
+					.command("kill", Long.toString(pid)))
+					.runAndWait(this.log::info);
 		}
 		return -1;
 	}
 
-	private int kill(long pid, ProcessBuilder builder) throws InterruptedException {
+	@Override
+	int kill(ProcessId processId) throws InterruptedException {
+		long pid = processId.getPid();
 		if (pid != -1) {
-			return new RunProcess(builder.command("kill", "-SIGINT", Long.toString(pid))).runAndWait();
+			return new RunProcess(newBuilder().command("kill", "-SIGINT", Long.toString(pid)))
+					.runAndWait(this.log::info);
 		}
 		return -1;
+	}
+
+	private ProcessBuilder newBuilder() {
+		return new ProcessBuilder().directory(this.workingDirectory.toFile()).redirectErrorStream(true);
 	}
 
 }

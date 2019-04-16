@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -36,20 +35,14 @@ class RunProcessTests {
 
 	@Test
 	void shouldRunUnix(@TempDir Path temporaryFolder) throws Exception {
-		Process process = runProcess(temporaryFolder, "bash", "-c", command("echo", "$RUN_PROCESS_TEST")).run();
 		StringBuilder output = new StringBuilder();
-		ProcessUtils.read(process, output::append);
-		assertThat(process.waitFor()).isEqualTo(0);
+		int exit = runProcess(temporaryFolder, "bash", "-c", command("echo", "$RUN_PROCESS_TEST"))
+				.runAndWait(output::append);
 		assertThat(output.toString()).isEqualTo("TEST");
+		assertThat(exit).isEqualTo(0);
 	}
 
-	@Test
-	void shouldRunUnixWait(@TempDir Path temporaryFolder) throws IOException, InterruptedException {
-		int exit = runProcess(temporaryFolder, "echo", "Hello World").runAndWait();
-		assertThat(exit).isZero();
-	}
-
-	private RunProcess runProcess(Path temporaryFolder, String... arguments) throws IOException {
+	private RunProcess runProcess(Path temporaryFolder, String... arguments) {
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(temporaryFolder.toFile());
 		processBuilder.environment().put("RUN_PROCESS_TEST", "TEST");

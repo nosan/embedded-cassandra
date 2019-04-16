@@ -137,7 +137,17 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		Process process = (processId != null) ? processId.getProcess() : null;
 		if (processId != null && process.isAlive()) {
 			long pid = processId.getPid();
-			stop(processId, Collections.emptyMap());
+			if (terminate(processId) != 0) {
+				process.destroy();
+			}
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
+				if (kill(processId) != 0) {
+					process.destroy();
+				}
+				if (!process.waitFor(5, TimeUnit.SECONDS)) {
+					process.destroyForcibly();
+				}
+			}
 			if (process.isAlive()) {
 				throw new IOException(String.format("Apache Casandra Node '%s' is not stopped.", pid));
 			}
@@ -171,15 +181,24 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	abstract ProcessId start(Map<String, String> environment) throws IOException, InterruptedException;
 
 	/**
-	 * Stops the Apache Cassandra.
+	 * Terminates the Apache Cassandra.
 	 *
 	 * @param processId the process that handles {@code Cassandra} process
-	 * @param environment the environment variables
+	 * @return the exit code
 	 * @throws IOException in the case of I/O errors
 	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	abstract void stop(ProcessId processId, Map<String, String> environment)
-			throws IOException, InterruptedException;
+	abstract int terminate(ProcessId processId) throws IOException, InterruptedException;
+
+	/**
+	 * Kills the Apache Cassandra.
+	 *
+	 * @param processId the process that handles {@code Cassandra} process
+	 * @return the exit code
+	 * @throws IOException in the case of I/O errors
+	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
+	 */
+	abstract int kill(ProcessId processId) throws IOException, InterruptedException;
 
 	private NodeSettings awaitStart(ProcessId processId) throws InterruptedException, IOException {
 		Logger logger = LoggerFactory.getLogger(Cassandra.class);

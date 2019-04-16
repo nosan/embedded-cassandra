@@ -17,9 +17,15 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Utility class to run a {@link Process}.
@@ -30,6 +36,20 @@ import org.slf4j.LoggerFactory;
 class RunProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
+
+	private static final AtomicLong counter = new AtomicLong();
+
+	private final long id = counter.incrementAndGet();
+
+	private final ThreadFactory threadFactory = runnable -> {
+		Map<String, String> context = MDC.getCopyOfContextMap();
+		Thread thread = new Thread(() -> {
+			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
+			runnable.run();
+		}, String.format("process-%d", this.id));
+		thread.setDaemon(true);
+		return thread;
+	};
 
 	private final ProcessBuilder builder;
 
@@ -56,13 +76,19 @@ class RunProcess {
 	/**
 	 * Starts a new process.
 	 *
+	 * @param consumer the output consumer
 	 * @return the exit value
 	 * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting, then the
 	 * wait is ended and an InterruptedException is thrown.
 	 */
-	int runAndWait() throws InterruptedException {
+	int runAndWait(Consumer<? super String> consumer) throws InterruptedException {
 		try {
-			return run().waitFor();
+			Process process = run();
+			Thread thread = this.threadFactory.newThread(() -> ProcessUtils.read(process, consumer));
+			thread.start();
+			int exit = process.waitFor();
+			thread.join(100);
+			return exit;
 		}
 		catch (IOException ex) {
 			log.error(String.format("Can not execute '%s'", String.join(" ", this.builder.command())), ex);
