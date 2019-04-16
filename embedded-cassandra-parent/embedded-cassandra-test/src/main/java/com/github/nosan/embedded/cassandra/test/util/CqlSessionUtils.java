@@ -160,7 +160,7 @@ public abstract class CqlSessionUtils {
 		}
 		for (CqlScript script : scripts) {
 			for (String statement : script.getStatements()) {
-				CqlSessionUtils.execute(session, statement);
+				execute(session, statement);
 			}
 		}
 	}
