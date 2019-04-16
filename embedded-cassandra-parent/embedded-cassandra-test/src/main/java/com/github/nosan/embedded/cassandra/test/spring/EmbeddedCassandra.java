@@ -35,7 +35,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * Annotation that can be specified on a test class that runs Apache Cassandra based tests.
  * <p>The typical usage of this annotation is like:
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class) //for JUnit4
+ * &#064;RunWith(SpringRunner.class)
  * &#064;EmbeddedCassandra
  * public class CassandraTests {
  * 	&#064;Test
@@ -43,8 +43,27 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  *    }
  * }
  * </pre>
- * It is possible to define you own {@link CassandraFactory}, {@link TestCassandraFactory}, {@link
- * CassandraFactoryTestCustomizer} bean(s) to control {@link TestCassandra} instance.
+ * If you would like to override some properties which annotation does not have, {@link CassandraFactoryTestCustomizer
+ * customizers}  can be used. Here is a quick example:
+ * <pre class="code">
+ * &#064;RunWith(SpringRunner.class)
+ * &#064;ContextConfiguration
+ * &#064;EmbeddedCassandra
+ * class EmbeddedCassandraCustomizerTests {
+ * &#064;Test
+ * void testMe() {
+ * }
+ * &#064;Configuration
+ * static class TestConfiguration {
+ * &#064;Bean
+ * public CassandraFactoryTestCustomizer<LocalCassandraFactory> allowRootCustomizer() {
+ * return factory -> factory.setAllowRoot(true);
+ * }
+ * }
+ * }
+ * </pre>
+ * Also, it is possible to define you own {@link CassandraFactory}, {@link TestCassandraFactory}  bean(s) to control
+ * {@link TestCassandra} instance.
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
