@@ -18,6 +18,8 @@ package com.github.nosan.embedded.cassandra.util;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.nosan.embedded.cassandra.Cassandra;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -32,6 +34,16 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.getPackageName(null)).isEmpty();
 		assertThat(ClassUtils.getPackageName(Object[].class)).isEqualTo("java.lang");
 		assertThat(ClassUtils.getPackageName(ClassUtils.class)).isEqualTo("com.github.nosan.embedded.cassandra.util");
+	}
+
+	@Test
+	void classIsPresent() {
+		assertThat(ClassUtils.isPresent(Cassandra.class.getTypeName(), null)).isTrue();
+	}
+
+	@Test
+	void classIsNotPresent() {
+		assertThat(ClassUtils.isPresent("text", null)).isFalse();
 	}
 
 }

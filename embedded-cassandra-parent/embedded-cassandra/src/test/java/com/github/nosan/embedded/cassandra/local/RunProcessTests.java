@@ -19,13 +19,10 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,36 +31,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@SuppressWarnings("ConstantConditions")
+@DisabledOnOs(OS.WINDOWS)
 class RunProcessTests {
 
-	@Nullable
-	private Path temporaryFolder;
-
-	@Nullable
-	private StringBuilder output;
-
-	@BeforeEach
-	void setUp(@TempDir Path temporaryFolder) {
-		this.temporaryFolder = temporaryFolder;
-		this.output = new StringBuilder();
+	@Test
+	void shouldRunUnix(@TempDir Path temporaryFolder) throws Exception {
+		Process process = runProcess(temporaryFolder, "bash", "-c", command("echo", "$RUN_PROCESS_TEST")).run();
+		StringBuilder output = new StringBuilder();
+		ProcessUtils.read(process, output::append);
+		assertThat(process.waitFor()).isEqualTo(0);
+		assertThat(output.toString()).isEqualTo("TEST");
 	}
 
 	@Test
-	@DisabledOnOs(OS.WINDOWS)
-	void shouldRunAndWaitUnix() throws Exception {
-		Process process = runProcess("bash", "-c", command("echo", "$RUN_PROCESS_TEST"));
-		Thread.sleep(500); //waits for output...
-		assertThat(process.waitFor()).isEqualTo(0);
-		assertThat(this.output.toString()).isEqualTo("TEST");
+	void shouldRunUnixWait(@TempDir Path temporaryFolder) throws IOException, InterruptedException {
+		int exit = runProcess(temporaryFolder, "echo", "Hello World").runAndWait();
+		assertThat(exit).isZero();
 	}
 
-	private Process runProcess(String... arguments) throws IOException {
+	private RunProcess runProcess(Path temporaryFolder, String... arguments) throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(this.temporaryFolder.toFile());
+		processBuilder.directory(temporaryFolder.toFile());
 		processBuilder.environment().put("RUN_PROCESS_TEST", "TEST");
 		processBuilder.command(arguments);
-		return new RunProcess(processBuilder, Thread::new).run(this.output::append);
+		return new RunProcess(processBuilder);
 	}
 
 	private String command(String... arguments) {

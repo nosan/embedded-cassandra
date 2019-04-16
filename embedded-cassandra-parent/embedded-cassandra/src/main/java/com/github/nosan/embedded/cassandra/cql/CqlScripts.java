@@ -23,9 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
  * {@link CqlScript} implementation for a given CQL {@code scripts}.
@@ -34,7 +32,6 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  * @see CqlScript
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public final class CqlScripts implements CqlScript {
 
 	private final List<CqlScript> scripts;
@@ -59,7 +56,7 @@ public final class CqlScripts implements CqlScript {
 	}
 
 	@Override
-	public Collection<String> getStatements() {
+	public List<String> getStatements() {
 		List<String> statements = new ArrayList<>();
 		for (CqlScript script : this.scripts) {
 			statements.addAll(script.getStatements());

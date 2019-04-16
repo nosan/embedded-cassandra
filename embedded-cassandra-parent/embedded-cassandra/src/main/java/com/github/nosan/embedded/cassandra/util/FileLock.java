@@ -25,20 +25,18 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 
-import org.apiguardian.api.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility class to lock a file.
+ * Utility class to lock a file. <b>Only for internal purposes.</b>
  *
  * @author Dmytro Nosan
  * @see java.nio.channels.FileLock
  * @since 1.4.2
  */
-@API(since = "1.4.2", status = API.Status.INTERNAL)
 public final class FileLock implements AutoCloseable {
 
 	private static final Logger log = LoggerFactory.getLogger(FileLock.class);
@@ -85,7 +83,7 @@ public final class FileLock implements AutoCloseable {
 		}
 		this.fileLock = fileLock;
 		if (log.isDebugEnabled()) {
-			log.debug("The lock to the file '{}' has been acquired", file);
+			log.debug("The lock to the file '{}' is acquired", file);
 		}
 	}
 
@@ -121,10 +119,8 @@ public final class FileLock implements AutoCloseable {
 			try {
 				closeable.close();
 			}
-			catch (Throwable ex) {
-				if (log.isDebugEnabled()) {
-					log.error(ex.getMessage(), ex);
-				}
+			catch (Exception ex) {
+				log.error(ex.getMessage(), ex);
 			}
 		}
 	}

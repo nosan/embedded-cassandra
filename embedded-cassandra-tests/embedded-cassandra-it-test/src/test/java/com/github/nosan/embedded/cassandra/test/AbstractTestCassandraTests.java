@@ -16,9 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import com.datastax.driver.core.KeyspaceMetadata;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
+import java.util.Optional;
+
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.metadata.schema.KeyspaceMetadata;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,9 +27,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import com.github.nosan.embedded.cassandra.CassandraFactory;
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,69 +41,61 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SuppressWarnings("ConstantConditions")
 abstract class AbstractTestCassandraTests {
 
 	private final TestCassandra cassandra;
 
-	AbstractTestCassandraTests(@Nullable CassandraFactory cassandraFactory, @Nullable ClusterFactory clusterFactory) {
-		this.cassandra = new TestCassandra(cassandraFactory, clusterFactory);
+	@Nullable
+	private CqlSession session;
+
+	AbstractTestCassandraTests(Version version) {
+		LocalCassandraFactory factory = new LocalCassandraFactory();
+		factory.setVersion(version);
+		this.cassandra = new TestCassandra(factory);
 	}
 
 	@BeforeAll
 	void startCassandra() {
 		this.cassandra.start();
+		this.session = new CqlSessionFactory().create(this.cassandra.getSettings());
 	}
 
 	@AfterAll
 	void stopCassandra() {
 		this.cassandra.stop();
+		this.session.close();
 	}
 
 	@BeforeEach
 	void initAllKeyspaces() {
-		this.cassandra.executeScripts(CqlScript.classpath("init.cql"));
+		CqlSessionUtils.execute(this.session, CqlScript.classpath("init.cql"));
 	}
 
 	@AfterEach
 	void dropAllKeyspaces() {
-		this.cassandra.dropKeyspaces("test");
+		CqlSessionUtils.dropKeyspaces(this.session, "test");
 	}
 
 	@Test
 	void dropTables() {
-		KeyspaceMetadata keyspace = this.cassandra.getCluster().getMetadata().getKeyspace("test");
-		assertThat(keyspace).isNotNull();
-		assertThat(keyspace.getTable("users")).isNotNull();
-		this.cassandra.dropTables("test.users");
-		assertThat(keyspace.getTable("users")).isNull();
+		Optional<KeyspaceMetadata> keyspace = this.session.getMetadata().getKeyspace("test");
+		assertThat(keyspace).isPresent();
+		assertThat(keyspace.get().getTable("users")).isPresent();
+		CqlSessionUtils.dropTables(this.session, "test.users");
+		assertThat(keyspace.get().getTable("users")).isPresent();
 	}
 
 	@Test
 	void getCount() {
-		assertThat(this.cassandra.getRowCount("test.users")).isEqualTo(1);
+		assertThat(CqlSessionUtils.getCount(this.session, "test.users")).isEqualTo(1);
 	}
 
 	@Test
 	void deleteFromTables() {
-		assertThat(this.cassandra.getRowCount("test.users")).isEqualTo(1);
-		this.cassandra.deleteFromTables("test.users");
-		assertThat(this.cassandra.getRowCount("test.users")).isEqualTo(0);
-	}
-
-	@Test
-	void statement() {
-		Row row = this.cassandra.executeStatement("SELECT * FROM test.users WHERE user_id = ?", "frodo").one();
-		assertColumnValue(row, "first_name", "Frodo");
-		assertColumnValue(row, "last_name", "Baggins");
-
-		Row row1 = this.cassandra.executeStatement(QueryBuilder.select("first_name").from("test", "users").limit(1))
-				.one();
-		assertColumnValue(row1, "first_name", "Frodo");
-	}
-
-	private static void assertColumnValue(Row row, String column, String value) {
-		assertThat(row).isNotNull();
-		assertThat(row.get(column, String.class)).isEqualTo(value);
+		assertThat(CqlSessionUtils.getCount(this.session, "test.users")).isEqualTo(1);
+		CqlSessionUtils.truncateTables(this.session, "test.users");
+		assertThat(CqlSessionUtils.getCount(this.session, "test.users")).isZero();
 	}
 
 }

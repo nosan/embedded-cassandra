@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import org.apiguardian.api.API;
-
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 
 /**
@@ -28,7 +26,6 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
  * @see LocalCassandraFactory
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 @FunctionalInterface
 public interface CassandraFactory {
 

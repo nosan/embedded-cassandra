@@ -55,9 +55,6 @@ class ArchiveUtilsTests {
 		parameters.add(arguments("tar.xz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
 		parameters.add(arguments("txz", ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
 		parameters.add(arguments("tbz2", ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
-		parameters.add(arguments("a", ArchiveStreamFactory.AR, ""));
-		parameters.add(arguments("ar", ArchiveStreamFactory.AR, ""));
-		parameters.add(arguments("cpio", ArchiveStreamFactory.CPIO, ""));
 		parameters.add(arguments("jar", ArchiveStreamFactory.JAR, ""));
 		parameters.add(arguments("tar", ArchiveStreamFactory.TAR, ""));
 		parameters.add(arguments("zip", ArchiveStreamFactory.ZIP, ""));

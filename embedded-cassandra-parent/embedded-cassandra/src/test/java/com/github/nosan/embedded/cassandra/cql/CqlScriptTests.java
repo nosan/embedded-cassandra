@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
@@ -35,40 +33,33 @@ class CqlScriptTests {
 
 	@Test
 	void assertClasspathsGlobs() {
-		assertThat(CqlScript.classpathGlobs((String[]) null)).isNotNull();
-		assertStatements(CqlScript.classpathGlobs("roles.cql"));
-		assertStatements(CqlScript.classpathGlobs("*.cql"));
+		assertStatements(CqlScript.classpathPatterns("roles.cql"));
+		assertStatements(CqlScript.classpathPatterns("*.cql"));
 	}
 
 	@Test
 	void assertClasspaths() {
-		assertThat(CqlScript.classpath((String[]) null)).isNotNull();
 		assertStatements(CqlScript.classpath("roles.cql"));
-		assertStatements(CqlScript.classpath(getClass(), "/roles.cql"));
 	}
 
 	@Test
 	void assertUrls() {
-		assertThat(CqlScript.urls((URL[]) null)).isNotNull();
 		assertStatements(CqlScript.urls(getClass().getResource("/roles.cql")));
 	}
 
 	@Test
 	void assertFiles() throws URISyntaxException {
-		assertThat(CqlScript.files((File[]) null)).isNotNull();
 		assertStatements(CqlScript.files(new File(getClass().getResource("/roles.cql").toURI())));
 	}
 
 	@Test
 	void assertPaths() throws URISyntaxException {
-		assertThat(CqlScript.paths((Path[]) null)).isNotNull();
 		assertStatements(CqlScript.paths(Paths.get(getClass().getResource("/roles.cql").toURI())));
 
 	}
 
 	@Test
 	void assertStatements() {
-		assertThat(CqlScript.statements((String[]) null)).isNotNull();
 		assertStatements(CqlScript.statements("CREATE TABLE IF NOT EXISTS test.roles (id text PRIMARY KEY)"));
 	}
 

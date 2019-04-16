@@ -20,17 +20,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 
-import org.apiguardian.api.API;
-
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
- * {@link UrlFactory} to create {@code URL}.
+ * {@link UrlFactory} that creates {@code URLs} to the well known resources.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public class DefaultUrlFactory implements UrlFactory {
 
 	@Override

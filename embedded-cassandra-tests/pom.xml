@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-project</artifactId>
-        <version>1.4.3-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
 
     <description>Embedded Cassandra Tests</description>
@@ -19,11 +19,10 @@
 
     <modules>
         <module>embedded-cassandra-it-test</module>
-        <module>embedded-cassandra-junit-test</module>
-        <module>embedded-cassandra-jupiter-test</module>
-        <module>embedded-cassandra-testng-test</module>
-        <module>embedded-cassandra-spring-test</module>
-        <module>embedded-cassandra-spring-boot-test</module>
+        <module>embedded-cassandra-junit4-it-test</module>
+        <module>embedded-cassandra-junit5-it-test</module>
+        <module>embedded-cassandra-testng-it-test</module>
+        <module>embedded-cassandra-spring-it-test</module>
     </modules>
 
 </project>

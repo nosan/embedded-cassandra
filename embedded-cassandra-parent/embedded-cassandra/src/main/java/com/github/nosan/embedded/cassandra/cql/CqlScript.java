@@ -19,17 +19,12 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Collection;
-
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import java.util.List;
 
 /**
  * CQL Script that abstracts from the actual type of underlying source.
  *
  * @author Dmytro Nosan
- * @see AbstractCqlScript
  * @see AbstractCqlResourceScript
  * @see CqlScripts
  * @see UrlCqlScript
@@ -37,11 +32,9 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  * @see StaticCqlScript
  * @see FileCqlScript
  * @see PathCqlScript
- * @see InputStreamCqlScript
- * @see ClassPathGlobCqlScript
+ * @see ClassPathPatternCqlScript
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 @FunctionalInterface
 public interface CqlScript {
 
@@ -50,11 +43,11 @@ public interface CqlScript {
 	 *
 	 * @param patterns classpath glob patterns
 	 * @return CQL script
-	 * @see ClassPathGlobCqlScript
+	 * @see ClassPathPatternCqlScript
 	 * @since 1.2.6
 	 */
-	static CqlScript classpathGlobs(@Nullable String... patterns) {
-		return CqlScriptConstructor.create(patterns, ClassPathGlobCqlScript::new);
+	static CqlScript classpathPatterns(String... patterns) {
+		return CqlScriptFactory.create(patterns, ClassPathPatternCqlScript::new);
 	}
 
 	/**
@@ -64,20 +57,8 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see ClassPathCqlScript
 	 */
-	static CqlScript classpath(@Nullable String... locations) {
-		return CqlScriptConstructor.create(locations, ClassPathCqlScript::new);
-	}
-
-	/**
-	 * Factory method to create {@link CqlScripts} based on classpath locations.
-	 *
-	 * @param locations classpath locations
-	 * @param contextClass the class to load the resource with.
-	 * @return CQL script
-	 * @see ClassPathCqlScript
-	 */
-	static CqlScript classpath(@Nullable Class<?> contextClass, @Nullable String... locations) {
-		return CqlScriptConstructor.create(locations, element -> new ClassPathCqlScript(element, contextClass));
+	static CqlScript classpath(String... locations) {
+		return CqlScriptFactory.create(locations, ClassPathCqlScript::new);
 	}
 
 	/**
@@ -87,8 +68,8 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see UrlCqlScript
 	 */
-	static CqlScript urls(@Nullable URL... locations) {
-		return CqlScriptConstructor.create(locations, UrlCqlScript::new);
+	static CqlScript urls(URL... locations) {
+		return CqlScriptFactory.create(locations, UrlCqlScript::new);
 	}
 
 	/**
@@ -98,8 +79,8 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see FileCqlScript
 	 */
-	static CqlScript files(@Nullable File... locations) {
-		return CqlScriptConstructor.create(locations, FileCqlScript::new);
+	static CqlScript files(File... locations) {
+		return CqlScriptFactory.create(locations, FileCqlScript::new);
 	}
 
 	/**
@@ -109,8 +90,8 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see PathCqlScript
 	 */
-	static CqlScript paths(@Nullable Path... locations) {
-		return CqlScriptConstructor.create(locations, PathCqlScript::new);
+	static CqlScript paths(Path... locations) {
+		return CqlScriptFactory.create(locations, PathCqlScript::new);
 	}
 
 	/**
@@ -120,15 +101,15 @@ public interface CqlScript {
 	 * @return CQL script
 	 * @see StaticCqlScript
 	 */
-	static CqlScript statements(@Nullable String... statements) {
+	static CqlScript statements(String... statements) {
 		return new StaticCqlScript(statements);
 	}
 
 	/**
-	 * Return CQL Statements.
+	 * Returns CQL Statements.
 	 *
-	 * @return CQL statements.
+	 * @return CQL statements to execute.
 	 */
-	Collection<String> getStatements();
+	List<String> getStatements();
 
 }

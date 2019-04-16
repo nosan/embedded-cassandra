@@ -70,7 +70,7 @@ class FileLockTests {
 
 	private static Process fork(Path fileLock) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder();
-		Path home = Paths.get(new SystemProperty("java.home").getRequired());
+		Path home = Paths.get(System.getProperty("java.home"));
 		if (Files.exists(home.resolve("bin/java"))) {
 			builder.command(home.resolve("bin/java").toString());
 		}
@@ -78,7 +78,7 @@ class FileLockTests {
 			builder.command(home.resolve("bin/java.exe").toString());
 		}
 		builder.command().add("-cp");
-		builder.command().add(new SystemProperty("java.class.path").getRequired());
+		builder.command().add(System.getProperty("java.class.path"));
 		builder.command().add(FileLockSuite.class.getCanonicalName());
 		builder.command().add(fileLock.toAbsolutePath().toString());
 

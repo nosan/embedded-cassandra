@@ -16,16 +16,14 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
+import java.net.InetAddress;
 
 import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link NodeSettings}.
@@ -34,93 +32,53 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class NodeSettingsTests {
 
-	@Test
-	void shouldParseCassandraYamlUtf8() throws Exception {
-		assertSettings(load("/cassandra.yaml"));
-	}
+	private final NodeSettings settings = new NodeSettings(Version.parse("3.11.4"));
 
 	@Test
-	void shouldParseCassandraYamlUtf16() throws Exception {
-		assertSettings(load("/cassandra-utf16.yaml"));
-	}
-
-	@Test
-	void defaultSettingsV3() {
-		NodeSettings settings = new NodeSettings(new Version(3, 11, 3), null);
-		assertThat(settings.getClusterName()).isNull();
-		assertThat(settings.getPort()).isEqualTo(9042);
-		assertThat(settings.getRpcPort()).isEqualTo(9160);
-		assertThat(settings.getStoragePort()).isEqualTo(7000);
-		assertThat(settings.getSslStoragePort()).isEqualTo(7001);
-		assertThat(settings.isStartNativeTransport()).isTrue();
-		assertThat(settings.isStartRpc()).isTrue();
-		assertThat(settings.getSslPort()).isNull();
-		assertThat(settings.getRpcAddress()).isNull();
-		assertThat(settings.getListenAddress()).isNull();
-		assertThat(settings.getListenInterface()).isNull();
-		assertThat(settings.getBroadcastAddress()).isNull();
-		assertThat(settings.getRpcInterface()).isNull();
-		assertThat(settings.getVersion()).isEqualTo(new Version(3, 11, 3));
-		assertThat(settings.isListenInterfacePreferIpv6()).isEqualTo(false);
-		assertThat(settings.isRpcInterfacePreferIpv6()).isEqualTo(false);
-		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
-		assertThat(settings.getBroadcastRpcAddress()).isNull();
-		assertThat(settings.getProperties()).isEmpty();
+	void getAddress() {
+		assertThatThrownBy(this.settings::getAddress).isInstanceOf(IllegalStateException.class)
+				.hasStackTraceContaining("RPC and Native Transport are not enabled");
+		this.settings.setTransportEnabled(true);
+		assertThatThrownBy(this.settings::getAddress).isInstanceOf(IllegalStateException.class)
+				.hasStackTraceContaining("RPC or Native transport is enabled, but Address is null");
+		this.settings.setAddress(InetAddress.getLoopbackAddress());
+		assertThat(this.settings.getAddress()).isEqualTo(InetAddress.getLoopbackAddress());
 	}
 
 	@Test
-	void defaultSettingsV4() {
-		NodeSettings settings = new NodeSettings(new Version(4, 0, 0), null);
-		assertThat(settings.getClusterName()).isNull();
-		assertThat(settings.getPort()).isEqualTo(9042);
-		assertThat(settings.getRpcPort()).isEqualTo(-1);
-		assertThat(settings.getStoragePort()).isEqualTo(7000);
-		assertThat(settings.getSslStoragePort()).isEqualTo(7001);
-		assertThat(settings.isStartNativeTransport()).isTrue();
-		assertThat(settings.isStartRpc()).isFalse();
-		assertThat(settings.getSslPort()).isNull();
-		assertThat(settings.getRpcAddress()).isNull();
-		assertThat(settings.getListenAddress()).isNull();
-		assertThat(settings.getListenInterface()).isNull();
-		assertThat(settings.getBroadcastAddress()).isNull();
-		assertThat(settings.getRpcInterface()).isNull();
-		assertThat(settings.getVersion()).isEqualTo(new Version(4, 0, 0));
-		assertThat(settings.isListenInterfacePreferIpv6()).isEqualTo(false);
-		assertThat(settings.isRpcInterfacePreferIpv6()).isEqualTo(false);
-		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
-		assertThat(settings.getBroadcastRpcAddress()).isNull();
-		assertThat(settings.getProperties()).isEmpty();
+	void getVersion() {
+		assertThat(this.settings.getVersion()).isEqualTo(Version.parse("3.11.4"));
 	}
 
-	private void assertSettings(NodeSettings settings) {
-		assertThat(settings.getClusterName()).isEqualTo("Test Cluster");
-		assertThat(settings.getPort()).isEqualTo(9042);
-		assertThat(settings.getRpcPort()).isEqualTo(9160);
-		assertThat(settings.getStoragePort()).isEqualTo(7000);
-		assertThat(settings.getSslStoragePort()).isEqualTo(7001);
-		assertThat(settings.isStartNativeTransport()).isTrue();
-		assertThat(settings.isStartRpc()).isFalse();
-		assertThat(settings.getSslPort()).isEqualTo(9142);
-		assertThat(settings.getRpcAddress()).isEqualTo("localhost");
-		assertThat(settings.getListenAddress()).isEqualTo("localhost");
-		assertThat(settings.getListenInterface()).isEqualTo("eth0");
-		assertThat(settings.getBroadcastAddress()).isEqualTo("1.2.3.4");
-		assertThat(settings.getRpcInterface()).isEqualTo("eth1");
-		assertThat(settings.getVersion()).isEqualTo(new Version(3, 11, 3));
-		assertThat(settings.isListenInterfacePreferIpv6()).isEqualTo(false);
-		assertThat(settings.isRpcInterfacePreferIpv6()).isEqualTo(false);
-		assertThat(settings.isListenOnBroadcastAddress()).isEqualTo(false);
-		assertThat(settings.getBroadcastRpcAddress()).isEqualTo("1.2.3.4");
-		assertThat(settings.getProperties()).containsEntry("authenticator", "AllowAllAuthenticator");
-		assertThat(settings.toString()).contains("authenticator=AllowAllAuthenticator")
-				.contains("version=" + settings.getVersion()).contains("real_address=" + settings.getRealAddress())
-				.contains("real_listen_address=" + settings.getRealListenAddress());
+	@Test
+	void getPort() {
+		assertThatThrownBy(this.settings::getPort).isInstanceOf(IllegalStateException.class)
+				.hasStackTraceContaining("Native Transport is not enabled");
+		this.settings.setTransportEnabled(true);
+		assertThatThrownBy(this.settings::getPort).isInstanceOf(IllegalStateException.class)
+				.hasStackTraceContaining("Native transport is enabled, but port is null");
+		this.settings.setPort(9042);
+		assertThat(this.settings.getPort()).isEqualTo(9042);
 	}
 
-	private NodeSettings load(String resource) throws IOException {
-		try (InputStream is = getClass().getResourceAsStream(resource)) {
-			return new NodeSettings(new Version(3, 11, 3), new Yaml().loadAs(is, Map.class));
-		}
+	@Test
+	void getSslPort() {
+		assertThatThrownBy(this.settings::getSslPort).isInstanceOf(IllegalStateException.class)
+				.hasStackTraceContaining("Native transport is not enabled");
+		this.settings.setTransportEnabled(true);
+		this.settings.setSslPort(9142);
+		assertThat(this.settings.getSslPort()).hasValue(9142);
+	}
+
+	@Test
+	void getRpcPort() {
+		assertThatThrownBy(this.settings::getRpcPort).isInstanceOf(IllegalStateException.class)
+				.hasStackTraceContaining("RPC transport is not enabled");
+		this.settings.setRpcTransportEnabled(true);
+		assertThatThrownBy(this.settings::getRpcPort).isInstanceOf(IllegalStateException.class)
+				.hasStackTraceContaining("RPC transport is enabled, but RPC port is null");
+		this.settings.setRpcPort(9042);
+		assertThat(this.settings.getRpcPort()).isEqualTo(9042);
 	}
 
 }

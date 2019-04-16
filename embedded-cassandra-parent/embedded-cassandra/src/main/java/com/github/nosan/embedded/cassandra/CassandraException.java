@@ -16,9 +16,7 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import org.apiguardian.api.API;
-
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
  * Exceptions thrown by Cassandra.
@@ -26,7 +24,6 @@ import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-@API(since = "1.0.0", status = API.Status.STABLE)
 public class CassandraException extends RuntimeException {
 
 	/**

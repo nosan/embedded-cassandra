@@ -24,13 +24,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.apiguardian.api.API;
+import com.datastax.driver.core.Session;
+import com.datastax.oss.driver.api.core.CqlSession;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * {@code @Cql} is used to annotate a test method to configure CQL {@link #scripts} and {@link #statements} to be
- * executed against a given cluster during integration tests.
+ * executed against a given {@link CqlSession} during integration tests.
  * <p>Script execution is performed by the {@link CqlExecutionListener},
  * which is enabled by default.
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
@@ -46,7 +47,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 @Documented
 @Inherited
 @Repeatable(CqlGroup.class)
-@API(since = "1.0.0", status = API.Status.STABLE)
 public @interface Cql {
 
 	/**
@@ -61,6 +61,8 @@ public @interface Cql {
 	 * <p>All resources will be loaded by {@link ResourcePatternResolver}.
 	 * Resources which were loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
 	 * Resource.getURL().toString()}.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
 	 *
 	 * @return CQL Scripts
 	 */
@@ -82,6 +84,8 @@ public @interface Cql {
 	/**
 	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
 	 * <p>An empty string denotes that the platform encoding should be used.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
 	 *
 	 * @return CQL scripts encoding.
 	 */
@@ -96,23 +100,25 @@ public @interface Cql {
 	ExecutionPhase executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
 
 	/**
-	 * The bean name of the {@link com.datastax.driver.core.Cluster} against which the scripts should be executed.
+	 * The bean name of the {@link CqlSession} or {@link Session} against which the scripts should be executed.
 	 * <p>The name is only required if there is more than one bean of type
-	 * {@code Cluster} in the test's {@code ApplicationContext}. If there is only one such bean, it is not necessary to
+	 * {@code Session} in the test's {@code ApplicationContext}. If there is only one such bean, it is not necessary to
 	 * specify a bean name.
 	 * <p>Defaults to an empty string, requiring that one of the following is
 	 * true:
 	 * <ol>
-	 * <li>There is only one bean of type {@code Cluster} in the test's
+	 * <li>There is only one bean of type {@code Session} in the test's
 	 * {@code ApplicationContext}.</li>
-	 * <li>There is a primary bean of type {@code Cluster} in the test's
+	 * <li>There is a primary bean of type {@code Session} in the test's
 	 * {@code ApplicationContext}.</li>
-	 * <li>The {@code Cluster} bean to use is named {@code "cluster"}.</li>
+	 * <li>The {@code Session} bean to use is named {@code "cassandraSession"}</li>
 	 * </ol>
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
 	 *
-	 * @return {@code Cluster} bean name.
+	 * @return {@code Session} bean name.
 	 */
-	String cluster() default "";
+	String session() default "";
 
 	/**
 	 * Enumeration of <em>phases</em> that dictate when CQL scripts are executed.

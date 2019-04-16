@@ -16,39 +16,43 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.net.InetAddress;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.StringUtils;
-import com.github.nosan.embedded.cassandra.util.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Basic implementation of the {@link Settings}.
+ * Default implementation of the {@link Settings}.
  *
  * @author Dmytro Nosan
- * @since 1.2.10
+ * @since 2.0.0
  */
 class NodeSettings implements Settings {
 
+	@Nullable
+	private volatile InetAddress address;
+
+	@Nullable
+	private volatile Integer port;
+
+	@Nullable
+	private volatile Integer sslPort;
+
+	@Nullable
+	private volatile Integer rpcPort;
+
+	@Nullable
+	private volatile Boolean rpcTransportEnabled;
+
+	@Nullable
+	private volatile Boolean transportEnabled;
+
 	private final Version version;
 
-	private final Map<Object, Object> properties;
-
-	/**
-	 * Creates a new {@link NodeSettings}.
-	 *
-	 * @param version a version
-	 * @param properties a node properties
-	 */
-	NodeSettings(Version version, @Nullable Map<?, ?> properties) {
+	NodeSettings(Version version) {
 		this.version = version;
-		this.properties = Collections
-				.unmodifiableMap((properties != null) ? new LinkedHashMap<>(properties) : Collections.emptyMap());
 	}
 
 	@Override
@@ -57,143 +61,113 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public Map<Object, Object> getProperties() {
-		return this.properties;
+	public InetAddress getAddress() throws IllegalStateException {
+		if (!isRpcTransportEnabled() && !isTransportEnabled()) {
+			throw new IllegalStateException("RPC and Native Transport are not enabled");
+		}
+		InetAddress address = this.address;
+		if (address == null) {
+			throw new IllegalStateException("RPC or Native transport is enabled, but Address is null");
+		}
+		return address;
 	}
 
-	@Nullable
-	@Override
-	public String getClusterName() {
-		return getString("cluster_name", this.properties).orElseGet(Settings.super::getClusterName);
-	}
-
-	@Override
-	public int getStoragePort() {
-		return getInteger("storage_port", this.properties).orElseGet(Settings.super::getStoragePort);
-	}
-
-	@Override
-	public int getSslStoragePort() {
-		return getInteger("ssl_storage_port", this.properties).orElseGet(Settings.super::getSslStoragePort);
-	}
-
-	@Nullable
-	@Override
-	public String getListenAddress() {
-		return getString("listen_address", this.properties).orElseGet(Settings.super::getListenAddress);
-	}
-
-	@Nullable
-	@Override
-	public String getListenInterface() {
-		return getString("listen_interface", this.properties).orElseGet(Settings.super::getListenInterface);
-	}
-
-	@Nullable
-	@Override
-	public String getBroadcastAddress() {
-		return getString("broadcast_address", this.properties).orElseGet(Settings.super::getBroadcastAddress);
-	}
-
-	@Nullable
-	@Override
-	public String getRpcAddress() {
-		return getString("rpc_address", this.properties).orElseGet(Settings.super::getRpcAddress);
-	}
-
-	@Nullable
-	@Override
-	public String getRpcInterface() {
-		return getString("rpc_interface", this.properties).orElseGet(Settings.super::getRpcInterface);
-	}
-
-	@Nullable
-	@Override
-	public String getBroadcastRpcAddress() {
-		return getString("broadcast_rpc_address", this.properties).orElseGet(Settings.super::getBroadcastRpcAddress);
+	/**
+	 * Initializes the value for the {@link NodeSettings#getAddress} attribute.
+	 *
+	 * @param address The value for address
+	 */
+	void setAddress(@Nullable InetAddress address) {
+		this.address = address;
 	}
 
 	@Override
-	public boolean isStartNativeTransport() {
-		return getBoolean("start_native_transport", this.properties).orElseGet(Settings.super::isStartNativeTransport);
+	public boolean isTransportEnabled() {
+		Boolean transportEnabled = this.transportEnabled;
+		return transportEnabled != null && transportEnabled;
+	}
+
+	/**
+	 * Initializes the value for the {@link NodeSettings#isTransportEnabled()} attribute.
+	 *
+	 * @param transportEnabled The value for transportEnabled
+	 */
+	void setTransportEnabled(@Nullable Boolean transportEnabled) {
+		this.transportEnabled = transportEnabled;
 	}
 
 	@Override
-	public int getPort() {
-		return getInteger("native_transport_port", this.properties).orElseGet(Settings.super::getPort);
+	public int getPort() throws IllegalStateException {
+		if (!isTransportEnabled()) {
+			throw new IllegalStateException("Native Transport is not enabled");
+		}
+		Integer port = this.port;
+		if (port == null) {
+			throw new IllegalStateException("Native transport is enabled, but port is null");
+		}
+		return port;
 	}
 
-	@Nullable
-	@Override
-	public Integer getSslPort() {
-		return getInteger("native_transport_port_ssl", this.properties).orElseGet(Settings.super::getSslPort);
-	}
-
-	@Override
-	public boolean isStartRpc() {
-		return getBoolean("start_rpc", this.properties).orElseGet(Settings.super::isStartRpc);
-	}
-
-	@Override
-	public int getRpcPort() {
-		return getInteger("rpc_port", this.properties).orElseGet(Settings.super::getRpcPort);
-	}
-
-	@Override
-	public boolean isListenOnBroadcastAddress() {
-		return getBoolean("listen_on_broadcast_address", this.properties)
-				.orElseGet(Settings.super::isListenOnBroadcastAddress);
+	/**
+	 * Initializes the value for the {@link NodeSettings#getPort} attribute.
+	 *
+	 * @param port The value for port
+	 */
+	void setPort(@Nullable Integer port) {
+		this.port = port;
 	}
 
 	@Override
-	public boolean isListenInterfacePreferIpv6() {
-		return getBoolean("listen_interface_prefer_ipv6", this.properties)
-				.orElseGet(Settings.super::isListenInterfacePreferIpv6);
+	public Optional<Integer> getSslPort() throws IllegalStateException {
+		if (!isTransportEnabled()) {
+			throw new IllegalStateException("Native transport is not enabled");
+		}
+		return Optional.ofNullable(this.sslPort);
+	}
+
+	/**
+	 * Initializes the value for the {@link NodeSettings#getSslPort} attribute.
+	 *
+	 * @param sslPort The value for sslPort
+	 */
+	void setSslPort(@Nullable Integer sslPort) {
+		this.sslPort = sslPort;
 	}
 
 	@Override
-	public boolean isRpcInterfacePreferIpv6() {
-		return getBoolean("rpc_interface_prefer_ipv6", this.properties)
-				.orElseGet(Settings.super::isRpcInterfacePreferIpv6);
+	public boolean isRpcTransportEnabled() {
+		Boolean rpcTransportEnabled = this.rpcTransportEnabled;
+		return rpcTransportEnabled != null && rpcTransportEnabled;
+	}
+
+	/**
+	 * Initializes the value for the {@link NodeSettings#isRpcTransportEnabled()} attribute.
+	 *
+	 * @param rpcTransportEnabled The value for rpcTransportEnabled
+	 */
+	void setRpcTransportEnabled(@Nullable Boolean rpcTransportEnabled) {
+		this.rpcTransportEnabled = rpcTransportEnabled;
 	}
 
 	@Override
-	public String toString() {
-		Map<Object, Object> properties = new LinkedHashMap<>(getProperties());
-		properties.put("version", getVersion());
-		properties.put("real_listen_address", getRealListenAddress());
-		properties.put("real_address", getRealAddress());
-		properties.put("cluster_name", getClusterName());
-		properties.put("storage_port", getStoragePort());
-		properties.put("ssl_storage_port", getSslStoragePort());
-		properties.put("listen_address", getListenAddress());
-		properties.put("listen_interface", getListenInterface());
-		properties.put("broadcast_address", getBroadcastAddress());
-		properties.put("rpc_address", getRpcAddress());
-		properties.put("rpc_interface", getRpcInterface());
-		properties.put("broadcast_rpc_address", getBroadcastRpcAddress());
-		properties.put("start_native_transport", isStartNativeTransport());
-		properties.put("native_transport_port", getPort());
-		properties.put("rpc_port", getRpcPort());
-		properties.put("native_transport_port_ssl", getSslPort());
-		properties.put("start_rpc", isStartRpc());
-		properties.put("listen_on_broadcast_address", isListenOnBroadcastAddress());
-		properties.put("listen_interface_prefer_ipv6", isListenInterfacePreferIpv6());
-		properties.put("rpc_interface_prefer_ipv6", isRpcInterfacePreferIpv6());
-		return properties.entrySet().stream().filter(entry -> entry.getValue() != null).map(String::valueOf)
-				.collect(Collectors.joining(",", "{", "}"));
+	public int getRpcPort() throws IllegalStateException {
+		if (!isRpcTransportEnabled()) {
+			throw new IllegalStateException("RPC transport is not enabled");
+		}
+		Integer rpcPort = this.rpcPort;
+		if (rpcPort == null) {
+			throw new IllegalStateException("RPC transport is enabled, but RPC port is null");
+		}
+		return rpcPort;
 	}
 
-	private static Optional<Integer> getInteger(String name, Map<?, ?> source) {
-		return getString(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
-	}
-
-	private static Optional<Boolean> getBoolean(String name, Map<?, ?> source) {
-		return getString(name, source).filter(StringUtils::hasText).map(Boolean::parseBoolean);
-	}
-
-	private static Optional<String> getString(String name, Map<?, ?> source) {
-		return Optional.ofNullable(source.get(name)).map(String::valueOf);
+	/**
+	 * Initializes the value for the {@link NodeSettings#getRpcPort} attribute.
+	 *
+	 * @param rpcPort The value for rpcPort
+	 */
+	void setRpcPort(@Nullable Integer rpcPort) {
+		this.rpcPort = rpcPort;
 	}
 
 }

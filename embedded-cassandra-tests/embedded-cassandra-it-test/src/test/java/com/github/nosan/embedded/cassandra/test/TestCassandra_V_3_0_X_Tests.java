@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.test;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 
 /**
  * Tests for {@link TestCassandra}.
@@ -27,9 +26,7 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactoryBuilder;
 class TestCassandra_V_3_0_X_Tests extends AbstractTestCassandraTests {
 
 	TestCassandra_V_3_0_X_Tests() {
-		super(new LocalCassandraFactoryBuilder()
-				.setVersion(new Version(3, 0, 18))
-				.setDeleteWorkingDirectory(true).build(), null);
+		super(Version.parse("3.0.18"));
 	}
 
 }
