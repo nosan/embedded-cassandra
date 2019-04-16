@@ -56,7 +56,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * &#064;Configuration
  * static class TestConfiguration {
  * &#064;Bean
- * public CassandraFactoryTestCustomizer<LocalCassandraFactory> allowRootCustomizer() {
+ * public CassandraFactoryTestCustomizer&lt;LocalCassandraFactory&gt; allowRootCustomizer() {
  * return factory -> factory.setAllowRoot(true);
  * }
  * }
