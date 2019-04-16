@@ -69,7 +69,7 @@ abstract class AbstractTestCassandraTests {
 
 	@BeforeEach
 	void initAllKeyspaces() {
-		CqlSessionUtils.execute(this.session, CqlScript.classpath("init.cql"));
+		CqlSessionUtils.executeScripts(this.session, CqlScript.classpath("init.cql"));
 	}
 
 	@AfterEach

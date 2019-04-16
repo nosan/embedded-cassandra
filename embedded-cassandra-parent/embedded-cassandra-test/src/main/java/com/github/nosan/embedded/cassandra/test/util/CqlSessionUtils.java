@@ -152,7 +152,7 @@ public abstract class CqlSessionUtils {
 	 * @param session a session
 	 * @see CqlScript
 	 */
-	public static void execute(CqlSession session, CqlScript... scripts) {
+	public static void executeScripts(CqlSession session, CqlScript... scripts) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(scripts, "Scripts must not be null");
 		if (log.isDebugEnabled()) {

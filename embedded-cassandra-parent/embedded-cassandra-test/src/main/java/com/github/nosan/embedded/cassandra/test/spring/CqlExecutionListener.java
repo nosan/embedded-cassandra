@@ -111,10 +111,10 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	private void executeScripts(String name, ApplicationContext applicationContext, CqlScript... scripts) {
 		ClassLoader classLoader = getClass().getClassLoader();
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, classLoader)) {
-			CqlSessionUtils.execute(getSession(name, applicationContext, CqlSession.class), scripts);
+			CqlSessionUtils.executeScripts(getSession(name, applicationContext, CqlSession.class), scripts);
 		}
 		else if (ClassUtils.isPresent(SESSION_CLASS, classLoader)) {
-			SessionUtils.execute(getSession(name, applicationContext, Session.class), scripts);
+			SessionUtils.executeScripts(getSession(name, applicationContext, Session.class), scripts);
 		}
 		else {
 			throw new IllegalStateException(String.format("There is no way to execute '%s'."

@@ -181,12 +181,12 @@ public class TestCassandra {
 		ClassLoader classLoader = getClass().getClassLoader();
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, classLoader)) {
 			try (CqlSession session = new CqlSessionFactory().create(getSettings())) {
-				CqlSessionUtils.execute(session, scripts);
+				CqlSessionUtils.executeScripts(session, scripts);
 			}
 		}
 		else if (ClassUtils.isPresent(CLUSTER_CLASS, classLoader)) {
 			try (Cluster cluster = new ClusterFactory().create(getSettings())) {
-				SessionUtils.execute(cluster.connect(), scripts);
+				SessionUtils.executeScripts(cluster.connect(), scripts);
 			}
 		}
 		else {
