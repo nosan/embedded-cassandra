@@ -24,7 +24,6 @@ import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.context.DriverContext;
 import com.datastax.oss.driver.api.core.metadata.EndPoint;
-import edu.umd.cs.findbugs.annotations.NonNull;
 
 import com.github.nosan.embedded.cassandra.Settings;
 
@@ -75,7 +74,7 @@ public class CqlSessionFactory {
 		}
 
 		@Override
-		public void onMissingChallenge(@NonNull EndPoint endPoint) {
+		public void onMissingChallenge(EndPoint endPoint) {
 		}
 
 	}
