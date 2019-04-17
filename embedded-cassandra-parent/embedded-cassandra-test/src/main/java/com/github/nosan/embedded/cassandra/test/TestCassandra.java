@@ -179,13 +179,14 @@ public class TestCassandra {
 	public void executeScripts(CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
 		ClassLoader classLoader = getClass().getClassLoader();
+		Settings settings = getSettings();
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, classLoader)) {
-			try (CqlSession session = new CqlSessionFactory().create(getSettings())) {
+			try (CqlSession session = new CqlSessionFactory().create(settings)) {
 				CqlSessionUtils.executeScripts(session, scripts);
 			}
 		}
 		else if (ClassUtils.isPresent(CLUSTER_CLASS, classLoader)) {
-			try (Cluster cluster = new ClusterFactory().create(getSettings())) {
+			try (Cluster cluster = new ClusterFactory().create(settings)) {
 				SessionUtils.executeScripts(cluster.connect(), scripts);
 			}
 		}

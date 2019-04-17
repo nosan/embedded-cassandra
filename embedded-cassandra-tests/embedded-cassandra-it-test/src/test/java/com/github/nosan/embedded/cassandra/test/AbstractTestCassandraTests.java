@@ -88,14 +88,14 @@ abstract class AbstractTestCassandraTests {
 
 	@Test
 	void getCount() {
-		assertThat(CqlSessionUtils.getCount(this.session, "test.users")).isEqualTo(1);
+		assertThat(CqlSessionUtils.count(this.session, "test.users")).isEqualTo(1);
 	}
 
 	@Test
 	void deleteFromTables() {
-		assertThat(CqlSessionUtils.getCount(this.session, "test.users")).isEqualTo(1);
+		assertThat(CqlSessionUtils.count(this.session, "test.users")).isEqualTo(1);
 		CqlSessionUtils.truncateTables(this.session, "test.users");
-		assertThat(CqlSessionUtils.getCount(this.session, "test.users")).isZero();
+		assertThat(CqlSessionUtils.count(this.session, "test.users")).isZero();
 	}
 
 }

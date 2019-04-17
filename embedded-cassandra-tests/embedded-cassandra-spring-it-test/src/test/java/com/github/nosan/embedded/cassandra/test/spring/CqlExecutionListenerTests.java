@@ -45,12 +45,12 @@ class CqlExecutionListenerTests {
 	@Test
 	@Cql(scripts = "/users-data.cql")
 	void shouldHaveUser() {
-		assertThat(CqlSessionUtils.getCount(this.session, "test.users")).isEqualTo(1);
+		assertThat(CqlSessionUtils.count(this.session, "test.users")).isEqualTo(1);
 	}
 
 	@Test
 	void shouldNotHaveUser() {
-		assertThat(CqlSessionUtils.getCount(this.session, "test.users")).isZero();
+		assertThat(CqlSessionUtils.count(this.session, "test.users")).isZero();
 	}
 
 }
