@@ -19,10 +19,10 @@ package com.github.nosan.embedded.cassandra.test.spring.data;
 import org.springframework.data.cassandra.repository.ReactiveCassandraRepository;
 
 /**
- * Simple reactive repository for {@link City}.
+ * Simple reactive repository for {@link CityEntity}.
  *
  * @author Dmytro Nosan
  */
-interface CityReactiveRepository extends ReactiveCassandraRepository<City, Long> {
+interface CityReactiveRepository extends ReactiveCassandraRepository<CityEntity, Long> {
 
 }

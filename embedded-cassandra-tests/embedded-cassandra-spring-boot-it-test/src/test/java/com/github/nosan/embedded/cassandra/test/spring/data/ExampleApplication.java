@@ -24,6 +24,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Dmytro Nosan
  */
 @SpringBootApplication
-public class CassandraApplication {
+public class ExampleApplication {
 
 }

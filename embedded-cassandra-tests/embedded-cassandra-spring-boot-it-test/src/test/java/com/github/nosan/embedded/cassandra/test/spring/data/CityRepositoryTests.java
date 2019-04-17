@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest
 @EmbeddedCassandra(scripts = "/setup.cql", port = "0")
-class CassandraCityRepositoryTests {
+class CityRepositoryTests {
 
 	@Autowired
 	private CassandraTemplate cassandraTemplate;
@@ -47,12 +47,12 @@ class CassandraCityRepositoryTests {
 
 	@Test
 	void testRepository() {
-		City city = new City();
+		CityEntity city = new CityEntity();
 		city.setId(Long.MAX_VALUE - 1);
 		city.setName("Lviv");
 		city = this.cityRepository.save(city);
 		assertThat(city.getId()).isNotNull();
-		assertThat(this.cassandraTemplate.exists(city.getId(), City.class)).isTrue();
+		assertThat(this.cassandraTemplate.exists(city.getId(), CityEntity.class)).isTrue();
 	}
 
 	@TestConfiguration

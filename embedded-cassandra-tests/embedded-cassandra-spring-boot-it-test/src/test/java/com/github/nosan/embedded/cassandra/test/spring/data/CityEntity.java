@@ -28,7 +28,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
  * @author Dmytro Nosan
  */
 @Table("city")
-class City {
+class CityEntity {
 
 	@PrimaryKey
 	@CassandraType(type = Name.BIGINT)
