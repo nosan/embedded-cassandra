@@ -96,7 +96,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	private boolean deleteWorkingDirectory = true;
 
 	/**
-	 * Whether to allow running Cassandra as a {@code root} or not.
+	 * Allow running Cassandra under a {@code root} user.
 	 * <p>
 	 * This property will be added as {@code -R} to the command line
 	 *
