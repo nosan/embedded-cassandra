@@ -188,14 +188,14 @@ public class TestCassandra {
 				CqlSessionUtils.executeScripts(session, scripts);
 			}
 		}
-		else if (ClassUtils.isPresent(CLUSTER_CLASS, classLoader)) {
+		else if (ClassUtils.isPresent(CLUSTER_CLASS, classLoader) && ClassUtils.isPresent(SESSION_CLASS, classLoader)) {
 			try (Cluster cluster = new ClusterFactory().create(settings)) {
 				SessionUtils.executeScripts(cluster.connect(), scripts);
 			}
 		}
 		else {
 			throw new IllegalStateException(String.format("There is no way to execute '%s'."
-							+ " '%s' or '%s' and '%s' classes are not present in the classpath.",
+							+ " '%s' and ('%s' or '%s') classes are not present in the classpath.",
 					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(",")),
 					CQL_SESSION_CLASS, CLUSTER_CLASS, SESSION_CLASS));
 		}
