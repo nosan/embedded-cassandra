@@ -43,7 +43,7 @@
         <cassandra-driver-core.version>3.7.1</cassandra-driver-core.version>
         <junit.jupiter.version>5.4.0</junit.jupiter.version>
         <checkstyle.version>8.19</checkstyle.version>
-        <slf4j-api.version>1.7.25</slf4j-api.version>
+        <slf4j-api.version>1.7.26</slf4j-api.version>
         <logback-classic.version>1.2.3</logback-classic.version>
         <spring.version>5.1.6.RELEASE</spring.version>
         <jsr305.version>3.0.2</jsr305.version>
