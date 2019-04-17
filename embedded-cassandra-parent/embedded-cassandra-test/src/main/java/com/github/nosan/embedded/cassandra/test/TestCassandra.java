@@ -62,6 +62,8 @@ public class TestCassandra {
 
 	private static final String CLUSTER_CLASS = "com.datastax.driver.core.Cluster";
 
+	private static final String SESSION_CLASS = "com.datastax.driver.core.Session";
+
 	private final Object monitor = new Object();
 
 	private final Cassandra cassandra;
@@ -193,8 +195,8 @@ public class TestCassandra {
 		}
 		else {
 			throw new IllegalStateException(String.format("There is no way to execute '%s'."
-							+ " Both java 'com.datastax.cassandra:cassandra-driver-core' and "
-							+ "'com.datastax.oss:java-driver-core' libraries are not present in the classpath.",
+							+ " '%s' or '%s' and '%s' classes are not present in the classpath.",
+					CQL_SESSION_CLASS, CLUSTER_CLASS, SESSION_CLASS,
 					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(","))));
 		}
 	}

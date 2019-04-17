@@ -32,9 +32,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
@@ -43,6 +41,8 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.test.spring.Cql.ExecutionPhase;
 import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 import com.github.nosan.embedded.cassandra.test.util.SessionUtils;
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
+import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
  * {@code TestExecutionListener} that provides support for executing CQL {@link Cql#scripts scripts} and {@link
@@ -119,8 +119,8 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 		else {
 			throw new IllegalStateException(String.format("There is no way to execute '%s'."
-							+ " Both java 'com.datastax.cassandra:cassandra-driver-core' and "
-							+ "'com.datastax.oss:java-driver-core' libraries are not present in the classpath.",
+							+ " Both '%s' and '%s' classes are not present in the classpath.",
+					CQL_SESSION_CLASS, SESSION_CLASS,
 					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(","))));
 		}
 	}

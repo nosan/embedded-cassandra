@@ -42,8 +42,22 @@ class ClassUtilsTests {
 	}
 
 	@Test
+	void classIsPresentNotInitialize() {
+		assertThat(ClassUtils.isPresent(MyClass.class.getTypeName(), null)).isTrue();
+	}
+
+	@Test
 	void classIsNotPresent() {
-		assertThat(ClassUtils.isPresent("text", null)).isFalse();
+		assertThat(ClassUtils.isPresent("text", getClass().getClassLoader())).isFalse();
+	}
+
+	private static final class MyClass {
+
+		static {
+			if (Boolean.TRUE) {
+				throw new IllegalStateException();
+			}
+		}
 	}
 
 }
