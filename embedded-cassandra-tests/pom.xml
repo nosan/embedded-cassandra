@@ -23,6 +23,7 @@
         <module>embedded-cassandra-junit5-it-test</module>
         <module>embedded-cassandra-testng-it-test</module>
         <module>embedded-cassandra-spring-it-test</module>
+        <module>embedded-cassandra-spring-boot-it-test</module>
     </modules>
 
 </project>
