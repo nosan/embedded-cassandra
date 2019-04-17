@@ -67,7 +67,13 @@ public final class FileLock implements AutoCloseable {
 	 */
 	public void lock() throws IOException, FileLockInterruptionException {
 		Path file = this.file;
-		FileChannel fileChannel = FileChannel.open(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+		FileChannel fileChannel;
+		try {
+			fileChannel = tryOpen(file);
+		}
+		catch (InterruptedException ex) {
+			throw new FileLockInterruptionException();
+		}
 		this.fileChannel = fileChannel;
 		java.nio.channels.FileLock fileLock;
 		if (log.isDebugEnabled()) {
@@ -102,6 +108,18 @@ public final class FileLock implements AutoCloseable {
 	@Override
 	public void close() {
 		release();
+	}
+
+	private static FileChannel tryOpen(Path file) throws IOException, InterruptedException {
+		for (int i = 0; i < 2; i++) {
+			try {
+				return FileChannel.open(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+			}
+			catch (IOException ex) {
+				Thread.sleep(100);
+			}
+		}
+		return FileChannel.open(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 	}
 
 	@Nullable
