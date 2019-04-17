@@ -65,7 +65,7 @@ class EmbeddedCassandraCustomizerTests {
 	static class TestConfiguration {
 
 		@Bean
-		public CassandraFactoryTestCustomizer<LocalCassandraFactory> versionCustomizer() {
+		public EmbeddedCassandraFactoryCustomizer<LocalCassandraFactory> versionCustomizer() {
 			return factory -> factory.setVersion(Version.parse("3.11.3"));
 		}
 

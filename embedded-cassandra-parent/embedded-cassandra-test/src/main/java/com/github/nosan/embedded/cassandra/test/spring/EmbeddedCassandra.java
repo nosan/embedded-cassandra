@@ -43,8 +43,8 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  *    }
  * }
  * </pre>
- * If you would like to override some properties which annotation does not have, {@link CassandraFactoryTestCustomizer
- * customizers}  can be used. Here is a quick example:
+ * If you would like to override some properties which annotation does not have, {@link
+ * EmbeddedCassandraFactoryCustomizer customizers}  can be used. Here is a quick example:
  * <pre class="code">
  * &#064;RunWith(SpringRunner.class)
  * &#064;ContextConfiguration
@@ -56,7 +56,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * &#064;Configuration
  * static class TestConfiguration {
  * &#064;Bean
- * public CassandraFactoryTestCustomizer&lt;LocalCassandraFactory&gt; allowRootCustomizer() {
+ * public EmbeddedCassandraFactoryCustomizer&lt;LocalCassandraFactory&gt; allowRootCustomizer() {
  * return factory -&gt; factory.setAllowRoot(true);
  * }
  * }
@@ -68,7 +68,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @author Dmytro Nosan
  * @see CassandraFactory
  * @see TestCassandraFactory
- * @see CassandraFactoryTestCustomizer
+ * @see EmbeddedCassandraFactoryCustomizer
  * @see DirtiesContext
  * @since 1.0.0
  */

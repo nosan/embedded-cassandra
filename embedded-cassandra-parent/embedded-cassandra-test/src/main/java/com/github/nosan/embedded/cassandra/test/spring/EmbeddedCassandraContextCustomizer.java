@@ -141,7 +141,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 					.getIfUnique(() -> TestCassandra::new);
 			CassandraFactory cassandraFactory = context.getBeanProvider(CassandraFactory.class)
 					.getIfUnique(this::getCassandraFactory);
-			context.getBeanProvider(CassandraFactoryTestCustomizer.class)
+			context.getBeanProvider(EmbeddedCassandraFactoryCustomizer.class)
 					.forEach(customizer -> customize(cassandraFactory, customizer));
 			TestCassandra cassandra = testCassandraFactory.create(cassandraFactory, getScripts());
 			this.cassandra = Objects.requireNonNull(cassandra, "Test Cassandra must not be null");
@@ -154,7 +154,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		}
 
 		@SuppressWarnings("unchecked")
-		private void customize(CassandraFactory cassandraFactory, CassandraFactoryTestCustomizer customizer) {
+		private void customize(CassandraFactory cassandraFactory, EmbeddedCassandraFactoryCustomizer customizer) {
 			try {
 				customizer.customize(cassandraFactory);
 			}
