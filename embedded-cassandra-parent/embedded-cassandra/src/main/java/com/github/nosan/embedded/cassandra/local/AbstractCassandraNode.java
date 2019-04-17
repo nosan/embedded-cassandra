@@ -242,7 +242,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		if (settings.isRpcTransportEnabled() && !PortUtils.isPortBusy(settings.getAddress(), settings.getRpcPort())) {
 			return false;
 		}
-		return !settings.isTransportEnabled() || PortUtils.isPortBusy(settings.getAddress(), settings.getPort());
+		if (settings.isTransportEnabled() && !PortUtils.isPortBusy(settings.getAddress(), settings.getPort())) {
+			return false;
+		}
+		return true;
 	}
 
 	private void parse(String line, NodeSettings settings) {
