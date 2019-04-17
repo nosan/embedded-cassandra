@@ -48,7 +48,7 @@ class StaticCqlScriptTests {
 
 	@Test
 	void assertToString() {
-		assertThat(statements(ROLES).toString()).contains("Static CQL Statements '1'");
+		assertThat(statements(ROLES).toString()).contains(ROLES);
 	}
 
 	private StaticCqlScript statements(String... statements) {

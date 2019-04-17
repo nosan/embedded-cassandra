@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import com.datastax.driver.core.Session;
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -120,7 +121,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			throw new IllegalStateException(String.format("There is no way to execute '%s'."
 							+ " Both java 'com.datastax.cassandra:cassandra-driver-core' and "
 							+ "'com.datastax.oss:java-driver-core' libraries are not present in the classpath.",
-					Arrays.toString(scripts)));
+					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(","))));
 		}
 	}
 

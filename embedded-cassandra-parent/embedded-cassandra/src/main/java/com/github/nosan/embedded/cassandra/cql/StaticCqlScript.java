@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
@@ -80,7 +81,8 @@ public final class StaticCqlScript implements CqlScript {
 
 	@Override
 	public String toString() {
-		return String.format("Static CQL Statements '%s'", this.statements.size());
+		return this.statements.stream()
+				.collect(Collectors.joining(",", getClass().getSimpleName() + "[", "]"));
 	}
 
 }

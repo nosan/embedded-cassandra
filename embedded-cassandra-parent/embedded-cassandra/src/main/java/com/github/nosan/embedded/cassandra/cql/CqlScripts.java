@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
@@ -83,7 +84,8 @@ public final class CqlScripts implements CqlScript {
 
 	@Override
 	public String toString() {
-		return String.format("CQL Scripts %s", this.scripts);
+		return this.scripts.stream().map(String::valueOf)
+				.collect(Collectors.joining(",", getClass().getSimpleName() + " [", "]"));
 	}
 
 }

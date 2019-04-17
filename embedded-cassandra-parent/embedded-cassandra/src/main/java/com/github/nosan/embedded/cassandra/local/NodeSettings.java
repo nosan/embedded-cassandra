@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.net.InetAddress;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
@@ -30,6 +31,8 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @since 2.0.0
  */
 class NodeSettings implements Settings {
+
+	private final Version version;
 
 	@Nullable
 	private volatile InetAddress address;
@@ -48,8 +51,6 @@ class NodeSettings implements Settings {
 
 	@Nullable
 	private volatile Boolean transportEnabled;
-
-	private final Version version;
 
 	NodeSettings(Version version) {
 		this.version = version;
@@ -168,6 +169,19 @@ class NodeSettings implements Settings {
 	 */
 	void setRpcPort(@Nullable Integer rpcPort) {
 		this.rpcPort = rpcPort;
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", getClass().getSimpleName() + " [", "]")
+				.add("address=" + this.address)
+				.add("port=" + this.port)
+				.add("sslPort=" + this.sslPort)
+				.add("rpcPort=" + this.rpcPort)
+				.add("rpcTransportEnabled=" + this.rpcTransportEnabled)
+				.add("transportEnabled=" + this.transportEnabled)
+				.add("version=" + this.version)
+				.toString();
 	}
 
 }

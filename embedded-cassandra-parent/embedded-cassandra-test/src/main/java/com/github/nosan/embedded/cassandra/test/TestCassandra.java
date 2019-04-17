@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -194,7 +195,7 @@ public class TestCassandra {
 			throw new IllegalStateException(String.format("There is no way to execute '%s'."
 							+ " Both java 'com.datastax.cassandra:cassandra-driver-core' and "
 							+ "'com.datastax.oss:java-driver-core' libraries are not present in the classpath.",
-					Arrays.toString(scripts)));
+					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(","))));
 		}
 	}
 
