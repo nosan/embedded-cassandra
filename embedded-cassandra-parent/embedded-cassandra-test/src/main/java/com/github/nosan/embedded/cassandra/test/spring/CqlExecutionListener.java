@@ -120,8 +120,8 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		else {
 			throw new IllegalStateException(String.format("There is no way to execute '%s'."
 							+ " Both '%s' and '%s' classes are not present in the classpath.",
-					CQL_SESSION_CLASS, SESSION_CLASS,
-					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(","))));
+					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(",")),
+					CQL_SESSION_CLASS, SESSION_CLASS));
 		}
 	}
 

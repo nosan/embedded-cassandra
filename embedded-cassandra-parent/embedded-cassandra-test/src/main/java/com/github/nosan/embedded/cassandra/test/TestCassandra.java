@@ -196,8 +196,8 @@ public class TestCassandra {
 		else {
 			throw new IllegalStateException(String.format("There is no way to execute '%s'."
 							+ " '%s' or '%s' and '%s' classes are not present in the classpath.",
-					CQL_SESSION_CLASS, CLUSTER_CLASS, SESSION_CLASS,
-					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(","))));
+					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(",")),
+					CQL_SESSION_CLASS, CLUSTER_CLASS, SESSION_CLASS));
 		}
 	}
 
