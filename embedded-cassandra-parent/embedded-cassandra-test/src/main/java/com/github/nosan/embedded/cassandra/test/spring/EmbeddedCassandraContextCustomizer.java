@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -91,6 +93,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	static class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>, InitializingBean,
 			DisposableBean, ApplicationContextAware {
 
+		private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraFactoryBean.class);
+
 		private final EmbeddedCassandra annotation;
 
 		private final Class<?> testClass;
@@ -150,7 +154,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 				customizer.customize(cassandraFactory);
 			}
 			catch (ClassCastException ex) {
-				//ignore
+				if (log.isDebugEnabled()) {
+					log.error(String.format("Factory customizer '%s' was not invoked due to the factory type mismatch",
+							customizer), ex);
+				}
 			}
 		}
 
