@@ -118,7 +118,8 @@ public class TestCassandra {
 			}
 			catch (Exception ex) {
 				stopInternalSilently();
-				throw new CassandraException(String.format("Unable to start Test Apache Cassandra '%s'", getVersion()));
+				throw new CassandraException(String.format("Unable to start Test Apache Cassandra '%s'", getVersion()),
+						ex);
 			}
 		}
 	}
@@ -140,7 +141,8 @@ public class TestCassandra {
 				throw ex;
 			}
 			catch (Exception ex) {
-				throw new CassandraException(String.format("Unable to stop Test Apache Cassandra '%s'", getVersion()));
+				throw new CassandraException(String.format("Unable to stop Test Apache Cassandra '%s'", getVersion()),
+						ex);
 			}
 		}
 
