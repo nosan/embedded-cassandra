@@ -98,7 +98,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	private final Path javaHome;
 
 	@Nullable
-	private NodeSettings settings;
+	private Settings settings;
 
 	@Nullable
 	private ProcessId processId;
@@ -158,11 +158,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	@Override
 	public Settings getSettings() throws IllegalStateException {
-		NodeSettings settings = this.settings;
-		if (settings == null) {
-			throw new IllegalStateException("Cassandra is not running");
-		}
-		return settings;
+		return Optional.ofNullable(this.settings)
+				.orElseThrow(() -> new IllegalStateException(String.format("Apache Cassandra '%s' is not running.",
+						getVersion())));
 	}
 
 	@Override

@@ -42,7 +42,7 @@ class LocalCassandraDatabase implements CassandraDatabase {
 
 	private final Path workingDirectory;
 
-	private final CassandraNode cassandraNode;
+	private final CassandraNode node;
 
 	private final Path artifactDirectory;
 
@@ -52,10 +52,10 @@ class LocalCassandraDatabase implements CassandraDatabase {
 
 	private final List<WorkingDirectoryCustomizer> workingDirectoryCustomizers;
 
-	LocalCassandraDatabase(CassandraNode cassandraNode, Path workingDirectory, Path artifactDirectory,
+	LocalCassandraDatabase(CassandraNode node, Path workingDirectory, Path artifactDirectory,
 			ArtifactFactory artifactFactory, boolean deleteWorkingDirectory,
 			List<WorkingDirectoryCustomizer> workingDirectoryCustomizers) {
-		this.cassandraNode = cassandraNode;
+		this.node = node;
 		this.workingDirectory = workingDirectory;
 		this.artifactDirectory = artifactDirectory;
 		this.artifactFactory = artifactFactory;
@@ -68,7 +68,7 @@ class LocalCassandraDatabase implements CassandraDatabase {
 		initialize();
 		log.info("Start Apache Cassandra '{}'", getVersion());
 		long start = System.currentTimeMillis();
-		this.cassandraNode.start();
+		this.node.start();
 		long elapsed = System.currentTimeMillis() - start;
 		log.info("Apache Cassandra '{}' is started ({} ms)", getVersion(), elapsed);
 	}
@@ -77,7 +77,7 @@ class LocalCassandraDatabase implements CassandraDatabase {
 	public void stop() throws IOException, InterruptedException {
 		long start = System.currentTimeMillis();
 		log.info("Stop Apache Cassandra '{}'", getVersion());
-		this.cassandraNode.stop();
+		this.node.stop();
 		delete();
 		long elapsed = System.currentTimeMillis() - start;
 		log.info("Apache Cassandra '{}' is stopped ({} ms)", getVersion(), elapsed);
@@ -85,12 +85,12 @@ class LocalCassandraDatabase implements CassandraDatabase {
 
 	@Override
 	public Version getVersion() {
-		return this.cassandraNode.getVersion();
+		return this.node.getVersion();
 	}
 
 	@Override
 	public Settings getSettings() {
-		return this.cassandraNode.getSettings();
+		return this.node.getSettings();
 	}
 
 	private void initialize() throws IOException {

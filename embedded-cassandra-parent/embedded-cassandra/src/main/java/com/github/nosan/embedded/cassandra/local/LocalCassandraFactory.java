@@ -542,8 +542,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 			artifactDirectory = getTempDir()
 					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
 		}
-		CassandraNode cassandraNode = createCassandraNode(workingDirectory, version);
-		CassandraDatabase cassandraDatabase = new LocalCassandraDatabase(cassandraNode, workingDirectory,
+		CassandraNode node = createCassandraNode(workingDirectory, version);
+		CassandraDatabase cassandraDatabase = new LocalCassandraDatabase(node, workingDirectory,
 				artifactDirectory, artifactFactory, isDeleteWorkingDirectory(), getMergedWorkingDirectoryCustomizers());
 		return new LocalCassandra(isRegisterShutdownHook(), cassandraDatabase);
 	}

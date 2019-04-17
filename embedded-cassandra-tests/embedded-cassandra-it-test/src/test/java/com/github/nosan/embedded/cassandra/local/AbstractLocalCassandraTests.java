@@ -174,6 +174,7 @@ abstract class AbstractLocalCassandraTests {
 	@Test
 	void shouldNotGetSettings() {
 		assertThatThrownBy(() -> this.factory.create().getSettings())
+				.hasStackTraceContaining("is not running")
 				.isInstanceOf(IllegalStateException.class);
 	}
 

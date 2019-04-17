@@ -82,7 +82,8 @@ class LocalCassandra implements Cassandra {
 					this.awaitThread = null;
 					this.state = State.START_FAILED;
 					stopInternalSilently();
-					throw new CassandraException("Unable to start Cassandra", ex);
+					throw new CassandraException(String.format("Unable to start Apache Cassandra '%s'", getVersion()),
+							ex);
 				}
 			}
 		}
@@ -103,7 +104,8 @@ class LocalCassandra implements Cassandra {
 				}
 				catch (Exception ex) {
 					this.state = State.STOP_FAILED;
-					throw new CassandraException("Unable to stop Cassandra", ex);
+					throw new CassandraException(String.format("Unable to stop Apache Cassandra '%s'", getVersion()),
+							ex);
 				}
 			}
 		}
@@ -113,7 +115,7 @@ class LocalCassandra implements Cassandra {
 	public Settings getSettings() throws IllegalStateException {
 		synchronized (this.monitor) {
 			if (getState() != State.STARTED) {
-				throw new IllegalStateException("Apache Cassandra is not running.");
+				throw new IllegalStateException(String.format("Apache Cassandra '%s' is not running.", getVersion()));
 			}
 			return this.database.getSettings();
 		}
@@ -145,7 +147,7 @@ class LocalCassandra implements Cassandra {
 				awaitThread.interrupt();
 			}
 			stop();
-		}, "CassandraShutdownHook"));
+		}, toString()));
 	}
 
 	private void stopInternalSilently() {
@@ -156,7 +158,7 @@ class LocalCassandra implements Cassandra {
 			selfThread().interrupt();
 		}
 		catch (Exception ex) {
-			log.error("Unable to stop Cassandra", ex);
+			log.error(String.format("Unable to stop Apache Cassandra '%s'", getVersion()), ex);
 		}
 	}
 
