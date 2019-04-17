@@ -53,11 +53,13 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraRunner;
+import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.test.CqlSessionFactory;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutputExtension;
+import com.github.nosan.embedded.cassandra.util.PortUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -103,7 +105,10 @@ abstract class AbstractLocalCassandraTests {
 		jvmOptions.add("-Dcassandra.start_rpc=true");
 		jvmOptions.add("-Dcassandra.start_native_transport=true");
 		CassandraRunner runner = new CassandraRunner(factory);
-		runner.run(assertCreateKeyspace());
+		runner.run(assertCreateKeyspace().andThen(cassandra -> {
+			Settings settings = cassandra.getSettings();
+			assertThat(PortUtils.isPortBusy(settings.getAddress(), 9155));
+		}));
 	}
 
 	@Test
