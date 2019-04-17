@@ -148,6 +148,11 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			cassandra.start();
 		}
 
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
+
 		@SuppressWarnings("unchecked")
 		private void customize(CassandraFactory cassandraFactory, CassandraFactoryTestCustomizer customizer) {
 			try {
@@ -159,11 +164,6 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 							customizer), ex);
 				}
 			}
-		}
-
-		@Override
-		public boolean isSingleton() {
-			return true;
 		}
 
 		private CassandraFactory getCassandraFactory() {

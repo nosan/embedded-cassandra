@@ -80,6 +80,45 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 public @interface EmbeddedCassandra {
 
 	/**
+	 * The paths to the CQL scripts to execute.
+	 * <h3>Path Resource Semantics</h3>
+	 * Each path will be interpreted as a Spring {@link Resource}. A plain path &mdash; for example, {@code
+	 * "schema.cql"} &mdash; will be treated as a classpath resource that is <em>relative</em> to the package in which
+	 * the test class is defined. A path starting with a slash will be treated as an <em>absolute</em> classpath
+	 * resource, for example: {@code "/org/example/schema.cql"}. A path which references a URL (e.g., a path prefixed
+	 * with {@code http:}, etc.) will be loaded using the specified resource protocol.
+	 * <p>All resources will be loaded by {@link ResourcePatternResolver}.
+	 * Resources which were loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
+	 * Resource.getURL().toString()}.
+	 * <p>
+	 * Can contain {@code ${...}} placeholders.
+	 *
+	 * @return CQL Scripts
+	 */
+	String[] scripts() default {};
+
+	/**
+	 * <em>CQL statements</em> to execute.
+	 * <p>This attribute may be used in conjunction with or instead of {@link #scripts}.
+	 * <h3>Ordering</h3>
+	 * <p>Statements declared via this attribute will be executed after
+	 * statements loaded from {@link #scripts}.
+	 *
+	 * @return CQL statements
+	 * @see #scripts
+	 */
+	String[] statements() default {};
+
+	/**
+	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
+	 * <p>
+	 * Can contain a {@code ${...}} placeholder.
+	 *
+	 * @return CQL scripts encoding.
+	 */
+	String encoding() default "";
+
+	/**
 	 * {@link Version} to use.
 	 * <p>
 	 * Can contain a {@code ${...}} placeholder.
@@ -167,44 +206,5 @@ public @interface EmbeddedCassandra {
 	 * @since 2.0.0
 	 */
 	String[] jvmOptions() default {};
-
-	/**
-	 * The paths to the CQL scripts to execute.
-	 * <h3>Path Resource Semantics</h3>
-	 * Each path will be interpreted as a Spring {@link Resource}. A plain path &mdash; for example, {@code
-	 * "schema.cql"} &mdash; will be treated as a classpath resource that is <em>relative</em> to the package in which
-	 * the test class is defined. A path starting with a slash will be treated as an <em>absolute</em> classpath
-	 * resource, for example: {@code "/org/example/schema.cql"}. A path which references a URL (e.g., a path prefixed
-	 * with {@code http:}, etc.) will be loaded using the specified resource protocol.
-	 * <p>All resources will be loaded by {@link ResourcePatternResolver}.
-	 * Resources which were loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
-	 * Resource.getURL().toString()}.
-	 * <p>
-	 * Can contain {@code ${...}} placeholders.
-	 *
-	 * @return CQL Scripts
-	 */
-	String[] scripts() default {};
-
-	/**
-	 * <em>CQL statements</em> to execute.
-	 * <p>This attribute may be used in conjunction with or instead of {@link #scripts}.
-	 * <h3>Ordering</h3>
-	 * <p>Statements declared via this attribute will be executed after
-	 * statements loaded from {@link #scripts}.
-	 *
-	 * @return CQL statements
-	 * @see #scripts
-	 */
-	String[] statements() default {};
-
-	/**
-	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
-	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
-	 *
-	 * @return CQL scripts encoding.
-	 */
-	String encoding() default "";
 
 }

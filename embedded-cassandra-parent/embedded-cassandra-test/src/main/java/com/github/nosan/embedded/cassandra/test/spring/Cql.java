@@ -62,7 +62,7 @@ public @interface Cql {
 	 * Resources which were loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
 	 * Resource.getURL().toString()}.
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * Can contain {@code ${...}} placeholders.
 	 *
 	 * @return CQL Scripts
 	 */

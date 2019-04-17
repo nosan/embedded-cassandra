@@ -116,7 +116,7 @@ public class TestCassandra {
 			}
 			catch (Exception ex) {
 				stopInternalSilently();
-				throw new CassandraException("Unable to start Test Cassandra", ex);
+				throw new CassandraException(String.format("Unable to start Test Apache Cassandra '%s'", getVersion()));
 			}
 		}
 	}
@@ -138,7 +138,7 @@ public class TestCassandra {
 				throw ex;
 			}
 			catch (Exception ex) {
-				throw new CassandraException("Unable to stop Test Cassandra", ex);
+				throw new CassandraException(String.format("Unable to stop Test Apache Cassandra '%s'", getVersion()));
 			}
 		}
 
@@ -168,7 +168,7 @@ public class TestCassandra {
 
 	@Override
 	public String toString() {
-		return String.format("Test Cassandra '%s'", this.cassandra);
+		return String.format("Test Apache Cassandra '%s'", getVersion());
 	}
 
 	/**
@@ -201,14 +201,14 @@ public class TestCassandra {
 
 	private void startInternal() {
 		if (log.isDebugEnabled()) {
-			log.debug("Starts Test Cassandra '{}'", this.cassandra);
+			log.debug("Starts Test Apache Cassandra '{}'", getVersion());
 		}
 		this.cassandra.start();
 		if (!this.scripts.isEmpty()) {
 			executeScripts(this.scripts.toArray(new CqlScript[0]));
 		}
 		if (log.isDebugEnabled()) {
-			log.debug("Test Cassandra '{}' is started", this.cassandra);
+			log.debug("Test Apache Cassandra '{}' is started", getVersion());
 		}
 	}
 
@@ -216,7 +216,7 @@ public class TestCassandra {
 		this.cassandra.stop();
 		Cassandra.State state = this.cassandra.getState();
 		if (log.isDebugEnabled() && state == Cassandra.State.STOPPED) {
-			log.debug("Test Cassandra '{}' is stopped", this.cassandra);
+			log.debug("Test Apache Cassandra '{}' is stopped", getVersion());
 		}
 	}
 
@@ -228,7 +228,7 @@ public class TestCassandra {
 			Thread.currentThread().interrupt();
 		}
 		catch (Exception ex) {
-			log.error("Unable to stop Test Cassandra", ex);
+			log.error(String.format("Unable to stop Test Apache Cassandra '%s'", getVersion()), ex);
 		}
 	}
 

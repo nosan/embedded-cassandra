@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-@EmbeddedCassandra(port = "0")
+@EmbeddedCassandra
 class EmbeddedCassandraCustomizerTests {
 
 	@Autowired
@@ -52,8 +52,12 @@ class EmbeddedCassandraCustomizerTests {
 
 	@Test
 	void shouldSelectFromRoles() {
-		assertThat(this.cassandra.getVersion()).isEqualTo(Version.parse("3.11.3"));
 		assertThat(this.session.execute("SELECT * FROM test.roles").wasApplied()).isTrue();
+	}
+
+	@Test
+	void customizerWasInvoked() {
+		assertThat(this.cassandra.getVersion()).isEqualTo(Version.parse("3.11.3"));
 	}
 
 	@Import(SessionConfiguration.class)
