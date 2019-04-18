@@ -32,7 +32,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.util.ObjectUtils;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
@@ -131,8 +130,9 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		for (URL url : ResourceUtils.getResources(context, testClass, asArray(environment, annotation::scripts))) {
 			scripts.add(new UrlCqlScript(url, asCharset(environment, annotation::encoding)));
 		}
-		if (!ObjectUtils.isEmpty(annotation.statements())) {
-			scripts.add(new StaticCqlScript(annotation.statements()));
+		List<String> statements = getStatements(annotation.statements());
+		if (!statements.isEmpty()) {
+			scripts.add(new StaticCqlScript(statements));
 		}
 		return scripts.toArray(new CqlScript[0]);
 	}
@@ -146,6 +146,12 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 				.map(environment::resolvePlaceholders)
 				.filter(StringUtils::hasText)
 				.toArray(String[]::new);
+	}
+
+	private List<String> getStatements(String[] statements) {
+		return Arrays.stream(statements)
+				.filter(StringUtils::hasText)
+				.collect(Collectors.toList());
 	}
 
 	@Nullable

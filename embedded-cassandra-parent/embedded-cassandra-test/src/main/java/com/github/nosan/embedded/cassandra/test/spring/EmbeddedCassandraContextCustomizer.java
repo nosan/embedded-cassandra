@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.util.ObjectUtils;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
@@ -188,10 +188,17 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			for (URL url : ResourceUtils.getResources(context, testClass, asArray(annotation::scripts))) {
 				scripts.add(new UrlCqlScript(url, asCharset(annotation::encoding)));
 			}
-			if (!ObjectUtils.isEmpty(annotation.statements())) {
-				scripts.add(new StaticCqlScript(Arrays.asList(annotation.statements())));
+			List<String> statements = getStatements(annotation.statements());
+			if (!statements.isEmpty()) {
+				scripts.add(new StaticCqlScript(statements));
 			}
 			return scripts.toArray(new CqlScript[0]);
+		}
+
+		private List<String> getStatements(String[] statements) {
+			return Arrays.stream(statements)
+					.filter(StringUtils::hasText)
+					.collect(Collectors.toList());
 		}
 
 		private String[] asArray(Supplier<String[]> arraySupplier) {
