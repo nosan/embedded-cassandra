@@ -84,14 +84,21 @@ public abstract class ArchiveUtils {
 			Files.createDirectories(destination);
 			ArchiveEntry entry;
 			while ((entry = archiveStream.getNextEntry()) != null) {
-				Path dest = destination.resolve(entry.getName());
 				if (entry.isDirectory()) {
-					Files.createDirectories(dest);
+					Path directory = destination.resolve(entry.getName());
+					Files.createDirectories(directory);
+					FileModeUtils.set(entry, directory);
 				}
 				else {
-					Files.copy(archiveStream, dest, StandardCopyOption.REPLACE_EXISTING);
+					Path file = destination.resolve(entry.getName());
+					Path directory = file.getParent();
+					if (directory != null && !Files.exists(directory)) {
+						Files.createDirectories(directory);
+					}
+					Files.copy(archiveStream, file, StandardCopyOption.REPLACE_EXISTING);
+					FileModeUtils.set(entry, file);
+
 				}
-				FileModeUtils.set(entry, dest);
 			}
 		}
 		catch (ArchiveException | CompressorException ex) {
