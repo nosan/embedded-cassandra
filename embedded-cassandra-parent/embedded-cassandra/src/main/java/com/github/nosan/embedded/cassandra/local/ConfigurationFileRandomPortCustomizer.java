@@ -64,20 +64,20 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		}
 	}
 
-	private static Optional<Integer> getInteger(String name, Map<Object, Object> source) {
-		return getString(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
+	private static Optional<Integer> getInteger(String name, Map<Object, Object> properties) {
+		return getString(name, properties).filter(StringUtils::hasText).map(Integer::parseInt);
 	}
 
-	private static Optional<String> getString(String name, Map<Object, Object> source) {
-		return Optional.ofNullable(source.get(name)).map(Object::toString);
+	private static Optional<String> getString(String name, Map<Object, Object> properties) {
+		return Optional.ofNullable(properties.get(name)).map(Object::toString);
 	}
 
-	private static void setPort(String name, Map<Object, Object> source, Set<Integer> skipPorts) {
-		getInteger(name, source).filter(port -> port == 0).ifPresent(port -> {
+	private static void setPort(String name, Map<Object, Object> properties, Set<Integer> skipPorts) {
+		getInteger(name, properties).filter(port -> port == 0).ifPresent(port -> {
 			int newPort = PortUtils.getPort(integer -> skipPorts.contains(integer)
 					|| CASSANDRA_PORTS.contains(integer));
 			skipPorts.add(newPort);
-			source.put(name, newPort);
+			properties.put(name, newPort);
 		});
 	}
 
