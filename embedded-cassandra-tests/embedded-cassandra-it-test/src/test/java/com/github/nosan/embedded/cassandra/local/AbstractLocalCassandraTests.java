@@ -132,18 +132,22 @@ abstract class AbstractLocalCassandraTests {
 
 	@Test
 	void shouldStartIfTransportDisabled() {
+		this.factory.setStoragePort(8555);
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
-		new CassandraRunner(this.factory).run();
+		new CassandraRunner(this.factory)
+				.run(cassandra -> assertThat(PortUtils.isPortBusy(8555))
+						.describedAs("Storage port is not busy")
+						.isTrue());
 	}
 
 	@Test
 	void shouldStartOnInterfaceIPV4() throws Exception {
-		startAndAssertCassandraListenInterface("/cassandra-interface.yaml", false);
+		shouldStartCassandraOnInterface("/cassandra-interface.yaml", false);
 	}
 
 	@Test
 	void shouldStartOnInterfaceIPV6() throws Exception {
-		startAndAssertCassandraListenInterface("/cassandra-interface-ipv6.yaml", true);
+		shouldStartCassandraOnInterface("/cassandra-interface-ipv6.yaml", true);
 	}
 
 	@Test
@@ -205,14 +209,14 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	void shouldReInitializedCassandra() {
+	void shouldDeleteWorkingDirectory() {
 		CassandraRunner runner = new CassandraRunner(this.factory.create());
 		runner.run(assertCreateKeyspace());
 		runner.run(assertCreateKeyspace());
 	}
 
 	@Test
-	void shouldInitializedOnlyOnce() {
+	void shouldNotDeleteWorkingDirectory() {
 		Path path = this.temporaryFolder.resolve(UUID.randomUUID().toString());
 		this.factory.setWorkingDirectory(path);
 		this.factory.setDeleteWorkingDirectory(false);
@@ -237,7 +241,47 @@ abstract class AbstractLocalCassandraTests {
 		}
 	}
 
-	private void startAndAssertCassandraListenInterface(String location, boolean ipv6) throws IOException {
+	private static InetAddress getAddressByInterface(String interfaceName, boolean useIpv6) {
+		Objects.requireNonNull(interfaceName, "Interface name must not be null");
+		Predicate<InetAddress> condition = useIpv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
+		return getAddressesByInterface(interfaceName).stream().filter(condition).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException(
+						String.format("Can not find an address for %s and IPv6 : %s", interfaceName, useIpv6)));
+	}
+
+	private static List<InetAddress> getAddressesByInterface(String interfaceName) {
+		Objects.requireNonNull(interfaceName, "Interface name must not be null");
+		try {
+			NetworkInterface networkInterface = NetworkInterface.getByName(interfaceName);
+			if (networkInterface == null) {
+				throw new SocketException(String.format("'%s' interface is not valid", interfaceName));
+			}
+			Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+			return Collections.unmodifiableList(Collections.list(addresses));
+		}
+		catch (SocketException ex) {
+			throw new UncheckedIOException(ex);
+		}
+	}
+
+	private static Consumer<Cassandra> assertDeleteKeyspace() {
+		return new CqlAssert("DROP KEYSPACE test");
+	}
+
+	private static Consumer<Cassandra> assertCreateKeyspace() {
+		return new CqlAssert(
+				"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
+	}
+
+	private static String getInterface(boolean ipv6) throws SocketException {
+		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
+		return Collections.list(NetworkInterface.getNetworkInterfaces()).stream()
+				.filter(it -> Collections.list(it.getInetAddresses()).stream().filter(InetAddress::isLoopbackAddress)
+						.anyMatch(test)).map(NetworkInterface::getName).findFirst()
+				.orElseThrow(IllegalStateException::new);
+	}
+
+	private void shouldStartCassandraOnInterface(String location, boolean ipv6) throws IOException {
 		Path configurationFile = this.temporaryFolder.resolve("cassandra.yaml");
 		String interfaceName = getInterface(ipv6);
 		InetAddress address = getAddressByInterface(interfaceName, ipv6);
@@ -254,46 +298,6 @@ abstract class AbstractLocalCassandraTests {
 
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(assertCreateKeyspace());
-	}
-
-	private InetAddress getAddressByInterface(String interfaceName, boolean useIpv6) {
-		Objects.requireNonNull(interfaceName, "Interface name must not be null");
-		Predicate<InetAddress> condition = useIpv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
-		return getAddressesByInterface(interfaceName).stream().filter(condition).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException(
-						String.format("Can not find an address for %s and IPv6 : %s", interfaceName, useIpv6)));
-	}
-
-	private List<InetAddress> getAddressesByInterface(String interfaceName) {
-		Objects.requireNonNull(interfaceName, "Interface name must not be null");
-		try {
-			NetworkInterface networkInterface = NetworkInterface.getByName(interfaceName);
-			if (networkInterface == null) {
-				throw new SocketException(String.format("'%s' interface is not valid", interfaceName));
-			}
-			Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
-			return Collections.unmodifiableList(Collections.list(addresses));
-		}
-		catch (SocketException ex) {
-			throw new UncheckedIOException(ex);
-		}
-	}
-
-	private Consumer<Cassandra> assertDeleteKeyspace() {
-		return new CqlAssert("DROP KEYSPACE test");
-	}
-
-	private Consumer<Cassandra> assertCreateKeyspace() {
-		return new CqlAssert(
-				"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
-	}
-
-	private String getInterface(boolean ipv6) throws SocketException {
-		Predicate<InetAddress> test = ipv6 ? Inet6Address.class::isInstance : Inet4Address.class::isInstance;
-		return Collections.list(NetworkInterface.getNetworkInterfaces()).stream()
-				.filter(it -> Collections.list(it.getInetAddresses()).stream().filter(InetAddress::isLoopbackAddress)
-						.anyMatch(test)).map(NetworkInterface::getName).findFirst()
-				.orElseThrow(IllegalStateException::new);
 	}
 
 	private static final class CqlAssert implements Consumer<Cassandra> {
