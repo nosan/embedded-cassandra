@@ -21,11 +21,11 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link StaticCqlScript}.
+ * Tests for {@link CqlStatements}.
  *
  * @author Dmytro Nosan
  */
-class StaticCqlScriptTests {
+class CqlStatementsTests {
 
 	private static final String ROLES = "CREATE TABLE IF NOT EXISTS test.roles ( id text PRIMARY KEY )";
 
@@ -51,8 +51,8 @@ class StaticCqlScriptTests {
 		assertThat(statements(ROLES).toString()).contains(ROLES);
 	}
 
-	private StaticCqlScript statements(String... statements) {
-		return new StaticCqlScript(statements);
+	private CqlStatements statements(String... statements) {
+		return new CqlStatements(statements);
 	}
 
 }

@@ -45,7 +45,7 @@ import org.springframework.test.context.MergedContextConfiguration;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
+import com.github.nosan.embedded.cassandra.cql.CqlStatements;
 import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
@@ -190,7 +190,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			}
 			List<String> statements = getStatements(annotation.statements());
 			if (!statements.isEmpty()) {
-				scripts.add(new StaticCqlScript(statements));
+				scripts.add(new CqlStatements(statements));
 			}
 			return scripts.toArray(new CqlScript[0]);
 		}

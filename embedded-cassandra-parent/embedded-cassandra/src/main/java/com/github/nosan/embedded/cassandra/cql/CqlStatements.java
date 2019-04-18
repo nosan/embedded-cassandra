@@ -33,26 +33,26 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @see CqlScript#statements(String...)
  * @since 1.0.0
  */
-public final class StaticCqlScript implements CqlScript {
+public final class CqlStatements implements CqlScript {
 
 	private final List<String> statements;
 
 	/**
-	 * Create a new {@link StaticCqlScript} based on statements.
+	 * Create a new {@link CqlStatements} based on statements.
 	 *
 	 * @param statements CQL statements
 	 */
-	public StaticCqlScript(@Nullable String... statements) {
+	public CqlStatements(@Nullable String... statements) {
 		this.statements = Collections
 				.unmodifiableList((statements != null) ? Arrays.asList(statements) : Collections.emptyList());
 	}
 
 	/**
-	 * Create a new {@link StaticCqlScript} based on statements.
+	 * Create a new {@link CqlStatements} based on statements.
 	 *
 	 * @param statements CQL statements
 	 */
-	public StaticCqlScript(@Nullable Collection<String> statements) {
+	public CqlStatements(@Nullable Collection<String> statements) {
 		this.statements = Collections
 				.unmodifiableList(new ArrayList<>((statements != null) ? statements : Collections.emptyList()));
 	}
@@ -75,14 +75,14 @@ public final class StaticCqlScript implements CqlScript {
 		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		StaticCqlScript that = (StaticCqlScript) other;
+		CqlStatements that = (CqlStatements) other;
 		return Objects.equals(this.statements, that.statements);
 	}
 
 	@Override
 	public String toString() {
 		return this.statements.stream()
-				.collect(Collectors.joining(",", getClass().getSimpleName() + "[", "]"));
+				.collect(Collectors.joining(",", getClass().getSimpleName() + " [", "]"));
 	}
 
 }

@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.cql;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -28,12 +29,17 @@ import java.util.function.Function;
  */
 abstract class CqlScriptFactory {
 
-	static <T> CqlScript create(T[] elements, Function<T, CqlScript> mapper) {
-		Objects.requireNonNull(elements, "Elements must not be null");
-		if (elements.length == 0) {
-			return new CqlScripts();
+	private static final CqlScripts EMPTY = new CqlScripts(Collections.emptyList());
+
+	static <T> CqlScript create(T[] locations, Function<T, CqlScript> mapper) {
+		Objects.requireNonNull(locations, "Locations must not be null");
+		if (locations.length == 0) {
+			return EMPTY;
 		}
-		return new CqlScripts(Arrays.stream(elements).map(mapper).toArray(CqlScript[]::new));
+		if (locations.length == 1) {
+			return mapper.apply(locations[0]);
+		}
+		return new CqlScripts(Arrays.stream(locations).map(mapper).toArray(CqlScript[]::new));
 	}
 
 }

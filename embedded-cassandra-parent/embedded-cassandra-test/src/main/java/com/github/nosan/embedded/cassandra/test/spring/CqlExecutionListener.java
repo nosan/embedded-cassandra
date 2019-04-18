@@ -34,7 +34,7 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.cql.StaticCqlScript;
+import com.github.nosan.embedded.cassandra.cql.CqlStatements;
 import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.test.spring.Cql.ExecutionPhase;
@@ -132,7 +132,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 		List<String> statements = getStatements(annotation.statements());
 		if (!statements.isEmpty()) {
-			scripts.add(new StaticCqlScript(statements));
+			scripts.add(new CqlStatements(statements));
 		}
 		return scripts.toArray(new CqlScript[0]);
 	}

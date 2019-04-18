@@ -139,7 +139,7 @@ public abstract class SessionUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(statement, "Statement must not be null");
 		if (log.isDebugEnabled()) {
-			log.debug("Executing Statement: {}", getCql(statement));
+			log.debug("Executing Statement {}", getCql(statement));
 		}
 		return session.execute(statement);
 	}
@@ -155,7 +155,7 @@ public abstract class SessionUtils {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(scripts, "Scripts must not be null");
 		if (log.isDebugEnabled()) {
-			log.debug("Executing CQL Scripts: {}", Arrays.toString(scripts));
+			log.debug("Executing CQL Scripts {}", Arrays.toString(scripts));
 		}
 		for (CqlScript script : scripts) {
 			for (String statement : script.getStatements()) {

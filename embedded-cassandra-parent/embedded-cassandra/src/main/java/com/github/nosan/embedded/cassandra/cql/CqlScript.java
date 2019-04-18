@@ -25,11 +25,10 @@ import java.util.List;
  * CQL Script that abstracts from the actual type of underlying source.
  *
  * @author Dmytro Nosan
- * @see AbstractCqlResourceScript
  * @see CqlScripts
  * @see UrlCqlScript
  * @see ClassPathCqlScript
- * @see StaticCqlScript
+ * @see CqlStatements
  * @see FileCqlScript
  * @see PathCqlScript
  * @see ClassPathPatternCqlScript
@@ -42,7 +41,7 @@ public interface CqlScript {
 	 * Factory method to create {@link CqlScripts} based on classpath {@code 'glob'} patterns.
 	 *
 	 * @param patterns classpath glob patterns
-	 * @return CQL script
+	 * @return CQL scripts
 	 * @see ClassPathPatternCqlScript
 	 * @since 1.2.6
 	 */
@@ -54,7 +53,7 @@ public interface CqlScript {
 	 * Factory method to create {@link CqlScripts} based on classpath locations.
 	 *
 	 * @param locations classpath locations
-	 * @return CQL script
+	 * @return CQL scripts
 	 * @see ClassPathCqlScript
 	 */
 	static CqlScript classpath(String... locations) {
@@ -65,7 +64,7 @@ public interface CqlScript {
 	 * Factory method to create {@link CqlScripts} based on urls.
 	 *
 	 * @param locations URL locations
-	 * @return CQL script
+	 * @return CQL scripts
 	 * @see UrlCqlScript
 	 */
 	static CqlScript urls(URL... locations) {
@@ -76,7 +75,7 @@ public interface CqlScript {
 	 * Factory method to create {@link CqlScripts} based on files.
 	 *
 	 * @param locations File locations
-	 * @return CQL script
+	 * @return CQL scripts
 	 * @see FileCqlScript
 	 */
 	static CqlScript files(File... locations) {
@@ -87,7 +86,7 @@ public interface CqlScript {
 	 * Factory method to create {@link CqlScripts} based on paths.
 	 *
 	 * @param locations Path locations
-	 * @return CQL script
+	 * @return CQL scripts
 	 * @see PathCqlScript
 	 */
 	static CqlScript paths(Path... locations) {
@@ -95,14 +94,14 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Factory method to create {@link StaticCqlScript} based on statements.
+	 * Factory method to create {@link CqlStatements} based on statements.
 	 *
 	 * @param statements CQL statements
-	 * @return CQL script
-	 * @see StaticCqlScript
+	 * @return CQL scripts
+	 * @see CqlStatements
 	 */
 	static CqlScript statements(String... statements) {
-		return new StaticCqlScript(statements);
+		return new CqlStatements(statements);
 	}
 
 	/**
