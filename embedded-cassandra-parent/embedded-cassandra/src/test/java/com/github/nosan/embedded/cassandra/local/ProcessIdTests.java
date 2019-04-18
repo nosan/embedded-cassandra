@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
@@ -39,12 +40,15 @@ class ProcessIdTests {
 	@DisabledOnOs(OS.WINDOWS)
 	void getPid() throws IOException {
 		Process process = new ProcessBuilder("echo", "Hello world").start();
-		assertThat(new ProcessId(process).getPid()).isGreaterThan(0);
+		ProcessId processId = new ProcessId(process);
+		assertThat(processId.getPid()).isGreaterThan(0);
+		assertThat(processId.getProcess()).isSameAs(process);
 	}
 
 	@Test
 	void getPidFromFile() throws URISyntaxException {
-		assertThat(new ProcessId(new Process() {
+		Path pidFile = Paths.get(getClass().getResource("/pid.file").toURI());
+		Process process = new Process() {
 
 			@Override
 			public OutputStream getOutputStream() {
@@ -75,7 +79,10 @@ class ProcessIdTests {
 			public void destroy() {
 				throw new UnsupportedOperationException();
 			}
-		}, Paths.get(getClass().getResource("/pid.file").toURI())).getPid()).isEqualTo(5141);
+		};
+		ProcessId processId = new ProcessId(process, pidFile);
+		assertThat(processId.getPid()).isEqualTo(5141);
+		assertThat(processId.getPidFile()).isSameAs(pidFile);
 	}
 
 }
