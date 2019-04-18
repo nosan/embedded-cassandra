@@ -31,7 +31,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 /**
  * {@code @Cql} is used to annotate a test method to configure CQL {@link #scripts} and {@link #statements} to be
- * executed against a given {@link CqlSession} during integration tests.
+ * executed against a given {@link CqlSession} or {@link Session} during integration tests.
  * <p>Script execution is performed by the {@link CqlExecutionListener},
  * which is enabled by default.
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
