@@ -21,7 +21,11 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+
+import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
+import com.github.nosan.embedded.cassandra.test.support.CaptureOutputExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,15 +35,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @DisabledOnOs(OS.WINDOWS)
+@ExtendWith(CaptureOutputExtension.class)
 class RunProcessTests {
 
 	@Test
-	void shouldRunUnix(@TempDir Path temporaryFolder) throws Exception {
+	void shouldRunProcess(@TempDir Path temporaryFolder) throws Exception {
 		StringBuilder output = new StringBuilder();
 		int exit = runProcess(temporaryFolder, "bash", "-c", command("echo", "$RUN_PROCESS_TEST"))
 				.runAndWait(output::append);
 		assertThat(output.toString()).isEqualTo("TEST");
 		assertThat(exit).isEqualTo(0);
+	}
+
+	@Test
+	void shouldNotRunProcess(@TempDir Path temporaryFolder, CaptureOutput output) throws Exception {
+		int exit = runProcess(temporaryFolder, "invalid_command")
+				.runAndWait(line -> {
+				});
+		assertThat(exit).isEqualTo(-1);
+		assertThat(output.toString()).contains("Can not execute 'invalid_command'");
 	}
 
 	private RunProcess runProcess(Path temporaryFolder, String... arguments) {
