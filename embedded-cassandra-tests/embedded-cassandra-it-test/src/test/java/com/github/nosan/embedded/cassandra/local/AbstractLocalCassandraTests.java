@@ -43,8 +43,6 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
@@ -223,22 +221,6 @@ abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(this.factory.create());
 		runner.run(assertCreateKeyspace());
 		runner.run(assertDeleteKeyspace());
-	}
-
-	@Test
-	@DisabledOnOs(OS.WINDOWS)
-	void shouldPassAllowRootIfNecessary() {
-		LocalCassandraFactory factory = this.factory;
-		Version version = factory.getVersion();
-		factory.setAllowRoot(true);
-		CassandraRunner runner = new CassandraRunner(factory);
-		runner.run(assertCreateKeyspace());
-		if ((version.getMajor() > 3 || (version.getMajor() == 3 && version.getMinor() > 1))) {
-			assertThat(this.output.toString()).contains("-f -R");
-		}
-		else {
-			assertThat(this.output.toString()).doesNotContain("-f -R");
-		}
 	}
 
 	private static InetAddress getAddressByInterface(String interfaceName, boolean useIpv6) {

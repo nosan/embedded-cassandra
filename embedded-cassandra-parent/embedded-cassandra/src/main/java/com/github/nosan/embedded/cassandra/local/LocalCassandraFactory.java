@@ -89,7 +89,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	@Nullable
 	private URL configurationFile;
 
-	private boolean allowRoot = false;
+	private boolean allowRoot = true;
 
 	private boolean registerShutdownHook = true;
 
