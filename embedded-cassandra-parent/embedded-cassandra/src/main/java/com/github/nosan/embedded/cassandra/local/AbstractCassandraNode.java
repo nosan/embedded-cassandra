@@ -103,8 +103,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Nullable
 	private ProcessId processId;
 
-	private volatile boolean started = false;
-
 	AbstractCassandraNode(Version version, @Nullable Path javaHome, Ports ports,
 			List<String> jvmOptions) {
 		this.version = version;
@@ -131,8 +129,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	@Override
 	public void stop() throws IOException, InterruptedException {
-		this.started = false;
-		this.settings = null;
 		ProcessId processId = this.processId;
 		Process process = (processId != null) ? processId.getProcess() : null;
 		if (processId != null && process.isAlive()) {
@@ -151,8 +147,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			if (process.isAlive()) {
 				throw new IOException(String.format("Apache Casandra Node '%s' is not stopped.", pid));
 			}
-			this.log.info("Apache Cassandra Node '{}' is stopped", pid);
 			this.processId = null;
+			this.settings = null;
+			this.log.info("Apache Cassandra Node '{}' is stopped", pid);
 		}
 	}
 
@@ -233,8 +230,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 						+ " or Apache Cassandra is hanging.", processId.getPid()));
 	}
 
-	private boolean isStarted(Settings settings) {
-		if (!this.started) {
+	private boolean isStarted(NodeSettings settings) {
+		Version version = settings.getVersion();
+		if (settings.getRpcTransportEnabled() == null && version.getMajor() < 4) {
+			return false;
+		}
+		if (settings.getTransportEnabled() == null && version.getMajor() >= 2) {
 			return false;
 		}
 		if (settings.isRpcTransportEnabled() && !PortUtils.isPortBusy(settings.getAddress(), settings.getRpcPort())) {
@@ -249,7 +250,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	private void parse(String line, NodeSettings settings) {
 		onMatch(TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> {
 			settings.setTransportEnabled(false);
-			this.started = true;
 		});
 		onMatch(TRANSPORT_PATTERN, line, matcher -> {
 			onAddress(matcher.group(1), settings::setAddress);
@@ -262,17 +262,14 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				}
 			});
 			settings.setTransportEnabled(true);
-			this.started = true;
 		});
 		onMatch(RPC_TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> {
 			settings.setRpcTransportEnabled(false);
-			this.started = true;
 		});
 		onMatch(RPC_TRANSPORT_PATTERN, line, matcher -> {
 			onAddress(matcher.group(1), settings::setAddress);
 			onPort(matcher.group(2), settings::setRpcPort);
 			settings.setRpcTransportEnabled(true);
-			this.started = true;
 		});
 	}
 

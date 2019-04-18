@@ -171,6 +171,26 @@ class NodeSettings implements Settings {
 		this.rpcPort = rpcPort;
 	}
 
+	/**
+	 * Whether RPC transport is started or not.
+	 *
+	 * @return rpc transport is enabled, or {@code null} if not set.
+	 */
+	@Nullable
+	Boolean getRpcTransportEnabled() {
+		return this.rpcTransportEnabled;
+	}
+
+	/**
+	 * Whether native transport is started or not.
+	 *
+	 * @return native transport is enabled, or {@code null} if not set.
+	 */
+	@Nullable
+	Boolean getTransportEnabled() {
+		return this.transportEnabled;
+	}
+
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", getClass().getSimpleName() + " [", "]")
