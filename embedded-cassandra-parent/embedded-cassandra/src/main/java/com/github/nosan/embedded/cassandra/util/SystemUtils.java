@@ -53,7 +53,7 @@ public abstract class SystemUtils {
 	 * @return a directory (java.io.tmpdir)
 	 */
 	public static Optional<Path> getTmpDirectory() {
-		return Optional.ofNullable(getValue("java.io.tmpdir")).map(Paths::get);
+		return getProperty("java.io.tmpdir").map(Paths::get);
 	}
 
 	/**
@@ -62,7 +62,7 @@ public abstract class SystemUtils {
 	 * @return a directory (user.home)
 	 */
 	public static Optional<Path> getUserHomeDirectory() {
-		return Optional.ofNullable(getValue("user.home")).map(Paths::get);
+		return getProperty("user.home").map(Paths::get);
 	}
 
 	/**
@@ -71,7 +71,7 @@ public abstract class SystemUtils {
 	 * @return a directory (user.dir)
 	 */
 	public static Optional<Path> getUserDirectory() {
-		return Optional.ofNullable(getValue("user.dir")).map(Paths::get);
+		return getProperty("user.dir").map(Paths::get);
 	}
 
 	/**
@@ -80,7 +80,20 @@ public abstract class SystemUtils {
 	 * @return a directory (java.home)
 	 */
 	public static Optional<Path> getJavaHomeDirectory() {
-		return Optional.ofNullable(getValue("java.home")).map(Paths::get);
+		return getProperty("java.home").map(Paths::get);
+	}
+
+	/**
+	 * Returns a {@link System#getProperty(String)} or a {@link System#getenv(String)}.
+	 *
+	 * @param name the name of the system/env property
+	 * @return a value, or {@code empty}
+	 */
+	public static Optional<String> getProperty(String name) {
+		if (!StringUtils.hasText(name)) {
+			throw new IllegalArgumentException("Name must not be null or empty");
+		}
+		return Optional.ofNullable(getValue(name));
 	}
 
 	@Nullable
