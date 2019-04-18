@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.cassandra.core.ReactiveCassandraTemplate;
 
+import com.github.nosan.embedded.cassandra.test.spring.Cql;
 import com.github.nosan.embedded.cassandra.test.spring.EmbeddedCassandra;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,6 +52,12 @@ class CityReactiveRepositoryTests {
 		assertThat(city).isNotNull();
 		assertThat(city.getId()).isNotNull();
 		assertThat(this.cassandraTemplate.exists(city.getId(), CityEntity.class).block(Duration.ofSeconds(5))).isTrue();
+	}
+
+	@Test
+	@Cql(statements = "INSERT INTO \"test\".\"city\" (\"id\", \"name\") VALUES (1000, 'test_city');")
+	void testFindRepository() {
+		assertThat(this.cassandraTemplate.exists(1000, CityEntity.class).block(Duration.ofSeconds(5))).isTrue();
 	}
 
 }
