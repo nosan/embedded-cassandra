@@ -17,11 +17,16 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
@@ -35,6 +40,9 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * @since 2.0.0
  */
 class JvmOptions {
+
+	private static final Set<Integer> CASSANDRA_PORTS = Collections.unmodifiableSet(new LinkedHashSet<>(
+			Arrays.asList(7000, 7001, 7199, 9042, 9142, 9160)));
 
 	private static final String JMX_LOCAL_PORT = "-Dcassandra.jmx.local.port";
 
@@ -81,19 +89,20 @@ class JvmOptions {
 	private static Map<String, String> getJvmOptions(Ports ports, List<String> options) {
 		Map<String, String> jvmOptions = getJvmOptions(options);
 
-		setOption(JMX_LOCAL_PORT, ports.getJmxLocalPort(), jvmOptions);
-		setOption(STORAGE_PORT, ports.getStoragePort(), jvmOptions);
-		setOption(SSL_STORAGE_PORT, ports.getSslStoragePort(), jvmOptions);
-		setOption(NATIVE_TRANSPORT_PORT, ports.getPort(), jvmOptions);
-		setOption(RPC_PORT, ports.getRpcPort(), jvmOptions);
+		addOption(JMX_LOCAL_PORT, ports.getJmxLocalPort(), jvmOptions);
+		addOption(STORAGE_PORT, ports.getStoragePort(), jvmOptions);
+		addOption(SSL_STORAGE_PORT, ports.getSslStoragePort(), jvmOptions);
+		addOption(NATIVE_TRANSPORT_PORT, ports.getPort(), jvmOptions);
+		addOption(RPC_PORT, ports.getRpcPort(), jvmOptions);
 
-		setPort(NATIVE_TRANSPORT_PORT, jvmOptions);
-		setPort(RPC_PORT, jvmOptions);
-		setPort(STORAGE_PORT, jvmOptions);
-		setPort(SSL_STORAGE_PORT, jvmOptions);
-		setPort(JMX_LOCAL_PORT, jvmOptions);
-		setPort(JMX_REMOTE_PORT, jvmOptions);
-		setPort(JMX_REMOTE_RMI_PORT, jvmOptions);
+		Set<Integer> skipPorts = new HashSet<>();
+		setPort(NATIVE_TRANSPORT_PORT, jvmOptions, skipPorts);
+		setPort(RPC_PORT, jvmOptions, skipPorts);
+		setPort(STORAGE_PORT, jvmOptions, skipPorts);
+		setPort(SSL_STORAGE_PORT, jvmOptions, skipPorts);
+		setPort(JMX_LOCAL_PORT, jvmOptions, skipPorts);
+		setPort(JMX_REMOTE_PORT, jvmOptions, skipPorts);
+		setPort(JMX_REMOTE_RMI_PORT, jvmOptions, skipPorts);
 		return jvmOptions;
 	}
 
@@ -114,15 +123,19 @@ class JvmOptions {
 		return result;
 	}
 
-	private static void setOption(String name, @Nullable Object value, Map<String, String> jvmOptions) {
+	private static void addOption(String name, @Nullable Object value, Map<String, String> jvmOptions) {
 		if (value != null) {
 			jvmOptions.put(name, value.toString());
 		}
 	}
 
-	private static void setPort(String name, Map<String, String> jvmOptions) {
-		getInteger(name, jvmOptions).filter(port -> port == 0)
-				.ifPresent(port -> jvmOptions.put(name, Integer.toString(PortUtils.getPort())));
+	private static void setPort(String name, Map<String, String> jvmOptions, Set<Integer> skipPorts) {
+		getInteger(name, jvmOptions).filter(port -> port == 0).ifPresent(port -> {
+			int newPort = PortUtils.getPort(integer -> skipPorts.contains(integer)
+					|| CASSANDRA_PORTS.contains(integer));
+			skipPorts.add(newPort);
+			jvmOptions.put(name, Integer.toString(newPort));
+		});
 	}
 
 	private static Optional<Integer> getInteger(String name, Map<String, String> source) {

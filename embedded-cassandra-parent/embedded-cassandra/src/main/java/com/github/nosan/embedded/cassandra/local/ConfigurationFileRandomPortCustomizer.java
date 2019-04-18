@@ -21,10 +21,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Set;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -40,17 +44,20 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomizer {
 
+	private static final Set<Integer> CASSANDRA_PORTS = Collections.unmodifiableSet(new LinkedHashSet<>(
+			Arrays.asList(7000, 7001, 7199, 9042, 9142, 9160)));
+
 	@Override
 	public void customize(Path workingDirectory, Version version) throws IOException {
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
 		Map<Object, Object> properties = getProperties(file);
-		AtomicBoolean replaced = new AtomicBoolean(false);
-		setPort("native_transport_port", properties, replaced);
-		setPort("native_transport_port_ssl", properties, replaced);
-		setPort("rpc_port", properties, replaced);
-		setPort("storage_port", properties, replaced);
-		setPort("ssl_storage_port", properties, replaced);
-		if (replaced.get()) {
+		Set<Integer> skipPorts = new HashSet<>();
+		setPort("native_transport_port", properties, skipPorts);
+		setPort("native_transport_port_ssl", properties, skipPorts);
+		setPort("rpc_port", properties, skipPorts);
+		setPort("storage_port", properties, skipPorts);
+		setPort("ssl_storage_port", properties, skipPorts);
+		if (!skipPorts.isEmpty()) {
 			try (BufferedWriter writer = Files.newBufferedWriter(file)) {
 				new Yaml().dump(properties, writer);
 			}
@@ -65,10 +72,12 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		return Optional.ofNullable(source.get(name)).map(Object::toString);
 	}
 
-	private static void setPort(String name, Map<Object, Object> source, AtomicBoolean replaced) {
+	private static void setPort(String name, Map<Object, Object> source, Set<Integer> skipPorts) {
 		getInteger(name, source).filter(port -> port == 0).ifPresent(port -> {
-			source.put(name, PortUtils.getPort());
-			replaced.set(true);
+			int newPort = PortUtils.getPort(integer -> skipPorts.contains(integer)
+					|| CASSANDRA_PORTS.contains(integer));
+			skipPorts.add(newPort);
+			source.put(name, newPort);
 		});
 	}
 

@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
@@ -50,7 +51,19 @@ public abstract class PortUtils {
 	 * @throws IllegalStateException if port can not be found
 	 */
 	public static int getPort() {
-		return getPort(null);
+		return getPort(null, null);
+	}
+
+	/**
+	 * Find a free {@code TCP} port.
+	 *
+	 * @param skipFilter the predicate to test whether port should be skipped or not
+	 * @return a port
+	 * @throws IllegalStateException if port can not be found
+	 * @since 2.0.0
+	 */
+	public static int getPort(@Nullable Predicate<Integer> skipFilter) {
+		return getPort(null, skipFilter);
 	}
 
 	/**
@@ -62,10 +75,23 @@ public abstract class PortUtils {
 	 * @since 1.1.0
 	 */
 	public static int getPort(@Nullable InetAddress address) {
+		return getPort(address, null);
+	}
+
+	/**
+	 * Find a free {@code TCP} port.
+	 *
+	 * @param address the address
+	 * @param skipFilter the predicate to test whether port should be skipped or not
+	 * @return a port
+	 * @throws IllegalStateException if port can not be found
+	 * @since 2.0.0
+	 */
+	public static int getPort(@Nullable InetAddress address, @Nullable Predicate<Integer> skipFilter) {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
 		for (int i = 0; i <= MAX - MIN; i++) {
 			int port = MIN + random.nextInt(MAX - MIN + 1);
-			if (isPortAvailable(address, port)) {
+			if ((skipFilter == null || !skipFilter.test(port)) && isPortAvailable(address, port)) {
 				return port;
 			}
 		}
