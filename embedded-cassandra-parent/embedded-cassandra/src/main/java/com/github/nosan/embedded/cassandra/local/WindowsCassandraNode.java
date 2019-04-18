@@ -38,8 +38,8 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 
 	private final Path workingDirectory;
 
-	WindowsCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome,
-			Ports ports, List<String> jvmOptions) {
+	WindowsCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
+			List<String> jvmOptions) {
 		super(version, javaHome, ports, jvmOptions);
 		this.version = version;
 		this.workingDirectory = workingDirectory;
@@ -111,9 +111,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	}
 
 	private ProcessBuilder newBuilder() {
-		return new ProcessBuilder()
-				.directory(this.workingDirectory.toFile())
-				.redirectErrorStream(true);
+		return new ProcessBuilder().directory(this.workingDirectory.toFile()).redirectErrorStream(true);
 	}
 
 }

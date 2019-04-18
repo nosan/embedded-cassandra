@@ -587,8 +587,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		if (SystemUtils.isWindows()) {
 			return new WindowsCassandraNode(version, workingDirectory, getJavaHome(), ports, getJvmOptions());
 		}
-		return new UnixCassandraNode(version, workingDirectory, getJavaHome(), ports, getJvmOptions(),
-				isAllowRoot());
+		return new UnixCassandraNode(version, workingDirectory, getJavaHome(), ports, getJvmOptions(), isAllowRoot());
 	}
 
 }

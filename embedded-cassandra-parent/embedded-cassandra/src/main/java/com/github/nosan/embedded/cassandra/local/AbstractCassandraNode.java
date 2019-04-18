@@ -103,8 +103,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Nullable
 	private ProcessId processId;
 
-	AbstractCassandraNode(Version version, @Nullable Path javaHome, Ports ports,
-			List<String> jvmOptions) {
+	AbstractCassandraNode(Version version, @Nullable Path javaHome, Ports ports, List<String> jvmOptions) {
 		this.version = version;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
@@ -248,9 +247,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	private void parse(String line, NodeSettings settings) {
-		onMatch(TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> {
-			settings.setTransportEnabled(false);
-		});
 		onMatch(TRANSPORT_PATTERN, line, matcher -> {
 			onAddress(matcher.group(1), settings::setAddress);
 			onPort(matcher.group(2), port -> {
@@ -263,14 +259,13 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			});
 			settings.setTransportEnabled(true);
 		});
-		onMatch(RPC_TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> {
-			settings.setRpcTransportEnabled(false);
-		});
 		onMatch(RPC_TRANSPORT_PATTERN, line, matcher -> {
 			onAddress(matcher.group(1), settings::setAddress);
 			onPort(matcher.group(2), settings::setRpcPort);
 			settings.setRpcTransportEnabled(true);
 		});
+		onMatch(TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> settings.setTransportEnabled(false));
+		onMatch(RPC_TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> settings.setRpcTransportEnabled(false));
 	}
 
 	private void onAddress(String address, Consumer<InetAddress> addressConsumer) {
