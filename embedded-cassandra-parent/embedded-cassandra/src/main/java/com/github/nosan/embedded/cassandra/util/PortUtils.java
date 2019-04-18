@@ -51,7 +51,7 @@ public abstract class PortUtils {
 	 * @throws IllegalStateException if port can not be found
 	 */
 	public static int getPort() {
-		return getPort(null, null);
+		return getPort(InetAddress.getLoopbackAddress(), null);
 	}
 
 	/**
@@ -63,7 +63,7 @@ public abstract class PortUtils {
 	 * @since 2.0.0
 	 */
 	public static int getPort(@Nullable Predicate<Integer> skipFilter) {
-		return getPort(null, skipFilter);
+		return getPort(InetAddress.getLoopbackAddress(), skipFilter);
 	}
 
 	/**
@@ -97,6 +97,17 @@ public abstract class PortUtils {
 		}
 		throw new IllegalStateException(
 				String.format("Can not find an available port in the range [%d, %d]", MIN, MAX));
+	}
+
+	/**
+	 * Test whether the {@code TCP} port is busy or not.
+	 *
+	 * @param port the TCP port
+	 * @return {@code true} if port is busy, otherwise {@code false}
+	 * @since 2.0.0
+	 */
+	public static boolean isPortBusy(int port) {
+		return isPortBusy(InetAddress.getLoopbackAddress(), port);
 	}
 
 	/**
