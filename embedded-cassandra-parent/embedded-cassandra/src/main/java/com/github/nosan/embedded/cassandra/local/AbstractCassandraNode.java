@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
@@ -72,21 +71,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final String JAVA_HOME = "JAVA_HOME";
 
-	private static final AtomicLong counter = new AtomicLong();
-
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 
-	private final long id = counter.incrementAndGet();
-
-	private final ThreadFactory threadFactory = runnable -> {
-		Map<String, String> context = MDC.getCopyOfContextMap();
-		Thread thread = new Thread(() -> {
-			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
-			runnable.run();
-		}, String.format("cassandra-%d", this.id));
-		thread.setDaemon(true);
-		return thread;
-	};
+	private final ThreadFactory threadFactory;
 
 	private final Version version;
 
@@ -103,11 +90,20 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Nullable
 	private ProcessId processId;
 
-	AbstractCassandraNode(Version version, @Nullable Path javaHome, Ports ports, List<String> jvmOptions) {
+	AbstractCassandraNode(long id, Version version, @Nullable Path javaHome, Ports ports, List<String> jvmOptions) {
 		this.version = version;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 		this.ports = ports;
+		this.threadFactory = runnable -> {
+			Map<String, String> context = MDC.getCopyOfContextMap();
+			Thread thread = new Thread(() -> {
+				Optional.ofNullable(context).ifPresent(MDC::setContextMap);
+				runnable.run();
+			}, String.format("cassandra-%d", id));
+			thread.setDaemon(true);
+			return thread;
+		};
 	}
 
 	@Override

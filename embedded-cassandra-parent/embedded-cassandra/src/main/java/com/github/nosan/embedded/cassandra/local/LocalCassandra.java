@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileLockInterruptionException;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +49,12 @@ class LocalCassandra implements Cassandra {
 	private volatile State state = State.NEW;
 
 	@Nullable
-	private volatile Thread awaitThread;
+	private volatile Thread currentThread;
 
-	LocalCassandra(boolean registerShutdownHook, CassandraDatabase database) {
+	LocalCassandra(long id, boolean registerShutdownHook, CassandraDatabase database) {
 		this.database = database;
 		if (registerShutdownHook) {
-			registerShutdownHook();
+			registerShutdownHook(id);
 		}
 	}
 
@@ -62,26 +63,22 @@ class LocalCassandra implements Cassandra {
 		synchronized (this.monitor) {
 			if (this.state != State.STARTED) {
 				try {
-					this.awaitThread = selfThread();
+					this.currentThread = Thread.currentThread();
 					this.state = State.STARTING;
 					this.database.start();
 					this.state = State.STARTED;
-					this.awaitThread = null;
+					this.currentThread = null;
 				}
 				catch (InterruptedException | ClosedByInterruptException | FileLockInterruptionException ex) {
-					this.awaitThread = null;
+					this.currentThread = null;
 					this.state = State.START_INTERRUPTED;
-					boolean interrupted = Thread.interrupted();
-					stopInternalSilently();
-					if (interrupted) {
-						selfThread().interrupt();
-					}
+					stopDatabase();
 					throw new CassandraInterruptedException(ex);
 				}
 				catch (Exception ex) {
-					this.awaitThread = null;
+					this.currentThread = null;
 					this.state = State.START_FAILED;
-					stopInternalSilently();
+					stopDatabase();
 					throw new CassandraException(String.format("Unable to start Apache Cassandra '%s'", getVersion()),
 							ex);
 				}
@@ -98,7 +95,7 @@ class LocalCassandra implements Cassandra {
 					this.database.stop();
 					this.state = State.STOPPED;
 				}
-				catch (InterruptedException | ClosedByInterruptException | FileLockInterruptionException ex) {
+				catch (InterruptedException | ClosedByInterruptException ex) {
 					this.state = State.STOP_INTERRUPTED;
 					throw new CassandraInterruptedException(ex);
 				}
@@ -136,26 +133,19 @@ class LocalCassandra implements Cassandra {
 		return String.format("Apache Cassandra '%s'", getVersion());
 	}
 
-	private static Thread selfThread() {
-		return Thread.currentThread();
-	}
-
-	private void registerShutdownHook() {
+	private void registerShutdownHook(long id) {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			Thread awaitThread = this.awaitThread;
-			if (awaitThread != null) {
-				awaitThread.interrupt();
-			}
+			Optional.ofNullable(this.currentThread).ifPresent(Thread::interrupt);
 			stop();
-		}, toString()));
+		}, String.format("cassandra:%d:hook", id)));
 	}
 
-	private void stopInternalSilently() {
+	private void stopDatabase() {
 		try {
 			this.database.stop();
 		}
 		catch (InterruptedException ex) {
-			selfThread().interrupt();
+			Thread.currentThread().interrupt();
 		}
 		catch (Exception ex) {
 			log.error(String.format("Unable to stop Apache Cassandra '%s'", getVersion()), ex);

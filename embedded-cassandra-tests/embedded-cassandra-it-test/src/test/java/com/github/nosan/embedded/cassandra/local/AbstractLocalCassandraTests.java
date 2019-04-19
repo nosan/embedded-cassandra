@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -41,6 +42,7 @@ import java.util.function.Predicate;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.apache.commons.compress.utils.IOUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,6 +92,22 @@ abstract class AbstractLocalCassandraTests {
 	void setUp(@TempDir Path temporaryFolder, CaptureOutput captureOutput) {
 		this.temporaryFolder = temporaryFolder;
 		this.output = captureOutput;
+	}
+
+	@Test
+	void shouldInterruptStartup() {
+		Assertions.assertTimeout(Duration.ofSeconds(15), () -> {
+			Cassandra cassandra = this.factory.create();
+			Thread thread = new Thread(cassandra::start);
+			thread.setUncaughtExceptionHandler((t, e) -> {
+			});
+			thread.start();
+			Thread.sleep(5000);
+			thread.interrupt();
+			thread.join();
+			Thread.sleep(4000);
+			assertThat(this.output.toString()).contains("Stop Apache Cassandra");
+		});
 	}
 
 	@Test

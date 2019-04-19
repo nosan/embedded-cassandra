@@ -38,9 +38,9 @@ class UnixCassandraNode extends AbstractCassandraNode {
 
 	private final boolean allowRoot;
 
-	UnixCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
+	UnixCassandraNode(long id, Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
 			List<String> jvmOptions, boolean allowRoot) {
-		super(version, javaHome, ports, jvmOptions);
+		super(id, version, javaHome, ports, jvmOptions);
 		this.version = version;
 		this.workingDirectory = workingDirectory;
 		this.allowRoot = allowRoot;
@@ -63,9 +63,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	int terminate(ProcessId processId) throws InterruptedException {
 		long pid = processId.getPid();
 		if (pid != -1) {
-			return new RunProcess(newBuilder()
-					.command("kill", Long.toString(pid)))
-					.runAndWait(this.log::info);
+			return new RunProcess(newBuilder().command("kill", Long.toString(pid))).runAndWait(this.log::info);
 		}
 		return -1;
 	}
