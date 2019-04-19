@@ -82,8 +82,8 @@ class LocalCassandra implements Cassandra {
 				catch (Throwable ex) {
 					this.state = State.START_FAILED;
 					stopDatabaseSafely();
-					throw new CassandraException(String.format("Unable to start Apache Cassandra '%s'", getVersion()),
-							ex);
+					throw new CassandraException(String.format("Unable to start Apache Cassandra '%s'",
+							getVersion()), ex);
 				}
 			}
 		}
@@ -92,7 +92,8 @@ class LocalCassandra implements Cassandra {
 	@Override
 	public void stop() throws CassandraException {
 		synchronized (this.monitor) {
-			if (this.state != State.STOPPED && this.state != State.NEW) {
+			if (this.state != State.STOPPED && this.state != State.NEW && this.state != State.START_FAILED
+					&& this.state != State.START_INTERRUPTED) {
 				try {
 					this.state = State.STOPPING;
 					stopDatabase();
@@ -104,8 +105,8 @@ class LocalCassandra implements Cassandra {
 				}
 				catch (Throwable ex) {
 					this.state = State.STOP_FAILED;
-					throw new CassandraException(String.format("Unable to stop Apache Cassandra '%s'", getVersion()),
-							ex);
+					throw new CassandraException(String.format("Unable to stop Apache Cassandra '%s'",
+							getVersion()), ex);
 				}
 			}
 		}

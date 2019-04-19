@@ -96,7 +96,7 @@ abstract class AbstractLocalCassandraTests {
 
 	@Test
 	void shouldInterruptStartup() {
-		Assertions.assertTimeout(Duration.ofSeconds(8), () -> {
+		Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
 			Cassandra cassandra = this.factory.create();
 			Thread thread = new Thread(cassandra::start);
 			thread.setUncaughtExceptionHandler((t, e) -> {
@@ -105,7 +105,6 @@ abstract class AbstractLocalCassandraTests {
 			Thread.sleep(2000);
 			thread.interrupt();
 			thread.join();
-			Thread.sleep(3500);
 			assertThat(this.output.toString()).contains("Stop Apache Cassandra");
 		});
 	}
