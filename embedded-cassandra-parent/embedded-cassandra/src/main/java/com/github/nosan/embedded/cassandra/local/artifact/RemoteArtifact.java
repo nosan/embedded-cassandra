@@ -270,7 +270,7 @@ class RemoteArtifact implements Artifact {
 							long percent = Math.max(current * 100, 1) / size;
 							if (percent - prevPercent.get() >= minPercentStep) {
 								prevPercent.set(percent);
-								log.info("Downloaded {} / {}  {}%", current, size, percent);
+								log.info("Downloaded {} / {}  {}%", formatSize(current), formatSize(size), percent);
 							}
 						}
 					}
@@ -281,6 +281,17 @@ class RemoteArtifact implements Artifact {
 					}
 				}, 0, 1, TimeUnit.SECONDS);
 			}
+		}
+
+		private static String formatSize(long bytes) {
+			if (bytes > 1024) {
+				long kilobytes = bytes / 1024;
+				if (kilobytes > 1024) {
+					return (kilobytes / 1024) + "MB";
+				}
+				return kilobytes + "KB";
+			}
+			return bytes + "B";
 		}
 
 		private URLConnection getUrlConnection(URL url, int maxRedirects, int redirectCount) throws IOException {
