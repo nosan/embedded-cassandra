@@ -10,7 +10,7 @@ before_build:
   - mvnw.cmd clean install -DskipTests=true -B -V
 
 build_script:
-  - mvnw.cmd clean install -e
+  - mvnw.cmd clean install -e --fail-fast
 
 on_failure:
   - ps: |
