@@ -70,13 +70,13 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final String JAVA_HOME = "JAVA_HOME";
 
-	protected final Logger log = LoggerFactory.getLogger(getClass());
+	final Logger log = LoggerFactory.getLogger(getClass());
 
-	protected final Path workingDirectory;
+	final Path workingDirectory;
 
-	protected final ThreadFactory threadFactory;
+	final ThreadFactory threadFactory;
 
-	protected final Version version;
+	final Version version;
 
 	private final Ports ports;
 
