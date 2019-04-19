@@ -63,7 +63,9 @@ abstract class AbstractTestCassandraTests {
 
 	@AfterAll
 	void stopCassandra() {
-		this.session.close();
+		if (this.session != null) {
+			this.session.close();
+		}
 		this.cassandra.stop();
 	}
 
