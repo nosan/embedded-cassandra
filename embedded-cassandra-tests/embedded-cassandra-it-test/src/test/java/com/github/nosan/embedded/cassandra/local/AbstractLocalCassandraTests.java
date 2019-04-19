@@ -102,7 +102,7 @@ abstract class AbstractLocalCassandraTests {
 			thread.setUncaughtExceptionHandler((t, e) -> {
 			});
 			thread.start();
-			Thread.sleep(5000);
+			Thread.sleep(3000);
 			thread.interrupt();
 			thread.join();
 			Thread.sleep(4000);

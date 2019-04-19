@@ -42,7 +42,7 @@ class RunProcessTests {
 	void shouldRunProcess(@TempDir Path temporaryFolder) throws Exception {
 		StringBuilder output = new StringBuilder();
 		int exit = runProcess(temporaryFolder, "bash", "-c", command("echo", "$RUN_PROCESS_TEST"))
-				.runAndWait(output::append);
+				.runAndWait(Thread::new, output::append);
 		assertThat(output.toString()).isEqualTo("TEST");
 		assertThat(exit).isEqualTo(0);
 	}
@@ -50,7 +50,7 @@ class RunProcessTests {
 	@Test
 	void shouldNotRunProcess(@TempDir Path temporaryFolder, CaptureOutput output) throws Exception {
 		int exit = runProcess(temporaryFolder, "invalid_command")
-				.runAndWait(line -> {
+				.runAndWait(Thread::new, line -> {
 				});
 		assertThat(exit).isEqualTo(-1);
 		assertThat(output.toString()).contains("Can not execute 'invalid_command'");

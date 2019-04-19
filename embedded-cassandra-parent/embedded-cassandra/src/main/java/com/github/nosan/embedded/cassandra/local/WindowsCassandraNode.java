@@ -34,15 +34,9 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  */
 class WindowsCassandraNode extends AbstractCassandraNode {
 
-	private final Version version;
-
-	private final Path workingDirectory;
-
 	WindowsCassandraNode(long id, Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
 			List<String> jvmOptions) {
-		super(id, version, javaHome, ports, jvmOptions);
-		this.version = version;
-		this.workingDirectory = workingDirectory;
+		super(id, workingDirectory, version, javaHome, ports, jvmOptions);
 	}
 
 	@Override
@@ -95,7 +89,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 			if (force) {
 				builder.command().add("-f");
 			}
-			return new RunProcess(builder).runAndWait(this.log::info);
+			return new RunProcess(builder).runAndWait(this.threadFactory, this.log::info);
 		}
 		return -1;
 	}
@@ -107,7 +101,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		}
 		builder.command().add("/pid");
 		builder.command().add(Long.toString(pid));
-		return new RunProcess(builder).runAndWait(this.log::info);
+		return new RunProcess(builder).runAndWait(this.threadFactory, this.log::info);
 	}
 
 	private ProcessBuilder newBuilder() {

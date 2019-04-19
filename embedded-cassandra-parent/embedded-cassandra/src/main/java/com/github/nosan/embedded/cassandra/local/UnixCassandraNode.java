@@ -32,17 +32,11 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  */
 class UnixCassandraNode extends AbstractCassandraNode {
 
-	private final Version version;
-
-	private final Path workingDirectory;
-
 	private final boolean allowRoot;
 
 	UnixCassandraNode(long id, Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
 			List<String> jvmOptions, boolean allowRoot) {
-		super(id, version, javaHome, ports, jvmOptions);
-		this.version = version;
-		this.workingDirectory = workingDirectory;
+		super(id, workingDirectory, version, javaHome, ports, jvmOptions);
 		this.allowRoot = allowRoot;
 	}
 
@@ -63,7 +57,8 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	int terminate(ProcessId processId) throws InterruptedException {
 		long pid = processId.getPid();
 		if (pid != -1) {
-			return new RunProcess(newBuilder().command("kill", Long.toString(pid))).runAndWait(this.log::info);
+			return new RunProcess(newBuilder().command("kill", Long.toString(pid)))
+					.runAndWait(this.threadFactory, this.log::info);
 		}
 		return -1;
 	}
@@ -73,7 +68,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 		long pid = processId.getPid();
 		if (pid != -1) {
 			return new RunProcess(newBuilder().command("kill", "-SIGINT", Long.toString(pid)))
-					.runAndWait(this.log::info);
+					.runAndWait(this.threadFactory, this.log::info);
 		}
 		return -1;
 	}

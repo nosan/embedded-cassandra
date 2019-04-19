@@ -18,7 +18,8 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileLockInterruptionException;
-import java.util.Optional;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,8 @@ class LocalCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(LocalCassandra.class);
 
+	private final ThreadFactory threadFactory;
+
 	private final Object monitor = new Object();
 
 	private final CassandraDatabase database;
@@ -49,10 +52,11 @@ class LocalCassandra implements Cassandra {
 	private volatile State state = State.NEW;
 
 	@Nullable
-	private volatile Thread currentThread;
+	private volatile Thread startDatabaseThread;
 
 	LocalCassandra(long id, boolean registerShutdownHook, CassandraDatabase database) {
 		this.database = database;
+		this.threadFactory = new DefaultThreadFactory("ac", id);
 		if (registerShutdownHook) {
 			registerShutdownHook(id);
 		}
@@ -63,22 +67,20 @@ class LocalCassandra implements Cassandra {
 		synchronized (this.monitor) {
 			if (this.state != State.STARTED) {
 				try {
-					this.currentThread = Thread.currentThread();
 					this.state = State.STARTING;
-					this.database.start();
+					startDatabase();
 					this.state = State.STARTED;
-					this.currentThread = null;
 				}
-				catch (InterruptedException | ClosedByInterruptException | FileLockInterruptionException ex) {
-					this.currentThread = null;
+				catch (InterruptedException ex) {
 					this.state = State.START_INTERRUPTED;
-					stopDatabase();
+					interruptStartDatabase();
+					stopDatabaseSafely();
 					throw new CassandraInterruptedException(ex);
 				}
-				catch (Exception ex) {
-					this.currentThread = null;
+				catch (Throwable ex) {
 					this.state = State.START_FAILED;
-					stopDatabase();
+					interruptStartDatabase();
+					stopDatabaseSafely();
 					throw new CassandraException(String.format("Unable to start Apache Cassandra '%s'", getVersion()),
 							ex);
 				}
@@ -92,14 +94,14 @@ class LocalCassandra implements Cassandra {
 			if (this.state != State.STOPPED && this.state != State.NEW) {
 				try {
 					this.state = State.STOPPING;
-					this.database.stop();
+					stopDatabase();
 					this.state = State.STOPPED;
 				}
-				catch (InterruptedException | ClosedByInterruptException ex) {
+				catch (InterruptedException ex) {
 					this.state = State.STOP_INTERRUPTED;
 					throw new CassandraInterruptedException(ex);
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					this.state = State.STOP_FAILED;
 					throw new CassandraException(String.format("Unable to stop Apache Cassandra '%s'", getVersion()),
 							ex);
@@ -133,22 +135,87 @@ class LocalCassandra implements Cassandra {
 		return String.format("Apache Cassandra '%s'", getVersion());
 	}
 
-	private void registerShutdownHook(long id) {
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			Optional.ofNullable(this.currentThread).ifPresent(Thread::interrupt);
-			stop();
-		}, String.format("cassandra:%d:hook", id)));
+	private static void selfInterrupt() {
+		Thread.currentThread().interrupt();
 	}
 
-	private void stopDatabase() {
+	private void registerShutdownHook(long id) {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			interruptStartDatabase();
+			stop();
+		}, String.format("ac:%d:sh", id)));
+	}
+
+	private void startDatabase() throws Throwable {
+		AtomicReference<Throwable> throwableRef = new AtomicReference<>();
+		Thread thread = this.threadFactory.newThread(() -> {
+			try {
+				this.database.start();
+			}
+			catch (InterruptedException | ClosedByInterruptException | FileLockInterruptionException ex) {
+				selfInterrupt();
+			}
+			catch (Throwable ex) {
+				throwableRef.set(ex);
+			}
+		});
+		this.startDatabaseThread = thread;
+		thread.start();
+		thread.join();
+		Throwable ex = throwableRef.get();
+		if (ex != null) {
+			throw ex;
+		}
+	}
+
+	private void stopDatabase() throws Throwable {
+		AtomicReference<Throwable> throwableRef = new AtomicReference<>();
+		Thread thread = this.threadFactory.newThread(() -> {
+			try {
+				this.database.stop();
+			}
+			catch (InterruptedException | ClosedByInterruptException ex) {
+				selfInterrupt();
+			}
+			catch (Throwable ex) {
+				throwableRef.set(ex);
+			}
+		});
+		thread.start();
+		thread.join();
+		Throwable ex = throwableRef.get();
+		if (ex != null) {
+			throw ex;
+		}
+	}
+
+	private void stopDatabaseSafely() {
 		try {
-			this.database.stop();
+			stopDatabase();
 		}
 		catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
+			selfInterrupt();
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			log.error(String.format("Unable to stop Apache Cassandra '%s'", getVersion()), ex);
+		}
+	}
+
+	private void interruptStartDatabase() {
+		Thread thread = this.startDatabaseThread;
+		if (thread != null) {
+			try {
+				thread.interrupt();
+			}
+			catch (SecurityException ex) {
+				//ignore
+			}
+			try {
+				thread.join();
+			}
+			catch (InterruptedException ex) {
+				selfInterrupt();
+			}
 		}
 	}
 

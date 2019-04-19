@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Settings;
@@ -73,9 +72,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 
-	private final ThreadFactory threadFactory;
+	protected final Path workingDirectory;
 
-	private final Version version;
+	protected final ThreadFactory threadFactory;
+
+	protected final Version version;
 
 	private final Ports ports;
 
@@ -90,20 +91,14 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Nullable
 	private ProcessId processId;
 
-	AbstractCassandraNode(long id, Version version, @Nullable Path javaHome, Ports ports, List<String> jvmOptions) {
+	AbstractCassandraNode(long id, Path workingDirectory, Version version, @Nullable Path javaHome, Ports ports,
+			List<String> jvmOptions) {
 		this.version = version;
+		this.workingDirectory = workingDirectory;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 		this.ports = ports;
-		this.threadFactory = runnable -> {
-			Map<String, String> context = MDC.getCopyOfContextMap();
-			Thread thread = new Thread(() -> {
-				Optional.ofNullable(context).ifPresent(MDC::setContextMap);
-				runnable.run();
-			}, String.format("cassandra-%d", id));
-			thread.setDaemon(true);
-			return thread;
-		};
+		this.threadFactory = new DefaultThreadFactory("ac-node", id);
 	}
 
 	@Override
@@ -236,10 +231,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		if (settings.isRpcTransportEnabled() && !PortUtils.isPortBusy(settings.getAddress(), settings.getRpcPort())) {
 			return false;
 		}
-		if (settings.isTransportEnabled() && !PortUtils.isPortBusy(settings.getAddress(), settings.getPort())) {
-			return false;
-		}
-		return true;
+		return !settings.isTransportEnabled() || PortUtils.isPortBusy(settings.getAddress(), settings.getPort());
 	}
 
 	private void parse(String line, NodeSettings settings) {

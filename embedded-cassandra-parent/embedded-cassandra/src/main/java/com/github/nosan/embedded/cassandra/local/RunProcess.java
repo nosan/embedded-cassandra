@@ -17,15 +17,11 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * Utility class to run a {@link Process}.
@@ -36,20 +32,6 @@ import org.slf4j.MDC;
 class RunProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
-
-	private static final AtomicLong counter = new AtomicLong();
-
-	private final long id = counter.incrementAndGet();
-
-	private final ThreadFactory threadFactory = runnable -> {
-		Map<String, String> context = MDC.getCopyOfContextMap();
-		Thread thread = new Thread(() -> {
-			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
-			runnable.run();
-		}, String.format("process-%d", this.id));
-		thread.setDaemon(true);
-		return thread;
-	};
 
 	private final ProcessBuilder builder;
 
@@ -76,18 +58,19 @@ class RunProcess {
 	/**
 	 * Starts a new process.
 	 *
-	 * @param consumer the output consumer
+	 * @param threadFactory a thread factory to create a thread to read process output
+	 * @param consumer the process output consumer
 	 * @return the exit value
 	 * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting, then the
 	 * wait is ended and an InterruptedException is thrown.
 	 */
-	int runAndWait(Consumer<? super String> consumer) throws InterruptedException {
+	int runAndWait(ThreadFactory threadFactory, Consumer<? super String> consumer) throws InterruptedException {
 		try {
 			Process process = run();
-			Thread thread = this.threadFactory.newThread(() -> ProcessUtils.read(process, consumer));
+			Thread thread = threadFactory.newThread(() -> ProcessUtils.read(process, consumer));
 			thread.start();
 			int exit = process.waitFor();
-			thread.join(100);
+			thread.join(1000);
 			return exit;
 		}
 		catch (IOException ex) {
