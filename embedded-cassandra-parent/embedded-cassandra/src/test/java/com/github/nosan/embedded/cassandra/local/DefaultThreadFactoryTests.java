@@ -49,7 +49,7 @@ class DefaultThreadFactoryTests {
 	void createThread() throws InterruptedException {
 		AtomicReference<String> value = new AtomicReference<>();
 		Thread thread = this.threadFactory.newThread(() -> value.set(MDC.get("X")));
-		assertThat(thread.getName()).isEqualTo("mythread-1-th-1");
+		assertThat(thread.getName()).isEqualTo("mythread-1-T-1");
 		assertThat(thread.isDaemon()).isTrue();
 		thread.start();
 		thread.join();

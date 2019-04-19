@@ -59,7 +59,7 @@ class LocalCassandra implements Cassandra {
 
 	LocalCassandra(long id, boolean registerShutdownHook, CassandraDatabase database) {
 		this.database = database;
-		this.threadFactory = new DefaultThreadFactory("ac", id);
+		this.threadFactory = new DefaultThreadFactory("AC", id);
 		if (registerShutdownHook) {
 			registerShutdownHook(id);
 		}
@@ -144,7 +144,7 @@ class LocalCassandra implements Cassandra {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			interrupt(this.startThread);
 			stop();
-		}, String.format("ac:%d:sh", id)));
+		}, String.format("AC:%d:SH", id)));
 	}
 
 	private void startDatabase() throws Throwable {

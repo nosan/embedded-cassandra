@@ -98,7 +98,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 		this.ports = ports;
-		this.threadFactory = new DefaultThreadFactory("ac-node", id);
+		this.threadFactory = new DefaultThreadFactory("ACN", id);
 	}
 
 	@Override
