@@ -102,10 +102,10 @@ abstract class AbstractLocalCassandraTests {
 			thread.setUncaughtExceptionHandler((t, e) -> {
 			});
 			thread.start();
-			Thread.sleep(3000);
+			Thread.sleep(5000);
 			thread.interrupt();
 			thread.join();
-			Thread.sleep(4000);
+			Thread.sleep(5000);
 			assertThat(this.output.toString()).contains("Stop Apache Cassandra");
 		});
 	}
