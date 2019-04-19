@@ -51,8 +51,11 @@ class LocalCassandra implements Cassandra {
 
 	private volatile State state = State.NEW;
 
+	/**
+	 * The thread which ran {@link CassandraDatabase#start()}.
+	 */
 	@Nullable
-	private volatile Thread startDatabaseThread;
+	private volatile Thread startThread;
 
 	LocalCassandra(long id, boolean registerShutdownHook, CassandraDatabase database) {
 		this.database = database;
@@ -73,13 +76,11 @@ class LocalCassandra implements Cassandra {
 				}
 				catch (InterruptedException ex) {
 					this.state = State.START_INTERRUPTED;
-					interruptStartDatabase();
 					stopDatabaseSafely();
 					throw new CassandraInterruptedException(ex);
 				}
 				catch (Throwable ex) {
 					this.state = State.START_FAILED;
-					interruptStartDatabase();
 					stopDatabaseSafely();
 					throw new CassandraException(String.format("Unable to start Apache Cassandra '%s'", getVersion()),
 							ex);
@@ -141,7 +142,7 @@ class LocalCassandra implements Cassandra {
 
 	private void registerShutdownHook(long id) {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			interruptStartDatabase();
+			interrupt(this.startThread);
 			stop();
 		}, String.format("ac:%d:sh", id)));
 	}
@@ -159,9 +160,15 @@ class LocalCassandra implements Cassandra {
 				throwableRef.set(ex);
 			}
 		});
-		this.startDatabaseThread = thread;
+		this.startThread = thread;
 		thread.start();
-		thread.join();
+		try {
+			thread.join();
+		}
+		catch (InterruptedException ex) {
+			interrupt(thread);
+			throw ex;
+		}
 		Throwable ex = throwableRef.get();
 		if (ex != null) {
 			throw ex;
@@ -201,8 +208,7 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
-	private void interruptStartDatabase() {
-		Thread thread = this.startDatabaseThread;
+	private void interrupt(@Nullable Thread thread) {
 		if (thread != null) {
 			try {
 				thread.interrupt();
