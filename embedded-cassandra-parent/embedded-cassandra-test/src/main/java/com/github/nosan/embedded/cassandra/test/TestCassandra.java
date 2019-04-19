@@ -110,14 +110,14 @@ public class TestCassandra {
 	public void start() throws CassandraException {
 		synchronized (this.monitor) {
 			try {
-				startInternal();
+				startCassandra();
 			}
 			catch (CassandraException ex) {
-				stopInternalSilently();
+				stopCassandraSafely();
 				throw ex;
 			}
-			catch (Exception ex) {
-				stopInternalSilently();
+			catch (Throwable ex) {
+				stopCassandraSafely();
 				throw new CassandraException(String.format("Unable to start Test Apache Cassandra '%s'", getVersion()),
 						ex);
 			}
@@ -135,12 +135,12 @@ public class TestCassandra {
 	public void stop() throws CassandraException {
 		synchronized (this.monitor) {
 			try {
-				stopInternal();
+				stopCassandra();
 			}
 			catch (CassandraException ex) {
 				throw ex;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new CassandraException(String.format("Unable to stop Test Apache Cassandra '%s'", getVersion()),
 						ex);
 			}
@@ -203,7 +203,11 @@ public class TestCassandra {
 		}
 	}
 
-	private void startInternal() {
+	private static void selfInterrupt() {
+		Thread.currentThread().interrupt();
+	}
+
+	private void startCassandra() {
 		if (log.isDebugEnabled()) {
 			log.debug("Starts Test Apache Cassandra '{}'", getVersion());
 		}
@@ -216,7 +220,7 @@ public class TestCassandra {
 		}
 	}
 
-	private void stopInternal() {
+	private void stopCassandra() {
 		this.cassandra.stop();
 		Cassandra.State state = this.cassandra.getState();
 		if (log.isDebugEnabled() && state == Cassandra.State.STOPPED) {
@@ -224,14 +228,14 @@ public class TestCassandra {
 		}
 	}
 
-	private void stopInternalSilently() {
+	private void stopCassandraSafely() {
 		try {
-			stopInternal();
+			stopCassandra();
 		}
 		catch (CassandraInterruptedException ex) {
-			Thread.currentThread().interrupt();
+			selfInterrupt();
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			log.error(String.format("Unable to stop Test Apache Cassandra '%s'", getVersion()), ex);
 		}
 	}
