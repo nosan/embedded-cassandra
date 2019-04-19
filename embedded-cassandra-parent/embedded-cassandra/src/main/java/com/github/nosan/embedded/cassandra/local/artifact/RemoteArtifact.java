@@ -57,7 +57,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class RemoteArtifact implements Artifact {
 
-	private static final Logger log = LoggerFactory.getLogger(Artifact.class);
+	private static final Logger log = LoggerFactory.getLogger(RemoteArtifact.class);
 
 	private final Version version;
 
@@ -180,7 +180,7 @@ class RemoteArtifact implements Artifact {
 			Thread thread = new Thread(() -> {
 				Optional.ofNullable(context).ifPresent(MDC::setContextMap);
 				runnable.run();
-			}, String.format("artifact-%d", this.id));
+			}, String.format("progress-%d", this.id));
 			thread.setDaemon(true);
 			return thread;
 		};
