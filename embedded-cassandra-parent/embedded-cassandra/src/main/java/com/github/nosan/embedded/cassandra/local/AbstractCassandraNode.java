@@ -42,7 +42,6 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.util.PortUtils;
-import com.github.nosan.embedded.cassandra.util.StringUtils;
 import com.github.nosan.embedded.cassandra.util.SystemUtils;
 
 /**
@@ -108,10 +107,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Override
 	public void start() throws IOException, InterruptedException {
 		Map<String, String> environment = new LinkedHashMap<>();
-		String javaHome = Optional.ofNullable(this.javaHome).map(Path::toString)
-				.orElseGet(() -> SystemUtils.getJavaHomeDirectory().map(Path::toString).orElse(null));
-		if (StringUtils.hasText(javaHome)) {
-			environment.put(JAVA_HOME, javaHome);
+		Path javaHome = Optional.ofNullable(this.javaHome)
+				.orElseGet(() -> SystemUtils.getJavaHomeDirectory().orElse(null));
+		if (javaHome != null) {
+			environment.put(JAVA_HOME, javaHome.toString());
 		}
 		JvmOptions jvmOptions = new JvmOptions(this.ports, this.jvmOptions);
 		environment.put(JVM_EXTRA_OPTS, jvmOptions.toString());
