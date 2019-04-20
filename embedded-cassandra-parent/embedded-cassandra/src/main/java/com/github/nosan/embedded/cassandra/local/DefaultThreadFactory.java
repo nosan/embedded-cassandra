@@ -55,7 +55,7 @@ public final class DefaultThreadFactory implements ThreadFactory {
 		Thread thread = new Thread(() -> {
 			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
 			runnable.run();
-		}, String.format("%s-T-%d", this.prefix, this.threadNumber.incrementAndGet()));
+		}, String.format("%s-thread-%d", this.prefix, this.threadNumber.incrementAndGet()));
 		thread.setDaemon(true);
 		return thread;
 	}

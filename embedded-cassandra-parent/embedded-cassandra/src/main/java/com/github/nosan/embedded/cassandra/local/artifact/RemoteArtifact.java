@@ -171,7 +171,7 @@ class RemoteArtifact implements Artifact {
 
 		private static final AtomicLong counter = new AtomicLong();
 
-		private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("PROGRESS-%d",
+		private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("progress-%d",
 				counter.incrementAndGet()));
 
 		private final Path directory;
