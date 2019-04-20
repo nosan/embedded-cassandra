@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DefaultThreadFactoryTests {
 
-	private final ThreadFactory threadFactory = new DefaultThreadFactory("mythread", 1);
+	private final ThreadFactory threadFactory = new DefaultThreadFactory("mythread");
 
 	@BeforeEach
 	void setUp() {
@@ -49,7 +49,7 @@ class DefaultThreadFactoryTests {
 	void createThread() throws InterruptedException {
 		AtomicReference<String> value = new AtomicReference<>();
 		Thread thread = this.threadFactory.newThread(() -> value.set(MDC.get("X")));
-		assertThat(thread.getName()).isEqualTo("mythread-1-T-1");
+		assertThat(thread.getName()).isEqualTo("mythread-T-1");
 		assertThat(thread.isDaemon()).isTrue();
 		thread.start();
 		thread.join();

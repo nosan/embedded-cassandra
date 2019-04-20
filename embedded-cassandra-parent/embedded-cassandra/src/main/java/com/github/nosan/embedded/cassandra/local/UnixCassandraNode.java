@@ -34,9 +34,9 @@ class UnixCassandraNode extends AbstractCassandraNode {
 
 	private final boolean allowRoot;
 
-	UnixCassandraNode(long id, Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
+	UnixCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
 			List<String> jvmOptions, boolean allowRoot) {
-		super(id, workingDirectory, version, javaHome, ports, jvmOptions);
+		super(workingDirectory, version, javaHome, ports, jvmOptions);
 		this.allowRoot = allowRoot;
 	}
 

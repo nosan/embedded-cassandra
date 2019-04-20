@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
@@ -51,6 +52,8 @@ import com.github.nosan.embedded.cassandra.util.SystemUtils;
  * @since 2.0.0
  */
 abstract class AbstractCassandraNode implements CassandraNode {
+
+	private static final AtomicLong counter = new AtomicLong();
 
 	private static final Pattern RPC_TRANSPORT_NOT_STARTING_PATTERN = Pattern
 			.compile("(?i).*not\\s*starting\\s*rpc\\s*server.*");
@@ -91,14 +94,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Nullable
 	private ProcessId processId;
 
-	AbstractCassandraNode(long id, Path workingDirectory, Version version, @Nullable Path javaHome, Ports ports,
+	AbstractCassandraNode(Path workingDirectory, Version version, @Nullable Path javaHome, Ports ports,
 			List<String> jvmOptions) {
+		long id = counter.incrementAndGet();
 		this.version = version;
 		this.workingDirectory = workingDirectory;
 		this.javaHome = javaHome;
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 		this.ports = ports;
-		this.threadFactory = new DefaultThreadFactory("ACN", id);
+		this.threadFactory = new DefaultThreadFactory(String.format("ACN-%d", id));
 	}
 
 	@Override

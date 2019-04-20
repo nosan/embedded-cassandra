@@ -28,9 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,10 +39,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.local.DefaultThreadFactory;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -173,17 +171,8 @@ class RemoteArtifact implements Artifact {
 
 		private static final AtomicLong counter = new AtomicLong();
 
-		private final long id = counter.incrementAndGet();
-
-		private final ThreadFactory threadFactory = runnable -> {
-			Map<String, String> context = MDC.getCopyOfContextMap();
-			Thread thread = new Thread(() -> {
-				Optional.ofNullable(context).ifPresent(MDC::setContextMap);
-				runnable.run();
-			}, String.format("progress-%d", this.id));
-			thread.setDaemon(true);
-			return thread;
-		};
+		private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("PROGRESS-%d",
+				counter.incrementAndGet()));
 
 		private final Path directory;
 

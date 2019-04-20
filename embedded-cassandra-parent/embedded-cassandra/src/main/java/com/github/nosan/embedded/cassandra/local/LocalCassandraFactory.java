@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
@@ -41,8 +40,6 @@ import com.github.nosan.embedded.cassandra.util.SystemUtils;
  * @since 1.0.0
  */
 public final class LocalCassandraFactory implements CassandraFactory {
-
-	private static final AtomicLong counter = new AtomicLong();
 
 	private static final String SNAKEYAML_YAML_CLASS = "org.yaml.snakeyaml.Yaml";
 
@@ -545,11 +542,10 @@ public final class LocalCassandraFactory implements CassandraFactory {
 			artifactDirectory = getTempDir()
 					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
 		}
-		long id = counter.incrementAndGet();
-		CassandraNode node = createCassandraNode(id, workingDirectory, version);
+		CassandraNode node = createCassandraNode(workingDirectory, version);
 		CassandraDatabase cassandraDatabase = new LocalCassandraDatabase(node, workingDirectory,
 				artifactDirectory, artifactFactory, isDeleteWorkingDirectory(), getMergedWorkingDirectoryCustomizers());
-		return new LocalCassandra(id, isRegisterShutdownHook(), cassandraDatabase);
+		return new LocalCassandra(isRegisterShutdownHook(), cassandraDatabase);
 	}
 
 	private Path getTempDir() {
@@ -586,13 +582,12 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		return customizers;
 	}
 
-	private CassandraNode createCassandraNode(long id, Path workingDirectory, Version version) {
+	private CassandraNode createCassandraNode(Path workingDirectory, Version version) {
 		Ports ports = new Ports(getPort(), getRpcPort(), getStoragePort(), getSslStoragePort(), getJmxLocalPort());
 		if (SystemUtils.isWindows()) {
-			return new WindowsCassandraNode(id, version, workingDirectory, getJavaHome(), ports, getJvmOptions());
+			return new WindowsCassandraNode(version, workingDirectory, getJavaHome(), ports, getJvmOptions());
 		}
-		return new UnixCassandraNode(id, version, workingDirectory, getJavaHome(), ports, getJvmOptions(),
-				isAllowRoot());
+		return new UnixCassandraNode(version, workingDirectory, getJavaHome(), ports, getJvmOptions(), isAllowRoot());
 	}
 
 }

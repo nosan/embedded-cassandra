@@ -23,23 +23,30 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.MDC;
 
+import com.github.nosan.embedded.cassandra.util.StringUtils;
+
 /**
- * Default {@link ThreadFactory}.
+ * Default {@link ThreadFactory factory} to create {@link Thread}.
  *
  * @author Dmytro Nosan
  * @since 2.0.0
  */
-class DefaultThreadFactory implements ThreadFactory {
+public final class DefaultThreadFactory implements ThreadFactory {
 
 	private final AtomicLong threadNumber = new AtomicLong();
 
-	private final long id;
-
 	private final String prefix;
 
-	DefaultThreadFactory(String prefix, long id) {
+	/**
+	 * Creates {@link ThreadFactory}.
+	 *
+	 * @param prefix the thread name prefix
+	 */
+	public DefaultThreadFactory(String prefix) {
+		if (!StringUtils.hasText(prefix)) {
+			throw new IllegalArgumentException("Prefix must not be empty or null");
+		}
 		this.prefix = prefix;
-		this.id = id;
 	}
 
 	@Override
@@ -48,7 +55,7 @@ class DefaultThreadFactory implements ThreadFactory {
 		Thread thread = new Thread(() -> {
 			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
 			runnable.run();
-		}, String.format("%s-%d-T-%d", this.prefix, this.id, this.threadNumber.incrementAndGet()));
+		}, String.format("%s-T-%d", this.prefix, this.threadNumber.incrementAndGet()));
 		thread.setDaemon(true);
 		return thread;
 	}

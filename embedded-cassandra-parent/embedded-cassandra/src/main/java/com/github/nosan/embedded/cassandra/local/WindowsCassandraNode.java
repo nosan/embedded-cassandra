@@ -34,9 +34,9 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  */
 class WindowsCassandraNode extends AbstractCassandraNode {
 
-	WindowsCassandraNode(long id, Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
+	WindowsCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
 			List<String> jvmOptions) {
-		super(id, workingDirectory, version, javaHome, ports, jvmOptions);
+		super(workingDirectory, version, javaHome, ports, jvmOptions);
 	}
 
 	@Override

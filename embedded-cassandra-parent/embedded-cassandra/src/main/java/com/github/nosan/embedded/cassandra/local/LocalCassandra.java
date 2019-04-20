@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.local;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileLockInterruptionException;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
@@ -41,6 +42,8 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  */
 class LocalCassandra implements Cassandra {
 
+	private static final AtomicLong counter = new AtomicLong();
+
 	private static final Logger log = LoggerFactory.getLogger(LocalCassandra.class);
 
 	private final ThreadFactory threadFactory;
@@ -57,9 +60,10 @@ class LocalCassandra implements Cassandra {
 	@Nullable
 	private volatile Thread startThread;
 
-	LocalCassandra(long id, boolean registerShutdownHook, CassandraDatabase database) {
+	LocalCassandra(boolean registerShutdownHook, CassandraDatabase database) {
+		long id = counter.incrementAndGet();
 		this.database = database;
-		this.threadFactory = new DefaultThreadFactory("AC", id);
+		this.threadFactory = new DefaultThreadFactory(String.format("AC-%d", id));
 		if (registerShutdownHook) {
 			registerShutdownHook(id);
 		}
