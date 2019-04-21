@@ -17,11 +17,14 @@
 package com.github.nosan.embedded.cassandra.junit5;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.CqlSessionFactory;
+import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.test.junit5.CassandraExtension;
 import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 
@@ -32,15 +35,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
+@ExtendWith(CassandraExtension.class)
 class CassandraExtensionTests {
 
-	@RegisterExtension
-	static final CassandraExtension cassandra = new CassandraExtension(CqlScript.classpath("init.cql"));
+	@BeforeEach
+	void setUp(TestCassandra cassandra) {
+		cassandra.executeScripts(CqlScript.classpath("init.cql"));
+	}
 
 	@Test
-	void selectRoles() {
-		try (CqlSession session = new CqlSessionFactory()
-				.create(cassandra.getSettings())) {
+	void selectRoles(Cassandra cassandra) {
+		try (CqlSession session = new CqlSessionFactory().create(cassandra.getSettings())) {
 			assertThat(CqlSessionUtils.execute(session, "SELECT * FROM  test.roles")).isEmpty();
 		}
 	}
