@@ -169,10 +169,6 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public Settings getSettings() throws IllegalStateException {
 		synchronized (this.monitor) {
-			if (!this.started) {
-				throw new IllegalStateException(String.format("Test Apache Cassandra '%s' is not running.",
-						getVersion()));
-			}
 			return this.cassandra.getSettings();
 		}
 	}
