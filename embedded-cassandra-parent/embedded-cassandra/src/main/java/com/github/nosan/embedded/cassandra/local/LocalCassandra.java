@@ -56,9 +56,6 @@ class LocalCassandra implements Cassandra {
 
 	private volatile boolean started = false;
 
-	/**
-	 * The thread which ran {@link CassandraDatabase#start()}.
-	 */
 	@Nullable
 	private volatile Thread startThread;
 
