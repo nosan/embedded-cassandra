@@ -124,7 +124,7 @@ class LocalCassandra implements Cassandra {
 	@Override
 	public Settings getSettings() throws IllegalStateException {
 		synchronized (this.monitor) {
-			if (this.started) {
+			if (!this.started) {
 				throw new IllegalStateException(String.format("Apache Cassandra '%s' is not running.", getVersion()));
 			}
 			return this.database.getSettings();
