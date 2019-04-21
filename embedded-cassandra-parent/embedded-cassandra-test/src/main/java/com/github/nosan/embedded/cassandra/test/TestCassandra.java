@@ -169,6 +169,10 @@ public class TestCassandra implements Cassandra {
 	@Override
 	public Settings getSettings() throws IllegalStateException {
 		synchronized (this.monitor) {
+			if (!this.started) {
+				throw new IllegalStateException(String.format("Test Apache Cassandra '%s' is not running.",
+						getVersion()));
+			}
 			return this.cassandra.getSettings();
 		}
 	}
@@ -234,7 +238,7 @@ public class TestCassandra implements Cassandra {
 
 	private void startCassandra() {
 		if (log.isDebugEnabled()) {
-			log.debug("Starts Test Apache Cassandra '{}'", getVersion());
+			log.debug("Start Test Apache Cassandra '{}'", getVersion());
 		}
 		this.cassandra.start();
 		if (!this.scripts.isEmpty()) {
@@ -246,9 +250,11 @@ public class TestCassandra implements Cassandra {
 	}
 
 	private void stopCassandra() {
+		if (log.isDebugEnabled()) {
+			log.debug("Stop Test Apache Cassandra '{}'", getVersion());
+		}
 		this.cassandra.stop();
-		Cassandra.State state = this.cassandra.getState();
-		if (log.isDebugEnabled() && state == Cassandra.State.STOPPED) {
+		if (log.isDebugEnabled()) {
 			log.debug("Test Apache Cassandra '{}' is stopped", getVersion());
 		}
 	}
