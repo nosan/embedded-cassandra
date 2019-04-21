@@ -54,7 +54,7 @@ import com.github.nosan.embedded.cassandra.util.ClassUtils;
  * @see CqlScript
  * @since 1.0.0
  */
-public class TestCassandra {
+public class TestCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);
 
@@ -63,6 +63,8 @@ public class TestCassandra {
 	private static final String CLUSTER_CLASS = "com.datastax.driver.core.Cluster";
 
 	private static final String SESSION_CLASS = "com.datastax.driver.core.Session";
+
+	private volatile boolean started = false;
 
 	private final Object monitor = new Object();
 
@@ -107,10 +109,15 @@ public class TestCassandra {
 	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another
 	 * thread
 	 */
+	@Override
 	public void start() throws CassandraException {
 		synchronized (this.monitor) {
+			if (this.started) {
+				return;
+			}
 			try {
 				startCassandra();
+				this.started = true;
 			}
 			catch (CassandraException ex) {
 				stopCassandraSafely();
@@ -118,8 +125,8 @@ public class TestCassandra {
 			}
 			catch (Throwable ex) {
 				stopCassandraSafely();
-				throw new CassandraException(String.format("Unable to start Test Apache Cassandra '%s'", getVersion()),
-						ex);
+				throw new CassandraException(String.format("Unable to start Test Apache Cassandra '%s'",
+						getVersion()), ex);
 			}
 		}
 	}
@@ -132,17 +139,22 @@ public class TestCassandra {
 	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted}
 	 * by another thread
 	 */
+	@Override
 	public void stop() throws CassandraException {
 		synchronized (this.monitor) {
+			if (!this.started) {
+				return;
+			}
 			try {
 				stopCassandra();
+				this.started = false;
 			}
 			catch (CassandraException ex) {
 				throw ex;
 			}
 			catch (Throwable ex) {
-				throw new CassandraException(String.format("Unable to stop Test Apache Cassandra '%s'", getVersion()),
-						ex);
+				throw new CassandraException(String.format("Unable to stop Test Apache Cassandra '%s'",
+						getVersion()), ex);
 			}
 		}
 
@@ -154,6 +166,7 @@ public class TestCassandra {
 	 * @return the settings
 	 * @throws IllegalStateException If the underlying {@link Cassandra} is not running
 	 */
+	@Override
 	public Settings getSettings() throws IllegalStateException {
 		synchronized (this.monitor) {
 			return this.cassandra.getSettings();
@@ -166,8 +179,20 @@ public class TestCassandra {
 	 * @return a version
 	 * @since 2.0.0
 	 */
+	@Override
 	public Version getVersion() {
 		return this.cassandra.getVersion();
+	}
+
+	/**
+	 * Returns the {@link State state} of the underlying {@code Cassandra}.
+	 *
+	 * @return the state
+	 * @since 1.4.1
+	 */
+	@Override
+	public State getState() {
+		return this.cassandra.getState();
 	}
 
 	@Override
