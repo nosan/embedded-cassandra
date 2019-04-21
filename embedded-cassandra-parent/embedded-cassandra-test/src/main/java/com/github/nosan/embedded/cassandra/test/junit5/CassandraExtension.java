@@ -93,7 +93,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
-		return parameterContext.getParameter().getType().equals(TestCassandra.class);
+		return parameterContext.getParameter().getType().isAssignableFrom(TestCassandra.class);
 	}
 
 	@Override

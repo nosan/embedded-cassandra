@@ -50,7 +50,7 @@ public final class CaptureOutputExtension implements BeforeEachCallback, AfterEa
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
-		return parameterContext.getParameter().getType().equals(CaptureOutput.class);
+		return parameterContext.getParameter().getType().isAssignableFrom(CaptureOutput.class);
 	}
 
 	@Override
