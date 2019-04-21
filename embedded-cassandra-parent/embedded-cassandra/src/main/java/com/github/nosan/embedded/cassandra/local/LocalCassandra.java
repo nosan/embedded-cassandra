@@ -54,6 +54,8 @@ class LocalCassandra implements Cassandra {
 
 	private volatile State state = State.NEW;
 
+	private volatile boolean started = false;
+
 	/**
 	 * The thread which ran {@link CassandraDatabase#start()}.
 	 */
@@ -72,23 +74,25 @@ class LocalCassandra implements Cassandra {
 	@Override
 	public void start() throws CassandraException {
 		synchronized (this.monitor) {
-			if (this.state != State.STARTED) {
-				try {
-					this.state = State.STARTING;
-					startDatabase();
-					this.state = State.STARTED;
-				}
-				catch (InterruptedException ex) {
-					this.state = State.START_INTERRUPTED;
-					stopDatabaseSafely();
-					throw new CassandraInterruptedException(ex);
-				}
-				catch (Throwable ex) {
-					this.state = State.START_FAILED;
-					stopDatabaseSafely();
-					throw new CassandraException(String.format("Unable to start Apache Cassandra '%s'",
-							getVersion()), ex);
-				}
+			if (this.started) {
+				return;
+			}
+			try {
+				this.state = State.STARTING;
+				startDatabase();
+				this.started = true;
+				this.state = State.STARTED;
+			}
+			catch (InterruptedException ex) {
+				this.state = State.START_INTERRUPTED;
+				stopDatabaseSafely();
+				throw new CassandraInterruptedException(ex);
+			}
+			catch (Throwable ex) {
+				this.state = State.START_FAILED;
+				stopDatabaseSafely();
+				throw new CassandraException(String.format("Unable to start Apache Cassandra '%s'",
+						getVersion()), ex);
 			}
 		}
 	}
@@ -96,22 +100,23 @@ class LocalCassandra implements Cassandra {
 	@Override
 	public void stop() throws CassandraException {
 		synchronized (this.monitor) {
-			if (this.state != State.STOPPED && this.state != State.NEW && this.state != State.START_FAILED
-					&& this.state != State.START_INTERRUPTED) {
-				try {
-					this.state = State.STOPPING;
-					stopDatabase();
-					this.state = State.STOPPED;
-				}
-				catch (InterruptedException ex) {
-					this.state = State.STOP_INTERRUPTED;
-					throw new CassandraInterruptedException(ex);
-				}
-				catch (Throwable ex) {
-					this.state = State.STOP_FAILED;
-					throw new CassandraException(String.format("Unable to stop Apache Cassandra '%s'",
-							getVersion()), ex);
-				}
+			if (!this.started) {
+				return;
+			}
+			try {
+				this.state = State.STOPPING;
+				stopDatabase();
+				this.started = false;
+				this.state = State.STOPPED;
+			}
+			catch (InterruptedException ex) {
+				this.state = State.STOP_INTERRUPTED;
+				throw new CassandraInterruptedException(ex);
+			}
+			catch (Throwable ex) {
+				this.state = State.STOP_FAILED;
+				throw new CassandraException(String.format("Unable to stop Apache Cassandra '%s'",
+						getVersion()), ex);
 			}
 		}
 	}
@@ -119,7 +124,7 @@ class LocalCassandra implements Cassandra {
 	@Override
 	public Settings getSettings() throws IllegalStateException {
 		synchronized (this.monitor) {
-			if (getState() != State.STARTED) {
+			if (this.started) {
 				throw new IllegalStateException(String.format("Apache Cassandra '%s' is not running.", getVersion()));
 			}
 			return this.database.getSettings();
