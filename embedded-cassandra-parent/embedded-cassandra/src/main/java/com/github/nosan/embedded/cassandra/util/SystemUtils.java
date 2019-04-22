@@ -27,7 +27,7 @@ import java.util.Optional;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility classes for dealing with system properties. <b>Only for internal purposes.</b>
+ * Utility class for dealing with system properties. <b>Only for internal purposes.</b>
  *
  * @author Dmytro Nosan
  * @since 2.0.0
