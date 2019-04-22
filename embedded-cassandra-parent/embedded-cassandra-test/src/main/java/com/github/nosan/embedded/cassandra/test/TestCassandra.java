@@ -212,12 +212,12 @@ public class TestCassandra implements Cassandra {
 		Settings settings = getSettings();
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, classLoader)) {
 			try (CqlSession session = new CqlSessionFactory().create(settings)) {
-				CqlSessionUtils.executeScripts(session, scripts);
+				CqlSessionUtils.execute(session, scripts);
 			}
 		}
 		else if (ClassUtils.isPresent(CLUSTER_CLASS, classLoader) && ClassUtils.isPresent(SESSION_CLASS, classLoader)) {
 			try (Cluster cluster = new ClusterFactory().create(settings)) {
-				SessionUtils.executeScripts(cluster.connect(), scripts);
+				SessionUtils.execute(cluster.connect(), scripts);
 			}
 		}
 		else {

@@ -15,7 +15,7 @@
  */
 
 /**
- * Utility classes for dealing with CqlSession and Session.
+ * Utility classes for helping writing tests against Cassandra.
  */
 
 @NonNullFields

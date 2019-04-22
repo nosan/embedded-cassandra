@@ -130,7 +130,6 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			TestCassandra cassandra = this.cassandra;
 			if (cassandra != null) {
 				cassandra.stop();
-				this.cassandra = null;
 			}
 		}
 

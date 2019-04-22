@@ -22,7 +22,6 @@ import org.testng.annotations.Test;
 import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
 import com.github.nosan.embedded.cassandra.test.CqlSessionFactory;
 import com.github.nosan.embedded.cassandra.test.testng.CassandraTestNG;
-import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,7 +39,7 @@ public class CassandraTestNGTests extends CassandraTestNG {
 	@Test
 	public void selectRoles() {
 		try (CqlSession session = new CqlSessionFactory().create(getSettings())) {
-			assertThat(CqlSessionUtils.execute(session, "SELECT * FROM  test.roles")).isEmpty();
+			assertThat(session.execute("SELECT * FROM  test.roles")).isEmpty();
 		}
 	}
 

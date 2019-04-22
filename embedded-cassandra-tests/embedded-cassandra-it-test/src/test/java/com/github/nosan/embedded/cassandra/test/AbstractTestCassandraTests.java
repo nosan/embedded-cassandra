@@ -16,22 +16,16 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import java.util.Optional;
-
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.metadata.schema.KeyspaceMetadata;
+import com.datastax.oss.driver.api.core.cql.Row;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
-import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,63 +35,33 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SuppressWarnings("ConstantConditions")
 abstract class AbstractTestCassandraTests {
 
 	private final TestCassandra cassandra;
 
-	@Nullable
-	private CqlSession session;
-
 	AbstractTestCassandraTests(Version version) {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		factory.setVersion(version);
-		this.cassandra = new TestCassandra(factory);
+		this.cassandra = new TestCassandra(factory, CqlScript.classpath("init.cql"));
 	}
 
 	@BeforeAll
 	void startCassandra() {
 		this.cassandra.start();
-		this.session = new CqlSessionFactory().create(this.cassandra.getSettings());
 	}
 
 	@AfterAll
 	void stopCassandra() {
-		if (this.session != null) {
-			this.session.close();
-		}
 		this.cassandra.stop();
 	}
 
-	@BeforeEach
-	void initAllKeyspaces() {
-		CqlSessionUtils.executeScripts(this.session, CqlScript.classpath("init.cql"));
-	}
-
-	@AfterEach
-	void dropAllKeyspaces() {
-		CqlSessionUtils.dropKeyspaces(this.session, "test");
-	}
-
 	@Test
-	void dropTables() {
-		Optional<KeyspaceMetadata> keyspace = this.session.getMetadata().getKeyspace("test");
-		assertThat(keyspace).isPresent();
-		assertThat(keyspace.get().getTable("users")).isPresent();
-		CqlSessionUtils.dropTables(this.session, "test.users");
-		assertThat(keyspace.get().getTable("users")).isPresent();
-	}
-
-	@Test
-	void getCount() {
-		assertThat(CqlSessionUtils.count(this.session, "test.users")).isEqualTo(1);
-	}
-
-	@Test
-	void deleteFromTables() {
-		assertThat(CqlSessionUtils.count(this.session, "test.users")).isEqualTo(1);
-		CqlSessionUtils.truncateTables(this.session, "test.users");
-		assertThat(CqlSessionUtils.count(this.session, "test.users")).isZero();
+	void countRows() {
+		try (CqlSession session = new CqlSessionFactory().create(this.cassandra.getSettings())) {
+			Row resultSet = session.execute("SELECT COUNT(*) FROM test.users").one();
+			assertThat(resultSet).isNotNull();
+			assertThat(resultSet.getLong(0)).isEqualTo(1);
+		}
 	}
 
 }

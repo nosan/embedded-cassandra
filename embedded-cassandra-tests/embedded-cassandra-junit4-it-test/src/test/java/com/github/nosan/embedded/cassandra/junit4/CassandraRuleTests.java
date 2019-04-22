@@ -23,7 +23,6 @@ import org.junit.Test;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.CqlSessionFactory;
 import com.github.nosan.embedded.cassandra.test.junit4.CassandraRule;
-import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,7 +40,7 @@ public class CassandraRuleTests {
 	public void selectRoles() {
 		try (CqlSession session = new CqlSessionFactory()
 				.create(cassandra.getSettings())) {
-			assertThat(CqlSessionUtils.execute(session, "SELECT * FROM  test.roles")).isEmpty();
+			assertThat(session.execute("SELECT * FROM  test.roles")).isEmpty();
 		}
 	}
 

@@ -17,13 +17,12 @@
 package com.github.nosan.embedded.cassandra.test.spring;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.Row;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,12 +44,18 @@ class CqlExecutionListenerTests {
 	@Test
 	@Cql(scripts = "/users-data.cql")
 	void shouldHaveUser() {
-		assertThat(CqlSessionUtils.count(this.session, "test.users")).isEqualTo(1);
+		assertThat(getCount()).isEqualTo(1);
 	}
 
 	@Test
 	void shouldNotHaveUser() {
-		assertThat(CqlSessionUtils.count(this.session, "test.users")).isZero();
+		assertThat(getCount()).isZero();
+	}
+
+	private long getCount() {
+		Row resultSet = this.session.execute("SELECT COUNT(*) FROM test.users").one();
+		assertThat(resultSet).isNotNull();
+		return resultSet.getLong(0);
 	}
 
 }

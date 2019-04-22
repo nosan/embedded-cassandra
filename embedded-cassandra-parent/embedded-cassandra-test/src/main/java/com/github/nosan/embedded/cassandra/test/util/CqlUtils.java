@@ -16,32 +16,55 @@
 
 package com.github.nosan.embedded.cassandra.test.util;
 
-import java.util.Objects;
-
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
 /**
- * Utility class for dealing with {@link Session}.
+ * Utility class for dealing with {@link CqlScript scripts}.
  *
  * @author Dmytro Nosan
  * @since 2.0.0
  */
-public abstract class SessionUtils {
+abstract class CqlUtils {
+
+	private static final Logger log = LoggerFactory.getLogger(CqlUtils.class);
 
 	/**
 	 * Executes the given scripts.
 	 *
 	 * @param scripts the CQL scripts to execute.
-	 * @param session a session
+	 * @param statementCallback a callback
 	 * @see CqlScript
 	 */
-	public static void execute(Session session, CqlScript... scripts) {
-		Objects.requireNonNull(session, "Session must not be null");
-		Objects.requireNonNull(scripts, "Scripts must not be null");
-		CqlUtils.execute(scripts, cql -> session.execute(new SimpleStatement(cql)));
+	static void execute(CqlScript[] scripts, StatementCallback statementCallback) {
+		for (CqlScript script : scripts) {
+			if (log.isDebugEnabled()) {
+				log.debug("Executing Script: {}", script);
+			}
+			for (String statement : script.getStatements()) {
+				if (log.isDebugEnabled()) {
+					log.debug("Executing Statement: {}", statement);
+				}
+				statementCallback.execute(statement);
+			}
+		}
+	}
+
+	/**
+	 * CQL statement callback interface.
+	 */
+	@FunctionalInterface
+	interface StatementCallback {
+
+		/**
+		 * Execute the {@code CQL} statement.
+		 *
+		 * @param statement the CQL statement
+		 */
+		void execute(String statement);
+
 	}
 
 }
