@@ -306,7 +306,7 @@ class RemoteArtifact implements Artifact {
 						throw new IOException(String.format("Too many redirects for URL '%s'", url));
 					}
 				}
-				else if (status >= 400) {
+				else if (status >= 400 || status < 200) {
 					throw new IOException(String.format("HTTP (%d %s) status for URL '%s' is invalid", status,
 							httpConnection.getResponseMessage(), url));
 				}
