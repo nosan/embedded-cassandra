@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
 /**
- * Utility class for dealing with {@link CqlScript scripts}.
+ * Utility class for dealing with {@code CQL}.
  *
  * @author Dmytro Nosan
  * @since 2.0.0
