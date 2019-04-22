@@ -1,5 +1,5 @@
 # Embedded Cassandra [![Build Status OSX/Linux](https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?logo=travis&logoColor=white&style=flat)](https://travis-ci.org/nosan/embedded-cassandra) [![Build Status Windows](https://img.shields.io/appveyor/ci/nosan/embedded-cassandra/master.svg?logo=appveyor&logoColor=white&style=flat)](https://ci.appveyor.com/project/nosan/embedded-cassandra)
-`Embedded Cassandra` provides an easy way to run [Apache Cassandra](https://cassandra.apache.org/).
+`Embedded Cassandra` provides an easy way to run [Apache Cassandra](https://cassandra.apache.org/) within JVM.
 
 You can find more information 
  - [Embedded Cassandra 2.X.X](https://github.com/nosan/embedded-cassandra/wiki).
