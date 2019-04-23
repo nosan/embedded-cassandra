@@ -47,10 +47,10 @@ class NodeSettings implements Settings {
 	private volatile Integer rpcPort;
 
 	@Nullable
-	private volatile Boolean rpcTransportEnabled;
+	private volatile Boolean rpcTransportStarted;
 
 	@Nullable
-	private volatile Boolean transportEnabled;
+	private volatile Boolean transportStarted;
 
 	NodeSettings(Version version) {
 		this.version = version;
@@ -62,13 +62,13 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public boolean isTransportEnabled() {
-		return getTransportEnabled().orElse(false);
+	public boolean isTransportStarted() {
+		return getTransportStarted().orElse(false);
 	}
 
 	@Override
-	public boolean isRpcTransportEnabled() {
-		return getRpcTransportEnabled().orElse(false);
+	public boolean isRpcTransportStarted() {
+		return getRpcTransportStarted().orElse(false);
 	}
 
 	@Override
@@ -134,8 +134,8 @@ class NodeSettings implements Settings {
 				.add("port=" + this.port)
 				.add("sslPort=" + this.sslPort)
 				.add("rpcPort=" + this.rpcPort)
-				.add("rpcTransportEnabled=" + this.rpcTransportEnabled)
-				.add("transportEnabled=" + this.transportEnabled)
+				.add("rpcTransportEnabled=" + this.rpcTransportStarted)
+				.add("transportEnabled=" + this.transportStarted)
 				.add("version=" + this.version)
 				.toString();
 	}
@@ -145,17 +145,17 @@ class NodeSettings implements Settings {
 	 *
 	 * @return rpc transport is enabled, or {@code empty} if not present.
 	 */
-	Optional<Boolean> getRpcTransportEnabled() {
-		return Optional.ofNullable(this.rpcTransportEnabled);
+	Optional<Boolean> getRpcTransportStarted() {
+		return Optional.ofNullable(this.rpcTransportStarted);
 	}
 
 	/**
-	 * Initializes the value for the {@link NodeSettings#isRpcTransportEnabled()} attribute.
+	 * Initializes the value for the {@link NodeSettings#isRpcTransportStarted()} attribute.
 	 *
-	 * @param rpcTransportEnabled The value for rpcTransportEnabled
+	 * @param rpcTransportStarted The value for rpcTransportEnabled
 	 */
-	void setRpcTransportEnabled(@Nullable Boolean rpcTransportEnabled) {
-		this.rpcTransportEnabled = rpcTransportEnabled;
+	void setRpcTransportStarted(@Nullable Boolean rpcTransportStarted) {
+		this.rpcTransportStarted = rpcTransportStarted;
 	}
 
 	/**
@@ -163,17 +163,17 @@ class NodeSettings implements Settings {
 	 *
 	 * @return native transport is enabled, or {@code empty} if not present.
 	 */
-	Optional<Boolean> getTransportEnabled() {
-		return Optional.ofNullable(this.transportEnabled);
+	Optional<Boolean> getTransportStarted() {
+		return Optional.ofNullable(this.transportStarted);
 	}
 
 	/**
-	 * Initializes the value for the {@link NodeSettings#isTransportEnabled()} attribute.
+	 * Initializes the value for the {@link NodeSettings#isTransportStarted()} attribute.
 	 *
-	 * @param transportEnabled The value for transportEnabled
+	 * @param transportStarted The value for transportEnabled
 	 */
-	void setTransportEnabled(@Nullable Boolean transportEnabled) {
-		this.transportEnabled = transportEnabled;
+	void setTransportStarted(@Nullable Boolean transportStarted) {
+		this.transportStarted = transportStarted;
 	}
 
 }

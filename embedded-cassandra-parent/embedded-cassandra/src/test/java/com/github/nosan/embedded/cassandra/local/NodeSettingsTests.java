@@ -37,10 +37,10 @@ class NodeSettingsTests {
 	@Test
 	void getRequiredAddress() {
 		assertThatThrownBy(this.settings::getRequiredAddress).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("RPC and Native Transport are not enabled");
-		this.settings.setTransportEnabled(true);
+				.hasStackTraceContaining("RPC and Native Transport are not started");
+		this.settings.setTransportStarted(true);
 		assertThatThrownBy(this.settings::getRequiredAddress).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("RPC or Native transport is enabled, but Address is not present");
+				.hasStackTraceContaining("RPC or Native transport is started, but Address is not present");
 		this.settings.setAddress(InetAddress.getLoopbackAddress());
 		assertThat(this.settings.getRequiredAddress()).isEqualTo(InetAddress.getLoopbackAddress());
 	}
@@ -53,10 +53,10 @@ class NodeSettingsTests {
 	@Test
 	void getRequiredPort() {
 		assertThatThrownBy(this.settings::getRequiredPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("Native Transport is not enabled");
-		this.settings.setTransportEnabled(true);
+				.hasStackTraceContaining("Native Transport is not started");
+		this.settings.setTransportStarted(true);
 		assertThatThrownBy(this.settings::getRequiredPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("Native transport is enabled, but <unencrypted> port is not present");
+				.hasStackTraceContaining("Native transport is started, but <unencrypted> port is not present");
 		this.settings.setPort(9042);
 		assertThat(this.settings.getRequiredPort()).isEqualTo(9042);
 	}
@@ -64,10 +64,10 @@ class NodeSettingsTests {
 	@Test
 	void getRequiredSslPort() {
 		assertThatThrownBy(this.settings::getRequiredSslPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("Native transport is not enabled");
-		this.settings.setTransportEnabled(true);
+				.hasStackTraceContaining("Native transport is not started");
+		this.settings.setTransportStarted(true);
 		assertThatThrownBy(this.settings::getRequiredSslPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("Native transport is enabled, but <encrypted> port is not present");
+				.hasStackTraceContaining("Native transport is started, but <encrypted> port is not present");
 		this.settings.setSslPort(9142);
 		assertThat(this.settings.getRequiredSslPort()).isEqualTo(9142);
 	}
@@ -75,10 +75,10 @@ class NodeSettingsTests {
 	@Test
 	void getRequiredRpcPort() {
 		assertThatThrownBy(this.settings::getRequiredRpcPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("RPC transport is not enabled");
-		this.settings.setRpcTransportEnabled(true);
+				.hasStackTraceContaining("RPC transport is not started");
+		this.settings.setRpcTransportStarted(true);
 		assertThatThrownBy(this.settings::getRequiredRpcPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("RPC transport is enabled, but rpc port is not present");
+				.hasStackTraceContaining("RPC transport is started, but rpc port is not present");
 		this.settings.setRpcPort(9042);
 		assertThat(this.settings.getRequiredRpcPort()).isEqualTo(9042);
 	}

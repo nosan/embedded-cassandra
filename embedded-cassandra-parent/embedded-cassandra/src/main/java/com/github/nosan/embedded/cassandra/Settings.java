@@ -37,16 +37,16 @@ public interface Settings {
 	/**
 	 * The native transport is started.
 	 *
-	 * @return native transport is enabled
+	 * @return native transport is started
 	 */
-	boolean isTransportEnabled();
+	boolean isTransportStarted();
 
 	/**
 	 * RPC transport is started.
 	 *
-	 * @return rpc transport is enabled
+	 * @return rpc transport is started
 	 */
-	boolean isRpcTransportEnabled();
+	boolean isRpcTransportStarted();
 
 	/**
 	 * The address to listen for the clients on.
@@ -88,11 +88,11 @@ public interface Settings {
 	 * @since 2.0.1
 	 */
 	default InetAddress getRequiredAddress() throws IllegalStateException {
-		if (!isRpcTransportEnabled() && !isTransportEnabled()) {
-			throw new IllegalStateException("RPC and Native Transport are not enabled");
+		if (!isRpcTransportStarted() && !isTransportStarted()) {
+			throw new IllegalStateException("RPC and Native Transport are not started");
 		}
 		return getAddress().orElseThrow(() -> new IllegalStateException(
-				"RPC or Native transport is enabled, but Address is not present"));
+				"RPC or Native transport is started, but Address is not present"));
 	}
 
 	/**
@@ -103,11 +103,11 @@ public interface Settings {
 	 * @since 2.0.1
 	 */
 	default int getRequiredPort() throws IllegalStateException {
-		if (!isTransportEnabled()) {
-			throw new IllegalStateException("Native Transport is not enabled");
+		if (!isTransportStarted()) {
+			throw new IllegalStateException("Native Transport is not started");
 		}
 		return getPort().orElseThrow(() -> new IllegalStateException(
-				"Native transport is enabled, but <unencrypted> port is not present"));
+				"Native transport is started, but <unencrypted> port is not present"));
 	}
 
 	/**
@@ -118,11 +118,11 @@ public interface Settings {
 	 * @since 2.0.1
 	 */
 	default int getRequiredSslPort() throws IllegalStateException {
-		if (!isTransportEnabled()) {
-			throw new IllegalStateException("Native transport is not enabled");
+		if (!isTransportStarted()) {
+			throw new IllegalStateException("Native transport is not started");
 		}
 		return getSslPort().orElseThrow(() -> new IllegalStateException(
-				"Native transport is enabled, but <encrypted> port is not present"));
+				"Native transport is started, but <encrypted> port is not present"));
 	}
 
 	/**
@@ -133,11 +133,11 @@ public interface Settings {
 	 * @since 2.0.1
 	 */
 	default int getRequiredRpcPort() throws IllegalStateException {
-		if (!isRpcTransportEnabled()) {
-			throw new IllegalStateException("RPC transport is not enabled");
+		if (!isRpcTransportStarted()) {
+			throw new IllegalStateException("RPC transport is not started");
 		}
 		return getRpcPort().orElseThrow(() -> new IllegalStateException(
-				"RPC transport is enabled, but rpc port is not present"));
+				"RPC transport is started, but rpc port is not present"));
 	}
 
 }

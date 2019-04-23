@@ -225,24 +225,24 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean isStarted(NodeSettings settings) {
 		Version version = settings.getVersion();
-		if (!settings.getRpcTransportEnabled().isPresent() && version.getMajor() < 4) {
+		if (!settings.getRpcTransportStarted().isPresent() && version.getMajor() < 4) {
 			return false;
 		}
-		if (!settings.getTransportEnabled().isPresent() && version.getMajor() > 1) {
+		if (!settings.getTransportStarted().isPresent() && version.getMajor() > 1) {
 			return false;
 		}
-		if (!settings.isTransportEnabled() && !settings.isRpcTransportEnabled()) {
+		if (!settings.isTransportStarted() && !settings.isRpcTransportStarted()) {
 			return true;
 		}
 		InetAddress address = settings.getRequiredAddress();
-		if (settings.isRpcTransportEnabled() && !PortUtils.isPortBusy(address, settings.getRequiredRpcPort())) {
+		if (settings.isRpcTransportStarted() && !PortUtils.isPortBusy(address, settings.getRequiredRpcPort())) {
 			return false;
 		}
-		if (settings.isTransportEnabled() && settings.getPort().isPresent()
+		if (settings.isTransportStarted() && settings.getPort().isPresent()
 				&& !PortUtils.isPortBusy(address, settings.getRequiredPort())) {
 			return false;
 		}
-		return !settings.isTransportEnabled() || !settings.getSslPort().isPresent()
+		return !settings.isTransportStarted() || !settings.getSslPort().isPresent()
 				|| PortUtils.isPortBusy(address, settings.getRequiredSslPort());
 	}
 
@@ -257,15 +257,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					settings.setPort(port);
 				}
 			});
-			settings.setTransportEnabled(true);
+			settings.setTransportStarted(true);
 		});
 		onMatch(RPC_TRANSPORT_PATTERN, line, matcher -> {
 			onAddress(matcher.group(1), settings::setAddress);
 			onPort(matcher.group(2), settings::setRpcPort);
-			settings.setRpcTransportEnabled(true);
+			settings.setRpcTransportStarted(true);
 		});
-		onMatch(TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> settings.setTransportEnabled(false));
-		onMatch(RPC_TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> settings.setRpcTransportEnabled(false));
+		onMatch(TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> settings.setTransportStarted(false));
+		onMatch(RPC_TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> settings.setRpcTransportStarted(false));
 	}
 
 	private void onAddress(String address, Consumer<InetAddress> addressConsumer) {
