@@ -62,15 +62,18 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public InetAddress getAddress() throws IllegalStateException {
-		if (!isRpcTransportEnabled() && !isTransportEnabled()) {
-			throw new IllegalStateException("RPC and Native Transport are not enabled");
-		}
-		InetAddress address = this.address;
-		if (address == null) {
-			throw new IllegalStateException("RPC or Native transport is enabled, but Address is null");
-		}
-		return address;
+	public boolean isTransportEnabled() {
+		return getTransportEnabled().orElse(false);
+	}
+
+	@Override
+	public boolean isRpcTransportEnabled() {
+		return getRpcTransportEnabled().orElse(false);
+	}
+
+	@Override
+	public Optional<InetAddress> getAddress() {
+		return Optional.ofNullable(this.address);
 	}
 
 	/**
@@ -83,30 +86,8 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public boolean isTransportEnabled() {
-		Boolean transportEnabled = this.transportEnabled;
-		return transportEnabled != null && transportEnabled;
-	}
-
-	/**
-	 * Initializes the value for the {@link NodeSettings#isTransportEnabled()} attribute.
-	 *
-	 * @param transportEnabled The value for transportEnabled
-	 */
-	void setTransportEnabled(@Nullable Boolean transportEnabled) {
-		this.transportEnabled = transportEnabled;
-	}
-
-	@Override
-	public int getPort() throws IllegalStateException {
-		if (!isTransportEnabled()) {
-			throw new IllegalStateException("Native Transport is not enabled");
-		}
-		Integer port = this.port;
-		if (port == null) {
-			throw new IllegalStateException("Native transport is enabled, but port is null");
-		}
-		return port;
+	public Optional<Integer> getPort() {
+		return Optional.ofNullable(this.port);
 	}
 
 	/**
@@ -119,10 +100,7 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public Optional<Integer> getSslPort() throws IllegalStateException {
-		if (!isTransportEnabled()) {
-			throw new IllegalStateException("Native transport is not enabled");
-		}
+	public Optional<Integer> getSslPort() {
 		return Optional.ofNullable(this.sslPort);
 	}
 
@@ -136,30 +114,8 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public boolean isRpcTransportEnabled() {
-		Boolean rpcTransportEnabled = this.rpcTransportEnabled;
-		return rpcTransportEnabled != null && rpcTransportEnabled;
-	}
-
-	/**
-	 * Initializes the value for the {@link NodeSettings#isRpcTransportEnabled()} attribute.
-	 *
-	 * @param rpcTransportEnabled The value for rpcTransportEnabled
-	 */
-	void setRpcTransportEnabled(@Nullable Boolean rpcTransportEnabled) {
-		this.rpcTransportEnabled = rpcTransportEnabled;
-	}
-
-	@Override
-	public int getRpcPort() throws IllegalStateException {
-		if (!isRpcTransportEnabled()) {
-			throw new IllegalStateException("RPC transport is not enabled");
-		}
-		Integer rpcPort = this.rpcPort;
-		if (rpcPort == null) {
-			throw new IllegalStateException("RPC transport is enabled, but RPC port is null");
-		}
-		return rpcPort;
+	public Optional<Integer> getRpcPort() {
+		return Optional.ofNullable(this.rpcPort);
 	}
 
 	/**
@@ -169,26 +125,6 @@ class NodeSettings implements Settings {
 	 */
 	void setRpcPort(@Nullable Integer rpcPort) {
 		this.rpcPort = rpcPort;
-	}
-
-	/**
-	 * Whether RPC transport is started or not.
-	 *
-	 * @return rpc transport is enabled, or {@code null} if not set.
-	 */
-	@Nullable
-	Boolean getRpcTransportEnabled() {
-		return this.rpcTransportEnabled;
-	}
-
-	/**
-	 * Whether native transport is started or not.
-	 *
-	 * @return native transport is enabled, or {@code null} if not set.
-	 */
-	@Nullable
-	Boolean getTransportEnabled() {
-		return this.transportEnabled;
 	}
 
 	@Override
@@ -202,6 +138,42 @@ class NodeSettings implements Settings {
 				.add("transportEnabled=" + this.transportEnabled)
 				.add("version=" + this.version)
 				.toString();
+	}
+
+	/**
+	 * RPC transport is started or not.
+	 *
+	 * @return rpc transport is enabled, or {@code empty} if not present.
+	 */
+	Optional<Boolean> getRpcTransportEnabled() {
+		return Optional.ofNullable(this.rpcTransportEnabled);
+	}
+
+	/**
+	 * Initializes the value for the {@link NodeSettings#isRpcTransportEnabled()} attribute.
+	 *
+	 * @param rpcTransportEnabled The value for rpcTransportEnabled
+	 */
+	void setRpcTransportEnabled(@Nullable Boolean rpcTransportEnabled) {
+		this.rpcTransportEnabled = rpcTransportEnabled;
+	}
+
+	/**
+	 * Native transport is started or not.
+	 *
+	 * @return native transport is enabled, or {@code empty} if not present.
+	 */
+	Optional<Boolean> getTransportEnabled() {
+		return Optional.ofNullable(this.transportEnabled);
+	}
+
+	/**
+	 * Initializes the value for the {@link NodeSettings#isTransportEnabled()} attribute.
+	 *
+	 * @param transportEnabled The value for transportEnabled
+	 */
+	void setTransportEnabled(@Nullable Boolean transportEnabled) {
+		this.transportEnabled = transportEnabled;
 	}
 
 }

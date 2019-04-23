@@ -116,7 +116,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		environment.put(JVM_EXTRA_OPTS, jvmOptions.toString());
 		ProcessId processId = start(environment);
 		this.processId = processId;
-		this.settings = awaitStart(processId);
+		this.settings = getSettings(processId);
 		this.log.info("Apache Cassandra Node '{}' is started", this.processId.getPid());
 	}
 
@@ -188,7 +188,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 */
 	abstract int kill(ProcessId processId) throws IOException, InterruptedException;
 
-	private NodeSettings awaitStart(ProcessId processId) throws InterruptedException, IOException {
+	private NodeSettings getSettings(ProcessId processId) throws InterruptedException, IOException {
 		Logger logger = LoggerFactory.getLogger(Cassandra.class);
 		NodeSettings settings = new NodeSettings(this.version);
 		Process process = processId.getProcess();
@@ -204,8 +204,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			long pid = processId.getPid();
 			if (!process.isAlive()) {
 				int exitValue = process.exitValue();
-				throw new IOException(String.format("Apache Cassandra Node '%s' is not alive. Exit code is '%s'. "
-						+ "Please see logs for more details.", pid, exitValue));
+				throw new IOException(String.format("Apache Cassandra Node '%s' is not alive. Exit code is '%s'."
+						+ " Please see logs for more details.", pid, exitValue));
 			}
 			if (isStarted(settings)) {
 				return settings;
@@ -217,24 +217,33 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		} while (rem > 0);
 
 		throw new IllegalStateException(
-				String.format("There is no way to detect whether Apache Cassandra Node '%s' is started or not."
+				String.format("There is no way to detect whether Apache Cassandra Node '%s' %s is started or not."
 						+ " Note, that Apache Cassandra <output> must be enabled."
 						+ " If the <output> is enabled, and you see this message, then either you found a bug"
-						+ " or Apache Cassandra is hanging.", processId.getPid()));
+						+ " or Apache Cassandra is hanging.", settings, processId.getPid()));
 	}
 
 	private boolean isStarted(NodeSettings settings) {
 		Version version = settings.getVersion();
-		if (settings.getRpcTransportEnabled() == null && version.getMajor() < 4) {
+		if (!settings.getRpcTransportEnabled().isPresent() && version.getMajor() <= 3) {
 			return false;
 		}
-		if (settings.getTransportEnabled() == null && version.getMajor() >= 2) {
+		if (!settings.getTransportEnabled().isPresent() && version.getMajor() >= 2) {
 			return false;
 		}
-		if (settings.isRpcTransportEnabled() && !PortUtils.isPortBusy(settings.getAddress(), settings.getRpcPort())) {
+		if (!settings.isTransportEnabled() && !settings.isRpcTransportEnabled()) {
+			return true;
+		}
+		InetAddress address = settings.getRequiredAddress();
+		if (settings.isRpcTransportEnabled() && !PortUtils.isPortBusy(address, settings.getRequiredRpcPort())) {
 			return false;
 		}
-		return !settings.isTransportEnabled() || PortUtils.isPortBusy(settings.getAddress(), settings.getPort());
+		if (settings.isTransportEnabled() && settings.getPort().isPresent()
+				&& !PortUtils.isPortBusy(address, settings.getRequiredPort())) {
+			return false;
+		}
+		return !settings.isTransportEnabled() || !settings.getSslPort().isPresent()
+				|| PortUtils.isPortBusy(address, settings.getRequiredSslPort());
 	}
 
 	private void parse(String line, NodeSettings settings) {

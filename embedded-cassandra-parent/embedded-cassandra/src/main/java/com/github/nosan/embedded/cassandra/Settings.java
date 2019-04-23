@@ -28,56 +28,116 @@ import java.util.Optional;
 public interface Settings {
 
 	/**
-	 * The address to listen the native or rpc transport.
+	 * Returns the {@link Version version}.
 	 *
-	 * @return the address to listen for the clients
-	 * @throws IllegalStateException if rpc and native transport are disabled
+	 * @return a version
 	 */
-	InetAddress getAddress() throws IllegalStateException;
+	Version getVersion();
 
 	/**
-	 * Whether native transport is started or not.
+	 * The native transport is started.
 	 *
 	 * @return native transport is enabled
 	 */
 	boolean isTransportEnabled();
 
 	/**
-	 * The native transport port to listen for the clients on.
-	 *
-	 * @return native transport port
-	 * @throws IllegalStateException if native transport is disabled
-	 */
-	int getPort() throws IllegalStateException;
-
-	/**
-	 * The native transport ssl port to listen for the clients on.
-	 *
-	 * @return native ssl transport port or empty
-	 * @throws IllegalStateException if native transport is disabled
-	 */
-	Optional<Integer> getSslPort() throws IllegalStateException;
-
-	/**
-	 * Whether RPC transport is started or not.
+	 * RPC transport is started.
 	 *
 	 * @return rpc transport is enabled
 	 */
 	boolean isRpcTransportEnabled();
 
 	/**
+	 * The address to listen for the clients on.
+	 *
+	 * @return the address to listen for the clients on, or {@code empty} if RPC and Native transports are not started
+	 * @see #getRequiredAddress()
+	 */
+	Optional<InetAddress> getAddress();
+
+	/**
+	 * The native transport {@code unencrypted} port to listen for the clients on.
+	 *
+	 * @return native transport port, or {@code empty}, if{@code unencrypted} transport is not started
+	 * @see #getRequiredPort()
+	 */
+	Optional<Integer> getPort();
+
+	/**
+	 * The native transport {@code encrypted} port to listen for the clients on.
+	 *
+	 * @return native SSL transport port, or {@code empty}, if {@code encrypted} native transport is not started
+	 * @see #getRequiredSslPort()
+	 */
+	Optional<Integer> getSslPort();
+
+	/**
+	 * Thrift port for client connections.
+	 *
+	 * @return the thrift port, or {@code empty} if RPC transport is not started
+	 * @see #getRequiredRpcPort()
+	 */
+	Optional<Integer> getRpcPort();
+
+	/**
+	 * The address to listen for the clients on.
+	 *
+	 * @return the address to listen for the clients on
+	 * @throws IllegalStateException if RPC and native transport are not started
+	 * @since 2.0.1
+	 */
+	default InetAddress getRequiredAddress() throws IllegalStateException {
+		if (!isRpcTransportEnabled() && !isTransportEnabled()) {
+			throw new IllegalStateException("RPC and Native Transport are not enabled");
+		}
+		return getAddress().orElseThrow(() -> new IllegalStateException(
+				"RPC or Native transport is enabled, but Address is not present"));
+	}
+
+	/**
+	 * The native transport port to listen for the clients on.
+	 *
+	 * @return native transport port
+	 * @throws IllegalStateException if {@code unencrypted} native transport is not started
+	 * @since 2.0.1
+	 */
+	default int getRequiredPort() throws IllegalStateException {
+		if (!isTransportEnabled()) {
+			throw new IllegalStateException("Native Transport is not enabled");
+		}
+		return getPort().orElseThrow(() -> new IllegalStateException(
+				"Native transport is enabled, but <unencrypted> port is not present"));
+	}
+
+	/**
+	 * The native transport SSL port to listen for the clients on.
+	 *
+	 * @return native SSL transport port or empty
+	 * @throws IllegalStateException if {@code encrypted} native transport is not started
+	 * @since 2.0.1
+	 */
+	default int getRequiredSslPort() throws IllegalStateException {
+		if (!isTransportEnabled()) {
+			throw new IllegalStateException("Native transport is not enabled");
+		}
+		return getSslPort().orElseThrow(() -> new IllegalStateException(
+				"Native transport is enabled, but <encrypted> port is not present"));
+	}
+
+	/**
 	 * Thrift port for client connections.
 	 *
 	 * @return the thrift port
-	 * @throws IllegalStateException if rpc transport is disabled
+	 * @throws IllegalStateException if RPC transport is not started
+	 * @since 2.0.1
 	 */
-	int getRpcPort() throws IllegalStateException;
-
-	/**
-	 * Returns the {@link Version version}.
-	 *
-	 * @return a version
-	 */
-	Version getVersion();
+	default int getRequiredRpcPort() throws IllegalStateException {
+		if (!isRpcTransportEnabled()) {
+			throw new IllegalStateException("RPC transport is not enabled");
+		}
+		return getRpcPort().orElseThrow(() -> new IllegalStateException(
+				"RPC transport is enabled, but rpc port is not present"));
+	}
 
 }

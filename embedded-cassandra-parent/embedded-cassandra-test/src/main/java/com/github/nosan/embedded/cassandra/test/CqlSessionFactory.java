@@ -49,7 +49,7 @@ public class CqlSessionFactory {
 	 */
 	public CqlSession create(Settings settings) {
 		return CqlSession.builder()
-				.addContactPoint(new InetSocketAddress(settings.getAddress(), settings.getPort()))
+				.addContactPoint(new InetSocketAddress(settings.getRequiredAddress(), settings.getRequiredPort()))
 				.withLocalDatacenter(DATACENTER)
 				.withConfigLoader(DriverConfigLoader.programmaticBuilder()
 						.withBoolean(DefaultDriverOption.RECONNECT_ON_INIT, true)

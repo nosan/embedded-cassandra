@@ -122,7 +122,7 @@ abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(factory);
 		runner.run(assertCreateKeyspace().andThen(cassandra -> {
 			Settings settings = cassandra.getSettings();
-			assertThat(PortUtils.isPortBusy(settings.getAddress(), 9155));
+			assertThat(PortUtils.isPortBusy(settings.getRequiredAddress(), 9155));
 		}));
 	}
 
