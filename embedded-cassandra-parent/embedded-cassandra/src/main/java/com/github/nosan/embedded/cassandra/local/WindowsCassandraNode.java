@@ -60,9 +60,9 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	int terminate(ProcessId processId) throws InterruptedException {
 		long pid = processId.getPid();
 		Path pidFile = processId.getPidFile();
-		int exit = killByPidFile(pidFile, newBuilder(), false);
-		if (exit != 0 && pid != -1) {
-			return killByPid(pid, newBuilder(), false);
+		int exit = kill(pidFile, false);
+		if (exit != 0) {
+			return kill(pid, false);
 		}
 		return exit;
 	}
@@ -71,19 +71,19 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	int kill(ProcessId processId) throws InterruptedException {
 		long pid = processId.getPid();
 		Path pidFile = processId.getPidFile();
-		int exit = killByPidFile(pidFile, newBuilder(), true);
-		if (exit != 0 && pid != -1) {
-			return killByPid(pid, newBuilder(), true);
+		int exit = kill(pidFile, true);
+		if (exit != 0) {
+			return kill(pid, true);
 		}
 		return exit;
 	}
 
-	private int killByPidFile(@Nullable Path pidFile, ProcessBuilder builder, boolean force)
-			throws InterruptedException {
-		Path stopServerFile = this.workingDirectory.resolve("bin/stop-server.ps1");
-		if (pidFile != null && Files.exists(pidFile) && Files.exists(stopServerFile)) {
+	private int kill(@Nullable Path pidFile, boolean force) throws InterruptedException {
+		Path stopFile = this.workingDirectory.resolve("bin/stop-server.ps1");
+		if (pidFile != null && Files.exists(pidFile) && Files.exists(stopFile)) {
+			ProcessBuilder builder = newBuilder();
 			builder.command("powershell", "-ExecutionPolicy", "Unrestricted");
-			builder.command().add(stopServerFile.toString());
+			builder.command().add(stopFile.toString());
 			builder.command().add("-p");
 			builder.command().add(pidFile.toString());
 			if (force) {
@@ -94,14 +94,18 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		return -1;
 	}
 
-	private int killByPid(long pid, ProcessBuilder builder, boolean force) throws InterruptedException {
-		builder.command("taskkill");
-		if (force) {
-			builder.command().add("/f");
+	private int kill(long pid, boolean force) throws InterruptedException {
+		if (pid != -1) {
+			ProcessBuilder builder = newBuilder();
+			builder.command("taskkill");
+			if (force) {
+				builder.command().add("/f");
+			}
+			builder.command().add("/pid");
+			builder.command().add(Long.toString(pid));
+			return new RunProcess(builder).runAndWait(this.threadFactory, this.log::info);
 		}
-		builder.command().add("/pid");
-		builder.command().add(Long.toString(pid));
-		return new RunProcess(builder).runAndWait(this.threadFactory, this.log::info);
+		return -1;
 	}
 
 	private ProcessBuilder newBuilder() {
