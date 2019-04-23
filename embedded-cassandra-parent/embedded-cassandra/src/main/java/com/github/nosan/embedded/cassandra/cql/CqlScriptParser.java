@@ -59,12 +59,6 @@ public abstract class CqlScriptParser {
 	 * <li>For a block of comments put a forward slash asterisk at the beginning of the comment and then asterisk
 	 * forward slash at the end (<b>/&#42; comment here &#42;/ </b>).</li>
 	 * </ol>
-	 * <p>Column names that contain characters that CQL cannot parse need to be enclosed in double quotation
-	 * (<b>"</b>) marks in CQL. Dates, IP addresses, and strings need to be enclosed in single quotation (<b>'</b>)
-	 * marks. To use a single quotation mark itself in a string literal, escape it using a single quotation mark. An
-	 * alternative is to use dollar-quoted (<b>$$</b>) strings. Dollar-quoted string constants can be used to create
-	 * functions, insert data, and select data when complex quoting is needed. Use double dollar signs to enclose the
-	 * desired string.
 	 *
 	 * @param script CQL script.
 	 * @return CQL statements
@@ -85,19 +79,16 @@ public abstract class CqlScriptParser {
 
 			char c = script.charAt(index);
 
-			//single quote 'text'
 			if (!doubleQuote && !doubleDollar && c == SINGLE_QUOTE) {
 				result.append(SINGLE_QUOTE);
 				singleQuote = !singleQuote;
 				continue;
 			}
-			//double quote "text"
 			else if (!singleQuote && !doubleDollar && c == DOUBLE_QUOTE) {
 				result.append(DOUBLE_QUOTE);
 				doubleQuote = !doubleQuote;
 				continue;
 			}
-			//double dollars $$text$$
 			else if (!singleQuote && !doubleQuote && script.startsWith(DOUBLE_DOLLAR, index)) {
 				result.append(DOUBLE_DOLLAR);
 				index++;
@@ -106,7 +97,6 @@ public abstract class CqlScriptParser {
 			}
 
 			if (!singleQuote && !doubleQuote && !doubleDollar) {
-				// single comment
 				if (script.startsWith(SINGLE_DASH_COMMENT, index) || script.startsWith(SINGLE_SLASH_COMMENT, index)) {
 					if (script.indexOf(LINE_SEPARATOR, index) < 0) {
 						break;
@@ -114,7 +104,6 @@ public abstract class CqlScriptParser {
 					index = script.indexOf(LINE_SEPARATOR, index);
 					continue;
 				}
-				// block comment
 				else if (script.startsWith(BLOCK_START_COMMENT, index)) {
 					if (script.indexOf(BLOCK_END_COMMENT, index) < 0) {
 						throw new IllegalArgumentException(
@@ -123,7 +112,6 @@ public abstract class CqlScriptParser {
 					index = script.indexOf(BLOCK_END_COMMENT, index) + 1;
 					continue;
 				}
-				//statement
 				else if (c == STATEMENT) {
 					if (StringUtils.hasText(result)) {
 						statements.add(result.toString());
@@ -131,7 +119,6 @@ public abstract class CqlScriptParser {
 					}
 					continue;
 				}
-				//trim whitespaces and break lines.
 				else if (c == '\n' || c == '\r' || c == '\t' || c == ' ') {
 					if (StringUtils.isEmpty(result) || result.charAt(result.length() - 1) == ' ') {
 						continue;
