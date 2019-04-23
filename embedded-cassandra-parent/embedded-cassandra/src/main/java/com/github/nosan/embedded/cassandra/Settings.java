@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.net.InetAddress;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
@@ -35,109 +36,79 @@ public interface Settings {
 	Version getVersion();
 
 	/**
-	 * The native transport is started.
-	 *
-	 * @return native transport is started
-	 */
-	boolean isTransportStarted();
-
-	/**
-	 * RPC transport is started.
-	 *
-	 * @return rpc transport is started
-	 */
-	boolean isRpcTransportStarted();
-
-	/**
 	 * The address to listen for the clients on.
 	 *
-	 * @return the address to listen for the clients on, or {@code empty} if RPC and Native transports are not started
+	 * @return the address, or {@code empty}
 	 * @see #getRequiredAddress()
 	 */
 	Optional<InetAddress> getAddress();
 
 	/**
-	 * The native transport {@code unencrypted} port to listen for the clients on.
+	 * The port for client connections.
 	 *
-	 * @return native transport port, or {@code empty}, if {@code unencrypted} transport is not started
+	 * @return the port, or {@code empty}
 	 * @see #getRequiredPort()
 	 */
 	Optional<Integer> getPort();
 
 	/**
-	 * The native transport {@code encrypted} port to listen for the clients on.
+	 * SSL port for client connections.
 	 *
-	 * @return native SSL transport port, or {@code empty}, if {@code encrypted} native transport is not started
+	 * @return SSL port, or {@code empty}
 	 * @see #getRequiredSslPort()
 	 */
 	Optional<Integer> getSslPort();
 
 	/**
-	 * Thrift port for client connections.
+	 * RPC port for client connections.
 	 *
-	 * @return the thrift port, or {@code empty} if RPC transport is not started
-	 * @see #getRequiredRpcPort()
+	 * @return RPC port, or {@code empty}
+	 * @see #getRpcPort()
 	 */
 	Optional<Integer> getRpcPort();
 
 	/**
 	 * The address to listen for the clients on.
 	 *
-	 * @return the address to listen for the clients on
-	 * @throws IllegalStateException if RPC and native transport are not started
+	 * @return the address
+	 * @throws NoSuchElementException if address is not present
 	 * @since 2.0.1
 	 */
-	default InetAddress getRequiredAddress() throws IllegalStateException {
-		if (!isRpcTransportStarted() && !isTransportStarted()) {
-			throw new IllegalStateException("RPC and Native Transport are not started");
-		}
-		return getAddress().orElseThrow(() -> new IllegalStateException(
-				"RPC or Native transport is started, but Address is not present"));
+	default InetAddress getRequiredAddress() throws NoSuchElementException {
+		return getAddress().orElseThrow(() -> new NoSuchElementException("Address is not present"));
 	}
 
 	/**
-	 * The native transport port to listen for the clients on.
+	 * The port for client connections.
 	 *
-	 * @return native transport port
-	 * @throws IllegalStateException if {@code unencrypted} native transport is not started
+	 * @return the port
+	 * @throws NoSuchElementException if port is not present
 	 * @since 2.0.1
 	 */
-	default int getRequiredPort() throws IllegalStateException {
-		if (!isTransportStarted()) {
-			throw new IllegalStateException("Native Transport is not started");
-		}
-		return getPort().orElseThrow(() -> new IllegalStateException(
-				"Native transport is started, but <unencrypted> port is not present"));
+	default int getRequiredPort() throws NoSuchElementException {
+		return getPort().orElseThrow(() -> new NoSuchElementException("Port is not present"));
 	}
 
 	/**
-	 * The native transport SSL port to listen for the clients on.
+	 * SSL port for client connections.
 	 *
-	 * @return native SSL transport port or empty
-	 * @throws IllegalStateException if {@code encrypted} native transport is not started
+	 * @return SSL port
+	 * @throws NoSuchElementException if SSL port is not present
 	 * @since 2.0.1
 	 */
-	default int getRequiredSslPort() throws IllegalStateException {
-		if (!isTransportStarted()) {
-			throw new IllegalStateException("Native transport is not started");
-		}
-		return getSslPort().orElseThrow(() -> new IllegalStateException(
-				"Native transport is started, but <encrypted> port is not present"));
+	default int getRequiredSslPort() throws NoSuchElementException {
+		return getSslPort().orElseThrow(() -> new NoSuchElementException("SSL port is not present"));
 	}
 
 	/**
-	 * Thrift port for client connections.
+	 * RPC port for client connections.
 	 *
-	 * @return the thrift port
-	 * @throws IllegalStateException if RPC transport is not started
+	 * @return RPC port
+	 * @throws NoSuchElementException if RPC port is not present
 	 * @since 2.0.1
 	 */
-	default int getRequiredRpcPort() throws IllegalStateException {
-		if (!isRpcTransportStarted()) {
-			throw new IllegalStateException("RPC transport is not started");
-		}
-		return getRpcPort().orElseThrow(() -> new IllegalStateException(
-				"RPC transport is started, but rpc port is not present"));
+	default int getRequiredRpcPort() throws NoSuchElementException {
+		return getRpcPort().orElseThrow(() -> new NoSuchElementException("RPC port is not present"));
 	}
 
 }

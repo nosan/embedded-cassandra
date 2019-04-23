@@ -62,16 +62,6 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public boolean isTransportStarted() {
-		return getTransportStarted().orElse(false);
-	}
-
-	@Override
-	public boolean isRpcTransportStarted() {
-		return getRpcTransportStarted().orElse(false);
-	}
-
-	@Override
 	public Optional<InetAddress> getAddress() {
 		return Optional.ofNullable(this.address);
 	}
@@ -130,13 +120,11 @@ class NodeSettings implements Settings {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", getClass().getSimpleName() + " [", "]")
+				.add("version=" + this.version)
 				.add("address=" + this.address)
 				.add("port=" + this.port)
 				.add("sslPort=" + this.sslPort)
 				.add("rpcPort=" + this.rpcPort)
-				.add("rpcTransportEnabled=" + this.rpcTransportStarted)
-				.add("transportEnabled=" + this.transportStarted)
-				.add("version=" + this.version)
 				.toString();
 	}
 
@@ -150,7 +138,7 @@ class NodeSettings implements Settings {
 	}
 
 	/**
-	 * Initializes the value for the {@link NodeSettings#isRpcTransportStarted()} attribute.
+	 * Initializes the value for the {@link NodeSettings#getRpcTransportStarted()} attribute.
 	 *
 	 * @param rpcTransportStarted The value for rpcTransportEnabled
 	 */
@@ -168,7 +156,7 @@ class NodeSettings implements Settings {
 	}
 
 	/**
-	 * Initializes the value for the {@link NodeSettings#isTransportStarted()} attribute.
+	 * Initializes the value for the {@link NodeSettings#getTransportStarted()} attribute.
 	 *
 	 * @param transportStarted The value for transportEnabled
 	 */

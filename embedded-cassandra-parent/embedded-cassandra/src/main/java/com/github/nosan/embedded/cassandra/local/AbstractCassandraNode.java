@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadFactory;
@@ -225,32 +226,37 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean isStarted(NodeSettings settings) {
 		Version version = settings.getVersion();
+
 		if (!settings.getRpcTransportStarted().isPresent() && version.getMajor() < 4) {
 			return false;
 		}
+
 		if (!settings.getTransportStarted().isPresent() && version.getMajor() > 1) {
 			return false;
 		}
-		if (!settings.isTransportStarted() && !settings.isRpcTransportStarted()) {
-			return true;
-		}
-		InetAddress address = settings.getRequiredAddress();
-		if (settings.isRpcTransportStarted() && !PortUtils.isPortBusy(address, settings.getRequiredRpcPort())) {
+
+		boolean transportStarted = settings.getTransportStarted().orElse(false);
+		boolean rpcTransportStarted = settings.getRpcTransportStarted().orElse(false);
+
+		if (transportStarted && settings.getPort().isPresent()
+				&& !PortUtils.isPortBusy(settings.getRequiredAddress(), settings.getRequiredPort())) {
 			return false;
 		}
-		if (settings.isTransportStarted() && settings.getPort().isPresent()
-				&& !PortUtils.isPortBusy(address, settings.getRequiredPort())) {
+		if (transportStarted && settings.getSslPort().isPresent()
+				&& !PortUtils.isPortBusy(settings.getRequiredAddress(), settings.getRequiredSslPort())) {
 			return false;
 		}
-		return !settings.isTransportStarted() || !settings.getSslPort().isPresent()
-				|| PortUtils.isPortBusy(address, settings.getRequiredSslPort());
+
+		return !rpcTransportStarted || !settings.getRpcPort().isPresent()
+				|| PortUtils.isPortBusy(settings.getRequiredAddress(), settings.getRequiredRpcPort());
+
 	}
 
 	private void parse(String line, NodeSettings settings) {
 		onMatch(TRANSPORT_PATTERN, line, matcher -> {
 			onAddress(matcher.group(1), settings::setAddress);
 			onPort(matcher.group(2), port -> {
-				if (line.contains(ENCRYPTED)) {
+				if (line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED)) {
 					settings.setSslPort(port);
 				}
 				else {

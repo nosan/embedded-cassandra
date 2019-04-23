@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.net.InetAddress;
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
 
@@ -35,52 +36,52 @@ class NodeSettingsTests {
 	private final NodeSettings settings = new NodeSettings(Version.parse("3.11.4"));
 
 	@Test
-	void getRequiredAddress() {
-		assertThatThrownBy(this.settings::getRequiredAddress).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("RPC and Native Transport are not started");
-		this.settings.setTransportStarted(true);
-		assertThatThrownBy(this.settings::getRequiredAddress).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("RPC or Native transport is started, but Address is not present");
-		this.settings.setAddress(InetAddress.getLoopbackAddress());
-		assertThat(this.settings.getRequiredAddress()).isEqualTo(InetAddress.getLoopbackAddress());
-	}
-
-	@Test
 	void getVersion() {
 		assertThat(this.settings.getVersion()).isEqualTo(Version.parse("3.11.4"));
 	}
 
 	@Test
+	void getRequiredAddress() {
+		assertThatThrownBy(this.settings::getRequiredAddress).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Address is not present");
+		this.settings.setAddress(InetAddress.getLoopbackAddress());
+		assertThat(this.settings.getRequiredAddress()).isEqualTo(InetAddress.getLoopbackAddress());
+	}
+
+	@Test
 	void getRequiredPort() {
-		assertThatThrownBy(this.settings::getRequiredPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("Native Transport is not started");
-		this.settings.setTransportStarted(true);
-		assertThatThrownBy(this.settings::getRequiredPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("Native transport is started, but <unencrypted> port is not present");
+		assertThatThrownBy(this.settings::getRequiredPort).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Port is not present");
 		this.settings.setPort(9042);
 		assertThat(this.settings.getRequiredPort()).isEqualTo(9042);
 	}
 
 	@Test
 	void getRequiredSslPort() {
-		assertThatThrownBy(this.settings::getRequiredSslPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("Native transport is not started");
-		this.settings.setTransportStarted(true);
-		assertThatThrownBy(this.settings::getRequiredSslPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("Native transport is started, but <encrypted> port is not present");
+		assertThatThrownBy(this.settings::getRequiredSslPort).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("SSL port is not present");
 		this.settings.setSslPort(9142);
 		assertThat(this.settings.getRequiredSslPort()).isEqualTo(9142);
 	}
 
 	@Test
 	void getRequiredRpcPort() {
-		assertThatThrownBy(this.settings::getRequiredRpcPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("RPC transport is not started");
-		this.settings.setRpcTransportStarted(true);
-		assertThatThrownBy(this.settings::getRequiredRpcPort).isInstanceOf(IllegalStateException.class)
-				.hasStackTraceContaining("RPC transport is started, but rpc port is not present");
+		assertThatThrownBy(this.settings::getRequiredRpcPort).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("RPC port is not present");
 		this.settings.setRpcPort(9042);
 		assertThat(this.settings.getRequiredRpcPort()).isEqualTo(9042);
+	}
+
+	@Test
+	void toStringTest() {
+		this.settings.setRpcPort(9160);
+		this.settings.setPort(9042);
+		this.settings.setSslPort(9142);
+		this.settings.setAddress(InetAddress.getLoopbackAddress());
+		assertThat(this.settings.toString())
+				.isEqualTo(String.format("NodeSettings [version=%s, address=%s, port=%d, sslPort=%d, rpcPort=%d]",
+						"3.11.4", InetAddress.getLoopbackAddress(), 9042, 9142, 9160));
+
 	}
 
 }
