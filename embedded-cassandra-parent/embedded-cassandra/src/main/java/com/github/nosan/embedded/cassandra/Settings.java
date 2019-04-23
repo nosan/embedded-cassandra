@@ -59,7 +59,7 @@ public interface Settings {
 	/**
 	 * The native transport {@code unencrypted} port to listen for the clients on.
 	 *
-	 * @return native transport port, or {@code empty}, if{@code unencrypted} transport is not started
+	 * @return native transport port, or {@code empty}, if {@code unencrypted} transport is not started
 	 * @see #getRequiredPort()
 	 */
 	Optional<Integer> getPort();
