@@ -225,10 +225,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean isStarted(NodeSettings settings) {
 		Version version = settings.getVersion();
-		if (!settings.getRpcTransportEnabled().isPresent() && version.getMajor() <= 3) {
+		if (!settings.getRpcTransportEnabled().isPresent() && version.getMajor() < 4) {
 			return false;
 		}
-		if (!settings.getTransportEnabled().isPresent() && version.getMajor() >= 2) {
+		if (!settings.getTransportEnabled().isPresent() && version.getMajor() > 1) {
 			return false;
 		}
 		if (!settings.isTransportEnabled() && !settings.isRpcTransportEnabled()) {
