@@ -200,6 +200,16 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getVersion()} attribute.
+	 *
+	 * @param version The value for version
+	 * @since 2.0.1
+	 */
+	public void setVersion(@Nullable String version) {
+		setVersion((version != null) ? Version.parse(version) : null);
+	}
+
+	/**
 	 * {@link ArtifactFactory} that creates a {@link Artifact}.
 	 *
 	 * @return The value of the {@code artifactFactory} attribute
