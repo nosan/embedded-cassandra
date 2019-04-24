@@ -63,7 +63,7 @@ public interface Settings {
 	 * RPC port for client connections.
 	 *
 	 * @return RPC port, or {@code empty}
-	 * @see #getRpcPort()
+	 * @see #getRequiredRpcPort()
 	 */
 	Optional<Integer> getRpcPort();
 
