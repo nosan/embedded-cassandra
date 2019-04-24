@@ -50,16 +50,16 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * &#064;ContextConfiguration
  * &#064;EmbeddedCassandra
  * class EmbeddedCassandraCustomizerTests {
- * &#064;Test
- * void testMe() {
- * }
- * &#064;Configuration
- * static class TestConfiguration {
- * &#064;Bean
- * public EmbeddedCassandraFactoryCustomizer&lt;LocalCassandraFactory&gt; allowRootCustomizer() {
- * return factory -&gt; factory.setAllowRoot(true);
- * }
- * }
+ *    &#064;Test
+ *    void testMe() {
+ *    }
+ *    &#064;Configuration
+ *    static class TestConfiguration {
+ *        &#064;Bean
+ *        public EmbeddedCassandraFactoryCustomizer&lt;LocalCassandraFactory&gt; allowRootCustomizer() {
+ * 			return factory -&gt; factory.setAllowRoot(true);
+ *        }
+ *    }
  * }
  * </pre>
  * Also, it is possible to define you own {@link CassandraFactory}, {@link TestCassandraFactory}  bean(s) to control

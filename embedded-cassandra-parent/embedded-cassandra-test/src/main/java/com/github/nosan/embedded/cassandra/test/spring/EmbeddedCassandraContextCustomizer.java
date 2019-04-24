@@ -168,14 +168,14 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		private CassandraFactory getCassandraFactory() {
 			EmbeddedCassandra annotation = this.annotation;
 			LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
-			cassandraFactory.setVersion(asVersion(annotation::version));
-			cassandraFactory.setConfigurationFile(asURL(annotation::configurationFile));
-			cassandraFactory.setJvmOptions(asArray(annotation::jvmOptions));
-			cassandraFactory.setJmxLocalPort(asPort(annotation::jmxLocalPort));
-			cassandraFactory.setPort(asPort(annotation::port));
-			cassandraFactory.setStoragePort(asPort(annotation::storagePort));
-			cassandraFactory.setSslStoragePort(asPort(annotation::sslStoragePort));
-			cassandraFactory.setRpcPort(asPort(annotation::rpcPort));
+			cassandraFactory.setVersion(getVersion(annotation::version));
+			cassandraFactory.setConfigurationFile(getURL(annotation::configurationFile));
+			cassandraFactory.setJvmOptions(getArray(annotation::jvmOptions));
+			cassandraFactory.setJmxLocalPort(getPort(annotation::jmxLocalPort));
+			cassandraFactory.setPort(getPort(annotation::port));
+			cassandraFactory.setStoragePort(getPort(annotation::storagePort));
+			cassandraFactory.setSslStoragePort(getPort(annotation::sslStoragePort));
+			cassandraFactory.setRpcPort(getPort(annotation::rpcPort));
 			return cassandraFactory;
 		}
 
@@ -184,8 +184,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			Class<?> testClass = this.testClass;
 			ApplicationContext context = getContext();
 			List<CqlScript> scripts = new ArrayList<>();
-			for (URL url : ResourceUtils.getResources(context, testClass, asArray(annotation::scripts))) {
-				scripts.add(new UrlCqlScript(url, asCharset(annotation::encoding)));
+			for (URL url : ResourceUtils.getResources(context, testClass, getArray(annotation::scripts))) {
+				scripts.add(new UrlCqlScript(url, getCharset(annotation::encoding)));
 			}
 			List<String> statements = getStatements(annotation.statements());
 			if (!statements.isEmpty()) {
@@ -200,7 +200,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 					.collect(Collectors.toList());
 		}
 
-		private String[] asArray(Supplier<String[]> arraySupplier) {
+		private String[] getArray(Supplier<String[]> arraySupplier) {
 			Environment environment = getContext().getEnvironment();
 			return Arrays.stream(arraySupplier.get())
 					.map(environment::resolvePlaceholders)
@@ -209,28 +209,28 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		}
 
 		@Nullable
-		private Version asVersion(Supplier<String> supplier) {
+		private Version getVersion(Supplier<String> supplier) {
 			Environment environment = getContext().getEnvironment();
 			String version = environment.resolvePlaceholders(supplier.get());
 			return StringUtils.hasText(version) ? Version.parse(version) : null;
 		}
 
 		@Nullable
-		private Charset asCharset(Supplier<String> supplier) {
+		private Charset getCharset(Supplier<String> supplier) {
 			Environment environment = getContext().getEnvironment();
 			String charset = environment.resolvePlaceholders(supplier.get());
 			return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
 		}
 
 		@Nullable
-		private Integer asPort(Supplier<String> supplier) {
+		private Integer getPort(Supplier<String> supplier) {
 			Environment environment = getContext().getEnvironment();
 			String port = environment.resolvePlaceholders(supplier.get());
 			return StringUtils.hasText(port) ? Integer.parseInt(port) : null;
 		}
 
 		@Nullable
-		private URL asURL(Supplier<String> supplier) {
+		private URL getURL(Supplier<String> supplier) {
 			Class<?> testClass = this.testClass;
 			ApplicationContext context = getContext();
 			Environment environment = context.getEnvironment();

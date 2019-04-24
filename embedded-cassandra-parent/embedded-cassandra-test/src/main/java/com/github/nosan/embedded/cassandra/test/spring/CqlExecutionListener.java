@@ -102,7 +102,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			if (executionPhase == cql.executionPhase()) {
 				CqlScript[] scripts = getScripts(cql, testContext.getTestClass(), applicationContext);
 				if (scripts.length > 0) {
-					executeScripts(asSession(environment, cql::session), applicationContext, scripts);
+					executeScripts(getSession(environment, cql::session), applicationContext, scripts);
 				}
 			}
 		}
@@ -127,8 +127,8 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	private CqlScript[] getScripts(Cql annotation, Class<?> testClass, ApplicationContext context) {
 		List<CqlScript> scripts = new ArrayList<>();
 		Environment environment = context.getEnvironment();
-		for (URL url : ResourceUtils.getResources(context, testClass, asArray(environment, annotation::scripts))) {
-			scripts.add(new UrlCqlScript(url, asCharset(environment, annotation::encoding)));
+		for (URL url : ResourceUtils.getResources(context, testClass, getArray(environment, annotation::scripts))) {
+			scripts.add(new UrlCqlScript(url, getCharset(environment, annotation::encoding)));
 		}
 		List<String> statements = getStatements(annotation.statements());
 		if (!statements.isEmpty()) {
@@ -137,11 +137,11 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		return scripts.toArray(new CqlScript[0]);
 	}
 
-	private String asSession(Environment environment, Supplier<String> supplier) {
+	private String getSession(Environment environment, Supplier<String> supplier) {
 		return environment.resolvePlaceholders(supplier.get());
 	}
 
-	private String[] asArray(Environment environment, Supplier<String[]> arraySupplier) {
+	private String[] getArray(Environment environment, Supplier<String[]> arraySupplier) {
 		return Arrays.stream(arraySupplier.get())
 				.map(environment::resolvePlaceholders)
 				.filter(StringUtils::hasText)
@@ -155,7 +155,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	@Nullable
-	private Charset asCharset(Environment environment, Supplier<String> supplier) {
+	private Charset getCharset(Environment environment, Supplier<String> supplier) {
 		String charset = environment.resolvePlaceholders(supplier.get());
 		return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
 	}
