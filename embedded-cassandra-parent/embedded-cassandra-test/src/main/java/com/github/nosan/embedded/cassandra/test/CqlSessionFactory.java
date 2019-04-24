@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.test;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
+import java.util.Objects;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
@@ -48,12 +49,12 @@ public class CqlSessionFactory {
 	 * @return a cql session
 	 */
 	public CqlSession create(Settings settings) {
+		Objects.requireNonNull(settings, "Settings must not be null");
 		return CqlSession.builder()
 				.addContactPoint(new InetSocketAddress(settings.getRequiredAddress(), settings.getRequiredPort()))
 				.withLocalDatacenter(DATACENTER)
 				.withConfigLoader(DriverConfigLoader.programmaticBuilder()
 						.withBoolean(DefaultDriverOption.RECONNECT_ON_INIT, true)
-						.withBoolean(DefaultDriverOption.CONNECTION_WARN_INIT_ERROR, true)
 						.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)
 						.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, PASSWORD)
 						.withString(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class.getTypeName())

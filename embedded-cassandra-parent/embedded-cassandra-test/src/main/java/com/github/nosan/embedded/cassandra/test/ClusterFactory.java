@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import java.util.Objects;
+
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.SocketOptions;
 
@@ -40,13 +42,14 @@ public class ClusterFactory {
 	 * @return a cluster
 	 */
 	public Cluster create(Settings settings) {
+		Objects.requireNonNull(settings, "Settings must not be null");
 		SocketOptions socketOptions = new SocketOptions();
 		socketOptions.setConnectTimeoutMillis(30000);
 		socketOptions.setReadTimeoutMillis(30000);
-		Cluster.Builder builder = Cluster.builder().
-				addContactPoints(settings.getRequiredAddress())
-				.withCredentials(USERNAME, PASSWORD)
+		Cluster.Builder builder = Cluster.builder()
+				.addContactPoints(settings.getRequiredAddress())
 				.withPort(settings.getRequiredPort())
+				.withCredentials(USERNAME, PASSWORD)
 				.withSocketOptions(socketOptions);
 		return builder.withoutJMXReporting().withoutMetrics().build();
 
