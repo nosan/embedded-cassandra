@@ -221,7 +221,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 				String.format("There is no way to detect whether Apache Cassandra Node '%s' %s is started or not."
 						+ " Note, that Apache Cassandra <output> must be enabled."
 						+ " If the <output> is enabled, and you see this message, then either you found a bug"
-						+ " or Apache Cassandra is hanging.", settings, processId.getPid()));
+						+ " or Apache Cassandra is hanging.", processId, settings));
 	}
 
 	private boolean isStarted(NodeSettings settings) {
