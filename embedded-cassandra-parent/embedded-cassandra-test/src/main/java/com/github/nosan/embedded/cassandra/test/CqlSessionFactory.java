@@ -54,12 +54,11 @@ public class CqlSessionFactory {
 				.addContactPoint(new InetSocketAddress(settings.getRequiredAddress(), settings.getRequiredPort()))
 				.withLocalDatacenter(DATACENTER)
 				.withConfigLoader(DriverConfigLoader.programmaticBuilder()
-						.withBoolean(DefaultDriverOption.RECONNECT_ON_INIT, true)
 						.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)
 						.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, PASSWORD)
-						.withString(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class.getTypeName())
-						.withDuration(DefaultDriverOption.RECONNECTION_MAX_DELAY, Duration.ofSeconds(30))
+						.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class)
 						.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
+						.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3))
 						.build())
 				.build();
 	}
