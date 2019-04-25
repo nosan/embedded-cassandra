@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.util;
+package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -26,27 +28,37 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link PortUtils}.
+ * Tests for {@link PortSupplier}.
  *
  * @author Dmytro Nosan
  */
-class PortUtilsTests {
+class PortSupplierTests {
 
 	@Test
-	void shouldGet100Ports() {
+	void shouldGet100RandomPorts() {
 		Set<Integer> ports = new LinkedHashSet<>();
-		for (int i = 0; i < 100; i++) {
-			ports.add(PortUtils.getPort());
+		try (PortSupplier portSupplier = new PortSupplier()) {
+			for (int i = 0; i < 100; i++) {
+				Integer port = portSupplier.get();
+				assertThat(isListen(port)).isTrue();
+				ports.add(port);
+
+			}
 		}
-		assertThat(ports.size()).isBetween(95, 100);
+		assertThat(ports).hasSize(100);
+		assertThat(ports).doesNotContain(7000, 7001, 7199, 9042, 9142, 9160);
+		for (Integer port : ports) {
+			assertThat(isListen(port)).isFalse();
+		}
 	}
 
-	@Test
-	void shouldBeBusy() throws IOException {
-		int port = PortUtils.getPort();
-		assertThat(PortUtils.isPortBusy(null, port)).isFalse();
-		try (ServerSocket ss = new ServerSocket(port)) {
-			assertThat(PortUtils.isPortBusy(ss.getInetAddress(), ss.getLocalPort())).isTrue();
+	private boolean isListen(int port) {
+		try (Socket s = new Socket()) {
+			s.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 1000);
+			return true;
+		}
+		catch (IOException ex) {
+			return false;
 		}
 	}
 

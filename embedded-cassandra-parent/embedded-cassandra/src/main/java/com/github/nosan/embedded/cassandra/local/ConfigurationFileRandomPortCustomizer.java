@@ -21,19 +21,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.util.PortUtils;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -44,22 +38,20 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomizer {
 
-	private static final Set<Integer> CASSANDRA_PORTS = Collections.unmodifiableSet(new LinkedHashSet<>(
-			Arrays.asList(7000, 7001, 7199, 9042, 9142, 9160)));
-
 	@Override
 	public void customize(Path workingDirectory, Version version) throws IOException {
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
 		Map<Object, Object> properties = getProperties(file);
-		Set<Integer> skipPorts = new HashSet<>();
-		setPort("native_transport_port", properties, skipPorts);
-		setPort("native_transport_port_ssl", properties, skipPorts);
-		setPort("rpc_port", properties, skipPorts);
-		setPort("storage_port", properties, skipPorts);
-		setPort("ssl_storage_port", properties, skipPorts);
-		if (!skipPorts.isEmpty()) {
-			try (BufferedWriter writer = Files.newBufferedWriter(file)) {
-				new Yaml().dump(properties, writer);
+		try (TrackPortSupplier supplier = new TrackPortSupplier()) {
+			setPort("native_transport_port", properties, supplier);
+			setPort("native_transport_port_ssl", properties, supplier);
+			setPort("rpc_port", properties, supplier);
+			setPort("storage_port", properties, supplier);
+			setPort("ssl_storage_port", properties, supplier);
+			if (supplier.isCalled()) {
+				try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+					new Yaml().dump(properties, writer);
+				}
 			}
 		}
 	}
@@ -72,13 +64,9 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		return Optional.ofNullable(properties.get(name)).map(Object::toString);
 	}
 
-	private static void setPort(String name, Map<Object, Object> properties, Set<Integer> skipPorts) {
-		getInteger(name, properties).filter(port -> port == 0).ifPresent(port -> {
-			int newPort = PortUtils.getPort(integer -> skipPorts.contains(integer)
-					|| CASSANDRA_PORTS.contains(integer));
-			skipPorts.add(newPort);
-			properties.put(name, newPort);
-		});
+	private static void setPort(String name, Map<Object, Object> properties, TrackPortSupplier supplier) {
+		getInteger(name, properties).filter(port -> port == 0)
+				.ifPresent(port -> properties.put(name, supplier.get()));
 	}
 
 	private static Map<Object, Object> getProperties(Path file) throws IOException {
@@ -86,6 +74,22 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 			Map<?, ?> values = new Yaml().loadAs(is, Map.class);
 			return (values != null) ? new LinkedHashMap<>(values) : new LinkedHashMap<>();
 		}
+	}
+
+	private static final class TrackPortSupplier extends PortSupplier {
+
+		private boolean called = false;
+
+		@Override
+		public Integer get() {
+			this.called = true;
+			return super.get();
+		}
+
+		boolean isCalled() {
+			return this.called;
+		}
+
 	}
 
 }
