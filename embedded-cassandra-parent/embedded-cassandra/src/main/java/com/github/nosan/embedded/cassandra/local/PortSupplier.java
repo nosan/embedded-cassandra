@@ -20,11 +20,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
@@ -41,10 +37,7 @@ class PortSupplier implements Supplier<Integer>, AutoCloseable {
 
 	private static final Logger log = LoggerFactory.getLogger(PortSupplier.class);
 
-	private static final Set<Integer> CASSANDRA_PORTS = Collections
-			.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(7000, 7001, 7199, 9042, 9142, 9160)));
-
-	private static final int MIN = 1024;
+	private static final int MIN = 49152;
 
 	private static final int MAX = 65535;
 
@@ -67,13 +60,11 @@ class PortSupplier implements Supplier<Integer>, AutoCloseable {
 		InetAddress address = InetAddress.getLoopbackAddress();
 		for (int i = 0; i <= MAX - MIN; i++) {
 			int port = MIN + random.nextInt(MAX - MIN + 1);
-			if (!CASSANDRA_PORTS.contains(port)) {
-				try {
-					return new ServerSocket(port, 1, address);
-				}
-				catch (IOException ex) {
-					//ignore
-				}
+			try {
+				return new ServerSocket(port, 1, address);
+			}
+			catch (IOException ex) {
+				//ignore
 			}
 		}
 		throw new IllegalStateException(String.format("Can not find an available port in the range [%d, %d]",

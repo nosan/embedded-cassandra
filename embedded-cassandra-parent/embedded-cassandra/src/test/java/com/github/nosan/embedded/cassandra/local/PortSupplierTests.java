@@ -23,7 +23,7 @@ import java.net.Socket;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class PortSupplierTests {
 
-	@Test
+	@RepeatedTest(10)
 	void shouldGet100RandomPorts() {
 		Set<Integer> ports = new LinkedHashSet<>();
 		try (PortSupplier portSupplier = new PortSupplier()) {
@@ -46,7 +46,6 @@ class PortSupplierTests {
 			}
 		}
 		assertThat(ports).hasSize(100);
-		assertThat(ports).doesNotContain(7000, 7001, 7199, 9042, 9142, 9160);
 		for (Integer port : ports) {
 			assertThat(isListen(port)).isFalse();
 		}
