@@ -101,7 +101,7 @@ class Ports {
 	 * <p>
 	 * This value will be added as {@code -Dcassandra.jmx.local.port} system property.
 	 *
-	 * @return The value of the {@code jmxPort} attribute
+	 * @return the jmx local port
 	 */
 	@Nullable
 	Integer getJmxLocalPort() {
