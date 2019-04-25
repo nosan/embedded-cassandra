@@ -35,24 +35,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PortSupplierTests {
 
 	@Test
-	void shouldGet20RandomPorts() {
+	void shouldGet20RandomPorts() throws InterruptedException {
 		Set<Integer> ports = new LinkedHashSet<>();
-		try (PortSupplier portSupplier = new PortSupplier()) {
+		InetAddress address = InetAddress.getLoopbackAddress();
+		try (PortSupplier portSupplier = new PortSupplier(address)) {
 			for (int i = 0; i < 20; i++) {
 				Integer port = portSupplier.get();
-				assertThat(isListen(port)).describedAs("Port %d is not busy").isTrue();
+				assertThat(isListen(address, port)).describedAs("Port %d is not busy").isTrue();
 				ports.add(port);
 			}
 		}
 		assertThat(ports).hasSize(20);
+		Thread.sleep(250);
 		for (Integer port : ports) {
-			assertThat(isListen(port)).describedAs("Port %d is busy").isFalse();
+			assertThat(isListen(address, port)).describedAs("Port %d is busy").isFalse();
 		}
 	}
 
-	private boolean isListen(int port) {
+	private boolean isListen(InetAddress address, int port) {
 		try (Socket s = new Socket()) {
-			s.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 1000);
+			s.connect(new InetSocketAddress(address, port), 1000);
 			return true;
 		}
 		catch (IOException ex) {

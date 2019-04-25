@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
  * Random port {@link Supplier}.
@@ -43,6 +46,13 @@ class PortSupplier implements Supplier<Integer>, AutoCloseable {
 
 	private final List<ServerSocket> sockets = new ArrayList<>();
 
+	@Nullable
+	private final InetAddress inetAddress;
+
+	PortSupplier(@Nullable InetAddress inetAddress) {
+		this.inetAddress = inetAddress;
+	}
+
 	@Override
 	public Integer get() {
 		ServerSocket serverSocket = createServerSocket();
@@ -57,11 +67,10 @@ class PortSupplier implements Supplier<Integer>, AutoCloseable {
 
 	private ServerSocket createServerSocket() {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
-		InetAddress address = InetAddress.getLoopbackAddress();
 		for (int i = 0; i <= MAX - MIN; i++) {
 			int port = MIN + random.nextInt(MAX - MIN + 1);
 			try {
-				return new ServerSocket(port, 1, address);
+				return new ServerSocket(port, 1, this.inetAddress);
 			}
 			catch (IOException ex) {
 				//ignore
@@ -71,12 +80,12 @@ class PortSupplier implements Supplier<Integer>, AutoCloseable {
 				MIN, MAX));
 	}
 
-	private void close(AutoCloseable closeable) {
+	private void close(ServerSocket ss) {
 		try {
-			closeable.close();
+			ss.close();
 		}
-		catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
+		catch (IOException ex) {
+			throw new UncheckedIOException(String.format("Can not close '%s'", ss), ex);
 		}
 	}
 

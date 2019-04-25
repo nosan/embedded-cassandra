@@ -19,6 +19,8 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -42,7 +44,7 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 	public void customize(Path workingDirectory, Version version) throws IOException {
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
 		Map<Object, Object> properties = getProperties(file);
-		try (TrackPortSupplier supplier = new TrackPortSupplier()) {
+		try (TrackPortSupplier supplier = new TrackPortSupplier(getAddress())) {
 			setPort("native_transport_port", properties, supplier);
 			setPort("native_transport_port_ssl", properties, supplier);
 			setPort("rpc_port", properties, supplier);
@@ -76,9 +78,22 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		}
 	}
 
+	private static InetAddress getAddress() {
+		try {
+			return InetAddress.getByName("localhost");
+		}
+		catch (UnknownHostException ex) {
+			return InetAddress.getLoopbackAddress();
+		}
+	}
+
 	private static final class TrackPortSupplier extends PortSupplier {
 
 		private boolean called = false;
+
+		private TrackPortSupplier(InetAddress inetAddress) {
+			super(inetAddress);
+		}
 
 		@Override
 		public Integer get() {
