@@ -62,7 +62,19 @@ class PortSupplier implements Supplier<Integer>, AutoCloseable {
 
 	@Override
 	public void close() {
-		this.sockets.forEach(this::close);
+		List<IOException> exceptions = new ArrayList<>();
+		for (ServerSocket ss : this.sockets) {
+			try {
+				ss.close();
+			}
+			catch (IOException ex) {
+				exceptions.add(ex);
+				log.error(String.format("Can not close '%s'", ss), ex);
+			}
+		}
+		if (!exceptions.isEmpty()) {
+			throw new UncheckedIOException(exceptions.get(0));
+		}
 	}
 
 	private ServerSocket createServerSocket() {
@@ -78,15 +90,6 @@ class PortSupplier implements Supplier<Integer>, AutoCloseable {
 		}
 		throw new IllegalStateException(String.format("Can not find an available port in the range [%d, %d]",
 				MIN, MAX));
-	}
-
-	private void close(ServerSocket ss) {
-		try {
-			ss.close();
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(String.format("Can not close '%s'", ss), ex);
-		}
 	}
 
 }
