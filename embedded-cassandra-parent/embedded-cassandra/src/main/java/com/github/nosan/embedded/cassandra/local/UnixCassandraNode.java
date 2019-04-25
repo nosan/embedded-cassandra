@@ -41,7 +41,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	protected ProcessId start(Map<String, String> environment) throws IOException {
+	ProcessId start(Map<String, String> environment) throws IOException {
 		Path workingDirectory = this.workingDirectory;
 		Version version = this.version;
 		ProcessBuilder builder = newBuilder();
