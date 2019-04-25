@@ -23,8 +23,6 @@ import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -75,13 +73,12 @@ public final class FileLock implements AutoCloseable {
 		if (log.isDebugEnabled()) {
 			log.debug("Acquires a lock to the file '{}' ...", file);
 		}
-		FileChannel fileChannel = await(10, TimeUnit.SECONDS,
+		FileChannel fileChannel = await(3, TimeUnit.SECONDS,
 				() -> open(file), () -> String.format("File lock for a file '%s' is not acquired because "
-						+ "FileChannel.open(...) was not created. See suppressed exceptions for details.", file));
+						+ "FileChannel.open(...) was not created.", file));
 		this.fileChannel = fileChannel;
-		this.fileLock = await(5, TimeUnit.MINUTES, () -> lock(fileChannel), () -> String.format("File lock for "
-				+ "a file '%s' is not acquired because FileChannel.lock() was not created. "
-				+ "See suppressed exceptions for details.", file));
+		this.fileLock = await(2, TimeUnit.MINUTES, () -> lock(fileChannel), () -> String.format("File lock for "
+				+ "a file '%s' is not acquired because FileChannel.lock() was not created.", file));
 		if (log.isDebugEnabled()) {
 			log.debug("The lock to the file '{}' is acquired", file);
 		}
@@ -91,9 +88,9 @@ public final class FileLock implements AutoCloseable {
 	 * Releases this lock.
 	 */
 	public void release() {
-		close(() -> Files.deleteIfExists(this.file));
-		close(this.fileLock);
-		close(this.fileChannel);
+		close(() -> Files.deleteIfExists(this.file), () -> String.format("Can not delete a file '%s'", this.file));
+		close(this.fileLock, () -> String.format("Can not close a file lock '%s'", this.fileLock));
+		close(this.fileChannel, () -> String.format("Can not close a file channel '%s'", this.fileChannel));
 	}
 
 	/**
@@ -104,8 +101,16 @@ public final class FileLock implements AutoCloseable {
 		release();
 	}
 
-	private static FileChannel open(Path file) throws IOException {
-		return FileChannel.open(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+	@Nullable
+	private static FileChannel open(Path file) {
+		try {
+			return FileChannel.open(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+		}
+		catch (IOException ex) {
+			log.error(String.format("Can not open a file channel to a file '%s'. Cause '%s'", file, ex.getMessage()),
+					ex);
+		}
+		return null;
 	}
 
 	@Nullable
@@ -118,44 +123,32 @@ public final class FileLock implements AutoCloseable {
 		}
 	}
 
-	private static void close(@Nullable AutoCloseable closeable) {
+	private static void close(@Nullable AutoCloseable closeable, Supplier<String> message) {
 		if (closeable != null) {
 			try {
 				closeable.close();
 			}
 			catch (Exception ex) {
-				log.error(ex.getMessage(), ex);
+				log.error(message.get(), ex);
 			}
 		}
 	}
 
-	private static <T> T await(long timeout, TimeUnit unit,
-			Callable<T> callback, Supplier<String> messageSupplier) throws IOException {
+	private static <T> T await(long timeout, TimeUnit unit, IOCallable<T> callback,
+			Supplier<String> message) throws IOException {
 		long startTime = System.nanoTime();
 		long rem = unit.toNanos(timeout);
-		List<Throwable> throwables = new ArrayList<>();
 		do {
-			try {
-				T result = callback.call();
-				if (result != null) {
-					return result;
-				}
+			T result = callback.call();
+			if (result != null) {
+				return result;
 			}
-			catch (FileLockInterruptionException ex) {
-				throw ex;
-			}
-			catch (Exception ex) {
-				throwables.add(ex);
-				if (rem > 0) {
-					sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 500));
-				}
+			if (rem > 0) {
+				sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 1000));
 			}
 			rem = unit.toNanos(timeout) - (System.nanoTime() - startTime);
 		} while (rem > 0);
-
-		IOException exceptions = new IOException(messageSupplier.get());
-		throwables.forEach(exceptions::addSuppressed);
-		throw exceptions;
+		throw new IOException(message.get());
 	}
 
 	private static void sleep(long millis) throws FileLockInterruptionException {
@@ -165,6 +158,14 @@ public final class FileLock implements AutoCloseable {
 		catch (InterruptedException ex) {
 			throw new FileLockInterruptionException();
 		}
+	}
+
+	private interface IOCallable<T> extends Callable<T> {
+
+		@Override
+		@Nullable
+		T call() throws IOException;
+
 	}
 
 }

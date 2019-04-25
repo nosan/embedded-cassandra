@@ -16,7 +16,14 @@
 
 package com.github.nosan.embedded.cassandra.util;
 
+import java.io.ByteArrayInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility test class to lock a file.
@@ -25,10 +32,18 @@ import java.nio.file.Paths;
  */
 public abstract class FileLockSuite {
 
+	private static final Logger log = LoggerFactory.getLogger(FileLockSuite.class);
+
 	public static void main(String[] args) throws Exception {
-		try (FileLock fileLock = new FileLock(Paths.get(args[0]))) {
+		Path lockFile = Paths.get(args[0]);
+		log.info("File lock is '{}'", lockFile);
+		try (FileLock fileLock = new FileLock(lockFile)) {
 			fileLock.lock();
-			Thread.sleep(500);
+			Path file = Paths.get(args[1]);
+			long l = Long.parseLong(new String(Files.readAllBytes(file)));
+			log.info("Current value is '{}' in the file '{}'", l, file);
+			Files.copy(new ByteArrayInputStream(Long.toString(l + 1).getBytes()), file,
+					StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 

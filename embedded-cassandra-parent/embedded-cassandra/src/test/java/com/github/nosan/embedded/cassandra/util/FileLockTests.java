@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -45,30 +46,26 @@ class FileLockTests {
 
 	@Test
 	void shouldLockUsingFile(@TempDir Path temporaryFolder) throws Exception {
-		long start = System.currentTimeMillis();
 		Path fileLock = temporaryFolder.resolve(String.format("%s.lock", UUID.randomUUID()));
+		Path file = temporaryFolder.resolve("file.txt");
+		Files.copy(new ByteArrayInputStream("0".getBytes()), file);
+
 		List<Process> processes = new ArrayList<>();
 		Map<Process, ProcessReader> readers = new LinkedHashMap<>();
 		for (int i = 0; i < 3; i++) {
-			processes.add(fork(fileLock));
+			processes.add(runProcess(fileLock, file));
 		}
 		for (Process process : processes) {
 			readers.put(process, new ProcessReader(process));
 		}
 		for (Process process : processes) {
-			assertThat(process.waitFor())
-					.describedAs(String.format("Process exit code %s is not valid. %n%s", process.exitValue(),
-							readers.get(process))).isZero();
+			assertThat(process.waitFor()).describedAs(String.format("Process exit code %s is not valid. %n%s",
+					process.exitValue(), readers.get(process))).isZero();
 		}
-		long elapsed = System.currentTimeMillis() - start;
-		assertThat(elapsed).describedAs("Seems like 'FileLock' does not work correctly.%n%s",
-				readers.entrySet().stream().map(entry -> String.format("[%s] %s", entry.getKey(), entry.getValue()))
-						.collect(Collectors.joining(System.lineSeparator())))
-				.isGreaterThan(1500);
-
+		assertThat(new String(Files.readAllBytes(file))).describedAs(getDescription(readers)).isEqualTo("3");
 	}
 
-	private static Process fork(Path fileLock) throws IOException {
+	private static Process runProcess(Path fileLock, Path file) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder();
 		Path home = Paths.get(System.getProperty("java.home"));
 		if (Files.exists(home.resolve("bin/java"))) {
@@ -81,9 +78,15 @@ class FileLockTests {
 		builder.command().add(System.getProperty("java.class.path"));
 		builder.command().add(FileLockSuite.class.getCanonicalName());
 		builder.command().add(fileLock.toAbsolutePath().toString());
-
+		builder.command().add(file.toAbsolutePath().toString());
 		return builder.start();
 
+	}
+
+	private static String getDescription(Map<Process, ProcessReader> readers) {
+		return readers.entrySet().stream()
+				.map(entry -> String.format("[%s] %s", entry.getKey(), entry.getValue()))
+				.collect(Collectors.joining(System.lineSeparator()));
 	}
 
 	private static final class ProcessReader extends Thread {
