@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayList;
@@ -62,18 +61,13 @@ class PortSupplier implements Supplier<Integer>, AutoCloseable {
 
 	@Override
 	public void close() {
-		List<IOException> exceptions = new ArrayList<>();
 		for (ServerSocket ss : this.sockets) {
 			try {
 				ss.close();
 			}
 			catch (IOException ex) {
-				exceptions.add(ex);
 				log.error(String.format("Can not close '%s'", ss), ex);
 			}
-		}
-		if (!exceptions.isEmpty()) {
-			throw new UncheckedIOException(exceptions.get(0));
 		}
 	}
 

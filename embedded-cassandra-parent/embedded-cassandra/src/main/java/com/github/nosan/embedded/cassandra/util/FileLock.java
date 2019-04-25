@@ -107,8 +107,7 @@ public final class FileLock implements AutoCloseable {
 			return FileChannel.open(file, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
 		}
 		catch (IOException ex) {
-			log.error(String.format("Can not open a file channel to a file '%s'. Cause '%s'", file, ex.getMessage()),
-					ex);
+			log.error(String.format("Can not open a file channel to a file '%s'.", file), ex);
 		}
 		return null;
 	}
