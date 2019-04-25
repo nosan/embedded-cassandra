@@ -23,7 +23,7 @@ import java.net.Socket;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,20 +34,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class PortSupplierTests {
 
-	@RepeatedTest(10)
-	void shouldGet100RandomPorts() {
+	@Test
+	void shouldGet20RandomPorts() {
 		Set<Integer> ports = new LinkedHashSet<>();
 		try (PortSupplier portSupplier = new PortSupplier()) {
-			for (int i = 0; i < 100; i++) {
+			for (int i = 0; i < 20; i++) {
 				Integer port = portSupplier.get();
-				assertThat(isListen(port)).isTrue();
+				assertThat(isListen(port)).describedAs("Port %d is not busy").isTrue();
 				ports.add(port);
-
 			}
 		}
-		assertThat(ports).hasSize(100);
+		assertThat(ports).hasSize(20);
 		for (Integer port : ports) {
-			assertThat(isListen(port)).isFalse();
+			assertThat(isListen(port)).describedAs("Port %d is busy").isFalse();
 		}
 	}
 
