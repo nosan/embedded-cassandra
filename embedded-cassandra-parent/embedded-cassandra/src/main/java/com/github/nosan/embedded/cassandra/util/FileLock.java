@@ -159,6 +159,7 @@ public final class FileLock implements AutoCloseable {
 		}
 	}
 
+	@FunctionalInterface
 	private interface IOCallable<T> extends Callable<T> {
 
 		@Override

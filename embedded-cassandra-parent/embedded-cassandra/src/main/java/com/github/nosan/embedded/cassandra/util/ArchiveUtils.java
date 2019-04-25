@@ -118,6 +118,7 @@ public abstract class ArchiveUtils {
 	/**
 	 * Factory for creating {@link ArchiveInputStream} instances by a given archive.
 	 */
+	@FunctionalInterface
 	private interface ArchiveFactory {
 
 		/**

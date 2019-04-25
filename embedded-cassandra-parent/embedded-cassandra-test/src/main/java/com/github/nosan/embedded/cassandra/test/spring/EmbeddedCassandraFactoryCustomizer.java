@@ -27,6 +27,7 @@ import com.github.nosan.embedded.cassandra.CassandraFactory;
  * @author Dmytro Nosan
  * @since 2.0.0
  */
+@FunctionalInterface
 public interface EmbeddedCassandraFactoryCustomizer<T extends CassandraFactory> {
 
 	/**
