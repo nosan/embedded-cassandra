@@ -26,19 +26,19 @@ import java.util.List;
  *
  * @author Dmytro Nosan
  * @see CqlScripts
- * @see UrlCqlScript
- * @see ClassPathCqlScript
  * @see CqlStatements
+ * @see ClassPathCqlScript
+ * @see ClassPathPatternCqlScript
  * @see FileCqlScript
  * @see PathCqlScript
- * @see ClassPathPatternCqlScript
+ * @see UrlCqlScript
  * @since 1.0.0
  */
 @FunctionalInterface
 public interface CqlScript {
 
 	/**
-	 * Factory method to create {@link CqlScripts} based on classpath {@code 'glob'} patterns.
+	 * Factory method that creates {@link CqlScript} based on classpath {@code 'glob'} patterns.
 	 *
 	 * @param patterns classpath glob patterns
 	 * @return CQL scripts
@@ -50,7 +50,7 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Factory method to create {@link CqlScripts} based on classpath locations.
+	 * Factory method that creates {@link CqlScript} based on classpath locations.
 	 *
 	 * @param locations classpath locations
 	 * @return CQL scripts
@@ -61,7 +61,7 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Factory method to create {@link CqlScripts} based on urls.
+	 * Factory method that creates {@link CqlScript} based on {@link URL}.
 	 *
 	 * @param locations URL locations
 	 * @return CQL scripts
@@ -72,7 +72,7 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Factory method to create {@link CqlScripts} based on files.
+	 * Factory method that creates {@link CqlScript} based on {@link File}.
 	 *
 	 * @param locations File locations
 	 * @return CQL scripts
@@ -83,7 +83,7 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Factory method to create {@link CqlScripts} based on paths.
+	 * Factory method that creates {@link CqlScript} based on {@link Path}.
 	 *
 	 * @param locations Path locations
 	 * @return CQL scripts
@@ -94,7 +94,7 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Factory method to create {@link CqlStatements} based on statements.
+	 * Factory method that creates {@link CqlScript} based on statements.
 	 *
 	 * @param statements CQL statements
 	 * @return CQL scripts
