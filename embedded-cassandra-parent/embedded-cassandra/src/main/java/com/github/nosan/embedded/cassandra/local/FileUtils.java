@@ -29,7 +29,7 @@ import java.util.function.Predicate;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility methods for dealing with files. <b>Only for internal purposes.</b>
+ * Utility methods for dealing with files.
  *
  * @author Dmytro Nosan
  * @since 1.0.0

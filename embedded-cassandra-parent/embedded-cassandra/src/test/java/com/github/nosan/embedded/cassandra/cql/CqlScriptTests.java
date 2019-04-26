@@ -32,13 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CqlScriptTests {
 
 	@Test
-	void assertClasspathsGlobs() {
+	void assertClasspathPatterns() {
 		assertStatements(CqlScript.classpathPatterns("roles.cql"));
 		assertStatements(CqlScript.classpathPatterns("*.cql"));
 	}
 
 	@Test
-	void assertClasspaths() {
+	void assertClasspath() {
 		assertStatements(CqlScript.classpath("roles.cql"));
 	}
 
