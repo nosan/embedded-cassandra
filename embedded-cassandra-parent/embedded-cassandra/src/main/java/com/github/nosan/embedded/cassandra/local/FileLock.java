@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.util;
+package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLockInterruptionException;
 import java.nio.channels.OverlappingFileLockException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
@@ -34,13 +33,13 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility class to lock a file. <b>Only for internal purposes.</b>
+ * Utility class to lock a file.
  *
  * @author Dmytro Nosan
  * @see java.nio.channels.FileLock
  * @since 1.4.2
  */
-public final class FileLock implements AutoCloseable {
+class FileLock implements AutoCloseable {
 
 	private static final Logger log = LoggerFactory.getLogger(FileLock.class);
 
@@ -57,8 +56,17 @@ public final class FileLock implements AutoCloseable {
 	 *
 	 * @param file the lock file.
 	 */
-	public FileLock(Path file) {
+	FileLock(Path file) {
 		this.file = Objects.requireNonNull(file, "File must not be null");
+	}
+
+	/**
+	 * Releases this lock.
+	 */
+	@Override
+	public void close() {
+		close(this.fileLock, () -> String.format("Can not close a file lock '%s'", this.fileLock));
+		close(this.fileChannel, () -> String.format("Can not close a file channel '%s'", this.fileChannel));
 	}
 
 	/**
@@ -68,13 +76,13 @@ public final class FileLock implements AutoCloseable {
 	 * this method
 	 * @throws java.io.IOException If some other I/O error occurs
 	 */
-	public void lock() throws IOException, FileLockInterruptionException {
+	void lock() throws IOException, FileLockInterruptionException {
 		Path file = this.file;
 		if (log.isDebugEnabled()) {
 			log.debug("Acquires a lock to the file '{}' ...", file);
 		}
-		FileChannel fileChannel = await(3, TimeUnit.SECONDS,
-				() -> open(file), () -> String.format("File lock for a file '%s' is not acquired because "
+		FileChannel fileChannel = await(3, TimeUnit.SECONDS, () -> open(file),
+				() -> String.format("File lock for a file '%s' is not acquired because "
 						+ "FileChannel.open(...) was not created.", file));
 		this.fileChannel = fileChannel;
 		this.fileLock = await(2, TimeUnit.MINUTES, () -> lock(fileChannel), () -> String.format("File lock for "
@@ -82,23 +90,6 @@ public final class FileLock implements AutoCloseable {
 		if (log.isDebugEnabled()) {
 			log.debug("The lock to the file '{}' is acquired", file);
 		}
-	}
-
-	/**
-	 * Releases this lock.
-	 */
-	public void release() {
-		close(() -> Files.deleteIfExists(this.file), () -> String.format("Can not delete a file '%s'", this.file));
-		close(this.fileLock, () -> String.format("Can not close a file lock '%s'", this.fileLock));
-		close(this.fileChannel, () -> String.format("Can not close a file channel '%s'", this.fileChannel));
-	}
-
-	/**
-	 * Releases this lock.
-	 */
-	@Override
-	public void close() {
-		release();
 	}
 
 	@Nullable

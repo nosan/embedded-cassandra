@@ -18,8 +18,6 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -240,16 +238,16 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		boolean rpcTransportStarted = settings.getRpcTransportStarted().orElse(false);
 
 		if (transportStarted && settings.getPort().isPresent()
-				&& !isListen(settings.getRequiredAddress(), settings.getRequiredPort())) {
+				&& !NetworkUtils.isListen(settings.getRequiredAddress(), settings.getRequiredPort())) {
 			return false;
 		}
 		if (transportStarted && settings.getSslPort().isPresent()
-				&& !isListen(settings.getRequiredAddress(), settings.getRequiredSslPort())) {
+				&& !NetworkUtils.isListen(settings.getRequiredAddress(), settings.getRequiredSslPort())) {
 			return false;
 		}
 
 		return !rpcTransportStarted || !settings.getRpcPort().isPresent()
-				|| isListen(settings.getRequiredAddress(), settings.getRequiredRpcPort());
+				|| NetworkUtils.isListen(settings.getRequiredAddress(), settings.getRequiredRpcPort());
 
 	}
 
@@ -297,16 +295,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		Matcher matcher = pattern.matcher(line);
 		if (matcher.matches()) {
 			matcherConsumer.accept(matcher);
-		}
-	}
-
-	private boolean isListen(InetAddress address, int port) {
-		try (Socket s = new Socket()) {
-			s.connect(new InetSocketAddress(address, port), 1000);
-			return true;
-		}
-		catch (IOException ex) {
-			return false;
 		}
 	}
 

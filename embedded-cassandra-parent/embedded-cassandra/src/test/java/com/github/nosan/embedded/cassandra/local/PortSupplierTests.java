@@ -16,10 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -41,24 +38,14 @@ class PortSupplierTests {
 		try (PortSupplier portSupplier = new PortSupplier(address)) {
 			for (int i = 0; i < 20; i++) {
 				Integer port = portSupplier.get();
-				assertThat(isListen(address, port)).describedAs("Port %d is not busy").isTrue();
+				assertThat(NetworkUtils.isListen(address, port)).describedAs("Port %d is not busy").isTrue();
 				ports.add(port);
 			}
 		}
 		assertThat(ports).hasSize(20);
 		Thread.sleep(250);
 		for (Integer port : ports) {
-			assertThat(isListen(address, port)).describedAs("Port %d is busy").isFalse();
-		}
-	}
-
-	private boolean isListen(InetAddress address, int port) {
-		try (Socket s = new Socket()) {
-			s.connect(new InetSocketAddress(address, port), 1000);
-			return true;
-		}
-		catch (IOException ex) {
-			return false;
+			assertThat(NetworkUtils.isListen(address, port)).describedAs("Port %d is busy").isFalse();
 		}
 	}
 

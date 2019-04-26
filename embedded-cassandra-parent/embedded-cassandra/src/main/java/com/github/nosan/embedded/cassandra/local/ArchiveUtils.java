@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.util;
+package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,14 +41,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.util.StringUtils;
+import com.github.nosan.embedded.cassandra.util.SystemUtils;
 
 /**
- * Utility methods for dealing with archives. <b>Only for internal purposes.</b>
+ * Utility methods for dealing with archives.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-public abstract class ArchiveUtils {
+abstract class ArchiveUtils {
 
 	private static final Map<String, ArchiveFactory> ARCHIVES;
 
@@ -75,7 +77,7 @@ public abstract class ArchiveUtils {
 	 * @param destination the directory to which to extract the files
 	 * @throws IOException in the case of I/O errors
 	 */
-	public static void extract(Path archiveFile, Path destination) throws IOException {
+	static void extract(Path archiveFile, Path destination) throws IOException {
 		Objects.requireNonNull(archiveFile, "Archive must not be null");
 		Objects.requireNonNull(destination, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);

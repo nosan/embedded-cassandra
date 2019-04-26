@@ -20,7 +20,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -44,7 +43,7 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 	public void customize(Path workingDirectory, Version version) throws IOException {
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
 		Map<Object, Object> properties = getProperties(file);
-		try (TrackPortSupplier supplier = new TrackPortSupplier(getAddress())) {
+		try (TrackPortSupplier supplier = new TrackPortSupplier(NetworkUtils.getLocalhost())) {
 			setPort("native_transport_port", properties, supplier);
 			setPort("native_transport_port_ssl", properties, supplier);
 			setPort("rpc_port", properties, supplier);
@@ -75,15 +74,6 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		try (InputStream is = Files.newInputStream(file)) {
 			Map<?, ?> values = new Yaml().loadAs(is, Map.class);
 			return (values != null) ? new LinkedHashMap<>(values) : new LinkedHashMap<>();
-		}
-	}
-
-	private static InetAddress getAddress() {
-		try {
-			return InetAddress.getByName("localhost");
-		}
-		catch (UnknownHostException ex) {
-			return InetAddress.getLoopbackAddress();
 		}
 	}
 

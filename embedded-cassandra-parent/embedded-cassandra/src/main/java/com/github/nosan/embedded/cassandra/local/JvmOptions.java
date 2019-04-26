@@ -16,8 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -88,7 +86,7 @@ class JvmOptions {
 		addOption(NATIVE_TRANSPORT_PORT, ports.getPort(), jvmOptions);
 		addOption(RPC_PORT, ports.getRpcPort(), jvmOptions);
 
-		try (PortSupplier supplier = new PortSupplier(getAddress())) {
+		try (PortSupplier supplier = new PortSupplier(NetworkUtils.getLocalhost())) {
 			setPort(NATIVE_TRANSPORT_PORT, jvmOptions, supplier);
 			setPort(RPC_PORT, jvmOptions, supplier);
 			setPort(STORAGE_PORT, jvmOptions, supplier);
@@ -134,15 +132,6 @@ class JvmOptions {
 
 	private static Optional<String> getString(String name, Map<String, String> source) {
 		return Optional.ofNullable(source.get(name)).map(Objects::toString);
-	}
-
-	private static InetAddress getAddress() {
-		try {
-			return InetAddress.getByName("localhost");
-		}
-		catch (UnknownHostException ex) {
-			return InetAddress.getLoopbackAddress();
-		}
 	}
 
 }

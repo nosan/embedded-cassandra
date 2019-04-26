@@ -32,9 +32,6 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
-import com.github.nosan.embedded.cassandra.util.ArchiveUtils;
-import com.github.nosan.embedded.cassandra.util.FileLock;
-import com.github.nosan.embedded.cassandra.util.FileUtils;
 
 /**
  * An initializer that initialize a {@code working directory} with an {@link Artifact}.

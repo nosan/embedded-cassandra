@@ -23,9 +23,7 @@ import java.io.UncheckedIOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
-import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -123,7 +121,7 @@ abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(factory);
 		runner.run(assertCreateKeyspace().andThen(cassandra -> {
 			Settings settings = cassandra.getSettings();
-			assertThat(isListen(settings.getRequiredAddress(), 9155));
+			assertThat(NetworkUtils.isListen(settings.getRequiredAddress(), 9155));
 		}));
 	}
 
@@ -151,7 +149,7 @@ abstract class AbstractLocalCassandraTests {
 		this.factory.setStoragePort(8555);
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
 		new CassandraRunner(this.factory)
-				.run(cassandra -> assertThat(isListen(InetAddress.getLoopbackAddress(), 8555))
+				.run(cassandra -> assertThat(NetworkUtils.isListen(InetAddress.getLoopbackAddress(), 8555))
 						.describedAs("Storage port is not busy")
 						.isTrue());
 	}
@@ -239,16 +237,6 @@ abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(this.factory.create());
 		runner.run(assertCreateKeyspace());
 		runner.run(assertDeleteKeyspace());
-	}
-
-	private static boolean isListen(InetAddress address, int port) {
-		try (Socket s = new Socket()) {
-			s.connect(new InetSocketAddress(address, port), 1000);
-			return true;
-		}
-		catch (IOException ex) {
-			return false;
-		}
 	}
 
 	private static InetAddress getAddressByInterface(String interfaceName, boolean useIpv6) {

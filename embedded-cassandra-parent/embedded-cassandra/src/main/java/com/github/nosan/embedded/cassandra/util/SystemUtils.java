@@ -19,8 +19,6 @@ package com.github.nosan.embedded.cassandra.util;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -98,29 +96,11 @@ public abstract class SystemUtils {
 
 	@Nullable
 	private static String getValue(String name) {
-		String value = getSystemProperty(name);
+		String value = System.getProperty(name);
 		if (value == null) {
-			value = getEnvironmentProperty(name);
+			value = System.getenv(name);
 		}
 		return value;
-	}
-
-	@Nullable
-	private static String getSystemProperty(String name) {
-		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty(name));
-		}
-		return System.getProperty(name);
-	}
-
-	@Nullable
-	private static String getEnvironmentProperty(String name) {
-		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			return AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getenv(name));
-		}
-		return System.getenv(name);
 	}
 
 }

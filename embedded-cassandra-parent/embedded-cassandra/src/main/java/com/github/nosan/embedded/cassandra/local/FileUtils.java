@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.util;
+package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -34,7 +34,7 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-public abstract class FileUtils {
+abstract class FileUtils {
 
 	/**
 	 * Delete the supplied {@link Path}. For directories, recursively delete any nested directories or files as well.
@@ -43,7 +43,7 @@ public abstract class FileUtils {
 	 * @return {@code true} if the {@code path} existed and was deleted, or {@code false} it it did not exist
 	 * @throws IOException in the case of I/O errors
 	 */
-	public static boolean delete(@Nullable Path path) throws IOException {
+	static boolean delete(@Nullable Path path) throws IOException {
 		if (path == null) {
 			return false;
 		}
@@ -79,7 +79,7 @@ public abstract class FileUtils {
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.3.0
 	 */
-	public static void copy(Path src, Path dest, Predicate<? super Path> filter) throws IOException {
+	static void copy(Path src, Path dest, Predicate<? super Path> filter) throws IOException {
 		Objects.requireNonNull(src, "Source must not be null");
 		Objects.requireNonNull(dest, "Destination must not be null");
 		Objects.requireNonNull(filter, "Filter must not be null");
