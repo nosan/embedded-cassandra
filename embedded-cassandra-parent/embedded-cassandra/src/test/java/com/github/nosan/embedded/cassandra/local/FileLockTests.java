@@ -28,8 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.compress.utils.IOUtils;
+import org.assertj.core.description.Description;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,30 +43,47 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class FileLockTests {
 
+	private static final Logger log = LoggerFactory.getLogger(FileLockTests.class);
+
 	public static void main(String[] args) throws Exception {
 		Path lockFile = Paths.get(args[0]);
 		try (FileLock fileLock = new FileLock(lockFile)) {
 			fileLock.lock();
 			Path file = Paths.get(args[1]);
+			log.info("Current count : {}", Long.parseLong(readFromFile(file)));
 			writeToFile(file, Long.parseLong(readFromFile(file)) + 1);
+			log.info("New count : {}", Long.parseLong(readFromFile(file)));
 		}
 	}
 
-	@RepeatedTest(5)
+	@RepeatedTest(10)
 	void shouldSynchronizeCodeViaFile(@TempDir Path folder) throws Exception {
 		Path fileLock = folder.resolve("file.txt.lock");
 		Path file = folder.resolve("file.txt");
 		writeToFile(file, 0);
 		List<Process> processes = new ArrayList<>();
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 5; i++) {
 			processes.add(runProcess(folder, fileLock, file));
 		}
 		for (Process process : processes) {
 			int exit = process.waitFor();
-			assertThat(exit).describedAs(String.format("Process exit code %s. %n%s", exit, readFromProcess(process)))
-					.isZero();
+			assertThat(exit).describedAs(new Description() {
+
+				@Override
+				public String value() {
+					return String.format("%nProcess exit code %s. %n%s", exit, readFromProcess(process));
+				}
+
+			}).isZero();
 		}
-		assertThat(Long.parseLong(readFromFile(file))).describedAs(readFromProcess(processes)).isEqualTo(3);
+		assertThat(Long.parseLong(readFromFile(file))).describedAs(new Description() {
+
+			@Override
+			public String value() {
+				return String.format("%n%s", readFromProcesses(processes));
+			}
+
+		}).isEqualTo(5);
 	}
 
 	private static Process runProcess(Path folder, Path lockFile, Path file) throws IOException {
@@ -83,7 +103,6 @@ class FileLockTests {
 		builder.command().add(lockFile.toAbsolutePath().toString());
 		builder.command().add(file.toAbsolutePath().toString());
 		return builder.start();
-
 	}
 
 	private static void writeToFile(Path file, Object value) throws IOException {
@@ -99,7 +118,7 @@ class FileLockTests {
 		}
 	}
 
-	private static String readFromProcess(List<Process> processes) {
+	private static String readFromProcesses(List<Process> processes) {
 		StringBuilder builder = new StringBuilder();
 		for (Process process : processes) {
 			builder.append(process).append(String.format("%n")).append(readFromProcess(process))
