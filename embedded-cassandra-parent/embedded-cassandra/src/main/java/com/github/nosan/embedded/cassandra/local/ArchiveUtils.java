@@ -191,22 +191,22 @@ abstract class ArchiveUtils {
 		}
 
 		/**
-		 * Sets the file mode onto the given file.
+		 * Sets the file mode onto the given path.
 		 *
 		 * @param entry the archive entry that holds the mode
-		 * @param file the file to apply the mode onto
+		 * @param path the path to apply the mode onto
 		 */
-		static void set(ArchiveEntry entry, Path file) {
+		static void set(ArchiveEntry entry, Path path) {
 			if (!SystemUtils.isWindows()) {
 				long mode = getMode(entry) & MASK;
 				if (mode > 0) {
 					Set<PosixFilePermission> permissions = getPermissions(mode);
 					try {
-						Files.setPosixFilePermissions(file, permissions);
+						Files.setPosixFilePermissions(path, permissions);
 					}
 					catch (Exception ex) {
 						if (log.isDebugEnabled()) {
-							log.error(String.format("Can not set permission(s) '%s' to '%s'", permissions, file), ex);
+							log.error(String.format("Can not set permission(s) '%s' to '%s'", permissions, path), ex);
 						}
 					}
 				}
