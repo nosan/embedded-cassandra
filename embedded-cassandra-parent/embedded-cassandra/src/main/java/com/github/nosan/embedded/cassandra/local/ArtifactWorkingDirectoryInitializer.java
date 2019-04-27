@@ -78,18 +78,26 @@ class ArtifactWorkingDirectoryInitializer {
 	private static void extract(Artifact artifact, Path artifactDirectory, String artifactName) throws IOException {
 		Objects.requireNonNull(artifact, "Artifact must not be null");
 		Path archiveFile = artifact.getArchive();
-		log.info("Extract '{}' into the '{}'.", archiveFile, artifactDirectory);
+		if (log.isDebugEnabled()) {
+			log.debug("Extract '{}' into the '{}'.", archiveFile, artifactDirectory);
+		}
 		ArchiveUtils.extract(archiveFile, artifactDirectory);
 		requireSingleDirectory(artifactDirectory);
 		createFile(artifactDirectory.resolve(artifactName));
-		log.info("'{}' archive is extracted into the '{}'", archiveFile, artifactDirectory);
+		if (log.isDebugEnabled()) {
+			log.debug("'{}' archive is extracted into the '{}'", archiveFile, artifactDirectory);
+		}
 	}
 
 	private static void copy(Path artifactDirectory, Path workingDirectory, String artifactName) throws IOException {
-		log.info("Copy '{}' folder into the '{}'.", artifactDirectory, workingDirectory);
+		if (log.isDebugEnabled()) {
+			log.debug("Copy '{}' folder into the '{}'.", artifactDirectory, workingDirectory);
+		}
 		Files.createDirectories(workingDirectory);
 		FileUtils.copy(artifactDirectory, workingDirectory, path -> shouldCopy(artifactDirectory, path, artifactName));
-		log.info("'{}' folder is copied into the '{}'", artifactDirectory, workingDirectory);
+		if (log.isDebugEnabled()) {
+			log.debug("'{}' folder is copied into the '{}'", artifactDirectory, workingDirectory);
+		}
 	}
 
 	private static boolean shouldCopy(Path src, Path srcPath, String artifactName) {
