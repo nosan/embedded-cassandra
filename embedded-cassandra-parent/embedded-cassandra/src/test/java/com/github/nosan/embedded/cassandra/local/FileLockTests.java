@@ -93,8 +93,8 @@ class FileLockTests {
 	}
 
 	private static void writeToFile(Path file, Object value) throws IOException {
-		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(file, StandardOpenOption.WRITE,
-				StandardOpenOption.CREATE))) {
+		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(file,
+				StandardCharsets.UTF_8, StandardOpenOption.WRITE, StandardOpenOption.CREATE))) {
 			writer.print(value);
 		}
 	}
