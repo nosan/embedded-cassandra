@@ -43,19 +43,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class FileLockTests {
 
-	private static final Logger log = LoggerFactory.getLogger(FileLockTests.class);
-
-	public static void main(String[] args) throws Exception {
-		Path lockFile = Paths.get(args[0]);
-		try (FileLock fileLock = new FileLock(lockFile)) {
-			fileLock.lock();
-			Path file = Paths.get(args[1]);
-			log.info("Current count : {}", Long.parseLong(readFromFile(file)));
-			writeToFile(file, Long.parseLong(readFromFile(file)) + 1);
-			log.info("New count : {}", Long.parseLong(readFromFile(file)));
-		}
-	}
-
 	@RepeatedTest(10)
 	void shouldSynchronizeCodeViaFile(@TempDir Path folder) throws Exception {
 		Path fileLock = folder.resolve("file.txt.lock");
@@ -99,7 +86,7 @@ class FileLockTests {
 		}
 		builder.command().add("-cp");
 		builder.command().add(System.getProperty("java.class.path"));
-		builder.command().add(FileLockTests.class.getCanonicalName());
+		builder.command().add(Suite.class.getTypeName());
 		builder.command().add(lockFile.toAbsolutePath().toString());
 		builder.command().add(file.toAbsolutePath().toString());
 		return builder.start();
@@ -131,6 +118,23 @@ class FileLockTests {
 		StringBuilder builder = new StringBuilder();
 		ProcessUtils.read(process, line -> builder.append(line).append(System.lineSeparator()));
 		return builder.toString();
+	}
+
+	static final class Suite {
+
+		private static final Logger log = LoggerFactory.getLogger(Suite.class);
+
+		public static void main(String[] args) throws Exception {
+			Path lockFile = Paths.get(args[0]);
+			try (FileLock fileLock = new FileLock(lockFile)) {
+				fileLock.lock();
+				Path file = Paths.get(args[1]);
+				log.info("Current count : {}", Long.parseLong(readFromFile(file)));
+				writeToFile(file, Long.parseLong(readFromFile(file)) + 1);
+				log.info("New count : {}", Long.parseLong(readFromFile(file)));
+			}
+		}
+
 	}
 
 }
