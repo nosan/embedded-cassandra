@@ -210,14 +210,6 @@ public class TestCassandra implements Cassandra {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
 		ClassLoader classLoader = getClass().getClassLoader();
 		Settings settings = getSettings();
-		if (!settings.getAddress().isPresent()) {
-			throw new IllegalStateException(String.format("There is no way to execute '%s'. Address is not present",
-					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(","))));
-		}
-		if (!settings.getPort().isPresent()) {
-			throw new IllegalStateException(String.format("There is no way to execute '%s'. Port is not present",
-					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(","))));
-		}
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, classLoader)) {
 			try (CqlSession session = new CqlSessionFactory().create(settings)) {
 				CqlSessionUtils.execute(session, scripts);
