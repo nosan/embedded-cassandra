@@ -109,7 +109,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	private void executeScripts(String name, ApplicationContext applicationContext, CqlScript... scripts) {
-		ClassLoader classLoader = applicationContext.getClassLoader();
+		ClassLoader classLoader = getClass().getClassLoader();
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, classLoader)) {
 			CqlSessionUtils.execute(getSession(name, applicationContext, CqlSession.class), scripts);
 		}
