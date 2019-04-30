@@ -67,7 +67,7 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	int kill(ProcessId processId) throws InterruptedException {
 		long pid = processId.getPid();
 		if (pid != -1) {
-			return new RunProcess(newBuilder().command("kill", "-SIGINT", Long.toString(pid)))
+			return new RunProcess(newBuilder().command("kill", "-SIGKILL", Long.toString(pid)))
 					.runAndWait(this.threadFactory, this.log::info);
 		}
 		return -1;
