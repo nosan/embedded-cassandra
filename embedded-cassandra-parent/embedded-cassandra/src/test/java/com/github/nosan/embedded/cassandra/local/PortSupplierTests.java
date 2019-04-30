@@ -38,14 +38,14 @@ class PortSupplierTests {
 		try (PortSupplier portSupplier = new PortSupplier(address)) {
 			for (int i = 0; i < 20; i++) {
 				Integer port = portSupplier.get();
-				assertThat(NetworkUtils.isListen(address, port)).describedAs("Port %d is not busy").isTrue();
+				assertThat(NetworkUtils.isListen(address, port)).describedAs("Port %d is not busy", port).isTrue();
 				ports.add(port);
 			}
 		}
 		assertThat(ports).hasSize(20);
 		Thread.sleep(250);
 		for (Integer port : ports) {
-			assertThat(NetworkUtils.isListen(address, port)).describedAs("Port %d is busy").isFalse();
+			assertThat(NetworkUtils.isListen(address, port)).describedAs("Port %d is busy", port).isFalse();
 		}
 	}
 
