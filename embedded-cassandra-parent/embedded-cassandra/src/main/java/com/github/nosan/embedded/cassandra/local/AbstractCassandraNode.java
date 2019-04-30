@@ -54,17 +54,23 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final AtomicLong counter = new AtomicLong();
 
-	private static final Pattern RPC_TRANSPORT_NOT_STARTING_PATTERN = Pattern
-			.compile("(?i).*not\\s*starting\\s*rpc\\s*server.*");
+	private static final Pattern TRANSPORT_START_PATTERN = Pattern
+			.compile("(?i).*listening\\s*for\\s*cql\\s*clients\\s*on.*/(.+):(\\d+).*");
 
-	private static final Pattern TRANSPORT_NOT_STARTING_PATTERN = Pattern
+	private static final Pattern TRANSPORT_STOP_PATTERN = Pattern
+			.compile("(?i).*stop\\s*listening\\s*for\\s*cql\\s*clients.*");
+
+	private static final Pattern TRANSPORT_NOT_START_PATTERN = Pattern
 			.compile("(?i).*((not\\s*starting\\s*client\\s*transports)|(not\\s*starting\\s*native\\s*transport)).*");
 
-	private static final Pattern RPC_TRANSPORT_PATTERN = Pattern
+	private static final Pattern RPC_TRANSPORT_NOT_START_PATTERN = Pattern
+			.compile("(?i).*not\\s*starting\\s*rpc\\s*server.*");
+
+	private static final Pattern RPC_TRANSPORT_START_PATTERN = Pattern
 			.compile("(?i).*binding\\s*thrift\\s*service\\s*to.*/(.+):(\\d+).*");
 
-	private static final Pattern TRANSPORT_PATTERN = Pattern
-			.compile("(?i).*listening\\s*for\\s*cql\\s*clients\\s*on.*/(.+):(\\d+).*");
+	private static final Pattern RPC_TRANSPORT_STOP_PATTERN = Pattern
+			.compile("(?i).*stop\\s*listening\\s*to\\s*thrift\\s*clients.*");
 
 	private static final String ENCRYPTED = "(encrypted)";
 
@@ -252,7 +258,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	private void parse(String line, NodeSettings settings) {
-		onMatch(TRANSPORT_PATTERN, line, matcher -> {
+		onMatch(TRANSPORT_START_PATTERN, line, matcher -> {
 			onAddress(matcher.group(1), settings::setAddress);
 			onPort(matcher.group(2), port -> {
 				if (line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED)) {
@@ -264,13 +270,22 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			});
 			settings.setTransportStarted(true);
 		});
-		onMatch(RPC_TRANSPORT_PATTERN, line, matcher -> {
-			onAddress(matcher.group(1), settings::setAddress);
+		onAnyMatch(new Pattern[]{TRANSPORT_NOT_START_PATTERN, TRANSPORT_STOP_PATTERN}, line, matcher -> {
+			settings.setAddress(null);
+			settings.setPort(null);
+			settings.setSslPort(null);
+			settings.setTransportStarted(false);
+		});
+		onMatch(RPC_TRANSPORT_START_PATTERN, line, matcher -> {
+			onAddress(matcher.group(1), settings::setRpcAddress);
 			onPort(matcher.group(2), settings::setRpcPort);
 			settings.setRpcTransportStarted(true);
 		});
-		onMatch(TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> settings.setTransportStarted(false));
-		onMatch(RPC_TRANSPORT_NOT_STARTING_PATTERN, line, matcher -> settings.setRpcTransportStarted(false));
+		onAnyMatch(new Pattern[]{RPC_TRANSPORT_NOT_START_PATTERN, RPC_TRANSPORT_STOP_PATTERN}, line, matcher -> {
+			settings.setRpcAddress(null);
+			settings.setRpcPort(null);
+			settings.setRpcTransportStarted(false);
+		});
 	}
 
 	private void onAddress(String address, Consumer<InetAddress> addressConsumer) {
@@ -295,6 +310,16 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		Matcher matcher = pattern.matcher(line);
 		if (matcher.matches()) {
 			matcherConsumer.accept(matcher);
+		}
+	}
+
+	private void onAnyMatch(Pattern[] patterns, String line, Consumer<Matcher> matcherConsumer) {
+		for (Pattern pattern : patterns) {
+			Matcher matcher = pattern.matcher(line);
+			if (matcher.matches()) {
+				matcherConsumer.accept(matcher);
+				return;
+			}
 		}
 	}
 

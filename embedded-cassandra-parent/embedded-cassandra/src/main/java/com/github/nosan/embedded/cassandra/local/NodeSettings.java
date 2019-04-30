@@ -38,6 +38,9 @@ class NodeSettings implements Settings {
 	private volatile InetAddress address;
 
 	@Nullable
+	private volatile InetAddress rpcAddress;
+
+	@Nullable
 	private volatile Integer port;
 
 	@Nullable
@@ -63,7 +66,11 @@ class NodeSettings implements Settings {
 
 	@Override
 	public Optional<InetAddress> getAddress() {
-		return Optional.ofNullable(this.address);
+		InetAddress address = this.address;
+		if (address != null) {
+			return Optional.of(address);
+		}
+		return Optional.ofNullable(this.rpcAddress);
 	}
 
 	/**
@@ -119,12 +126,12 @@ class NodeSettings implements Settings {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", getClass().getSimpleName() + " [", "]")
-				.add("version=" + this.version)
-				.add("address=" + this.address)
-				.add("port=" + this.port)
-				.add("sslPort=" + this.sslPort)
-				.add("rpcPort=" + this.rpcPort)
+		return new StringJoiner(", ", NodeSettings.class.getSimpleName() + " [", "]")
+				.add("version=" + getVersion())
+				.add("address=" + getAddress().orElse(null))
+				.add("port=" + getPort().orElse(null))
+				.add("sslPort=" + getSslPort().orElse(null))
+				.add("rpcPort=" + getRpcPort().orElse(null))
 				.toString();
 	}
 
@@ -162,6 +169,15 @@ class NodeSettings implements Settings {
 	 */
 	void setTransportStarted(@Nullable Boolean transportStarted) {
 		this.transportStarted = transportStarted;
+	}
+
+	/**
+	 * Initializes the value for the rpc address attribute.
+	 *
+	 * @param rpcAddress The value for rpcAddress
+	 */
+	void setRpcAddress(@Nullable InetAddress rpcAddress) {
+		this.rpcAddress = rpcAddress;
 	}
 
 }

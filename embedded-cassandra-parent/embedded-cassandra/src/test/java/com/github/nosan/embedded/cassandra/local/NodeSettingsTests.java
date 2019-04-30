@@ -49,6 +49,14 @@ class NodeSettingsTests {
 	}
 
 	@Test
+	void getRequiredAddressRpc() {
+		assertThatThrownBy(this.settings::getRequiredAddress).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Address is not present");
+		this.settings.setRpcAddress(InetAddress.getLoopbackAddress());
+		assertThat(this.settings.getRequiredAddress()).isEqualTo(InetAddress.getLoopbackAddress());
+	}
+
+	@Test
 	void getRequiredPort() {
 		assertThatThrownBy(this.settings::getRequiredPort).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("Port is not present");
