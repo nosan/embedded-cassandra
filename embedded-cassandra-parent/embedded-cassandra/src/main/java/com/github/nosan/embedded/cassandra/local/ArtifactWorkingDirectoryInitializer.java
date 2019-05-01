@@ -17,9 +17,9 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -61,107 +61,73 @@ class ArtifactWorkingDirectoryInitializer {
 	 */
 	void initialize(Path workingDirectory, Version version) throws IOException {
 		Path artifactDirectory = this.artifactDirectory;
-		String artifactName = getArtifactName(version);
-		if (hasNotExtracted(artifactDirectory, artifactName)) {
+		Path artifactFile = artifactDirectory.resolve(String.format(".artifact.%s", version));
+		if (!Files.exists(artifactFile)) {
 			Files.createDirectories(artifactDirectory);
-			Path lockFile = artifactDirectory.resolve(String.format("%s.lock", artifactName));
+			Path lockFile = artifactDirectory.resolve(String.format("%s.lock", artifactFile.getFileName()));
 			try (FileLock fileLock = new FileLock(lockFile)) {
 				fileLock.lock();
-				if (hasNotExtracted(artifactDirectory, artifactName)) {
-					extract(this.artifactFactory.create(version), artifactDirectory, artifactName);
+				if (!Files.exists(artifactFile)) {
+					extract(this.artifactFactory.create(version), artifactDirectory);
+					findCassandraHome(artifactDirectory);
+					Files.createFile(artifactFile);
 				}
 			}
 		}
-		copy(requireSingleDirectory(artifactDirectory), workingDirectory, artifactName);
+		copy(findCassandraHome(artifactDirectory), workingDirectory);
 	}
 
-	private static void extract(Artifact artifact, Path artifactDirectory, String artifactName) throws IOException {
+	private void extract(Artifact artifact, Path artifactDirectory) throws IOException {
 		Objects.requireNonNull(artifact, "Artifact must not be null");
 		Path archiveFile = artifact.getArchive();
-		if (log.isDebugEnabled()) {
-			log.debug("Extract '{}' into the '{}'.", archiveFile, artifactDirectory);
-		}
 		ArchiveUtils.extract(archiveFile, artifactDirectory);
-		requireSingleDirectory(artifactDirectory);
-		createFile(artifactDirectory.resolve(artifactName));
 		if (log.isDebugEnabled()) {
-			log.debug("'{}' archive is extracted into the '{}'", archiveFile, artifactDirectory);
+			log.debug("Archive '{}' was extracted into the '{}'", archiveFile, artifactDirectory);
 		}
 	}
 
-	private static void copy(Path artifactDirectory, Path workingDirectory, String artifactName) throws IOException {
-		if (log.isDebugEnabled()) {
-			log.debug("Copy '{}' folder into the '{}'.", artifactDirectory, workingDirectory);
-		}
+	private void copy(Path cassandraHome, Path workingDirectory) throws IOException {
 		Files.createDirectories(workingDirectory);
-		FileUtils.copy(artifactDirectory, workingDirectory, path -> shouldCopy(artifactDirectory, path, artifactName));
+		FileUtils.copy(cassandraHome, workingDirectory, this::skipDocs);
 		if (log.isDebugEnabled()) {
-			log.debug("'{}' folder is copied into the '{}'", artifactDirectory, workingDirectory);
+			log.debug("Folder '{}' was recursively copied into the '{}'", cassandraHome, workingDirectory);
 		}
 	}
 
-	private static boolean shouldCopy(Path src, Path srcPath, String artifactName) {
-		if (Files.isDirectory(srcPath)) {
-			String name = src.relativize(srcPath).getName(0).toString().toLowerCase(Locale.ENGLISH);
+	private boolean skipDocs(Path path, BasicFileAttributes attributes) {
+		if (attributes.isDirectory()) {
+			String name = path.getFileName().toString().toLowerCase(Locale.ENGLISH);
 			return !name.equals("javadoc") && !name.equals("doc");
 		}
-		return !artifactName.equals(srcPath.getFileName().toString());
+		return true;
 	}
 
-	private static boolean hasNotExtracted(Path directory, String artifactName) {
-		try {
-			return !Files.exists(directory.resolve(artifactName));
-		}
-		catch (Exception ex) {
-			return true;
-		}
-	}
-
-	private static Path requireSingleDirectory(Path directory) throws IOException {
-		try (Stream<Path> stream = Files.find(directory, 1, (path, attributes) -> {
-			Path bin = path.resolve("bin");
-			Path lib = path.resolve("lib");
-			Path conf = path.resolve("conf");
-			Path configuration = conf.resolve("cassandra.yaml");
-			return getCount(bin) > 0 && getCount(lib) > 0 && getCount(conf) > 0 && Files.exists(configuration);
-		})) {
-
+	private Path findCassandraHome(Path artifactDirectory) throws IOException {
+		try (Stream<Path> stream = Files.find(artifactDirectory, 1, this::isCassandraHome)) {
 			Set<Path> directories = stream.collect(Collectors.toSet());
-
 			if (directories.isEmpty()) {
 				throw new IllegalStateException(
-						String.format("'%s' does not have the Apache Cassandra files.", directory));
+						String.format("'%s' does not have the Apache Cassandra files.", artifactDirectory));
 			}
-
 			if (directories.size() > 1) {
 				throw new IllegalStateException(String.format(
 						"Impossible to determine the Apache Cassandra directory. There are '%s' candidates : '%s'",
 						directories.size(), directories));
 			}
-
 			return directories.iterator().next();
 		}
 	}
 
-	private static long getCount(Path path) {
-		try (Stream<Path> list = Files.list(path)) {
-			return list.count();
+	private boolean isCassandraHome(Path path, BasicFileAttributes attributes) {
+		if (attributes.isDirectory()) {
+			Path bin = path.resolve("bin");
+			Path lib = path.resolve("lib");
+			Path conf = path.resolve("conf");
+			Path configuration = conf.resolve("cassandra.yaml");
+			return Files.isDirectory(bin) && Files.isDirectory(lib) && Files.isDirectory(conf)
+					&& Files.isRegularFile(configuration);
 		}
-		catch (IOException ex) {
-			return 0;
-		}
-	}
-
-	private static String getArtifactName(Version version) {
-		return String.format(".artifact.%s", version);
-	}
-
-	private static void createFile(Path file) throws IOException {
-		try {
-			Files.createFile(file);
-		}
-		catch (FileAlreadyExistsException ignored) {
-		}
+		return false;
 	}
 
 }

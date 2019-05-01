@@ -79,7 +79,7 @@ class FileUtilsTests {
 
 		assertThat(src).exists();
 		assertThat(dest).doesNotExist();
-		FileUtils.copy(src, dest, path -> true);
+		FileUtils.copy(src, dest, (path, attrs) -> true);
 		assertThat(dest).exists();
 	}
 
@@ -94,7 +94,7 @@ class FileUtilsTests {
 		assertThat(src).exists();
 		assertThat(dest).doesNotExist();
 
-		FileUtils.copy(src, dest, path -> true);
+		FileUtils.copy(src, dest, (path, attrs) -> true);
 
 		assertThat(dest).exists();
 		assertThat(dest.resolve(folder.getFileName())).exists();
@@ -109,7 +109,7 @@ class FileUtilsTests {
 
 		assertThat(src).exists();
 		assertThat(dest).doesNotExist();
-		FileUtils.copy(src, dest, p -> false);
+		FileUtils.copy(src, dest, (path, attrs) -> false);
 		assertThat(dest).doesNotExist();
 	}
 
@@ -124,7 +124,7 @@ class FileUtilsTests {
 		assertThat(src).exists();
 		assertThat(dest).doesNotExist();
 
-		FileUtils.copy(src, dest, p -> false);
+		FileUtils.copy(src, dest, (path, attrs) -> false);
 
 		assertThat(dest).doesNotExist();
 		assertThat(dest.resolve(folder.getFileName())).doesNotExist();

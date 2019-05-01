@@ -24,7 +24,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
@@ -73,22 +73,23 @@ abstract class FileUtils {
 	/**
 	 * Recursively copy the contents of the {@code src} file/directory to the {@code dest} file/directory.
 	 *
-	 * @param src the source path
-	 * @param dest the destination path
-	 * @param filter the filter to check whether the {@code path} should be copied or not
+	 * @param source the source path
+	 * @param destination the destination path
+	 * @param matcher the function used to decide whether a path should be copied or not
 	 * @throws IOException in the case of I/O errors
 	 * @since 1.3.0
 	 */
-	static void copy(Path src, Path dest, Predicate<? super Path> filter) throws IOException {
-		Objects.requireNonNull(src, "Source must not be null");
-		Objects.requireNonNull(dest, "Destination must not be null");
-		Objects.requireNonNull(filter, "Filter must not be null");
-		Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
+	static void copy(Path source, Path destination,
+			BiPredicate<? super Path, ? super BasicFileAttributes> matcher) throws IOException {
+		Objects.requireNonNull(source, "Source must not be null");
+		Objects.requireNonNull(destination, "Destination must not be null");
+		Objects.requireNonNull(matcher, "Matcher must not be null");
+		Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
 
 			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				if (filter.test(dir)) {
-					Files.createDirectories(dest.resolve(src.relativize(dir)));
+			public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attrs) throws IOException {
+				if (matcher.test(directory, attrs)) {
+					Files.createDirectories(destination.resolve(source.relativize(directory)));
 					return FileVisitResult.CONTINUE;
 				}
 				return FileVisitResult.SKIP_SUBTREE;
@@ -96,8 +97,8 @@ abstract class FileUtils {
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
-				if (filter.test(file)) {
-					Files.copy(file, dest.resolve(src.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+				if (matcher.test(file, attributes)) {
+					Files.copy(file, destination.resolve(source.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
 				}
 				return FileVisitResult.CONTINUE;
 			}
