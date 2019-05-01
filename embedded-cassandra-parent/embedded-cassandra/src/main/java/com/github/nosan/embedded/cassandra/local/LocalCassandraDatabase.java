@@ -96,10 +96,8 @@ class LocalCassandraDatabase implements CassandraDatabase {
 		log.info("Initialize Apache Cassandra '{}'. It takes a while...", getVersion());
 		long start = System.currentTimeMillis();
 		Path workingDirectory = this.workingDirectory;
-		ArtifactFactory artifactFactory = this.artifactFactory;
-		Path artifactDirectory = this.artifactDirectory;
 		ArtifactWorkingDirectoryInitializer artifactWorkingDirectoryInitializer =
-				new ArtifactWorkingDirectoryInitializer(artifactFactory, artifactDirectory);
+				new ArtifactWorkingDirectoryInitializer(this.artifactFactory, this.artifactDirectory);
 		artifactWorkingDirectoryInitializer.initialize(workingDirectory, getVersion());
 		for (WorkingDirectoryCustomizer workingDirectoryCustomizer : this.workingDirectoryCustomizers) {
 			workingDirectoryCustomizer.customize(workingDirectory, getVersion());
