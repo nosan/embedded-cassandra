@@ -19,12 +19,12 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -43,13 +43,13 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 	public void customize(Path workingDirectory, Version version) throws IOException {
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
 		Map<Object, Object> properties = getProperties(file);
-		try (TrackPortSupplier supplier = new TrackPortSupplier(NetworkUtils.getLocalhost())) {
+		try (PortSupplierDelegate supplier = new PortSupplierDelegate()) {
 			setPort("native_transport_port", properties, supplier);
 			setPort("native_transport_port_ssl", properties, supplier);
 			setPort("rpc_port", properties, supplier);
 			setPort("storage_port", properties, supplier);
 			setPort("ssl_storage_port", properties, supplier);
-			if (supplier.isCalled()) {
+			if (supplier.isCall()) {
 				try (BufferedWriter writer = Files.newBufferedWriter(file)) {
 					new Yaml().dump(properties, writer);
 				}
@@ -65,7 +65,7 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		return Optional.ofNullable(properties.get(name)).map(Object::toString);
 	}
 
-	private static void setPort(String name, Map<Object, Object> properties, TrackPortSupplier supplier) {
+	private static void setPort(String name, Map<Object, Object> properties, PortSupplierDelegate supplier) {
 		getInteger(name, properties).filter(port -> port == 0)
 				.ifPresent(port -> properties.put(name, supplier.get()));
 	}
@@ -77,22 +77,29 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		}
 	}
 
-	private static final class TrackPortSupplier extends PortSupplier {
+	private static final class PortSupplierDelegate implements Supplier<Integer>, AutoCloseable {
 
-		private boolean called = false;
+		private final PortSupplier supplier;
 
-		private TrackPortSupplier(InetAddress inetAddress) {
-			super(inetAddress);
+		private boolean call = false;
+
+		PortSupplierDelegate() {
+			this.supplier = new PortSupplier(NetworkUtils.getLocalhost());
 		}
 
 		@Override
 		public Integer get() {
-			this.called = true;
-			return super.get();
+			this.call = true;
+			return this.supplier.get();
 		}
 
-		boolean isCalled() {
-			return this.called;
+		@Override
+		public void close() {
+			this.supplier.close();
+		}
+
+		boolean isCall() {
+			return this.call;
 		}
 
 	}

@@ -36,8 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ConfigurationFileRandomPortCustomizerTests {
 
-	private final ConfigurationFileRandomPortCustomizer customizer =
-			new ConfigurationFileRandomPortCustomizer();
+	private final ConfigurationFileRandomPortCustomizer customizer = new ConfigurationFileRandomPortCustomizer();
 
 	@Test
 	void shouldReplaceZeroPortWithRandom(@TempDir Path temporaryFolder) throws Exception {

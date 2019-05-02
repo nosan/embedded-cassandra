@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
@@ -51,6 +52,7 @@ public final class DefaultThreadFactory implements ThreadFactory {
 
 	@Override
 	public Thread newThread(Runnable runnable) {
+		Objects.requireNonNull(runnable, "Runnable must not be null");
 		Map<String, String> context = MDC.getCopyOfContextMap();
 		Thread thread = new Thread(() -> {
 			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
