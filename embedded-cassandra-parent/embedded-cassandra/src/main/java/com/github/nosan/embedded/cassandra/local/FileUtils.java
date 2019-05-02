@@ -96,8 +96,8 @@ abstract class FileUtils {
 			}
 
 			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
-				if (matcher.test(file, attributes)) {
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				if (matcher.test(file, attrs)) {
 					Files.copy(file, destination.resolve(source.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
 				}
 				return FileVisitResult.CONTINUE;
