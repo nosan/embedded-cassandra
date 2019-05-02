@@ -22,7 +22,6 @@ import java.nio.channels.FileLockInterruptionException;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -57,7 +56,7 @@ class FileLock implements AutoCloseable {
 	 * @param file the lock file.
 	 */
 	FileLock(Path file) {
-		this.file = Objects.requireNonNull(file, "File must not be null");
+		this.file = file;
 	}
 
 	/**

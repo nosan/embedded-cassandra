@@ -68,7 +68,7 @@ class ArtifactWorkingDirectoryInitializer {
 			try (FileLock fileLock = new FileLock(lockFile)) {
 				fileLock.lock();
 				if (!Files.exists(artifactFile)) {
-					extract(this.artifactFactory.create(version), artifactDirectory);
+					extract(getArchive(version), artifactDirectory);
 					findCassandraHome(artifactDirectory);
 					Files.createFile(artifactFile);
 				}
@@ -77,9 +77,15 @@ class ArtifactWorkingDirectoryInitializer {
 		copy(findCassandraHome(artifactDirectory), workingDirectory);
 	}
 
-	private void extract(Artifact artifact, Path artifactDirectory) throws IOException {
+	private Path getArchive(Version version) throws IOException {
+		Artifact artifact = this.artifactFactory.create(version);
 		Objects.requireNonNull(artifact, "Artifact must not be null");
 		Path archiveFile = artifact.getArchive();
+		Objects.requireNonNull(archiveFile, "Archive File must not be null");
+		return archiveFile;
+	}
+
+	private void extract(Path archiveFile, Path artifactDirectory) throws IOException {
 		ArchiveUtils.extract(archiveFile, artifactDirectory);
 		if (log.isDebugEnabled()) {
 			log.debug("Archive '{}' was extracted into the '{}'", archiveFile, artifactDirectory);

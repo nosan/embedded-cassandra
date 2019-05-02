@@ -25,7 +25,6 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -78,8 +77,6 @@ abstract class ArchiveUtils {
 	 * @throws IOException in the case of I/O errors
 	 */
 	static void extract(Path archiveFile, Path destination) throws IOException {
-		Objects.requireNonNull(archiveFile, "Archive must not be null");
-		Objects.requireNonNull(destination, "Destination must not be null");
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
 		try (InputStream stream = Files.newInputStream(archiveFile);
 				ArchiveInputStream archiveStream = archiveFactory.create(stream)) {

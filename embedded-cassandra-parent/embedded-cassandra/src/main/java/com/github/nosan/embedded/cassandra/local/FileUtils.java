@@ -23,7 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Objects;
 import java.util.function.BiPredicate;
 
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
@@ -81,9 +80,6 @@ abstract class FileUtils {
 	 */
 	static void copy(Path source, Path destination,
 			BiPredicate<? super Path, ? super BasicFileAttributes> matcher) throws IOException {
-		Objects.requireNonNull(source, "Source must not be null");
-		Objects.requireNonNull(destination, "Destination must not be null");
-		Objects.requireNonNull(matcher, "Matcher must not be null");
 		Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
 
 			@Override
