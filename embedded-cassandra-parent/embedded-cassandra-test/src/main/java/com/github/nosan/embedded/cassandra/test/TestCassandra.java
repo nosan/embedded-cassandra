@@ -125,8 +125,7 @@ public class TestCassandra implements Cassandra {
 			}
 			catch (Throwable ex) {
 				stopCassandraSafely();
-				throw new CassandraException(String.format("Unable to start Test Apache Cassandra '%s'",
-						getVersion()), ex);
+				throw new CassandraException(String.format("Unable to start %s", toString()), ex);
 			}
 		}
 	}
@@ -153,8 +152,7 @@ public class TestCassandra implements Cassandra {
 				throw ex;
 			}
 			catch (Throwable ex) {
-				throw new CassandraException(String.format("Unable to stop Test Apache Cassandra '%s'",
-						getVersion()), ex);
+				throw new CassandraException(String.format("Unable to stop %s", toString()), ex);
 			}
 		}
 
@@ -197,7 +195,7 @@ public class TestCassandra implements Cassandra {
 
 	@Override
 	public String toString() {
-		return String.format("Test Apache Cassandra '%s'", getVersion());
+		return String.format("%s (%s)", getClass().getSimpleName(), this.cassandra);
 	}
 
 	/**
@@ -228,30 +226,26 @@ public class TestCassandra implements Cassandra {
 		}
 	}
 
-	private static void selfInterrupt() {
-		Thread.currentThread().interrupt();
-	}
-
 	private void startCassandra() {
 		if (log.isDebugEnabled()) {
-			log.debug("Start Test Apache Cassandra '{}'", getVersion());
+			log.debug("Start {}", toString());
 		}
 		this.cassandra.start();
 		if (!this.scripts.isEmpty()) {
 			executeScripts(this.scripts.toArray(new CqlScript[0]));
 		}
 		if (log.isDebugEnabled()) {
-			log.debug("Test Apache Cassandra '{}' is started", getVersion());
+			log.debug("{} is started", toString());
 		}
 	}
 
 	private void stopCassandra() {
 		if (log.isDebugEnabled()) {
-			log.debug("Stop Test Apache Cassandra '{}'", getVersion());
+			log.debug("Stop {}", toString());
 		}
 		this.cassandra.stop();
 		if (log.isDebugEnabled()) {
-			log.debug("Test Apache Cassandra '{}' is stopped", getVersion());
+			log.debug("{} is stopped", toString());
 		}
 	}
 
@@ -260,10 +254,11 @@ public class TestCassandra implements Cassandra {
 			stopCassandra();
 		}
 		catch (CassandraInterruptedException ex) {
-			selfInterrupt();
+			Thread.currentThread().interrupt();
+			log.error(String.format("Unable to stop %s. Cassandra was interrupted", toString()), ex);
 		}
 		catch (Throwable ex) {
-			log.error(String.format("Unable to stop Test Apache Cassandra '%s'", getVersion()), ex);
+			log.error(String.format("Unable to stop %s", toString()), ex);
 		}
 	}
 
