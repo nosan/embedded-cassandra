@@ -30,8 +30,7 @@ public interface Cassandra {
 	 * the current thread to wait, until the {@code Cassandra} has started.
 	 *
 	 * @throws CassandraException if the {@code Cassandra} cannot be started
-	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another
-	 * thread
+	 * @throws CassandraInterruptedException if the {@code Cassandra} was interrupted.
 	 */
 	void start() throws CassandraException, CassandraInterruptedException;
 
@@ -40,8 +39,7 @@ public interface Cassandra {
 	 * the current thread to wait, until the {@code Cassandra} has stopped.
 	 *
 	 * @throws CassandraException if the {@code Cassandra} cannot be stopped
-	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted}
-	 * by another thread
+	 * @throws CassandraInterruptedException if the {@code Cassandra} was interrupted.
 	 */
 	void stop() throws CassandraException, CassandraInterruptedException;
 
@@ -49,7 +47,7 @@ public interface Cassandra {
 	 * Returns the settings this {@code Cassandra} is running on.
 	 *
 	 * @return the settings
-	 * @throws IllegalStateException If the {@link Cassandra} is not running
+	 * @throws IllegalStateException If the {@code Cassandra} is not running
 	 */
 	Settings getSettings() throws IllegalStateException;
 
