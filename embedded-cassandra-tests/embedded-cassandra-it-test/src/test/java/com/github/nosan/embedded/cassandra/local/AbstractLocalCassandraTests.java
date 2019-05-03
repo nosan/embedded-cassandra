@@ -110,7 +110,7 @@ abstract class AbstractLocalCassandraTests {
 			thread.start();
 			Thread.sleep(2000);
 			thread.interrupt();
-			thread.join();
+			thread.join(5000);
 		});
 	}
 
@@ -181,7 +181,7 @@ abstract class AbstractLocalCassandraTests {
 		Cassandra cassandra = this.factory.create();
 		assertThat(cassandra.getState()).isEqualTo(Cassandra.State.NEW);
 		CassandraRunner runner = new CassandraRunner(cassandra);
-		runner.run(assertCreateKeyspace().andThen(unused -> {
+		runner.run(assertCreateKeyspace().andThen(c -> {
 			assertThat(cassandra.getState()).isEqualTo(Cassandra.State.STARTED);
 			cassandra.start();
 		}));
