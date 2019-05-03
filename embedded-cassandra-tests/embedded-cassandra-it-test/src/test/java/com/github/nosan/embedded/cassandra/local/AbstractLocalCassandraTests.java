@@ -42,6 +42,7 @@ import java.util.function.Predicate;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.apache.commons.compress.utils.IOUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraException;
@@ -72,8 +74,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith(CaptureOutputExtension.class)
 abstract class AbstractLocalCassandraTests {
 
-	private final Logger log = LoggerFactory.getLogger(getClass());
-
 	private final LocalCassandraFactory factory;
 
 	@Nullable
@@ -91,13 +91,20 @@ abstract class AbstractLocalCassandraTests {
 	void setUp(@TempDir Path temporaryFolder, CaptureOutput captureOutput) {
 		this.temporaryFolder = temporaryFolder;
 		this.output = captureOutput;
+		MDC.put("ID", UUID.randomUUID().toString());
+	}
+
+	@AfterEach
+	void tearDown() {
+		MDC.remove("ID");
 	}
 
 	@Test
 	void shouldInterruptStartup() {
 		Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
 			Cassandra cassandra = this.factory.create();
-			Thread thread = new Thread(cassandra::start);
+			DefaultThreadFactory factory = new DefaultThreadFactory("interrupt");
+			Thread thread = factory.newThread(cassandra::start);
 			thread.setUncaughtExceptionHandler((t, e) -> {
 			});
 			thread.start();
@@ -166,8 +173,7 @@ abstract class AbstractLocalCassandraTests {
 	@Test
 	void shouldOverrideJavaHome() {
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
-		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class)
-				.hasStackTraceContaining("Check JAVA_HOME");
+		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class);
 	}
 
 	@Test
@@ -207,18 +213,19 @@ abstract class AbstractLocalCassandraTests {
 				runner.run(assertCreateKeyspace());
 			}
 			catch (Throwable ex) {
+				Logger logger = LoggerFactory.getLogger(getClass().getName());
+				logger.error(ex.getMessage(), ex);
 				exceptions.add(ex);
 			}
 		};
-		Thread t = new Thread(runnable);
-		Thread t1 = new Thread(runnable);
+		DefaultThreadFactory factory = new DefaultThreadFactory("more-than-one");
+		Thread t = factory.newThread(runnable);
+		Thread t1 = factory.newThread(runnable);
 		t.start();
 		t1.start();
 		t.join();
 		t1.join();
-
-		exceptions.forEach(exception -> this.log.error(exception.getMessage(), exception));
-		assertThat(exceptions).isEmpty();
+		assertThat(exceptions).describedAs("See logs for more details").isEmpty();
 
 	}
 
