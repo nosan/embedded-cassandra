@@ -103,7 +103,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		this.workingDirectory = workingDirectory;
 		this.javaHome = javaHome;
 		this.jvmOptions = jvmOptions;
-		this.threadFactory = new DefaultThreadFactory(String.format("cassandra-%d-db", id));
+		this.threadFactory = new DefaultThreadFactory(String.format("cassandra:db-%d", id));
 	}
 
 	@Override
