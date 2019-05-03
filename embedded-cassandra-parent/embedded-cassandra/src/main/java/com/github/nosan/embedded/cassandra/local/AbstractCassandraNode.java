@@ -20,11 +20,13 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -118,7 +120,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 		ProcessId processId = start(environment);
 		this.processId = processId;
-		this.settings = getSettings(processId);
+		this.settings = awaitStart(processId);
 		this.log.info("Apache Cassandra Node '{}' is started", processId.getPid());
 	}
 
@@ -196,14 +198,21 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 */
 	abstract int kill(ProcessId processId) throws IOException, InterruptedException;
 
-	private NodeSettings getSettings(ProcessId processId) throws InterruptedException, IOException {
+	private NodeSettings awaitStart(ProcessId processId) throws InterruptedException, IOException {
 		Logger logger = LoggerFactory.getLogger(Cassandra.class);
 		NodeSettings settings = new NodeSettings(this.version);
 		Process process = processId.getProcess();
-		this.threadFactory.newThread(() -> ProcessUtils.read(process, line -> {
+		Deque<String> lines = new ConcurrentLinkedDeque<>();
+		Thread thread = this.threadFactory.newThread(() -> ProcessUtils.read(process, line -> {
+			if (lines.size() == 10) {
+				lines.removeFirst();
+			}
+			lines.addLast(line);
 			logger.info(line);
 			parse(line, settings);
-		})).start();
+		}));
+
+		thread.start();
 
 		long start = System.nanoTime();
 		Duration timeout = Duration.ofMinutes(2);
@@ -211,9 +220,16 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		do {
 			long pid = processId.getPid();
 			if (!process.isAlive()) {
+				try {
+					thread.join(1000);
+				}
+				catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
 				int exitValue = process.exitValue();
 				throw new IOException(String.format("Apache Cassandra Node '%s' is not alive. Exit code is '%s'."
-						+ " Please see logs for more details.", pid, exitValue));
+								+ " Please see logs for more details.%n%s", pid, exitValue,
+						String.join(System.lineSeparator(), lines)));
 			}
 			if (isStarted(settings)) {
 				return settings;

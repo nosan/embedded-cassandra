@@ -166,7 +166,8 @@ abstract class AbstractLocalCassandraTests {
 	@Test
 	void shouldOverrideJavaHome() {
 		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
-		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class);
+		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class)
+				.hasStackTraceContaining("Check JAVA_HOME");
 	}
 
 	@Test
