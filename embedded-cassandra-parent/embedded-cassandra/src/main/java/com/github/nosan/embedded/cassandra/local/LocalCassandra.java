@@ -76,20 +76,23 @@ class LocalCassandra implements Cassandra {
 			}
 			try {
 				this.state = State.STARTING;
-				startDatabase();
-				this.started = true;
+				execute(this.database::start, runnable -> {
+					Thread thread = this.threadFactory.newThread(runnable);
+					this.startThread = thread;
+					return thread;
+				});
 				this.state = State.STARTED;
+				this.started = true;
 			}
-			catch (InterruptedException | ClosedByInterruptException | FileLockInterruptionException ex) {
+			catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
 				this.state = State.START_INTERRUPTED;
 				stopDatabaseSafely();
-				throw new CassandraInterruptedException(ex);
+				throw new CassandraInterruptedException("Startup has interrupted", ex);
 			}
 			catch (Throwable ex) {
 				this.state = State.START_FAILED;
 				stopDatabaseSafely();
-				throw new CassandraException(String.format("Unable to start Apache Cassandra '%s'",
-						getVersion()), ex);
+				throw new CassandraException(String.format("Unable to start %s", toString()), ex);
 			}
 		}
 	}
@@ -102,18 +105,17 @@ class LocalCassandra implements Cassandra {
 			}
 			try {
 				this.state = State.STOPPING;
-				stopDatabase();
-				this.started = false;
+				execute(this.database::stop, this.threadFactory);
 				this.state = State.STOPPED;
+				this.started = false;
 			}
-			catch (InterruptedException | ClosedByInterruptException ex) {
+			catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
 				this.state = State.STOP_INTERRUPTED;
-				throw new CassandraInterruptedException(ex);
+				throw new CassandraInterruptedException("Shutdown has interrupted", ex);
 			}
 			catch (Throwable ex) {
 				this.state = State.STOP_FAILED;
-				throw new CassandraException(String.format("Unable to stop Apache Cassandra '%s'",
-						getVersion()), ex);
+				throw new CassandraException(String.format("Unable to stop %s", toString()), ex);
 			}
 		}
 	}
@@ -122,7 +124,7 @@ class LocalCassandra implements Cassandra {
 	public Settings getSettings() throws IllegalStateException {
 		synchronized (this.monitor) {
 			if (!this.started) {
-				throw new IllegalStateException(String.format("Apache Cassandra '%s' is not running.", getVersion()));
+				throw new IllegalStateException(String.format("%s is not running.", toString()));
 			}
 			return this.database.getSettings();
 		}
@@ -140,95 +142,92 @@ class LocalCassandra implements Cassandra {
 
 	@Override
 	public String toString() {
-		return String.format("Apache Cassandra '%s'", getVersion());
-	}
-
-	private static void selfInterrupt() {
-		Thread.currentThread().interrupt();
+		return String.format("%s '%s'", getClass().getSimpleName(), getVersion());
 	}
 
 	private void registerShutdownHook(long id) {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			try {
-				interrupt(this.startThread);
-			}
-			catch (InterruptedException ex) {
-				selfInterrupt();
+			Thread thread = this.startThread;
+			if (thread != null && thread.isAlive()) {
+				ThreadUtils.interrupt(thread);
 			}
 			stop();
 		}, String.format("cassandra:%d:sh", id)));
 	}
 
-	private void startDatabase() throws Throwable {
-		AtomicReference<Throwable> throwableRef = new AtomicReference<>();
-		Thread thread = this.threadFactory.newThread(() -> {
-			try {
-				this.database.start();
-			}
-			catch (Throwable ex) {
-				throwableRef.set(ex);
-			}
-		});
-		this.startThread = thread;
-		thread.start();
-		try {
-			thread.join();
-		}
-		catch (InterruptedException ex) {
-			try {
-				interrupt(thread);
-			}
-			catch (InterruptedException suppressed) {
-				ex.addSuppressed(suppressed);
-			}
-			throw ex;
-		}
-		Throwable ex = throwableRef.get();
-		if (ex != null) {
-			throw ex;
-		}
-	}
-
-	private void stopDatabase() throws Throwable {
-		AtomicReference<Throwable> throwableRef = new AtomicReference<>();
-		Thread thread = this.threadFactory.newThread(() -> {
-			try {
-				this.database.stop();
-			}
-			catch (Throwable ex) {
-				throwableRef.set(ex);
-			}
-		});
-		thread.start();
-		thread.join();
-		Throwable ex = throwableRef.get();
-		if (ex != null) {
-			throw ex;
-		}
-	}
-
 	private void stopDatabaseSafely() {
 		try {
-			stopDatabase();
+			execute(this.database::stop, this.threadFactory);
 		}
-		catch (InterruptedException | ClosedByInterruptException ex) {
-			selfInterrupt();
+		catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
+			Thread.currentThread().interrupt();
+			log.error(String.format("Unable to stop %s", toString()), ex);
 		}
 		catch (Throwable ex) {
-			log.error(String.format("Unable to stop Apache Cassandra '%s'", getVersion()), ex);
+			log.error(String.format("Unable to stop %s", toString()), ex);
 		}
 	}
 
-	private void interrupt(@Nullable Thread thread) throws InterruptedException {
-		if (thread != null) {
-			try {
-				thread.interrupt();
-			}
-			catch (SecurityException ex) {
-				//ignore
-			}
+	private void execute(Executable executable, ThreadFactory threadFactory) throws Throwable {
+		RunnableExecutable runnable = new RunnableExecutable(executable);
+		Thread thread = threadFactory.newThread(runnable);
+		thread.start();
+		try {
 			thread.join();
 		}
+		catch (InterruptedException je) {
+			ThreadUtils.interrupt(thread);
+			try {
+				ThreadUtils.joinUninterruptedly(thread);
+			}
+			catch (InterruptedException jue) {
+				je.addSuppressed(jue);
+			}
+			Throwable ex = runnable.getThrowable();
+			if (ex != null) {
+				je.addSuppressed(ex);
+			}
+			throw je;
+		}
+		Throwable ex = runnable.getThrowable();
+		if (ex != null) {
+			throw ex;
+		}
+
+	}
+
+	@FunctionalInterface
+	private interface Executable {
+
+		void execute() throws Throwable;
+
+	}
+
+	private static final class RunnableExecutable implements Runnable {
+
+		private final Executable executable;
+
+		private final AtomicReference<Throwable> throwable = new AtomicReference<>();
+
+		RunnableExecutable(Executable executable) {
+			this.executable = executable;
+		}
+
+		@Override
+		public void run() {
+			try {
+				this.executable.execute();
+			}
+			catch (Throwable ex) {
+				this.throwable.set(ex);
+			}
+		}
+
+		@Nullable
+		Throwable getThrowable() {
+			return this.throwable.get();
+		}
+
 	}
 
 }
