@@ -59,23 +59,29 @@ class RemoteArtifactTests {
 
 	private RemoteArtifactFactory factory;
 
+	private HttpServer httpServer;
+
+	private CaptureOutput output;
+
 	@BeforeEach
-	void setUp(@TempDir Path temporaryFolder, HttpServer httpServer) {
+	void setUp(@TempDir Path temporaryFolder, HttpServer httpServer, CaptureOutput output) {
 		Path directory = temporaryFolder.resolve(UUID.randomUUID().toString());
 		this.factory = new RemoteArtifactFactory();
 		this.factory.setUrlFactory(version -> new URL[]{
 				new URL(String.format("http:/%s/dist/apache-cassandra-%s.zip", httpServer.getAddress(), version))});
 		this.factory.setDirectory(directory);
+		this.output = output;
+		this.httpServer = httpServer;
 
 	}
 
 	@Test
-	void shouldDownloadArtifactAndShowProgress(HttpServer httpServer, CaptureOutput output) throws Exception {
+	void shouldDownloadArtifactAndShowProgress() throws Exception {
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
 		}
-		httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, content.length);
 			for (int i = 0; i < content.length; i += 8192) {
 				exchange.getResponseBody().write(content, i, Math.min(8192, content.length - i));
@@ -85,7 +91,7 @@ class RemoteArtifactTests {
 		});
 		Artifact artifact = this.factory.create(VERSION);
 		Path archive = artifact.getArchive();
-		assertThat(output.toString()).contains("Downloaded");
+		assertThat(this.output.toString()).contains("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
@@ -93,51 +99,51 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void shouldDownloadArtifact(HttpServer httpServer, CaptureOutput output) throws Exception {
+	void shouldDownloadArtifact() throws Exception {
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
 		}
-		httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
 		Artifact artifact = this.factory.create(VERSION);
 		Path archive = artifact.getArchive();
-		assertThat(output.toString()).doesNotContain("Downloaded");
+		assertThat(this.output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 	}
 
 	@Test
-	void shouldDownloadArtifactRedirection(HttpServer httpServer, CaptureOutput output) throws Exception {
+	void shouldDownloadArtifactRedirection() throws Exception {
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
 		}
-		httpServer.createContext("/apache-cassandra-3.1.1.zip", exchange -> {
+		this.httpServer.createContext("/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
-		httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.getResponseHeaders().put("Location", Collections.singletonList("/apache-cassandra-3.1.1.zip"));
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
 			exchange.close();
 		});
 		Artifact artifact = this.factory.create(VERSION);
 		Path archive = artifact.getArchive();
-		assertThat(output.toString()).doesNotContain("Downloaded");
+		assertThat(this.output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 	}
 
 	@Test
-	void shouldDownloadArtifactMaxRedirection(HttpServer httpServer) {
-		httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+	void shouldDownloadArtifactMaxRedirection() {
+		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.getResponseHeaders()
 					.put("Location", Collections.singletonList("/dist/apache-cassandra-3.1.1.zip"));
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
@@ -148,30 +154,30 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void shouldDownloadArtifactURLs(HttpServer httpServer, CaptureOutput output) throws Exception {
+	void shouldDownloadArtifactURLs() throws Exception {
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
 		}
-		httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
 		UrlFactory delegate = this.factory.getUrlFactory();
 		this.factory.setUrlFactory(version -> Stream
-				.concat(Stream.of(new URL(String.format("http:/%s/cassandra.zip", httpServer.getAddress()))),
+				.concat(Stream.of(new URL(String.format("http:/%s/cassandra.zip", this.httpServer.getAddress()))),
 						Arrays.stream((delegate).create(version))).toArray(URL[]::new));
 		Artifact artifact = this.factory.create(VERSION);
 		Path archive = artifact.getArchive();
-		assertThat(output.toString()).doesNotContain("Downloaded");
+		assertThat(this.output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 	}
 
 	@Test
-	void shouldNotDownloadArtifactIfExists(CaptureOutput output) throws Exception {
+	void shouldNotDownloadArtifactIfExists() throws Exception {
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
@@ -182,15 +188,15 @@ class RemoteArtifactTests {
 
 		Artifact artifact = this.factory.create(VERSION);
 		Path archive = artifact.getArchive();
-		assertThat(output.toString()).doesNotContain("Downloaded");
+		assertThat(this.output.toString()).doesNotContain("Downloaded");
 		assertThat(archive).exists().hasParent(this.factory.getDirectory());
 		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 	}
 
 	@Test
-	void shouldNotDownloadInvalidStatus(HttpServer httpServer) {
-		httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
+	void shouldNotDownloadInvalidStatus() {
+		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.sendResponseHeaders(400, 0);
 			exchange.close();
 		});
@@ -206,8 +212,8 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void readTimeoutIsExceeded(HttpServer server) {
-		server.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(600));
+	void readTimeoutIsExceeded() {
+		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(600));
 
 		this.factory.setReadTimeout(Duration.ofMillis(200));
 		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
@@ -232,10 +238,11 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void impossibleDetermineFileName(HttpServer httpServer) {
-		httpServer.createContext("/", exchange -> exchange.sendResponseHeaders(200, 0));
+	void impossibleDetermineFileName() {
+		this.httpServer.createContext("/", exchange -> exchange.sendResponseHeaders(200, 0));
 		this.factory.setUrlFactory(version -> new URL[]{new URL(String
-				.format("http://%s:%d/", httpServer.getAddress().getHostName(), httpServer.getAddress().getPort()))});
+				.format("http://%s:%d/", this.httpServer.getAddress().getHostName(),
+						this.httpServer.getAddress().getPort()))});
 		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
 				.hasStackTraceContaining("There is no way to determine");
 
