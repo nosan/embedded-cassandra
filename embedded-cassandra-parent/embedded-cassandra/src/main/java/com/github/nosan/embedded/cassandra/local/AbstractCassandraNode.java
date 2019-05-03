@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -86,9 +84,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	final Version version;
 
-	private final Ports ports;
-
-	private final List<String> jvmOptions;
+	private final JvmOptions jvmOptions;
 
 	@Nullable
 	private final Path javaHome;
@@ -99,14 +95,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Nullable
 	private ProcessId processId;
 
-	AbstractCassandraNode(Path workingDirectory, Version version, @Nullable Path javaHome, Ports ports,
-			List<String> jvmOptions) {
+	AbstractCassandraNode(Path workingDirectory, Version version, @Nullable Path javaHome, JvmOptions jvmOptions) {
 		long id = counter.incrementAndGet();
 		this.version = version;
 		this.workingDirectory = workingDirectory;
 		this.javaHome = javaHome;
-		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
-		this.ports = ports;
+		this.jvmOptions = jvmOptions;
 		this.threadFactory = new DefaultThreadFactory(String.format("cassandra-%d-db", id));
 	}
 
@@ -118,8 +112,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		if (javaHome != null) {
 			environment.put(JAVA_HOME, javaHome.toString());
 		}
-		JvmOptions jvmOptions = new JvmOptions(this.ports, this.jvmOptions);
-		environment.put(JVM_EXTRA_OPTS, jvmOptions.toString());
+		List<String> jvmOptions = this.jvmOptions.get();
+		if (!jvmOptions.isEmpty()) {
+			environment.put(JVM_EXTRA_OPTS, String.join(" ", jvmOptions));
+		}
 		ProcessId processId = start(environment);
 		this.processId = processId;
 		this.settings = getSettings(processId);

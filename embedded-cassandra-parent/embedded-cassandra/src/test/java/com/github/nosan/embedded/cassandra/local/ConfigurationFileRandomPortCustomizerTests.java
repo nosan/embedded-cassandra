@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -36,7 +37,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ConfigurationFileRandomPortCustomizerTests {
 
-	private final ConfigurationFileRandomPortCustomizer customizer = new ConfigurationFileRandomPortCustomizer();
+	private final ConfigurationFileRandomPortCustomizer customizer = new ConfigurationFileRandomPortCustomizer(
+			new RandomPortSupplier(InetAddress::getLoopbackAddress));
 
 	@Test
 	void shouldReplaceZeroPortWithRandom(@TempDir Path temporaryFolder) throws Exception {

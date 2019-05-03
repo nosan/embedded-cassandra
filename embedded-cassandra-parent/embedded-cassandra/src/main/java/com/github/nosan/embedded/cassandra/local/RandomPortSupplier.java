@@ -19,15 +19,9 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
  * Random port {@link Supplier}.
@@ -35,55 +29,50 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @author Dmytro Nosan
  * @since 2.0.1
  */
-class PortSupplier implements Supplier<Integer>, AutoCloseable {
+class RandomPortSupplier implements Supplier<Integer> {
 
-	private static final Logger log = LoggerFactory.getLogger(PortSupplier.class);
+	private static final int ATTEMPTS = 1024;
+
+	private static final int SIZE = 50;
 
 	private static final int MIN = 49152;
 
 	private static final int MAX = 65535;
 
-	private final List<ServerSocket> sockets = new ArrayList<>();
+	private final ArrayDeque<Integer> ports = new ArrayDeque<>(50);
 
-	@Nullable
-	private final InetAddress inetAddress;
+	private final Supplier<InetAddress> addressSupplier;
 
-	PortSupplier(@Nullable InetAddress inetAddress) {
-		this.inetAddress = inetAddress;
+	RandomPortSupplier(Supplier<InetAddress> addressSupplier) {
+		this.addressSupplier = addressSupplier;
 	}
 
 	@Override
 	public Integer get() {
-		ServerSocket serverSocket = createServerSocket();
-		this.sockets.add(serverSocket);
-		return serverSocket.getLocalPort();
-	}
-
-	@Override
-	public void close() {
-		for (ServerSocket ss : this.sockets) {
-			try {
-				ss.close();
-			}
-			catch (IOException ex) {
-				log.error(String.format("Can not close '%s'", ss), ex);
-			}
+		int size = this.ports.size();
+		if (size == SIZE) {
+			this.ports.removeFirst();
 		}
+		return getPort();
 	}
 
-	private ServerSocket createServerSocket() {
+	private int getPort() {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
-		for (int i = 0; i <= MAX - MIN; i++) {
+		InetAddress address = this.addressSupplier.get();
+		for (int i = 0; i < ATTEMPTS; i++) {
 			int port = MIN + random.nextInt(MAX - MIN + 1);
-			try {
-				return new ServerSocket(port, 1, this.inetAddress);
-			}
-			catch (IOException ex) {
-				//ignore
+			if (!this.ports.contains(port)) {
+				try (ServerSocket ss = new ServerSocket(port, 1, address)) {
+					this.ports.addLast(port);
+					return port;
+				}
+				catch (IOException ex) {
+					//ignore
+				}
 			}
 		}
-		throw new IllegalStateException(String.format("Can not find an available port in the range [%d, %d]",
-				MIN, MAX));
+		throw new IllegalStateException(
+				String.format("Can not find an available port in the range [%d, %d]", MIN, MAX));
 	}
 
 }

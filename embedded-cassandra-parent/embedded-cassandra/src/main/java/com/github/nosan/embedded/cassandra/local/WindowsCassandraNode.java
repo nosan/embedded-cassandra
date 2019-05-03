@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.local;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,9 +33,8 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  */
 class WindowsCassandraNode extends AbstractCassandraNode {
 
-	WindowsCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome, Ports ports,
-			List<String> jvmOptions) {
-		super(workingDirectory, version, javaHome, ports, jvmOptions);
+	WindowsCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome, JvmOptions jvmOptions) {
+		super(workingDirectory, version, javaHome, jvmOptions);
 	}
 
 	@Override

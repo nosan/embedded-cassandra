@@ -25,28 +25,20 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link PortSupplier}.
+ * Tests for {@link RandomPortSupplier}.
  *
  * @author Dmytro Nosan
  */
-class PortSupplierTests {
+class RandomPortSupplierTests {
 
 	@Test
-	void shouldGet20RandomPorts() throws InterruptedException {
+	void shouldGet50RandomPorts() {
 		Set<Integer> ports = new LinkedHashSet<>();
-		InetAddress address = InetAddress.getLoopbackAddress();
-		try (PortSupplier portSupplier = new PortSupplier(address)) {
-			for (int i = 0; i < 20; i++) {
-				Integer port = portSupplier.get();
-				assertThat(NetworkUtils.isListen(address, port)).describedAs("Port %d is not busy", port).isTrue();
-				ports.add(port);
-			}
+		RandomPortSupplier portSupplier = new RandomPortSupplier(InetAddress::getLoopbackAddress);
+		for (int i = 0; i < 50; i++) {
+			ports.add(portSupplier.get());
 		}
-		assertThat(ports).hasSize(20);
-		Thread.sleep(250);
-		for (Integer port : ports) {
-			assertThat(NetworkUtils.isListen(address, port)).describedAs("Port %d is busy", port).isFalse();
-		}
+		assertThat(ports).hasSize(50);
 	}
 
 }

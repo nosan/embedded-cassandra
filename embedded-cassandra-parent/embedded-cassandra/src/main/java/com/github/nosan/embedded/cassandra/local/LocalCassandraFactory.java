@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
@@ -552,9 +553,10 @@ public final class LocalCassandraFactory implements CassandraFactory {
 			artifactDirectory = getTempDir()
 					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
 		}
-		CassandraNode node = createCassandraNode(workingDirectory, version);
-		CassandraDatabase cassandraDatabase = new LocalCassandraDatabase(node, workingDirectory,
-				artifactDirectory, artifactFactory, isDeleteWorkingDirectory(), getMergedWorkingDirectoryCustomizers());
+		RandomPortSupplier portSupplier = new RandomPortSupplier(NetworkUtils::getLocalhost);
+		CassandraNode node = createCassandraNode(workingDirectory, version, portSupplier);
+		CassandraDatabase cassandraDatabase = new LocalCassandraDatabase(node, workingDirectory, artifactDirectory,
+				artifactFactory, isDeleteWorkingDirectory(), getMergedWorkingDirectoryCustomizers(portSupplier));
 		return new LocalCassandra(isRegisterShutdownHook(), cassandraDatabase);
 	}
 
@@ -564,26 +566,14 @@ public final class LocalCassandraFactory implements CassandraFactory {
 						+ " Please set java.io.tmpdir system property."));
 	}
 
-	private List<WorkingDirectoryCustomizer> getMergedWorkingDirectoryCustomizers() {
+	private List<WorkingDirectoryCustomizer> getMergedWorkingDirectoryCustomizers(RandomPortSupplier portSupplier) {
 		List<WorkingDirectoryCustomizer> customizers = new ArrayList<>();
-		URL configurationFile = getConfigurationFile();
-		if (configurationFile != null) {
-			customizers.add(new ConfigurationFileCustomizer(configurationFile));
-		}
-		URL rackFile = getRackFile();
-		if (rackFile != null) {
-			customizers.add(new RackFileCustomizer(rackFile));
-		}
-		URL topologyFile = getTopologyFile();
-		if (topologyFile != null) {
-			customizers.add(new TopologyFileCustomizer(topologyFile));
-		}
-		URL loggingFile = getLoggingFile();
-		if (loggingFile != null) {
-			customizers.add(new LoggingFileCustomizer(loggingFile));
-		}
+		Optional.ofNullable(getConfigurationFile()).map(ConfigurationFileCustomizer::new).ifPresent(customizers::add);
+		Optional.ofNullable(getRackFile()).map(RackFileCustomizer::new).ifPresent(customizers::add);
+		Optional.ofNullable(getTopologyFile()).map(TopologyFileCustomizer::new).ifPresent(customizers::add);
+		Optional.ofNullable(getLoggingFile()).map(LoggingFileCustomizer::new).ifPresent(customizers::add);
 		if (ClassUtils.isPresent(SNAKEYAML_YAML_CLASS, getClass().getClassLoader())) {
-			customizers.add(new ConfigurationFileRandomPortCustomizer());
+			customizers.add(new ConfigurationFileRandomPortCustomizer(portSupplier));
 		}
 		if (!SystemUtils.isWindows()) {
 			customizers.add(new CassandraFileExecutableCustomizer());
@@ -592,12 +582,13 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		return customizers;
 	}
 
-	private CassandraNode createCassandraNode(Path workingDirectory, Version version) {
+	private CassandraNode createCassandraNode(Path workingDirectory, Version version, RandomPortSupplier portSupplier) {
 		Ports ports = new Ports(getPort(), getRpcPort(), getStoragePort(), getSslStoragePort(), getJmxLocalPort());
+		JvmOptions jvmOptions = new JvmOptions(getJvmOptions(), ports, portSupplier);
 		if (SystemUtils.isWindows()) {
-			return new WindowsCassandraNode(version, workingDirectory, getJavaHome(), ports, getJvmOptions());
+			return new WindowsCassandraNode(version, workingDirectory, getJavaHome(), jvmOptions);
 		}
-		return new UnixCassandraNode(version, workingDirectory, getJavaHome(), ports, getJvmOptions(), isAllowRoot());
+		return new UnixCassandraNode(version, workingDirectory, getJavaHome(), jvmOptions, isAllowRoot());
 	}
 
 }

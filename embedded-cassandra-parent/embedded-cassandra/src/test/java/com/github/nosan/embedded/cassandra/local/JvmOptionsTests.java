@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,8 +34,9 @@ class JvmOptionsTests {
 
 	@Test
 	void randomizePorts() {
-		JvmOptions jvmOptions = new JvmOptions(new Ports(0, 0, 0, 0, 0), Collections.emptyList());
-		assertThat(jvmOptions.toString()).doesNotContain("=0");
+		JvmOptions jvmOptions = new JvmOptions(Collections.emptyList(), new Ports(0, 0, 0, 0, 0),
+				new RandomPortSupplier(InetAddress::getLoopbackAddress));
+		assertThat(toString(jvmOptions)).doesNotContain("=0");
 	}
 
 	@Test
@@ -49,13 +51,18 @@ class JvmOptionsTests {
 		options.add("-Dcassandra.start_rpc=true");
 		options.add("-Dcassandra.start_native_transport=true");
 		options.add("-X512m");
-		JvmOptions jvmOptions = new JvmOptions(new Ports(null, null, null, null, null), options);
-		assertThat(jvmOptions.toString()).matches(
+		JvmOptions jvmOptions = new JvmOptions(options, new Ports(null, null, null, null, null),
+				new RandomPortSupplier(InetAddress::getLoopbackAddress));
+		assertThat(toString(jvmOptions)).matches(
 				"-Dcassandra.jmx.local.port=\\d{4,5} -Dcassandra.native_transport_port=\\d{4,5}"
 						+ " -Dcassandra.rpc_port=\\d{4,5}"
 						+ " -Dcassandra.storage_port=\\d{4,5} -Dcassandra.ssl_storage_port=\\d{4,5}"
 						+ " -Dcassandra.jmx.remote.port=\\d{4,5} -Dcassandra.start_rpc=true"
 						+ " -Dcassandra.start_native_transport=true -X512m");
+	}
+
+	private String toString(JvmOptions jvmOptions) {
+		return String.join(" ", jvmOptions.get());
 	}
 
 }

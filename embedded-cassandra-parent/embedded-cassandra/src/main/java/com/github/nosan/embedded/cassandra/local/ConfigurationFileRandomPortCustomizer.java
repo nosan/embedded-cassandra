@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -39,21 +38,25 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomizer {
 
+	private final RandomPortSupplier portSupplier;
+
+	ConfigurationFileRandomPortCustomizer(RandomPortSupplier portSupplier) {
+		this.portSupplier = portSupplier;
+	}
+
 	@Override
 	public void customize(Path workingDirectory, Version version) throws IOException {
+		RandomPortSupplier portSupplier = this.portSupplier;
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
-		Map<Object, Object> properties = getProperties(file);
-		try (PortSupplierDelegate supplier = new PortSupplierDelegate()) {
-			setPort("native_transport_port", properties, supplier);
-			setPort("native_transport_port_ssl", properties, supplier);
-			setPort("rpc_port", properties, supplier);
-			setPort("storage_port", properties, supplier);
-			setPort("ssl_storage_port", properties, supplier);
-			if (supplier.isCall()) {
-				try (BufferedWriter writer = Files.newBufferedWriter(file)) {
-					new Yaml().dump(properties, writer);
-				}
-			}
+		Map<Object, Object> oldProperties = readProperties(file);
+		Map<Object, Object> newProperties = new LinkedHashMap<>(oldProperties);
+		setPort("native_transport_port", newProperties, portSupplier);
+		setPort("native_transport_port_ssl", newProperties, portSupplier);
+		setPort("rpc_port", newProperties, portSupplier);
+		setPort("storage_port", newProperties, portSupplier);
+		setPort("ssl_storage_port", newProperties, portSupplier);
+		if (!newProperties.equals(oldProperties)) {
+			writeProperties(file, newProperties);
 		}
 	}
 
@@ -65,43 +68,22 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		return Optional.ofNullable(properties.get(name)).map(Object::toString);
 	}
 
-	private static void setPort(String name, Map<Object, Object> properties, PortSupplierDelegate supplier) {
+	private static void setPort(String name, Map<Object, Object> properties, RandomPortSupplier portSupplier) {
 		getInteger(name, properties).filter(port -> port == 0)
-				.ifPresent(port -> properties.put(name, supplier.get()));
+				.ifPresent(port -> properties.put(name, portSupplier.get()));
 	}
 
-	private static Map<Object, Object> getProperties(Path file) throws IOException {
+	private static Map<Object, Object> readProperties(Path file) throws IOException {
 		try (InputStream is = Files.newInputStream(file)) {
 			Map<?, ?> values = new Yaml().loadAs(is, Map.class);
-			return (values != null) ? new LinkedHashMap<>(values) : new LinkedHashMap<>();
+			return (values != null) ? new LinkedHashMap<>(values) : new LinkedHashMap<>(0);
 		}
 	}
 
-	private static final class PortSupplierDelegate implements Supplier<Integer>, AutoCloseable {
-
-		private final PortSupplier supplier;
-
-		private boolean call = false;
-
-		PortSupplierDelegate() {
-			this.supplier = new PortSupplier(NetworkUtils.getLocalhost());
+	private static void writeProperties(Path file, Map<Object, Object> newProperties) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+			new Yaml().dump(newProperties, writer);
 		}
-
-		@Override
-		public Integer get() {
-			this.call = true;
-			return this.supplier.get();
-		}
-
-		@Override
-		public void close() {
-			this.supplier.close();
-		}
-
-		boolean isCall() {
-			return this.call;
-		}
-
 	}
 
 }
