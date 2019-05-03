@@ -255,7 +255,7 @@ public class TestCassandra implements Cassandra {
 		}
 		catch (CassandraInterruptedException ex) {
 			Thread.currentThread().interrupt();
-			log.error(String.format("Unable to stop %s. Cassandra was interrupted", toString()), ex);
+			log.error(String.format("Unable to stop %s", toString()), ex);
 		}
 		catch (Throwable ex) {
 			log.error(String.format("Unable to stop %s", toString()), ex);
