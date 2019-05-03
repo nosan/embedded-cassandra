@@ -32,6 +32,7 @@ abstract class ThreadUtils {
 	/**
 	 * Joins {@code uninterruptedly} to the given thread.
 	 *
+	 * @param thread a thread
 	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
 	static void joinUninterruptedly(Thread thread) throws InterruptedException {
@@ -53,7 +54,7 @@ abstract class ThreadUtils {
 	/**
 	 * Interrupts the given thread.
 	 *
-	 * @param thread the thread
+	 * @param thread a thread
 	 */
 	static void interrupt(Thread thread) {
 		try {
