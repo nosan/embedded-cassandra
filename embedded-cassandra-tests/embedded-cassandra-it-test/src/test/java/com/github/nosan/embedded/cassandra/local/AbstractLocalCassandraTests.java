@@ -30,13 +30,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -46,9 +52,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
@@ -59,8 +63,6 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.test.CqlSessionFactory;
-import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
-import com.github.nosan.embedded.cassandra.test.support.CaptureOutputExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -71,27 +73,25 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Dmytro Nosan
  */
 @SuppressWarnings("ConstantConditions")
-@ExtendWith(CaptureOutputExtension.class)
 abstract class AbstractLocalCassandraTests {
+
+	private static final SecureRandom random = new SecureRandom();
 
 	private final LocalCassandraFactory factory;
 
 	@Nullable
 	private Path temporaryFolder;
 
-	@Nullable
-	private CaptureOutput output;
-
 	AbstractLocalCassandraTests(Version version) {
 		this.factory = new LocalCassandraFactory();
 		this.factory.setVersion(version);
+		LoggerFactory.getLogger(getClass());
 	}
 
 	@BeforeEach
-	void setUp(@TempDir Path temporaryFolder, CaptureOutput captureOutput) {
+	void setUp(@TempDir Path temporaryFolder) {
 		this.temporaryFolder = temporaryFolder;
-		this.output = captureOutput;
-		MDC.put("ID", UUID.randomUUID().toString());
+		MDC.put("ID", Long.toString(random.nextLong()));
 	}
 
 	@AfterEach
@@ -183,16 +183,10 @@ abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(cassandra);
 		runner.run(assertCreateKeyspace().andThen(unused -> {
 			assertThat(cassandra.getState()).isEqualTo(Cassandra.State.STARTED);
-			assertThat(this.output.toString()).contains("Start Apache Cassandra");
-			this.output.reset();
 			cassandra.start();
-			assertThat(this.output.toString()).doesNotContain("Start Apache Cassandra");
 		}));
 		assertThat(cassandra.getState()).isEqualTo(Cassandra.State.STOPPED);
-		assertThat(this.output.toString()).contains("Stop Apache Cassandra");
-		this.output.reset();
 		cassandra.stop();
-		assertThat(this.output.toString()).doesNotContain("Stop Apache Cassandra");
 	}
 
 	@Test
@@ -206,27 +200,23 @@ abstract class AbstractLocalCassandraTests {
 	void shouldStartMoreThanOneCassandra() throws Throwable {
 		this.factory.setJmxLocalPort(0);
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-random.yaml"));
-		List<Throwable> exceptions = new CopyOnWriteArrayList<>();
-		Runnable runnable = () -> {
-			try {
-				CassandraRunner runner = new CassandraRunner(this.factory);
-				runner.run(assertCreateKeyspace());
+		ExecutorService executorService = Executors.newFixedThreadPool(2, new DefaultThreadFactory("pool"));
+		List<Future<?>> futures = new ArrayList<>();
+		try {
+			for (int i = 0; i < 2; i++) {
+				futures.add(executorService.submit((Callable<?>) () -> {
+					CassandraRunner runner = new CassandraRunner(this.factory);
+					runner.run(assertCreateKeyspace());
+					return new Object();
+				}));
 			}
-			catch (Throwable ex) {
-				Logger logger = LoggerFactory.getLogger(getClass().getName());
-				logger.error(ex.getMessage(), ex);
-				exceptions.add(ex);
+			for (Future<?> future : futures) {
+				future.get(2, TimeUnit.MINUTES);
 			}
-		};
-		DefaultThreadFactory factory = new DefaultThreadFactory("more-than-one");
-		Thread t = factory.newThread(runnable);
-		Thread t1 = factory.newThread(runnable);
-		t.start();
-		t1.start();
-		t.join();
-		t1.join();
-		assertThat(exceptions).describedAs("See logs for more details").isEmpty();
-
+		}
+		finally {
+			executorService.shutdownNow();
+		}
 	}
 
 	@Test
