@@ -80,7 +80,7 @@ class LocalCassandra implements Cassandra {
 				this.started = true;
 				this.state = State.STARTED;
 			}
-			catch (InterruptedException ex) {
+			catch (InterruptedException | ClosedByInterruptException | FileLockInterruptionException ex) {
 				this.state = State.START_INTERRUPTED;
 				stopDatabaseSafely();
 				throw new CassandraInterruptedException(ex);
@@ -106,7 +106,7 @@ class LocalCassandra implements Cassandra {
 				this.started = false;
 				this.state = State.STOPPED;
 			}
-			catch (InterruptedException ex) {
+			catch (InterruptedException | ClosedByInterruptException ex) {
 				this.state = State.STOP_INTERRUPTED;
 				throw new CassandraInterruptedException(ex);
 			}
@@ -149,7 +149,12 @@ class LocalCassandra implements Cassandra {
 
 	private void registerShutdownHook(long id) {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			interrupt(this.startThread);
+			try {
+				interrupt(this.startThread);
+			}
+			catch (InterruptedException ex) {
+				selfInterrupt();
+			}
 			stop();
 		}, String.format("cassandra:%d:sh", id)));
 	}
@@ -159,9 +164,6 @@ class LocalCassandra implements Cassandra {
 		Thread thread = this.threadFactory.newThread(() -> {
 			try {
 				this.database.start();
-			}
-			catch (InterruptedException | ClosedByInterruptException | FileLockInterruptionException ex) {
-				selfInterrupt();
 			}
 			catch (Throwable ex) {
 				throwableRef.set(ex);
@@ -173,7 +175,12 @@ class LocalCassandra implements Cassandra {
 			thread.join();
 		}
 		catch (InterruptedException ex) {
-			interrupt(thread);
+			try {
+				interrupt(thread);
+			}
+			catch (InterruptedException suppressed) {
+				ex.addSuppressed(suppressed);
+			}
 			throw ex;
 		}
 		Throwable ex = throwableRef.get();
@@ -187,9 +194,6 @@ class LocalCassandra implements Cassandra {
 		Thread thread = this.threadFactory.newThread(() -> {
 			try {
 				this.database.stop();
-			}
-			catch (InterruptedException | ClosedByInterruptException ex) {
-				selfInterrupt();
 			}
 			catch (Throwable ex) {
 				throwableRef.set(ex);
@@ -207,7 +211,7 @@ class LocalCassandra implements Cassandra {
 		try {
 			stopDatabase();
 		}
-		catch (InterruptedException ex) {
+		catch (InterruptedException | ClosedByInterruptException ex) {
 			selfInterrupt();
 		}
 		catch (Throwable ex) {
@@ -215,7 +219,7 @@ class LocalCassandra implements Cassandra {
 		}
 	}
 
-	private void interrupt(@Nullable Thread thread) {
+	private void interrupt(@Nullable Thread thread) throws InterruptedException {
 		if (thread != null) {
 			try {
 				thread.interrupt();
@@ -223,12 +227,7 @@ class LocalCassandra implements Cassandra {
 			catch (SecurityException ex) {
 				//ignore
 			}
-			try {
-				thread.join();
-			}
-			catch (InterruptedException ex) {
-				selfInterrupt();
-			}
+			thread.join();
 		}
 	}
 
