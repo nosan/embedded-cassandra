@@ -104,7 +104,6 @@ abstract class AbstractLocalCassandraTests {
 			Thread.sleep(2000);
 			thread.interrupt();
 			thread.join();
-			assertThat(this.output.toString()).contains("Stop Apache Cassandra");
 		});
 	}
 

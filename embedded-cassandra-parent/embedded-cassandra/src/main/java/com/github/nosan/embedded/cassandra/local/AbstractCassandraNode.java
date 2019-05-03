@@ -123,7 +123,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		ProcessId processId = start(environment);
 		this.processId = processId;
 		this.settings = getSettings(processId);
-		this.log.info("Apache Cassandra Node '{}' is started", this.processId.getPid());
+		this.log.info("Apache Cassandra Node '{}' is started", processId.getPid());
 	}
 
 	@Override
@@ -162,6 +162,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Override
 	public Version getVersion() {
 		return this.version;
+	}
+
+	@Override
+	public boolean isAlive() {
+		ProcessId processId = this.processId;
+		return processId != null && processId.getProcess().isAlive();
 	}
 
 	/**

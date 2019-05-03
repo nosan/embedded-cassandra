@@ -74,12 +74,14 @@ class LocalCassandraDatabase implements CassandraDatabase {
 
 	@Override
 	public void stop() throws IOException, InterruptedException {
-		long start = System.currentTimeMillis();
-		log.info("Stop Apache Cassandra '{}'", getVersion());
-		this.node.stop();
+		if (this.node.isAlive()) {
+			long start = System.currentTimeMillis();
+			log.info("Stop Apache Cassandra '{}'", getVersion());
+			this.node.stop();
+			long elapsed = System.currentTimeMillis() - start;
+			log.info("Apache Cassandra '{}' is stopped ({} ms)", getVersion(), elapsed);
+		}
 		delete();
-		long elapsed = System.currentTimeMillis() - start;
-		log.info("Apache Cassandra '{}' is stopped ({} ms)", getVersion(), elapsed);
 	}
 
 	@Override
@@ -108,7 +110,7 @@ class LocalCassandraDatabase implements CassandraDatabase {
 
 	private void delete() throws IOException {
 		if (this.deleteWorkingDirectory && FileUtils.delete(this.workingDirectory)) {
-			log.info("The '{}' directory is deleted.", this.workingDirectory);
+			log.info("The working directory '{}' was deleted.", this.workingDirectory);
 		}
 	}
 
