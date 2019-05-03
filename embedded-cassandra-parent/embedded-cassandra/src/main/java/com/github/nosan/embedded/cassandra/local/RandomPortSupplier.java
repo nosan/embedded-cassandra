@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
@@ -33,13 +34,13 @@ class RandomPortSupplier implements Supplier<Integer> {
 
 	private static final int ATTEMPTS = 1024;
 
-	private static final int SIZE = 50;
+	private static final int SIZE = 15;
 
 	private static final int MIN = 49152;
 
 	private static final int MAX = 65535;
 
-	private final ArrayDeque<Integer> ports = new ArrayDeque<>(50);
+	private final Deque<Integer> ports = new ArrayDeque<>(15);
 
 	private final Supplier<InetAddress> addressSupplier;
 
@@ -53,7 +54,9 @@ class RandomPortSupplier implements Supplier<Integer> {
 		if (size == SIZE) {
 			this.ports.removeFirst();
 		}
-		return getPort();
+		int port = getPort();
+		this.ports.addLast(port);
+		return port;
 	}
 
 	private int getPort() {
@@ -63,8 +66,7 @@ class RandomPortSupplier implements Supplier<Integer> {
 			int port = MIN + random.nextInt(MAX - MIN + 1);
 			if (!this.ports.contains(port)) {
 				try (ServerSocket ss = new ServerSocket(port, 1, address)) {
-					this.ports.addLast(port);
-					return port;
+					return ss.getLocalPort();
 				}
 				catch (IOException ex) {
 					//ignore
