@@ -22,7 +22,6 @@ import java.nio.channels.FileLockInterruptionException;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -123,7 +122,7 @@ class FileLock implements AutoCloseable {
 		}
 	}
 
-	private static <T> T await(long timeout, TimeUnit unit, IOCallable<T> callback,
+	private static <T> T await(long timeout, TimeUnit unit, Callable<T> callback,
 			Supplier<String> message) throws IOException {
 		long startTime = System.nanoTime();
 		long rem = unit.toNanos(timeout);
@@ -150,9 +149,8 @@ class FileLock implements AutoCloseable {
 	}
 
 	@FunctionalInterface
-	private interface IOCallable<T> extends Callable<T> {
+	private interface Callable<T> {
 
-		@Override
 		@Nullable
 		T call() throws IOException;
 
