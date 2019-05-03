@@ -265,7 +265,6 @@
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
                         <failIfNoTests>false</failIfNoTests>
-                        <trimStackTrace>false</trimStackTrace>
                         <argLine>-Xms256m -Xmx512m</argLine>
                     </configuration>
                 </plugin>
