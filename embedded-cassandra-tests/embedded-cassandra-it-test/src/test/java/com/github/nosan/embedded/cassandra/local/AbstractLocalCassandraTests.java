@@ -105,8 +105,6 @@ abstract class AbstractLocalCassandraTests {
 			Cassandra cassandra = this.factory.create();
 			DefaultThreadFactory factory = new DefaultThreadFactory("interrupt");
 			Thread thread = factory.newThread(cassandra::start);
-			thread.setUncaughtExceptionHandler((t, e) -> {
-			});
 			thread.start();
 			Thread.sleep(2000);
 			thread.interrupt();
