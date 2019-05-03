@@ -22,8 +22,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraRunner;
 import com.github.nosan.embedded.cassandra.test.support.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,9 +38,7 @@ class LocalCassandraExtendedTests {
 		Set<Thread> beforeHooks = getHooks();
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		factory.setRegisterShutdownHook(true);
-		Cassandra cassandra = factory.create();
-		new CassandraRunner(cassandra).run();
-		new CassandraRunner(cassandra).run();
+		factory.create();
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks).filteredOn(thread -> thread.getName().startsWith("cassandra:")).hasSize(1);
@@ -53,8 +49,7 @@ class LocalCassandraExtendedTests {
 		Set<Thread> beforeHooks = getHooks();
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		factory.setRegisterShutdownHook(false);
-		Cassandra cassandra = factory.create();
-		new CassandraRunner(cassandra).run();
+		factory.create();
 		Set<Thread> afterHooks = getHooks();
 		afterHooks.removeAll(beforeHooks);
 		assertThat(afterHooks).noneMatch(thread -> thread.getName().startsWith("cassandra:"));
