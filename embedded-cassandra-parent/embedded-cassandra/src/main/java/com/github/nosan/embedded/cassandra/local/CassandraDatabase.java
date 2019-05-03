@@ -22,7 +22,7 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 
 /**
- * Simple interface that allows the Cassandra Databse to be {@link #start() started} and {@link #stop() stopped}.
+ * Simple interface that allows the Cassandra Database to be {@link #start() started} and {@link #stop() stopped}.
  *
  * @author Dmytro Nosan
  * @since 2.0.0
@@ -48,7 +48,7 @@ interface CassandraDatabase {
 	/**
 	 * Returns the settings.
 	 *
-	 * @return the settings this node is running on.
+	 * @return the settings this database is running on.
 	 * @throws IllegalStateException if Cassandra is not running
 	 */
 	Settings getSettings() throws IllegalStateException;
