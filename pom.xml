@@ -51,7 +51,6 @@
         <commons-compress.version>1.18</commons-compress.version>
         <xz.version>1.8</xz.version>
         <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
-        <reactor-core.version>3.2.8.RELEASE</reactor-core.version>
         <java-driver-core.version>4.0.1</java-driver-core.version>
     </properties>
 
@@ -79,13 +78,13 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
+                <artifactId>spring-boot-starter-data-cassandra-reactive</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.projectreactor</groupId>
-                <artifactId>reactor-core</artifactId>
-                <version>${reactor-core.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
