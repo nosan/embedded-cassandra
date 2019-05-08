@@ -37,6 +37,7 @@ class JvmOptionsTests {
 		JvmOptions jvmOptions = new JvmOptions(Collections.emptyList(), new Ports(0, 0, 0, 0, 0),
 				new RandomPortSupplier(InetAddress::getLoopbackAddress));
 		assertThat(toString(jvmOptions)).doesNotContain("=0");
+		assertThat(toString(jvmOptions)).isNotEqualTo(toString(jvmOptions));
 	}
 
 	@Test
