@@ -133,8 +133,10 @@ class JvmOptions implements Supplier<List<String>> {
 	}
 
 	private static void setPort(String name, Map<String, String> jvmOptions, RandomPortSupplier portSupplier) {
-		getInteger(name, jvmOptions).filter(port -> port == 0)
-				.ifPresent(port -> jvmOptions.put(name, Integer.toString(portSupplier.get())));
+		Integer port = getInteger(name, jvmOptions).orElse(null);
+		if (port != null && port == 0) {
+			jvmOptions.put(name, Integer.toString(portSupplier.getPort()));
+		}
 	}
 
 	private static Optional<Integer> getInteger(String name, Map<String, String> source) {

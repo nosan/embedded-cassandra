@@ -20,7 +20,11 @@ import java.net.InetAddress;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,13 +36,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RandomPortSupplierTests {
 
 	@Test
-	void shouldGet36RandomPorts() {
+	@EnabledOnOs(OS.WINDOWS)
+	void shouldGet20RandomPorts() {
 		Set<Integer> ports = new LinkedHashSet<>();
 		RandomPortSupplier portSupplier = new RandomPortSupplier(InetAddress::getLoopbackAddress);
-		for (int i = 0; i < 36; i++) {
-			ports.add(portSupplier.get());
+		for (int i = 0; i < 20; i++) {
+			ports.add(portSupplier.getPort());
 		}
-		assertThat(ports).hasSize(36);
+		assertThat(ports).hasSize(20);
+	}
+
+	@RepeatedTest(100)
+	@DisabledOnOs(OS.WINDOWS)
+	void shouldGet100RandomPorts() {
+		Set<Integer> ports = new LinkedHashSet<>();
+		RandomPortSupplier portSupplier = new RandomPortSupplier(InetAddress::getLoopbackAddress);
+		for (int i = 0; i < 100; i++) {
+			ports.add(portSupplier.getPort());
+		}
+		assertThat(ports).hasSize(100);
 	}
 
 }

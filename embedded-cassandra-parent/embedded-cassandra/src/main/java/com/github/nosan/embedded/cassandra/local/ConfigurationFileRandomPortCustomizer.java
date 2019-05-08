@@ -69,8 +69,10 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 	}
 
 	private static void setPort(String name, Map<Object, Object> properties, RandomPortSupplier portSupplier) {
-		getInteger(name, properties).filter(port -> port == 0)
-				.ifPresent(port -> properties.put(name, portSupplier.get()));
+		Integer port = getInteger(name, properties).orElse(null);
+		if (port != null && port == 0) {
+			properties.put(name, portSupplier.getPort());
+		}
 	}
 
 	private static Map<Object, Object> readProperties(Path file) throws IOException {

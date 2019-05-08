@@ -25,16 +25,16 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 /**
- * Random port {@link Supplier}.
+ * Synchronized {@link Supplier} to generate random ports.
  *
  * @author Dmytro Nosan
  * @since 2.0.1
  */
-class RandomPortSupplier implements Supplier<Integer> {
+final class RandomPortSupplier {
 
 	private static final int ATTEMPTS = 1024;
 
-	private static final int SIZE = 36;
+	private static final int SIZE = 100;
 
 	private static final int MIN = 49152;
 
@@ -48,26 +48,26 @@ class RandomPortSupplier implements Supplier<Integer> {
 		this.addressSupplier = addressSupplier;
 	}
 
-	@Override
-	public Integer get() {
-		synchronized (this) {
-			if (this.ports.size() == SIZE) {
-				this.ports.removeFirst();
-			}
-			int port = getPort();
-			this.ports.addLast(port);
-			return port;
-		}
+	/**
+	 * Returns a random port between {@link #MIN} and {@link #MAX}.
+	 *
+	 * @return a port
+	 */
+	synchronized Integer getPort() {
+		return getPort(this.addressSupplier.get());
 	}
 
-	private int getPort() {
+	private int getPort(InetAddress address) {
 		ThreadLocalRandom random = ThreadLocalRandom.current();
-		InetAddress address = this.addressSupplier.get();
+		if (this.ports.size() == SIZE) {
+			this.ports.removeFirst();
+		}
 		for (int i = 0; i < ATTEMPTS; i++) {
 			int port = MIN + random.nextInt(MAX - MIN + 1);
 			if (!this.ports.contains(port)) {
-				try (ServerSocket ss = new ServerSocket(port, 1, address)) {
-					return ss.getLocalPort();
+				try (ServerSocket ignore = new ServerSocket(port, 1, address)) {
+					this.ports.addLast(port);
+					return port;
 				}
 				catch (IOException ex) {
 					//ignore
