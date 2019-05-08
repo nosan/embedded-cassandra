@@ -33,63 +33,92 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class NodeSettingsTests {
 
-	private final NodeSettings settings = new NodeSettings(Version.parse("3.11.4"));
+	private static final InetAddress ADDRESS = InetAddress.getLoopbackAddress();
+
+	private static final Version VERSION = Version.parse("3.11.4");
+
+	private final NodeSettings settings = new NodeSettings(VERSION);
 
 	@Test
 	void getVersion() {
-		assertThat(this.settings.getVersion()).isEqualTo(Version.parse("3.11.4"));
+		assertThat(this.settings.getVersion()).isEqualTo(VERSION);
 	}
 
 	@Test
-	void getRequiredAddress() {
-		assertThatThrownBy(this.settings::getRequiredAddress).isInstanceOf(NoSuchElementException.class)
+	void startTransport() {
+		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("Address is not present");
-		this.settings.setAddress(InetAddress.getLoopbackAddress());
-		assertThat(this.settings.getRequiredAddress()).isEqualTo(InetAddress.getLoopbackAddress());
-	}
-
-	@Test
-	void getRequiredAddressRpc() {
-		assertThatThrownBy(this.settings::getRequiredAddress).isInstanceOf(NoSuchElementException.class)
-				.hasStackTraceContaining("Address is not present");
-		this.settings.setRpcAddress(InetAddress.getLoopbackAddress());
-		assertThat(this.settings.getRequiredAddress()).isEqualTo(InetAddress.getLoopbackAddress());
-	}
-
-	@Test
-	void getRequiredPort() {
-		assertThatThrownBy(this.settings::getRequiredPort).isInstanceOf(NoSuchElementException.class)
+		assertThatThrownBy(this.settings::getPort).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("Port is not present");
-		this.settings.setPort(9042);
-		assertThat(this.settings.getRequiredPort()).isEqualTo(9042);
+		assertThatThrownBy(this.settings::isTransportStarted).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Transport is not present");
+		this.settings.startTransport(ADDRESS, 9042, false);
+		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
+		assertThat(this.settings.getPort()).isEqualTo(9042);
+		assertThat(this.settings.isTransportStarted()).isTrue();
 	}
 
 	@Test
-	void getRequiredSslPort() {
-		assertThatThrownBy(this.settings::getRequiredSslPort).isInstanceOf(NoSuchElementException.class)
+	void startSslTransport() {
+		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Address is not present");
+		assertThatThrownBy(this.settings::getSslPort).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("SSL port is not present");
-		this.settings.setSslPort(9142);
-		assertThat(this.settings.getRequiredSslPort()).isEqualTo(9142);
+		assertThatThrownBy(this.settings::isTransportStarted).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Transport is not present");
+		this.settings.startTransport(ADDRESS, 9142, true);
+		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
+		assertThat(this.settings.getSslPort()).isEqualTo(9142);
+		assertThat(this.settings.isTransportStarted()).isTrue();
 	}
 
 	@Test
-	void getRequiredRpcPort() {
-		assertThatThrownBy(this.settings::getRequiredRpcPort).isInstanceOf(NoSuchElementException.class)
+	void startRpcTransport() {
+		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Address is not present");
+		assertThatThrownBy(this.settings::getRpcPort).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("RPC port is not present");
-		this.settings.setRpcPort(9042);
-		assertThat(this.settings.getRequiredRpcPort()).isEqualTo(9042);
+		assertThatThrownBy(this.settings::isRpcTransportStarted).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("RPC transport is not present");
+		this.settings.startRpcTransport(ADDRESS, 9160);
+		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
+		assertThat(this.settings.getRpcPort()).isEqualTo(9160);
+		assertThat(this.settings.isRpcTransportStarted()).isTrue();
+	}
+
+	@Test
+	void stopRpcTransport() {
+		this.settings.startRpcTransport(ADDRESS, 9160);
+		this.settings.stopRpcTransport();
+		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Address is not present");
+		assertThatThrownBy(this.settings::getRpcPort).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("RPC port is not present");
+		assertThat(this.settings.isRpcTransportStarted()).isFalse();
+	}
+
+	@Test
+	void stopTransport() {
+		this.settings.startTransport(ADDRESS, 9142, true);
+		this.settings.stopTransport();
+		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Address is not present");
+		assertThatThrownBy(this.settings::getPort).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("Port is not present");
+		assertThatThrownBy(this.settings::getSslPort).isInstanceOf(NoSuchElementException.class)
+				.hasStackTraceContaining("SSL port is not present");
+		assertThat(this.settings.isTransportStarted()).isFalse();
 	}
 
 	@Test
 	void toStringTest() {
-		this.settings.setRpcPort(9160);
-		this.settings.setPort(9042);
-		this.settings.setSslPort(9142);
-		this.settings.setAddress(InetAddress.getLoopbackAddress());
+		this.settings.startTransport(ADDRESS, 9042, false);
+		this.settings.startTransport(ADDRESS, 9142, true);
+		this.settings.startRpcTransport(ADDRESS, 9160);
 		assertThat(this.settings.toString())
-				.isEqualTo(String.format("NodeSettings [version=%s, address=%s, port=%d, sslPort=%d, rpcPort=%d]",
-						"3.11.4", InetAddress.getLoopbackAddress(), 9042, 9142, 9160));
-
+				.isEqualTo(String.format("NodeSettings [version=%s, address=%s, port=%d, sslPort=%d, rpcPort=%d,"
+								+ " rpcTransportStarted=%b, transportStarted=%b]",
+						VERSION, InetAddress.getLoopbackAddress(), 9042, 9142, 9160, true, true));
 	}
 
 }

@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Deque;
@@ -31,7 +30,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import java.util.function.IntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -249,89 +247,48 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean isStarted(NodeSettings settings) {
 		Version version = settings.getVersion();
-
-		if (!settings.getRpcTransportStarted().isPresent() && version.getMajor() < 4) {
+		if (!settings.getOptionalRpcTransportStarted().isPresent() && version.getMajor() < 4) {
 			return false;
 		}
-
-		if (!settings.getTransportStarted().isPresent() && version.getMajor() > 1) {
+		if (!settings.getOptionalTransportStarted().isPresent() && version.getMajor() > 1) {
 			return false;
 		}
-
-		boolean transportStarted = settings.getTransportStarted().orElse(false);
-		boolean rpcTransportStarted = settings.getRpcTransportStarted().orElse(false);
-
-		if (transportStarted && settings.getPort().isPresent()
-				&& !NetworkUtils.isListen(settings.getRequiredAddress(), settings.getRequiredPort())) {
+		boolean transportStarted = settings.getOptionalTransportStarted().orElse(false);
+		boolean rpcTransportStarted = settings.getOptionalRpcTransportStarted().orElse(false);
+		if (transportStarted && settings.getOptionalPort().isPresent()
+				&& !NetworkUtils.isListen(settings.getAddress(), settings.getPort())) {
 			return false;
 		}
-		if (transportStarted && settings.getSslPort().isPresent()
-				&& !NetworkUtils.isListen(settings.getRequiredAddress(), settings.getRequiredSslPort())) {
+		if (transportStarted && settings.getOptionalSslPort().isPresent()
+				&& !NetworkUtils.isListen(settings.getAddress(), settings.getSslPort())) {
 			return false;
 		}
-
-		return !rpcTransportStarted || !settings.getRpcPort().isPresent()
-				|| NetworkUtils.isListen(settings.getRequiredAddress(), settings.getRequiredRpcPort());
+		return !rpcTransportStarted || !settings.getOptionalRpcPort().isPresent()
+				|| NetworkUtils.isListen(settings.getAddress(), settings.getRpcPort());
 
 	}
 
 	private void parse(String line, NodeSettings settings) {
-		onMatch(TRANSPORT_START_PATTERN, line, matcher -> {
-			onAddress(matcher.group(1), settings::setAddress);
-			onPort(matcher.group(2), port -> {
-				if (line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED)) {
-					settings.setSslPort(port);
-				}
-				else {
-					settings.setPort(port);
-				}
-			});
-			settings.setTransportStarted(true);
-		});
-		onAnyMatch(new Pattern[]{TRANSPORT_NOT_START_PATTERN, TRANSPORT_STOP_PATTERN}, line, matcher -> {
-			settings.setAddress(null);
-			settings.setPort(null);
-			settings.setSslPort(null);
-			settings.setTransportStarted(false);
-		});
-		onMatch(RPC_TRANSPORT_START_PATTERN, line, matcher -> {
-			onAddress(matcher.group(1), settings::setRpcAddress);
-			onPort(matcher.group(2), settings::setRpcPort);
-			settings.setRpcTransportStarted(true);
-		});
-		onAnyMatch(new Pattern[]{RPC_TRANSPORT_NOT_START_PATTERN, RPC_TRANSPORT_STOP_PATTERN}, line, matcher -> {
-			settings.setRpcAddress(null);
-			settings.setRpcPort(null);
-			settings.setRpcTransportStarted(false);
-		});
+		onMatch(TRANSPORT_START_PATTERN, line, matcher ->
+				settings.startTransport(NetworkUtils.getAddress(matcher.group(1)),
+						NetworkUtils.getPort(matcher.group(2)), line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED)));
+		onMatch(RPC_TRANSPORT_START_PATTERN, line, matcher ->
+				settings.startRpcTransport(NetworkUtils.getAddress(matcher.group(1)),
+						NetworkUtils.getPort(matcher.group(2))));
+		onAnyMatch(new Pattern[]{TRANSPORT_NOT_START_PATTERN, TRANSPORT_STOP_PATTERN}, line, matcher ->
+				settings.stopTransport());
+		onAnyMatch(new Pattern[]{RPC_TRANSPORT_NOT_START_PATTERN, RPC_TRANSPORT_STOP_PATTERN}, line, matcher ->
+				settings.stopRpcTransport());
 	}
 
-	private void onAddress(String address, Consumer<InetAddress> addressConsumer) {
-		try {
-			addressConsumer.accept(InetAddress.getByName(address));
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(String.format("Can not parse an address '%s'", address), ex);
-		}
-	}
-
-	private void onPort(String port, IntConsumer portConsumer) {
-		try {
-			portConsumer.accept(Integer.parseInt(port));
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(String.format("Can not parse a port '%s'", port), ex);
-		}
-	}
-
-	private void onMatch(Pattern pattern, String line, Consumer<Matcher> matcherConsumer) {
+	private void onMatch(Pattern pattern, String line, Consumer<? super Matcher> matcherConsumer) {
 		Matcher matcher = pattern.matcher(line);
 		if (matcher.matches()) {
 			matcherConsumer.accept(matcher);
 		}
 	}
 
-	private void onAnyMatch(Pattern[] patterns, String line, Consumer<Matcher> matcherConsumer) {
+	private void onAnyMatch(Pattern[] patterns, String line, Consumer<? super Matcher> matcherConsumer) {
 		for (Pattern pattern : patterns) {
 			Matcher matcher = pattern.matcher(line);
 			if (matcher.matches()) {

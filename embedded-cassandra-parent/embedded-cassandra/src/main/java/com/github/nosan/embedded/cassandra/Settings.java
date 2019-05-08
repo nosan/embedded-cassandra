@@ -29,6 +29,68 @@ import java.util.Optional;
 public interface Settings {
 
 	/**
+	 * The address to listen for the clients on.
+	 *
+	 * @return the address
+	 * @throws NoSuchElementException if address is not present
+	 */
+	default InetAddress getAddress() throws NoSuchElementException {
+		return getOptionalAddress().orElseThrow(() -> new NoSuchElementException("Address is not present"));
+	}
+
+	/**
+	 * The port for client connections.
+	 *
+	 * @return the port
+	 * @throws NoSuchElementException if port is not present
+	 */
+	default int getPort() throws NoSuchElementException {
+		return getOptionalPort().orElseThrow(() -> new NoSuchElementException("Port is not present"));
+	}
+
+	/**
+	 * SSL port for client connections.
+	 *
+	 * @return SSL port
+	 * @throws NoSuchElementException if SSL port is not present
+	 */
+	default int getSslPort() throws NoSuchElementException {
+		return getOptionalSslPort().orElseThrow(() -> new NoSuchElementException("SSL port is not present"));
+	}
+
+	/**
+	 * RPC port for client connections.
+	 *
+	 * @return RPC port
+	 * @throws NoSuchElementException if RPC port is not present
+	 */
+	default int getRpcPort() throws NoSuchElementException {
+		return getOptionalRpcPort().orElseThrow(() -> new NoSuchElementException("RPC port is not present"));
+	}
+
+	/**
+	 * The native transport is started.
+	 *
+	 * @return native transport is started
+	 * @throws NoSuchElementException if transport is not present
+	 */
+	default boolean isTransportStarted() throws NoSuchElementException {
+		return getOptionalTransportStarted()
+				.orElseThrow(() -> new NoSuchElementException("Transport is not present"));
+	}
+
+	/**
+	 * RPC transport is started.
+	 *
+	 * @return rpc transport is started
+	 * @throws NoSuchElementException if RPC transport is not present
+	 */
+	default boolean isRpcTransportStarted() throws NoSuchElementException {
+		return getOptionalRpcTransportStarted()
+				.orElseThrow(() -> new NoSuchElementException("RPC transport is not present"));
+	}
+
+	/**
 	 * Returns the {@link Version version}.
 	 *
 	 * @return a version
@@ -39,76 +101,54 @@ public interface Settings {
 	 * The address to listen for the clients on.
 	 *
 	 * @return the address, or {@code empty}
-	 * @see #getRequiredAddress()
+	 * @see #getAddress()
+	 * @since 2.0.1
 	 */
-	Optional<InetAddress> getAddress();
+	Optional<InetAddress> getOptionalAddress();
 
 	/**
 	 * The port for client connections.
 	 *
 	 * @return the port, or {@code empty}
-	 * @see #getRequiredPort()
+	 * @see #getPort()
+	 * @since 2.0.1
 	 */
-	Optional<Integer> getPort();
+	Optional<Integer> getOptionalPort();
 
 	/**
 	 * SSL port for client connections.
 	 *
 	 * @return SSL port, or {@code empty}
-	 * @see #getRequiredSslPort()
+	 * @see #getSslPort()
+	 * @since 2.0.1
 	 */
-	Optional<Integer> getSslPort();
+	Optional<Integer> getOptionalSslPort();
 
 	/**
 	 * RPC port for client connections.
 	 *
 	 * @return RPC port, or {@code empty}
-	 * @see #getRequiredRpcPort()
-	 */
-	Optional<Integer> getRpcPort();
-
-	/**
-	 * The address to listen for the clients on.
-	 *
-	 * @return the address
-	 * @throws NoSuchElementException if address is not present
+	 * @see #getRpcPort()
 	 * @since 2.0.1
 	 */
-	default InetAddress getRequiredAddress() throws NoSuchElementException {
-		return getAddress().orElseThrow(() -> new NoSuchElementException("Address is not present"));
-	}
+	Optional<Integer> getOptionalRpcPort();
 
 	/**
-	 * The port for client connections.
+	 * The native transport is started.
 	 *
-	 * @return the port
-	 * @throws NoSuchElementException if port is not present
+	 * @return native transport is started, or {@code empty}
+	 * @see #isTransportStarted()
 	 * @since 2.0.1
 	 */
-	default int getRequiredPort() throws NoSuchElementException {
-		return getPort().orElseThrow(() -> new NoSuchElementException("Port is not present"));
-	}
+	Optional<Boolean> getOptionalTransportStarted();
 
 	/**
-	 * SSL port for client connections.
+	 * RPC transport is started.
 	 *
-	 * @return SSL port
-	 * @throws NoSuchElementException if SSL port is not present
+	 * @return rpc transport is started, or {@code empty}
+	 * @see #isRpcTransportStarted()
 	 * @since 2.0.1
 	 */
-	default int getRequiredSslPort() throws NoSuchElementException {
-		return getSslPort().orElseThrow(() -> new NoSuchElementException("SSL port is not present"));
-	}
-
-	/**
-	 * RPC port for client connections.
-	 *
-	 * @return RPC port
-	 * @throws NoSuchElementException if RPC port is not present
-	 * @since 2.0.1
-	 */
-	default int getRequiredRpcPort() throws NoSuchElementException {
-		return getRpcPort().orElseThrow(() -> new NoSuchElementException("RPC port is not present"));
-	}
+	Optional<Boolean> getOptionalRpcTransportStarted();
 
 }

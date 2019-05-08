@@ -62,7 +62,7 @@ class CityRepositoryTests {
 		ClusterBuilderCustomizer embeddedClusterCustomizer(TestCassandra cassandra) {
 			return builder -> {
 				Settings settings = cassandra.getSettings();
-				builder.withPort(settings.getRequiredPort()).addContactPoints(settings.getRequiredAddress());
+				builder.withPort(settings.getPort()).addContactPoints(settings.getAddress());
 			};
 		}
 

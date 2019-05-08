@@ -51,7 +51,7 @@ public class CqlSessionFactory {
 	public CqlSession create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
 		return CqlSession.builder()
-				.addContactPoint(new InetSocketAddress(settings.getRequiredAddress(), settings.getRequiredPort()))
+				.addContactPoint(new InetSocketAddress(settings.getAddress(), settings.getPort()))
 				.withLocalDatacenter(DATACENTER)
 				.withConfigLoader(DriverConfigLoader.programmaticBuilder()
 						.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)

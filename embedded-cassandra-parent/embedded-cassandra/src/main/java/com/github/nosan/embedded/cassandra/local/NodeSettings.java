@@ -19,41 +19,51 @@ package com.github.nosan.embedded.cassandra.local;
 import java.net.InetAddress;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Default implementation of the {@link Settings}.
+ * The node {@link Settings}.
  *
  * @author Dmytro Nosan
  * @since 2.0.0
  */
 class NodeSettings implements Settings {
 
+	private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+	private final Lock writeLock = this.readWriteLock.writeLock();
+
+	private final Lock readLock = this.readWriteLock.readLock();
+
 	private final Version version;
 
 	@Nullable
-	private volatile InetAddress address;
+	private InetAddress address;
 
 	@Nullable
-	private volatile InetAddress rpcAddress;
+	private InetAddress rpcAddress;
 
 	@Nullable
-	private volatile Integer port;
+	private Integer port;
 
 	@Nullable
-	private volatile Integer sslPort;
+	private Integer sslPort;
 
 	@Nullable
-	private volatile Integer rpcPort;
+	private Integer rpcPort;
 
 	@Nullable
-	private volatile Boolean rpcTransportStarted;
+	private Boolean rpcTransportStarted;
 
 	@Nullable
-	private volatile Boolean transportStarted;
+	private Boolean transportStarted;
 
 	NodeSettings(Version version) {
 		this.version = version;
@@ -65,119 +75,112 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public Optional<InetAddress> getAddress() {
-		InetAddress address = this.address;
-		if (address != null) {
-			return Optional.of(address);
-		}
-		return Optional.ofNullable(this.rpcAddress);
-	}
-
-	/**
-	 * Initializes the value for the {@link NodeSettings#getAddress} attribute.
-	 *
-	 * @param address The value for address
-	 */
-	void setAddress(@Nullable InetAddress address) {
-		this.address = address;
+	public Optional<InetAddress> getOptionalAddress() {
+		return read(() -> {
+			InetAddress address = this.address;
+			if (address != null) {
+				return Optional.of(address);
+			}
+			return Optional.ofNullable(this.rpcAddress);
+		});
 	}
 
 	@Override
-	public Optional<Integer> getPort() {
-		return Optional.ofNullable(this.port);
-	}
-
-	/**
-	 * Initializes the value for the {@link NodeSettings#getPort} attribute.
-	 *
-	 * @param port The value for port
-	 */
-	void setPort(@Nullable Integer port) {
-		this.port = port;
+	public Optional<Integer> getOptionalPort() {
+		return read(() -> Optional.ofNullable(this.port));
 	}
 
 	@Override
-	public Optional<Integer> getSslPort() {
-		return Optional.ofNullable(this.sslPort);
-	}
-
-	/**
-	 * Initializes the value for the {@link NodeSettings#getSslPort} attribute.
-	 *
-	 * @param sslPort The value for sslPort
-	 */
-	void setSslPort(@Nullable Integer sslPort) {
-		this.sslPort = sslPort;
+	public Optional<Integer> getOptionalSslPort() {
+		return read(() -> Optional.ofNullable(this.sslPort));
 	}
 
 	@Override
-	public Optional<Integer> getRpcPort() {
-		return Optional.ofNullable(this.rpcPort);
+	public Optional<Integer> getOptionalRpcPort() {
+		return read(() -> Optional.ofNullable(this.rpcPort));
 	}
 
-	/**
-	 * Initializes the value for the {@link NodeSettings#getRpcPort} attribute.
-	 *
-	 * @param rpcPort The value for rpcPort
-	 */
-	void setRpcPort(@Nullable Integer rpcPort) {
-		this.rpcPort = rpcPort;
+	@Override
+	public Optional<Boolean> getOptionalRpcTransportStarted() {
+		return read(() -> Optional.ofNullable(this.rpcTransportStarted));
+	}
+
+	@Override
+	public Optional<Boolean> getOptionalTransportStarted() {
+		return read(() -> Optional.ofNullable(this.transportStarted));
 	}
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", NodeSettings.class.getSimpleName() + " [", "]")
-				.add("version=" + getVersion())
-				.add("address=" + getAddress().orElse(null))
-				.add("port=" + getPort().orElse(null))
-				.add("sslPort=" + getSslPort().orElse(null))
-				.add("rpcPort=" + getRpcPort().orElse(null))
-				.toString();
+		return read(() -> new StringJoiner(", ", NodeSettings.class.getSimpleName() + " [", "]")
+				.add("version=" + this.version)
+				.add("address=" + Optional.ofNullable(this.address).orElse(this.rpcAddress))
+				.add("port=" + this.port)
+				.add("sslPort=" + this.sslPort)
+				.add("rpcPort=" + this.rpcPort)
+				.add("rpcTransportStarted=" + this.rpcTransportStarted)
+				.add("transportStarted=" + this.transportStarted)
+				.toString());
 	}
 
-	/**
-	 * RPC transport is started or not.
-	 *
-	 * @return rpc transport is enabled, or {@code empty} if not present.
-	 */
-	Optional<Boolean> getRpcTransportStarted() {
-		return Optional.ofNullable(this.rpcTransportStarted);
+	void stopRpcTransport() {
+		write(() -> {
+			this.rpcAddress = null;
+			this.rpcPort = null;
+			this.rpcTransportStarted = false;
+		});
 	}
 
-	/**
-	 * Initializes the value for the {@link NodeSettings#getRpcTransportStarted()} attribute.
-	 *
-	 * @param rpcTransportStarted The value for rpcTransportEnabled
-	 */
-	void setRpcTransportStarted(@Nullable Boolean rpcTransportStarted) {
-		this.rpcTransportStarted = rpcTransportStarted;
+	void stopTransport() {
+		write(() -> {
+			this.port = null;
+			this.sslPort = null;
+			this.address = null;
+			this.transportStarted = false;
+		});
 	}
 
-	/**
-	 * Native transport is started or not.
-	 *
-	 * @return native transport is enabled, or {@code empty} if not present.
-	 */
-	Optional<Boolean> getTransportStarted() {
-		return Optional.ofNullable(this.transportStarted);
+	void startRpcTransport(InetAddress address, int port) {
+		write(() -> {
+			this.rpcPort = port;
+			this.rpcAddress = address;
+			this.rpcTransportStarted = true;
+		});
 	}
 
-	/**
-	 * Initializes the value for the {@link NodeSettings#getTransportStarted()} attribute.
-	 *
-	 * @param transportStarted The value for transportEnabled
-	 */
-	void setTransportStarted(@Nullable Boolean transportStarted) {
-		this.transportStarted = transportStarted;
+	void startTransport(InetAddress address, int port, boolean ssl) {
+		write(() -> {
+			if (ssl) {
+				this.sslPort = port;
+			}
+			else {
+				this.port = port;
+			}
+			this.address = address;
+			this.transportStarted = true;
+		});
 	}
 
-	/**
-	 * Initializes the value for the rpc address attribute.
-	 *
-	 * @param rpcAddress The value for rpcAddress
-	 */
-	void setRpcAddress(@Nullable InetAddress rpcAddress) {
-		this.rpcAddress = rpcAddress;
+	private <T> T read(Supplier<T> supplier) {
+		Lock lock = this.readLock;
+		lock.lock();
+		try {
+			return supplier.get();
+		}
+		finally {
+			lock.unlock();
+		}
+	}
+
+	private void write(Runnable runnable) {
+		Lock lock = this.writeLock;
+		lock.lock();
+		try {
+			runnable.run();
+		}
+		finally {
+			lock.unlock();
+		}
 	}
 
 }

@@ -47,8 +47,8 @@ public class ClusterFactory {
 		socketOptions.setConnectTimeoutMillis(30000);
 		socketOptions.setReadTimeoutMillis(30000);
 		Cluster.Builder builder = Cluster.builder()
-				.addContactPoints(settings.getRequiredAddress())
-				.withPort(settings.getRequiredPort())
+				.addContactPoints(settings.getAddress())
+				.withPort(settings.getPort())
 				.withCredentials(USERNAME, PASSWORD)
 				.withSocketOptions(socketOptions);
 		return builder.withoutJMXReporting().withoutMetrics().build();

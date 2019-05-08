@@ -125,7 +125,7 @@ abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(factory);
 		runner.run(assertCreateKeyspace().andThen(cassandra -> {
 			Settings settings = cassandra.getSettings();
-			assertThat(NetworkUtils.isListen(settings.getRequiredAddress(), 9155));
+			assertThat(NetworkUtils.isListen(settings.getAddress(), 9155));
 		}));
 	}
 
