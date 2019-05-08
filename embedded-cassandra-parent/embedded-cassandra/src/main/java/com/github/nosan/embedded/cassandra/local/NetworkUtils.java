@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
@@ -28,7 +27,7 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * Utility methods for dealing with a network.
  *
  * @author Dmytro Nosan
- * @since 1.0.0
+ * @since 2.0.1
  */
 abstract class NetworkUtils {
 
@@ -53,10 +52,40 @@ abstract class NetworkUtils {
 
 	static InetAddress getLocalhost() {
 		try {
-			return InetAddress.getByName(LOCALHOST);
+			return getAddress(LOCALHOST);
 		}
-		catch (UnknownHostException ex) {
+		catch (IllegalArgumentException ex) {
 			return InetAddress.getLoopbackAddress();
+		}
+	}
+
+	/**
+	 * Determines the IP address of a host, given the host's name.
+	 *
+	 * @param host the specified host
+	 * @return an IP address for the given host name
+	 */
+	static InetAddress getAddress(@Nullable String host) {
+		try {
+			return InetAddress.getByName(host);
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(String.format("Can not parse an address '%s'", host), ex);
+		}
+	}
+
+	/**
+	 * Parses the port.
+	 *
+	 * @param port the specified port
+	 * @return a port
+	 */
+	static int getPort(String port) {
+		try {
+			return Integer.parseInt(port);
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(String.format("Can not parse a port '%s'", port), ex);
 		}
 	}
 

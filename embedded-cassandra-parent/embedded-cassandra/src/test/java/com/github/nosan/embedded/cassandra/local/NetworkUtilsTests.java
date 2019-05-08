@@ -24,6 +24,7 @@ import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link NetworkUtils}.
@@ -45,9 +46,30 @@ class NetworkUtilsTests {
 	}
 
 	@Test
-	void getLocalhost() throws UnknownHostException {
+	void shouldGetLocalhost() throws UnknownHostException {
 		InetAddress localhost = NetworkUtils.getLocalhost();
 		assertThat(localhost).isEqualTo(InetAddress.getByName("localhost"));
+	}
+
+	@Test
+	void shouldGetPort() {
+		assertThat(NetworkUtils.getPort("9140")).isEqualTo(9140);
+	}
+
+	@Test
+	void shouldGetAddress() {
+		assertThat(NetworkUtils.getAddress(InetAddress.getLoopbackAddress().getHostAddress())).
+				isEqualTo(InetAddress.getLoopbackAddress());
+	}
+
+	@Test
+	void shouldNotGetPort() {
+		assertThatThrownBy(() -> NetworkUtils.getPort("em...?")).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void shouldNotGetAddress() {
+		assertThatThrownBy(() -> NetworkUtils.getAddress("em...?")).isInstanceOf(IllegalArgumentException.class);
 	}
 
 }
