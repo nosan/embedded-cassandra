@@ -32,13 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RandomPortSupplierTests {
 
 	@Test
-	void shouldGet15RandomPorts() {
+	void shouldGet36RandomPorts() {
 		Set<Integer> ports = new LinkedHashSet<>();
 		RandomPortSupplier portSupplier = new RandomPortSupplier(InetAddress::getLoopbackAddress);
-		for (int i = 0; i < 15; i++) {
+		for (int i = 0; i < 36; i++) {
 			ports.add(portSupplier.get());
 		}
-		assertThat(ports).hasSize(15);
+		assertThat(ports).hasSize(36);
 	}
 
 }

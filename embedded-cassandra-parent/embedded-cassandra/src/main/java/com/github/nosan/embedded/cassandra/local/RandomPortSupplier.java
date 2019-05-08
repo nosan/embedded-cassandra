@@ -34,13 +34,13 @@ class RandomPortSupplier implements Supplier<Integer> {
 
 	private static final int ATTEMPTS = 1024;
 
-	private static final int SIZE = 15;
+	private static final int SIZE = 36;
 
 	private static final int MIN = 49152;
 
 	private static final int MAX = 65535;
 
-	private final Deque<Integer> ports = new ArrayDeque<>(15);
+	private final Deque<Integer> ports = new ArrayDeque<>(SIZE);
 
 	private final Supplier<InetAddress> addressSupplier;
 
@@ -50,13 +50,14 @@ class RandomPortSupplier implements Supplier<Integer> {
 
 	@Override
 	public Integer get() {
-		int size = this.ports.size();
-		if (size == SIZE) {
-			this.ports.removeFirst();
+		synchronized (this) {
+			if (this.ports.size() == SIZE) {
+				this.ports.removeFirst();
+			}
+			int port = getPort();
+			this.ports.addLast(port);
+			return port;
 		}
-		int port = getPort();
-		this.ports.addLast(port);
-		return port;
 	}
 
 	private int getPort() {
@@ -73,8 +74,8 @@ class RandomPortSupplier implements Supplier<Integer> {
 				}
 			}
 		}
-		throw new IllegalStateException(
-				String.format("Can not find an available port in the range [%d, %d]", MIN, MAX));
+		throw new IllegalStateException(String.format("Can not find an available port in the range [%d, %d]",
+				MIN, MAX));
 	}
 
 }
