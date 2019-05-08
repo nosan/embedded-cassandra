@@ -50,6 +50,11 @@ abstract class NetworkUtils {
 		}
 	}
 
+	/**
+	 * Determines the IP address of a localhost.
+	 *
+	 * @return the localhost
+	 */
 	static InetAddress getLocalhost() {
 		try {
 			return getAddress(LOCALHOST);
