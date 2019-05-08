@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class NetworkUtilsTests {
 
 	@Test
-	void isListen() throws IOException {
+	void isListen() throws IOException, InterruptedException {
 		int port;
 		InetAddress address;
 		try (ServerSocket serverSocket = new ServerSocket(0)) {
@@ -42,6 +42,7 @@ class NetworkUtilsTests {
 			address = serverSocket.getInetAddress();
 			assertThat(NetworkUtils.isListen(address, port)).isTrue();
 		}
+		Thread.sleep(500); //for mac os.
 		assertThat(NetworkUtils.isListen(address, port)).isFalse();
 	}
 
