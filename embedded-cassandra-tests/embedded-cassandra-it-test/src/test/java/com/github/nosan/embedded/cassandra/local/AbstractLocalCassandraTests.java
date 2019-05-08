@@ -142,6 +142,13 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
+	void shouldFailAndCatchError() {
+		this.factory.setConfigurationFile(getClass().getResource("/cassandra-invalid.yaml"));
+		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class)
+				.hasMessageNotContaining("invalid_property");
+	}
+
+	@Test
 	void shouldFailCassandraUseSamePorts() {
 		CassandraRunner runner = new CassandraRunner(this.factory);
 		runner.run(cassandra -> assertThatThrownBy(new CassandraRunner(this.factory)::run)
