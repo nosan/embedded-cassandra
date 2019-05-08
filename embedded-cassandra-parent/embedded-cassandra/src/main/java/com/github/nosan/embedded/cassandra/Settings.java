@@ -78,24 +78,18 @@ public interface Settings {
 	/**
 	 * The native transport is started.
 	 *
-	 * @return native transport is started
-	 * @throws NoSuchElementException if transport is not present
+	 * @return native transport is started, or {@code empty}
+	 * @since 2.0.1
 	 */
-	default boolean isTransportStarted() throws NoSuchElementException {
-		return transportStarted()
-				.orElseThrow(() -> new NoSuchElementException("Transport is not present"));
-	}
+	Optional<Boolean> transportStarted();
 
 	/**
 	 * RPC transport is started.
 	 *
-	 * @return rpc transport is started
-	 * @throws NoSuchElementException if RPC transport is not present
+	 * @return rpc transport is started, or {@code empty}
+	 * @since 2.0.1
 	 */
-	default boolean isRpcTransportStarted() throws NoSuchElementException {
-		return rpcTransportStarted()
-				.orElseThrow(() -> new NoSuchElementException("RPC transport is not present"));
-	}
+	Optional<Boolean> rpcTransportStarted();
 
 	/**
 	 * The address to listen for the clients on.
@@ -132,23 +126,5 @@ public interface Settings {
 	 * @since 2.0.1
 	 */
 	Optional<Integer> rpcPort();
-
-	/**
-	 * The native transport is started.
-	 *
-	 * @return native transport is started, or {@code empty}
-	 * @see #isTransportStarted()
-	 * @since 2.0.1
-	 */
-	Optional<Boolean> transportStarted();
-
-	/**
-	 * RPC transport is started.
-	 *
-	 * @return rpc transport is started, or {@code empty}
-	 * @see #isRpcTransportStarted()
-	 * @since 2.0.1
-	 */
-	Optional<Boolean> rpcTransportStarted();
 
 }
