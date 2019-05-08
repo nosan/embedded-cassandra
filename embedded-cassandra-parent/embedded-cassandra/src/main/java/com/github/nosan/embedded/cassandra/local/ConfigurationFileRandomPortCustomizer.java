@@ -38,6 +38,16 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomizer {
 
+	private static final String PORT = "native_transport_port";
+
+	private static final String SSL_PORT = "native_transport_port_ssl";
+
+	private static final String RPC_PORT = "rpc_port";
+
+	private static final String STORAGE_PORT = "storage_port";
+
+	private static final String SSL_STORAGE_PORT = "ssl_storage_port";
+
 	private final RandomPortSupplier portSupplier;
 
 	ConfigurationFileRandomPortCustomizer(RandomPortSupplier portSupplier) {
@@ -50,11 +60,11 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
 		Map<Object, Object> oldProperties = readProperties(file);
 		Map<Object, Object> newProperties = new LinkedHashMap<>(oldProperties);
-		setPort("native_transport_port", newProperties, portSupplier);
-		setPort("native_transport_port_ssl", newProperties, portSupplier);
-		setPort("rpc_port", newProperties, portSupplier);
-		setPort("storage_port", newProperties, portSupplier);
-		setPort("ssl_storage_port", newProperties, portSupplier);
+		setPort(PORT, newProperties, portSupplier);
+		setPort(SSL_PORT, newProperties, portSupplier);
+		setPort(RPC_PORT, newProperties, portSupplier);
+		setPort(STORAGE_PORT, newProperties, portSupplier);
+		setPort(SSL_STORAGE_PORT, newProperties, portSupplier);
 		if (!newProperties.equals(oldProperties)) {
 			writeProperties(file, newProperties);
 		}
