@@ -29,13 +29,20 @@ import java.util.Optional;
 public interface Settings {
 
 	/**
+	 * Returns the {@link Version version}.
+	 *
+	 * @return a version
+	 */
+	Version getVersion();
+
+	/**
 	 * The address to listen for the clients on.
 	 *
 	 * @return the address
 	 * @throws NoSuchElementException if address is not present
 	 */
 	default InetAddress getAddress() throws NoSuchElementException {
-		return getOptionalAddress().orElseThrow(() -> new NoSuchElementException("Address is not present"));
+		return address().orElseThrow(() -> new NoSuchElementException("Address is not present"));
 	}
 
 	/**
@@ -45,7 +52,7 @@ public interface Settings {
 	 * @throws NoSuchElementException if port is not present
 	 */
 	default int getPort() throws NoSuchElementException {
-		return getOptionalPort().orElseThrow(() -> new NoSuchElementException("Port is not present"));
+		return port().orElseThrow(() -> new NoSuchElementException("Port is not present"));
 	}
 
 	/**
@@ -55,7 +62,7 @@ public interface Settings {
 	 * @throws NoSuchElementException if SSL port is not present
 	 */
 	default int getSslPort() throws NoSuchElementException {
-		return getOptionalSslPort().orElseThrow(() -> new NoSuchElementException("SSL port is not present"));
+		return sslPort().orElseThrow(() -> new NoSuchElementException("SSL port is not present"));
 	}
 
 	/**
@@ -65,7 +72,7 @@ public interface Settings {
 	 * @throws NoSuchElementException if RPC port is not present
 	 */
 	default int getRpcPort() throws NoSuchElementException {
-		return getOptionalRpcPort().orElseThrow(() -> new NoSuchElementException("RPC port is not present"));
+		return rpcPort().orElseThrow(() -> new NoSuchElementException("RPC port is not present"));
 	}
 
 	/**
@@ -75,7 +82,7 @@ public interface Settings {
 	 * @throws NoSuchElementException if transport is not present
 	 */
 	default boolean isTransportStarted() throws NoSuchElementException {
-		return getOptionalTransportStarted()
+		return transportStarted()
 				.orElseThrow(() -> new NoSuchElementException("Transport is not present"));
 	}
 
@@ -86,16 +93,9 @@ public interface Settings {
 	 * @throws NoSuchElementException if RPC transport is not present
 	 */
 	default boolean isRpcTransportStarted() throws NoSuchElementException {
-		return getOptionalRpcTransportStarted()
+		return rpcTransportStarted()
 				.orElseThrow(() -> new NoSuchElementException("RPC transport is not present"));
 	}
-
-	/**
-	 * Returns the {@link Version version}.
-	 *
-	 * @return a version
-	 */
-	Version getVersion();
 
 	/**
 	 * The address to listen for the clients on.
@@ -104,7 +104,7 @@ public interface Settings {
 	 * @see #getAddress()
 	 * @since 2.0.1
 	 */
-	Optional<InetAddress> getOptionalAddress();
+	Optional<InetAddress> address();
 
 	/**
 	 * The port for client connections.
@@ -113,7 +113,7 @@ public interface Settings {
 	 * @see #getPort()
 	 * @since 2.0.1
 	 */
-	Optional<Integer> getOptionalPort();
+	Optional<Integer> port();
 
 	/**
 	 * SSL port for client connections.
@@ -122,7 +122,7 @@ public interface Settings {
 	 * @see #getSslPort()
 	 * @since 2.0.1
 	 */
-	Optional<Integer> getOptionalSslPort();
+	Optional<Integer> sslPort();
 
 	/**
 	 * RPC port for client connections.
@@ -131,7 +131,7 @@ public interface Settings {
 	 * @see #getRpcPort()
 	 * @since 2.0.1
 	 */
-	Optional<Integer> getOptionalRpcPort();
+	Optional<Integer> rpcPort();
 
 	/**
 	 * The native transport is started.
@@ -140,7 +140,7 @@ public interface Settings {
 	 * @see #isTransportStarted()
 	 * @since 2.0.1
 	 */
-	Optional<Boolean> getOptionalTransportStarted();
+	Optional<Boolean> transportStarted();
 
 	/**
 	 * RPC transport is started.
@@ -149,6 +149,6 @@ public interface Settings {
 	 * @see #isRpcTransportStarted()
 	 * @since 2.0.1
 	 */
-	Optional<Boolean> getOptionalRpcTransportStarted();
+	Optional<Boolean> rpcTransportStarted();
 
 }

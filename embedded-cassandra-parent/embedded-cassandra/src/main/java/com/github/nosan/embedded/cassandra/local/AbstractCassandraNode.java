@@ -247,23 +247,23 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean isStarted(NodeSettings settings) {
 		Version version = settings.getVersion();
-		if (!settings.getOptionalRpcTransportStarted().isPresent() && version.getMajor() < 4) {
+		if (!settings.rpcTransportStarted().isPresent() && version.getMajor() < 4) {
 			return false;
 		}
-		if (!settings.getOptionalTransportStarted().isPresent() && version.getMajor() > 1) {
+		if (!settings.transportStarted().isPresent() && version.getMajor() > 1) {
 			return false;
 		}
-		boolean transportStarted = settings.getOptionalTransportStarted().orElse(false);
-		boolean rpcTransportStarted = settings.getOptionalRpcTransportStarted().orElse(false);
-		if (transportStarted && settings.getOptionalPort().isPresent()
+		boolean transportStarted = settings.transportStarted().orElse(false);
+		boolean rpcTransportStarted = settings.rpcTransportStarted().orElse(false);
+		if (transportStarted && settings.port().isPresent()
 				&& !NetworkUtils.isListen(settings.getAddress(), settings.getPort())) {
 			return false;
 		}
-		if (transportStarted && settings.getOptionalSslPort().isPresent()
+		if (transportStarted && settings.sslPort().isPresent()
 				&& !NetworkUtils.isListen(settings.getAddress(), settings.getSslPort())) {
 			return false;
 		}
-		return !rpcTransportStarted || !settings.getOptionalRpcPort().isPresent()
+		return !rpcTransportStarted || !settings.rpcPort().isPresent()
 				|| NetworkUtils.isListen(settings.getAddress(), settings.getRpcPort());
 
 	}

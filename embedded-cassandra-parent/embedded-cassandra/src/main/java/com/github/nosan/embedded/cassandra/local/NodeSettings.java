@@ -75,7 +75,7 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public Optional<InetAddress> getOptionalAddress() {
+	public Optional<InetAddress> address() {
 		return read(() -> {
 			InetAddress address = this.address;
 			if (address != null) {
@@ -86,27 +86,27 @@ class NodeSettings implements Settings {
 	}
 
 	@Override
-	public Optional<Integer> getOptionalPort() {
+	public Optional<Integer> port() {
 		return read(() -> Optional.ofNullable(this.port));
 	}
 
 	@Override
-	public Optional<Integer> getOptionalSslPort() {
+	public Optional<Integer> sslPort() {
 		return read(() -> Optional.ofNullable(this.sslPort));
 	}
 
 	@Override
-	public Optional<Integer> getOptionalRpcPort() {
+	public Optional<Integer> rpcPort() {
 		return read(() -> Optional.ofNullable(this.rpcPort));
 	}
 
 	@Override
-	public Optional<Boolean> getOptionalRpcTransportStarted() {
+	public Optional<Boolean> rpcTransportStarted() {
 		return read(() -> Optional.ofNullable(this.rpcTransportStarted));
 	}
 
 	@Override
-	public Optional<Boolean> getOptionalTransportStarted() {
+	public Optional<Boolean> transportStarted() {
 		return read(() -> Optional.ofNullable(this.transportStarted));
 	}
 
