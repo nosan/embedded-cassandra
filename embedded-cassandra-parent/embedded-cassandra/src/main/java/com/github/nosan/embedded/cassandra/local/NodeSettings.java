@@ -96,14 +96,6 @@ class NodeSettings implements Settings {
 		return read(() -> Optional.ofNullable(this.rpcPort));
 	}
 
-	Optional<Boolean> rpcTransportStarted() {
-		return read(() -> Optional.ofNullable(this.rpcTransportStarted));
-	}
-
-	Optional<Boolean> transportStarted() {
-		return read(() -> Optional.ofNullable(this.transportStarted));
-	}
-
 	@Override
 	public String toString() {
 		return read(() -> new StringJoiner(", ", NodeSettings.class.getSimpleName() + " [", "]")
@@ -113,6 +105,14 @@ class NodeSettings implements Settings {
 				.add("sslPort=" + this.sslPort)
 				.add("rpcPort=" + this.rpcPort)
 				.toString());
+	}
+
+	Optional<Boolean> rpcTransportStarted() {
+		return read(() -> Optional.ofNullable(this.rpcTransportStarted));
+	}
+
+	Optional<Boolean> transportStarted() {
+		return read(() -> Optional.ofNullable(this.transportStarted));
 	}
 
 	void stopRpcTransport() {
