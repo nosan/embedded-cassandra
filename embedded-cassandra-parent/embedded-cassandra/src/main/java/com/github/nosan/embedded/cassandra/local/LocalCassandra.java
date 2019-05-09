@@ -46,26 +46,26 @@ class LocalCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(LocalCassandra.class);
 
-	private final ThreadFactory threadFactory;
+	private final long id = counter.incrementAndGet();
+
+	private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("cassandra-%d", this.id));
 
 	private final Object monitor = new Object();
 
 	private final CassandraDatabase database;
+
+	private final boolean registerShutdownHook;
 
 	private volatile State state = State.NEW;
 
 	private volatile boolean started = false;
 
 	@Nullable
-	private volatile Thread startThread;
+	private volatile Thread shutdownHook;
 
 	LocalCassandra(boolean registerShutdownHook, CassandraDatabase database) {
-		long id = counter.incrementAndGet();
+		this.registerShutdownHook = registerShutdownHook;
 		this.database = database;
-		this.threadFactory = new DefaultThreadFactory(String.format("cassandra-%d", id));
-		if (registerShutdownHook) {
-			registerShutdownHook(id);
-		}
 	}
 
 	@Override
@@ -76,22 +76,18 @@ class LocalCassandra implements Cassandra {
 			}
 			try {
 				this.state = State.STARTING;
-				execute(this.database::start, runnable -> {
-					Thread thread = this.threadFactory.newThread(runnable);
-					this.startThread = thread;
-					return thread;
-				});
+				doStart();
 				this.state = State.STARTED;
 				this.started = true;
 			}
 			catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
 				this.state = State.START_INTERRUPTED;
-				stopDatabaseSafely();
+				doStopSafely();
 				throw new CassandraInterruptedException("Startup has interrupted", ex);
 			}
 			catch (Throwable ex) {
 				this.state = State.START_FAILED;
-				stopDatabaseSafely();
+				doStopSafely();
 				throw new CassandraException(String.format("Unable to start %s", toString()), ex);
 			}
 		}
@@ -105,7 +101,7 @@ class LocalCassandra implements Cassandra {
 			}
 			try {
 				this.state = State.STOPPING;
-				execute(this.database::stop, this.threadFactory);
+				doStop();
 				this.state = State.STOPPED;
 				this.started = false;
 			}
@@ -142,22 +138,41 @@ class LocalCassandra implements Cassandra {
 
 	@Override
 	public String toString() {
-		return String.format("%s '%s'", getClass().getSimpleName(), getVersion());
+		return String.format("%s (id=%d, version=%s)", getClass().getSimpleName(), this.id, getVersion());
 	}
 
-	private void registerShutdownHook(long id) {
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			Thread thread = this.startThread;
-			if (thread != null && thread.isAlive()) {
-				ThreadUtils.interrupt(thread);
+	private void doStart() throws Throwable {
+		execute(this.database::start, runnable -> {
+			Thread thread = this.threadFactory.newThread(runnable);
+			if (this.registerShutdownHook) {
+				Thread shutdownHook = new Thread(() -> {
+					ThreadUtils.interrupt(thread);
+					stop();
+				}, String.format("cassandra:%d:sh", this.id));
+				Runtime.getRuntime().addShutdownHook(shutdownHook);
+				this.shutdownHook = shutdownHook;
 			}
-			stop();
-		}, String.format("cassandra:%d:sh", id)));
+			return thread;
+		});
 	}
 
-	private void stopDatabaseSafely() {
+	private void doStop() throws Throwable {
+		execute(this.database::stop, this.threadFactory);
+		Thread shutdownHook = this.shutdownHook;
+		if (shutdownHook != null && shutdownHook != Thread.currentThread()) {
+			this.shutdownHook = null;
+			try {
+				Runtime.getRuntime().removeShutdownHook(shutdownHook);
+			}
+			catch (Throwable ex) {
+				//VM is already shutting down
+			}
+		}
+	}
+
+	private void doStopSafely() {
 		try {
-			execute(this.database::stop, this.threadFactory);
+			doStop();
 		}
 		catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
 			Thread.currentThread().interrupt();
