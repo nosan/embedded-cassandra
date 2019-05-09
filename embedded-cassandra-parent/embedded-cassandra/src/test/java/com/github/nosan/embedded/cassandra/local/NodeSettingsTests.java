@@ -110,9 +110,8 @@ class NodeSettingsTests {
 		this.settings.startTransport(ADDRESS, 9142, true);
 		this.settings.startRpcTransport(ADDRESS, 9160);
 		assertThat(this.settings.toString())
-				.isEqualTo(String.format("NodeSettings [version=%s, address=%s, port=%d, sslPort=%d, rpcPort=%d,"
-								+ " rpcTransportStarted=%b, transportStarted=%b]",
-						VERSION, InetAddress.getLoopbackAddress(), 9042, 9142, 9160, true, true));
+				.isEqualTo(String.format("NodeSettings [version=%s, address=%s, port=%d, sslPort=%d, rpcPort=%d]",
+						VERSION, InetAddress.getLoopbackAddress(), 9042, 9142, 9160));
 	}
 
 }

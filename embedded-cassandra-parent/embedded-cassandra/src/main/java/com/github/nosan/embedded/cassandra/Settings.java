@@ -76,22 +76,6 @@ public interface Settings {
 	}
 
 	/**
-	 * The native transport is started.
-	 *
-	 * @return native transport is started, or {@code empty}
-	 * @since 2.0.1
-	 */
-	Optional<Boolean> transportStarted();
-
-	/**
-	 * RPC transport is started.
-	 *
-	 * @return rpc transport is started, or {@code empty}
-	 * @since 2.0.1
-	 */
-	Optional<Boolean> rpcTransportStarted();
-
-	/**
 	 * The address to listen for the clients on.
 	 *
 	 * @return the address, or {@code empty}

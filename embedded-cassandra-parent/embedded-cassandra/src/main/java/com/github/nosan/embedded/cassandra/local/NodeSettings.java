@@ -38,10 +38,6 @@ class NodeSettings implements Settings {
 
 	private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
-	private final Lock writeLock = this.readWriteLock.writeLock();
-
-	private final Lock readLock = this.readWriteLock.readLock();
-
 	private final Version version;
 
 	@Nullable
@@ -100,13 +96,11 @@ class NodeSettings implements Settings {
 		return read(() -> Optional.ofNullable(this.rpcPort));
 	}
 
-	@Override
-	public Optional<Boolean> rpcTransportStarted() {
+	Optional<Boolean> rpcTransportStarted() {
 		return read(() -> Optional.ofNullable(this.rpcTransportStarted));
 	}
 
-	@Override
-	public Optional<Boolean> transportStarted() {
+	Optional<Boolean> transportStarted() {
 		return read(() -> Optional.ofNullable(this.transportStarted));
 	}
 
@@ -118,8 +112,6 @@ class NodeSettings implements Settings {
 				.add("port=" + this.port)
 				.add("sslPort=" + this.sslPort)
 				.add("rpcPort=" + this.rpcPort)
-				.add("rpcTransportStarted=" + this.rpcTransportStarted)
-				.add("transportStarted=" + this.transportStarted)
 				.toString());
 	}
 
@@ -162,7 +154,7 @@ class NodeSettings implements Settings {
 	}
 
 	private <T> T read(Supplier<T> supplier) {
-		Lock lock = this.readLock;
+		Lock lock = this.readWriteLock.readLock();
 		lock.lock();
 		try {
 			return supplier.get();
@@ -173,7 +165,7 @@ class NodeSettings implements Settings {
 	}
 
 	private void write(Runnable runnable) {
-		Lock lock = this.writeLock;
+		Lock lock = this.readWriteLock.writeLock();
 		lock.lock();
 		try {
 			runnable.run();
