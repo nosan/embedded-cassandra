@@ -80,9 +80,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	final Path workingDirectory;
 
-	final ThreadFactory threadFactory;
-
 	final Version version;
+
+	final ThreadFactory threadFactory = new DefaultThreadFactory(
+			String.format("cassandra-%d-db", counter.incrementAndGet()));
 
 	private final JvmOptions jvmOptions;
 
@@ -96,12 +97,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	private ProcessId processId;
 
 	AbstractCassandraNode(Path workingDirectory, Version version, @Nullable Path javaHome, JvmOptions jvmOptions) {
-		long id = counter.incrementAndGet();
 		this.version = version;
 		this.workingDirectory = workingDirectory;
 		this.javaHome = javaHome;
 		this.jvmOptions = jvmOptions;
-		this.threadFactory = new DefaultThreadFactory(String.format("cassandra-%d-db", id));
 	}
 
 	@Override
