@@ -64,13 +64,13 @@ public class TestCassandra implements Cassandra {
 
 	private static final String SESSION_CLASS = "com.datastax.driver.core.Session";
 
-	private volatile boolean started = false;
-
 	private final Object monitor = new Object();
 
 	private final Cassandra cassandra;
 
 	private final List<CqlScript> scripts;
+
+	private volatile boolean started = false;
 
 	/**
 	 * Creates a {@link TestCassandra}.
