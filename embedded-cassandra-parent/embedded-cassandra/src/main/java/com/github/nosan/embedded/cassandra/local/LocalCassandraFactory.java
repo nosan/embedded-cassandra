@@ -536,7 +536,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	@Override
-	public LocalCassandra create() {
+	public Cassandra create() {
 		ArtifactFactory artifactFactory = getArtifactFactory();
 		if (artifactFactory == null) {
 			artifactFactory = new RemoteArtifactFactory();
