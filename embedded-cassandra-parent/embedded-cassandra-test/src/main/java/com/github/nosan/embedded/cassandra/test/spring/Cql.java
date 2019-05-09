@@ -62,7 +62,7 @@ public @interface Cql {
 	 * Resources which were loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
 	 * Resource.getURL().toString()}.
 	 * <p>
-	 * Can contain {@code ${...}} placeholders.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return CQL Scripts
 	 */
@@ -85,7 +85,7 @@ public @interface Cql {
 	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
 	 * <p>An empty string denotes that the platform encoding should be used.
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return CQL scripts encoding.
 	 */
@@ -114,7 +114,7 @@ public @interface Cql {
 	 * <li>The {@code Session} bean to use is named {@code "cassandraSession"}</li>
 	 * </ol>
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return {@code Session} bean name.
 	 */

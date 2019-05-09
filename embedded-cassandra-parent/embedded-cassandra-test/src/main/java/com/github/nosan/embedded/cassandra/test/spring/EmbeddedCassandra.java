@@ -91,7 +91,7 @@ public @interface EmbeddedCassandra {
 	 * Resources which were loaded from a path with a {@code wildcard} (e.g. {@code *}) will be <b>sorted</b> by {@code
 	 * Resource.getURL().toString()}.
 	 * <p>
-	 * Can contain {@code ${...}} placeholders.
+	 * The placeholder {@code ${...}} can be used.
 	 *
 	 * @return CQL Scripts
 	 */
@@ -112,7 +112,7 @@ public @interface EmbeddedCassandra {
 	/**
 	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return CQL scripts encoding.
 	 */
@@ -121,7 +121,7 @@ public @interface EmbeddedCassandra {
 	/**
 	 * {@link Version} to use.
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return a version, or {@code empty} to ignore
 	 * @since 2.0.0
@@ -131,7 +131,7 @@ public @interface EmbeddedCassandra {
 	/**
 	 * Cassandra configuration file ({@code cassandra.yaml}).
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return the configuration file, or {@code empty} to ignore
 	 * @since 2.0.0
@@ -142,7 +142,7 @@ public @interface EmbeddedCassandra {
 	 * The native transport port to listen for the clients on.
 	 * This value will be added as {@code -Dcassandra.native_transport_port} system property.
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return native transport port, or {@code empty} to ignore
 	 * @since 2.0.0
@@ -153,7 +153,7 @@ public @interface EmbeddedCassandra {
 	 * Thrift port for client connections.
 	 * This value will be added as {@code -Dcassandra.rpc_port} system property.
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return the thrift port, or {@code empty} to ignore
 	 * @since 2.0.0
@@ -164,7 +164,7 @@ public @interface EmbeddedCassandra {
 	 * The port for inter-node communication.
 	 * This value will be added as {@code -Dcassandra.storage_port} system property.
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return storage port, or {@code empty} to ignore
 	 * @since 2.0.0
@@ -176,7 +176,7 @@ public @interface EmbeddedCassandra {
 	 * <p>
 	 * This value will be added as {@code -Dcassandra.ssl_storage_port} system property.
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return storage ssl port, or {@code empty} to ignore
 	 * @since 2.0.0
@@ -188,7 +188,7 @@ public @interface EmbeddedCassandra {
 	 * <p>
 	 * This value will be added as {@code -Dcassandra.jmx.local.port} system property.
 	 * <p>
-	 * Can contain a {@code ${...}} placeholder.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return jmx local port, or {@code empty} to ignore
 	 * @since 2.0.0
@@ -200,7 +200,7 @@ public @interface EmbeddedCassandra {
 	 * <p>
 	 * These values will be added as {@code $JVM_EXTRA_OPTS} environment variable.
 	 * <p>
-	 * Can contain {@code ${...}} placeholders.
+	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return jvm options
 	 * @since 2.0.0
