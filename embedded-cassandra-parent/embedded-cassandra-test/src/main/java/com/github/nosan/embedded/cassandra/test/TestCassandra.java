@@ -116,15 +116,15 @@ public class TestCassandra implements Cassandra {
 				return;
 			}
 			try {
-				startCassandra();
+				doStart();
 				this.started = true;
 			}
 			catch (CassandraException ex) {
-				stopCassandraSafely();
+				doStopSafely();
 				throw ex;
 			}
 			catch (Throwable ex) {
-				stopCassandraSafely();
+				doStopSafely();
 				throw new CassandraException(String.format("Unable to start %s", toString()), ex);
 			}
 		}
@@ -145,7 +145,7 @@ public class TestCassandra implements Cassandra {
 				return;
 			}
 			try {
-				stopCassandra();
+				doStop();
 				this.started = false;
 			}
 			catch (CassandraException ex) {
@@ -226,7 +226,7 @@ public class TestCassandra implements Cassandra {
 		}
 	}
 
-	private void startCassandra() {
+	private void doStart() {
 		if (log.isDebugEnabled()) {
 			log.debug("Start {}", toString());
 		}
@@ -239,7 +239,7 @@ public class TestCassandra implements Cassandra {
 		}
 	}
 
-	private void stopCassandra() {
+	private void doStop() {
 		if (log.isDebugEnabled()) {
 			log.debug("Stop {}", toString());
 		}
@@ -249,9 +249,9 @@ public class TestCassandra implements Cassandra {
 		}
 	}
 
-	private void stopCassandraSafely() {
+	private void doStopSafely() {
 		try {
-			stopCassandra();
+			doStop();
 		}
 		catch (CassandraInterruptedException ex) {
 			Thread.currentThread().interrupt();
