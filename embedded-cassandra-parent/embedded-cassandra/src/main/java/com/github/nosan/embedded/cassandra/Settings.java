@@ -82,7 +82,9 @@ public interface Settings {
 	 * @see #getAddress()
 	 * @since 2.0.1
 	 */
-	Optional<InetAddress> address();
+	default Optional<InetAddress> address() {
+		throw new UnsupportedOperationException("Optional address is not supported");
+	}
 
 	/**
 	 * The port for client connections.
@@ -91,7 +93,9 @@ public interface Settings {
 	 * @see #getPort()
 	 * @since 2.0.1
 	 */
-	Optional<Integer> port();
+	default Optional<Integer> port() {
+		throw new UnsupportedOperationException("Optional port is not supported");
+	}
 
 	/**
 	 * SSL port for client connections.
@@ -100,7 +104,9 @@ public interface Settings {
 	 * @see #getSslPort()
 	 * @since 2.0.1
 	 */
-	Optional<Integer> sslPort();
+	default Optional<Integer> sslPort() {
+		throw new UnsupportedOperationException("Optional SSL port is not supported");
+	}
 
 	/**
 	 * RPC port for client connections.
@@ -109,6 +115,8 @@ public interface Settings {
 	 * @see #getRpcPort()
 	 * @since 2.0.1
 	 */
-	Optional<Integer> rpcPort();
+	default Optional<Integer> rpcPort() {
+		throw new UnsupportedOperationException("Optional RPC port is not supported");
+	}
 
 }
