@@ -74,7 +74,7 @@ class ProcessId {
 	}
 
 	/**
-	 * Returns the pif file.
+	 * Returns the pid file.
 	 *
 	 * @return the pid file or null
 	 */
