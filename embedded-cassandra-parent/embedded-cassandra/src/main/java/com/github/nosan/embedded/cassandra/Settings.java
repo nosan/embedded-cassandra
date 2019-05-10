@@ -40,6 +40,7 @@ public interface Settings {
 	 *
 	 * @return the address
 	 * @throws NoSuchElementException if address is not present
+	 * @see #address()
 	 */
 	default InetAddress getAddress() throws NoSuchElementException {
 		return address().orElseThrow(() -> new NoSuchElementException("Address is not present"));
@@ -50,6 +51,7 @@ public interface Settings {
 	 *
 	 * @return the port
 	 * @throws NoSuchElementException if port is not present
+	 * @see #port()
 	 */
 	default int getPort() throws NoSuchElementException {
 		return port().orElseThrow(() -> new NoSuchElementException("Port is not present"));
@@ -60,6 +62,7 @@ public interface Settings {
 	 *
 	 * @return SSL port
 	 * @throws NoSuchElementException if SSL port is not present
+	 * @see #sslPort()
 	 */
 	default int getSslPort() throws NoSuchElementException {
 		return sslPort().orElseThrow(() -> new NoSuchElementException("SSL port is not present"));
@@ -70,6 +73,7 @@ public interface Settings {
 	 *
 	 * @return RPC port
 	 * @throws NoSuchElementException if RPC port is not present
+	 * @see #rpcPort()
 	 */
 	default int getRpcPort() throws NoSuchElementException {
 		return rpcPort().orElseThrow(() -> new NoSuchElementException("RPC port is not present"));
