@@ -17,56 +17,45 @@
 package com.github.nosan.embedded.cassandra.test.spring;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.Row;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
-import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandraContextCustomizer}.
+ * Tests for {@link CqlExecutionListener}.
  *
  * @author Dmytro Nosan
  */
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration
-@EmbeddedCassandra(scripts = "/init.cql",
-		statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY  KEY );")
-class EmbeddedCassandraTests {
-
-	@Autowired
-	private TestCassandra cassandra;
+@ContextConfiguration(classes = CqlSessionConfiguration.class)
+@EmbeddedCassandra(scripts = "/init.cql")
+@Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
+class CqlExecutionListenerCqlSessionTests {
 
 	@Autowired
 	private CqlSession session;
 
 	@Test
-	void shouldSelectFromRoles() {
-		assertThat(this.cassandra.getVersion()).isEqualTo(Version.parse("3.11.3"));
-		assertThat(this.session.execute("SELECT * FROM test.roles").wasApplied()).isTrue();
+	@Cql(scripts = "/users-data.cql")
+	void shouldHaveUser() {
+		assertThat(getCount()).isEqualTo(1);
 	}
 
-	@Configuration
-	@Import(CqlSessionConfiguration.class)
-	static class TestConfiguration {
+	@Test
+	void shouldNotHaveUser() {
+		assertThat(getCount()).isZero();
+	}
 
-		@Bean
-		public LocalCassandraFactory localCassandraFactory() {
-			LocalCassandraFactory factory = new LocalCassandraFactory();
-			factory.setVersion(Version.parse("3.11.3"));
-			return factory;
-		}
-
+	private long getCount() {
+		Row resultSet = this.session.execute("SELECT COUNT(*) FROM test.users").one();
+		assertThat(resultSet).isNotNull();
+		return resultSet.getLong(0);
 	}
 
 }

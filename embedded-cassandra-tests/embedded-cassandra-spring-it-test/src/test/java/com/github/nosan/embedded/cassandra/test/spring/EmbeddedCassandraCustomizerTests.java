@@ -60,7 +60,7 @@ class EmbeddedCassandraCustomizerTests {
 		assertThat(this.cassandra.getVersion()).isEqualTo(Version.parse("3.11.3"));
 	}
 
-	@Import(SessionConfiguration.class)
+	@Import(CqlSessionConfiguration.class)
 	@Configuration
 	static class TestConfiguration {
 

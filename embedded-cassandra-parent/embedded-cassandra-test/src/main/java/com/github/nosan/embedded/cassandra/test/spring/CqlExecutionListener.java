@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -94,27 +95,28 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 	}
 
-	private void executeScripts(Set<Cql> cqlAnnotations, ExecutionPhase executionPhase,
-			TestContext testContext) {
+	private void executeScripts(Set<Cql> cqlAnnotations, ExecutionPhase executionPhase, TestContext testContext) {
 		ApplicationContext applicationContext = testContext.getApplicationContext();
 		Environment environment = applicationContext.getEnvironment();
 		for (Cql cql : cqlAnnotations) {
 			if (executionPhase == cql.executionPhase()) {
 				CqlScript[] scripts = getScripts(cql, testContext.getTestClass(), applicationContext);
 				if (scripts.length > 0) {
-					executeScripts(getSession(environment, cql::session), applicationContext, scripts);
+					String name = environment.resolvePlaceholders(cql.session());
+					executeScripts(name, applicationContext, scripts);
 				}
 			}
 		}
 	}
 
 	private void executeScripts(String name, ApplicationContext applicationContext, CqlScript... scripts) {
-		ClassLoader classLoader = getClass().getClassLoader();
-		if (ClassUtils.isPresent(CQL_SESSION_CLASS, classLoader)) {
-			CqlSessionUtils.execute(getSession(name, applicationContext, CqlSession.class), scripts);
+		ClassLoader cl = getClass().getClassLoader();
+		Object session = getSession(name, applicationContext);
+		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl) && session instanceof CqlSession) {
+			CqlSessionUtils.execute(((CqlSession) session), scripts);
 		}
-		else if (ClassUtils.isPresent(SESSION_CLASS, classLoader)) {
-			SessionUtils.execute(getSession(name, applicationContext, Session.class), scripts);
+		else if (ClassUtils.isPresent(SESSION_CLASS, cl) && session instanceof Session) {
+			SessionUtils.execute(((Session) session), scripts);
 		}
 		else {
 			throw new IllegalStateException(String.format("There is no way to execute '%s'."
@@ -124,21 +126,38 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 	}
 
+	private Object getSession(String name, ApplicationContext applicationContext) {
+		if (StringUtils.hasText(name)) {
+			return applicationContext.getBean(name);
+		}
+		return Optional.ofNullable(getSession(applicationContext))
+				.orElseGet(() -> applicationContext.getBean(BEAN_NAME));
+	}
+
+	@Nullable
+	private Object getSession(ApplicationContext applicationContext) {
+		ClassLoader cl = getClass().getClassLoader();
+		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl)) {
+			return applicationContext.getBeanProvider(CqlSession.class).getIfUnique();
+		}
+		if (ClassUtils.isPresent(SESSION_CLASS, cl)) {
+			return applicationContext.getBeanProvider(Session.class).getIfUnique();
+		}
+		return null;
+	}
+
 	private CqlScript[] getScripts(Cql annotation, Class<?> testClass, ApplicationContext context) {
 		List<CqlScript> scripts = new ArrayList<>();
 		Environment environment = context.getEnvironment();
+		Charset charset = getCharset(environment, annotation::encoding);
 		for (URL url : ResourceUtils.getResources(context, testClass, getArray(environment, annotation::scripts))) {
-			scripts.add(new UrlCqlScript(url, getCharset(environment, annotation::encoding)));
+			scripts.add(new UrlCqlScript(url, charset));
 		}
 		List<String> statements = getStatements(annotation.statements());
 		if (!statements.isEmpty()) {
 			scripts.add(new CqlStatements(statements));
 		}
 		return scripts.toArray(new CqlScript[0]);
-	}
-
-	private String getSession(Environment environment, Supplier<String> supplier) {
-		return environment.resolvePlaceholders(supplier.get());
 	}
 
 	private String[] getArray(Environment environment, Supplier<String[]> arraySupplier) {
@@ -158,17 +177,6 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	private Charset getCharset(Environment environment, Supplier<String> supplier) {
 		String charset = environment.resolvePlaceholders(supplier.get());
 		return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
-	}
-
-	private <T> T getSession(String name, ApplicationContext applicationContext, Class<T> sessionClass) {
-		if (StringUtils.hasText(name)) {
-			return applicationContext.getBean(name, sessionClass);
-		}
-		T session = applicationContext.getBeanProvider(sessionClass).getIfUnique();
-		if (session != null) {
-			return session;
-		}
-		return applicationContext.getBean(BEAN_NAME, sessionClass);
 	}
 
 }

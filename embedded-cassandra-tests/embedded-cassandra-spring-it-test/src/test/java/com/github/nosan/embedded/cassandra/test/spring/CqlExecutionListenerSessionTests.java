@@ -16,8 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +33,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = SessionConfiguration.class)
+@ContextConfiguration(classes = {CqlSessionConfiguration.class, SessionConfiguration.class})
 @EmbeddedCassandra(scripts = "/init.cql")
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
-class CqlExecutionListenerTests {
+class CqlExecutionListenerSessionTests {
 
 	@Autowired
-	private CqlSession session;
+	private Session session;
 
 	@Test
-	@Cql(scripts = "/users-data.cql")
+	@Cql(scripts = "/users-data.cql", session = "session")
 	void shouldHaveUser() {
 		assertThat(getCount()).isEqualTo(1);
 	}

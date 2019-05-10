@@ -16,30 +16,24 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
+import com.datastax.oss.driver.api.core.CqlSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.github.nosan.embedded.cassandra.test.ClusterFactory;
+import com.github.nosan.embedded.cassandra.test.CqlSessionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
- * {@link Configuration} for configuring {@link Session}.
+ * {@link Configuration} for configuring {@link com.datastax.oss.driver.api.core.CqlSession}.
  *
  * @author Dmytro Nosan
  */
 @Configuration
-public class SessionConfiguration {
+public class CqlSessionConfiguration {
 
 	@Bean(destroyMethod = "close")
-	public Session session(Cluster cluster) {
-		return cluster.connect();
-	}
-
-	@Bean(destroyMethod = "close")
-	public Cluster cassandraCluster(TestCassandra testCassandra) {
-		return new ClusterFactory().create(testCassandra.getSettings());
+	public CqlSession cqlSession(TestCassandra testCassandra) {
+		return new CqlSessionFactory().create(testCassandra.getSettings());
 	}
 
 }
