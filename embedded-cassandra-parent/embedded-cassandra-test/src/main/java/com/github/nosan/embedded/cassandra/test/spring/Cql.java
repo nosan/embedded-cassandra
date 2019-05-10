@@ -100,10 +100,9 @@ public @interface Cql {
 	ExecutionPhase executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
 
 	/**
-	 * The bean name of the {@link CqlSession} or {@link Session} against which the scripts should be executed.
-	 * <p>The name is only required if there is more than one bean of type
-	 * {@code Session} in the test's {@code ApplicationContext}. If there is only one such bean, it is not necessary to
-	 * specify a bean name.
+	 * The bean name of the {@code Session} against which the scripts should be executed.
+	 * <p>The name is only required if there is more than one bean of type {@code Session} in the test's {@code
+	 * ApplicationContext}. If there is only one such bean, it is not necessary to specify a bean name.
 	 * <p>Defaults to an empty string, requiring that one of the following is
 	 * true:
 	 * <ol>
@@ -113,6 +112,9 @@ public @interface Cql {
 	 * {@code ApplicationContext}.</li>
 	 * <li>The {@code Session} bean to use is named {@code "cassandraSession"}</li>
 	 * </ol>
+	 * <p>
+	 * Note, that {@code com.datastax.oss.driver.api.core.CqlSession} has more priority than
+	 * {@code com.datastax.driver.core.Session}.
 	 * <p>
 	 * The placeholder {@code ${...}} can be used
 	 *
