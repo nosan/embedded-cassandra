@@ -33,9 +33,9 @@ public interface WorkingDirectoryCustomizer {
 	/**
 	 * Customize a working directory.
 	 *
-	 * @param workingDirectory an initialized working directory
+	 * @param workingDirectory a working directory
 	 * @param version a version
-	 * @throws IOException in the case of any IO errors
+	 * @throws IOException in the case of any I/O errors
 	 */
 	void customize(Path workingDirectory, Version version) throws IOException;
 

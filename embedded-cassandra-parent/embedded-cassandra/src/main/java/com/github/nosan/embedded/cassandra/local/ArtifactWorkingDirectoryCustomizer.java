@@ -34,32 +34,26 @@ import com.github.nosan.embedded.cassandra.local.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 
 /**
- * An initializer that initialize a {@code working directory} with an {@link Artifact}.
+ * {@link WorkingDirectoryCustomizer} that initialize a {@code working directory} using {@link Artifact}.
  *
  * @author Dmytro Nosan
  * @since 1.3.0
  */
-class ArtifactWorkingDirectoryInitializer {
+class ArtifactWorkingDirectoryCustomizer implements WorkingDirectoryCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(ArtifactWorkingDirectoryInitializer.class);
+	private static final Logger log = LoggerFactory.getLogger(ArtifactWorkingDirectoryCustomizer.class);
 
 	private final ArtifactFactory artifactFactory;
 
 	private final Path artifactDirectory;
 
-	ArtifactWorkingDirectoryInitializer(ArtifactFactory artifactFactory, Path artifactDirectory) {
+	ArtifactWorkingDirectoryCustomizer(ArtifactFactory artifactFactory, Path artifactDirectory) {
 		this.artifactFactory = artifactFactory;
 		this.artifactDirectory = artifactDirectory;
 	}
 
-	/**
-	 * Initializes the working directory with an {@link Artifact}.
-	 *
-	 * @param version a version
-	 * @param workingDirectory the working directory that should be initialized
-	 * @throws IOException in the case of I/O errors
-	 */
-	void initialize(Path workingDirectory, Version version) throws IOException {
+	@Override
+	public void customize(Path workingDirectory, Version version) throws IOException {
 		Path artifactDirectory = this.artifactDirectory;
 		Path artifactFile = artifactDirectory.resolve(String.format(".artifact.%s", version));
 		if (!Files.exists(artifactFile)) {

@@ -537,10 +537,6 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	@Override
 	public Cassandra create() {
-		ArtifactFactory artifactFactory = getArtifactFactory();
-		if (artifactFactory == null) {
-			artifactFactory = new RemoteArtifactFactory();
-		}
 		Version version = getVersion();
 		if (version == null) {
 			version = Version.parse("3.11.4");
@@ -550,15 +546,10 @@ public final class LocalCassandraFactory implements CassandraFactory {
 			workingDirectory = getTempDir()
 					.resolve(String.format("embedded-cassandra/%s/%s", version, UUID.randomUUID()));
 		}
-		Path artifactDirectory = getArtifactDirectory();
-		if (artifactDirectory == null) {
-			artifactDirectory = getTempDir()
-					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
-		}
 		CassandraNode node = createCassandraNode(workingDirectory, version);
-		CassandraDatabase cassandraDatabase = new LocalCassandraDatabase(node, workingDirectory, artifactDirectory,
-				artifactFactory, isDeleteWorkingDirectory(), getMergedWorkingDirectoryCustomizers());
-		return new LocalCassandra(isRegisterShutdownHook(), cassandraDatabase);
+		CassandraDatabase database = new LocalCassandraDatabase(node, workingDirectory, isDeleteWorkingDirectory(),
+				getMergedWorkingDirectoryCustomizers(version));
+		return new LocalCassandra(isRegisterShutdownHook(), database);
 	}
 
 	private Path getTempDir() {
@@ -567,8 +558,18 @@ public final class LocalCassandraFactory implements CassandraFactory {
 						+ " Please set java.io.tmpdir system property."));
 	}
 
-	private List<WorkingDirectoryCustomizer> getMergedWorkingDirectoryCustomizers() {
+	private List<WorkingDirectoryCustomizer> getMergedWorkingDirectoryCustomizers(Version version) {
+		ArtifactFactory artifactFactory = getArtifactFactory();
+		if (artifactFactory == null) {
+			artifactFactory = new RemoteArtifactFactory();
+		}
+		Path artifactDirectory = getArtifactDirectory();
+		if (artifactDirectory == null) {
+			artifactDirectory = getTempDir()
+					.resolve(String.format("embedded-cassandra/%1$s/apache-cassandra-%1$s", version));
+		}
 		List<WorkingDirectoryCustomizer> customizers = new ArrayList<>();
+		customizers.add(new ArtifactWorkingDirectoryCustomizer(artifactFactory, artifactDirectory));
 		Optional.ofNullable(getConfigurationFile()).map(ConfigurationFileCustomizer::new).ifPresent(customizers::add);
 		Optional.ofNullable(getRackFile()).map(RackFileCustomizer::new).ifPresent(customizers::add);
 		Optional.ofNullable(getTopologyFile()).map(TopologyFileCustomizer::new).ifPresent(customizers::add);

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
-import com.github.nosan.embedded.cassandra.local.artifact.ArtifactFactory;
 
 /**
  * A simple implementation of {@link CassandraDatabase}.
@@ -39,25 +38,18 @@ class LocalCassandraDatabase implements CassandraDatabase {
 
 	private static final Logger log = LoggerFactory.getLogger(LocalCassandraDatabase.class);
 
-	private final Path workingDirectory;
-
 	private final CassandraNode node;
 
-	private final Path artifactDirectory;
-
-	private final ArtifactFactory artifactFactory;
+	private final Path workingDirectory;
 
 	private final boolean deleteWorkingDirectory;
 
 	private final List<WorkingDirectoryCustomizer> workingDirectoryCustomizers;
 
-	LocalCassandraDatabase(CassandraNode node, Path workingDirectory, Path artifactDirectory,
-			ArtifactFactory artifactFactory, boolean deleteWorkingDirectory,
+	LocalCassandraDatabase(CassandraNode node, Path workingDirectory, boolean deleteWorkingDirectory,
 			List<WorkingDirectoryCustomizer> workingDirectoryCustomizers) {
 		this.node = node;
 		this.workingDirectory = workingDirectory;
-		this.artifactDirectory = artifactDirectory;
-		this.artifactFactory = artifactFactory;
 		this.deleteWorkingDirectory = deleteWorkingDirectory;
 		this.workingDirectoryCustomizers = Collections.unmodifiableList(new ArrayList<>(workingDirectoryCustomizers));
 	}
@@ -97,12 +89,8 @@ class LocalCassandraDatabase implements CassandraDatabase {
 	private void initialize() throws IOException {
 		log.info("Initialize Apache Cassandra '{}'. It takes a while...", getVersion());
 		long start = System.currentTimeMillis();
-		Path workingDirectory = this.workingDirectory;
-		ArtifactWorkingDirectoryInitializer artifactWorkingDirectoryInitializer =
-				new ArtifactWorkingDirectoryInitializer(this.artifactFactory, this.artifactDirectory);
-		artifactWorkingDirectoryInitializer.initialize(workingDirectory, getVersion());
-		for (WorkingDirectoryCustomizer workingDirectoryCustomizer : this.workingDirectoryCustomizers) {
-			workingDirectoryCustomizer.customize(workingDirectory, getVersion());
+		for (WorkingDirectoryCustomizer customizer : this.workingDirectoryCustomizers) {
+			customizer.customize(this.workingDirectory, getVersion());
 		}
 		long elapsed = System.currentTimeMillis() - start;
 		log.info("Apache Cassandra '{}' is initialized ({} ms)", getVersion(), elapsed);

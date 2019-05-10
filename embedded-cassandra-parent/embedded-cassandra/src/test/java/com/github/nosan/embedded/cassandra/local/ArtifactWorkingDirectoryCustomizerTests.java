@@ -33,12 +33,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link ArtifactWorkingDirectoryInitializer}.
+ * Tests for {@link ArtifactWorkingDirectoryCustomizer}.
  *
  * @author Dmytro Nosan
  */
 @SuppressWarnings("ConstantConditions")
-class ArtifactWorkingDirectoryInitializerTests {
+class ArtifactWorkingDirectoryCustomizerTests {
 
 	private final Version version = Version.parse("3.11.3");
 
@@ -64,10 +64,10 @@ class ArtifactWorkingDirectoryInitializerTests {
 
 		ArchiveUtils.extract(plain, artifactDirectory);
 
-		ArtifactWorkingDirectoryInitializer initializer = new ArtifactWorkingDirectoryInitializer(
+		ArtifactWorkingDirectoryCustomizer customizer = new ArtifactWorkingDirectoryCustomizer(
 				new StaticArtifactFactory(version, root), artifactDirectory);
 
-		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version))
+		assertThatThrownBy(() -> customizer.customize(workingDirectory, version))
 				.hasStackTraceContaining("Impossible to determine the Apache Cassandra directory")
 				.isInstanceOf(IllegalStateException.class);
 	}
@@ -79,9 +79,9 @@ class ArtifactWorkingDirectoryInitializerTests {
 		Path artifactDirectory = this.artifactDirectory;
 		Version version = this.version;
 
-		ArtifactWorkingDirectoryInitializer initializer = new ArtifactWorkingDirectoryInitializer(
+		ArtifactWorkingDirectoryCustomizer customizer = new ArtifactWorkingDirectoryCustomizer(
 				new StaticArtifactFactory(version, archive), artifactDirectory);
-		initializer.initialize(workingDirectory, version);
+		customizer.customize(workingDirectory, version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
@@ -97,10 +97,10 @@ class ArtifactWorkingDirectoryInitializerTests {
 		Path artifactDirectory = this.artifactDirectory;
 		Version version = this.version;
 
-		ArtifactWorkingDirectoryInitializer initializer = new ArtifactWorkingDirectoryInitializer(
+		ArtifactWorkingDirectoryCustomizer customizer = new ArtifactWorkingDirectoryCustomizer(
 				new StaticArtifactFactory(version, archive), artifactDirectory);
 
-		initializer.initialize(workingDirectory, version);
+		customizer.customize(workingDirectory, version);
 
 		assertThat(workingDirectory).exists();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
@@ -116,10 +116,10 @@ class ArtifactWorkingDirectoryInitializerTests {
 		Path artifactDirectory = this.artifactDirectory;
 		Version version = this.version;
 
-		ArtifactWorkingDirectoryInitializer initializer = new ArtifactWorkingDirectoryInitializer(
+		ArtifactWorkingDirectoryCustomizer customizer = new ArtifactWorkingDirectoryCustomizer(
 				new StaticArtifactFactory(version, archive), artifactDirectory);
 
-		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version))
+		assertThatThrownBy(() -> customizer.customize(workingDirectory, version))
 				.hasStackTraceContaining("does not have the Apache Cassandra files")
 				.isInstanceOf(IllegalStateException.class);
 	}
@@ -131,10 +131,10 @@ class ArtifactWorkingDirectoryInitializerTests {
 		Path artifactDirectory = this.artifactDirectory;
 		Version version = this.version;
 
-		ArtifactWorkingDirectoryInitializer initializer = new ArtifactWorkingDirectoryInitializer(
+		ArtifactWorkingDirectoryCustomizer customizer = new ArtifactWorkingDirectoryCustomizer(
 				new StaticArtifactFactory(version, archive), artifactDirectory);
 
-		assertThatThrownBy(() -> initializer.initialize(workingDirectory, version))
+		assertThatThrownBy(() -> customizer.customize(workingDirectory, version))
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
