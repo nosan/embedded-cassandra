@@ -18,13 +18,11 @@ package com.github.nosan.embedded.cassandra.local.artifact;
 
 import java.net.Proxy;
 import java.net.URL;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Objects;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
-import com.github.nosan.embedded.cassandra.util.SystemUtils;
 
 /**
  * {@link ArtifactFactory} to create a {@link RemoteArtifact}.
@@ -33,9 +31,6 @@ import com.github.nosan.embedded.cassandra.util.SystemUtils;
  * @since 1.0.0
  */
 public final class RemoteArtifactFactory implements ArtifactFactory {
-
-	@Nullable
-	private Path directory;
 
 	@Nullable
 	private UrlFactory urlFactory;
@@ -48,26 +43,6 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 
 	@Nullable
 	private Duration connectTimeout;
-
-	/**
-	 * The directory where a downloaded {@code archive} should be saved. Default directory is {@link
-	 * SystemUtils#getUserHomeDirectory() user.home}{@code /Downloads}
-	 *
-	 * @return The value of the {@code directory} attribute
-	 */
-	@Nullable
-	public Path getDirectory() {
-		return this.directory;
-	}
-
-	/**
-	 * Initializes the value for the {@link RemoteArtifactFactory#getDirectory()} attribute.
-	 *
-	 * @param directory The value for directory
-	 */
-	public void setDirectory(@Nullable Path directory) {
-		this.directory = directory;
-	}
 
 	/**
 	 * Factory that creates {@link URL URLs} for downloading an archive.
@@ -149,12 +124,6 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 	@Override
 	public Artifact create(Version version) {
 		Objects.requireNonNull(version, "Version must not be null");
-		Path directory = getDirectory();
-		if (directory == null) {
-			directory = SystemUtils.getUserHomeDirectory()
-					.orElseThrow(() -> new IllegalStateException("user.home is not defined."
-							+ " Please set user.home system property.")).resolve("Downloads");
-		}
 		UrlFactory urlFactory = getUrlFactory();
 		if (urlFactory == null) {
 			urlFactory = new DefaultUrlFactory();
@@ -167,7 +136,7 @@ public final class RemoteArtifactFactory implements ArtifactFactory {
 		if (connectTimeout == null) {
 			connectTimeout = Duration.ofSeconds(30);
 		}
-		return new RemoteArtifact(version, directory, urlFactory, getProxy(), readTimeout, connectTimeout);
+		return new RemoteArtifact(version, urlFactory, getProxy(), readTimeout, connectTimeout);
 	}
 
 }

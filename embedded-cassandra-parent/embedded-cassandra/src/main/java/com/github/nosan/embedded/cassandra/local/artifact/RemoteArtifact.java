@@ -29,7 +29,6 @@ import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -46,8 +45,7 @@ import com.github.nosan.embedded.cassandra.local.DefaultThreadFactory;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
- * {@link Artifact} implementation, that downloads an {@code archive} from the internet, only if an {@code archive}
- * doesn't exist locally.
+ * {@link Artifact} that downloads an {@code archive} from the internet.
  *
  * @author Dmytro Nosan
  * @see RemoteArtifactFactory
@@ -57,9 +55,12 @@ class RemoteArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(RemoteArtifact.class);
 
-	private final Version version;
+	private static final AtomicLong counter = new AtomicLong();
 
-	private final Path directory;
+	private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("progress-%d",
+			counter.incrementAndGet()));
+
+	private final Version version;
 
 	private final UrlFactory urlFactory;
 
@@ -70,10 +71,9 @@ class RemoteArtifact implements Artifact {
 	@Nullable
 	private final Proxy proxy;
 
-	RemoteArtifact(Version version, Path directory, UrlFactory urlFactory, @Nullable Proxy proxy, Duration readTimeout,
+	RemoteArtifact(Version version, UrlFactory urlFactory, @Nullable Proxy proxy, Duration readTimeout,
 			Duration connectTimeout) {
 		this.version = version;
-		this.directory = directory;
 		this.urlFactory = urlFactory;
 		this.proxy = proxy;
 		this.readTimeout = readTimeout;
@@ -83,22 +83,13 @@ class RemoteArtifact implements Artifact {
 	@Override
 	public Path getArchive() throws IOException {
 		Version version = this.version;
-		Path directory = this.directory;
 		URL[] urls = this.urlFactory.create(version);
 		Objects.requireNonNull(urls, "URLs must not be null");
-
-		Files.createDirectories(directory);
-
-		IOException exceptions = new IOException(
-				String.format("Can not download a resource from URLs %s. See suppressed exceptions for details",
-						Arrays.toString(urls)));
-
+		IOException exceptions = new IOException(String.format("Can not download a resource from URLs %s."
+				+ " See suppressed exceptions for details", Arrays.toString(urls)));
 		for (URL url : urls) {
 			try {
-				Resource remoteResource = new RemoteResource(directory, version, url, this.proxy, this.readTimeout,
-						this.connectTimeout);
-				Resource localResource = new LocalResource(directory, remoteResource);
-				return localResource.getFile();
+				return getFile(url);
 			}
 			catch (ClosedByInterruptException ex) {
 				throw ex;
@@ -111,211 +102,110 @@ class RemoteArtifact implements Artifact {
 		throw exceptions;
 	}
 
-	/**
-	 * Resource that abstracts from the actual type of underlying source.
-	 */
-	private interface Resource {
-
-		/**
-		 * Return a File handle for this resource.
-		 *
-		 * @return the file
-		 * @throws IOException in case of any I/O errors
-		 */
-		Path getFile() throws IOException;
-
-		/**
-		 * Return a name for this resource.
-		 *
-		 * @return a resource name
-		 */
-		String getName();
-
+	private Path getFile(URL url) throws IOException {
+		int maxRedirects = 20;
+		URLConnection urlConnection = getUrlConnection(url, maxRedirects, 1);
+		long size = urlConnection.getContentLengthLong();
+		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
+		Path file = Files.createTempFile(null, String.format("-%s", getFileName(url)));
+		try (InputStream urlInputStream = urlConnection.getInputStream()) {
+			log.info("Downloading Apache Cassandra '{}' from '{}'.", this.version, urlConnection.getURL());
+			long start = System.currentTimeMillis();
+			showProgress(file, size, executorService);
+			Files.copy(urlInputStream, file, StandardCopyOption.REPLACE_EXISTING);
+			long fileSize = Files.size(file);
+			if (fileSize < size) {
+				throw new IOException(String.format("The size '%d' of the file '%s' is not valid."
+						+ " Expected size is '%d'", fileSize, file, size));
+			}
+			long elapsed = System.currentTimeMillis() - start;
+			log.info("Apache Cassandra '{}' is downloaded ({} ms)", this.version, elapsed);
+		}
+		finally {
+			executorService.shutdown();
+		}
+		return file;
 	}
 
-	private static final class LocalResource implements Resource {
-
-		private final Path directory;
-
-		private final Resource resource;
-
-		LocalResource(Path directory, Resource resource) {
-			this.directory = directory;
-			this.resource = resource;
+	private String getFileName(URL url) {
+		String fileName = url.getFile();
+		if (StringUtils.hasText(fileName) && fileName.contains("/")) {
+			fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
 		}
-
-		@Override
-		public Path getFile() throws IOException {
-			Path file = this.directory.resolve(getName());
-			if (!Files.exists(file)) {
-				Path tempFile = this.resource.getFile();
-				try {
-					return Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
-				}
-				catch (IOException ex) {
-					log.error(String.format("Can not rename '%s' as '%s'.", tempFile, file), ex);
-					return tempFile;
-				}
-			}
-			return file;
+		if (!StringUtils.hasText(fileName)) {
+			throw new IllegalArgumentException(
+					String.format("There is no way to determine a file name from '%s'", url));
 		}
-
-		@Override
-		public String getName() {
-			return this.resource.getName();
-		}
-
+		return fileName;
 	}
 
-	private static final class RemoteResource implements Resource {
-
-		private static final AtomicLong counter = new AtomicLong();
-
-		private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("progress-%d",
-				counter.incrementAndGet()));
-
-		private final Path directory;
-
-		private final Version version;
-
-		private final URL url;
-
-		@Nullable
-		private final Proxy proxy;
-
-		private final Duration readTimeout;
-
-		private final Duration connectTimeout;
-
-		RemoteResource(Path directory, Version version, URL url, @Nullable Proxy proxy, Duration readTimeout,
-				Duration connectTimeout) {
-			this.directory = directory;
-			this.version = version;
-			this.url = url;
-			this.proxy = proxy;
-			this.readTimeout = readTimeout;
-			this.connectTimeout = connectTimeout;
-		}
-
-		@Override
-		public Path getFile() throws IOException {
-			int maxRedirects = 20;
-			URLConnection urlConnection = getUrlConnection(this.url, maxRedirects, 1);
-			long size = urlConnection.getContentLengthLong();
-
-			ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
-
-			Path file = this.directory
-					.resolve(String.format("download-%s-%s", UUID.randomUUID(), getFileName(this.url)));
-			file.toFile().deleteOnExit();
-
-			try (InputStream urlInputStream = urlConnection.getInputStream()) {
-				log.info("Downloading Apache Cassandra '{}' from '{}'.", this.version, urlConnection.getURL());
-				long start = System.currentTimeMillis();
-				showProgress(file, size, executorService);
-				Files.copy(urlInputStream, file, StandardCopyOption.REPLACE_EXISTING);
-				long fileSize = Files.size(file);
-				if (fileSize < size) {
-					throw new IOException(
-							String.format("The size '%d' of the file '%s' is not valid. Expected size is '%d'",
-									fileSize, file, size));
-				}
-				long elapsed = System.currentTimeMillis() - start;
-				log.info("Apache Cassandra '{}' is downloaded ({} ms)", this.version, elapsed);
-			}
-			finally {
-				executorService.shutdown();
-			}
-
-			return file;
-		}
-
-		@Override
-		public String getName() {
-			return getFileName(this.url);
-		}
-
-		private static String getFileName(URL url) {
-			String fileName = url.getFile();
-			if (StringUtils.hasText(fileName) && fileName.contains("/")) {
-				fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
-			}
-			if (!StringUtils.hasText(fileName)) {
-				throw new IllegalArgumentException(
-						String.format("There is no way to determine a file name from '%s'", url));
-			}
-			return fileName;
-		}
-
-		private static void showProgress(Path file, long size, ScheduledExecutorService executorService) {
-			if (size > 0) {
-				AtomicLong prevPercent = new AtomicLong(0);
-				int minPercentStep = 10;
-				AtomicBoolean logOnlyOnce = new AtomicBoolean(false);
-				executorService.scheduleAtFixedRate(() -> {
-					try {
-						if (Files.exists(file)) {
-							long current = Files.size(file);
-							long percent = Math.max(current * 100, 1) / size;
-							if (percent - prevPercent.get() >= minPercentStep) {
-								prevPercent.set(percent);
-								log.info("Downloaded {} / {}  {}%", formatSize(current), formatSize(size), percent);
-							}
-						}
-					}
-					catch (Exception ex) {
-						if (logOnlyOnce.compareAndSet(false, true)) {
-							log.error(String.format("Can not show progress for a file '%s'", file), ex);
-						}
-					}
-				}, 0, 1, TimeUnit.SECONDS);
-			}
-		}
-
-		private static String formatSize(long bytes) {
-			if (bytes > 1024) {
-				long kilobytes = bytes / 1024;
-				if (kilobytes > 1024) {
-					return (kilobytes / 1024) + "MB";
-				}
-				return kilobytes + "KB";
-			}
-			return bytes + "B";
-		}
-
-		private URLConnection getUrlConnection(URL url, int maxRedirects, int redirectCount) throws IOException {
-			URLConnection connection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
-			connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
-			connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
-			if (connection instanceof HttpURLConnection) {
-				HttpURLConnection httpConnection = (HttpURLConnection) connection;
-				httpConnection.setInstanceFollowRedirects(false);
-				int status = httpConnection.getResponseCode();
-				if (status >= 200 && status < 300) {
-					return httpConnection;
-				}
-				else if (status >= 300 && status <= 307 && status != 306 && status != 304) {
-					if (redirectCount <= maxRedirects) {
-						String location = httpConnection.getHeaderField("Location");
-						if (StringUtils.hasText(location)) {
-							return getUrlConnection(new URL(httpConnection.getURL(), location), maxRedirects,
-									redirectCount + 1);
-						}
-					}
-					else {
-						throw new IOException(String.format("Too many redirects for URL '%s'", url));
-					}
-				}
-				else if (status >= 400 || status < 200) {
-					throw new IOException(String.format("HTTP (%d %s) status for URL '%s'", status,
-							httpConnection.getResponseMessage(), url));
-				}
+	private URLConnection getUrlConnection(URL url, int maxRedirects, int redirectCount) throws IOException {
+		URLConnection connection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
+		connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
+		connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
+		if (connection instanceof HttpURLConnection) {
+			HttpURLConnection httpConnection = (HttpURLConnection) connection;
+			httpConnection.setInstanceFollowRedirects(false);
+			int status = httpConnection.getResponseCode();
+			if (status >= 200 && status < 300) {
 				return httpConnection;
 			}
-
-			return connection;
+			else if (status >= 300 && status <= 307 && status != 306 && status != 304) {
+				if (redirectCount <= maxRedirects) {
+					String location = httpConnection.getHeaderField("Location");
+					if (StringUtils.hasText(location)) {
+						return getUrlConnection(new URL(httpConnection.getURL(), location), maxRedirects,
+								redirectCount + 1);
+					}
+				}
+				else {
+					throw new IOException(String.format("Too many redirects for URL '%s'", url));
+				}
+			}
+			else if (status >= 400 || status < 200) {
+				throw new IOException(String.format("HTTP (%d %s) status for URL '%s'", status,
+						httpConnection.getResponseMessage(), url));
+			}
+			return httpConnection;
 		}
 
+		return connection;
+	}
+
+	private void showProgress(Path file, long size, ScheduledExecutorService executorService) {
+		if (size > 0) {
+			AtomicLong prevPercent = new AtomicLong(0);
+			int minPercentStep = 10;
+			AtomicBoolean logOnlyOnce = new AtomicBoolean(false);
+			executorService.scheduleAtFixedRate(() -> {
+				try {
+					if (Files.exists(file)) {
+						long current = Files.size(file);
+						long percent = Math.max(current * 100, 1) / size;
+						if (percent - prevPercent.get() >= minPercentStep) {
+							prevPercent.set(percent);
+							log.info("Downloaded {} / {}  {}%", formatSize(current), formatSize(size), percent);
+						}
+					}
+				}
+				catch (Exception ex) {
+					if (logOnlyOnce.compareAndSet(false, true)) {
+						log.error(String.format("Can not show progress for a file '%s'", file), ex);
+					}
+				}
+			}, 0, 1, TimeUnit.SECONDS);
+		}
+	}
+
+	private String formatSize(long bytes) {
+		if (bytes > 1024) {
+			long kilobytes = bytes / 1024;
+			if (kilobytes > 1024) {
+				return (kilobytes / 1024) + "MB";
+			}
+			return kilobytes + "KB";
+		}
+		return bytes + "B";
 	}
 
 }

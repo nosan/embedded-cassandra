@@ -16,19 +16,16 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.sun.net.httpserver.HttpServer;
@@ -36,7 +33,6 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.test.support.CaptureOutput;
@@ -64,12 +60,10 @@ class RemoteArtifactTests {
 	private CaptureOutput output;
 
 	@BeforeEach
-	void setUp(@TempDir Path temporaryFolder, HttpServer httpServer, CaptureOutput output) {
-		Path directory = temporaryFolder.resolve(UUID.randomUUID().toString());
+	void setUp(HttpServer httpServer, CaptureOutput output) {
 		this.factory = new RemoteArtifactFactory();
 		this.factory.setUrlFactory(version -> new URL[]{
 				new URL(String.format("http:/%s/dist/apache-cassandra-%s.zip", httpServer.getAddress(), version))});
-		this.factory.setDirectory(directory);
 		this.output = output;
 		this.httpServer = httpServer;
 
@@ -92,8 +86,8 @@ class RemoteArtifactTests {
 		Artifact artifact = this.factory.create(VERSION);
 		Path archive = artifact.getArchive();
 		assertThat(this.output.toString()).contains("Downloaded");
-		assertThat(archive).exists().hasParent(this.factory.getDirectory());
-		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
+		assertThat(archive).exists();
+		assertThat(archive.toString()).endsWith("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 
 	}
@@ -112,8 +106,8 @@ class RemoteArtifactTests {
 		Artifact artifact = this.factory.create(VERSION);
 		Path archive = artifact.getArchive();
 		assertThat(this.output.toString()).doesNotContain("Downloaded");
-		assertThat(archive).exists().hasParent(this.factory.getDirectory());
-		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
+		assertThat(archive).exists();
+		assertThat(archive.toString()).endsWith("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 	}
 
@@ -136,8 +130,8 @@ class RemoteArtifactTests {
 		Artifact artifact = this.factory.create(VERSION);
 		Path archive = artifact.getArchive();
 		assertThat(this.output.toString()).doesNotContain("Downloaded");
-		assertThat(archive).exists().hasParent(this.factory.getDirectory());
-		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
+		assertThat(archive).exists();
+		assertThat(archive.toString()).endsWith("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 	}
 
@@ -171,26 +165,8 @@ class RemoteArtifactTests {
 		Artifact artifact = this.factory.create(VERSION);
 		Path archive = artifact.getArchive();
 		assertThat(this.output.toString()).doesNotContain("Downloaded");
-		assertThat(archive).exists().hasParent(this.factory.getDirectory());
-		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
-		assertThat(archive).hasBinaryContent(content);
-	}
-
-	@Test
-	void shouldNotDownloadArtifactIfExists() throws Exception {
-		byte[] content;
-		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
-			content = IOUtils.toByteArray(inputStream);
-		}
-		Files.createDirectories(this.factory.getDirectory());
-		Files.copy(new ByteArrayInputStream(content), this.factory.getDirectory().
-				resolve("apache-cassandra-3.1.1.zip"));
-
-		Artifact artifact = this.factory.create(VERSION);
-		Path archive = artifact.getArchive();
-		assertThat(this.output.toString()).doesNotContain("Downloaded");
-		assertThat(archive).exists().hasParent(this.factory.getDirectory());
-		assertThat(archive).hasFileName("apache-cassandra-3.1.1.zip");
+		assertThat(archive).exists();
+		assertThat(archive.toString()).endsWith("apache-cassandra-3.1.1.zip");
 		assertThat(archive).hasBinaryContent(content);
 	}
 
