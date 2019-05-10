@@ -138,7 +138,7 @@ class LocalCassandra implements Cassandra {
 
 	@Override
 	public String toString() {
-		return String.format("%s (id=%d, version=%s)", getClass().getSimpleName(), this.id, getVersion());
+		return String.format("Local Cassandra [id=%d, version=%s]", this.id, getVersion());
 	}
 
 	private void doStart() throws Throwable {
