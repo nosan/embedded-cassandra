@@ -141,7 +141,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			CassandraFactory cassandraFactory = context.getBeanProvider(CassandraFactory.class)
 					.getIfUnique(this::getCassandraFactory);
 			context.getBeanProvider(EmbeddedCassandraFactoryCustomizer.class)
-					.forEach(customizer -> customize(cassandraFactory, customizer));
+					.orderedStream().forEach(customizer -> customize(cassandraFactory, customizer));
 			TestCassandra cassandra = testCassandraFactory.create(cassandraFactory, getScripts());
 			this.cassandra = Objects.requireNonNull(cassandra, "Test Cassandra must not be null");
 			cassandra.start();
