@@ -220,7 +220,7 @@ abstract class AbstractLocalCassandraTests {
 			}
 		}
 		finally {
-			executorService.shutdownNow();
+			executorService.shutdown();
 		}
 	}
 
