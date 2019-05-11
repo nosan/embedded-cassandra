@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.datastax.driver.core.Session;
@@ -149,8 +148,8 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	private CqlScript[] getScripts(Cql annotation, Class<?> testClass, ApplicationContext context) {
 		List<CqlScript> scripts = new ArrayList<>();
 		Environment environment = context.getEnvironment();
-		Charset charset = getCharset(environment, annotation::encoding);
-		for (URL url : ResourceUtils.getResources(context, testClass, getArray(environment, annotation::scripts))) {
+		Charset charset = getCharset(environment, annotation.encoding());
+		for (URL url : ResourceUtils.getResources(context, testClass, getArray(environment, annotation.scripts()))) {
 			scripts.add(new UrlCqlScript(url, charset));
 		}
 		List<String> statements = getStatements(annotation.statements());
@@ -160,10 +159,8 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		return scripts.toArray(new CqlScript[0]);
 	}
 
-	private String[] getArray(Environment environment, Supplier<String[]> arraySupplier) {
-		return Arrays.stream(arraySupplier.get())
-				.map(environment::resolvePlaceholders)
-				.filter(StringUtils::hasText)
+	private String[] getArray(Environment environment, String[] values) {
+		return Arrays.stream(values).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
 				.toArray(String[]::new);
 	}
 
@@ -174,8 +171,8 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	@Nullable
-	private Charset getCharset(Environment environment, Supplier<String> supplier) {
-		String charset = environment.resolvePlaceholders(supplier.get());
+	private Charset getCharset(Environment environment, String value) {
+		String charset = environment.resolvePlaceholders(value);
 		return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
 	}
 

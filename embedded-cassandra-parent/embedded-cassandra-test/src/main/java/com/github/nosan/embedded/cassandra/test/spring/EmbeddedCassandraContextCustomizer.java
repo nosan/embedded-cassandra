@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -168,14 +167,14 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		private CassandraFactory getCassandraFactory() {
 			EmbeddedCassandra annotation = this.annotation;
 			LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
-			cassandraFactory.setVersion(getVersion(annotation::version));
-			cassandraFactory.setConfigurationFile(getURL(annotation::configurationFile));
-			cassandraFactory.setJvmOptions(getArray(annotation::jvmOptions));
-			cassandraFactory.setJmxLocalPort(getPort(annotation::jmxLocalPort));
-			cassandraFactory.setPort(getPort(annotation::port));
-			cassandraFactory.setStoragePort(getPort(annotation::storagePort));
-			cassandraFactory.setSslStoragePort(getPort(annotation::sslStoragePort));
-			cassandraFactory.setRpcPort(getPort(annotation::rpcPort));
+			cassandraFactory.setVersion(getVersion(annotation.version()));
+			cassandraFactory.setConfigurationFile(getURL(annotation.configurationFile()));
+			cassandraFactory.setJvmOptions(getArray(annotation.jvmOptions()));
+			cassandraFactory.setJmxLocalPort(getPort(annotation.jmxLocalPort()));
+			cassandraFactory.setPort(getPort(annotation.port()));
+			cassandraFactory.setStoragePort(getPort(annotation.storagePort()));
+			cassandraFactory.setSslStoragePort(getPort(annotation.sslStoragePort()));
+			cassandraFactory.setRpcPort(getPort(annotation.rpcPort()));
 			return cassandraFactory;
 		}
 
@@ -184,8 +183,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			Class<?> testClass = this.testClass;
 			ApplicationContext context = getContext();
 			List<CqlScript> scripts = new ArrayList<>();
-			for (URL url : ResourceUtils.getResources(context, testClass, getArray(annotation::scripts))) {
-				scripts.add(new UrlCqlScript(url, getCharset(annotation::encoding)));
+			for (URL url : ResourceUtils.getResources(context, testClass, getArray(annotation.scripts()))) {
+				scripts.add(new UrlCqlScript(url, getCharset(annotation.encoding())));
 			}
 			List<String> statements = getStatements(annotation.statements());
 			if (!statements.isEmpty()) {
@@ -200,41 +199,39 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 					.collect(Collectors.toList());
 		}
 
-		private String[] getArray(Supplier<String[]> arraySupplier) {
+		private String[] getArray(String[] values) {
 			Environment environment = getContext().getEnvironment();
-			return Arrays.stream(arraySupplier.get())
-					.map(environment::resolvePlaceholders)
-					.filter(StringUtils::hasText)
+			return Arrays.stream(values).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
 					.toArray(String[]::new);
 		}
 
 		@Nullable
-		private Version getVersion(Supplier<String> supplier) {
+		private Version getVersion(String value) {
 			Environment environment = getContext().getEnvironment();
-			String version = environment.resolvePlaceholders(supplier.get());
+			String version = environment.resolvePlaceholders(value);
 			return StringUtils.hasText(version) ? Version.parse(version) : null;
 		}
 
 		@Nullable
-		private Charset getCharset(Supplier<String> supplier) {
+		private Charset getCharset(String value) {
 			Environment environment = getContext().getEnvironment();
-			String charset = environment.resolvePlaceholders(supplier.get());
+			String charset = environment.resolvePlaceholders(value);
 			return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
 		}
 
 		@Nullable
-		private Integer getPort(Supplier<String> supplier) {
+		private Integer getPort(String value) {
 			Environment environment = getContext().getEnvironment();
-			String port = environment.resolvePlaceholders(supplier.get());
+			String port = environment.resolvePlaceholders(value);
 			return StringUtils.hasText(port) ? Integer.parseInt(port) : null;
 		}
 
 		@Nullable
-		private URL getURL(Supplier<String> supplier) {
+		private URL getURL(String value) {
 			Class<?> testClass = this.testClass;
 			ApplicationContext context = getContext();
 			Environment environment = context.getEnvironment();
-			String location = environment.resolvePlaceholders(supplier.get());
+			String location = environment.resolvePlaceholders(value);
 			return StringUtils.hasText(location) ? ResourceUtils.getResource(context, testClass, location) : null;
 		}
 
