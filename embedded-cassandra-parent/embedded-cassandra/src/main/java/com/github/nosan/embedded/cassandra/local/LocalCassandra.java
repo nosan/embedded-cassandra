@@ -176,7 +176,7 @@ class LocalCassandra implements Cassandra {
 		}
 		catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
 			Thread.currentThread().interrupt();
-			log.error(String.format("%s can be still alive as stop was interrupted", toString()));
+			log.error(String.format("%s can be still alive. Shutdown has been interrupted", toString()));
 		}
 		catch (Throwable ex) {
 			log.error(String.format("Unable to stop %s", toString()), ex);
