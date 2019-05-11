@@ -100,7 +100,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		private final Class<?> testClass;
 
 		@Nullable
-		private TestCassandra cassandra;
+		private volatile TestCassandra cassandra;
 
 		@Nullable
 		private ApplicationContext applicationContext;
