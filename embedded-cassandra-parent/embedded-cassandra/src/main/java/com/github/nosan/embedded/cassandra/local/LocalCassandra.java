@@ -83,7 +83,7 @@ class LocalCassandra implements Cassandra {
 			catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
 				this.state = State.START_INTERRUPTED;
 				doStopSafely();
-				throw new CassandraInterruptedException("Startup has interrupted", ex);
+				throw new CassandraInterruptedException(String.format("%s has been interrupted", toString()), ex);
 			}
 			catch (Throwable ex) {
 				this.state = State.START_FAILED;
@@ -107,7 +107,7 @@ class LocalCassandra implements Cassandra {
 			}
 			catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
 				this.state = State.STOP_INTERRUPTED;
-				throw new CassandraInterruptedException("Shutdown has interrupted", ex);
+				throw new CassandraInterruptedException(String.format("%s has been interrupted", toString()), ex);
 			}
 			catch (Throwable ex) {
 				this.state = State.STOP_FAILED;
@@ -138,7 +138,7 @@ class LocalCassandra implements Cassandra {
 
 	@Override
 	public String toString() {
-		return String.format("Local Cassandra [id=%d, version=%s]", this.id, getVersion());
+		return String.format("Local Cassandra [id=%d, version=%s, state=%s]", this.id, getVersion(), getState());
 	}
 
 	private void doStart() throws Throwable {
