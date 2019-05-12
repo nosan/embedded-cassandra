@@ -50,8 +50,6 @@ class LocalCassandra implements Cassandra {
 
 	private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("cassandra-%d", this.id));
 
-	private final Object monitor = new Object();
-
 	private final CassandraDatabase database;
 
 	private final boolean registerShutdownHook;
@@ -69,61 +67,55 @@ class LocalCassandra implements Cassandra {
 	}
 
 	@Override
-	public void start() throws CassandraException {
-		synchronized (this.monitor) {
-			if (this.started) {
-				return;
-			}
-			try {
-				this.state = State.STARTING;
-				doStart();
-				this.state = State.STARTED;
-				this.started = true;
-			}
-			catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
-				this.state = State.START_INTERRUPTED;
-				doStopSafely();
-				throw new CassandraInterruptedException(String.format("%s has been interrupted", toString()), ex);
-			}
-			catch (Throwable ex) {
-				this.state = State.START_FAILED;
-				doStopSafely();
-				throw new CassandraException(String.format("Unable to start %s", toString()), ex);
-			}
+	public synchronized void start() throws CassandraException {
+		if (this.started) {
+			return;
+		}
+		try {
+			this.state = State.STARTING;
+			doStart();
+			this.state = State.STARTED;
+			this.started = true;
+		}
+		catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
+			this.state = State.START_INTERRUPTED;
+			doStopSafely();
+			throw new CassandraInterruptedException(String.format("%s has been interrupted", toString()), ex);
+		}
+		catch (Throwable ex) {
+			this.state = State.START_FAILED;
+			doStopSafely();
+			throw new CassandraException(String.format("Unable to start %s", toString()), ex);
 		}
 	}
 
 	@Override
-	public void stop() throws CassandraException {
-		synchronized (this.monitor) {
-			if (!this.started) {
-				return;
-			}
-			try {
-				this.state = State.STOPPING;
-				doStop();
-				this.state = State.STOPPED;
-				this.started = false;
-			}
-			catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
-				this.state = State.STOP_INTERRUPTED;
-				throw new CassandraInterruptedException(String.format("%s has been interrupted", toString()), ex);
-			}
-			catch (Throwable ex) {
-				this.state = State.STOP_FAILED;
-				throw new CassandraException(String.format("Unable to stop %s", toString()), ex);
-			}
+	public synchronized void stop() throws CassandraException {
+		if (!this.started) {
+			return;
+		}
+		try {
+			this.state = State.STOPPING;
+			doStop();
+			this.state = State.STOPPED;
+			this.started = false;
+		}
+		catch (InterruptedException | FileLockInterruptionException | ClosedByInterruptException ex) {
+			this.state = State.STOP_INTERRUPTED;
+			throw new CassandraInterruptedException(String.format("%s has been interrupted", toString()), ex);
+		}
+		catch (Throwable ex) {
+			this.state = State.STOP_FAILED;
+			throw new CassandraException(String.format("Unable to stop %s", toString()), ex);
 		}
 	}
 
 	@Override
-	public Settings getSettings() throws IllegalStateException {
-		synchronized (this.monitor) {
-			if (!this.started) {
-				throw new IllegalStateException(String.format("%s is not running.", toString()));
-			}
-			return this.database.getSettings();
+	public synchronized Settings getSettings() throws IllegalStateException {
+		if (!this.started) {
+			throw new IllegalStateException(String.format("%s is not running.", toString()));
 		}
+		return this.database.getSettings();
 	}
 
 	@Override
