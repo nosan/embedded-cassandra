@@ -38,7 +38,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -209,10 +208,9 @@ abstract class AbstractLocalCassandraTests {
 		List<Future<?>> futures = new ArrayList<>();
 		try {
 			for (int i = 0; i < 2; i++) {
-				futures.add(executorService.submit((Callable<?>) () -> {
+				futures.add(executorService.submit(() -> {
 					CassandraRunner runner = new CassandraRunner(this.factory);
 					runner.run(assertCreateKeyspace());
-					return new Object();
 				}));
 			}
 			for (Future<?> future : futures) {
