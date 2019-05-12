@@ -255,15 +255,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		boolean transportStarted = settings.transportStarted().orElse(false);
 		boolean rpcTransportStarted = settings.rpcTransportStarted().orElse(false);
 		if (transportStarted && settings.port().isPresent()
-				&& !SocketUtils.isListen(settings.getAddress(), settings.getPort())) {
+				&& !SocketUtils.connect(settings.getAddress(), settings.getPort())) {
 			return false;
 		}
 		if (transportStarted && settings.sslPort().isPresent()
-				&& !SocketUtils.isListen(settings.getAddress(), settings.getSslPort())) {
+				&& !SocketUtils.connect(settings.getAddress(), settings.getSslPort())) {
 			return false;
 		}
 		return !rpcTransportStarted || !settings.rpcPort().isPresent()
-				|| SocketUtils.isListen(settings.getAddress(), settings.getRpcPort());
+				|| SocketUtils.connect(settings.getAddress(), settings.getRpcPort());
 
 	}
 

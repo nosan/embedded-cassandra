@@ -34,13 +34,13 @@ abstract class SocketUtils {
 	private static final String LOCALHOST = "localhost";
 
 	/**
-	 * Test whether the {@code TCP} port is busy or not.
+	 * Test whether is is possible to connect to the given address and port.
 	 *
 	 * @param address the address
 	 * @param port the TCP port
-	 * @return {@code true} if port is busy, otherwise {@code false}
+	 * @return {@code true} if it possible to connect otherwise {@code false}
 	 */
-	static boolean isListen(@Nullable InetAddress address, int port) {
+	static boolean connect(@Nullable InetAddress address, int port) {
 		try (Socket s = new Socket()) {
 			s.connect(new InetSocketAddress(address, port), 1000);
 			return true;

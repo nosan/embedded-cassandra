@@ -34,16 +34,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SocketUtilsTests {
 
 	@Test
-	void isListen() throws IOException, InterruptedException {
+	void shouldConnect() throws IOException, InterruptedException {
 		int port;
 		InetAddress address;
-		try (ServerSocket serverSocket = new ServerSocket(0)) {
-			port = serverSocket.getLocalPort();
-			address = serverSocket.getInetAddress();
-			assertThat(SocketUtils.isListen(address, port)).isTrue();
+		try (ServerSocket ss = new ServerSocket(0)) {
+			port = ss.getLocalPort();
+			address = ss.getInetAddress();
+			assertThat(SocketUtils.connect(address, port)).isTrue();
 		}
 		Thread.sleep(500); //for mac os.
-		assertThat(SocketUtils.isListen(address, port)).isFalse();
+		assertThat(SocketUtils.connect(address, port)).isFalse();
 	}
 
 	@Test
