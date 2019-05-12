@@ -547,8 +547,8 @@ public final class LocalCassandraFactory implements CassandraFactory {
 					.resolve(String.format("embedded-cassandra/%s/%s", version, UUID.randomUUID()));
 		}
 		CassandraNode node = createCassandraNode(workingDirectory, version);
-		CassandraDatabase database = new LocalCassandraDatabase(node, workingDirectory, isDeleteWorkingDirectory(),
-				getMergedWorkingDirectoryCustomizers(version));
+		CassandraDatabase database = new LocalCassandraDatabase(workingDirectory, isDeleteWorkingDirectory(),
+				getMergedWorkingDirectoryCustomizers(version), node);
 		return new LocalCassandra(isRegisterShutdownHook(), database);
 	}
 

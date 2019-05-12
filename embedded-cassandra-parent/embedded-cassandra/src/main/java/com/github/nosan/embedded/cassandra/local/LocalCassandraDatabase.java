@@ -46,8 +46,8 @@ class LocalCassandraDatabase implements CassandraDatabase {
 
 	private final List<WorkingDirectoryCustomizer> workingDirectoryCustomizers;
 
-	LocalCassandraDatabase(CassandraNode node, Path workingDirectory, boolean deleteWorkingDirectory,
-			List<WorkingDirectoryCustomizer> workingDirectoryCustomizers) {
+	LocalCassandraDatabase(Path workingDirectory, boolean deleteWorkingDirectory,
+			List<WorkingDirectoryCustomizer> workingDirectoryCustomizers, CassandraNode node) {
 		this.node = node;
 		this.workingDirectory = workingDirectory;
 		this.deleteWorkingDirectory = deleteWorkingDirectory;
@@ -55,7 +55,7 @@ class LocalCassandraDatabase implements CassandraDatabase {
 	}
 
 	@Override
-	public void start() throws IOException, InterruptedException {
+	public synchronized void start() throws IOException, InterruptedException {
 		initialize();
 		log.info("Start Apache Cassandra '{}'", getVersion());
 		long start = System.currentTimeMillis();
@@ -65,7 +65,7 @@ class LocalCassandraDatabase implements CassandraDatabase {
 	}
 
 	@Override
-	public void stop() throws IOException, InterruptedException {
+	public synchronized void stop() throws IOException, InterruptedException {
 		if (this.node.isAlive()) {
 			long start = System.currentTimeMillis();
 			log.info("Stop Apache Cassandra '{}'", getVersion());
@@ -77,13 +77,13 @@ class LocalCassandraDatabase implements CassandraDatabase {
 	}
 
 	@Override
-	public Version getVersion() {
-		return this.node.getVersion();
+	public synchronized Settings getSettings() {
+		return this.node.getSettings();
 	}
 
 	@Override
-	public Settings getSettings() {
-		return this.node.getSettings();
+	public Version getVersion() {
+		return this.node.getVersion();
 	}
 
 	private void initialize() throws IOException {

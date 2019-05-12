@@ -91,10 +91,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	private final Path javaHome;
 
 	@Nullable
-	private Settings settings;
+	private volatile Settings settings;
 
 	@Nullable
-	private ProcessId processId;
+	private volatile ProcessId processId;
 
 	AbstractCassandraNode(Path workingDirectory, Version version, @Nullable Path javaHome, JvmOptions jvmOptions) {
 		this.version = version;
