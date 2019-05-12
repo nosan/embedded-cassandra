@@ -218,8 +218,8 @@ back_pressure_strategy:
   - class_name: org.apache.cassandra.net.RateBasedBackPressure
     parameters:
       - high_ratio: 0.90
-        factor: 5
-        flow: FAST
+    factor: 5
+    flow: FAST
 full_query_log_dir: /tmp/cassandrafullquerylog
 audit_logging_options:
   enabled: false
