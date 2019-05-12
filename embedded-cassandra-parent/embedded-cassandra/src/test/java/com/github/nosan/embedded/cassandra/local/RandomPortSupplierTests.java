@@ -41,7 +41,7 @@ class RandomPortSupplierTests {
 		Set<Integer> ports = new LinkedHashSet<>();
 		RandomPortSupplier portSupplier = new RandomPortSupplier(InetAddress::getLoopbackAddress);
 		for (int i = 0; i < 20; i++) {
-			ports.add(portSupplier.getPort());
+			ports.add(portSupplier.get());
 		}
 		assertThat(ports).hasSize(20);
 	}
@@ -52,7 +52,7 @@ class RandomPortSupplierTests {
 		Set<Integer> ports = new LinkedHashSet<>();
 		RandomPortSupplier portSupplier = new RandomPortSupplier(InetAddress::getLoopbackAddress);
 		for (int i = 0; i < 100; i++) {
-			ports.add(portSupplier.getPort());
+			ports.add(portSupplier.get());
 		}
 		assertThat(ports).hasSize(100);
 	}
