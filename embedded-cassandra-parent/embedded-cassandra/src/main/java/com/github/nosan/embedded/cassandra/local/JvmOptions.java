@@ -59,9 +59,9 @@ class JvmOptions implements Supplier<List<String>> {
 
 	private final List<String> jvmOptions;
 
-	private final RandomPortSupplier portSupplier;
+	private final Supplier<Integer> portSupplier;
 
-	JvmOptions(List<String> jvmOptions, Ports ports, RandomPortSupplier portSupplier) {
+	JvmOptions(List<String> jvmOptions, Ports ports, Supplier<Integer> portSupplier) {
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 		this.ports = ports;
 		this.portSupplier = portSupplier;
@@ -90,7 +90,7 @@ class JvmOptions implements Supplier<List<String>> {
 	}
 
 	private static Map<String, String> getJvmOptions(Ports ports, List<String> options,
-			RandomPortSupplier portSupplier) {
+			Supplier<Integer> portSupplier) {
 		Map<String, String> jvmOptions = getJvmOptions(options);
 
 		addOption(JMX_LOCAL_PORT, ports.getJmxLocalPort(), jvmOptions);
@@ -132,10 +132,10 @@ class JvmOptions implements Supplier<List<String>> {
 		}
 	}
 
-	private static void setPort(String name, Map<String, String> jvmOptions, RandomPortSupplier portSupplier) {
+	private static void setPort(String name, Map<String, String> jvmOptions, Supplier<Integer> portSupplier) {
 		Integer port = getInteger(name, jvmOptions).orElse(null);
 		if (port != null && port == 0) {
-			jvmOptions.put(name, Integer.toString(portSupplier.getPort()));
+			jvmOptions.put(name, Integer.toString(portSupplier.get()));
 		}
 	}
 

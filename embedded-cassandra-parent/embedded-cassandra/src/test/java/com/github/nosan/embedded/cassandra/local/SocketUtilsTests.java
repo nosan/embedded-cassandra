@@ -27,11 +27,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link NetworkUtils}.
+ * Tests for {@link SocketUtils}.
  *
  * @author Dmytro Nosan
  */
-class NetworkUtilsTests {
+class SocketUtilsTests {
 
 	@Test
 	void isListen() throws IOException, InterruptedException {
@@ -40,37 +40,37 @@ class NetworkUtilsTests {
 		try (ServerSocket serverSocket = new ServerSocket(0)) {
 			port = serverSocket.getLocalPort();
 			address = serverSocket.getInetAddress();
-			assertThat(NetworkUtils.isListen(address, port)).isTrue();
+			assertThat(SocketUtils.isListen(address, port)).isTrue();
 		}
 		Thread.sleep(500); //for mac os.
-		assertThat(NetworkUtils.isListen(address, port)).isFalse();
+		assertThat(SocketUtils.isListen(address, port)).isFalse();
 	}
 
 	@Test
 	void shouldGetLocalhost() throws UnknownHostException {
-		InetAddress localhost = NetworkUtils.getLocalhost();
+		InetAddress localhost = SocketUtils.getLocalhost();
 		assertThat(localhost).isEqualTo(InetAddress.getByName("localhost"));
 	}
 
 	@Test
 	void shouldGetPort() {
-		assertThat(NetworkUtils.getPort("9140")).isEqualTo(9140);
+		assertThat(SocketUtils.getPort("9140")).isEqualTo(9140);
 	}
 
 	@Test
 	void shouldGetAddress() {
-		assertThat(NetworkUtils.getAddress(InetAddress.getLoopbackAddress().getHostAddress())).
+		assertThat(SocketUtils.getAddress(InetAddress.getLoopbackAddress().getHostAddress())).
 				isEqualTo(InetAddress.getLoopbackAddress());
 	}
 
 	@Test
 	void shouldNotGetPort() {
-		assertThatThrownBy(() -> NetworkUtils.getPort("em...?")).isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> SocketUtils.getPort("em...?")).isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
 	void shouldNotGetAddress() {
-		assertThatThrownBy(() -> NetworkUtils.getAddress("em...?")).isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> SocketUtils.getAddress("em...?")).isInstanceOf(IllegalArgumentException.class);
 	}
 
 }

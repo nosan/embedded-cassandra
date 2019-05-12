@@ -30,7 +30,9 @@ import java.util.function.Supplier;
  * @author Dmytro Nosan
  * @since 2.0.1
  */
-final class RandomPortSupplier {
+class RandomPortSupplier implements Supplier<Integer> {
+
+	static final Supplier<Integer> INSTANCE = new RandomPortSupplier(SocketUtils::getLocalhost);
 
 	private static final int ATTEMPTS = 1024;
 
@@ -48,12 +50,8 @@ final class RandomPortSupplier {
 		this.addressSupplier = addressSupplier;
 	}
 
-	/**
-	 * Returns a random port between {@link #MIN} and {@link #MAX}.
-	 *
-	 * @return a port
-	 */
-	synchronized Integer getPort() {
+	@Override
+	public synchronized Integer get() {
 		return getPort(this.addressSupplier.get());
 	}
 

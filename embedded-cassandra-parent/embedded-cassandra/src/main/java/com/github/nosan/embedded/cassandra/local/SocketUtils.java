@@ -24,12 +24,12 @@ import java.net.Socket;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Utility methods for dealing with a network.
+ * Utility methods for dealing with sockets.
  *
  * @author Dmytro Nosan
  * @since 2.0.1
  */
-abstract class NetworkUtils {
+abstract class SocketUtils {
 
 	private static final String LOCALHOST = "localhost";
 

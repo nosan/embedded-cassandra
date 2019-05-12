@@ -255,39 +255,32 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		boolean transportStarted = settings.transportStarted().orElse(false);
 		boolean rpcTransportStarted = settings.rpcTransportStarted().orElse(false);
 		if (transportStarted && settings.port().isPresent()
-				&& !NetworkUtils.isListen(settings.getAddress(), settings.getPort())) {
+				&& !SocketUtils.isListen(settings.getAddress(), settings.getPort())) {
 			return false;
 		}
 		if (transportStarted && settings.sslPort().isPresent()
-				&& !NetworkUtils.isListen(settings.getAddress(), settings.getSslPort())) {
+				&& !SocketUtils.isListen(settings.getAddress(), settings.getSslPort())) {
 			return false;
 		}
 		return !rpcTransportStarted || !settings.rpcPort().isPresent()
-				|| NetworkUtils.isListen(settings.getAddress(), settings.getRpcPort());
+				|| SocketUtils.isListen(settings.getAddress(), settings.getRpcPort());
 
 	}
 
 	private void parse(String line, NodeSettings settings) {
-		onMatch(TRANSPORT_START_PATTERN, line, matcher ->
-				settings.startTransport(NetworkUtils.getAddress(matcher.group(1)),
-						NetworkUtils.getPort(matcher.group(2)), line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED)));
-		onMatch(RPC_TRANSPORT_START_PATTERN, line, matcher ->
-				settings.startRpcTransport(NetworkUtils.getAddress(matcher.group(1)),
-						NetworkUtils.getPort(matcher.group(2))));
-		onAnyMatch(new Pattern[]{TRANSPORT_NOT_START_PATTERN, TRANSPORT_STOP_PATTERN}, line, matcher ->
+		onMatch(new Pattern[]{TRANSPORT_START_PATTERN}, line, matcher ->
+				settings.startTransport(SocketUtils.getAddress(matcher.group(1)),
+						SocketUtils.getPort(matcher.group(2)), line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED)));
+		onMatch(new Pattern[]{RPC_TRANSPORT_START_PATTERN}, line, matcher ->
+				settings.startRpcTransport(SocketUtils.getAddress(matcher.group(1)),
+						SocketUtils.getPort(matcher.group(2))));
+		onMatch(new Pattern[]{TRANSPORT_NOT_START_PATTERN, TRANSPORT_STOP_PATTERN}, line, matcher ->
 				settings.stopTransport());
-		onAnyMatch(new Pattern[]{RPC_TRANSPORT_NOT_START_PATTERN, RPC_TRANSPORT_STOP_PATTERN}, line, matcher ->
+		onMatch(new Pattern[]{RPC_TRANSPORT_NOT_START_PATTERN, RPC_TRANSPORT_STOP_PATTERN}, line, matcher ->
 				settings.stopRpcTransport());
 	}
 
-	private void onMatch(Pattern pattern, String line, Consumer<? super Matcher> matcherConsumer) {
-		Matcher matcher = pattern.matcher(line);
-		if (matcher.matches()) {
-			matcherConsumer.accept(matcher);
-		}
-	}
-
-	private void onAnyMatch(Pattern[] patterns, String line, Consumer<? super Matcher> matcherConsumer) {
+	private void onMatch(Pattern[] patterns, String line, Consumer<? super Matcher> matcherConsumer) {
 		for (Pattern pattern : patterns) {
 			Matcher matcher = pattern.matcher(line);
 			if (matcher.matches()) {

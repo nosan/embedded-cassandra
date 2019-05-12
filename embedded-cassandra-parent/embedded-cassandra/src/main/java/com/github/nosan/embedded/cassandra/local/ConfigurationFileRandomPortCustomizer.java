@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -48,15 +49,15 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 
 	private static final String SSL_STORAGE_PORT = "ssl_storage_port";
 
-	private final RandomPortSupplier portSupplier;
+	private final Supplier<Integer> portSupplier;
 
-	ConfigurationFileRandomPortCustomizer(RandomPortSupplier portSupplier) {
+	ConfigurationFileRandomPortCustomizer(Supplier<Integer> portSupplier) {
 		this.portSupplier = portSupplier;
 	}
 
 	@Override
 	public void customize(Path workingDirectory, Version version) throws IOException {
-		RandomPortSupplier portSupplier = this.portSupplier;
+		Supplier<Integer> portSupplier = this.portSupplier;
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
 		Map<Object, Object> oldProperties = readProperties(file);
 		Map<Object, Object> newProperties = new LinkedHashMap<>(oldProperties);
@@ -78,10 +79,10 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		return Optional.ofNullable(properties.get(name)).map(Object::toString);
 	}
 
-	private static void setPort(String name, Map<Object, Object> properties, RandomPortSupplier portSupplier) {
+	private static void setPort(String name, Map<Object, Object> properties, Supplier<Integer> portSupplier) {
 		Integer port = getInteger(name, properties).orElse(null);
 		if (port != null && port == 0) {
-			properties.put(name, portSupplier.getPort());
+			properties.put(name, portSupplier.get());
 		}
 	}
 

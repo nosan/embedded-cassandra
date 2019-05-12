@@ -44,8 +44,6 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	private static final String SNAKEYAML_YAML_CLASS = "org.yaml.snakeyaml.Yaml";
 
-	private static final RandomPortSupplier PORT_SUPPLIER = new RandomPortSupplier(NetworkUtils::getLocalhost);
-
 	private final List<String> jvmOptions = new ArrayList<>();
 
 	private final List<WorkingDirectoryCustomizer> workingDirectoryCustomizers = new ArrayList<>();
@@ -575,7 +573,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		Optional.ofNullable(getTopologyFile()).map(TopologyFileCustomizer::new).ifPresent(customizers::add);
 		Optional.ofNullable(getLoggingFile()).map(LoggingFileCustomizer::new).ifPresent(customizers::add);
 		if (ClassUtils.isPresent(SNAKEYAML_YAML_CLASS, getClass().getClassLoader())) {
-			customizers.add(new ConfigurationFileRandomPortCustomizer(PORT_SUPPLIER));
+			customizers.add(new ConfigurationFileRandomPortCustomizer(RandomPortSupplier.INSTANCE));
 		}
 		if (!SystemUtils.isWindows()) {
 			customizers.add(new CassandraFileExecutableCustomizer());
@@ -586,7 +584,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	private CassandraNode createCassandraNode(Path workingDirectory, Version version) {
 		Ports ports = new Ports(getPort(), getRpcPort(), getStoragePort(), getSslStoragePort(), getJmxLocalPort());
-		JvmOptions jvmOptions = new JvmOptions(getJvmOptions(), ports, PORT_SUPPLIER);
+		JvmOptions jvmOptions = new JvmOptions(getJvmOptions(), ports, RandomPortSupplier.INSTANCE);
 		if (SystemUtils.isWindows()) {
 			return new WindowsCassandraNode(version, workingDirectory, getJavaHome(), jvmOptions);
 		}

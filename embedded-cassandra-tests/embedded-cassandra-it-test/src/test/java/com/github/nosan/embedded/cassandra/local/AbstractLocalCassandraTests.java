@@ -125,7 +125,7 @@ abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(factory);
 		runner.run(assertCreateKeyspace().andThen(cassandra -> {
 			Settings settings = cassandra.getSettings();
-			assertThat(NetworkUtils.isListen(settings.getAddress(), 9155));
+			assertThat(SocketUtils.isListen(settings.getAddress(), 9155));
 		}));
 	}
 
@@ -160,7 +160,7 @@ abstract class AbstractLocalCassandraTests {
 		this.factory.setStoragePort(8555);
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-transport.yaml"));
 		new CassandraRunner(this.factory)
-				.run(cassandra -> assertThat(NetworkUtils.isListen(InetAddress.getLoopbackAddress(), 8555))
+				.run(cassandra -> assertThat(SocketUtils.isListen(InetAddress.getLoopbackAddress(), 8555))
 						.describedAs("Storage port is not busy")
 						.isTrue());
 	}
