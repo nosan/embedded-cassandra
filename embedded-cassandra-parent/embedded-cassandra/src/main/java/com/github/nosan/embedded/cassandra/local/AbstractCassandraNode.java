@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -199,43 +200,52 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		Logger logger = LoggerFactory.getLogger(Cassandra.class);
 		NodeSettings settings = new NodeSettings(this.version);
 		Process process = processId.getProcess();
+		AtomicBoolean capture = new AtomicBoolean(true);
 		Deque<String> lines = new ConcurrentLinkedDeque<>();
 		Thread thread = this.threadFactory.newThread(() -> ProcessUtils.read(process, line -> {
-			if (lines.size() == 10) {
-				lines.removeFirst();
+			if (capture.get()) {
+				if (lines.size() == 20) {
+					lines.removeFirst();
+				}
+				lines.addLast(line);
 			}
-			lines.addLast(line);
 			logger.info(line);
 			parse(line, settings);
 		}));
 
 		thread.start();
 
-		long start = System.nanoTime();
-		Duration timeout = Duration.ofMinutes(2);
-		long rem = timeout.toNanos();
-		do {
-			long pid = processId.getPid();
-			if (!process.isAlive()) {
-				try {
-					thread.join(1000);
+		try {
+			long start = System.nanoTime();
+			Duration timeout = Duration.ofMinutes(2);
+			long rem = timeout.toNanos();
+			do {
+				long pid = processId.getPid();
+				if (!process.isAlive()) {
+					try {
+						thread.join(1000);
+					}
+					catch (InterruptedException ex) {
+						Thread.currentThread().interrupt();
+					}
+					int exitValue = process.exitValue();
+					throw new IOException(String.format("Apache Cassandra Node '%s' is not alive. Exit code is '%s'."
+									+ " Please see logs for more details.%n%s", pid, exitValue,
+							String.join(String.format("%n\t"), lines)));
 				}
-				catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
+				if (isStarted(settings)) {
+					return settings;
 				}
-				int exitValue = process.exitValue();
-				throw new IOException(String.format("Apache Cassandra Node '%s' is not alive. Exit code is '%s'."
-								+ " Please see logs for more details.%n%s", pid, exitValue,
-						String.join(System.lineSeparator(), lines)));
-			}
-			if (isStarted(settings)) {
-				return settings;
-			}
-			if (rem > 0) {
-				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
-			}
-			rem = timeout.toNanos() - (System.nanoTime() - start);
-		} while (rem > 0);
+				if (rem > 0) {
+					Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
+				}
+				rem = timeout.toNanos() - (System.nanoTime() - start);
+			} while (rem > 0);
+		}
+		finally {
+			capture.set(false);
+			lines.clear();
+		}
 
 		throw new IllegalStateException(
 				String.format("There is no way to detect whether Apache Cassandra Node '%s' %s is started or not."
