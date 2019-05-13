@@ -54,6 +54,7 @@ import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -183,17 +184,22 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
-	void shouldOverrideJavaHome() {
-		this.factory.setJavaHome(Paths.get(UUID.randomUUID().toString()));
+	void shouldOverrideJavaHome() throws IOException {
+		Path javaHome = this.temporaryFolder.resolve("JAVA_HOME");
+		Files.createDirectories(javaHome);
+		this.factory.setJavaHome(javaHome);
 		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class);
 	}
 
 	@Test
 	void shouldStartOnSsl() throws URISyntaxException {
+		Assumptions.assumeTrue(this.factory.getVersion().getMajor() >= 3,
+				"Native SSL transport is available since 3.X.X");
+
 		Path keystoreFile = Paths.get(getClass().getResource("/cert/keystore.node0").toURI());
 		Path truststoreFile = Paths.get(getClass().getResource("/cert/truststore.node0").toURI());
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-ssl.yaml"));
-		this.factory.getWorkingDirectoryCustomizers().add((workDir, version) -> {
+		this.factory.getWorkingDirectoryCustomizers().add((workDir, v) -> {
 			Files.copy(keystoreFile, workDir.resolve("conf").resolve("keystore.node0"));
 			Files.copy(truststoreFile, workDir.resolve("conf").resolve("truststore.node0"));
 		});
@@ -212,6 +218,7 @@ abstract class AbstractLocalCassandraTests {
 			}
 
 		}));
+
 	}
 
 	@Test
