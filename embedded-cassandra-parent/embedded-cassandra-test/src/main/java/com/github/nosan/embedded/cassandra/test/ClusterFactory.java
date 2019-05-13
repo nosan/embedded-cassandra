@@ -41,18 +41,35 @@ public class ClusterFactory {
 	 * @param settings the settings
 	 * @return a cluster
 	 */
-	public Cluster create(Settings settings) {
+	public final Cluster create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
-		SocketOptions socketOptions = new SocketOptions();
-		socketOptions.setConnectTimeoutMillis(30000);
-		socketOptions.setReadTimeoutMillis(30000);
-		Cluster.Builder builder = Cluster.builder()
-				.addContactPoints(settings.getAddress())
-				.withPort(settings.getPort())
-				.withCredentials(USERNAME, PASSWORD)
-				.withSocketOptions(socketOptions);
-		return builder.withoutJMXReporting().withoutMetrics().build();
+		if (settings.address().isPresent() && (settings.port().isPresent() || settings.sslPort().isPresent())) {
+			SocketOptions socketOptions = new SocketOptions();
+			socketOptions.setConnectTimeoutMillis(30000);
+			socketOptions.setReadTimeoutMillis(30000);
+			Cluster.Builder builder = Cluster.builder()
+					.addContactPoints(settings.getAddress())
+					.withPort(settings.port().orElseGet(settings::getSslPort))
+					.withCredentials(USERNAME, PASSWORD)
+					.withSocketOptions(socketOptions)
+					.withoutJMXReporting()
+					.withoutMetrics();
+			Cluster cluster = buildCluster(builder);
+			return Objects.requireNonNull(cluster, "Cluster must not be null");
+		}
+		throw new IllegalStateException(String.format("Cluster can not be created from %s", settings));
 
+	}
+
+	/**
+	 * Creates a new configured {@link Cluster}.
+	 *
+	 * @param builder a cluster builder
+	 * @return a cluster
+	 * @since 2.0.1
+	 */
+	protected Cluster buildCluster(Cluster.Builder builder) {
+		return builder.build();
 	}
 
 }
