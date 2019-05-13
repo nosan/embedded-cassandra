@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -31,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,6 +56,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -79,8 +80,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SuppressWarnings("ConstantConditions")
 abstract class AbstractLocalCassandraTests {
 
-	private static final SecureRandom random = new SecureRandom();
-
 	private final LocalCassandraFactory factory;
 
 	@Nullable
@@ -93,14 +92,18 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@BeforeEach
-	void setUp(@TempDir Path temporaryFolder) {
+	void setUp(@TempDir Path temporaryFolder, TestInfo testInfo) {
 		this.temporaryFolder = temporaryFolder;
-		MDC.put("ID", Long.toString(random.nextLong()));
+		MDC.put("ID", UUID.randomUUID().toString());
+		MDC.put("TC", testInfo.getTestClass().map(Class::getSimpleName).orElse(""));
+		MDC.put("TM", testInfo.getTestMethod().map(Method::getName).orElse(""));
 	}
 
 	@AfterEach
 	void tearDown() {
 		MDC.remove("ID");
+		MDC.remove("TC");
+		MDC.remove("TM");
 	}
 
 	@Test

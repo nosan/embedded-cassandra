@@ -16,17 +16,12 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
-import java.util.UUID;
-
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.Row;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.slf4j.MDC;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
@@ -58,16 +53,6 @@ abstract class AbstractTestCassandraTests {
 	@AfterAll
 	void stopCassandra() {
 		this.cassandra.stop();
-	}
-
-	@BeforeEach
-	void setUp() {
-		MDC.put("ID", UUID.randomUUID().toString());
-	}
-
-	@AfterEach
-	void tearDown() {
-		MDC.remove("ID");
 	}
 
 	@Test
