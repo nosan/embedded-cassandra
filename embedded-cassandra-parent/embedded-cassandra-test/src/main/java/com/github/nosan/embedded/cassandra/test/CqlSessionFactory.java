@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.util.Objects;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.context.DriverContext;
@@ -48,19 +49,34 @@ public class CqlSessionFactory {
 	 * @param settings the settings
 	 * @return a cql session
 	 */
-	public CqlSession create(Settings settings) {
+	public final CqlSession create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
-		return CqlSession.builder()
-				.addContactPoint(new InetSocketAddress(settings.getAddress(), settings.getPort()))
-				.withLocalDatacenter(DATACENTER)
-				.withConfigLoader(DriverConfigLoader.programmaticBuilder()
-						.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)
-						.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, PASSWORD)
-						.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class)
-						.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
-						.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3))
-						.build())
-				.build();
+		if (settings.address().isPresent() && (settings.port().isPresent() || settings.sslPort().isPresent())) {
+			CqlSessionBuilder builder = CqlSession.builder()
+					.addContactPoint(new InetSocketAddress(settings.getAddress(),
+							settings.port().orElseGet(settings::getSslPort)))
+					.withLocalDatacenter(DATACENTER)
+					.withConfigLoader(DriverConfigLoader.programmaticBuilder()
+							.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)
+							.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, PASSWORD)
+							.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class)
+							.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
+							.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3))
+							.build());
+			return Objects.requireNonNull(build(builder), "CqlSession must not be null");
+		}
+		throw new IllegalStateException(String.format("CqlSession can not be created from %s", settings));
+	}
+
+	/**
+	 * Creates a new configured {@link CqlSession}.
+	 *
+	 * @param builder a session builder
+	 * @return a session
+	 * @since 2.0.1
+	 */
+	protected CqlSession build(CqlSessionBuilder builder) {
+		return builder.build();
 	}
 
 	/**
