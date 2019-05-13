@@ -23,6 +23,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 /**
  * Tests for {@link JvmOptions}.
@@ -33,15 +34,21 @@ class JvmOptionsTests {
 
 	@Test
 	void parseJvmOptions() {
+		JvmOptions jvmOptions = getJvmOptions();
+		List<String> options = jvmOptions.getOptions();
+		Map<String, String> systemProperties = jvmOptions.getSystemProperties();
+		assertThat(systemProperties).containsExactly(entry("-Dcassandra.jmx.remote.port", "0"),
+				entry("-Dcassandra.start_rpc", ""), entry("-Dcassandra.start_native_transport", null));
+		assertThat(options).containsExactly("-X512m");
+	}
+
+	private JvmOptions getJvmOptions() {
 		List<String> options = new ArrayList<>();
 		options.add("-Dcassandra.jmx.remote.port=0");
 		options.add("-Dcassandra.start_rpc=");
-		options.add("-Dcassandra.start_native_transport=true");
+		options.add("-Dcassandra.start_native_transport");
 		options.add("-X512m");
-		Map<String, String> jvmOptions = new JvmOptions(options).get();
-		assertThat(jvmOptions).containsEntry("-Dcassandra.jmx.remote.port", "0");
-		assertThat(jvmOptions).containsEntry("-X512m", null);
-		assertThat(jvmOptions).containsEntry("-Dcassandra.start_rpc", "");
+		return new JvmOptions(options);
 	}
 
 }

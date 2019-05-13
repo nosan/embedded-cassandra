@@ -16,11 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
@@ -31,48 +33,67 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * @author Dmytro Nosan
  * @since 2.0.0
  */
-class JvmOptions implements Supplier<Map<String, String>> {
+class JvmOptions {
 
 	private static final String PROPERTY_SEPARATOR = "=";
 
 	private static final String PROPERTY_PREFIX = "-D";
 
-	private final Map<String, String> jvmOptions;
+	private final Map<String, String> systemProperties;
+
+	private final List<String> options;
 
 	JvmOptions(List<String> jvmOptions) {
-		this.jvmOptions = Collections.unmodifiableMap(parseJvmOptions(jvmOptions));
+		this.systemProperties = Collections.unmodifiableMap(parseSystemProperties(jvmOptions));
+		this.options = Collections.unmodifiableList(parseOptions(jvmOptions));
 	}
 
 	/**
-	 * Returns a new {@code JVM} options that should be associated with the Apache Cassandra.
+	 * Returns {@code JVM} system properties.
+	 *
+	 * @return {@code JVM} system properties
+	 */
+	Map<String, String> getSystemProperties() {
+		return this.systemProperties;
+	}
+
+	/**
+	 * Returns {@code JVM} options.
 	 *
 	 * @return {@code JVM} options
 	 */
-	@Override
-	public Map<String, String> get() {
-		return this.jvmOptions;
+	List<String> getOptions() {
+		return this.options;
 	}
 
-	@Override
-	public String toString() {
-		return this.jvmOptions.toString();
+	private static List<String> parseOptions(List<String> jvmOptions) {
+		List<String> result = new ArrayList<>();
+		process(jvmOptions, source -> !source.startsWith(PROPERTY_PREFIX), result::add);
+		return result;
 	}
 
-	private static Map<String, String> parseJvmOptions(List<String> jvmOptions) {
+	private static Map<String, String> parseSystemProperties(List<String> jvmOptions) {
 		Map<String, String> result = new LinkedHashMap<>();
-		for (String option : jvmOptions) {
-			String trimmed = option.trim();
-			if (StringUtils.hasText(trimmed)) {
-				if (trimmed.startsWith(PROPERTY_PREFIX) && trimmed.contains(PROPERTY_SEPARATOR)) {
-					int index = trimmed.indexOf(PROPERTY_SEPARATOR);
-					result.put(trimmed.substring(0, index), trimmed.substring(index + 1));
-				}
-				else {
-					result.put(trimmed, null);
-				}
+		process(jvmOptions, source -> source.startsWith(PROPERTY_PREFIX), source -> {
+			int index = source.indexOf(PROPERTY_SEPARATOR);
+			if (index != -1) {
+				result.put(source.substring(0, index).trim(), source.substring(index + 1).trim());
+			}
+			else {
+				result.put(source, null);
+			}
+
+		});
+		return result;
+	}
+
+	private static void process(List<String> jvmOptions, Predicate<String> filter, Consumer<String> consumer) {
+		for (String jvmOption : jvmOptions) {
+			String source = jvmOption.trim();
+			if (StringUtils.hasText(source) && filter.test(source)) {
+				consumer.accept(source);
 			}
 		}
-		return result;
 	}
 
 }

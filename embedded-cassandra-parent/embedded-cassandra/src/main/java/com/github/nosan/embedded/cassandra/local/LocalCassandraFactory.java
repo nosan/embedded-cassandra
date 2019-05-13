@@ -584,7 +584,7 @@ public final class LocalCassandraFactory implements CassandraFactory {
 
 	private CassandraNode createCassandraNode(Path workingDirectory, Version version) {
 		Ports ports = new Ports(getPort(), getRpcPort(), getStoragePort(), getSslStoragePort(), getJmxLocalPort());
-		JvmOptions jvmOptions = new JvmOptions(getJvmOptions());
+		JvmOptions jvmOptions = new JvmOptions(new ArrayList<>(getJvmOptions()));
 		JvmParameters jvmParameters = new JvmParameters(jvmOptions, ports, RandomPortSupplier.INSTANCE);
 		if (SystemUtils.isWindows()) {
 			return new WindowsCassandraNode(version, workingDirectory, getJavaHome(), jvmParameters);

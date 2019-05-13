@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,12 +30,12 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
- * {@link Cassandra} {@code JVM} startup parameters.
+ * {@link Cassandra} startup parameters.
  *
  * @author Dmytro Nosan
  * @since 2.0.1
  */
-class JvmParameters implements Supplier<List<String>> {
+class JvmParameters {
 
 	private static final String JMX_LOCAL_PORT = "-Dcassandra.jmx.local.port";
 
@@ -69,42 +70,43 @@ class JvmParameters implements Supplier<List<String>> {
 	 *
 	 * @return {@code Cassandra} startup parameters.
 	 */
-	@Override
-	public List<String> get() {
+	List<String> getParameters() {
 		Supplier<Integer> portSupplier = this.portSupplier;
 		Ports ports = this.ports;
-		Map<String, String> jvmOptions = new LinkedHashMap<>(this.jvmOptions.get());
+		JvmOptions jvmOptions = this.jvmOptions;
+		Map<String, String> systemProperties = new LinkedHashMap<>(jvmOptions.getSystemProperties());
 
-		List<String> result = new ArrayList<>();
+		List<String> parameters = new ArrayList<>();
 
-		addOption(JMX_LOCAL_PORT, ports.getJmxLocalPort(), jvmOptions);
-		addOption(STORAGE_PORT, ports.getStoragePort(), jvmOptions);
-		addOption(SSL_STORAGE_PORT, ports.getSslStoragePort(), jvmOptions);
-		addOption(NATIVE_TRANSPORT_PORT, ports.getPort(), jvmOptions);
-		addOption(RPC_PORT, ports.getRpcPort(), jvmOptions);
+		addProperty(JMX_LOCAL_PORT, ports.getJmxLocalPort(), systemProperties);
+		addProperty(STORAGE_PORT, ports.getStoragePort(), systemProperties);
+		addProperty(SSL_STORAGE_PORT, ports.getSslStoragePort(), systemProperties);
+		addProperty(NATIVE_TRANSPORT_PORT, ports.getPort(), systemProperties);
+		addProperty(RPC_PORT, ports.getRpcPort(), systemProperties);
 
-		setPort(NATIVE_TRANSPORT_PORT, jvmOptions, portSupplier);
-		setPort(RPC_PORT, jvmOptions, portSupplier);
-		setPort(STORAGE_PORT, jvmOptions, portSupplier);
-		setPort(SSL_STORAGE_PORT, jvmOptions, portSupplier);
-		setPort(JMX_LOCAL_PORT, jvmOptions, portSupplier);
-		setPort(JMX_REMOTE_PORT, jvmOptions, portSupplier);
-		setPort(JMX_REMOTE_RMI_PORT, jvmOptions, portSupplier);
+		setPort(NATIVE_TRANSPORT_PORT, systemProperties, portSupplier);
+		setPort(RPC_PORT, systemProperties, portSupplier);
+		setPort(STORAGE_PORT, systemProperties, portSupplier);
+		setPort(SSL_STORAGE_PORT, systemProperties, portSupplier);
+		setPort(JMX_LOCAL_PORT, systemProperties, portSupplier);
+		setPort(JMX_REMOTE_PORT, systemProperties, portSupplier);
+		setPort(JMX_REMOTE_RMI_PORT, systemProperties, portSupplier);
 
-		for (Map.Entry<String, String> entry : jvmOptions.entrySet()) {
+		for (Map.Entry<String, String> entry : systemProperties.entrySet()) {
 			String name = entry.getKey();
 			String value = entry.getValue();
 			if (value == null) {
-				result.add(name);
+				parameters.add(name);
 			}
 			else {
-				result.add(name + PROPERTY_SEPARATOR + value);
+				parameters.add(name + PROPERTY_SEPARATOR + value);
 			}
 		}
-		return result;
+		parameters.addAll(jvmOptions.getOptions());
+		return Collections.unmodifiableList(parameters);
 	}
 
-	private static void addOption(String name, @Nullable Object value, Map<String, String> jvmOptions) {
+	private static void addProperty(String name, @Nullable Object value, Map<String, String> jvmOptions) {
 		if (value != null) {
 			jvmOptions.put(name, value.toString());
 		}

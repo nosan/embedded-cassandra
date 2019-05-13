@@ -32,22 +32,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JvmParametersTests {
 
 	@Test
-	void randomizePorts() {
+	void getParameters() {
 		List<String> options = new ArrayList<>();
+		options.add("-Dcom.sun.management.jmxremote.port=0");
+		options.add("-Dcassandra.jmx.remote.port=0");
+		options.add("-Dcassandra.jmx.local.port=0");
 		options.add("-Dcassandra.rpc_port=0");
 		options.add("-Dcassandra.storage_port=0");
 		options.add("-Dcassandra.ssl_storage_port=0");
-		options.add("-Dcassandra.jmx.remote.port=0");
-		options.add("-Dcom.sun.management.jmxremote.port=0");
-		JvmOptions jvmOptions = new JvmOptions(options);
-		JvmParameters jvmParameters = new JvmParameters(jvmOptions, new Ports(0, 0, 0, 0, 0),
+		options.add("-Dcassandra.start_rpc");
+		options.add("-Dcassandra.start_native_transport=true");
+		options.add("-X512m");
+		JvmParameters jvmParameters = new JvmParameters(new JvmOptions(options), new Ports(0, null, null, null, null),
 				new RandomPortSupplier(InetAddress::getLoopbackAddress));
-		assertThat(toString(jvmParameters)).doesNotContain("=0");
-		assertThat(toString(jvmParameters)).isNotEqualTo(toString(jvmParameters));
+		assertThat(toString(jvmParameters)).matches("-Dcom.sun.management.jmxremote.port=\\d{4,5}"
+				+ " -Dcassandra.jmx.remote.port=\\d{4,5}"
+				+ " -Dcassandra.jmx.local.port=\\d{4,5}"
+				+ " -Dcassandra.rpc_port=\\d{4,5}"
+				+ " -Dcassandra.storage_port=\\d{4,5} -Dcassandra.ssl_storage_port=\\d{4,5}"
+				+ " -Dcassandra.start_rpc"
+				+ " -Dcassandra.start_native_transport=true -Dcassandra.native_transport_port=\\d{4,5} -X512m");
 	}
 
 	private String toString(JvmParameters jvmParameters) {
-		return String.join(" ", jvmParameters.get());
+		return String.join(" ", jvmParameters.getParameters());
 	}
 
 }

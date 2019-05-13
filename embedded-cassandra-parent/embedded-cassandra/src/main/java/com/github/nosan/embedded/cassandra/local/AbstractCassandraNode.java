@@ -113,7 +113,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		if (javaHome != null) {
 			environment.put(JAVA_HOME, javaHome.toString());
 		}
-		List<String> parameters = this.jvmParameters.get();
+		List<String> parameters = this.jvmParameters.getParameters();
 		if (!parameters.isEmpty()) {
 			environment.put(JVM_EXTRA_OPTS, String.join(" ", parameters));
 		}
