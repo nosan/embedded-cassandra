@@ -195,7 +195,7 @@ public class TestCassandra implements Cassandra {
 
 	@Override
 	public String toString() {
-		return String.format("%s [ %s ]", getClass().getSimpleName(), this.cassandra);
+		return String.format("%s %s", getClass().getSimpleName(), getVersion());
 	}
 
 	/**
