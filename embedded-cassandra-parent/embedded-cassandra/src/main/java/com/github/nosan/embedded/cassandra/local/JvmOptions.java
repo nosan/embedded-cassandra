@@ -16,55 +16,31 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
- * {@link Cassandra} native JVM system parameters.
+ * {@link Cassandra} JVM properties.
  *
  * @author Dmytro Nosan
  * @since 2.0.0
  */
-class JvmOptions implements Supplier<List<String>> {
-
-	private static final String JMX_LOCAL_PORT = "-Dcassandra.jmx.local.port";
-
-	private static final String JMX_REMOTE_PORT = "-Dcassandra.jmx.remote.port";
-
-	private static final String JMX_REMOTE_RMI_PORT = "-Dcom.sun.management.jmxremote.port";
-
-	private static final String STORAGE_PORT = "-Dcassandra.storage_port";
-
-	private static final String SSL_STORAGE_PORT = "-Dcassandra.ssl_storage_port";
-
-	private static final String NATIVE_TRANSPORT_PORT = "-Dcassandra.native_transport_port";
-
-	private static final String RPC_PORT = "-Dcassandra.rpc_port";
+class JvmOptions implements Supplier<Map<String, String>> {
 
 	private static final String PROPERTY_SEPARATOR = "=";
 
 	private static final String PROPERTY_PREFIX = "-D";
 
-	private final Ports ports;
+	private final Map<String, String> jvmOptions;
 
-	private final List<String> jvmOptions;
-
-	private final Supplier<Integer> portSupplier;
-
-	JvmOptions(List<String> jvmOptions, Ports ports, Supplier<Integer> portSupplier) {
-		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
-		this.ports = ports;
-		this.portSupplier = portSupplier;
+	JvmOptions(List<String> jvmOptions) {
+		this.jvmOptions = Collections.unmodifiableMap(parseJvmOptions(jvmOptions));
 	}
 
 	/**
@@ -73,43 +49,16 @@ class JvmOptions implements Supplier<List<String>> {
 	 * @return {@code JVM} options
 	 */
 	@Override
-	public List<String> get() {
-		List<String> result = new ArrayList<>();
-		Map<String, String> jvmOptions = getJvmOptions(this.ports, this.jvmOptions, this.portSupplier);
-		for (Map.Entry<String, String> entry : jvmOptions.entrySet()) {
-			String name = entry.getKey();
-			String value = entry.getValue();
-			if (value == null) {
-				result.add(name);
-			}
-			else {
-				result.add(name + PROPERTY_SEPARATOR + value);
-			}
-		}
-		return result;
+	public Map<String, String> get() {
+		return this.jvmOptions;
 	}
 
-	private static Map<String, String> getJvmOptions(Ports ports, List<String> options,
-			Supplier<Integer> portSupplier) {
-		Map<String, String> jvmOptions = getJvmOptions(options);
-
-		addOption(JMX_LOCAL_PORT, ports.getJmxLocalPort(), jvmOptions);
-		addOption(STORAGE_PORT, ports.getStoragePort(), jvmOptions);
-		addOption(SSL_STORAGE_PORT, ports.getSslStoragePort(), jvmOptions);
-		addOption(NATIVE_TRANSPORT_PORT, ports.getPort(), jvmOptions);
-		addOption(RPC_PORT, ports.getRpcPort(), jvmOptions);
-
-		setPort(NATIVE_TRANSPORT_PORT, jvmOptions, portSupplier);
-		setPort(RPC_PORT, jvmOptions, portSupplier);
-		setPort(STORAGE_PORT, jvmOptions, portSupplier);
-		setPort(SSL_STORAGE_PORT, jvmOptions, portSupplier);
-		setPort(JMX_LOCAL_PORT, jvmOptions, portSupplier);
-		setPort(JMX_REMOTE_PORT, jvmOptions, portSupplier);
-		setPort(JMX_REMOTE_RMI_PORT, jvmOptions, portSupplier);
-		return jvmOptions;
+	@Override
+	public String toString() {
+		return this.jvmOptions.toString();
 	}
 
-	private static Map<String, String> getJvmOptions(List<String> jvmOptions) {
+	private static Map<String, String> parseJvmOptions(List<String> jvmOptions) {
 		Map<String, String> result = new LinkedHashMap<>();
 		for (String option : jvmOptions) {
 			String trimmed = option.trim();
@@ -124,27 +73,6 @@ class JvmOptions implements Supplier<List<String>> {
 			}
 		}
 		return result;
-	}
-
-	private static void addOption(String name, @Nullable Object value, Map<String, String> jvmOptions) {
-		if (value != null) {
-			jvmOptions.put(name, value.toString());
-		}
-	}
-
-	private static void setPort(String name, Map<String, String> jvmOptions, Supplier<Integer> portSupplier) {
-		Integer port = getInteger(name, jvmOptions).orElse(null);
-		if (port != null && port == 0) {
-			jvmOptions.put(name, Integer.toString(portSupplier.get()));
-		}
-	}
-
-	private static Optional<Integer> getInteger(String name, Map<String, String> source) {
-		return getString(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
-	}
-
-	private static Optional<String> getString(String name, Map<String, String> source) {
-		return Optional.ofNullable(source.get(name)).map(Objects::toString);
 	}
 
 }

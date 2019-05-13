@@ -86,7 +86,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	final ThreadFactory threadFactory = new DefaultThreadFactory(
 			String.format("cassandra-%d-db", counter.incrementAndGet()));
 
-	private final JvmOptions jvmOptions;
+	private final JvmParameters jvmParameters;
 
 	@Nullable
 	private final Path javaHome;
@@ -97,11 +97,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Nullable
 	private volatile ProcessId processId;
 
-	AbstractCassandraNode(Path workingDirectory, Version version, @Nullable Path javaHome, JvmOptions jvmOptions) {
+	AbstractCassandraNode(Path workingDirectory, Version version, @Nullable Path javaHome,
+			JvmParameters jvmParameters) {
 		this.version = version;
 		this.workingDirectory = workingDirectory;
 		this.javaHome = javaHome;
-		this.jvmOptions = jvmOptions;
+		this.jvmParameters = jvmParameters;
 	}
 
 	@Override
@@ -112,9 +113,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		if (javaHome != null) {
 			environment.put(JAVA_HOME, javaHome.toString());
 		}
-		List<String> jvmOptions = this.jvmOptions.get();
-		if (!jvmOptions.isEmpty()) {
-			environment.put(JVM_EXTRA_OPTS, String.join(" ", jvmOptions));
+		List<String> parameters = this.jvmParameters.get();
+		if (!parameters.isEmpty()) {
+			environment.put(JVM_EXTRA_OPTS, String.join(" ", parameters));
 		}
 		ProcessId processId = start(environment);
 		this.processId = processId;

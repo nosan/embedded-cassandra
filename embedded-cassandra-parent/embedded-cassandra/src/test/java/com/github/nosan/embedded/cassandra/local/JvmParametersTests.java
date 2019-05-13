@@ -16,32 +16,38 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link JvmOptions}.
+ * Tests for {@link JvmParameters}.
  *
  * @author Dmytro Nosan
  */
-class JvmOptionsTests {
+class JvmParametersTests {
 
 	@Test
-	void parseJvmOptions() {
+	void randomizePorts() {
 		List<String> options = new ArrayList<>();
+		options.add("-Dcassandra.rpc_port=0");
+		options.add("-Dcassandra.storage_port=0");
+		options.add("-Dcassandra.ssl_storage_port=0");
 		options.add("-Dcassandra.jmx.remote.port=0");
-		options.add("-Dcassandra.start_rpc=");
-		options.add("-Dcassandra.start_native_transport=true");
-		options.add("-X512m");
-		Map<String, String> jvmOptions = new JvmOptions(options).get();
-		assertThat(jvmOptions).containsEntry("-Dcassandra.jmx.remote.port", "0");
-		assertThat(jvmOptions).containsEntry("-X512m", null);
-		assertThat(jvmOptions).containsEntry("-Dcassandra.start_rpc", "");
+		options.add("-Dcom.sun.management.jmxremote.port=0");
+		JvmOptions jvmOptions = new JvmOptions(options);
+		JvmParameters jvmParameters = new JvmParameters(jvmOptions, new Ports(0, 0, 0, 0, 0),
+				new RandomPortSupplier(InetAddress::getLoopbackAddress));
+		assertThat(toString(jvmParameters)).doesNotContain("=0");
+		assertThat(toString(jvmParameters)).isNotEqualTo(toString(jvmParameters));
+	}
+
+	private String toString(JvmParameters jvmParameters) {
+		return String.join(" ", jvmParameters.get());
 	}
 
 }
