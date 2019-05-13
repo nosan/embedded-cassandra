@@ -25,6 +25,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,6 +47,10 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
+import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
+import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -181,6 +186,32 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
+	void shouldStartOnSsl() throws URISyntaxException {
+		Path keystoreFile = Paths.get(getClass().getResource("/cert/keystore.node0").toURI());
+		Path truststoreFile = Paths.get(getClass().getResource("/cert/truststore.node0").toURI());
+		this.factory.setConfigurationFile(getClass().getResource("/cassandra-ssl.yaml"));
+		this.factory.getWorkingDirectoryCustomizers().add((workDir, version) -> {
+			Files.copy(keystoreFile, workDir.resolve("conf").resolve("keystore.node0"));
+			Files.copy(truststoreFile, workDir.resolve("conf").resolve("truststore.node0"));
+		});
+		CassandraRunner runner = new CassandraRunner(this.factory);
+		runner.run(assertCreateKeyspace(new CqlSessionFactory() {
+
+			@Override
+			protected DriverConfigLoader buildDriverConfigLoader(ProgrammaticDriverConfigLoaderBuilder builder) {
+				return builder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, false)
+						.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class)
+						.withString(DefaultDriverOption.SSL_KEYSTORE_PATH, keystoreFile.toString())
+						.withString(DefaultDriverOption.SSL_TRUSTSTORE_PATH, truststoreFile.toString())
+						.withString(DefaultDriverOption.SSL_KEYSTORE_PASSWORD, "cassandra")
+						.withString(DefaultDriverOption.SSL_TRUSTSTORE_PASSWORD, "cassandra")
+						.build();
+			}
+
+		}));
+	}
+
+	@Test
 	void shouldStartStopOnlyOnce() {
 		Cassandra cassandra = this.factory.create();
 		assertThat(cassandra.getState()).isEqualTo(Cassandra.State.NEW);
@@ -263,12 +294,21 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	private static Consumer<Cassandra> assertDeleteKeyspace() {
-		return new CqlAssert("DROP KEYSPACE test");
+		return assertDeleteKeyspace(new CqlSessionFactory());
 	}
 
 	private static Consumer<Cassandra> assertCreateKeyspace() {
+		return assertCreateKeyspace(new CqlSessionFactory());
+	}
+
+	private static Consumer<Cassandra> assertDeleteKeyspace(CqlSessionFactory sessionFactory) {
+		return new CqlAssert("DROP KEYSPACE test", sessionFactory);
+	}
+
+	private static Consumer<Cassandra> assertCreateKeyspace(CqlSessionFactory sessionFactory) {
 		return new CqlAssert(
-				"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
+				"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}",
+				sessionFactory);
 	}
 
 	private static String getInterface(boolean ipv6) throws SocketException {
@@ -302,13 +342,16 @@ abstract class AbstractLocalCassandraTests {
 
 		private final String statement;
 
-		CqlAssert(String statement) {
+		private final CqlSessionFactory sessionFactory;
+
+		CqlAssert(String statement, CqlSessionFactory sessionFactory) {
 			this.statement = statement;
+			this.sessionFactory = sessionFactory;
 		}
 
 		@Override
 		public void accept(Cassandra cassandra) {
-			try (CqlSession session = new CqlSessionFactory().create(cassandra.getSettings())) {
+			try (CqlSession session = this.sessionFactory.create(cassandra.getSettings())) {
 				assertThat(session.execute(this.statement).wasApplied())
 						.describedAs("Statement '%s' is not applied", this.statement).isTrue();
 			}

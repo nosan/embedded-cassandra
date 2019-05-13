@@ -54,7 +54,8 @@ public class ClusterFactory {
 					.withSocketOptions(socketOptions)
 					.withoutJMXReporting()
 					.withoutMetrics();
-			return Objects.requireNonNull(build(builder), "Cluster must not be null");
+			Cluster cluster = buildCluster(builder);
+			return Objects.requireNonNull(cluster, "Cluster must not be null");
 		}
 		throw new IllegalStateException(String.format("Cluster can not be created from %s", settings));
 
@@ -67,7 +68,7 @@ public class ClusterFactory {
 	 * @return a cluster
 	 * @since 2.0.1
 	 */
-	protected Cluster build(Cluster.Builder builder) {
+	protected Cluster buildCluster(Cluster.Builder builder) {
 		return builder.build();
 	}
 

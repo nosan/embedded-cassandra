@@ -24,6 +24,7 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
+import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
 import com.datastax.oss.driver.api.core.context.DriverContext;
 import com.datastax.oss.driver.api.core.metadata.EndPoint;
 
@@ -52,20 +53,20 @@ public class CqlSessionFactory {
 	public final CqlSession create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
 		if (settings.address().isPresent() && (settings.port().isPresent() || settings.sslPort().isPresent())) {
-			CqlSessionBuilder builder = CqlSession.builder()
-					.addContactPoint(new InetSocketAddress(settings.getAddress(),
-							settings.port().orElseGet(settings::getSslPort)))
+			DriverConfigLoader driverConfigLoader = buildDriverConfigLoader(DriverConfigLoader.programmaticBuilder()
+					.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)
+					.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, PASSWORD)
+					.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class)
+					.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
+					.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3)));
+			Objects.requireNonNull(driverConfigLoader, "Driver Config must not be null");
+			CqlSession cqlSession = buildCqlSession(CqlSession.builder().addContactPoint(
+					new InetSocketAddress(settings.getAddress(), settings.port().orElseGet(settings::getSslPort)))
 					.withLocalDatacenter(DATACENTER)
-					.withConfigLoader(DriverConfigLoader.programmaticBuilder()
-							.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)
-							.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, PASSWORD)
-							.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class)
-							.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
-							.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3))
-							.build());
-			return Objects.requireNonNull(build(builder), "CqlSession must not be null");
+					.withConfigLoader(driverConfigLoader));
+			return Objects.requireNonNull(cqlSession, "Cql Session must not be null");
 		}
-		throw new IllegalStateException(String.format("CqlSession can not be created from %s", settings));
+		throw new IllegalStateException(String.format("Cql Session can not be created from %s", settings));
 	}
 
 	/**
@@ -75,13 +76,24 @@ public class CqlSessionFactory {
 	 * @return a session
 	 * @since 2.0.1
 	 */
-	protected CqlSession build(CqlSessionBuilder builder) {
+	protected CqlSession buildCqlSession(CqlSessionBuilder builder) {
+		return builder.build();
+	}
+
+	/**
+	 * Creates a new configured {@link DriverConfigLoader}.
+	 *
+	 * @param builder a driver builder
+	 * @return a driver config
+	 * @since 2.0.1
+	 */
+	protected DriverConfigLoader buildDriverConfigLoader(ProgrammaticDriverConfigLoaderBuilder builder) {
 		return builder.build();
 	}
 
 	/**
 	 * A simple authentication provider that extends
-	 * {@link com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider} and disables the log warning message.
+	 * {@link com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider} and disables log warning message.
 	 */
 	public static class PlainTextAuthProvider extends com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider {
 
