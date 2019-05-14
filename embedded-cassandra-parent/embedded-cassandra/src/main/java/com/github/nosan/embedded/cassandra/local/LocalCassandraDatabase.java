@@ -57,22 +57,22 @@ class LocalCassandraDatabase implements CassandraDatabase {
 	@Override
 	public synchronized void start() throws IOException, InterruptedException {
 		initialize();
-		log.info("Start Apache Cassandra '{}'", getVersion());
+		Version version = getVersion();
+		log.info("Start Apache Cassandra '{}'", version);
 		long start = System.currentTimeMillis();
 		this.node.start();
 		long elapsed = System.currentTimeMillis() - start;
-		log.info("Apache Cassandra '{}' is started ({} ms)", getVersion(), elapsed);
+		log.info("Apache Cassandra '{}' is started ({} ms)", version, elapsed);
 	}
 
 	@Override
 	public synchronized void stop() throws IOException, InterruptedException {
-		if (this.node.isAlive()) {
-			long start = System.currentTimeMillis();
-			log.info("Stop Apache Cassandra '{}'", getVersion());
-			this.node.stop();
-			long elapsed = System.currentTimeMillis() - start;
-			log.info("Apache Cassandra '{}' is stopped ({} ms)", getVersion(), elapsed);
-		}
+		long start = System.currentTimeMillis();
+		Version version = getVersion();
+		log.info("Stop Apache Cassandra '{}'", version);
+		this.node.stop();
+		long elapsed = System.currentTimeMillis() - start;
+		log.info("Apache Cassandra '{}' is stopped ({} ms)", version, elapsed);
 		delete();
 	}
 
@@ -87,13 +87,14 @@ class LocalCassandraDatabase implements CassandraDatabase {
 	}
 
 	private void initialize() throws IOException {
-		log.info("Initialize Apache Cassandra '{}'. It takes a while...", getVersion());
+		Version version = getVersion();
+		log.info("Initialize Apache Cassandra '{}'. It takes a while...", version);
 		long start = System.currentTimeMillis();
 		for (WorkingDirectoryCustomizer customizer : this.workingDirectoryCustomizers) {
-			customizer.customize(this.workingDirectory, getVersion());
+			customizer.customize(this.workingDirectory, version);
 		}
 		long elapsed = System.currentTimeMillis() - start;
-		log.info("Apache Cassandra '{}' is initialized ({} ms)", getVersion(), elapsed);
+		log.info("Apache Cassandra '{}' is initialized ({} ms)", version, elapsed);
 	}
 
 	private void delete() throws IOException {

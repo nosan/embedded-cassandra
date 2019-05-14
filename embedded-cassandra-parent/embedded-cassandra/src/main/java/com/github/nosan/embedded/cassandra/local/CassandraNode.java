@@ -60,12 +60,4 @@ interface CassandraNode {
 	 */
 	Version getVersion();
 
-	/**
-	 * Tests whether the node is alive.
-	 *
-	 * @return {@code true} if the node is alive, otherwise {@code false}
-	 * @since 2.0.1
-	 */
-	boolean isAlive();
-
 }

@@ -161,12 +161,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		return this.version;
 	}
 
-	@Override
-	public boolean isAlive() {
-		ProcessId processId = this.processId;
-		return processId != null && processId.getProcess().isAlive();
-	}
-
 	/**
 	 * Starts the Apache Cassandra.
 	 *
