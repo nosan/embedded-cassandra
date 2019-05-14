@@ -108,6 +108,7 @@ class RemoteArtifact implements Artifact {
 		long size = urlConnection.getContentLengthLong();
 		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
 		Path file = Files.createTempFile(null, String.format("-%s", getFileName(url)));
+		file.toFile().deleteOnExit();
 		try (InputStream urlInputStream = urlConnection.getInputStream()) {
 			log.info("Downloading Apache Cassandra '{}' from '{}'.", this.version, urlConnection.getURL());
 			long start = System.currentTimeMillis();
