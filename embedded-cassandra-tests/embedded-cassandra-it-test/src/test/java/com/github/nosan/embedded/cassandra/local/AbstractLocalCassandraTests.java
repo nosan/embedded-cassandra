@@ -111,7 +111,7 @@ abstract class AbstractLocalCassandraTests {
 	void shouldInterruptStartup() {
 		Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
 			Cassandra cassandra = this.factory.create();
-			DefaultThreadFactory factory = new DefaultThreadFactory("interrupt");
+			DefaultThreadFactory factory = new DefaultThreadFactory("test");
 			Thread thread = factory.newThread(cassandra::start);
 			thread.start();
 			Thread.sleep(2000);
@@ -245,7 +245,7 @@ abstract class AbstractLocalCassandraTests {
 	void shouldStartMoreThanOneCassandra() throws Throwable {
 		this.factory.setJmxLocalPort(0);
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-random.yaml"));
-		ExecutorService executorService = Executors.newFixedThreadPool(2, new DefaultThreadFactory("pool"));
+		ExecutorService executorService = Executors.newFixedThreadPool(2, new DefaultThreadFactory("test"));
 		List<Future<?>> futures = new ArrayList<>();
 		try {
 			for (int i = 0; i < 2; i++) {
