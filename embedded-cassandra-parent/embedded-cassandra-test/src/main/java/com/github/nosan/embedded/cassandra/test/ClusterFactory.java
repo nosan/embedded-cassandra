@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import java.net.InetAddress;
 import java.util.Objects;
 
 import com.datastax.driver.core.Cluster;
@@ -43,13 +44,15 @@ public class ClusterFactory {
 	 */
 	public final Cluster create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
-		if (settings.address().isPresent() && (settings.port().isPresent() || settings.sslPort().isPresent())) {
+		Integer port = settings.port().orElseGet(() -> settings.sslPort().orElse(null));
+		InetAddress address = settings.address().orElse(null);
+		if (address != null && port != null) {
 			SocketOptions socketOptions = new SocketOptions();
 			socketOptions.setConnectTimeoutMillis(30000);
 			socketOptions.setReadTimeoutMillis(30000);
 			Cluster.Builder builder = Cluster.builder()
-					.addContactPoints(settings.getAddress())
-					.withPort(settings.port().orElseGet(settings::getSslPort))
+					.addContactPoints(address)
+					.withPort(port)
 					.withCredentials(USERNAME, PASSWORD)
 					.withSocketOptions(socketOptions)
 					.withoutJMXReporting()

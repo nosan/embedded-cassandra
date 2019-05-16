@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.Objects;
@@ -52,7 +53,9 @@ public class CqlSessionFactory {
 	 */
 	public final CqlSession create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
-		if (settings.address().isPresent() && (settings.port().isPresent() || settings.sslPort().isPresent())) {
+		Integer port = settings.port().orElseGet(() -> settings.sslPort().orElse(null));
+		InetAddress address = settings.address().orElse(null);
+		if (address != null && port != null) {
 			DriverConfigLoader driverConfigLoader = buildDriverConfigLoader(DriverConfigLoader.programmaticBuilder()
 					.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)
 					.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, PASSWORD)
@@ -61,7 +64,7 @@ public class CqlSessionFactory {
 					.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3)));
 			Objects.requireNonNull(driverConfigLoader, "Driver Config must not be null");
 			CqlSession cqlSession = buildCqlSession(CqlSession.builder().addContactPoint(
-					new InetSocketAddress(settings.getAddress(), settings.port().orElseGet(settings::getSslPort)))
+					new InetSocketAddress(address, port))
 					.withLocalDatacenter(DATACENTER)
 					.withConfigLoader(driverConfigLoader));
 			return Objects.requireNonNull(cqlSession, "Cql Session must not be null");

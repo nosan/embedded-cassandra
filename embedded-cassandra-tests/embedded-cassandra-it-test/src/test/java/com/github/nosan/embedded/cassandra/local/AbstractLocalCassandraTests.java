@@ -133,7 +133,7 @@ abstract class AbstractLocalCassandraTests {
 		CassandraRunner runner = new CassandraRunner(factory);
 		runner.run(assertCreateKeyspace().andThen(cassandra -> {
 			Settings settings = cassandra.getSettings();
-			assertThat(SocketUtils.connect(settings.getAddress(), 9155));
+			assertThat(SocketUtils.connect(settings.address().orElseGet(SocketUtils::getLocalhost), 9155));
 		}));
 	}
 

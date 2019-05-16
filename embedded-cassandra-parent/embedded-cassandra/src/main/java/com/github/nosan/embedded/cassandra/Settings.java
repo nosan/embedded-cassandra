@@ -38,6 +38,50 @@ public interface Settings {
 	/**
 	 * The address to listen for the clients on.
 	 *
+	 * @return the address, or {@code empty} if both native and RPC transports are disabled
+	 * @see #getAddress()
+	 * @since 2.0.1
+	 */
+	default Optional<InetAddress> address() {
+		throw new UnsupportedOperationException("Optional address is not supported");
+	}
+
+	/**
+	 * The port for client connections.
+	 *
+	 * @return the port, or {@code empty} if transport is not started.
+	 * @see #getPort()
+	 * @since 2.0.1
+	 */
+	default Optional<Integer> port() {
+		throw new UnsupportedOperationException("Optional port is not supported");
+	}
+
+	/**
+	 * SSL port for client connections.
+	 *
+	 * @return SSL port, or {@code empty} if SSL transport is not started.
+	 * @see #getSslPort()
+	 * @since 2.0.1
+	 */
+	default Optional<Integer> sslPort() {
+		throw new UnsupportedOperationException("Optional SSL port is not supported");
+	}
+
+	/**
+	 * RPC port for client connections.
+	 *
+	 * @return RPC port, or {@code empty} if RPC transport is not started.
+	 * @see #getRpcPort()
+	 * @since 2.0.1
+	 */
+	default Optional<Integer> rpcPort() {
+		throw new UnsupportedOperationException("Optional RPC port is not supported");
+	}
+
+	/**
+	 * The address to listen for the clients on.
+	 *
 	 * @return the address
 	 * @throws NoSuchElementException if address is not present
 	 * @see #address()
@@ -77,50 +121,6 @@ public interface Settings {
 	 */
 	default int getRpcPort() throws NoSuchElementException {
 		return rpcPort().orElseThrow(() -> new NoSuchElementException("RPC port is not present"));
-	}
-
-	/**
-	 * The address to listen for the clients on.
-	 *
-	 * @return the address, or {@code empty}
-	 * @see #getAddress()
-	 * @since 2.0.1
-	 */
-	default Optional<InetAddress> address() {
-		throw new UnsupportedOperationException("Optional address is not supported");
-	}
-
-	/**
-	 * The port for client connections.
-	 *
-	 * @return the port, or {@code empty}
-	 * @see #getPort()
-	 * @since 2.0.1
-	 */
-	default Optional<Integer> port() {
-		throw new UnsupportedOperationException("Optional port is not supported");
-	}
-
-	/**
-	 * SSL port for client connections.
-	 *
-	 * @return SSL port, or {@code empty}
-	 * @see #getSslPort()
-	 * @since 2.0.1
-	 */
-	default Optional<Integer> sslPort() {
-		throw new UnsupportedOperationException("Optional SSL port is not supported");
-	}
-
-	/**
-	 * RPC port for client connections.
-	 *
-	 * @return RPC port, or {@code empty}
-	 * @see #getRpcPort()
-	 * @since 2.0.1
-	 */
-	default Optional<Integer> rpcPort() {
-		throw new UnsupportedOperationException("Optional RPC port is not supported");
 	}
 
 }
