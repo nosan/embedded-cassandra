@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Deque;
@@ -259,17 +260,20 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 		boolean transportStarted = settings.transportStarted().orElse(false);
 		boolean rpcTransportStarted = settings.rpcTransportStarted().orElse(false);
-		if (transportStarted && settings.port().isPresent()
-				&& !SocketUtils.connect(settings.getAddress(), settings.getPort())) {
+		Optional<InetAddress> address = settings.address();
+		Optional<Integer> port = settings.port();
+		if (transportStarted && port.isPresent() && address.isPresent()
+				&& (port.get() != 0 && !SocketUtils.connect(address.get(), port.get()))) {
 			return false;
 		}
-		if (transportStarted && settings.sslPort().isPresent()
-				&& !SocketUtils.connect(settings.getAddress(), settings.getSslPort())) {
+		Optional<Integer> sslPort = settings.sslPort();
+		if (transportStarted && sslPort.isPresent() && address.isPresent()
+				&& (sslPort.get() != 0 && !SocketUtils.connect(address.get(), sslPort.get()))) {
 			return false;
 		}
-		return !rpcTransportStarted || !settings.rpcPort().isPresent()
-				|| SocketUtils.connect(settings.getAddress(), settings.getRpcPort());
-
+		Optional<Integer> rpcPort = settings.rpcPort();
+		return !rpcTransportStarted || !rpcPort.isPresent() || !address.isPresent()
+				|| (rpcPort.get() == 0 || SocketUtils.connect(address.get(), rpcPort.get()));
 	}
 
 	private void parse(String line, NodeSettings settings) {
