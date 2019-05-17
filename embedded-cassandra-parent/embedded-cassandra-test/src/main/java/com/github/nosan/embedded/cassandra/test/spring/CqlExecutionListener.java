@@ -74,31 +74,42 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	@Override
+	public void beforeTestExecution(TestContext testContext) {
+		executeScripts(testContext, ExecutionPhase.BEFORE_TEST_EXECUTION);
+	}
+
+	@Override
+	public void afterTestExecution(TestContext testContext) {
+		executeScripts(testContext, ExecutionPhase.AFTER_TEST_EXECUTION);
+	}
+
+	@Override
 	public void afterTestMethod(TestContext testContext) {
 		executeScripts(testContext, ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
-	private void executeScripts(TestContext testContext, ExecutionPhase executionPhase) {
+	private void executeScripts(TestContext testContext, ExecutionPhase phase) {
 		Set<Cql> methodAnnotations = AnnotatedElementUtils
 				.findMergedRepeatableAnnotations(testContext.getTestMethod(), Cql.class, CqlGroup.class);
 		Set<Cql> classAnnotations = AnnotatedElementUtils
 				.findMergedRepeatableAnnotations(testContext.getTestClass(), Cql.class, CqlGroup.class);
 
-		if (executionPhase == ExecutionPhase.BEFORE_TEST_METHOD) {
-			executeScripts(classAnnotations, executionPhase, testContext);
-			executeScripts(methodAnnotations, executionPhase, testContext);
+		if (phase == ExecutionPhase.BEFORE_TEST_METHOD || phase == ExecutionPhase.BEFORE_TEST_EXECUTION) {
+			executeScripts(classAnnotations, phase, testContext);
+			executeScripts(methodAnnotations, phase, testContext);
 		}
-		else if (executionPhase == ExecutionPhase.AFTER_TEST_METHOD) {
-			executeScripts(methodAnnotations, executionPhase, testContext);
-			executeScripts(classAnnotations, executionPhase, testContext);
+		else if (phase == ExecutionPhase.AFTER_TEST_METHOD || phase == ExecutionPhase.AFTER_TEST_EXECUTION) {
+			executeScripts(methodAnnotations, phase, testContext);
+			executeScripts(classAnnotations, phase, testContext);
 		}
 	}
 
-	private void executeScripts(Set<Cql> cqlAnnotations, ExecutionPhase executionPhase, TestContext testContext) {
+	private void executeScripts(Set<Cql> cqlAnnotations, ExecutionPhase phase, TestContext testContext) {
 		ApplicationContext applicationContext = testContext.getApplicationContext();
 		Environment environment = applicationContext.getEnvironment();
 		for (Cql cql : cqlAnnotations) {
-			if (executionPhase == cql.executionPhase()) {
+			List<ExecutionPhase> phases = Arrays.asList(cql.executionPhase());
+			if (phases.contains(phase)) {
 				CqlScript[] scripts = getScripts(cql, testContext.getTestClass(), applicationContext);
 				if (scripts.length > 0) {
 					String name = environment.resolvePlaceholders(cql.session());

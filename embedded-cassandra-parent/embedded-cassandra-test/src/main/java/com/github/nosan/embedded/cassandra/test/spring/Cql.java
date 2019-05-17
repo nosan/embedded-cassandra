@@ -28,6 +28,8 @@ import com.datastax.driver.core.Session;
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestExecutionListener;
 
 /**
  * {@code @Cql} is used to annotate a test method to configure CQL {@link #scripts} and {@link #statements} to be
@@ -97,7 +99,7 @@ public @interface Cql {
 	 *
 	 * @return Execution phase.
 	 */
-	ExecutionPhase executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
+	ExecutionPhase[] executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
 
 	/**
 	 * The bean name of the {@code Session} against which the scripts should be executed.
@@ -123,21 +125,42 @@ public @interface Cql {
 	String session() default "";
 
 	/**
-	 * Enumeration of <em>phases</em> that dictate when CQL scripts are executed.
+	 * Enumeration of <em>phases</em> that dictate when {@code CQL} scripts are executed.
 	 */
 	enum ExecutionPhase {
 
 		/**
-		 * The configured CQL scripts and statements will be executed
-		 * <em>before</em> the corresponding test method.
+		 * The configured {@code CQL} scripts and statements will be executed
+		 * <em>before</em> the test method.
+		 *
+		 * @see TestExecutionListener#beforeTestMethod(TestContext)
 		 */
 		BEFORE_TEST_METHOD,
 
 		/**
-		 * The configured CQL scripts and statements will be executed
-		 * <em>after</em> the corresponding test method.
+		 * The configured {@code CQL} scripts and statements will be executed
+		 * <em>before</em> the test execution.
+		 *
+		 * @see TestExecutionListener#beforeTestExecution(TestContext)
+		 * @since 2.0.2
 		 */
-		AFTER_TEST_METHOD
+		BEFORE_TEST_EXECUTION,
+
+		/**
+		 * The configured {@code CQL} scripts and statements will be executed
+		 * <em>after</em> the test execution.
+		 *
+		 * @see TestExecutionListener#afterTestExecution(TestContext)
+		 * @since 2.0.2
+		 */
+		AFTER_TEST_EXECUTION,
+		/**
+		 * The configured {@code CQL} scripts and statements will be executed
+		 * <em>after</em> the test method.
+		 *
+		 * @see TestExecutionListener#afterTestMethod(TestContext)
+		 */
+		AFTER_TEST_METHOD,
 
 	}
 
