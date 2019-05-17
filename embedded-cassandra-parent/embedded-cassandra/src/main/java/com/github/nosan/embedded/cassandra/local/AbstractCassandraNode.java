@@ -277,12 +277,17 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	private void parse(String line, NodeSettings settings) {
-		onMatch(new Pattern[]{TRANSPORT_START_PATTERN}, line, matcher ->
-				settings.startTransport(SocketUtils.getAddress(matcher.group(1)),
-						SocketUtils.getPort(matcher.group(2)), line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED)));
-		onMatch(new Pattern[]{RPC_TRANSPORT_START_PATTERN}, line, matcher ->
-				settings.startRpcTransport(SocketUtils.getAddress(matcher.group(1)),
-						SocketUtils.getPort(matcher.group(2))));
+		onMatch(new Pattern[]{TRANSPORT_START_PATTERN}, line, matcher -> {
+			InetAddress address = SocketUtils.getAddress(matcher.group(1));
+			int port = SocketUtils.getPort(matcher.group(2));
+			boolean ssl = line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED);
+			settings.startTransport(address, port, ssl);
+		});
+		onMatch(new Pattern[]{RPC_TRANSPORT_START_PATTERN}, line, matcher -> {
+			InetAddress address = SocketUtils.getAddress(matcher.group(1));
+			int port = SocketUtils.getPort(matcher.group(2));
+			settings.startRpcTransport(address, port);
+		});
 		onMatch(new Pattern[]{TRANSPORT_NOT_START_PATTERN, TRANSPORT_STOP_PATTERN}, line, matcher ->
 				settings.stopTransport());
 		onMatch(new Pattern[]{RPC_TRANSPORT_NOT_START_PATTERN, RPC_TRANSPORT_STOP_PATTERN}, line, matcher ->
