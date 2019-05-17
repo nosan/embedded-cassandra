@@ -33,7 +33,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -56,6 +55,8 @@ class RemoteArtifact implements Artifact {
 	private static final Logger log = LoggerFactory.getLogger(RemoteArtifact.class);
 
 	private static final AtomicLong counter = new AtomicLong();
+
+	private static final int MAX_REDIRECTS = 20;
 
 	private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("progress-%d",
 			counter.incrementAndGet()));
@@ -103,29 +104,27 @@ class RemoteArtifact implements Artifact {
 	}
 
 	private Path getFile(URL url) throws IOException {
-		int maxRedirects = 20;
-		URLConnection urlConnection = getUrlConnection(url, maxRedirects, 1);
-		long size = urlConnection.getContentLengthLong();
-		ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
-		Path file = Files.createTempFile(null, String.format("-%s", getFileName(url)));
-		file.toFile().deleteOnExit();
-		try (InputStream urlInputStream = urlConnection.getInputStream()) {
-			log.info("Downloading Apache Cassandra '{}' from '{}'.", this.version, urlConnection.getURL());
+		URLConnection connection = getUrlConnection(url, MAX_REDIRECTS);
+		try (InputStream stream = connection.getInputStream()) {
+			long expectedSize = connection.getContentLengthLong();
+			Path file = Files.createTempFile(null, String.format("-%s", getFileName(url)));
+			file.toFile().deleteOnExit();
+			FileProgress fileProgress = new FileProgress(file, expectedSize);
+			ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
+			log.info("Downloading Apache Cassandra '{}' from '{}'.", this.version, connection.getURL());
 			long start = System.currentTimeMillis();
-			showProgress(file, size, executorService);
-			Files.copy(urlInputStream, file, StandardCopyOption.REPLACE_EXISTING);
-			long fileSize = Files.size(file);
-			if (fileSize < size) {
-				throw new IOException(String.format("The size '%d' of the file '%s' is not valid."
-						+ " Expected size is '%d'", fileSize, file, size));
+			executor.scheduleAtFixedRate(fileProgress::update, 0, 1, TimeUnit.SECONDS);
+			try {
+				Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
+			}
+			finally {
+				executor.shutdown();
+				fileProgress.update();
 			}
 			long elapsed = System.currentTimeMillis() - start;
 			log.info("Apache Cassandra '{}' is downloaded ({} ms)", this.version, elapsed);
+			return file;
 		}
-		finally {
-			executorService.shutdown();
-		}
-		return file;
 	}
 
 	private String getFileName(URL url) {
@@ -140,23 +139,22 @@ class RemoteArtifact implements Artifact {
 		return fileName;
 	}
 
-	private URLConnection getUrlConnection(URL url, int maxRedirects, int redirectCount) throws IOException {
-		URLConnection connection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
-		connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
-		connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
-		if (connection instanceof HttpURLConnection) {
-			HttpURLConnection httpConnection = (HttpURLConnection) connection;
+	private URLConnection getUrlConnection(URL url, int maxRedirects) throws IOException {
+		URLConnection urlConnection = (this.proxy != null) ? url.openConnection(this.proxy) : url.openConnection();
+		urlConnection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
+		urlConnection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
+		if (urlConnection instanceof HttpURLConnection) {
+			HttpURLConnection httpConnection = (HttpURLConnection) urlConnection;
 			httpConnection.setInstanceFollowRedirects(false);
 			int status = httpConnection.getResponseCode();
 			if (status >= 200 && status < 300) {
 				return httpConnection;
 			}
 			else if (status >= 300 && status <= 307 && status != 306 && status != 304) {
-				if (redirectCount <= maxRedirects) {
+				if (maxRedirects > 0) {
 					String location = httpConnection.getHeaderField("Location");
 					if (StringUtils.hasText(location)) {
-						return getUrlConnection(new URL(httpConnection.getURL(), location), maxRedirects,
-								redirectCount + 1);
+						return getUrlConnection(new URL(httpConnection.getURL(), location), maxRedirects - 1);
 					}
 				}
 				else {
@@ -170,43 +168,56 @@ class RemoteArtifact implements Artifact {
 			return httpConnection;
 		}
 
-		return connection;
+		return urlConnection;
 	}
 
-	private void showProgress(Path file, long size, ScheduledExecutorService executorService) {
-		if (size > 0) {
-			AtomicLong prevPercent = new AtomicLong(0);
-			int minPercentStep = 10;
-			AtomicBoolean logOnlyOnce = new AtomicBoolean(false);
-			executorService.scheduleAtFixedRate(() -> {
-				try {
-					if (Files.exists(file)) {
-						long current = Files.size(file);
-						long percent = Math.max(current * 100, 1) / size;
-						if (percent - prevPercent.get() >= minPercentStep) {
-							prevPercent.set(percent);
-							log.info("Downloaded {} / {}  {}%", formatSize(current), formatSize(size), percent);
-						}
-					}
-				}
-				catch (Exception ex) {
-					if (logOnlyOnce.compareAndSet(false, true)) {
-						log.error(String.format("Can not show progress for a file '%s'", file), ex);
-					}
-				}
-			}, 0, 1, TimeUnit.SECONDS);
+	private static final class FileProgress {
+
+		private static final long MIN_STEP_PERCENT = 10;
+
+		private final Path file;
+
+		private long percent;
+
+		private long expectedSize;
+
+		FileProgress(Path file, long expectedSize) {
+			this.file = file;
+			this.expectedSize = expectedSize;
 		}
-	}
 
-	private String formatSize(long bytes) {
-		if (bytes > 1024) {
-			long kilobytes = bytes / 1024;
-			if (kilobytes > 1024) {
-				return (kilobytes / 1024) + "MB";
+		synchronized void update() {
+			long currentSize = getCurrentSize();
+			long expectedSize = this.expectedSize;
+			if (currentSize > 0 && expectedSize > 0) {
+				long percent = currentSize * 100 / expectedSize;
+				if ((percent - this.percent) >= MIN_STEP_PERCENT) {
+					this.percent = percent;
+					log.info("Downloaded {} / {}  {}%", formatSize(currentSize), formatSize(expectedSize), percent);
+				}
 			}
-			return kilobytes + "KB";
 		}
-		return bytes + "B";
+
+		private long getCurrentSize() {
+			try {
+				return Files.size(this.file);
+			}
+			catch (IOException ex) {
+				return -1;
+			}
+		}
+
+		private String formatSize(long bytes) {
+			if (bytes > 1024) {
+				long kilobytes = bytes / 1024;
+				if (kilobytes > 1024) {
+					return (kilobytes / 1024) + "MB";
+				}
+				return kilobytes + "KB";
+			}
+			return bytes + "B";
+		}
+
 	}
 
 }
