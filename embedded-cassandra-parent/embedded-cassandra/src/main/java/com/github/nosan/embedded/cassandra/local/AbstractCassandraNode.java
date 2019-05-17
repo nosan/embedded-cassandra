@@ -224,9 +224,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 					catch (InterruptedException ex) {
 						Thread.currentThread().interrupt();
 					}
-					int exitValue = process.exitValue();
-					throw new IOException(String.format("Apache Cassandra Node '%s' is not alive. Exit code is '%s'."
-									+ " Please see logs for more details.%n%s", pid, exitValue,
+					throw new IOException(String.format("Apache Cassandra Node '%s' is not alive."
+									+ " Please see logs for more details.%n\t%s", pid,
 							String.join(String.format("%n\t"), lines)));
 				}
 				if (isStarted(settings)) {
