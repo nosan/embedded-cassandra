@@ -70,7 +70,7 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void shouldDownloadArtifactAndShowProgress() throws Exception {
+	void shouldDownloadArtifactProgress() throws Exception {
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
@@ -93,7 +93,7 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void shouldDownloadArtifact() throws Exception {
+	void shouldDownloadArtifactNoProgress() throws Exception {
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
@@ -112,7 +112,7 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void shouldDownloadArtifactRedirection() throws Exception {
+	void shouldDownloadArtifactUsingRedirection() throws Exception {
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
@@ -136,7 +136,7 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void shouldDownloadArtifactMaxRedirection() {
+	void shouldNotDownloadArtifactMaxRedirection() {
 		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
 			exchange.getResponseHeaders()
 					.put("Location", Collections.singletonList("/dist/apache-cassandra-3.1.1.zip"));
@@ -148,7 +148,7 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void shouldDownloadArtifactURLs() throws Exception {
+	void shouldDownloadArtifactFromMultiplyUrls() throws Exception {
 		byte[] content;
 		try (InputStream inputStream = getClass().getResourceAsStream("/apache-cassandra-3.11.3.zip")) {
 			content = IOUtils.toByteArray(inputStream);
@@ -171,24 +171,24 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void shouldNotDownloadInvalidStatus() {
+	void shouldNotDownloadArtifactNotFound() {
 		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> {
-			exchange.sendResponseHeaders(400, 0);
+			exchange.sendResponseHeaders(404, 0);
 			exchange.close();
 		});
 		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
-				.hasStackTraceContaining("HTTP (400 Bad Request) status for URL");
+				.hasStackTraceContaining("HTTP (404 Not Found) status for URL");
 	}
 
 	@Test
-	void urlListEmpty() {
+	void shouldNotDownloadArtifactNoURLs() {
 		this.factory.setUrlFactory(version -> new URL[0]);
 		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
 				.isInstanceOf(IOException.class);
 	}
 
 	@Test
-	void readTimeoutIsExceeded() {
+	void shouldNotDownloadArtifactReadTimeout() {
 		this.httpServer.createContext("/dist/apache-cassandra-3.1.1.zip", exchange -> sleep(600));
 
 		this.factory.setReadTimeout(Duration.ofMillis(200));
@@ -197,7 +197,7 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void connectTimeoutIsExceeded() {
+	void shouldNotDownloadArtifactConnectionTimeout() {
 		this.factory.setUrlFactory(version -> new URL[]{new URL("http://example.com:81/apache-cassandra-3.1.1.zip")});
 		this.factory.setConnectTimeout(Duration.ofSeconds(1));
 
@@ -206,7 +206,7 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void proxyIsInvalid() {
+	void shouldNotDownloadArtifactInvalidProxy() {
 		this.factory.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
 		assertThatThrownBy(() -> this.factory.create(VERSION).getArchive())
 				.hasStackTraceContaining("Connection refused");
@@ -214,7 +214,7 @@ class RemoteArtifactTests {
 	}
 
 	@Test
-	void impossibleDetermineFileName() {
+	void shouldNotDownloadArtifactNoFileName() {
 		this.httpServer.createContext("/", exchange -> exchange.sendResponseHeaders(200, 0));
 		this.factory.setUrlFactory(version -> new URL[]{new URL(String
 				.format("http://%s:%d/", this.httpServer.getAddress().getHostName(),
