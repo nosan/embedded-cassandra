@@ -110,16 +110,15 @@ class RemoteArtifact implements Artifact {
 			Path file = Files.createTempFile(null, String.format("-%s", getFileName(url)));
 			file.toFile().deleteOnExit();
 			FileProgress fileProgress = new FileProgress(file, expectedSize);
-			ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
+			ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(this.threadFactory);
 			log.info("Downloading Apache Cassandra '{}' from '{}'.", this.version, connection.getURL());
 			long start = System.currentTimeMillis();
-			executor.scheduleAtFixedRate(fileProgress::update, 0, 1, TimeUnit.SECONDS);
+			scheduler.scheduleAtFixedRate(fileProgress::update, 0, 1, TimeUnit.SECONDS);
 			try {
 				Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
 			}
 			finally {
-				executor.shutdown();
-				fileProgress.update();
+				scheduler.shutdown();
 			}
 			long elapsed = System.currentTimeMillis() - start;
 			log.info("Apache Cassandra '{}' is downloaded ({} ms)", this.version, elapsed);
@@ -177,7 +176,7 @@ class RemoteArtifact implements Artifact {
 
 		private final Path file;
 
-		private long percent;
+		private long lastPercent;
 
 		private long expectedSize;
 
@@ -186,14 +185,15 @@ class RemoteArtifact implements Artifact {
 			this.expectedSize = expectedSize;
 		}
 
-		synchronized void update() {
+		void update() {
 			long currentSize = getCurrentSize();
 			long expectedSize = this.expectedSize;
 			if (currentSize > 0 && expectedSize > 0) {
-				long percent = currentSize * 100 / expectedSize;
-				if ((percent - this.percent) >= MIN_STEP_PERCENT) {
-					this.percent = percent;
-					log.info("Downloaded {} / {}  {}%", formatSize(currentSize), formatSize(expectedSize), percent);
+				long currentPercent = currentSize * 100 / expectedSize;
+				if ((currentPercent - this.lastPercent) >= MIN_STEP_PERCENT) {
+					this.lastPercent = currentPercent;
+					log.info("Downloaded {} / {}  {}%", getFormatSize(currentSize), getFormatSize(expectedSize),
+							currentPercent);
 				}
 			}
 		}
@@ -207,7 +207,7 @@ class RemoteArtifact implements Artifact {
 			}
 		}
 
-		private String formatSize(long bytes) {
+		private String getFormatSize(long bytes) {
 			if (bytes > 1024) {
 				long kilobytes = bytes / 1024;
 				if (kilobytes > 1024) {
