@@ -96,7 +96,6 @@ class RemoteArtifact implements Artifact {
 				throw ex;
 			}
 			catch (IOException ex) {
-				log.warn(ex.getMessage());
 				exceptions.addSuppressed(ex);
 			}
 		}
