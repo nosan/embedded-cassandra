@@ -30,8 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
-import com.github.nosan.embedded.cassandra.test.ClusterConnection;
-import com.github.nosan.embedded.cassandra.test.ClusterFactory;
+import com.github.nosan.embedded.cassandra.test.ClusterConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
@@ -77,7 +76,7 @@ class EmbeddedCassandraCustomizerTests {
 
 		@Bean
 		public ConnectionFactory connectionFactory() {
-			return settings -> new ClusterConnection(new ClusterFactory().create(settings));
+			return new ClusterConnectionFactory();
 		}
 
 		@Bean
