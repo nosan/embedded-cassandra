@@ -29,6 +29,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -62,12 +63,12 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  *    }
  * }
  * </pre>
- * Also, it is possible to define you own {@link CassandraFactory}, {@link TestCassandraFactory}  bean(s) to control
+ * Also, it is possible to define you own {@link CassandraFactory}, {@link ConnectionFactory} bean(s) to control
  * {@link TestCassandra} instance.
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
- * @see TestCassandraFactory
+ * @see ConnectionFactory
  * @see EmbeddedCassandraFactoryCustomizer
  * @see DirtiesContext
  * @since 1.0.0

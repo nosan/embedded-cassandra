@@ -14,13 +14,29 @@
  * limitations under the License.
  */
 
-/**
- * Core classes to write tests against Cassandra.
- */
-
-@NonNullFields
-@NonNullApi
 package com.github.nosan.embedded.cassandra.test;
 
-import com.github.nosan.embedded.cassandra.lang.annotation.NonNullApi;
-import com.github.nosan.embedded.cassandra.lang.annotation.NonNullFields;
+import com.github.nosan.embedded.cassandra.Settings;
+
+/**
+ * Factory that creates a {@link Connection connection}.
+ *
+ * @author Dmytro Nosan
+ * @see Connection
+ * @see DefaultConnectionFactory
+ * @see ClusterConnectionFactory
+ * @see CqlSessionConnectionFactory
+ * @since 2.0.2
+ */
+@FunctionalInterface
+public interface ConnectionFactory {
+
+	/**
+	 * Creates a new configured {@link Connection}.
+	 *
+	 * @param settings the settings
+	 * @return a configured {@code connection}
+	 */
+	Connection create(Settings settings);
+
+}

@@ -20,10 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.oss.driver.api.core.CqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,21 +33,17 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
-import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
-import com.github.nosan.embedded.cassandra.test.util.SessionUtils;
-import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 /**
  * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and {@link #stop() stopped}. {@link
  * TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the underlying {@link
- * Cassandra}.
+ * Cassandra}. It is also possible to get a {@code connection} to the underlying {@link Cassandra}. A connection will be
+ * created by {@link ConnectionFactory} and will be managed by this {@code TestCassandra} and closed when
+ * {@link #stop()} is called.
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
- * @see CqlSessionFactory
- * @see ClusterFactory
- * @see SessionUtils
- * @see CqlSessionUtils
+ * @see ConnectionFactory
  * @see CqlScript
  * @since 1.0.0
  */
@@ -58,25 +51,22 @@ public class TestCassandra implements Cassandra {
 
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);
 
-	private static final String CQL_SESSION_CLASS = "com.datastax.oss.driver.api.core.CqlSession";
-
-	private static final String CLUSTER_CLASS = "com.datastax.driver.core.Cluster";
-
-	private static final String SESSION_CLASS = "com.datastax.driver.core.Session";
-
-	private final Object monitor = new Object();
-
 	private final Cassandra cassandra;
+
+	private final ConnectionFactory connectionFactory;
 
 	private final List<CqlScript> scripts;
 
 	private volatile boolean started = false;
 
+	@Nullable
+	private volatile Connection connection;
+
 	/**
 	 * Creates a {@link TestCassandra}.
 	 */
 	public TestCassandra() {
-		this(null, new CqlScript[0]);
+		this(null, null, new CqlScript[0]);
 	}
 
 	/**
@@ -85,25 +75,51 @@ public class TestCassandra implements Cassandra {
 	 * @param scripts CQL scripts to execute
 	 */
 	public TestCassandra(CqlScript... scripts) {
-		this(null, scripts);
+		this(null, null, scripts);
 	}
 
 	/**
 	 * Creates a {@link TestCassandra}.
 	 *
-	 * @param cassandraFactory factory to create a {@link Cassandra}
+	 * @param cassandraFactory factory that creates {@link Cassandra}
 	 * @param scripts CQL scripts to execute
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
+		this(cassandraFactory, null, scripts);
+	}
+
+	/**
+	 * Creates a {@link TestCassandra}.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param scripts CQL scripts to execute
+	 * @since 2.0.2
+	 */
+	public TestCassandra(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
+		this(null, connectionFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link TestCassandra}.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param cassandraFactory factory that creates {@link Cassandra}
+	 * @param scripts CQL scripts to execute
+	 * @since 2.0.2
+	 */
+	public TestCassandra(@Nullable CassandraFactory cassandraFactory,
+			@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
 		this.scripts = Collections.unmodifiableList(Arrays.asList(scripts));
 		Cassandra cassandra = ((cassandraFactory != null) ? cassandraFactory : new LocalCassandraFactory()).create();
 		this.cassandra = Objects.requireNonNull(cassandra, "Cassandra must not be null");
+		this.connectionFactory = (connectionFactory != null) ? connectionFactory : new DefaultConnectionFactory();
 	}
 
 	/**
-	 * Starts the underlying {@link Cassandra}. Calling this method on an already started {@code Cassandra} has no
-	 * effect. Causes the current thread to wait, until the {@code Cassandra} has started.
+	 * Starts the underlying {@link Cassandra} and executes {@link CqlScript scripts}.
+	 * Calling this method on an already started {@code Cassandra} has no effect.
+	 * Causes the current thread to wait, until the {@code Cassandra} has started.
 	 *
 	 * @throws CassandraException if the underlying {@code Cassandra} cannot be started
 	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another
@@ -111,7 +127,7 @@ public class TestCassandra implements Cassandra {
 	 */
 	@Override
 	public void start() throws CassandraException {
-		synchronized (this.monitor) {
+		synchronized (this) {
 			if (this.started) {
 				return;
 			}
@@ -131,8 +147,9 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Stops the underlying {@link Cassandra}. Calling this method on an already stopped
-	 * {@code Cassandra} has no effect. Causes the current thread to wait, until the {@code Cassandra} has stopped.
+	 * Stops the underlying {@link Cassandra} and closes the {@code connection} to it. Calling this method on an
+	 * already stopped {@code Cassandra} has no effect. Causes the current thread to wait,
+	 * until the {@code Cassandra} has stopped.
 	 *
 	 * @throws CassandraException if the underlying {@code Cassandra} cannot be stopped
 	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted}
@@ -140,7 +157,7 @@ public class TestCassandra implements Cassandra {
 	 */
 	@Override
 	public void stop() throws CassandraException {
-		synchronized (this.monitor) {
+		synchronized (this) {
 			if (!this.started) {
 				return;
 			}
@@ -166,7 +183,7 @@ public class TestCassandra implements Cassandra {
 	 */
 	@Override
 	public Settings getSettings() throws IllegalStateException {
-		synchronized (this.monitor) {
+		synchronized (this) {
 			return this.cassandra.getSettings();
 		}
 	}
@@ -185,7 +202,7 @@ public class TestCassandra implements Cassandra {
 	/**
 	 * Returns the {@link State state} of the underlying {@code Cassandra}.
 	 *
-	 * @return the state
+	 * @return a state
 	 * @since 1.4.1
 	 */
 	@Override
@@ -193,37 +210,43 @@ public class TestCassandra implements Cassandra {
 		return this.cassandra.getState();
 	}
 
-	@Override
-	public String toString() {
-		return String.format("%s %s", getClass().getSimpleName(), getVersion());
+	/**
+	 * Returns the <b>singleton</b> {@link Connection connection} to the underlying {@code Cassandra}. This connection
+	 * is managed by {@code TestCassandra} and will be closed when {@link #stop()} is called.
+	 * There is only one connection per {@code TestCassandra}.
+	 *
+	 * @return a connection
+	 * @since 2.0.2
+	 */
+	public Connection getConnection() {
+		Connection connection = this.connection;
+		if (connection == null) {
+			synchronized (this) {
+				connection = this.connection;
+				if (connection == null) {
+					connection = this.connectionFactory.create(getSettings());
+					this.connection = Objects.requireNonNull(connection, "Connection must not be null");
+				}
+			}
+		}
+		return connection;
 	}
 
 	/**
-	 * Executes the {@link CqlScript scripts}.
+	 * Executes the given {@link CqlScript scripts} using the {@link #getConnection() connection}.
 	 *
 	 * @param scripts the scripts
+	 * @see #getConnection()
 	 * @since 2.0.0
 	 */
 	public void executeScripts(CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
-		ClassLoader classLoader = getClass().getClassLoader();
-		Settings settings = getSettings();
-		if (ClassUtils.isPresent(CQL_SESSION_CLASS, classLoader)) {
-			try (CqlSession session = new CqlSessionFactory().create(settings)) {
-				CqlSessionUtils.execute(session, scripts);
-			}
-		}
-		else if (ClassUtils.isPresent(CLUSTER_CLASS, classLoader) && ClassUtils.isPresent(SESSION_CLASS, classLoader)) {
-			try (Cluster cluster = new ClusterFactory().create(settings)) {
-				SessionUtils.execute(cluster.connect(), scripts);
-			}
-		}
-		else {
-			throw new IllegalStateException(String.format("There is no way to execute '%s'."
-							+ " '%s' and ('%s' or '%s') classes are not present in the classpath.",
-					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(",")),
-					CQL_SESSION_CLASS, CLUSTER_CLASS, SESSION_CLASS));
-		}
+		getConnection().executeScripts(scripts);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s %s", getClass().getSimpleName(), getVersion());
 	}
 
 	private void doStart() {
@@ -243,6 +266,16 @@ public class TestCassandra implements Cassandra {
 		if (log.isDebugEnabled()) {
 			log.debug("Stop {}", toString());
 		}
+		Connection connection = this.connection;
+		if (connection != null) {
+			try {
+				connection.close();
+			}
+			catch (Throwable ex) {
+				log.error(String.format("Can not close a connection '%s'", connection), ex);
+			}
+			this.connection = null;
+		}
 		this.cassandra.stop();
 		if (log.isDebugEnabled()) {
 			log.debug("{} is stopped", toString());
@@ -260,6 +293,7 @@ public class TestCassandra implements Cassandra {
 		catch (Throwable ex) {
 			log.error(String.format("Unable to stop %s", toString()), ex);
 		}
+
 	}
 
 }

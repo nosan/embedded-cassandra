@@ -14,29 +14,39 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.test.spring;
+package com.github.nosan.embedded.cassandra.test;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
- * Factory that creates {@link TestCassandra}.
+ * A connection to the {@link Cassandra}.
  *
  * @author Dmytro Nosan
- * @since 2.0.0
+ * @see CqlSessionConnection
+ * @see ClusterConnection
+ * @since 2.0.2
  */
-@FunctionalInterface
-public interface TestCassandraFactory {
+public interface Connection extends AutoCloseable {
 
 	/**
-	 * Creates {@link TestCassandra}.
+	 * Executes the given {@link CqlScript scripts}.
 	 *
-	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts the {@link CqlScript scripts} to execute
-	 * @return the {@link TestCassandra}
+	 * @param scripts the scripts
 	 */
-	TestCassandra create(CassandraFactory cassandraFactory, CqlScript... scripts);
+	void executeScripts(CqlScript... scripts);
+
+	/**
+	 * Returns the native {@code connection}.
+	 *
+	 * @return a connection
+	 */
+	Object getNativeConnection();
+
+	/**
+	 * Closes the current connection.
+	 */
+	@Override
+	void close();
 
 }

@@ -24,6 +24,8 @@ import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.test.Connection;
+import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -46,6 +48,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @author Dmytro Nosan
  * @see CqlScript
  * @see CassandraFactory
+ * @see ConnectionFactory
  * @since 1.0.0
  */
 public class CassandraTestNG extends TestCassandra {
@@ -69,11 +72,35 @@ public class CassandraTestNG extends TestCassandra {
 	/**
 	 * Creates a {@link CassandraTestNG}.
 	 *
-	 * @param cassandraFactory factory to create a {@link Cassandra}
+	 * @param cassandraFactory factory that creates {@link Cassandra}
 	 * @param scripts CQL scripts to execute
 	 */
 	public CassandraTestNG(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
 		super(cassandraFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraTestNG}.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param scripts CQL scripts to execute
+	 * @since 2.0.2
+	 */
+	public CassandraTestNG(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
+		super(connectionFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraTestNG}.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param cassandraFactory factory that creates {@link Cassandra}
+	 * @param scripts CQL scripts to execute
+	 * @since 2.0.2
+	 */
+	public CassandraTestNG(@Nullable CassandraFactory cassandraFactory,
+			@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
+		super(cassandraFactory, connectionFactory, scripts);
 	}
 
 	@BeforeClass(alwaysRun = true)

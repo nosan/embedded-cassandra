@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * Core classes to write tests against Cassandra.
- */
-
-@NonNullFields
-@NonNullApi
 package com.github.nosan.embedded.cassandra.test;
 
-import com.github.nosan.embedded.cassandra.lang.annotation.NonNullApi;
-import com.github.nosan.embedded.cassandra.lang.annotation.NonNullFields;
+import java.util.Objects;
+
+import com.github.nosan.embedded.cassandra.Settings;
+
+/**
+ * {@link ConnectionFactory} that create the {@link ClusterConnection}.
+ *
+ * @author Dmytro Nosan
+ * @since 2.0.2
+ */
+public class ClusterConnectionFactory implements ConnectionFactory {
+
+	@Override
+	public Connection create(Settings settings) {
+		Objects.requireNonNull(settings, "Settings must not be null");
+		return new ClusterConnection(new ClusterFactory().create(settings));
+	}
+
+}

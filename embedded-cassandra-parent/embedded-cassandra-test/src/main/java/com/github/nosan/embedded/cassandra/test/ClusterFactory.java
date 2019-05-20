@@ -42,7 +42,7 @@ public class ClusterFactory {
 	 * @param settings the settings
 	 * @return a cluster
 	 */
-	public final Cluster create(Settings settings) {
+	public Cluster create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
 		Integer port = settings.port().orElseGet(() -> settings.sslPort().orElse(null));
 		InetAddress address = settings.address().orElse(null);
