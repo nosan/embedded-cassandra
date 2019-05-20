@@ -137,16 +137,14 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Override
 		public void afterPropertiesSet() {
 			ApplicationContext context = getContext();
-			TestCassandraFactory testCassandraFactory = context.getBeanProvider(TestCassandraFactory.class)
-					.getIfUnique(() -> TestCassandra::new);
 			CassandraFactory cassandraFactory = context.getBeanProvider(CassandraFactory.class)
 					.getIfUnique(this::getCassandraFactory);
 			ConnectionFactory connectionFactory = context.getBeanProvider(ConnectionFactory.class)
 					.getIfUnique(DefaultConnectionFactory::new);
 			context.getBeanProvider(EmbeddedCassandraFactoryCustomizer.class).orderedStream()
 					.forEach(customizer -> customize(cassandraFactory, customizer));
-			TestCassandra cassandra = testCassandraFactory.create(cassandraFactory, connectionFactory, getScripts());
-			this.cassandra = Objects.requireNonNull(cassandra, "Test Cassandra must not be null");
+			TestCassandra cassandra = new TestCassandra(cassandraFactory, connectionFactory, getScripts());
+			this.cassandra = cassandra;
 			cassandra.start();
 		}
 
