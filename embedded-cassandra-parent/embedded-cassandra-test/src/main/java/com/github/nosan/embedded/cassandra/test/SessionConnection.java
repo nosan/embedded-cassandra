@@ -16,38 +16,47 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import java.util.Objects;
+
+import com.datastax.driver.core.Session;
+
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.test.util.SessionUtils;
 
 /**
- * A connection to the {@link Cassandra}.
+ * {@link Session} connection to the {@link Cassandra}.
  *
  * @author Dmytro Nosan
- * @see CqlSessionConnection
- * @see ClusterConnection
- * @see SessionConnection
  * @since 2.0.2
  */
-public interface Connection extends AutoCloseable {
+public class SessionConnection implements Connection {
+
+	private final Session session;
 
 	/**
-	 * Executes the given {@link CqlScript scripts}.
+	 * Creates a {@link SessionConnection}.
 	 *
-	 * @param scripts the scripts
+	 * @param session a session
 	 */
-	void executeScripts(CqlScript... scripts);
+	public SessionConnection(Session session) {
+		this.session = Objects.requireNonNull(session, "Session must not be null");
+	}
 
-	/**
-	 * Returns the underlying native {@code connection}.
-	 *
-	 * @return a connection
-	 */
-	Object getNativeConnection();
-
-	/**
-	 * Closes the current connection.
-	 */
 	@Override
-	void close();
+	public void executeScripts(CqlScript... scripts) {
+		SessionUtils.execute(this.session, scripts);
+	}
+
+	@Override
+	public Session getNativeConnection() {
+		return this.session;
+	}
+
+	@Override
+	public void close() {
+		this.session.close();
+
+	}
 
 }

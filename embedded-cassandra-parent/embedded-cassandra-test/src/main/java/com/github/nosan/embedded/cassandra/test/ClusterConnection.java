@@ -54,8 +54,8 @@ public class ClusterConnection implements Connection {
 	}
 
 	@Override
-	public Session getNativeConnection() {
-		return this.session;
+	public Cluster getNativeConnection() {
+		return this.cluster;
 	}
 
 	@Override

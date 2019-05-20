@@ -16,7 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
-import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Cluster;
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,8 +57,8 @@ class EmbeddedCassandraCustomizerTests {
 	@Test
 	void shouldSelectFromRoles() {
 		assertThat(this.session.execute("SELECT * FROM test.roles").wasApplied()).isTrue();
-		assertThat(((Session) this.cassandra.getConnection().getNativeConnection())
-				.execute("SELECT * FROM test.roles").wasApplied()).isTrue();
+		assertThat(((Cluster) this.cassandra.getConnection().getNativeConnection())
+				.connect().execute("SELECT * FROM test.roles").wasApplied()).isTrue();
 	}
 
 	@Test
