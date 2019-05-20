@@ -49,7 +49,6 @@ import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
-import com.github.nosan.embedded.cassandra.test.DefaultConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
@@ -141,8 +140,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 					.getIfUnique(() -> TestCassandra::new);
 			CassandraFactory cassandraFactory = context.getBeanProvider(CassandraFactory.class)
 					.getIfUnique(this::getCassandraFactory);
-			ConnectionFactory connectionFactory = context.getBeanProvider(ConnectionFactory.class)
-					.getIfUnique(DefaultConnectionFactory::new);
+			ConnectionFactory connectionFactory = context.getBeanProvider(ConnectionFactory.class).getIfUnique();
 			context.getBeanProvider(EmbeddedCassandraFactoryCustomizer.class).orderedStream()
 					.forEach(customizer -> customize(cassandraFactory, customizer));
 			TestCassandra cassandra = testCassandraFactory.create(cassandraFactory, connectionFactory, getScripts());
