@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import com.datastax.driver.core.Session;
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.test.ClusterConnection;
+import com.github.nosan.embedded.cassandra.test.ClusterFactory;
+import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,6 +57,8 @@ class EmbeddedCassandraCustomizerTests {
 	@Test
 	void shouldSelectFromRoles() {
 		assertThat(this.session.execute("SELECT * FROM test.roles").wasApplied()).isTrue();
+		assertThat(((Session) this.cassandra.getConnection().getNativeConnection())
+				.execute("SELECT * FROM test.roles").wasApplied()).isTrue();
 	}
 
 	@Test
@@ -70,8 +76,14 @@ class EmbeddedCassandraCustomizerTests {
 		}
 
 		@Bean
+		public ConnectionFactory connectionFactory() {
+			return settings -> new ClusterConnection(new ClusterFactory().create(settings));
+		}
+
+		@Bean
 		public TestCassandraFactory testCassandraFactory() {
-			return (cassandraFactory, scripts) -> new TestCassandra(cassandraFactory, CqlScript.classpath("init.cql"));
+			return (cassandraFactory, connectionFactory, scripts) -> new TestCassandra(cassandraFactory,
+					connectionFactory, CqlScript.classpath("init.cql"));
 		}
 
 	}

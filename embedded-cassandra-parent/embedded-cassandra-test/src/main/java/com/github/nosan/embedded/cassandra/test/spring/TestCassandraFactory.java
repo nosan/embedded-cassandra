@@ -19,6 +19,8 @@ package com.github.nosan.embedded.cassandra.test.spring;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.test.Connection;
+import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -34,9 +36,11 @@ public interface TestCassandraFactory {
 	 * Creates {@link TestCassandra}.
 	 *
 	 * @param cassandraFactory factory that creates {@link Cassandra}
+	 * @param connectionFactory factory that creates {@link Connection}.
 	 * @param scripts the {@link CqlScript scripts} to execute
 	 * @return the {@link TestCassandra}
 	 */
-	TestCassandra create(CassandraFactory cassandraFactory, CqlScript... scripts);
+	TestCassandra create(CassandraFactory cassandraFactory, ConnectionFactory connectionFactory,
+			CqlScript... scripts);
 
 }
