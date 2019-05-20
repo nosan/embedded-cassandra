@@ -38,7 +38,8 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
  * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and {@link #stop() stopped}. {@link
  * TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the underlying {@link
  * Cassandra}. It is also possible to get a {@code connection} to the underlying {@link Cassandra}. A connection will be
- * created by {@link ConnectionFactory} and will be managed by this {@code TestCassandra}.
+ * created by {@link ConnectionFactory} and will be managed by this {@code TestCassandra} and closed when
+ * {@link #stop()} is called.
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
@@ -116,8 +117,9 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Starts the underlying {@link Cassandra}. Calling this method on an already started {@code Cassandra} has no
-	 * effect. Causes the current thread to wait, until the {@code Cassandra} has started.
+	 * Starts the underlying {@link Cassandra} and executes {@link CqlScript scripts}.
+	 * Calling this method on an already started {@code Cassandra} has no effect.
+	 * Causes the current thread to wait, until the {@code Cassandra} has started.
 	 *
 	 * @throws CassandraException if the underlying {@code Cassandra} cannot be started
 	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another
@@ -145,8 +147,9 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Stops the underlying {@link Cassandra}. Calling this method on an already stopped
-	 * {@code Cassandra} has no effect. Causes the current thread to wait, until the {@code Cassandra} has stopped.
+	 * Stops the underlying {@link Cassandra} and closes the {@code connection} to it. Calling this method on an
+	 * already stopped {@code Cassandra} has no effect. Causes the current thread to wait,
+	 * until the {@code Cassandra} has stopped.
 	 *
 	 * @throws CassandraException if the underlying {@code Cassandra} cannot be stopped
 	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted}
@@ -208,8 +211,8 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Returns the {@link Connection connection} to the underlying {@code Cassandra}. This connection is
-	 * managed by {@code TestCassandra} and will be closed when {@link #stop()} is called.
+	 * Returns the <b>singleton</b> {@link Connection connection} to the underlying {@code Cassandra}. This connection
+	 * is managed by {@code TestCassandra} and will be closed when {@link #stop()} is called.
 	 * There is only one connection per {@code TestCassandra}.
 	 *
 	 * @return a connection

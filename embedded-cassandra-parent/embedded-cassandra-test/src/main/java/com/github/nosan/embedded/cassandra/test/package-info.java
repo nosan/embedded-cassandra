@@ -15,7 +15,7 @@
  */
 
 /**
- * Core classes to test Cassandra.
+ * Core classes to write tests against Cassandra.
  */
 
 @NonNullFields
