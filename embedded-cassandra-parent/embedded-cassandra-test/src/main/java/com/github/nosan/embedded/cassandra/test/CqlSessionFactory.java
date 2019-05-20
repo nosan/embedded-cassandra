@@ -51,7 +51,7 @@ public class CqlSessionFactory {
 	 * @param settings the settings
 	 * @return a cql session
 	 */
-	public final CqlSession create(Settings settings) {
+	public CqlSession create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
 		Integer port = settings.port().orElseGet(() -> settings.sslPort().orElse(null));
 		InetAddress address = settings.address().orElse(null);
