@@ -45,6 +45,7 @@ public class SessionConnection implements Connection {
 
 	@Override
 	public void executeScripts(CqlScript... scripts) {
+		Objects.requireNonNull(scripts, "Scripts must not be null");
 		SessionUtils.execute(this.session, scripts);
 	}
 

@@ -42,7 +42,8 @@ abstract class AbstractTestCassandraTests {
 	AbstractTestCassandraTests(Version version) {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		factory.setVersion(version);
-		this.cassandra = new TestCassandra(factory, new CqlSessionConnectionFactory(), CqlScript.classpath("init.cql"));
+		this.cassandra = new TestCassandra(factory, new CqlSessionConnectionFactory(),
+				CqlScript.classpath("init.cql"));
 	}
 
 	@BeforeAll
