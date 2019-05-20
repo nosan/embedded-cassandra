@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.test;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.github.nosan.embedded.cassandra.Settings;
@@ -40,6 +41,7 @@ public class DefaultConnectionFactory implements ConnectionFactory {
 
 	@Override
 	public Connection create(Settings settings) {
+		Objects.requireNonNull(settings, "Settings must not be null");
 		ClassLoader cl = getClass().getClassLoader();
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl)) {
 			return new CqlSessionConnectionFactory().create(settings);
