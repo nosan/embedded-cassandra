@@ -43,4 +43,10 @@ public interface Connection extends AutoCloseable {
 	 */
 	Object getNativeConnection();
 
+	/**
+	 * Closes the current connection.
+	 */
+	@Override
+	void close();
+
 }
