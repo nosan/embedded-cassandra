@@ -28,8 +28,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.Version;
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
-import com.github.nosan.embedded.cassandra.test.ClusterConnectionFactory;
+import com.github.nosan.embedded.cassandra.test.ClusterConnection;
+import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
@@ -43,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
-@EmbeddedCassandra(scripts = "/init.cql")
+@EmbeddedCassandra
 class EmbeddedCassandraCustomizerTests {
 
 	@Autowired
@@ -75,7 +77,13 @@ class EmbeddedCassandraCustomizerTests {
 
 		@Bean
 		public ConnectionFactory connectionFactory() {
-			return new ClusterConnectionFactory();
+			return settings -> new ClusterConnection(new ClusterFactory().create(settings));
+		}
+
+		@Bean
+		public TestCassandraFactory testCassandraFactory() {
+			return (cassandraFactory, connectionFactory, scripts) -> new TestCassandra(cassandraFactory,
+					connectionFactory, CqlScript.classpath("init.cql"));
 		}
 
 	}

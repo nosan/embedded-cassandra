@@ -63,11 +63,12 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  *    }
  * }
  * </pre>
- * Also, it is possible to define you own {@link CassandraFactory}, {@link ConnectionFactory} bean(s) to control
- * {@link TestCassandra} instance.
+ * Also, it is possible to define you own {@link CassandraFactory}, {@link TestCassandraFactory}, {@link
+ * ConnectionFactory}  bean(s) to control {@link TestCassandra} instance.
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
+ * @see TestCassandraFactory
  * @see ConnectionFactory
  * @see EmbeddedCassandraFactoryCustomizer
  * @see DirtiesContext
