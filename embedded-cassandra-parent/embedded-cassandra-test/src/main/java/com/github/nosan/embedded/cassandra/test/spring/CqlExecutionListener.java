@@ -32,6 +32,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.util.Assert;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.CqlStatements;
@@ -106,6 +107,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		Environment environment = applicationContext.getEnvironment();
 		for (Cql cql : cqlAnnotations) {
 			List<ExecutionPhase> phases = Arrays.asList(cql.executionPhase());
+			Assert.notEmpty(phases, "@Cql annotation does not have an execution phase.");
 			if (phases.contains(phase)) {
 				CqlScript[] scripts = getScripts(cql, testContext.getTestClass(), applicationContext);
 				if (scripts.length > 0) {
