@@ -49,6 +49,7 @@ public class DefaultConnection implements Connection {
 
 	@Override
 	public void execute(CqlScript... scripts) {
+		Objects.requireNonNull(scripts, "Scripts must not be null");
 		this.connection.execute(scripts);
 	}
 
