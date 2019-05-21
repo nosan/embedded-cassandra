@@ -568,12 +568,15 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 		List<WorkingDirectoryCustomizer> customizers = new ArrayList<>();
 		customizers.add(new ArtifactWorkingDirectoryCustomizer(artifactFactory, artifactDirectory));
-		Optional.ofNullable(getConfigurationFile()).map(ConfigurationFileCustomizer::new).ifPresent(customizers::add);
 		Optional.ofNullable(getRackFile()).map(RackFileCustomizer::new).ifPresent(customizers::add);
 		Optional.ofNullable(getTopologyFile()).map(TopologyFileCustomizer::new).ifPresent(customizers::add);
 		Optional.ofNullable(getLoggingFile()).map(LoggingFileCustomizer::new).ifPresent(customizers::add);
-		if (ClassUtils.isPresent(SNAKEYAML_YAML_CLASS, getClass().getClassLoader())) {
-			customizers.add(new ConfigurationFileRandomPortCustomizer(RandomPortSupplier.INSTANCE));
+		URL configurationFile = getConfigurationFile();
+		if (configurationFile != null) {
+			customizers.add(new ConfigurationFileCustomizer(configurationFile));
+			if (ClassUtils.isPresent(SNAKEYAML_YAML_CLASS, getClass().getClassLoader())) {
+				customizers.add(new ConfigurationFileRandomPortCustomizer(RandomPortSupplier.INSTANCE));
+			}
 		}
 		if (!SystemUtils.isWindows()) {
 			customizers.add(new CassandraFileExecutableCustomizer());
