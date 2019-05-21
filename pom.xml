@@ -50,7 +50,7 @@
         <snakeyaml.version>1.24</snakeyaml.version>
         <commons-compress.version>1.18</commons-compress.version>
         <xz.version>1.8</xz.version>
-        <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
         <java-driver-core.version>4.0.1</java-driver-core.version>
     </properties>
 
