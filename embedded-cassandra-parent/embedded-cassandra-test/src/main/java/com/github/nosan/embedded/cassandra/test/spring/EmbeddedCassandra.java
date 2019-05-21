@@ -64,6 +64,8 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * </pre>
  * Also, it is possible to define you own {@link CassandraFactory}, {@link TestCassandraFactory} bean(s) to control
  * {@link TestCassandra} instance.
+ * <p>
+ * This annotation is handled by {@link EmbeddedCassandraContextCustomizer}.
  *
  * @author Dmytro Nosan
  * @see CassandraFactory

@@ -22,7 +22,8 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
- * Factory that creates {@link TestCassandra}.
+ * Factory that creates {@link TestCassandra}. This bean will be used for creating {@link TestCassandra} before {@link
+ * TestCassandra} itself is started.
  *
  * @author Dmytro Nosan
  * @since 2.0.0
