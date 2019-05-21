@@ -92,12 +92,11 @@ public class TestCassandra implements Cassandra {
 	 * Calling this method on an already started {@code Cassandra} has no effect.
 	 * Causes the current thread to wait, until the {@code Cassandra} has started.
 	 *
-	 * @throws CassandraException if the underlying {@code Cassandra} cannot be started
-	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another
-	 * thread
+	 * @throws CassandraException if the {@code Cassandra} cannot be started
+	 * @throws CassandraInterruptedException if the {@code Cassandra} was interrupted.
 	 */
 	@Override
-	public void start() throws CassandraException {
+	public void start() throws CassandraInterruptedException, CassandraException {
 		synchronized (this) {
 			if (this.started) {
 				return;
@@ -118,16 +117,15 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Stops the underlying {@link Cassandra} and closes the {@code connection} to it. Calling this method on an
+	 * Stops the underlying {@link Cassandra} and closes the {@link Connection} to it. Calling this method on an
 	 * already stopped {@code Cassandra} has no effect. Causes the current thread to wait,
 	 * until the {@code Cassandra} has stopped.
 	 *
-	 * @throws CassandraException if the underlying {@code Cassandra} cannot be stopped
-	 * @throws CassandraInterruptedException if the current thread is {@link Thread#interrupt() interrupted}
-	 * by another thread
+	 * @throws CassandraException if the {@code Cassandra} cannot be stopped
+	 * @throws CassandraInterruptedException if the {@code Cassandra} was interrupted.
 	 */
 	@Override
-	public void stop() throws CassandraException {
+	public void stop() throws CassandraInterruptedException, CassandraException {
 		synchronized (this) {
 			if (!this.started) {
 				return;
