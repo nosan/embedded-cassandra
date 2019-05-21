@@ -25,7 +25,7 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 
 /**
- * {@link CqlSession} connection to the {@link Cassandra}.
+ * {@link CqlSession} based connection to the {@link Cassandra}.
  *
  * @author Dmytro Nosan
  * @since 2.0.2
