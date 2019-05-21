@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.test.spring.data;
 
 import java.net.InetAddress;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,10 +64,10 @@ class CityRepositoryTests {
 		ClusterBuilderCustomizer embeddedClusterCustomizer(TestCassandra cassandra) {
 			return builder -> {
 				Settings settings = cassandra.getSettings();
-				Optional<Integer> port = settings.port();
-				Optional<InetAddress> address = settings.address();
-				if (port.isPresent() && address.isPresent()) {
-					builder.withPort(port.get()).addContactPoints(address.get());
+				Integer port = settings.port().orElseGet(() -> settings.sslPort().orElse(null));
+				InetAddress address = settings.address().orElse(null);
+				if (port != null && address != null) {
+					builder.withPort(port).addContactPoints(address);
 				}
 			};
 		}
