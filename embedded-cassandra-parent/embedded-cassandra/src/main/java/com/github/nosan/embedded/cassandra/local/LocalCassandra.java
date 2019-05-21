@@ -185,7 +185,7 @@ class LocalCassandra implements Cassandra {
 		catch (InterruptedException je) {
 			ThreadUtils.interrupt(thread);
 			try {
-				ThreadUtils.joinUninterruptedly(thread);
+				ThreadUtils.forceJoin(thread);
 			}
 			catch (InterruptedException jue) {
 				je.addSuppressed(jue);

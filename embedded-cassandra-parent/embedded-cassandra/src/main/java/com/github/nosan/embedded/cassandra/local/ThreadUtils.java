@@ -30,12 +30,12 @@ abstract class ThreadUtils {
 	private static final Logger log = LoggerFactory.getLogger(ThreadUtils.class);
 
 	/**
-	 * Joins {@code uninterruptedly} to the given thread.
+	 * Force joins to the given thread.
 	 *
 	 * @param thread a thread
 	 * @throws InterruptedException if any thread has interrupted the current thread.
 	 */
-	static void joinUninterruptedly(Thread thread) throws InterruptedException {
+	static void forceJoin(Thread thread) throws InterruptedException {
 		boolean interrupted = false;
 		while (true) {
 			try {

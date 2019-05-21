@@ -51,7 +51,7 @@ class ThreadUtilsTests {
 	}
 
 	@Test
-	void shouldJoinUninterruptedly() {
+	void shouldJoinForce() {
 		assertThatThrownBy(() -> Assertions.assertTimeout(Duration.ofMillis(1250), () -> {
 			Thread runThread = new Thread(() -> {
 				try {
@@ -63,7 +63,7 @@ class ThreadUtilsTests {
 			});
 			Thread joinThread = new Thread(() -> {
 				try {
-					ThreadUtils.joinUninterruptedly(runThread);
+					ThreadUtils.forceJoin(runThread);
 				}
 				catch (InterruptedException ex) {
 					Thread.currentThread().interrupt();
