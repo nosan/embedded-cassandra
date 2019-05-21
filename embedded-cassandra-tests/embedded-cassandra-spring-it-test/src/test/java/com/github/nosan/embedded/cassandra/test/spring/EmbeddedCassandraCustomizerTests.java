@@ -33,9 +33,8 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.ClusterConnection;
-import com.github.nosan.embedded.cassandra.test.ClusterConnectionFactory;
+import com.github.nosan.embedded.cassandra.test.ClusterFactory;
 import com.github.nosan.embedded.cassandra.test.Connection;
-import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,7 +70,7 @@ class EmbeddedCassandraCustomizerTests {
 
 	private Session getSession(Connection connection) {
 		Assert.isInstanceOf(ClusterConnection.class, connection);
-		Cluster cluster = ((ClusterConnection) connection).getNativeConnection();
+		Cluster cluster = ((ClusterConnection) connection).get();
 		return cluster.connect();
 	}
 
@@ -85,14 +84,15 @@ class EmbeddedCassandraCustomizerTests {
 		}
 
 		@Bean
-		public ConnectionFactory connectionFactory() {
-			return new ClusterConnectionFactory();
-		}
-
-		@Bean
 		public TestCassandraFactory testCassandraFactory() {
-			return (cassandraFactory, connectionFactory, scripts) -> new TestCassandra(cassandraFactory,
-					connectionFactory, CqlScript.classpath("init.cql"));
+			return (cassandraFactory, scripts) -> new TestCassandra(cassandraFactory, CqlScript.classpath("init.cql")) {
+
+				@Override
+				protected Connection createConnection() {
+					return new ClusterConnection(new ClusterFactory().create(getSettings()));
+				}
+
+			};
 		}
 
 	}

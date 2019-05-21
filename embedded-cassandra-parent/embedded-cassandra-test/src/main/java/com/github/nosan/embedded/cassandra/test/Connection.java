@@ -20,9 +20,11 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
 /**
- * A connection to the {@link Cassandra}.
+ * A connection to the {@link Cassandra}. This interface just a wrapper on a {@code native} connection.
+ * To get a {@code native} connection, {@link #get()} method can be used.
  *
  * @author Dmytro Nosan
+ * @see DefaultConnection
  * @see CqlSessionConnection
  * @see ClusterConnection
  * @see SessionConnection
@@ -35,14 +37,14 @@ public interface Connection extends AutoCloseable {
 	 *
 	 * @param scripts the scripts
 	 */
-	void executeScripts(CqlScript... scripts);
+	void execute(CqlScript... scripts);
 
 	/**
-	 * Returns the underlying native {@code connection}.
+	 * Returns the underlying {@code connection} or {@code this}.
 	 *
-	 * @return a connection
+	 * @return a connection, never {@code null}
 	 */
-	Object getNativeConnection();
+	Object get();
 
 	/**
 	 * Closes the current connection.

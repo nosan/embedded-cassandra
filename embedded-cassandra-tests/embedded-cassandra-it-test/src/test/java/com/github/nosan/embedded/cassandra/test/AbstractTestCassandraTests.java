@@ -42,8 +42,7 @@ abstract class AbstractTestCassandraTests {
 	AbstractTestCassandraTests(Version version) {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		factory.setVersion(version);
-		this.cassandra = new TestCassandra(factory, new CqlSessionConnectionFactory(),
-				CqlScript.classpath("init.cql"));
+		this.cassandra = new TestCassandra(factory, CqlScript.classpath("init.cql"));
 	}
 
 	@BeforeAll
@@ -58,7 +57,7 @@ abstract class AbstractTestCassandraTests {
 
 	@Test
 	void shouldCountRows() {
-		CqlSession session = (CqlSession) this.cassandra.getConnection().getNativeConnection();
+		CqlSession session = (CqlSession) this.cassandra.getConnection().get();
 		Row resultSet = session.execute("SELECT COUNT(*) FROM test.users").one();
 		assertThat(resultSet).isNotNull();
 		assertThat(resultSet.getLong(0)).isEqualTo(1);

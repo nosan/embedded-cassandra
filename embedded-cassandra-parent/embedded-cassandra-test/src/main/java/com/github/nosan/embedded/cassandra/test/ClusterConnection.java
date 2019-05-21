@@ -48,13 +48,13 @@ public class ClusterConnection implements Connection {
 	}
 
 	@Override
-	public void executeScripts(CqlScript... scripts) {
+	public void execute(CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
 		SessionUtils.execute(this.session, scripts);
 	}
 
 	@Override
-	public Cluster getNativeConnection() {
+	public Cluster get() {
 		return this.cluster;
 	}
 

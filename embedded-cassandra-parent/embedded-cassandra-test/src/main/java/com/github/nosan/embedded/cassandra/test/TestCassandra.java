@@ -37,13 +37,11 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 /**
  * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and {@link #stop() stopped}. {@link
  * TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the underlying {@link
- * Cassandra}. It is also possible to get a {@code connection} to the underlying {@link Cassandra}. A connection will be
- * created by {@link ConnectionFactory} and will be managed by this {@code TestCassandra} and closed when
- * {@link #stop()} is called.
+ * Cassandra}. It is also possible to get a {@code connection} to the underlying {@link Cassandra}. Connection will be
+ * managed by this {@code TestCassandra} and closed when {@link #stop()} is called.
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
- * @see ConnectionFactory
  * @see CqlScript
  * @since 1.0.0
  */
@@ -52,8 +50,6 @@ public class TestCassandra implements Cassandra {
 	private static final Logger log = LoggerFactory.getLogger(TestCassandra.class);
 
 	private final Cassandra cassandra;
-
-	private final ConnectionFactory connectionFactory;
 
 	private final List<CqlScript> scripts;
 
@@ -66,7 +62,7 @@ public class TestCassandra implements Cassandra {
 	 * Creates a {@link TestCassandra}.
 	 */
 	public TestCassandra() {
-		this(null, null, new CqlScript[0]);
+		this(null, new CqlScript[0]);
 	}
 
 	/**
@@ -75,7 +71,7 @@ public class TestCassandra implements Cassandra {
 	 * @param scripts CQL scripts to execute
 	 */
 	public TestCassandra(CqlScript... scripts) {
-		this(null, null, scripts);
+		this(null, scripts);
 	}
 
 	/**
@@ -85,35 +81,10 @@ public class TestCassandra implements Cassandra {
 	 * @param scripts CQL scripts to execute
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
-		this(cassandraFactory, null, scripts);
-	}
-
-	/**
-	 * Creates a {@link TestCassandra}.
-	 *
-	 * @param connectionFactory factory that creates {@link Connection}
-	 * @param scripts CQL scripts to execute
-	 * @since 2.0.2
-	 */
-	public TestCassandra(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
-		this(null, connectionFactory, scripts);
-	}
-
-	/**
-	 * Creates a {@link TestCassandra}.
-	 *
-	 * @param connectionFactory factory that creates {@link Connection}
-	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute
-	 * @since 2.0.2
-	 */
-	public TestCassandra(@Nullable CassandraFactory cassandraFactory,
-			@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
 		this.scripts = Collections.unmodifiableList(Arrays.asList(scripts));
 		Cassandra cassandra = ((cassandraFactory != null) ? cassandraFactory : new LocalCassandraFactory()).create();
 		this.cassandra = Objects.requireNonNull(cassandra, "Cassandra must not be null");
-		this.connectionFactory = (connectionFactory != null) ? connectionFactory : new DefaultConnectionFactory();
 	}
 
 	/**
@@ -216,6 +187,7 @@ public class TestCassandra implements Cassandra {
 	 * There is only one connection per {@code TestCassandra}.
 	 *
 	 * @return a connection
+	 * @see #createConnection()
 	 * @since 2.0.2
 	 */
 	public Connection getConnection() {
@@ -224,7 +196,7 @@ public class TestCassandra implements Cassandra {
 			synchronized (this) {
 				connection = this.connection;
 				if (connection == null) {
-					connection = this.connectionFactory.create(getSettings());
+					connection = createConnection();
 					this.connection = Objects.requireNonNull(connection, "Connection must not be null");
 				}
 			}
@@ -236,17 +208,29 @@ public class TestCassandra implements Cassandra {
 	 * Executes the given {@link CqlScript scripts} using the {@link #getConnection() connection}.
 	 *
 	 * @param scripts the scripts
-	 * @see #getConnection()
 	 * @since 2.0.0
 	 */
 	public void executeScripts(CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
-		getConnection().executeScripts(scripts);
+		if (scripts.length > 0) {
+			getConnection().execute(scripts);
+		}
 	}
 
 	@Override
 	public String toString() {
 		return String.format("%s %s", getClass().getSimpleName(), getVersion());
+	}
+
+	/**
+	 * Creates a new connection to the underlying {@code Cassandra}. This connection is <b>not</b> managed by this
+	 * {@code TestCassandra}.
+	 *
+	 * @return a connection
+	 * @since 2.0.2
+	 */
+	protected Connection createConnection() {
+		return new DefaultConnection(getSettings());
 	}
 
 	private void doStart() {

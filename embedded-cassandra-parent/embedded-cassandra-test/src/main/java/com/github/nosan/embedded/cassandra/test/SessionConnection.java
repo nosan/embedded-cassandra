@@ -44,13 +44,13 @@ public class SessionConnection implements Connection {
 	}
 
 	@Override
-	public void executeScripts(CqlScript... scripts) {
+	public void execute(CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
 		SessionUtils.execute(this.session, scripts);
 	}
 
 	@Override
-	public Session getNativeConnection() {
+	public Session get() {
 		return this.session;
 	}
 

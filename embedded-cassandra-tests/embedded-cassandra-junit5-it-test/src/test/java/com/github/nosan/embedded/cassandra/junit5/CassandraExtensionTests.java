@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.CqlSessionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
@@ -43,7 +42,7 @@ class CassandraExtensionTests {
 	}
 
 	@Test
-	void selectRoles(Cassandra cassandra) {
+	void selectRoles(CassandraExtension cassandra) {
 		try (CqlSession session = new CqlSessionFactory().create(cassandra.getSettings())) {
 			assertThat(session.execute("SELECT * FROM  test.roles")).isEmpty();
 		}

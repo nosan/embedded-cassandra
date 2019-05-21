@@ -16,6 +16,8 @@
 
 package com.github.nosan.embedded.cassandra.test.junit5;
 
+import java.lang.reflect.Parameter;
+
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -28,8 +30,6 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
-import com.github.nosan.embedded.cassandra.test.Connection;
-import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -51,7 +51,6 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @author Dmytro Nosan
  * @see CqlScript
  * @see CassandraFactory
- * @see ConnectionFactory
  * @since 1.0.0
  */
 public class CassandraExtension extends TestCassandra implements BeforeAllCallback, AfterAllCallback,
@@ -83,30 +82,6 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 		super(cassandraFactory, scripts);
 	}
 
-	/**
-	 * Creates a {@link CassandraExtension}.
-	 *
-	 * @param connectionFactory factory that creates {@link Connection}
-	 * @param scripts CQL scripts to execute
-	 * @since 2.0.2
-	 */
-	public CassandraExtension(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
-		super(connectionFactory, scripts);
-	}
-
-	/**
-	 * Creates a {@link CassandraExtension}.
-	 *
-	 * @param connectionFactory factory that creates {@link Connection}
-	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute
-	 * @since 2.0.2
-	 */
-	public CassandraExtension(@Nullable CassandraFactory cassandraFactory,
-			@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
-		super(cassandraFactory, connectionFactory, scripts);
-	}
-
 	@Override
 	public void beforeAll(ExtensionContext context) {
 		start();
@@ -120,7 +95,9 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
-		return parameterContext.getParameter().getType().isAssignableFrom(TestCassandra.class);
+		Parameter parameter = parameterContext.getParameter();
+		Class<?> type = parameter.getType();
+		return type.isAssignableFrom(TestCassandra.class);
 	}
 
 	@Override
