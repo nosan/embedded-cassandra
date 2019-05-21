@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.test.spring;
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -38,6 +37,6 @@ public interface TestCassandraFactory {
 	 * @param scripts the {@link CqlScript scripts} to execute
 	 * @return the {@link TestCassandra}
 	 */
-	TestCassandra create(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts);
+	TestCassandra create(CassandraFactory cassandraFactory, CqlScript... scripts);
 
 }
