@@ -42,7 +42,7 @@ class CassandraExtensionTests {
 	}
 
 	@Test
-	void selectRoles(CassandraExtension cassandra) {
+	void selectRoles(TestCassandra cassandra) {
 		try (CqlSession session = new CqlSessionFactory().create(cassandra.getSettings())) {
 			assertThat(session.execute("SELECT * FROM  test.roles")).isEmpty();
 		}
