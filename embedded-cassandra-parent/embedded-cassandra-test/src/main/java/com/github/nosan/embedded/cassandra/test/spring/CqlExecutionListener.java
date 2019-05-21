@@ -107,7 +107,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		Environment environment = applicationContext.getEnvironment();
 		for (Cql cql : cqlAnnotations) {
 			List<ExecutionPhase> phases = Arrays.asList(cql.executionPhase());
-			Assert.notEmpty(phases, "@Cql annotation does not have an execution phase.");
+			Assert.notEmpty(phases, "@Cql annotation does not have an execution phase");
 			if (phases.contains(phase)) {
 				CqlScript[] scripts = getScripts(cql, testContext.getTestClass(), applicationContext);
 				if (scripts.length > 0) {
