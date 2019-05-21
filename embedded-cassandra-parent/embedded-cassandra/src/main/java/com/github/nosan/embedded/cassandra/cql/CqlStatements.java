@@ -43,8 +43,7 @@ public final class CqlStatements implements CqlScript {
 	 * @param statements CQL statements
 	 */
 	public CqlStatements(@Nullable String... statements) {
-		this.statements = Collections
-				.unmodifiableList((statements != null) ? Arrays.asList(statements) : Collections.emptyList());
+		this((statements != null) ? Arrays.asList(statements) : Collections.emptyList());
 	}
 
 	/**

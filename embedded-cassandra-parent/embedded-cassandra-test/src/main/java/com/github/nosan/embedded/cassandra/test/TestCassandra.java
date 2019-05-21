@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -82,7 +83,7 @@ public class TestCassandra implements Cassandra {
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
-		this.scripts = Collections.unmodifiableList(Arrays.asList(scripts));
+		this.scripts = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(scripts)));
 		Cassandra cassandra = ((cassandraFactory != null) ? cassandraFactory : new LocalCassandraFactory()).create();
 		this.cassandra = Objects.requireNonNull(cassandra, "Cassandra must not be null");
 	}
