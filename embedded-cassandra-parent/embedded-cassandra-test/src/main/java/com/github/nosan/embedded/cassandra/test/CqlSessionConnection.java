@@ -28,6 +28,7 @@ import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
  * {@link CqlSession} based connection to the {@link Cassandra}.
  *
  * @author Dmytro Nosan
+ * @see CqlSessionFactory
  * @since 2.0.2
  */
 public class CqlSessionConnection implements Connection {

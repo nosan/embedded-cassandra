@@ -44,6 +44,7 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
  * @author Dmytro Nosan
  * @see CassandraFactory
  * @see CqlScript
+ * @see Connection
  * @since 1.0.0
  */
 public class TestCassandra implements Cassandra {

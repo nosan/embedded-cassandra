@@ -29,6 +29,7 @@ import com.github.nosan.embedded.cassandra.test.util.SessionUtils;
  * {@link Cluster} based connection to the {@link Cassandra}.
  *
  * @author Dmytro Nosan
+ * @see ClusterFactory
  * @since 2.0.2
  */
 public class ClusterConnection implements Connection {
