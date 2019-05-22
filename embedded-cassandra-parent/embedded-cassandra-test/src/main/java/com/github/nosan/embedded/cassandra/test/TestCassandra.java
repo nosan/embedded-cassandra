@@ -223,8 +223,7 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Creates a new connection to the underlying {@code Cassandra}. This connection is <b>not</b> managed by this
-	 * {@code TestCassandra}.
+	 * Creates a new connection to the underlying {@code Cassandra}.
 	 *
 	 * @return a connection
 	 * @since 2.0.2
