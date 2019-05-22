@@ -56,7 +56,7 @@ class NodeSettingsTests {
 		this.settings.setTransportStarted(true);
 		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
 		assertThat(this.settings.getPort()).isEqualTo(9042);
-		assertThat(this.settings.getTransportStarted()).isTrue();
+		assertThat(this.settings.transportStarted()).hasValue(true);
 	}
 
 	@Test
@@ -71,7 +71,7 @@ class NodeSettingsTests {
 		this.settings.setTransportStarted(true);
 		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
 		assertThat(this.settings.getSslPort()).isEqualTo(9142);
-		assertThat(this.settings.getTransportStarted()).isTrue();
+		assertThat(this.settings.transportStarted()).hasValue(true);
 	}
 
 	@Test
@@ -86,7 +86,7 @@ class NodeSettingsTests {
 		this.settings.setRpcTransportStarted(true);
 		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
 		assertThat(this.settings.getRpcPort()).isEqualTo(9160);
-		assertThat(this.settings.getRpcTransportStarted()).isTrue();
+		assertThat(this.settings.rpcTransportStarted()).hasValue(true);
 	}
 
 }

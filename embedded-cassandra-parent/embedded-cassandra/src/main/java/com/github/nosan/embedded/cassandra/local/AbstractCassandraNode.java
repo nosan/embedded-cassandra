@@ -84,8 +84,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	final Version version;
 
-	final ThreadFactory threadFactory = new DefaultThreadFactory(
-			String.format("cassandra-%d-db", counter.incrementAndGet()));
+	final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("cassandra-%d-db",
+			counter.incrementAndGet()));
 
 	private final JvmParameters jvmParameters;
 
@@ -250,8 +250,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	private boolean isStarted(NodeSettings settings) {
-		Boolean transportStarted = settings.getTransportStarted();
-		Boolean rpcTransportStarted = settings.getRpcTransportStarted();
+		Boolean transportStarted = settings.transportStarted().orElse(null);
+		Boolean rpcTransportStarted = settings.rpcTransportStarted().orElse(null);
 		if (transportStarted == null || rpcTransportStarted == null) {
 			return false;
 		}
@@ -307,7 +307,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			settings.setSslPort(null);
 			settings.setPort(null);
 		});
-
 		onMatch(new Pattern[]{RPC_TRANSPORT_NOT_START_PATTERN, RPC_TRANSPORT_STOP_PATTERN}, line, matcher -> {
 			settings.setRpcTransportStarted(false);
 			settings.setRpcPort(null);

@@ -137,28 +137,26 @@ class NodeSettings implements Settings {
 		this.rpcPort = rpcPort;
 	}
 
-	@Nullable
-	Boolean getRpcTransportStarted() {
+	Optional<Boolean> rpcTransportStarted() {
 		Boolean rpcTransportStarted = this.rpcTransportStarted;
 		Version version = this.version;
 		if (rpcTransportStarted == null && version.getMajor() > 3) {
-			return false;
+			return Optional.of(false);
 		}
-		return rpcTransportStarted;
+		return Optional.ofNullable(rpcTransportStarted);
 	}
 
 	void setRpcTransportStarted(@Nullable Boolean rpcTransportStarted) {
 		this.rpcTransportStarted = rpcTransportStarted;
 	}
 
-	@Nullable
-	Boolean getTransportStarted() {
+	Optional<Boolean> transportStarted() {
 		Version version = this.version;
 		Boolean transportStarted = this.transportStarted;
 		if (transportStarted == null && version.getMajor() < 2) {
-			return false;
+			return Optional.of(false);
 		}
-		return transportStarted;
+		return Optional.ofNullable(transportStarted);
 	}
 
 	void setTransportStarted(@Nullable Boolean transportStarted) {
