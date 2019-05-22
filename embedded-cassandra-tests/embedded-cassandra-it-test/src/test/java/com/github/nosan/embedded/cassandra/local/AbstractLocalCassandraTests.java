@@ -32,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -53,7 +52,6 @@ import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBui
 import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -105,19 +103,6 @@ abstract class AbstractLocalCassandraTests {
 		MDC.remove("ID");
 		MDC.remove("TC");
 		MDC.remove("TM");
-	}
-
-	@Test
-	void shouldInterruptStartup() {
-		Assertions.assertTimeout(Duration.ofSeconds(5), () -> {
-			Cassandra cassandra = this.factory.create();
-			DefaultThreadFactory factory = new DefaultThreadFactory("test");
-			Thread thread = factory.newThread(cassandra::start);
-			thread.start();
-			Thread.sleep(2000);
-			thread.interrupt();
-			thread.join(5000);
-		});
 	}
 
 	@Test
