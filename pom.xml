@@ -350,6 +350,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <show>package</show>
                     <failOnWarnings>true</failOnWarnings>
                     <failOnError>true</failOnError>
                 </configuration>
