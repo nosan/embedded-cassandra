@@ -66,10 +66,10 @@ public class DefaultConnection implements Connection {
 	private static Connection create(ClassLoader cl, Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl)) {
-			return new CqlSessionConnection(new CqlSessionFactory().create(settings));
+			return new CqlSessionConnection(settings);
 		}
 		if (ClassUtils.isPresent(CLUSTER_CLASS, cl)) {
-			return new ClusterConnection(new ClusterFactory().create(settings));
+			return new ClusterConnection(settings);
 		}
 		return new NoOpConnection();
 	}

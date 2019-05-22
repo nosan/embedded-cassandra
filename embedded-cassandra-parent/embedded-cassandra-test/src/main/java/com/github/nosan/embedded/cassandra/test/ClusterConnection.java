@@ -22,6 +22,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.util.SessionUtils;
 
@@ -46,6 +47,15 @@ public class ClusterConnection implements Connection {
 	public ClusterConnection(Cluster cluster) {
 		this.cluster = Objects.requireNonNull(cluster, "Cluster must not be null");
 		this.session = this.cluster.newSession();
+	}
+
+	/**
+	 * Creates a {@link ClusterConnection}.
+	 *
+	 * @param settings the settings
+	 */
+	public ClusterConnection(Settings settings) {
+		this(new ClusterFactory().create(Objects.requireNonNull(settings, "Settings must not be null")));
 	}
 
 	@Override

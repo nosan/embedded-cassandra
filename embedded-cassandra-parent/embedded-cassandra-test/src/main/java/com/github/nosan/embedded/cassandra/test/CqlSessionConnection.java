@@ -21,6 +21,7 @@ import java.util.Objects;
 import com.datastax.oss.driver.api.core.CqlSession;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 
@@ -42,6 +43,15 @@ public class CqlSessionConnection implements Connection {
 	 */
 	public CqlSessionConnection(CqlSession session) {
 		this.session = Objects.requireNonNull(session, "Cql Session must not be null");
+	}
+
+	/**
+	 * Creates a {@link CqlSessionConnection}.
+	 *
+	 * @param settings the settings
+	 */
+	public CqlSessionConnection(Settings settings) {
+		this(new CqlSessionFactory().create(Objects.requireNonNull(settings, "Settings must not be null")));
 	}
 
 	@Override
