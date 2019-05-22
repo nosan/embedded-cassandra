@@ -251,28 +251,28 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private boolean isStarted(NodeSettings settings) {
 		Version version = settings.getVersion();
-		if (!settings.rpcTransportStarted().isPresent() && version.getMajor() < 4) {
+		Boolean transportStarted = settings.transportStarted().orElse(null);
+		Boolean rpcTransportStarted = settings.rpcTransportStarted().orElse(null);
+		if (transportStarted == null && version.getMajor() < 4) {
 			return false;
 		}
-		if (!settings.transportStarted().isPresent() && version.getMajor() > 1) {
+		if (rpcTransportStarted == null && version.getMajor() > 1) {
 			return false;
 		}
-		boolean transportStarted = settings.transportStarted().orElse(false);
-		boolean rpcTransportStarted = settings.rpcTransportStarted().orElse(false);
-		Optional<InetAddress> address = settings.address();
-		Optional<Integer> port = settings.port();
-		if (transportStarted && port.isPresent() && address.isPresent()
-				&& (port.get() != 0 && !SocketUtils.connect(address.get(), port.get()))) {
+		InetAddress address = settings.address().orElse(null);
+		Integer port = settings.port().orElse(null);
+		Integer rpcPort = settings.rpcPort().orElse(null);
+		Integer sslPort = settings.sslPort().orElse(null);
+		if (transportStarted != null && transportStarted && port != null && address != null && port != 0
+				&& !SocketUtils.connect(address, port)) {
 			return false;
 		}
-		Optional<Integer> sslPort = settings.sslPort();
-		if (transportStarted && sslPort.isPresent() && address.isPresent()
-				&& (sslPort.get() != 0 && !SocketUtils.connect(address.get(), sslPort.get()))) {
+		if (transportStarted != null && transportStarted && sslPort != null && address != null && sslPort != 0
+				&& !SocketUtils.connect(address, sslPort)) {
 			return false;
 		}
-		Optional<Integer> rpcPort = settings.rpcPort();
-		return !rpcTransportStarted || !rpcPort.isPresent() || !address.isPresent()
-				|| (rpcPort.get() == 0 || SocketUtils.connect(address.get(), rpcPort.get()));
+		return rpcTransportStarted == null || !rpcTransportStarted || rpcPort == null || address == null || rpcPort == 0
+				|| SocketUtils.connect(address, rpcPort);
 	}
 
 	private void parse(String line, NodeSettings settings) {
