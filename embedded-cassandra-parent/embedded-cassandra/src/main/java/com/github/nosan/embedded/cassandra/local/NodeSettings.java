@@ -19,10 +19,6 @@ package com.github.nosan.embedded.cassandra.local;
 import java.net.InetAddress;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Supplier;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
@@ -36,30 +32,28 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  */
 class NodeSettings implements Settings {
 
-	private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-
 	private final Version version;
 
 	@Nullable
-	private InetAddress address;
+	private volatile InetAddress address;
 
 	@Nullable
-	private InetAddress rpcAddress;
+	private volatile InetAddress rpcAddress;
 
 	@Nullable
-	private Integer port;
+	private volatile Integer port;
 
 	@Nullable
-	private Integer sslPort;
+	private volatile Integer sslPort;
 
 	@Nullable
-	private Integer rpcPort;
+	private volatile Integer rpcPort;
 
 	@Nullable
-	private Boolean rpcTransportStarted;
+	private volatile Boolean rpcTransportStarted;
 
 	@Nullable
-	private Boolean transportStarted;
+	private volatile Boolean transportStarted;
 
 	NodeSettings(Version version) {
 		this.version = version;
@@ -72,107 +66,103 @@ class NodeSettings implements Settings {
 
 	@Override
 	public Optional<InetAddress> address() {
-		return read(() -> {
-			InetAddress address = this.address;
-			if (address != null) {
-				return Optional.of(address);
-			}
-			return Optional.ofNullable(this.rpcAddress);
-		});
+		Boolean transportStarted = this.transportStarted;
+		Boolean rpcTransportStarted = this.rpcTransportStarted;
+		if ((transportStarted == null || !transportStarted) && (rpcTransportStarted == null || !rpcTransportStarted)) {
+			return Optional.empty();
+		}
+		InetAddress address = Optional.ofNullable(this.address)
+				.orElse(this.rpcAddress);
+		return Optional.ofNullable(address);
 	}
 
 	@Override
 	public Optional<Integer> port() {
-		return read(() -> Optional.ofNullable(this.port));
+		Boolean transportStarted = this.transportStarted;
+		if (transportStarted == null || !transportStarted) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(this.port);
+
 	}
 
 	@Override
 	public Optional<Integer> sslPort() {
-		return read(() -> Optional.ofNullable(this.sslPort));
+		Boolean transportStarted = this.transportStarted;
+		if (transportStarted == null || !transportStarted) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(this.sslPort);
 	}
 
 	@Override
 	public Optional<Integer> rpcPort() {
-		return read(() -> Optional.ofNullable(this.rpcPort));
+		Boolean rpcTransportStarted = this.rpcTransportStarted;
+		if (rpcTransportStarted == null || !rpcTransportStarted) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(this.rpcPort);
 	}
 
 	@Override
 	public String toString() {
-		return read(() -> new StringJoiner(", ", NodeSettings.class.getSimpleName() + " [", "]")
+		return new StringJoiner(", ", NodeSettings.class.getSimpleName() + "[", "]")
 				.add("version=" + this.version)
 				.add("address=" + Optional.ofNullable(this.address).orElse(this.rpcAddress))
 				.add("port=" + this.port)
 				.add("sslPort=" + this.sslPort)
 				.add("rpcPort=" + this.rpcPort)
-				.toString());
+				.add("rpcTransportStarted=" + this.rpcTransportStarted)
+				.add("transportStarted=" + this.transportStarted)
+				.toString();
 	}
 
-	Optional<Boolean> rpcTransportStarted() {
-		return read(() -> Optional.ofNullable(this.rpcTransportStarted));
+	void setAddress(@Nullable InetAddress address) {
+		this.address = address;
 	}
 
-	Optional<Boolean> transportStarted() {
-		return read(() -> Optional.ofNullable(this.transportStarted));
+	void setRpcAddress(@Nullable InetAddress rpcAddress) {
+		this.rpcAddress = rpcAddress;
 	}
 
-	void stopRpcTransport() {
-		write(() -> {
-			this.rpcAddress = null;
-			this.rpcPort = null;
-			this.rpcTransportStarted = false;
-		});
+	void setPort(@Nullable Integer port) {
+		this.port = port;
 	}
 
-	void stopTransport() {
-		write(() -> {
-			this.port = null;
-			this.sslPort = null;
-			this.address = null;
-			this.transportStarted = false;
-		});
+	void setSslPort(@Nullable Integer sslPort) {
+		this.sslPort = sslPort;
 	}
 
-	void startRpcTransport(InetAddress address, int port) {
-		write(() -> {
-			this.rpcPort = port;
-			this.rpcAddress = address;
-			this.rpcTransportStarted = true;
-		});
+	void setRpcPort(@Nullable Integer rpcPort) {
+		this.rpcPort = rpcPort;
 	}
 
-	void startTransport(InetAddress address, int port, boolean ssl) {
-		write(() -> {
-			if (ssl) {
-				this.sslPort = port;
-			}
-			else {
-				this.port = port;
-			}
-			this.address = address;
-			this.transportStarted = true;
-		});
-	}
-
-	private <T> T read(Supplier<T> supplier) {
-		Lock lock = this.readWriteLock.readLock();
-		lock.lock();
-		try {
-			return supplier.get();
+	@Nullable
+	Boolean getRpcTransportStarted() {
+		Boolean rpcTransportStarted = this.rpcTransportStarted;
+		Version version = this.version;
+		if (rpcTransportStarted == null && version.getMajor() > 3) {
+			return false;
 		}
-		finally {
-			lock.unlock();
-		}
+		return rpcTransportStarted;
 	}
 
-	private void write(Runnable runnable) {
-		Lock lock = this.readWriteLock.writeLock();
-		lock.lock();
-		try {
-			runnable.run();
+	void setRpcTransportStarted(@Nullable Boolean rpcTransportStarted) {
+		this.rpcTransportStarted = rpcTransportStarted;
+	}
+
+	@Nullable
+	Boolean getTransportStarted() {
+		Version version = this.version;
+		Boolean transportStarted = this.transportStarted;
+		if (transportStarted == null && version.getMajor() < 2) {
+			return false;
 		}
-		finally {
-			lock.unlock();
-		}
+		return transportStarted;
+	}
+
+	void setTransportStarted(@Nullable Boolean transportStarted) {
+		this.transportStarted = transportStarted;
 	}
 
 }

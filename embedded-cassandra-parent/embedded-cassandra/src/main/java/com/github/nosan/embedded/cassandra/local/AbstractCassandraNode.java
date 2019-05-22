@@ -250,29 +250,34 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	private boolean isStarted(NodeSettings settings) {
-		Version version = settings.getVersion();
-		Boolean transportStarted = settings.transportStarted().orElse(null);
-		Boolean rpcTransportStarted = settings.rpcTransportStarted().orElse(null);
-		if (transportStarted == null && version.getMajor() < 4) {
+		Boolean transportStarted = settings.getTransportStarted();
+		Boolean rpcTransportStarted = settings.getRpcTransportStarted();
+		if (transportStarted == null || rpcTransportStarted == null) {
 			return false;
 		}
-		if (rpcTransportStarted == null && version.getMajor() > 1) {
-			return false;
+		if (transportStarted) {
+			InetAddress address = settings.address().orElse(null);
+			Integer port = settings.port().orElse(null);
+			Integer sslPort = settings.sslPort().orElse(null);
+			if ((port != null || sslPort != null) && address == null) {
+				return false;
+			}
+			if (port != null && port != 0 && !SocketUtils.connect(address, port)) {
+				return false;
+			}
+			if (sslPort != null && sslPort != 0 && !SocketUtils.connect(address, sslPort)) {
+				return false;
+			}
 		}
-		InetAddress address = settings.address().orElse(null);
-		Integer port = settings.port().orElse(null);
-		Integer rpcPort = settings.rpcPort().orElse(null);
-		Integer sslPort = settings.sslPort().orElse(null);
-		if (transportStarted != null && transportStarted && port != null && address != null && port != 0
-				&& !SocketUtils.connect(address, port)) {
-			return false;
+		if (rpcTransportStarted) {
+			InetAddress address = settings.address().orElse(null);
+			Integer rpcPort = settings.rpcPort().orElse(null);
+			if (rpcPort == null || address == null) {
+				return false;
+			}
+			return rpcPort == 0 || SocketUtils.connect(address, rpcPort);
 		}
-		if (transportStarted != null && transportStarted && sslPort != null && address != null && sslPort != 0
-				&& !SocketUtils.connect(address, sslPort)) {
-			return false;
-		}
-		return rpcTransportStarted == null || !rpcTransportStarted || rpcPort == null || address == null || rpcPort == 0
-				|| SocketUtils.connect(address, rpcPort);
+		return true;
 	}
 
 	private void parse(String line, NodeSettings settings) {
@@ -280,17 +285,34 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			InetAddress address = SocketUtils.getAddress(matcher.group(1));
 			int port = SocketUtils.getPort(matcher.group(2));
 			boolean ssl = line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED);
-			settings.startTransport(address, port, ssl);
+			settings.setAddress(address);
+			if (ssl) {
+				settings.setSslPort(port);
+			}
+			else {
+				settings.setPort(port);
+			}
+			settings.setTransportStarted(true);
 		});
 		onMatch(new Pattern[]{RPC_TRANSPORT_START_PATTERN}, line, matcher -> {
 			InetAddress address = SocketUtils.getAddress(matcher.group(1));
 			int port = SocketUtils.getPort(matcher.group(2));
-			settings.startRpcTransport(address, port);
+			settings.setRpcPort(port);
+			settings.setRpcAddress(address);
+			settings.setRpcTransportStarted(true);
 		});
-		onMatch(new Pattern[]{TRANSPORT_NOT_START_PATTERN, TRANSPORT_STOP_PATTERN}, line, matcher ->
-				settings.stopTransport());
-		onMatch(new Pattern[]{RPC_TRANSPORT_NOT_START_PATTERN, RPC_TRANSPORT_STOP_PATTERN}, line, matcher ->
-				settings.stopRpcTransport());
+		onMatch(new Pattern[]{TRANSPORT_NOT_START_PATTERN, TRANSPORT_STOP_PATTERN}, line, matcher -> {
+			settings.setTransportStarted(false);
+			settings.setAddress(null);
+			settings.setSslPort(null);
+			settings.setPort(null);
+		});
+
+		onMatch(new Pattern[]{RPC_TRANSPORT_NOT_START_PATTERN, RPC_TRANSPORT_STOP_PATTERN}, line, matcher -> {
+			settings.setRpcTransportStarted(false);
+			settings.setRpcPort(null);
+			settings.setRpcAddress(null);
+		});
 	}
 
 	private void onMatch(Pattern[] patterns, String line, Consumer<? super Matcher> matcherConsumer) {

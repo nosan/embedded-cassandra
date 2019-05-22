@@ -45,73 +45,48 @@ class NodeSettingsTests {
 	}
 
 	@Test
-	void startTransport() {
+	void setPortAndAddress() {
+		this.settings.setTransportStarted(false);
 		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("Address is not present");
 		assertThatThrownBy(this.settings::getPort).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("Port is not present");
-		this.settings.startTransport(ADDRESS, 9042, false);
+		this.settings.setPort(9042);
+		this.settings.setAddress(ADDRESS);
+		this.settings.setTransportStarted(true);
 		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
 		assertThat(this.settings.getPort()).isEqualTo(9042);
-		assertThat(this.settings.transportStarted()).hasValue(true);
+		assertThat(this.settings.getTransportStarted()).isTrue();
 	}
 
 	@Test
-	void startSslTransport() {
+	void setSslPortAndAddress() {
+		this.settings.setTransportStarted(false);
 		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("Address is not present");
 		assertThatThrownBy(this.settings::getSslPort).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("SSL port is not present");
-		this.settings.startTransport(ADDRESS, 9142, true);
+		this.settings.setSslPort(9142);
+		this.settings.setAddress(ADDRESS);
+		this.settings.setTransportStarted(true);
 		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
 		assertThat(this.settings.getSslPort()).isEqualTo(9142);
-		assertThat(this.settings.transportStarted()).hasValue(true);
+		assertThat(this.settings.getTransportStarted()).isTrue();
 	}
 
 	@Test
-	void startRpcTransport() {
+	void setRpcPortAndAddress() {
+		this.settings.setRpcTransportStarted(false);
 		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("Address is not present");
 		assertThatThrownBy(this.settings::getRpcPort).isInstanceOf(NoSuchElementException.class)
 				.hasStackTraceContaining("RPC port is not present");
-		this.settings.startRpcTransport(ADDRESS, 9160);
+		this.settings.setRpcPort(9160);
+		this.settings.setRpcAddress(ADDRESS);
+		this.settings.setRpcTransportStarted(true);
 		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
 		assertThat(this.settings.getRpcPort()).isEqualTo(9160);
-		assertThat(this.settings.rpcTransportStarted()).hasValue(true);
-	}
-
-	@Test
-	void stopRpcTransport() {
-		this.settings.startRpcTransport(ADDRESS, 9160);
-		this.settings.stopRpcTransport();
-		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
-				.hasStackTraceContaining("Address is not present");
-		assertThatThrownBy(this.settings::getRpcPort).isInstanceOf(NoSuchElementException.class)
-				.hasStackTraceContaining("RPC port is not present");
-		assertThat(this.settings.rpcTransportStarted()).hasValue(false);
-	}
-
-	@Test
-	void stopTransport() {
-		this.settings.startTransport(ADDRESS, 9142, true);
-		this.settings.stopTransport();
-		assertThatThrownBy(this.settings::getAddress).isInstanceOf(NoSuchElementException.class)
-				.hasStackTraceContaining("Address is not present");
-		assertThatThrownBy(this.settings::getPort).isInstanceOf(NoSuchElementException.class)
-				.hasStackTraceContaining("Port is not present");
-		assertThatThrownBy(this.settings::getSslPort).isInstanceOf(NoSuchElementException.class)
-				.hasStackTraceContaining("SSL port is not present");
-		assertThat(this.settings.transportStarted()).hasValue(false);
-	}
-
-	@Test
-	void toStringTest() {
-		this.settings.startTransport(ADDRESS, 9042, false);
-		this.settings.startTransport(ADDRESS, 9142, true);
-		this.settings.startRpcTransport(ADDRESS, 9160);
-		assertThat(this.settings.toString())
-				.isEqualTo(String.format("NodeSettings [version=%s, address=%s, port=%d, sslPort=%d, rpcPort=%d]",
-						VERSION, InetAddress.getLoopbackAddress(), 9042, 9142, 9160));
+		assertThat(this.settings.getRpcTransportStarted()).isTrue();
 	}
 
 }
