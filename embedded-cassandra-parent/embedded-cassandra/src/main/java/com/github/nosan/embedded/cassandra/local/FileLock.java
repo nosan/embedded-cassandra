@@ -76,18 +76,14 @@ class FileLock implements AutoCloseable {
 	 */
 	void lock() throws IOException, FileLockInterruptionException {
 		Path file = this.file;
-		if (log.isDebugEnabled()) {
-			log.debug("Acquires a lock to the file '{}' ...", file);
-		}
+		log.info("Acquires a lock to the file '{}' ...", file);
 		FileChannel fileChannel = await(3, TimeUnit.SECONDS, () -> open(file),
 				() -> String.format("File lock for a file '%s' has not been acquired because "
 						+ "FileChannel.open(...) was not created.", file));
 		this.fileChannel = fileChannel;
 		this.fileLock = await(2, TimeUnit.MINUTES, () -> lock(fileChannel), () -> String.format("File lock for "
 				+ "a file '%s' has not been acquired because FileChannel.lock() was not created.", file));
-		if (log.isDebugEnabled()) {
-			log.debug("The lock to the file '{}' was acquired", file);
-		}
+		log.info("The lock to the file '{}' was acquired", file);
 	}
 
 	@Nullable
