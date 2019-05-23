@@ -147,7 +147,10 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	private Object getSession(ApplicationContext applicationContext) {
 		ClassLoader cl = getClass().getClassLoader();
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl)) {
-			return applicationContext.getBeanProvider(CqlSession.class).getIfUnique();
+			CqlSession session = applicationContext.getBeanProvider(CqlSession.class).getIfUnique();
+			if (session != null) {
+				return session;
+			}
 		}
 		if (ClassUtils.isPresent(SESSION_CLASS, cl)) {
 			return applicationContext.getBeanProvider(Session.class).getIfUnique();
