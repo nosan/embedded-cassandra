@@ -19,8 +19,8 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -31,108 +31,95 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 public abstract class CqlScriptParser {
 
-	private static final char SINGLE_QUOTE = '\'';
-
-	private static final char DOUBLE_QUOTE = '"';
-
-	private static final char STATEMENT = ';';
-
-	private static final char LINE_SEPARATOR = '\n';
-
-	private static final String DOUBLE_DOLLAR = "$$";
-
-	private static final String SINGLE_DASH_COMMENT = "--";
-
-	private static final String SINGLE_SLASH_COMMENT = "//";
-
-	private static final String BLOCK_START_COMMENT = "/*";
-
-	private static final String BLOCK_END_COMMENT = "*/";
-
 	/**
-	 * Parses script into the statements. Statements end in a semicolon (<b>statement1;statement..;statementN</b>).
-	 * <p>Use the following notation to include comments in CQL code:
-	 * <ol>
-	 * <li>For a single line or end of line put a double hyphen before the text (<b>-- comment here</b>)</li>
-	 * <li>For a single line or end of line put a double forward slash before the text (<b>// comment
-	 * here</b>)</li>
-	 * <li>For a block of comments put a forward slash asterisk at the beginning of the comment and then asterisk
-	 * forward slash at the end (<b>/&#42; comment here &#42;/ </b>).</li>
-	 * </ol>
+	 * Parses the given script into the statements. Statements end in a semicolon <b>statement1;statement...;statementN</b>.
+	 * This method does not validate the given {@code CQL} script, just only tries to split it into the statements.
 	 *
 	 * @param script CQL script.
 	 * @return CQL statements
 	 */
-	public static List<String> parse(String script) {
-		Objects.requireNonNull(script, "Script must not be null");
-		if (!StringUtils.hasText(script)) {
-			return Collections.emptyList();
-		}
+	public static List<String> parse(@Nullable String script) {
+		return StringUtils.hasText(script) ? parseScript(script) : Collections.emptyList();
+	}
+
+	private static List<String> parseScript(String script) {
 		List<String> statements = new ArrayList<>();
-		StringBuilder result = new StringBuilder();
-
-		boolean singleQuote = false;
-		boolean doubleQuote = false;
-		boolean doubleDollar = false;
-
-		for (int index = 0; index < script.length(); index++) {
-
-			char c = script.charAt(index);
-
-			if (!doubleQuote && !doubleDollar && c == SINGLE_QUOTE) {
-				result.append(SINGLE_QUOTE);
-				singleQuote = !singleQuote;
-				continue;
-			}
-			else if (!singleQuote && !doubleDollar && c == DOUBLE_QUOTE) {
-				result.append(DOUBLE_QUOTE);
-				doubleQuote = !doubleQuote;
-				continue;
-			}
-			else if (!singleQuote && !doubleQuote && script.startsWith(DOUBLE_DOLLAR, index)) {
-				result.append(DOUBLE_DOLLAR);
+		StringBuilder statement = new StringBuilder();
+		boolean singleQuoteEscape = false;
+		boolean doubleQuoteEscape = false;
+		boolean doubleDollarEscape = false;
+		int length = script.length();
+		int index = 0;
+		while (index < length) {
+			char c = getChar(script, index);
+			if (!doubleQuoteEscape && !doubleDollarEscape && c == '\'') {
+				statement.append('\'');
+				singleQuoteEscape = !singleQuoteEscape;
 				index++;
-				doubleDollar = !doubleDollar;
 				continue;
 			}
-
-			if (!singleQuote && !doubleQuote && !doubleDollar) {
-				if (script.startsWith(SINGLE_DASH_COMMENT, index) || script.startsWith(SINGLE_SLASH_COMMENT, index)) {
-					if (script.indexOf(LINE_SEPARATOR, index) < 0) {
+			if (!singleQuoteEscape && !doubleDollarEscape && c == '"') {
+				statement.append('"');
+				doubleQuoteEscape = !doubleQuoteEscape;
+				index++;
+				continue;
+			}
+			if (!singleQuoteEscape && !doubleQuoteEscape && script.startsWith("$$", index)) {
+				statement.append("$$");
+				doubleDollarEscape = !doubleDollarEscape;
+				index += 2;
+				continue;
+			}
+			if (!singleQuoteEscape && !doubleQuoteEscape && !doubleDollarEscape) {
+				if (script.startsWith("--", index) || script.startsWith("//", index)) {
+					if (script.indexOf('\n', index) < 0) {
 						break;
 					}
-					index = script.indexOf(LINE_SEPARATOR, index);
+					index = script.indexOf('\n', index) + 1;
 					continue;
 				}
-				else if (script.startsWith(BLOCK_START_COMMENT, index)) {
-					if (script.indexOf(BLOCK_END_COMMENT, index) < 0) {
-						throw new IllegalArgumentException(
-								String.format("Missing block comment '%s'", BLOCK_END_COMMENT));
+				if (script.startsWith("/*", index)) {
+					if (script.indexOf("*/", index) < 0) {
+						throw new IllegalArgumentException("Missing end block comment '*/'");
 					}
-					index = script.indexOf(BLOCK_END_COMMENT, index) + 1;
+					index = script.indexOf("*/", index) + 2;
 					continue;
 				}
-				else if (c == STATEMENT) {
-					if (StringUtils.hasText(result)) {
-						statements.add(result.toString());
-						result = new StringBuilder();
-					}
+				if (c == ';' && StringUtils.hasText(statement)) {
+					addStatement(statement, statements);
+					index++;
 					continue;
 				}
-				else if (c == '\n' || c == '\r' || c == '\t' || c == ' ') {
-					if (StringUtils.isEmpty(result) || result.charAt(result.length() - 1) == ' ') {
-						continue;
-					}
-					c = ' ';
+				if (c == ' ' && isSpaceBefore(statement)) {
+					index++;
+					continue;
 				}
 			}
-			result.append(c);
+			statement.append(c);
+			index++;
 		}
-		if (StringUtils.hasText(result)) {
-			statements.add(result.toString());
-		}
+		addStatement(statement, statements);
 		return Collections.unmodifiableList(statements);
+	}
 
+	private static void addStatement(StringBuilder statement, List<String> statements) {
+		if (StringUtils.hasText(statement)) {
+			statements.add(statement.toString().trim());
+			statement.delete(0, statement.length());
+		}
+	}
+
+	private static char getChar(String script, int index) {
+		char c = script.charAt(index);
+		if (c == '\r' || c == '\t' || c == '\n') {
+			return ' ';
+		}
+		return c;
+	}
+
+	private static boolean isSpaceBefore(StringBuilder statement) {
+		return StringUtils.hasLength(statement) && statement.charAt(statement.length() - 1) == ' ';
 	}
 
 }
+

@@ -44,7 +44,7 @@ class CqlScriptParserTests {
 
 	@Test
 	void parseStatements() {
-		List<String> statements = CqlScriptParser.parse("USE KEYSPACE \n\t test; DROP KEYSPACE \n\n   test");
+		List<String> statements = CqlScriptParser.parse("USE KEYSPACE \n\t test; DROP KEYSPACE \n\n   test  ");
 		assertThat(statements).containsExactly("USE KEYSPACE test", "DROP KEYSPACE test");
 	}
 
