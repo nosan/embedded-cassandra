@@ -32,8 +32,9 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 public abstract class CqlScriptParser {
 
 	/**
-	 * Parses the given script into the statements. Statements end in a semicolon <b>statement1;statement...;statementN</b>.
-	 * This method does not validate the given {@code CQL} script, just only tries to split it into the statements.
+	 * Parses the given script into the statements. Statements end in a semicolon
+	 * <b>statement1;statement...;statementN</b>. This method does not validate the given {@code CQL} script, just only
+	 * tries to split it into the statements.
 	 *
 	 * @param script CQL script.
 	 * @return CQL statements
