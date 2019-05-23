@@ -41,7 +41,7 @@ import com.github.nosan.embedded.cassandra.util.SystemUtils;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-public final class LocalCassandraFactory implements CassandraFactory {
+public class LocalCassandraFactory implements CassandraFactory {
 
 	private static final String SNAKEYAML_YAML_CLASS = "org.yaml.snakeyaml.Yaml";
 

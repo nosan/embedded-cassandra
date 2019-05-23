@@ -30,7 +30,7 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
-public final class RemoteArtifactFactory implements ArtifactFactory {
+public class RemoteArtifactFactory implements ArtifactFactory {
 
 	@Nullable
 	private UrlFactory urlFactory;
