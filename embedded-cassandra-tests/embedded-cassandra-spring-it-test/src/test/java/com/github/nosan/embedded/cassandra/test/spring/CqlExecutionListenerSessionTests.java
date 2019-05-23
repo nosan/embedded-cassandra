@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SuppressWarnings("NullableProblems")
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CqlSessionConfiguration.class, SessionConfiguration.class})
+@ContextConfiguration(classes = SessionConfiguration.class)
 @EmbeddedCassandra(scripts = "/init.cql")
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 class CqlExecutionListenerSessionTests {

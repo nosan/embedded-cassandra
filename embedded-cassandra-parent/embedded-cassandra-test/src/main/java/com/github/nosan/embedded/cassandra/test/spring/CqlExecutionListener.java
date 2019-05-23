@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -55,8 +54,6 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * @since 1.0.0
  */
 public final class CqlExecutionListener extends AbstractTestExecutionListener {
-
-	private static final String BEAN_NAME = "cassandraSession";
 
 	private static final String CQL_SESSION_CLASS = "com.datastax.oss.driver.api.core.CqlSession";
 
@@ -132,18 +129,19 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 			SessionUtils.execute(((Session) session), scripts);
 		}
 		else {
-			throw new IllegalStateException(String.format("There is no way to execute '%s' via '%s' "
-							+ "as this type is not supported",
-					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(",")), session.getClass()));
+			throw new IllegalStateException(String.format("Failed to execute CQL scripts: '%s'. "
+							+ "No one of types '%s', '%s', '%s' were found.",
+					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(",")),
+					CQL_SESSION_CLASS, SESSION_CLASS, Connection.class.getName()));
 		}
 	}
 
+	@Nullable
 	private Object getSession(String name, ApplicationContext applicationContext) {
 		if (StringUtils.hasText(name)) {
 			return applicationContext.getBean(name);
 		}
-		return Optional.ofNullable(getSession(applicationContext))
-				.orElseGet(() -> applicationContext.getBean(BEAN_NAME));
+		return getSession(applicationContext);
 	}
 
 	@Nullable
@@ -185,9 +183,7 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	private List<String> getStatements(String[] statements) {
-		return Arrays.stream(statements)
-				.filter(StringUtils::hasText)
-				.collect(Collectors.toList());
+		return Arrays.stream(statements).filter(StringUtils::hasText).collect(Collectors.toList());
 	}
 
 	@Nullable
