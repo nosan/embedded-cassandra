@@ -42,9 +42,7 @@ public interface Settings {
 	 * @see #getAddress()
 	 * @since 2.0.1
 	 */
-	default Optional<InetAddress> address() {
-		throw new UnsupportedOperationException("Optional address is not supported");
-	}
+	Optional<InetAddress> address();
 
 	/**
 	 * The port for client connections.
@@ -53,9 +51,7 @@ public interface Settings {
 	 * @see #getPort()
 	 * @since 2.0.1
 	 */
-	default Optional<Integer> port() {
-		throw new UnsupportedOperationException("Optional port is not supported");
-	}
+	Optional<Integer> port();
 
 	/**
 	 * SSL port for client connections.
@@ -64,9 +60,7 @@ public interface Settings {
 	 * @see #getSslPort()
 	 * @since 2.0.1
 	 */
-	default Optional<Integer> sslPort() {
-		throw new UnsupportedOperationException("Optional SSL port is not supported");
-	}
+	Optional<Integer> sslPort();
 
 	/**
 	 * RPC port for client connections.
@@ -75,8 +69,23 @@ public interface Settings {
 	 * @see #getRpcPort()
 	 * @since 2.0.1
 	 */
-	default Optional<Integer> rpcPort() {
-		throw new UnsupportedOperationException("Optional RPC port is not supported");
+	Optional<Integer> rpcPort();
+
+	/**
+	 * The port or SSL port for client connections.
+	 *
+	 * @return the port, or {@code empty} if transport is not started.
+	 * @see #port()
+	 * @see #sslPort()
+	 * @see #getPortOrSslPort()
+	 * @since 2.0.2
+	 */
+	default Optional<Integer> portOrSslPort() {
+		Integer port = port().orElse(null);
+		if (port != null) {
+			return Optional.of(port);
+		}
+		return sslPort();
 	}
 
 	/**
@@ -110,6 +119,18 @@ public interface Settings {
 	 */
 	default int getSslPort() throws NoSuchElementException {
 		return sslPort().orElseThrow(() -> new NoSuchElementException("SSL port is not present"));
+	}
+
+	/**
+	 * The port or SSL port for client connections.
+	 *
+	 * @return the port
+	 * @throws NoSuchElementException if port or ssl port are not present
+	 * @see #portOrSslPort()
+	 * @since 2.0.2
+	 */
+	default int getPortOrSslPort() throws NoSuchElementException {
+		return portOrSslPort().orElseThrow(() -> new NoSuchElementException("Port and SSL port are not present"));
 	}
 
 	/**

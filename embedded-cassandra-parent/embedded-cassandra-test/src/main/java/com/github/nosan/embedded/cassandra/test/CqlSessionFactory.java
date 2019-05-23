@@ -53,7 +53,7 @@ public class CqlSessionFactory {
 	 */
 	public CqlSession create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
-		Integer port = settings.port().orElseGet(() -> settings.sslPort().orElse(null));
+		Integer port = settings.portOrSslPort().orElse(null);
 		InetAddress address = settings.address().orElse(null);
 		if (address != null && port != null) {
 			DriverConfigLoader driverConfigLoader = buildDriverConfigLoader(DriverConfigLoader.programmaticBuilder()

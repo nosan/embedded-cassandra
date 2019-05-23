@@ -64,7 +64,7 @@ class CityRepositoryTests {
 		ClusterBuilderCustomizer embeddedClusterCustomizer(TestCassandra cassandra) {
 			return builder -> {
 				Settings settings = cassandra.getSettings();
-				Integer port = settings.port().orElseGet(() -> settings.sslPort().orElse(null));
+				Integer port = settings.portOrSslPort().orElse(null);
 				InetAddress address = settings.address().orElse(null);
 				if (port != null && address != null) {
 					builder.withPort(port).addContactPoints(address);
