@@ -81,9 +81,7 @@ class ArtifactWorkingDirectoryCustomizer implements WorkingDirectoryCustomizer {
 
 	private void extract(Path archiveFile, Path artifactDirectory) throws IOException {
 		ArchiveUtils.extract(archiveFile, artifactDirectory);
-		if (log.isDebugEnabled()) {
-			log.debug("Archive '{}' was extracted into the '{}'", archiveFile, artifactDirectory);
-		}
+		log.info("Archive '{}' was extracted into the '{}'", archiveFile, artifactDirectory);
 	}
 
 	private void copy(Path cassandraHome, Path workingDirectory) throws IOException {
