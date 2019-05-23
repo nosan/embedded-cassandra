@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.net.URL;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -95,6 +96,9 @@ public final class LocalCassandraFactory implements CassandraFactory {
 	private boolean registerShutdownHook = true;
 
 	private boolean deleteWorkingDirectory = true;
+
+	@Nullable
+	private Duration startupTimeout;
 
 	/**
 	 * Allow running Cassandra under {@code root} user.
@@ -533,6 +537,27 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		}
 	}
 
+	/**
+	 * Startup timeout. Must be positive.
+	 *
+	 * @return The value of the {@code startupTimeout} attribute
+	 * @since 2.0.2
+	 */
+	@Nullable
+	public Duration getStartupTimeout() {
+		return this.startupTimeout;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#getStartupTimeout()} attribute.
+	 *
+	 * @param startupTimeout The value for startupTimeout
+	 * @since 2.0.2
+	 */
+	public void setStartupTimeout(@Nullable Duration startupTimeout) {
+		this.startupTimeout = startupTimeout;
+	}
+
 	@Override
 	public Cassandra create() {
 		Version version = getVersion();
@@ -589,10 +614,14 @@ public final class LocalCassandraFactory implements CassandraFactory {
 		Ports ports = new Ports(getPort(), getRpcPort(), getStoragePort(), getSslStoragePort(), getJmxLocalPort());
 		JvmOptions jvmOptions = new JvmOptions(new ArrayList<>(getJvmOptions()));
 		JvmParameters jvmParameters = new JvmParameters(jvmOptions, ports, RandomPortSupplier.INSTANCE);
-		if (SystemUtils.isWindows()) {
-			return new WindowsCassandraNode(version, workingDirectory, getJavaHome(), jvmParameters);
+		Duration timeout = getStartupTimeout();
+		if (timeout == null || timeout.getSeconds() <= 0) {
+			timeout = Duration.ofMinutes(1);
 		}
-		return new UnixCassandraNode(version, workingDirectory, getJavaHome(), jvmParameters, isAllowRoot());
+		if (SystemUtils.isWindows()) {
+			return new WindowsCassandraNode(workingDirectory, version, timeout, getJavaHome(), jvmParameters);
+		}
+		return new UnixCassandraNode(workingDirectory, version, timeout, getJavaHome(), jvmParameters, isAllowRoot());
 	}
 
 }

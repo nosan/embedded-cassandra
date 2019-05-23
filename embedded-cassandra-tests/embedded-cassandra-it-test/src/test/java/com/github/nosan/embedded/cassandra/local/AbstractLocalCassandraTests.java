@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -135,10 +136,17 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
+	void shouldFailStartupTimeoutSmall() {
+		this.factory.setStartupTimeout(Duration.ofSeconds(3));
+		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class)
+				.hasStackTraceContaining("Try to increase a startup timeout");
+	}
+
+	@Test
 	void shouldFailAndCatchError() {
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-invalid.yaml"));
 		assertThatThrownBy(new CassandraRunner(this.factory)::run).isInstanceOf(CassandraException.class)
-				.hasMessageNotContaining("invalid_property");
+				.hasStackTraceContaining("invalid_property");
 	}
 
 	@Test

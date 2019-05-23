@@ -106,7 +106,7 @@ class NodeSettings implements Settings {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", NodeSettings.class.getSimpleName() + "[", "]")
+		return new StringJoiner(", ", "[", "]")
 				.add("version=" + this.version)
 				.add("address=" + Optional.ofNullable(this.address).orElse(this.rpcAddress))
 				.add("port=" + this.port)

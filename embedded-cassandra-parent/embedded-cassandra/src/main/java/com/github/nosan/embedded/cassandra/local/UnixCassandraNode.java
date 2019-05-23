@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.local;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Map;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -33,9 +34,9 @@ class UnixCassandraNode extends AbstractCassandraNode {
 
 	private final boolean allowRoot;
 
-	UnixCassandraNode(Version version, Path workingDirectory, @Nullable Path javaHome, JvmParameters jvmParameters,
-			boolean allowRoot) {
-		super(workingDirectory, version, javaHome, jvmParameters);
+	UnixCassandraNode(Path workingDirectory, Version version, Duration startupTimeout, @Nullable Path javaHome,
+			JvmParameters jvmParameters, boolean allowRoot) {
+		super(workingDirectory, version, startupTimeout, javaHome, jvmParameters);
 		this.allowRoot = allowRoot;
 	}
 

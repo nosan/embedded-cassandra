@@ -89,6 +89,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private final JvmParameters jvmParameters;
 
+	private final Duration startupTimeout;
+
 	@Nullable
 	private final Path javaHome;
 
@@ -98,10 +100,11 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Nullable
 	private volatile ProcessId processId;
 
-	AbstractCassandraNode(Path workingDirectory, Version version, @Nullable Path javaHome,
-			JvmParameters jvmParameters) {
+	AbstractCassandraNode(Path workingDirectory, Version version, Duration startupTimeout,
+			@Nullable Path javaHome, JvmParameters jvmParameters) {
 		this.version = version;
 		this.workingDirectory = workingDirectory;
+		this.startupTimeout = startupTimeout;
 		this.javaHome = javaHome;
 		this.jvmParameters = jvmParameters;
 	}
@@ -211,9 +214,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 		thread.start();
 
+		Duration timeout = this.startupTimeout;
 		try {
 			long start = System.nanoTime();
-			Duration timeout = Duration.ofMinutes(2);
 			long rem = timeout.toNanos();
 			do {
 				long pid = processId.getPid();
@@ -242,11 +245,18 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			lines.clear();
 		}
 
-		throw new IllegalStateException(
-				String.format("There is no way to detect whether Apache Cassandra Node '%s' %s is started or not."
-						+ " Note, that Apache Cassandra <output> must be enabled."
-						+ " If the <output> is enabled, and you see this message, then either you found a bug"
-						+ " or Apache Cassandra is hanging.", processId.getPid(), settings));
+		StringBuilder message = new StringBuilder(
+				String.format("Apache Cassandra Node '%s' is in unknown state.%n", processId.getPid()));
+		message.append(String.format("\tDescription:%n"));
+		message.append(String.format("\t\t- Settings: %s%n", settings));
+		message.append(String.format("\t\t- Startup timeout: '%s second(s)'%n", timeout.getSeconds()));
+		message.append(String.format("\t\t- PID: '%s'%n", processId.getPid()));
+		message.append(String.format("\tAction:%n"));
+		message.append(String.format("\t\t- Try to increase a startup timeout%n"));
+		message.append(String.format("\t\t- Apache Cassandra <output> must be enabled.%n"));
+		message.append(String.format("\t\t- If you feel this is a bug. Could you please copy logs and create an issue."
+				+ " Thanks in advance.%n"));
+		throw new IllegalStateException(message.toString());
 	}
 
 	private boolean isStarted(NodeSettings settings) {
