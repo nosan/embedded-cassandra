@@ -27,7 +27,7 @@ import org.slf4j.MDC;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * The {@link MDC} aware {@link ThreadFactory thread factory} to create a new {@link Thread}.<b>Only for internal
+ * The {@link MDC} aware {@link ThreadFactory} to create a new {@link Thread}. <b>Only for internal
  * purposes.</b>
  *
  * @author Dmytro Nosan
