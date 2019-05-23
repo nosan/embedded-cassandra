@@ -86,7 +86,7 @@ public abstract class CqlScriptParser {
 					index = script.indexOf("*/", index) + 2;
 					continue;
 				}
-				if (c == ';' && StringUtils.hasText(statement)) {
+				if (c == ';') {
 					addStatement(statement, statements);
 					index++;
 					continue;
@@ -106,8 +106,8 @@ public abstract class CqlScriptParser {
 	private static void addStatement(StringBuilder statement, List<String> statements) {
 		if (StringUtils.hasText(statement)) {
 			statements.add(statement.toString().trim());
-			statement.delete(0, statement.length());
 		}
+		statement.delete(0, statement.length());
 	}
 
 	private static char getChar(String script, int index) {
