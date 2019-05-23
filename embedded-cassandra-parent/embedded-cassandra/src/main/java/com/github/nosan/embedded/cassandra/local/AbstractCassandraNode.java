@@ -244,19 +244,16 @@ abstract class AbstractCassandraNode implements CassandraNode {
 			capture.set(false);
 			lines.clear();
 		}
-
-		StringBuilder message = new StringBuilder(
-				String.format("Apache Cassandra Node '%s' is in unknown state.%n", processId.getPid()));
-		message.append(String.format("\tDescription:%n"));
-		message.append(String.format("\t\t- Settings: %s%n", settings));
-		message.append(String.format("\t\t- Startup timeout: '%s second(s)'%n", timeout.getSeconds()));
-		message.append(String.format("\t\t- PID: '%s'%n", processId.getPid()));
-		message.append(String.format("\tAction:%n"));
-		message.append(String.format("\t\t- Try to increase a startup timeout%n"));
-		message.append(String.format("\t\t- Apache Cassandra <output> must be enabled.%n"));
-		message.append(String.format("\t\t- If you feel this is a bug. Could you please copy logs and create an issue."
-				+ " Thanks in advance.%n"));
-		throw new IllegalStateException(message.toString());
+		String message = String.format("Apache Cassandra Node '%s' is in unknown state.%n", processId.getPid())
+				+ String.format("\tDescription:%n")
+				+ String.format("\t\t- Settings: %s%n", settings)
+				+ String.format("\t\t- Startup timeout: '%s second(s)'%n", timeout.getSeconds())
+				+ String.format("\t\t- PID: '%s'%n", processId.getPid())
+				+ String.format("\tAction:%n")
+				+ String.format("\t\t- Try to increase a startup timeout%n")
+				+ String.format("\t\t- Apache Cassandra <output> must be enabled.%n")
+				+ String.format("\t\t- If you feel this is a bug. Could you please copy logs and create an issue.%n");
+		throw new IllegalStateException(message);
 	}
 
 	private boolean isStarted(NodeSettings settings) {
