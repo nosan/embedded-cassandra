@@ -38,6 +38,7 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.CqlStatements;
 import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.test.Connection;
 import com.github.nosan.embedded.cassandra.test.spring.Cql.ExecutionPhase;
 import com.github.nosan.embedded.cassandra.test.util.CqlSessionUtils;
 import com.github.nosan.embedded.cassandra.test.util.SessionUtils;
@@ -121,17 +122,19 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 	private void executeScripts(String name, ApplicationContext applicationContext, CqlScript... scripts) {
 		ClassLoader cl = getClass().getClassLoader();
 		Object session = getSession(name, applicationContext);
-		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl) && session instanceof CqlSession) {
+		if (session instanceof Connection) {
+			((Connection) session).execute(scripts);
+		}
+		else if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl) && session instanceof CqlSession) {
 			CqlSessionUtils.execute(((CqlSession) session), scripts);
 		}
 		else if (ClassUtils.isPresent(SESSION_CLASS, cl) && session instanceof Session) {
 			SessionUtils.execute(((Session) session), scripts);
 		}
 		else {
-			throw new IllegalStateException(String.format("There is no way to execute '%s'."
-							+ " Both '%s' and '%s' classes are not present in the classpath.",
-					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(",")),
-					CQL_SESSION_CLASS, SESSION_CLASS));
+			throw new IllegalStateException(String.format("There is no way to execute '%s' via '%s' "
+							+ "as this type is not supported",
+					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(",")), session.getClass()));
 		}
 	}
 
@@ -145,6 +148,10 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 
 	@Nullable
 	private Object getSession(ApplicationContext applicationContext) {
+		Connection connection = applicationContext.getBeanProvider(Connection.class).getIfUnique();
+		if (connection != null) {
+			return connection;
+		}
 		ClassLoader cl = getClass().getClassLoader();
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl)) {
 			CqlSession session = applicationContext.getBeanProvider(CqlSession.class).getIfUnique();

@@ -31,9 +31,11 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 
+import com.github.nosan.embedded.cassandra.test.Connection;
+
 /**
  * {@code @Cql} is used to annotate a test method to configure CQL {@link #scripts} and {@link #statements} to be
- * executed against a given {@link CqlSession} or {@link Session} during integration tests.
+ * executed against a given {@link CqlSession}, {@link Session}, {@link Connection} during integration tests.
  * <p>Script execution is performed by the {@link CqlExecutionListener},
  * which is enabled by default.
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
@@ -102,25 +104,24 @@ public @interface Cql {
 	ExecutionPhase[] executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
 
 	/**
-	 * The bean name of the {@code Session} against which the scripts should be executed.
-	 * <p>The name is only required if there is more than one bean of type {@code Session} in the test's {@code
+	 * The bean name of the {@link Connection}, {@link CqlSession} or {@link Session} against which the
+	 * scripts should be executed.
+	 * <p>The name is only required if there is more than one bean in the test's {@code
 	 * ApplicationContext}. If there is only one such bean, it is not necessary to specify a bean name.
 	 * <p>Defaults to an empty string, requiring that one of the following is
 	 * true:
 	 * <ol>
-	 * <li>There is only one bean of type {@code Session} in the test's
+	 * <li>There is an unique bean of type {@link Connection} in the test's
 	 * {@code ApplicationContext}.</li>
-	 * <li>There is a primary bean of type {@code Session} in the test's
+	 * <li>There is an unique bean of type {@link CqlSession} in the test's
 	 * {@code ApplicationContext}.</li>
-	 * <li>The {@code Session} bean to use is named {@code "cassandraSession"}</li>
+	 * <li>There is an unique bean of type {@link Session} in the test's
+	 * {@code ApplicationContext}.</li>
+	 * <li>The bean to use is named {@code "cassandraSession"}</li>
 	 * </ol>
-	 * <p>
-	 * Note, that {@code com.datastax.oss.driver.api.core.CqlSession} has more priority than
-	 * {@code com.datastax.driver.core.Session}.
-	 * <p>
 	 * The placeholder {@code ${...}} can be used
 	 *
-	 * @return {@code Session} bean name.
+	 * @return a bean name.
 	 */
 	String session() default "";
 
