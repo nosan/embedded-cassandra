@@ -46,7 +46,7 @@ public class ClusterConnection implements Connection {
 	 */
 	public ClusterConnection(Cluster cluster) {
 		this.cluster = Objects.requireNonNull(cluster, "Cluster must not be null");
-		this.session = this.cluster.newSession();
+		this.session = this.cluster.connect();
 	}
 
 	/**
