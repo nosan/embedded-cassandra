@@ -120,10 +120,30 @@ class CqlScriptParserTests {
 	void ignoreStatementSymbolInDoubleDollars() {
 		List<String> statements = CqlScriptParser
 				.parse("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
-						+ "  (201, $$Women's Tour of New Zealand; New England$$);");
+						+ "  (201, $$Women's Tour of New Zealand;  New England$$);");
 		assertThat(statements).containsExactly(
 				"INSERT INTO cycling.calendar (race_id, race_name) "
-						+ "VALUES (201, $$Women's Tour of New Zealand; New England$$)");
+						+ "VALUES (201, $$Women's Tour of New Zealand;  New England$$)");
+	}
+
+	@Test
+	void shouldNotTrimSpacesInDoubleQuotes() {
+		List<String> statements = CqlScriptParser
+				.parse("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
+						+ "  (201, \"Women's Tour   of New Zealand; New England\");");
+		assertThat(statements).containsExactly(
+				"INSERT INTO cycling.calendar (race_id, race_name) "
+						+ "VALUES (201, \"Women's Tour   of New Zealand; New England\")");
+	}
+
+	@Test
+	void shouldNotTrimSpacesInQuotes() {
+		List<String> statements = CqlScriptParser
+				.parse("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
+						+ "  (201, \"Women's Tour   of New Zealand; New England\");");
+		assertThat(statements).containsExactly(
+				"INSERT INTO cycling.calendar (race_id, race_name) "
+						+ "VALUES (201, \"Women's Tour   of New Zealand; New England\")");
 	}
 
 	@Test
