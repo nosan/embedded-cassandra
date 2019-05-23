@@ -16,6 +16,9 @@
 
 package com.github.nosan.embedded.cassandra.test.util;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +30,7 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
  * @author Dmytro Nosan
  * @since 2.0.0
  */
-abstract class CqlUtils {
+public abstract class CqlUtils {
 
 	private static final Logger log = LoggerFactory.getLogger(CqlUtils.class);
 
@@ -38,7 +41,22 @@ abstract class CqlUtils {
 	 * @param statementCallback a callback
 	 * @see CqlScript
 	 */
-	static void execute(CqlScript[] scripts, StatementCallback statementCallback) {
+	public static void execute(CqlScript[] scripts, StatementCallback statementCallback) {
+		Objects.requireNonNull(scripts, "Scripts must not be null");
+		Objects.requireNonNull(statementCallback, "Statement Callback must not be null");
+		execute(Arrays.asList(scripts), statementCallback);
+	}
+
+	/**
+	 * Executes the given scripts.
+	 *
+	 * @param scripts the CQL scripts to execute.
+	 * @param statementCallback a callback
+	 * @see CqlScript
+	 */
+	public static void execute(Iterable<? extends CqlScript> scripts, StatementCallback statementCallback) {
+		Objects.requireNonNull(scripts, "Scripts must not be null");
+		Objects.requireNonNull(statementCallback, "Statement Callback must not be null");
 		for (CqlScript script : scripts) {
 			if (log.isDebugEnabled()) {
 				log.debug("Executing Script: {}", script);
@@ -56,7 +74,7 @@ abstract class CqlUtils {
 	 * CQL statement callback interface.
 	 */
 	@FunctionalInterface
-	interface StatementCallback {
+	public interface StatementCallback {
 
 		/**
 		 * Execute the {@code CQL} statement.

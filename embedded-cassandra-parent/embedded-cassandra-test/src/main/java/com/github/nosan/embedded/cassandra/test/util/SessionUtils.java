@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.test.util;
 import java.util.Objects;
 
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
@@ -41,7 +40,7 @@ public abstract class SessionUtils {
 	public static void execute(Session session, CqlScript... scripts) {
 		Objects.requireNonNull(session, "Session must not be null");
 		Objects.requireNonNull(scripts, "Scripts must not be null");
-		CqlUtils.execute(scripts, cql -> session.execute(new SimpleStatement(cql)));
+		CqlUtils.execute(scripts, session::execute);
 	}
 
 }
