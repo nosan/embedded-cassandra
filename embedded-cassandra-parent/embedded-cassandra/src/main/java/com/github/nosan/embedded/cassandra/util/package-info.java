@@ -15,7 +15,7 @@
  */
 
 /**
- * Utility classes and annotations, only for internal purposes.
+ * Utility classes. Only for internal purposes.
  */
 
 @NonNullFields
