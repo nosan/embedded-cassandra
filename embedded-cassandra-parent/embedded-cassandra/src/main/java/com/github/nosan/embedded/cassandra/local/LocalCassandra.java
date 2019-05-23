@@ -49,7 +49,7 @@ class LocalCassandra implements Cassandra {
 
 	private final long id = cassandraNumber.incrementAndGet();
 
-	private final ThreadFactory threadFactory = new MDCThreadFactory(String.format("cassandra-%d", this.id));
+	private final ThreadFactory threadFactory;
 
 	private final CassandraDatabase database;
 
@@ -62,9 +62,10 @@ class LocalCassandra implements Cassandra {
 	@Nullable
 	private volatile Thread shutdownHook;
 
-	LocalCassandra(boolean registerShutdownHook, CassandraDatabase database) {
+	LocalCassandra(boolean registerShutdownHook, boolean daemon, CassandraDatabase database) {
 		this.registerShutdownHook = registerShutdownHook;
 		this.database = database;
+		this.threadFactory = new MDCThreadFactory(String.format("cassandra-%d", this.id), daemon);
 	}
 
 	@Override

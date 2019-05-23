@@ -59,7 +59,7 @@ class RemoteArtifact implements Artifact {
 	private static final int MAX_REDIRECTS = 20;
 
 	private final ThreadFactory threadFactory = new MDCThreadFactory(String.format("artifact-%d",
-			artifactNumber.incrementAndGet()));
+			artifactNumber.incrementAndGet()), true);
 
 	private final Version version;
 

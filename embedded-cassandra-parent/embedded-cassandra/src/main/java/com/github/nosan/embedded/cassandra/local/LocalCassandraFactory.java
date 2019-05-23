@@ -91,14 +91,16 @@ public class LocalCassandraFactory implements CassandraFactory {
 	@Nullable
 	private URL configurationFile;
 
+	@Nullable
+	private Duration startupTimeout;
+
 	private boolean allowRoot = true;
 
 	private boolean registerShutdownHook = true;
 
 	private boolean deleteWorkingDirectory = true;
 
-	@Nullable
-	private Duration startupTimeout;
+	private boolean daemon = true;
 
 	/**
 	 * Allow running Cassandra under {@code root} user.
@@ -558,6 +560,27 @@ public class LocalCassandraFactory implements CassandraFactory {
 		this.startupTimeout = startupTimeout;
 	}
 
+	/**
+	 * Marks {@code Cassandra} threads as daemons.
+	 *
+	 * @return The value of the {@code daemon} attribute
+	 * @see Thread#setDaemon(boolean)
+	 * @since 2.0.2
+	 */
+	public boolean isDaemon() {
+		return this.daemon;
+	}
+
+	/**
+	 * Initializes the value for the {@link LocalCassandraFactory#isDaemon()} attribute.
+	 *
+	 * @param daemon The value for daemon
+	 * @since 2.0.2
+	 */
+	public void setDaemon(boolean daemon) {
+		this.daemon = daemon;
+	}
+
 	@Override
 	public Cassandra create() {
 		Version version = getVersion();
@@ -572,7 +595,7 @@ public class LocalCassandraFactory implements CassandraFactory {
 		CassandraNode node = createCassandraNode(workingDirectory, version);
 		CassandraDatabase database = new LocalCassandraDatabase(workingDirectory, isDeleteWorkingDirectory(),
 				getMergedWorkingDirectoryCustomizers(version), node);
-		return new LocalCassandra(isRegisterShutdownHook(), database);
+		return new LocalCassandra(isRegisterShutdownHook(), isDaemon(), database);
 	}
 
 	private Path getTempDir() {
@@ -619,9 +642,11 @@ public class LocalCassandraFactory implements CassandraFactory {
 			timeout = Duration.ofMinutes(1);
 		}
 		if (SystemUtils.isWindows()) {
-			return new WindowsCassandraNode(workingDirectory, version, timeout, getJavaHome(), jvmParameters);
+			return new WindowsCassandraNode(workingDirectory, version, timeout, isDaemon(), getJavaHome(),
+					jvmParameters);
 		}
-		return new UnixCassandraNode(workingDirectory, version, timeout, getJavaHome(), jvmParameters, isAllowRoot());
+		return new UnixCassandraNode(workingDirectory, version, timeout, isDaemon(), getJavaHome(),
+				jvmParameters, isAllowRoot());
 	}
 
 }
