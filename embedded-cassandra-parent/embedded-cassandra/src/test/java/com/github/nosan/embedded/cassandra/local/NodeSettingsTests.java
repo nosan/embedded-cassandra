@@ -57,6 +57,7 @@ class NodeSettingsTests {
 		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
 		assertThat(this.settings.getPort()).isEqualTo(9042);
 		assertThat(this.settings.transportStarted()).hasValue(true);
+		assertThat(this.settings.getPortOrSslPort()).isEqualTo(9042);
 	}
 
 	@Test
@@ -72,6 +73,7 @@ class NodeSettingsTests {
 		assertThat(this.settings.getAddress()).isEqualTo(ADDRESS);
 		assertThat(this.settings.getSslPort()).isEqualTo(9142);
 		assertThat(this.settings.transportStarted()).hasValue(true);
+		assertThat(this.settings.getPortOrSslPort()).isEqualTo(9142);
 	}
 
 	@Test
