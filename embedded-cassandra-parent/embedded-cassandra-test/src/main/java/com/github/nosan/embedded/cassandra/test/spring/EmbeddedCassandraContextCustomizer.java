@@ -194,9 +194,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		}
 
 		private List<String> getStatements(String[] statements) {
-			return Arrays.stream(statements)
-					.filter(StringUtils::hasText)
-					.collect(Collectors.toList());
+			return Arrays.stream(statements).filter(StringUtils::hasText).collect(Collectors.toList());
 		}
 
 		private String[] getArray(String[] values) {

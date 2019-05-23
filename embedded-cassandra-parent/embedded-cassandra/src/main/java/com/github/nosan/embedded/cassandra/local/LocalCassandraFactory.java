@@ -598,12 +598,6 @@ public class LocalCassandraFactory implements CassandraFactory {
 		return new LocalCassandra(isRegisterShutdownHook(), isDaemon(), database);
 	}
 
-	private Path getTempDir() {
-		return SystemUtils.getTmpDirectory()
-				.orElseThrow(() -> new IllegalStateException("java.io.tmpdir is not defined."
-						+ " Please set java.io.tmpdir system property."));
-	}
-
 	private List<WorkingDirectoryCustomizer> getMergedWorkingDirectoryCustomizers(Version version) {
 		ArtifactFactory artifactFactory = getArtifactFactory();
 		if (artifactFactory == null) {
@@ -647,6 +641,12 @@ public class LocalCassandraFactory implements CassandraFactory {
 		}
 		return new UnixCassandraNode(workingDirectory, version, timeout, isDaemon(), getJavaHome(),
 				jvmParameters, isAllowRoot());
+	}
+
+	private Path getTempDir() {
+		return SystemUtils.getTmpDirectory()
+				.orElseThrow(() -> new IllegalStateException("java.io.tmpdir is not defined."
+						+ " Please set java.io.tmpdir system property."));
 	}
 
 }
