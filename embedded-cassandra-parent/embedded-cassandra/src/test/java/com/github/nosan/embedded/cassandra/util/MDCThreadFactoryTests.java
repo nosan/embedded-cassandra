@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.local;
+package com.github.nosan.embedded.cassandra.util;
 
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
@@ -27,13 +26,11 @@ import org.slf4j.MDC;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link DefaultThreadFactory}.
+ * Tests for {@link MDCThreadFactory}.
  *
  * @author Dmytro Nosan
  */
-class DefaultThreadFactoryTests {
-
-	private final ThreadFactory threadFactory = new DefaultThreadFactory("mythread");
+class MDCThreadFactoryTests {
 
 	@BeforeEach
 	void setUp() {
@@ -46,10 +43,21 @@ class DefaultThreadFactoryTests {
 	}
 
 	@Test
-	void createThread() throws InterruptedException {
+	void createThreadWithPrefix() throws InterruptedException {
 		AtomicReference<String> value = new AtomicReference<>();
-		Thread thread = this.threadFactory.newThread(() -> value.set(MDC.get("X")));
+		Thread thread = new MDCThreadFactory("mythread", false).newThread(() -> value.set(MDC.get("X")));
 		assertThat(thread.getName()).isEqualTo("mythread-T-1");
+		assertThat(thread.isDaemon()).isFalse();
+		thread.start();
+		thread.join();
+		assertThat(value).hasValue("Y");
+	}
+
+	@Test
+	void createThreadWitNoPrefix() throws InterruptedException {
+		AtomicReference<String> value = new AtomicReference<>();
+		Thread thread = new MDCThreadFactory(true).newThread(() -> value.set(MDC.get("X")));
+		assertThat(thread.getName()).isEqualTo("T-1");
 		assertThat(thread.isDaemon()).isTrue();
 		thread.start();
 		thread.join();

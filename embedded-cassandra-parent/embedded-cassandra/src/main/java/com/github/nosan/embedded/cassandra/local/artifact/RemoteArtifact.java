@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
-import com.github.nosan.embedded.cassandra.local.DefaultThreadFactory;
+import com.github.nosan.embedded.cassandra.util.MDCThreadFactory;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -54,12 +54,12 @@ class RemoteArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(RemoteArtifact.class);
 
-	private static final AtomicLong counter = new AtomicLong();
+	private static final AtomicLong artifactNumber = new AtomicLong();
 
 	private static final int MAX_REDIRECTS = 20;
 
-	private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("progress-%d",
-			counter.incrementAndGet()));
+	private final ThreadFactory threadFactory = new MDCThreadFactory(String.format("artifact-%d",
+			artifactNumber.incrementAndGet()));
 
 	private final Version version;
 

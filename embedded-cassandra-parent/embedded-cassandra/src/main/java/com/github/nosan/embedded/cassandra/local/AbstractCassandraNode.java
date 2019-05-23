@@ -42,6 +42,7 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.util.MDCThreadFactory;
 import com.github.nosan.embedded.cassandra.util.SystemUtils;
 
 /**
@@ -52,7 +53,7 @@ import com.github.nosan.embedded.cassandra.util.SystemUtils;
  */
 abstract class AbstractCassandraNode implements CassandraNode {
 
-	private static final AtomicLong counter = new AtomicLong();
+	private static final AtomicLong nodeNumber = new AtomicLong();
 
 	private static final Pattern TRANSPORT_START_PATTERN = Pattern
 			.compile("(?i).*listening\\s*for\\s*cql\\s*clients\\s*on.*/(.+):(\\d+).*");
@@ -84,8 +85,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	final Version version;
 
-	final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("cassandra-%d-db",
-			counter.incrementAndGet()));
+	final ThreadFactory threadFactory = new MDCThreadFactory(String.format("cassandra-%d-db",
+			nodeNumber.incrementAndGet()));
 
 	private final JvmParameters jvmParameters;
 

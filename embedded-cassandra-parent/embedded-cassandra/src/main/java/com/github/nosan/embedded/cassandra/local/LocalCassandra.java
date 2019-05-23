@@ -31,6 +31,7 @@ import com.github.nosan.embedded.cassandra.CassandraInterruptedException;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.util.MDCThreadFactory;
 
 /**
  * A simple implementation of the {@link Cassandra} which just delegates everything to the underlying
@@ -42,13 +43,13 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  */
 class LocalCassandra implements Cassandra {
 
-	private static final AtomicLong counter = new AtomicLong();
+	private static final AtomicLong cassandraNumber = new AtomicLong();
 
 	private static final Logger log = LoggerFactory.getLogger(LocalCassandra.class);
 
-	private final long id = counter.incrementAndGet();
+	private final long id = cassandraNumber.incrementAndGet();
 
-	private final ThreadFactory threadFactory = new DefaultThreadFactory(String.format("cassandra-%d", this.id));
+	private final ThreadFactory threadFactory = new MDCThreadFactory(String.format("cassandra-%d", this.id));
 
 	private final CassandraDatabase database;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.local;
+package com.github.nosan.embedded.cassandra.util;
 
 import java.util.Map;
 import java.util.Objects;
@@ -24,30 +24,58 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.MDC;
 
-import com.github.nosan.embedded.cassandra.util.StringUtils;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * Default {@link ThreadFactory factory} to create {@link Thread}.
+ * The {@link MDC} aware {@link ThreadFactory thread factory} to create a new {@link Thread}.<b>Only for internal
+ * purposes.</b>
  *
  * @author Dmytro Nosan
- * @since 2.0.0
+ * @since 2.0.2
  */
-public final class DefaultThreadFactory implements ThreadFactory {
+public class MDCThreadFactory implements ThreadFactory {
 
 	private final AtomicLong threadNumber = new AtomicLong();
 
+	@Nullable
 	private final String prefix;
 
+	private final boolean daemon;
+
 	/**
-	 * Creates {@link ThreadFactory}.
+	 * Creates {@link MDCThreadFactory}.
+	 */
+	public MDCThreadFactory() {
+		this(null, true);
+	}
+
+	/**
+	 * Creates {@link MDCThreadFactory}.
 	 *
 	 * @param prefix the thread name prefix
 	 */
-	public DefaultThreadFactory(String prefix) {
-		if (!StringUtils.hasText(prefix)) {
-			throw new IllegalArgumentException("Prefix must not be empty or null");
-		}
+	public MDCThreadFactory(@Nullable String prefix) {
+		this(prefix, true);
+	}
+
+	/**
+	 * Creates {@link MDCThreadFactory}.
+	 *
+	 * @param daemon marks thread as a daemon
+	 */
+	public MDCThreadFactory(boolean daemon) {
+		this(null, daemon);
+	}
+
+	/**
+	 * Creates {@link MDCThreadFactory}.
+	 *
+	 * @param prefix prefix for a thread name
+	 * @param daemon marks thread as a daemon
+	 */
+	public MDCThreadFactory(@Nullable String prefix, boolean daemon) {
 		this.prefix = prefix;
+		this.daemon = daemon;
 	}
 
 	@Override
@@ -57,9 +85,17 @@ public final class DefaultThreadFactory implements ThreadFactory {
 		Thread thread = new Thread(() -> {
 			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
 			runnable.run();
-		}, String.format("%s-T-%d", this.prefix, this.threadNumber.incrementAndGet()));
-		thread.setDaemon(true);
+		});
+		thread.setName(getName());
+		thread.setDaemon(this.daemon);
 		return thread;
+	}
+
+	private String getName() {
+		if (StringUtils.hasText(this.prefix)) {
+			return String.format("%s-T-%d", this.prefix, this.threadNumber.incrementAndGet());
+		}
+		return String.format("T-%d", this.threadNumber.incrementAndGet());
 	}
 
 }

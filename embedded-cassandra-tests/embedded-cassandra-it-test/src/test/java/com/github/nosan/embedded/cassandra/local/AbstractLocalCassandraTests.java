@@ -68,6 +68,7 @@ import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.test.CqlSessionFactory;
+import com.github.nosan.embedded.cassandra.util.MDCThreadFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -238,7 +239,7 @@ abstract class AbstractLocalCassandraTests {
 	void shouldStartMoreThanOneCassandra() throws Throwable {
 		this.factory.setJmxLocalPort(0);
 		this.factory.setConfigurationFile(getClass().getResource("/cassandra-random.yaml"));
-		ExecutorService executorService = Executors.newFixedThreadPool(2, new DefaultThreadFactory("test"));
+		ExecutorService executorService = Executors.newFixedThreadPool(2, new MDCThreadFactory("test"));
 		List<Future<?>> futures = new ArrayList<>();
 		try {
 			for (int i = 0; i < 2; i++) {
