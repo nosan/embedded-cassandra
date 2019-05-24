@@ -60,8 +60,8 @@ class RemoteArtifactFactoryTests {
 		assertThat(ReflectionUtils.getField(artifact, "version")).isEqualTo(Version.parse("3.11.3"));
 		assertThat(ReflectionUtils.getField(artifact, "urlFactory")).isInstanceOf(DefaultUrlFactory.class);
 		assertThat(ReflectionUtils.getField(artifact, "proxy")).isNull();
-		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isEqualTo(Duration.ofSeconds(10));
-		assertThat(ReflectionUtils.getField(artifact, "connectTimeout")).isEqualTo(Duration.ofSeconds(10));
+		assertThat(ReflectionUtils.getField(artifact, "readTimeout")).isEqualTo(Duration.ofSeconds(30));
+		assertThat(ReflectionUtils.getField(artifact, "connectTimeout")).isEqualTo(Duration.ofSeconds(30));
 	}
 
 }

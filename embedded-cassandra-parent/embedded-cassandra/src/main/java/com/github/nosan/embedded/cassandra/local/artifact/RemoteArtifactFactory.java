@@ -130,11 +130,11 @@ public class RemoteArtifactFactory implements ArtifactFactory {
 		}
 		Duration readTimeout = getReadTimeout();
 		if (readTimeout == null) {
-			readTimeout = Duration.ofSeconds(10);
+			readTimeout = Duration.ofSeconds(30);
 		}
 		Duration connectTimeout = getConnectTimeout();
 		if (connectTimeout == null) {
-			connectTimeout = Duration.ofSeconds(10);
+			connectTimeout = Duration.ofSeconds(30);
 		}
 		return new RemoteArtifact(version, urlFactory, getProxy(), readTimeout, connectTimeout);
 	}
