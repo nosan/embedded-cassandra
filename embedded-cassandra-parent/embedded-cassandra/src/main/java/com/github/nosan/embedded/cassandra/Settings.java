@@ -38,43 +38,51 @@ public interface Settings {
 	/**
 	 * The address to listen for the clients on.
 	 *
-	 * @return the address, or {@code empty} if both native and RPC transports are disabled
+	 * @return the address, or {@code empty} if transports are not started
 	 * @see #getAddress()
 	 * @since 2.0.1
 	 */
-	Optional<InetAddress> address();
+	default Optional<InetAddress> address() {
+		return Optional.empty();
+	}
 
 	/**
 	 * The port for client connections.
 	 *
-	 * @return the port, or {@code empty} if transport is not started.
+	 * @return the port, or {@code empty} if transport is not started
 	 * @see #getPort()
 	 * @since 2.0.1
 	 */
-	Optional<Integer> port();
+	default Optional<Integer> port() {
+		return Optional.empty();
+	}
 
 	/**
 	 * SSL port for client connections.
 	 *
-	 * @return SSL port, or {@code empty} if SSL transport is not started.
+	 * @return SSL port, or {@code empty} if SSL transport is not started
 	 * @see #getSslPort()
 	 * @since 2.0.1
 	 */
-	Optional<Integer> sslPort();
+	default Optional<Integer> sslPort() {
+		return Optional.empty();
+	}
 
 	/**
 	 * RPC port for client connections.
 	 *
-	 * @return RPC port, or {@code empty} if RPC transport is not started.
+	 * @return RPC port, or {@code empty} if RPC transport is not started
 	 * @see #getRpcPort()
 	 * @since 2.0.1
 	 */
-	Optional<Integer> rpcPort();
+	default Optional<Integer> rpcPort() {
+		return Optional.empty();
+	}
 
 	/**
 	 * The port or SSL port for client connections.
 	 *
-	 * @return the port, or {@code empty} if transport is not started.
+	 * @return the port, or {@code empty} if transport is not started
 	 * @see #port()
 	 * @see #sslPort()
 	 * @see #getPortOrSslPort()
