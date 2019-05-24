@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra-tests</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>2.0.2</version>
     </parent>
 
     <description>Embedded Cassandra Spring Tests</description>
