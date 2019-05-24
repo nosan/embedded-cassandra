@@ -81,7 +81,7 @@ class FileLock implements AutoCloseable {
 				() -> String.format("File lock for a file '%s' has not been acquired because "
 						+ "FileChannel.open(...) was not created.", file));
 		this.fileChannel = fileChannel;
-		this.fileLock = await(2, TimeUnit.MINUTES, () -> lock(fileChannel), () -> String.format("File lock for "
+		this.fileLock = await(5, TimeUnit.MINUTES, () -> lock(fileChannel), () -> String.format("File lock for "
 				+ "a file '%s' has not been acquired because FileChannel.lock() was not created.", file));
 		log.info("The lock to the file '{}' was acquired", file);
 	}
