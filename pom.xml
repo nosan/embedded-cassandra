@@ -41,7 +41,7 @@
         <junit.version>4.12</junit.version>
         <testng.version>6.14.3</testng.version>
         <cassandra-driver-core.version>3.7.1</cassandra-driver-core.version>
-        <junit.jupiter.version>5.4.0</junit.jupiter.version>
+        <junit.jupiter.version>5.4.2</junit.jupiter.version>
         <checkstyle.version>8.20</checkstyle.version>
         <slf4j-api.version>1.7.26</slf4j-api.version>
         <logback-classic.version>1.2.3</logback-classic.version>
