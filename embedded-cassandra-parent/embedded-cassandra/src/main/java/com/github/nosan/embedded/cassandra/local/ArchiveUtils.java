@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -78,7 +79,7 @@ abstract class ArchiveUtils {
 	 */
 	static void extract(Path archiveFile, Path destination) throws IOException {
 		ArchiveFactory archiveFactory = createArchiveFactory(archiveFile);
-		try (InputStream stream = Files.newInputStream(archiveFile);
+		try (InputStream stream = new BufferedInputStream(Files.newInputStream(archiveFile));
 				ArchiveInputStream archiveStream = archiveFactory.create(stream)) {
 			Files.createDirectories(destination);
 			ArchiveEntry entry;

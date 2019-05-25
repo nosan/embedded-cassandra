@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -41,7 +42,7 @@ class ConfigurationFileCustomizer implements WorkingDirectoryCustomizer {
 
 	@Override
 	public void customize(Path workingDirectory, Version version) throws IOException {
-		try (InputStream inputStream = this.configurationFile.openStream()) {
+		try (InputStream inputStream = new BufferedInputStream(this.configurationFile.openStream())) {
 			Files.copy(inputStream, workingDirectory.resolve("conf/cassandra.yaml"),
 					StandardCopyOption.REPLACE_EXISTING);
 		}

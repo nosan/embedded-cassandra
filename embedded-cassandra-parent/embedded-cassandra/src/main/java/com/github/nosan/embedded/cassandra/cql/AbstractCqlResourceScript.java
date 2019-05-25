@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,7 +79,7 @@ public abstract class AbstractCqlResourceScript implements CqlScript {
 	}
 
 	private String getScript() {
-		try (InputStream is = getInputStream()) {
+		try (InputStream is = new BufferedInputStream(getInputStream())) {
 			return new String(toByteArray(is), getEncoding());
 		}
 		catch (IOException ex) {

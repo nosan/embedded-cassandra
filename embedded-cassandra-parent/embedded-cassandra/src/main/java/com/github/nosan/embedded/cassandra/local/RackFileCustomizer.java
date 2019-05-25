@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -41,7 +42,7 @@ class RackFileCustomizer implements WorkingDirectoryCustomizer {
 
 	@Override
 	public void customize(Path workingDirectory, Version version) throws IOException {
-		try (InputStream inputStream = this.rackFile.openStream()) {
+		try (InputStream inputStream = new BufferedInputStream(this.rackFile.openStream())) {
 			Files.copy(inputStream, workingDirectory.resolve("conf/cassandra-rackdc.properties"),
 					StandardCopyOption.REPLACE_EXISTING);
 		}

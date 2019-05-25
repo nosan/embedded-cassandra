@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local.artifact;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -53,6 +54,8 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
 class RemoteArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(RemoteArtifact.class);
+
+	private static final int BUFFER_SIZE = 32768;
 
 	private static final AtomicLong artifactNumber = new AtomicLong();
 
@@ -104,7 +107,7 @@ class RemoteArtifact implements Artifact {
 
 	private Path getFile(URL url) throws IOException {
 		URLConnection connection = getUrlConnection(url, MAX_REDIRECTS);
-		try (InputStream stream = connection.getInputStream()) {
+		try (InputStream stream = new BufferedInputStream(connection.getInputStream())) {
 			long expectedSize = connection.getContentLengthLong();
 			Path file = Files.createTempFile(null, String.format("-%s", getFileName(url)));
 			file.toFile().deleteOnExit();
