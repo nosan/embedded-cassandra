@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,45 +58,42 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 
 	@Override
 	public void customize(Path workingDirectory, Version version) throws IOException {
-		Supplier<Integer> portSupplier = this.portSupplier;
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
-		Map<Object, Object> oldProperties = readProperties(file);
-		Map<Object, Object> newProperties = new LinkedHashMap<>(oldProperties);
-		setPort(PORT, newProperties, portSupplier);
-		setPort(SSL_PORT, newProperties, portSupplier);
-		setPort(RPC_PORT, newProperties, portSupplier);
-		setPort(STORAGE_PORT, newProperties, portSupplier);
-		setPort(SSL_STORAGE_PORT, newProperties, portSupplier);
-		if (!newProperties.equals(oldProperties)) {
-			writeProperties(file, newProperties);
-		}
+		Yaml yaml = new Yaml();
+		Map<Object, Object> properties = load(yaml, file);
+		setPort(PORT, properties);
+		setPort(SSL_PORT, properties);
+		setPort(RPC_PORT, properties);
+		setPort(STORAGE_PORT, properties);
+		setPort(SSL_STORAGE_PORT, properties);
+		dump(yaml, file, properties);
 	}
 
-	private static Optional<Integer> getInteger(String name, Map<Object, Object> properties) {
-		return getString(name, properties).filter(StringUtils::hasText).map(Integer::parseInt);
-	}
-
-	private static Optional<String> getString(String name, Map<Object, Object> properties) {
-		return Optional.ofNullable(properties.get(name)).map(Object::toString);
-	}
-
-	private static void setPort(String name, Map<Object, Object> properties, Supplier<Integer> portSupplier) {
-		Integer port = getInteger(name, properties).orElse(null);
-		if (port != null && port == 0) {
-			properties.put(name, portSupplier.get());
-		}
-	}
-
-	private static Map<Object, Object> readProperties(Path file) throws IOException {
-		try (InputStream is = Files.newInputStream(file)) {
-			Map<?, ?> values = new Yaml().loadAs(is, Map.class);
+	private Map<Object, Object> load(Yaml yaml, Path file) throws IOException {
+		try (InputStream is = new BufferedInputStream(Files.newInputStream(file))) {
+			Map<?, ?> values = yaml.loadAs(is, Map.class);
 			return (values != null) ? new LinkedHashMap<>(values) : new LinkedHashMap<>(0);
 		}
 	}
 
-	private static void writeProperties(Path file, Map<Object, Object> newProperties) throws IOException {
+	private void dump(Yaml yaml, Path file, Map<Object, Object> properties) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(file)) {
-			new Yaml().dump(newProperties, writer);
+			yaml.dump(properties, writer);
+		}
+	}
+
+	private Optional<Integer> getInteger(String name, Map<Object, Object> properties) {
+		return getString(name, properties).filter(StringUtils::hasText).map(Integer::parseInt);
+	}
+
+	private Optional<String> getString(String name, Map<Object, Object> properties) {
+		return Optional.ofNullable(properties.get(name)).map(Object::toString);
+	}
+
+	private void setPort(String name, Map<Object, Object> properties) {
+		Integer port = getInteger(name, properties).orElse(null);
+		if (port != null && port == 0) {
+			properties.put(name, this.portSupplier.get());
 		}
 	}
 
