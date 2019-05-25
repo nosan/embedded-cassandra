@@ -71,7 +71,6 @@ class JvmParameters {
 	 * @return {@code Cassandra} startup parameters.
 	 */
 	List<String> getParameters() {
-		Supplier<Integer> portSupplier = this.portSupplier;
 		Ports ports = this.ports;
 		JvmOptions jvmOptions = this.jvmOptions;
 		Map<String, String> systemProperties = new LinkedHashMap<>(jvmOptions.getSystemProperties());
@@ -84,13 +83,13 @@ class JvmParameters {
 		addProperty(NATIVE_TRANSPORT_PORT, ports.getPort(), systemProperties);
 		addProperty(RPC_PORT, ports.getRpcPort(), systemProperties);
 
-		setPort(NATIVE_TRANSPORT_PORT, systemProperties, portSupplier);
-		setPort(RPC_PORT, systemProperties, portSupplier);
-		setPort(STORAGE_PORT, systemProperties, portSupplier);
-		setPort(SSL_STORAGE_PORT, systemProperties, portSupplier);
-		setPort(JMX_LOCAL_PORT, systemProperties, portSupplier);
-		setPort(JMX_REMOTE_PORT, systemProperties, portSupplier);
-		setPort(JMX_REMOTE_RMI_PORT, systemProperties, portSupplier);
+		setPort(NATIVE_TRANSPORT_PORT, systemProperties);
+		setPort(RPC_PORT, systemProperties);
+		setPort(STORAGE_PORT, systemProperties);
+		setPort(SSL_STORAGE_PORT, systemProperties);
+		setPort(JMX_LOCAL_PORT, systemProperties);
+		setPort(JMX_REMOTE_PORT, systemProperties);
+		setPort(JMX_REMOTE_RMI_PORT, systemProperties);
 
 		for (Map.Entry<String, String> entry : systemProperties.entrySet()) {
 			String name = entry.getKey();
@@ -106,24 +105,24 @@ class JvmParameters {
 		return Collections.unmodifiableList(parameters);
 	}
 
-	private static void addProperty(String name, @Nullable Object value, Map<String, String> jvmOptions) {
+	private void addProperty(String name, @Nullable Object value, Map<String, String> jvmOptions) {
 		if (value != null) {
 			jvmOptions.put(name, value.toString());
 		}
 	}
 
-	private static void setPort(String name, Map<String, String> jvmOptions, Supplier<Integer> portSupplier) {
+	private void setPort(String name, Map<String, String> jvmOptions) {
 		Integer port = getInteger(name, jvmOptions).orElse(null);
 		if (port != null && port == 0) {
-			jvmOptions.put(name, Integer.toString(portSupplier.get()));
+			jvmOptions.put(name, Integer.toString(this.portSupplier.get()));
 		}
 	}
 
-	private static Optional<Integer> getInteger(String name, Map<String, String> source) {
+	private Optional<Integer> getInteger(String name, Map<String, String> source) {
 		return getString(name, source).filter(StringUtils::hasText).map(Integer::parseInt);
 	}
 
-	private static Optional<String> getString(String name, Map<String, String> source) {
+	private Optional<String> getString(String name, Map<String, String> source) {
 		return Optional.ofNullable(source.get(name)).map(Objects::toString);
 	}
 
