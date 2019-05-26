@@ -1,6 +1,10 @@
 # Embedded Cassandra [![Build Status OSX/Linux](https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?logo=travis&logoColor=white&style=flat)](https://travis-ci.org/nosan/embedded-cassandra) [![Build Status Windows](https://img.shields.io/appveyor/ci/nosan/embedded-cassandra/master.svg?logo=appveyor&logoColor=white&style=flat)](https://ci.appveyor.com/project/nosan/embedded-cassandra)
 `Embedded Cassandra` provides an easy way to run [Apache Cassandra](https://cassandra.apache.org/) and extensions to test your code.
 
+You can find more information _here_:
+ - [Embedded Cassandra 2.X.X](https://github.com/nosan/embedded-cassandra/wiki).
+ - [Embedded Cassandra 1.X.X](https://github.com/nosan/embedded-cassandra/wiki/1.X.X).
+
 Here is a quick example how to run `Apache Cassandra` in few lines:
 
 ```java
@@ -26,9 +30,6 @@ class Scratch {
 }
 ```
 
-You can find more information here:
- - [Embedded Cassandra 2.X.X](https://github.com/nosan/embedded-cassandra/wiki).
- - [Embedded Cassandra 1.X.X](https://github.com/nosan/embedded-cassandra/wiki/1.X.X).
 
 #### Issues
 
