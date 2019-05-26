@@ -1,5 +1,30 @@
 # Embedded Cassandra [![Build Status OSX/Linux](https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?logo=travis&logoColor=white&style=flat)](https://travis-ci.org/nosan/embedded-cassandra) [![Build Status Windows](https://img.shields.io/appveyor/ci/nosan/embedded-cassandra/master.svg?logo=appveyor&logoColor=white&style=flat)](https://ci.appveyor.com/project/nosan/embedded-cassandra)
-`Embedded Cassandra` provides an easy way to run [Apache Cassandra](https://cassandra.apache.org/) within JVM.
+`Embedded Cassandra` provides an easy way to run [Apache Cassandra](https://cassandra.apache.org/) and extensions to test your code.
+
+Here is a quick example how to run `Apache Cassandra` in few lines:
+
+```java
+import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.CassandraFactory;
+import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+
+class Scratch {
+
+	public static void main(String[] args) {
+		CassandraFactory cassandraFactory = new LocalCassandraFactory();
+		Cassandra cassandra = cassandraFactory.create();
+		cassandra.start();
+		try {
+			Settings settings = cassandra.getSettings();
+		}
+		finally {
+			cassandra.stop();
+		}
+	}
+
+}
+```
 
 You can find more information here:
  - [Embedded Cassandra 2.X.X](https://github.com/nosan/embedded-cassandra/wiki).
