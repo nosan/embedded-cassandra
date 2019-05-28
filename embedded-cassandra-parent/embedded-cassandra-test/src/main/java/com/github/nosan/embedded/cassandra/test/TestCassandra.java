@@ -41,7 +41,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the underlying {@link
  * Cassandra}. It is also possible to get a {@code connection} to the underlying {@link Cassandra}. Connection will be
  * managed by this {@code TestCassandra} and closed when {@link #stop()} is called. The typical usage is:
- * <pre>{@code
+ * <pre>
  * class Scratch {
  * 	public static void main(String[] args) {
  * 		TestCassandra cassandra = new TestCassandra(CqlScript.classpath("schema.cql"));
@@ -56,16 +56,15 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * 		finally {
  * 			cassandra.stop();
  *        }        }
- * }
  * }</pre>
  * By default {@link DefaultConnection} is used. This connection detects the client
  * implementation based on the classpath. You can override the {@link DefaultConnection} if you need this. The following
  * lines shows how to do this:
- * <pre>{@code
+ * <pre>
  * class Scratch {
  *     public static void main(String[] args) {
  *         TestCassandra cassandra = new TestCassandra(CqlScript.classpath("schema.cql")) {
- *             @Override
+ *             &#064;Override
  *             protected Connection createConnection() {
  *                 return new CqlSessionConnection(getSettings());
  *             }
@@ -79,7 +78,6 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  *             cassandra.stop();
  *         }
  *     }
- * }
  * }
  * </pre>
  *
