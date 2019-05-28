@@ -52,7 +52,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
- * {@link ContextCustomizer} used to create {@link EmbeddedCassandraFactoryBean}.
+ * {@link ContextCustomizer} used to create {@link TestCassandraFactoryBean}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
@@ -81,7 +81,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	private void register(Class<?> testClass, EmbeddedCassandra annotation, BeanDefinitionRegistry registry) {
 		registry.registerBeanDefinition(EmbeddedCassandra.class.getName(),
-				BeanDefinitionBuilder.rootBeanDefinition(EmbeddedCassandraFactoryBean.class)
+				BeanDefinitionBuilder.rootBeanDefinition(TestCassandraFactoryBean.class)
 						.addConstructorArgValue(annotation).addConstructorArgValue(testClass)
 						.getBeanDefinition());
 	}
@@ -89,10 +89,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	/**
 	 * {@link FactoryBean} used to create and configure a {@link TestCassandra}.
 	 */
-	static class EmbeddedCassandraFactoryBean implements FactoryBean<TestCassandra>, InitializingBean,
+	static class TestCassandraFactoryBean implements FactoryBean<TestCassandra>, InitializingBean,
 			DisposableBean, ApplicationContextAware {
 
-		private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraFactoryBean.class);
+		private static final Logger log = LoggerFactory.getLogger(TestCassandraFactoryBean.class);
 
 		private final EmbeddedCassandra annotation;
 
@@ -104,7 +104,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Nullable
 		private ApplicationContext applicationContext;
 
-		EmbeddedCassandraFactoryBean(EmbeddedCassandra annotation, Class<?> testClass) {
+		TestCassandraFactoryBean(EmbeddedCassandra annotation, Class<?> testClass) {
 			this.annotation = annotation;
 			this.testClass = testClass;
 		}
