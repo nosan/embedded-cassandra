@@ -25,10 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.Order;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 
+import com.github.nosan.embedded.cassandra.Cassandra;
+import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
@@ -78,9 +81,25 @@ class EmbeddedCassandraCustomizerTests {
 	@Configuration
 	static class TestConfiguration {
 
+		@Order(0)
 		@Bean
 		public EmbeddedCassandraFactoryCustomizer<LocalCassandraFactory> versionCustomizer() {
 			return factory -> factory.setVersion(Version.parse("3.11.3"));
+		}
+
+		@Order(1)
+		@Bean
+		public EmbeddedCassandraFactoryCustomizer<LocalCassandraFactory> assertCustomizer() {
+			return factory -> Assert.state(Version.parse("3.11.3").equals(factory.getVersion()),
+					"version customizer was not invoked");
+		}
+
+		@Bean
+		public EmbeddedCassandraFactoryCustomizer<TestFactory> typeMismatchCustomizer() {
+			return factory -> {
+				throw new IllegalStateException();
+			};
+
 		}
 
 		@Bean
@@ -93,6 +112,15 @@ class EmbeddedCassandraCustomizerTests {
 				}
 
 			};
+		}
+
+		private static final class TestFactory implements CassandraFactory {
+
+			@Override
+			public Cassandra create() {
+				throw new IllegalStateException();
+			}
+
 		}
 
 	}

@@ -21,22 +21,16 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -52,20 +46,31 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
- * {@link ContextCustomizer} used to create {@link TestCassandraFactoryBean}.
+ * {@link ContextCustomizer} used to create a {@link TestCassandra} bean.
  *
  * @author Dmytro Nosan
  * @since 1.0.0
  */
 class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
+	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraContextCustomizer.class);
+
+	private final Class<?> testClass;
+
+	private final EmbeddedCassandra annotation;
+
+	EmbeddedCassandraContextCustomizer(Class<?> testClass, EmbeddedCassandra annotation) {
+		this.testClass = testClass;
+		this.annotation = annotation;
+	}
+
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-		Class<?> testClass = mergedConfig.getTestClass();
-		EmbeddedCassandra annotation = AnnotatedElementUtils.findMergedAnnotation(testClass, EmbeddedCassandra.class);
-		if (annotation != null && beanFactory instanceof BeanDefinitionRegistry) {
-			register(testClass, annotation, ((BeanDefinitionRegistry) beanFactory));
+		if (beanFactory instanceof BeanDefinitionRegistry) {
+			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+			BeanDefinition bd = getBeanDefinition(this.testClass, this.annotation, context);
+			registry.registerBeanDefinition(TestCassandra.class.getName(), bd);
 		}
 	}
 
@@ -79,166 +84,106 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		return getClass().hashCode();
 	}
 
-	private void register(Class<?> testClass, EmbeddedCassandra annotation, BeanDefinitionRegistry registry) {
-		registry.registerBeanDefinition(EmbeddedCassandra.class.getName(),
-				BeanDefinitionBuilder.rootBeanDefinition(TestCassandraFactoryBean.class)
-						.addConstructorArgValue(annotation).addConstructorArgValue(testClass)
-						.getBeanDefinition());
-	}
-
-	/**
-	 * {@link FactoryBean} used to create and configure a {@link TestCassandra}.
-	 */
-	static class TestCassandraFactoryBean implements FactoryBean<TestCassandra>, InitializingBean,
-			DisposableBean, ApplicationContextAware {
-
-		private static final Logger log = LoggerFactory.getLogger(TestCassandraFactoryBean.class);
-
-		private final EmbeddedCassandra annotation;
-
-		private final Class<?> testClass;
-
-		@Nullable
-		private volatile TestCassandra cassandra;
-
-		@Nullable
-		private ApplicationContext applicationContext;
-
-		TestCassandraFactoryBean(EmbeddedCassandra annotation, Class<?> testClass) {
-			this.annotation = annotation;
-			this.testClass = testClass;
-		}
-
-		@Override
-		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-			this.applicationContext = applicationContext;
-		}
-
-		@Override
-		public TestCassandra getObject() {
-			return Objects.requireNonNull(this.cassandra, "Cassandra must not be null");
-		}
-
-		@Override
-		public Class<?> getObjectType() {
-			return TestCassandra.class;
-		}
-
-		@Override
-		public void destroy() {
-			TestCassandra cassandra = this.cassandra;
-			if (cassandra != null) {
-				cassandra.stop();
-			}
-		}
-
-		@Override
-		public void afterPropertiesSet() {
-			ApplicationContext context = getContext();
+	private static BeanDefinition getBeanDefinition(Class<?> testClass, EmbeddedCassandra annotation,
+			ConfigurableApplicationContext context) {
+		GenericBeanDefinition bd = new GenericBeanDefinition();
+		bd.setBeanClass(TestCassandra.class);
+		bd.setInitMethodName("start");
+		bd.setDestroyMethodName("stop");
+		bd.setInstanceSupplier(() -> {
 			TestCassandraFactory testCassandraFactory = context.getBeanProvider(TestCassandraFactory.class)
 					.getIfUnique(() -> TestCassandra::new);
 			CassandraFactory cassandraFactory = context.getBeanProvider(CassandraFactory.class)
-					.getIfUnique(this::getCassandraFactory);
+					.getIfUnique(() -> getCassandraFactory(testClass, annotation, context));
 			context.getBeanProvider(EmbeddedCassandraFactoryCustomizer.class).orderedStream()
 					.forEach(customizer -> customize(cassandraFactory, customizer));
-			TestCassandra cassandra = testCassandraFactory.create(cassandraFactory, getScripts());
-			this.cassandra = Objects.requireNonNull(cassandra, "Test Cassandra must not be null");
-			cassandra.start();
-		}
+			return testCassandraFactory.create(cassandraFactory, getScripts(testClass, annotation, context));
+		});
+		return bd;
+	}
 
-		@Override
-		public boolean isSingleton() {
-			return true;
+	@SuppressWarnings("unchecked")
+	private static void customize(CassandraFactory cassandraFactory, EmbeddedCassandraFactoryCustomizer customizer) {
+		try {
+			customizer.customize(cassandraFactory);
 		}
-
-		@SuppressWarnings("unchecked")
-		private void customize(CassandraFactory cassandraFactory, EmbeddedCassandraFactoryCustomizer customizer) {
-			try {
-				customizer.customize(cassandraFactory);
-			}
-			catch (ClassCastException ex) {
+		catch (ClassCastException ex) {
+			String message = ex.getMessage();
+			if (message == null || message.contains(cassandraFactory.getClass().getName())) {
 				if (log.isDebugEnabled()) {
-					log.error(String.format("Factory customizer '%s' was not invoked due to the factory type mismatch",
+					log.error(String.format("Factory customizer '%s' was not invoked due to the factory type mismatch.",
 							customizer), ex);
 				}
+				return;
 			}
+			throw ex;
 		}
+	}
 
-		private CassandraFactory getCassandraFactory() {
-			EmbeddedCassandra annotation = this.annotation;
-			LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
-			cassandraFactory.setVersion(getVersion(annotation.version()));
-			cassandraFactory.setConfigurationFile(getURL(annotation.configurationFile()));
-			cassandraFactory.setJvmOptions(getArray(annotation.jvmOptions()));
-			cassandraFactory.setJmxLocalPort(getPort(annotation.jmxLocalPort()));
-			cassandraFactory.setPort(getPort(annotation.port()));
-			cassandraFactory.setStoragePort(getPort(annotation.storagePort()));
-			cassandraFactory.setSslStoragePort(getPort(annotation.sslStoragePort()));
-			cassandraFactory.setRpcPort(getPort(annotation.rpcPort()));
-			return cassandraFactory;
+	private static CassandraFactory getCassandraFactory(Class<?> testClass, EmbeddedCassandra annotation,
+			ApplicationContext context) {
+		LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
+		cassandraFactory.setVersion(getVersion(annotation.version(), context));
+		cassandraFactory.setConfigurationFile(getURL(annotation.configurationFile(), testClass, context));
+		cassandraFactory.setJvmOptions(getArray(annotation.jvmOptions(), context));
+		cassandraFactory.setJmxLocalPort(getPort(annotation.jmxLocalPort(), context));
+		cassandraFactory.setPort(getPort(annotation.port(), context));
+		cassandraFactory.setStoragePort(getPort(annotation.storagePort(), context));
+		cassandraFactory.setSslStoragePort(getPort(annotation.sslStoragePort(), context));
+		cassandraFactory.setRpcPort(getPort(annotation.rpcPort(), context));
+		return cassandraFactory;
+	}
+
+	private static CqlScript[] getScripts(Class<?> testClass, EmbeddedCassandra annotation,
+			ApplicationContext context) {
+		List<CqlScript> scripts = new ArrayList<>();
+		for (URL url : ResourceUtils.getResources(context, testClass,
+				getArray(annotation.scripts(), context))) {
+			scripts.add(new UrlCqlScript(url, getCharset(annotation.encoding(), context)));
 		}
-
-		private CqlScript[] getScripts() {
-			EmbeddedCassandra annotation = this.annotation;
-			Class<?> testClass = this.testClass;
-			ApplicationContext context = getContext();
-			List<CqlScript> scripts = new ArrayList<>();
-			for (URL url : ResourceUtils.getResources(context, testClass, getArray(annotation.scripts()))) {
-				scripts.add(new UrlCqlScript(url, getCharset(annotation.encoding())));
-			}
-			List<String> statements = getStatements(annotation.statements());
-			if (!statements.isEmpty()) {
-				scripts.add(new CqlStatements(statements));
-			}
-			return scripts.toArray(new CqlScript[0]);
+		List<String> statements = getStatements(annotation.statements());
+		if (!statements.isEmpty()) {
+			scripts.add(new CqlStatements(statements));
 		}
+		return scripts.toArray(new CqlScript[0]);
+	}
 
-		private List<String> getStatements(String[] statements) {
-			return Arrays.stream(statements).filter(StringUtils::hasText).collect(Collectors.toList());
-		}
+	private static List<String> getStatements(String[] statements) {
+		return Arrays.stream(statements).filter(StringUtils::hasText).collect(Collectors.toList());
+	}
 
-		private String[] getArray(String[] values) {
-			Environment environment = getContext().getEnvironment();
-			return Arrays.stream(values).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
-					.toArray(String[]::new);
-		}
+	private static String[] getArray(String[] values, ApplicationContext context) {
+		Environment environment = context.getEnvironment();
+		return Arrays.stream(values).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
+				.toArray(String[]::new);
+	}
 
-		@Nullable
-		private Version getVersion(String value) {
-			Environment environment = getContext().getEnvironment();
-			String version = environment.resolvePlaceholders(value);
-			return StringUtils.hasText(version) ? Version.parse(version) : null;
-		}
+	@Nullable
+	private static Version getVersion(String value, ApplicationContext context) {
+		Environment environment = context.getEnvironment();
+		String version = environment.resolvePlaceholders(value);
+		return StringUtils.hasText(version) ? Version.parse(version) : null;
+	}
 
-		@Nullable
-		private Charset getCharset(String value) {
-			Environment environment = getContext().getEnvironment();
-			String charset = environment.resolvePlaceholders(value);
-			return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
-		}
+	@Nullable
+	private static Charset getCharset(String value, ApplicationContext context) {
+		Environment environment = context.getEnvironment();
+		String charset = environment.resolvePlaceholders(value);
+		return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
+	}
 
-		@Nullable
-		private Integer getPort(String value) {
-			Environment environment = getContext().getEnvironment();
-			String port = environment.resolvePlaceholders(value);
-			return StringUtils.hasText(port) ? Integer.parseInt(port) : null;
-		}
+	@Nullable
+	private static Integer getPort(String value, ApplicationContext context) {
+		Environment environment = context.getEnvironment();
+		String port = environment.resolvePlaceholders(value);
+		return StringUtils.hasText(port) ? Integer.parseInt(port) : null;
+	}
 
-		@Nullable
-		private URL getURL(String value) {
-			Class<?> testClass = this.testClass;
-			ApplicationContext context = getContext();
-			Environment environment = context.getEnvironment();
-			String location = environment.resolvePlaceholders(value);
-			return StringUtils.hasText(location) ? ResourceUtils.getResource(context, testClass, location) : null;
-		}
-
-		private ApplicationContext getContext() {
-			ApplicationContext context = this.applicationContext;
-			Objects.requireNonNull(context, "Application Context must not be null");
-			return context;
-		}
-
+	@Nullable
+	private static URL getURL(String value, Class<?> testClass, ApplicationContext context) {
+		Environment environment = context.getEnvironment();
+		String location = environment.resolvePlaceholders(value);
+		return StringUtils.hasText(location) ? ResourceUtils.getResource(context, testClass, location) : null;
 	}
 
 }
