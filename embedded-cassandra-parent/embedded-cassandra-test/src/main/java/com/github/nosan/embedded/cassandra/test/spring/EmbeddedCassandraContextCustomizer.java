@@ -62,17 +62,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-		if (beanFactory instanceof BeanDefinitionRegistry) {
-			Class<?> testClass = mergedConfig.getTestClass();
-			EmbeddedCassandra annotation = AnnotatedElementUtils
-					.findMergedAnnotation(testClass, EmbeddedCassandra.class);
-			if (annotation != null) {
-				BeanDefinitionRegistry registry = ((BeanDefinitionRegistry) beanFactory);
-				registry.registerBeanDefinition(EmbeddedCassandra.class.getName(),
-						BeanDefinitionBuilder.rootBeanDefinition(EmbeddedCassandraFactoryBean.class)
-								.addConstructorArgValue(annotation).addConstructorArgValue(testClass)
-								.getBeanDefinition());
-			}
+		Class<?> testClass = mergedConfig.getTestClass();
+		EmbeddedCassandra annotation = AnnotatedElementUtils.findMergedAnnotation(testClass, EmbeddedCassandra.class);
+		if (annotation != null && beanFactory instanceof BeanDefinitionRegistry) {
+			register(testClass, annotation, ((BeanDefinitionRegistry) beanFactory));
 		}
 	}
 
@@ -84,6 +77,13 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	@Override
 	public int hashCode() {
 		return getClass().hashCode();
+	}
+
+	private void register(Class<?> testClass, EmbeddedCassandra annotation, BeanDefinitionRegistry registry) {
+		registry.registerBeanDefinition(EmbeddedCassandra.class.getName(),
+				BeanDefinitionBuilder.rootBeanDefinition(EmbeddedCassandraFactoryBean.class)
+						.addConstructorArgValue(annotation).addConstructorArgValue(testClass)
+						.getBeanDefinition());
 	}
 
 	/**
