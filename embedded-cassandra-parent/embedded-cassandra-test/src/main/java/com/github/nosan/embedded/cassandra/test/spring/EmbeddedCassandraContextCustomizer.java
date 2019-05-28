@@ -96,50 +96,52 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			CassandraFactory cassandraFactory = context.getBeanProvider(CassandraFactory.class)
 					.getIfUnique(() -> getCassandraFactory(testClass, annotation, context));
 			context.getBeanProvider(EmbeddedCassandraFactoryCustomizer.class).orderedStream()
-					.forEach(customizer -> customize(cassandraFactory, customizer));
+					.forEach(customizer -> customizeFactory(cassandraFactory, customizer));
 			return testCassandraFactory.create(cassandraFactory, getScripts(testClass, annotation, context));
 		});
 		return bd;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void customize(CassandraFactory cassandraFactory, EmbeddedCassandraFactoryCustomizer customizer) {
+	private static void customizeFactory(CassandraFactory cassandraFactory,
+			EmbeddedCassandraFactoryCustomizer customizer) {
 		try {
 			customizer.customize(cassandraFactory);
 		}
 		catch (ClassCastException ex) {
 			String message = ex.getMessage();
-			if (message == null || message.contains(cassandraFactory.getClass().getName())) {
-				if (log.isDebugEnabled()) {
-					log.error(String.format("Factory customizer '%s' was not invoked due to the factory type mismatch.",
-							customizer), ex);
-				}
-				return;
+			if (message != null && !message.contains(cassandraFactory.getClass().getName())) {
+				throw ex;
 			}
-			throw ex;
+			if (log.isDebugEnabled()) {
+				log.error(String.format("Factory customizer '%s' was not invoked due to the factory type mismatch.",
+						customizer), ex);
+			}
 		}
 	}
 
 	private static CassandraFactory getCassandraFactory(Class<?> testClass, EmbeddedCassandra annotation,
 			ApplicationContext context) {
+		Environment environment = context.getEnvironment();
 		LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
-		cassandraFactory.setVersion(getVersion(annotation.version(), context));
+		cassandraFactory.setVersion(getVersion(annotation.version(), environment));
 		cassandraFactory.setConfigurationFile(getURL(annotation.configurationFile(), testClass, context));
-		cassandraFactory.setJvmOptions(getArray(annotation.jvmOptions(), context));
-		cassandraFactory.setJmxLocalPort(getPort(annotation.jmxLocalPort(), context));
-		cassandraFactory.setPort(getPort(annotation.port(), context));
-		cassandraFactory.setStoragePort(getPort(annotation.storagePort(), context));
-		cassandraFactory.setSslStoragePort(getPort(annotation.sslStoragePort(), context));
-		cassandraFactory.setRpcPort(getPort(annotation.rpcPort(), context));
+		cassandraFactory.setJvmOptions(getArray(annotation.jvmOptions(), environment));
+		cassandraFactory.setJmxLocalPort(getPort(annotation.jmxLocalPort(), environment));
+		cassandraFactory.setPort(getPort(annotation.port(), environment));
+		cassandraFactory.setStoragePort(getPort(annotation.storagePort(), environment));
+		cassandraFactory.setSslStoragePort(getPort(annotation.sslStoragePort(), environment));
+		cassandraFactory.setRpcPort(getPort(annotation.rpcPort(), environment));
 		return cassandraFactory;
 	}
 
 	private static CqlScript[] getScripts(Class<?> testClass, EmbeddedCassandra annotation,
 			ApplicationContext context) {
+		Environment environment = context.getEnvironment();
 		List<CqlScript> scripts = new ArrayList<>();
 		for (URL url : ResourceUtils.getResources(context, testClass,
-				getArray(annotation.scripts(), context))) {
-			scripts.add(new UrlCqlScript(url, getCharset(annotation.encoding(), context)));
+				getArray(annotation.scripts(), environment))) {
+			scripts.add(new UrlCqlScript(url, getCharset(annotation.encoding(), environment)));
 		}
 		List<String> statements = getStatements(annotation.statements());
 		if (!statements.isEmpty()) {
@@ -152,29 +154,25 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		return Arrays.stream(statements).filter(StringUtils::hasText).collect(Collectors.toList());
 	}
 
-	private static String[] getArray(String[] values, ApplicationContext context) {
-		Environment environment = context.getEnvironment();
+	private static String[] getArray(String[] values, Environment environment) {
 		return Arrays.stream(values).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
 				.toArray(String[]::new);
 	}
 
 	@Nullable
-	private static Version getVersion(String value, ApplicationContext context) {
-		Environment environment = context.getEnvironment();
+	private static Version getVersion(String value, Environment environment) {
 		String version = environment.resolvePlaceholders(value);
 		return StringUtils.hasText(version) ? Version.parse(version) : null;
 	}
 
 	@Nullable
-	private static Charset getCharset(String value, ApplicationContext context) {
-		Environment environment = context.getEnvironment();
+	private static Charset getCharset(String value, Environment environment) {
 		String charset = environment.resolvePlaceholders(value);
 		return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
 	}
 
 	@Nullable
-	private static Integer getPort(String value, ApplicationContext context) {
-		Environment environment = context.getEnvironment();
+	private static Integer getPort(String value, Environment environment) {
 		String port = environment.resolvePlaceholders(value);
 		return StringUtils.hasText(port) ? Integer.parseInt(port) : null;
 	}

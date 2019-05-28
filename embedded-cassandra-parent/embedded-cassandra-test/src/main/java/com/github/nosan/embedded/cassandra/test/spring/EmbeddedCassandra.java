@@ -133,6 +133,12 @@ public @interface EmbeddedCassandra {
 	/**
 	 * Cassandra configuration file ({@code cassandra.yaml}).
 	 * <p>
+	 * Path will be interpreted as a Spring {@link Resource}. A plain path &mdash; for example,
+	 * {@code "cassandra.yaml"} &mdash; will be treated as a classpath resource that is <em>relative</em> to the package
+	 * in which the test class is defined. A path starting with a slash will be treated as an
+	 * <em>absolute</em> classpath resource. A path which references a URL will be loaded using the specified
+	 * resource protocol.
+	 * <p>
 	 * The placeholder {@code ${...}} can be used
 	 *
 	 * @return the configuration file, or {@code empty} to ignore
