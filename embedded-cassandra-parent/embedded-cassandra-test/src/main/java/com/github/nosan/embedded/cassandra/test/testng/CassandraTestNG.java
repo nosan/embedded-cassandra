@@ -29,19 +29,6 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 /**
  * Base {@code test class} that allows the Cassandra to be {@link Cassandra#start() started} and {@link Cassandra#stop()
  * stopped}.
- * <p>
- * The typical usage is:
- * <pre>
- * public class CassandraTests extends CassandraTestNG {
- * public CassandraTests(){
- *     super(&#47;* constructor parameters *&#47;);
- * }
- * &#64;Test
- * public void test() {
- * //
- * }
- * }
- * </pre>
  *
  * @author Dmytro Nosan
  * @see CqlScript

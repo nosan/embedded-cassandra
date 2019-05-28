@@ -34,12 +34,54 @@ import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
  * Test {@link Cassandra} that allows the Cassandra to be {@link #start() started} and {@link #stop() stopped}. {@link
  * TestCassandra} does not launch {@link Cassandra} itself, it simply delegates calls to the underlying {@link
  * Cassandra}. It is also possible to get a {@code connection} to the underlying {@link Cassandra}. Connection will be
- * managed by this {@code TestCassandra} and closed when {@link #stop()} is called.
+ * managed by this {@code TestCassandra} and closed when {@link #stop()} is called. The typical usage is:
+ * <pre>{@code
+ * class Scratch {
+ * 	public static void main(String[] args) {
+ * 		TestCassandra cassandra = new TestCassandra(CqlScript.classpath("schema.cql"));
+ * 		cassandra.start();
+ * 		try {
+ * 			Connection connection = cassandra.getConnection();
+ * 			//if com.datastax.oss:java-driver-core:4.0.1 is present
+ * 			CqlSession session = (CqlSession) connection.get();
+ * 			//if com.datastax.cassandra:cassandra-driver-core:3.7.1 is present
+ * 			Cluster cluster = (Cluster) connection.get();
+ *                }
+ * 		finally {
+ * 			cassandra.stop();
+ *        }        }
+ * }
+ * }</pre>
+ * By default {@link DefaultConnection} is used. This connection detects the client
+ * implementation based on the classpath. You can override the {@link DefaultConnection} if you need this. The following
+ * lines shows how to do this:
+ * <pre>{@code
+ * class Scratch {
+ *     public static void main(String[] args) {
+ *         TestCassandra cassandra = new TestCassandra(CqlScript.classpath("schema.cql")) {
+ *             @Override
+ *             protected Connection createConnection() {
+ *                 return new CqlSessionConnection(getSettings());
+ *             }
+ *         };
+ *         cassandra.start();
+ *         try {
+ *             Connection connection = cassandra.getConnection();
+ *             CqlSession session = (CqlSession) connection.get();
+ *         }
+ *         finally {
+ *             cassandra.stop();
+ *         }
+ *     }
+ * }
+ * }
+ * </pre>
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
@@ -219,7 +261,11 @@ public class TestCassandra implements Cassandra {
 
 	@Override
 	public String toString() {
-		return String.format("%s %s", getClass().getSimpleName(), getVersion());
+		String name = getClass().getSimpleName();
+		if (!StringUtils.hasText(name)) {
+			name = TestCassandra.class.getSimpleName();
+		}
+		return String.format("%s %s", name, getVersion());
 	}
 
 	/**
