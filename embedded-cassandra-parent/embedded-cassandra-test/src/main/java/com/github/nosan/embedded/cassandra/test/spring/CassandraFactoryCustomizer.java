@@ -25,11 +25,16 @@ import com.github.nosan.embedded.cassandra.CassandraFactory;
  *
  * @param <T> the configurable {@link CassandraFactory}
  * @author Dmytro Nosan
- * @since 2.0.0
- * @deprecated since 2.0.3 in favor of {@link CassandraFactoryCustomizer}
+ * @since 2.0.3
  */
 @FunctionalInterface
-@Deprecated
-public interface EmbeddedCassandraFactoryCustomizer<T extends CassandraFactory> extends CassandraFactoryCustomizer<T> {
+public interface CassandraFactoryCustomizer<T extends CassandraFactory> {
+
+	/**
+	 * Customize the specified {@link CassandraFactory}.
+	 *
+	 * @param factory {@link CassandraFactory factory} to customize
+	 */
+	void customize(T factory);
 
 }

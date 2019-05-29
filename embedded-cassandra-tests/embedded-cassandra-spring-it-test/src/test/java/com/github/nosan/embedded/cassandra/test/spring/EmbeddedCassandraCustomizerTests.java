@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@SuppressWarnings("NullableProblems")
+@SuppressWarnings({"NullableProblems", "deprecation"})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration
 @EmbeddedCassandra

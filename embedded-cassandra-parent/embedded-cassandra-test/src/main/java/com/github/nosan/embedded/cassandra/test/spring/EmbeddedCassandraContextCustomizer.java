@@ -95,7 +95,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 					.getIfUnique(() -> TestCassandra::new);
 			CassandraFactory cassandraFactory = context.getBeanProvider(CassandraFactory.class)
 					.getIfUnique(() -> getCassandraFactory(testClass, annotation, context));
-			context.getBeanProvider(EmbeddedCassandraFactoryCustomizer.class).orderedStream()
+			context.getBeanProvider(CassandraFactoryCustomizer.class).orderedStream()
 					.forEach(customizer -> customizeFactory(cassandraFactory, customizer));
 			return testCassandraFactory.create(cassandraFactory, getScripts(testClass, annotation, context));
 		});
@@ -103,8 +103,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void customizeFactory(CassandraFactory cassandraFactory,
-			EmbeddedCassandraFactoryCustomizer customizer) {
+	private static void customizeFactory(CassandraFactory cassandraFactory, CassandraFactoryCustomizer customizer) {
 		try {
 			customizer.customize(cassandraFactory);
 		}
