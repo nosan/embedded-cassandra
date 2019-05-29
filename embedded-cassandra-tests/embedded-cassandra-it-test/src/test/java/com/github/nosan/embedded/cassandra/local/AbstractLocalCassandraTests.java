@@ -95,16 +95,14 @@ abstract class AbstractLocalCassandraTests {
 	@BeforeEach
 	void setUp(@TempDir Path temporaryFolder, TestInfo testInfo) {
 		this.temporaryFolder = temporaryFolder;
-		MDC.put("ID", UUID.randomUUID().toString());
-		MDC.put("TC", testInfo.getTestClass().map(Class::getSimpleName).orElse(""));
-		MDC.put("TM", testInfo.getTestMethod().map(Method::getName).orElse(""));
+		String className = testInfo.getTestClass().map(Class::getSimpleName).orElse("");
+		String methodName = testInfo.getTestMethod().map(Method::getName).orElse("");
+		MDC.put("TEST", String.format("%s.%s", className, methodName));
 	}
 
 	@AfterEach
 	void tearDown() {
-		MDC.remove("ID");
-		MDC.remove("TC");
-		MDC.remove("TM");
+		MDC.remove("TEST");
 	}
 
 	@Test
