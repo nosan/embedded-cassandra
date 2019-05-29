@@ -55,8 +55,6 @@ class RemoteArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(RemoteArtifact.class);
 
-	private static final int BUFFER_SIZE = 32768;
-
 	private static final AtomicLong artifactNumber = new AtomicLong();
 
 	private static final int MAX_REDIRECTS = 20;
