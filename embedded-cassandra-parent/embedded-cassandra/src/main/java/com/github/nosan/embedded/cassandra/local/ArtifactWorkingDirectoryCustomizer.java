@@ -55,7 +55,7 @@ class ArtifactWorkingDirectoryCustomizer implements WorkingDirectoryCustomizer {
 	@Override
 	public void customize(Path workingDirectory, Version version) throws IOException {
 		Path artifactDirectory = this.artifactDirectory;
-		Path artifactFile = artifactDirectory.resolve(String.format(".artifact.%s", version));
+		Path artifactFile = artifactDirectory.resolve(String.format("artifact-%s", version));
 		if (!Files.exists(artifactFile)) {
 			Files.createDirectories(artifactDirectory);
 			Path lockFile = artifactDirectory.resolve(String.format("%s.lock", artifactFile.getFileName()));
