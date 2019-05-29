@@ -66,12 +66,12 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-		if (beanFactory instanceof BeanDefinitionRegistry) {
-			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-			BeanDefinition bd = getBeanDefinition(this.testClass, this.annotation, context);
-			registry.registerBeanDefinition(TestCassandra.class.getName(), bd);
+		BeanDefinitionRegistry registry = getRegistry(context);
+		if (registry.containsBeanDefinition(TestCassandra.class.getName())) {
+			registry.removeBeanDefinition(TestCassandra.class.getName());
 		}
+		BeanDefinition bd = getBeanDefinition(this.testClass, this.annotation, context);
+		registry.registerBeanDefinition(TestCassandra.class.getName(), bd);
 	}
 
 	@Override
@@ -82,6 +82,20 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	@Override
 	public int hashCode() {
 		return getClass().hashCode();
+	}
+
+	private static BeanDefinitionRegistry getRegistry(ConfigurableApplicationContext applicationContext) {
+		if (applicationContext instanceof BeanDefinitionRegistry) {
+			return ((BeanDefinitionRegistry) applicationContext);
+		}
+		ConfigurableListableBeanFactory beanFactory = applicationContext.getBeanFactory();
+		if (beanFactory instanceof BeanDefinitionRegistry) {
+			return ((BeanDefinitionRegistry) beanFactory);
+		}
+		throw new IllegalStateException(String.format("'@%s' is not supported because "
+						+ "'%s' is not found in the '%s'", EmbeddedCassandra.class.getTypeName(),
+				BeanDefinitionRegistry.class.getTypeName(),
+				applicationContext));
 	}
 
 	private static BeanDefinition getBeanDefinition(Class<?> testClass, EmbeddedCassandra annotation,
