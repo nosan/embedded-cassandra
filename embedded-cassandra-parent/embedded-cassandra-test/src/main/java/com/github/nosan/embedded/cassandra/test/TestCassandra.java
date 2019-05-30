@@ -110,7 +110,7 @@ public class TestCassandra implements Cassandra {
 	/**
 	 * Creates a {@link TestCassandra}.
 	 *
-	 * @param scripts CQL scripts to execute
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
 	 */
 	public TestCassandra(CqlScript... scripts) {
 		this(null, scripts);
@@ -120,7 +120,7 @@ public class TestCassandra implements Cassandra {
 	 * Creates a {@link TestCassandra}.
 	 *
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
@@ -130,8 +130,8 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Starts the underlying {@link Cassandra} and executes {@link CqlScript scripts}.
-	 * Calling this method on an already started {@code Cassandra} has no effect.
+	 * Starts the underlying {@link Cassandra} and executes {@link CqlScript scripts} which were used during {@code
+	 * TestCassandra} initialization. Calling this method on an already started {@code Cassandra} has no effect.
 	 * Causes the current thread to wait, until the {@code Cassandra} has started.
 	 *
 	 * @throws CassandraException if the {@code Cassandra} cannot be started
