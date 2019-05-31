@@ -80,8 +80,7 @@ public final class CqlStatements implements CqlScript {
 
 	@Override
 	public String toString() {
-		return this.statements.stream()
-				.collect(Collectors.joining(",", getClass().getSimpleName() + " [", "]"));
+		return this.statements.stream().collect(Collectors.joining(",", "[", "]"));
 	}
 
 }

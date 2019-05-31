@@ -84,8 +84,7 @@ public final class CqlScripts implements CqlScript {
 
 	@Override
 	public String toString() {
-		return this.scripts.stream().map(String::valueOf)
-				.collect(Collectors.joining(",", getClass().getSimpleName() + " [", "]"));
+		return this.scripts.stream().map(String::valueOf).collect(Collectors.joining(",", "[", "]"));
 	}
 
 }
