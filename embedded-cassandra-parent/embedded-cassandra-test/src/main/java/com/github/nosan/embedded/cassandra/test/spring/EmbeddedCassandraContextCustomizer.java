@@ -21,16 +21,20 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -84,7 +88,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		return getClass().hashCode();
 	}
 
-	private static BeanDefinitionRegistry getRegistry(ConfigurableApplicationContext applicationContext) {
+	private BeanDefinitionRegistry getRegistry(ConfigurableApplicationContext applicationContext) {
 		if (applicationContext instanceof BeanDefinitionRegistry) {
 			return ((BeanDefinitionRegistry) applicationContext);
 		}
@@ -98,18 +102,18 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 				applicationContext));
 	}
 
-	private static BeanDefinition getBeanDefinition(Class<?> testClass, EmbeddedCassandra annotation,
+	private BeanDefinition getBeanDefinition(Class<?> testClass, EmbeddedCassandra annotation,
 			ConfigurableApplicationContext context) {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(TestCassandra.class);
 		bd.setInitMethodName("start");
 		bd.setDestroyMethodName("stop");
 		bd.setInstanceSupplier(() -> {
-			TestCassandraFactory testCassandraFactory = context.getBeanProvider(TestCassandraFactory.class)
-					.getIfUnique(() -> TestCassandra::new);
-			CassandraFactory cassandraFactory = context.getBeanProvider(CassandraFactory.class)
-					.getIfUnique(() -> getCassandraFactory(testClass, annotation, context));
-			context.getBeanProvider(CassandraFactoryCustomizer.class).orderedStream()
+			TestCassandraFactory testCassandraFactory = getUniqueBean(context, TestCassandraFactory.class)
+					.orElseGet(() -> TestCassandra::new);
+			CassandraFactory cassandraFactory = getUniqueBean(context, CassandraFactory.class)
+					.orElseGet(() -> getCassandraFactory(testClass, annotation, context));
+			getBeans(context, CassandraFactoryCustomizer.class)
 					.forEach(customizer -> customizeFactory(cassandraFactory, customizer));
 			return testCassandraFactory.create(cassandraFactory, getScripts(testClass, annotation, context));
 		});
@@ -117,7 +121,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void customizeFactory(CassandraFactory cassandraFactory, CassandraFactoryCustomizer customizer) {
+	private void customizeFactory(CassandraFactory cassandraFactory, CassandraFactoryCustomizer customizer) {
 		try {
 			customizer.customize(cassandraFactory);
 		}
@@ -133,7 +137,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		}
 	}
 
-	private static CassandraFactory getCassandraFactory(Class<?> testClass, EmbeddedCassandra annotation,
+	private CassandraFactory getCassandraFactory(Class<?> testClass, EmbeddedCassandra annotation,
 			ApplicationContext context) {
 		Environment environment = context.getEnvironment();
 		LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
@@ -148,7 +152,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		return cassandraFactory;
 	}
 
-	private static CqlScript[] getScripts(Class<?> testClass, EmbeddedCassandra annotation,
+	private CqlScript[] getScripts(Class<?> testClass, EmbeddedCassandra annotation,
 			ApplicationContext context) {
 		Environment environment = context.getEnvironment();
 		List<CqlScript> scripts = new ArrayList<>();
@@ -163,38 +167,66 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		return scripts.toArray(new CqlScript[0]);
 	}
 
-	private static List<String> getStatements(String[] statements) {
+	private List<String> getStatements(String[] statements) {
 		return Arrays.stream(statements).filter(StringUtils::hasText).collect(Collectors.toList());
 	}
 
-	private static String[] getArray(String[] values, Environment environment) {
+	private String[] getArray(String[] values, Environment environment) {
 		return Arrays.stream(values).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
 				.toArray(String[]::new);
 	}
 
 	@Nullable
-	private static Version getVersion(String value, Environment environment) {
+	private Version getVersion(String value, Environment environment) {
 		String version = environment.resolvePlaceholders(value);
 		return StringUtils.hasText(version) ? Version.parse(version) : null;
 	}
 
 	@Nullable
-	private static Charset getCharset(String value, Environment environment) {
+	private Charset getCharset(String value, Environment environment) {
 		String charset = environment.resolvePlaceholders(value);
 		return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
 	}
 
 	@Nullable
-	private static Integer getPort(String value, Environment environment) {
+	private Integer getPort(String value, Environment environment) {
 		String port = environment.resolvePlaceholders(value);
 		return StringUtils.hasText(port) ? Integer.parseInt(port) : null;
 	}
 
 	@Nullable
-	private static URL getURL(String value, Class<?> testClass, ApplicationContext context) {
+	private URL getURL(String value, Class<?> testClass, ApplicationContext context) {
 		Environment environment = context.getEnvironment();
 		String location = environment.resolvePlaceholders(value);
 		return StringUtils.hasText(location) ? ResourceUtils.getResource(context, testClass, location) : null;
+	}
+
+	private <T> Optional<T> getUniqueBean(ApplicationContext applicationContext, Class<T> beanClass) {
+		try {
+			return Optional.ofNullable(applicationContext.getBeanProvider(beanClass).getIfUnique());
+		}
+		catch (NoSuchMethodError ex) {
+			// ignore
+		}
+		try {
+			return Optional.of(applicationContext.getBean(beanClass));
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			return Optional.empty();
+		}
+	}
+
+	private <T> List<T> getBeans(ApplicationContext applicationContext, Class<T> beanClass) {
+		try {
+			return applicationContext.getBeanProvider(beanClass).orderedStream().collect(Collectors.toList());
+		}
+		catch (NoSuchMethodError ex) {
+			// ignore
+		}
+		List<T> beans = new ArrayList<>(BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, beanClass,
+				true, true).values());
+		AnnotationAwareOrderComparator.sort(beans);
+		return beans;
 	}
 
 }

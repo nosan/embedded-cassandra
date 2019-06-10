@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import com.datastax.driver.core.Session;
 import com.datastax.oss.driver.api.core.CqlSession;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
@@ -146,21 +147,37 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 
 	@Nullable
 	private Object getSession(ApplicationContext applicationContext) {
-		Connection connection = applicationContext.getBeanProvider(Connection.class).getIfUnique();
+		Connection connection = getUniqueBean(applicationContext, Connection.class);
 		if (connection != null) {
 			return connection;
 		}
 		ClassLoader cl = getClass().getClassLoader();
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl)) {
-			CqlSession session = applicationContext.getBeanProvider(CqlSession.class).getIfUnique();
+			CqlSession session = getUniqueBean(applicationContext, CqlSession.class);
 			if (session != null) {
 				return session;
 			}
 		}
 		if (ClassUtils.isPresent(SESSION_CLASS, cl)) {
-			return applicationContext.getBeanProvider(Session.class).getIfUnique();
+			return getUniqueBean(applicationContext, Session.class);
 		}
 		return null;
+	}
+
+	@Nullable
+	private <T> T getUniqueBean(ApplicationContext applicationContext, Class<T> beanClass) {
+		try {
+			return applicationContext.getBeanProvider(beanClass).getIfUnique();
+		}
+		catch (NoSuchMethodError ex) {
+			// ignore
+		}
+		try {
+			return applicationContext.getBean(beanClass);
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			return null;
+		}
 	}
 
 	private CqlScript[] getScripts(Cql annotation, Class<?> testClass, ApplicationContext context) {
