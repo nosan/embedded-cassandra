@@ -22,6 +22,9 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
@@ -31,6 +34,8 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @since 2.0.0
  */
 public abstract class SystemUtils {
+
+	private static final Logger log = LoggerFactory.getLogger(SystemUtils.class);
 
 	/**
 	 * Returns {@code true} if this is Windows.
@@ -96,11 +101,17 @@ public abstract class SystemUtils {
 
 	@Nullable
 	private static String getValue(String name) {
-		String value = System.getProperty(name);
-		if (value == null) {
-			value = System.getenv(name);
+		try {
+			String value = System.getProperty(name);
+			if (value == null) {
+				value = System.getenv(name);
+			}
+			return value;
 		}
-		return value;
+		catch (SecurityException ex) {
+			log.error(String.format("Can not get a system or environment property by a name: '%s'", name), ex);
+			return null;
+		}
 	}
 
 }
