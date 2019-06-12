@@ -110,6 +110,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		bd.setBeanClass(TestCassandra.class);
 		bd.setInitMethodName("start");
 		bd.setDestroyMethodName("stop");
+		bd.setLazyInit(false);
 		bd.setInstanceSupplier(() -> {
 			TestCassandraFactory testCassandraFactory = getUniqueBean(applicationContext, TestCassandraFactory.class)
 					.orElseGet(() -> TestCassandra::new);
