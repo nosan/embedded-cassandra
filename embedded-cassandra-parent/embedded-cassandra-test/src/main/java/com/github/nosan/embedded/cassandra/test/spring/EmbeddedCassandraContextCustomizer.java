@@ -130,12 +130,12 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		}
 		catch (ClassCastException ex) {
 			String message = ex.getMessage();
-			if (message != null && !message.contains(cassandraFactory.getClass().getName())) {
+			if (message == null || !message.contains(cassandraFactory.getClass().getName())) {
 				throw ex;
 			}
 			if (log.isDebugEnabled()) {
-				log.error(String.format("Factory customizer '%s' was not invoked due to the factory type mismatch.",
-						customizer), ex);
+				log.error(String.format("'%s' can not customize '%s' due to type mismatch.", customizer,
+						cassandraFactory), ex);
 			}
 		}
 	}
