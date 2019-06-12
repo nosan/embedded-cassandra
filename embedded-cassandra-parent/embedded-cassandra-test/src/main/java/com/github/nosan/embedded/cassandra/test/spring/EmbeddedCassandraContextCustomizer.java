@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -69,12 +70,13 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	@Override
-	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		BeanDefinitionRegistry registry = getRegistry(context);
+	public void customizeContext(ConfigurableApplicationContext applicationContext,
+			MergedContextConfiguration mergedConfig) {
+		BeanDefinitionRegistry registry = getRegistry(applicationContext);
 		if (registry.containsBeanDefinition(TestCassandra.class.getName())) {
 			registry.removeBeanDefinition(TestCassandra.class.getName());
 		}
-		BeanDefinition bd = getBeanDefinition(this.testClass, this.annotation, context);
+		BeanDefinition bd = getBeanDefinition(this.testClass, this.annotation, applicationContext);
 		registry.registerBeanDefinition(TestCassandra.class.getName(), bd);
 	}
 
@@ -103,19 +105,19 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	private BeanDefinition getBeanDefinition(Class<?> testClass, EmbeddedCassandra annotation,
-			ConfigurableApplicationContext context) {
+			ConfigurableApplicationContext applicationContext) {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(TestCassandra.class);
 		bd.setInitMethodName("start");
 		bd.setDestroyMethodName("stop");
 		bd.setInstanceSupplier(() -> {
-			TestCassandraFactory testCassandraFactory = getUniqueBean(context, TestCassandraFactory.class)
+			TestCassandraFactory testCassandraFactory = getUniqueBean(applicationContext, TestCassandraFactory.class)
 					.orElseGet(() -> TestCassandra::new);
-			CassandraFactory cassandraFactory = getUniqueBean(context, CassandraFactory.class)
-					.orElseGet(() -> getCassandraFactory(testClass, annotation, context));
-			getBeans(context, CassandraFactoryCustomizer.class)
+			CassandraFactory cassandraFactory = getUniqueBean(applicationContext, CassandraFactory.class)
+					.orElseGet(() -> getCassandraFactory(testClass, annotation, applicationContext));
+			getBeans(applicationContext, CassandraFactoryCustomizer.class)
 					.forEach(customizer -> customizeFactory(cassandraFactory, customizer));
-			return testCassandraFactory.create(cassandraFactory, getScripts(testClass, annotation, context));
+			return testCassandraFactory.create(cassandraFactory, getScripts(testClass, annotation, applicationContext));
 		});
 		return bd;
 	}
@@ -138,11 +140,11 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	private CassandraFactory getCassandraFactory(Class<?> testClass, EmbeddedCassandra annotation,
-			ApplicationContext context) {
-		Environment environment = context.getEnvironment();
+			ApplicationContext applicationContext) {
+		Environment environment = applicationContext.getEnvironment();
 		LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
 		cassandraFactory.setVersion(getVersion(annotation.version(), environment));
-		cassandraFactory.setConfigurationFile(getURL(annotation.configurationFile(), testClass, context));
+		cassandraFactory.setConfigurationFile(getURL(annotation.configurationFile(), testClass, applicationContext));
 		cassandraFactory.setJvmOptions(getArray(annotation.jvmOptions(), environment));
 		cassandraFactory.setJmxLocalPort(getPort(annotation.jmxLocalPort(), environment));
 		cassandraFactory.setPort(getPort(annotation.port(), environment));
@@ -153,10 +155,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	private CqlScript[] getScripts(Class<?> testClass, EmbeddedCassandra annotation,
-			ApplicationContext context) {
-		Environment environment = context.getEnvironment();
+			ApplicationContext applicationContext) {
+		Environment environment = applicationContext.getEnvironment();
 		List<CqlScript> scripts = new ArrayList<>();
-		for (URL url : ResourceUtils.getResources(context, testClass,
+		for (URL url : ResourceUtils.getResources(applicationContext, testClass,
 				getArray(annotation.scripts(), environment))) {
 			scripts.add(new UrlCqlScript(url, getCharset(annotation.encoding(), environment)));
 		}
@@ -195,18 +197,17 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	@Nullable
-	private URL getURL(String value, Class<?> testClass, ApplicationContext context) {
-		Environment environment = context.getEnvironment();
+	private URL getURL(String value, Class<?> testClass, ApplicationContext applicationContext) {
+		Environment environment = applicationContext.getEnvironment();
 		String location = environment.resolvePlaceholders(value);
-		return StringUtils.hasText(location) ? ResourceUtils.getResource(context, testClass, location) : null;
+		return StringUtils.hasText(location) ? ResourceUtils.getResource(applicationContext, testClass,
+				location) : null;
 	}
 
 	private <T> Optional<T> getUniqueBean(ApplicationContext applicationContext, Class<T> beanClass) {
-		try {
-			return Optional.ofNullable(applicationContext.getBeanProvider(beanClass).getIfUnique());
-		}
-		catch (NoSuchMethodError ex) {
-			// ignore
+		ObjectProvider<T> beanProvider = getBeanProvider(applicationContext, beanClass);
+		if (beanProvider != null) {
+			return Optional.ofNullable(beanProvider.getIfUnique());
 		}
 		try {
 			return Optional.of(applicationContext.getBean(beanClass));
@@ -217,16 +218,24 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	private <T> List<T> getBeans(ApplicationContext applicationContext, Class<T> beanClass) {
-		try {
-			return applicationContext.getBeanProvider(beanClass).orderedStream().collect(Collectors.toList());
-		}
-		catch (NoSuchMethodError ex) {
-			// ignore
+		ObjectProvider<T> beanProvider = getBeanProvider(applicationContext, beanClass);
+		if (beanProvider != null) {
+			return beanProvider.orderedStream().collect(Collectors.toList());
 		}
 		List<T> beans = new ArrayList<>(BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, beanClass,
 				true, true).values());
 		AnnotationAwareOrderComparator.sort(beans);
 		return beans;
+	}
+
+	@Nullable
+	private <T> ObjectProvider<T> getBeanProvider(ApplicationContext applicationContext, Class<T> beanClass) {
+		try {
+			return applicationContext.getBeanProvider(beanClass);
+		}
+		catch (NoSuchMethodError ex) {
+			return null;
+		}
 	}
 
 }

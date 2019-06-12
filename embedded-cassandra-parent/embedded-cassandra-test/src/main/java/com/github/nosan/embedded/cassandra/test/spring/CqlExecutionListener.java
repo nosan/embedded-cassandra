@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import com.datastax.driver.core.Session;
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
@@ -137,6 +138,21 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 	}
 
+	private CqlScript[] getScripts(Cql annotation, Class<?> testClass, ApplicationContext applicationContext) {
+		List<CqlScript> scripts = new ArrayList<>();
+		Environment environment = applicationContext.getEnvironment();
+		Charset charset = getCharset(environment, annotation.encoding());
+		for (URL url : ResourceUtils.getResources(applicationContext, testClass,
+				getArray(environment, annotation.scripts()))) {
+			scripts.add(new UrlCqlScript(url, charset));
+		}
+		List<String> statements = getStatements(annotation.statements());
+		if (!statements.isEmpty()) {
+			scripts.add(new CqlStatements(statements));
+		}
+		return scripts.toArray(new CqlScript[0]);
+	}
+
 	@Nullable
 	private Object getSession(String name, ApplicationContext applicationContext) {
 		if (StringUtils.hasText(name)) {
@@ -166,11 +182,9 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 
 	@Nullable
 	private <T> T getUniqueBean(ApplicationContext applicationContext, Class<T> beanClass) {
-		try {
-			return applicationContext.getBeanProvider(beanClass).getIfUnique();
-		}
-		catch (NoSuchMethodError ex) {
-			// ignore
+		ObjectProvider<T> beanProvider = getBeanProvider(applicationContext, beanClass);
+		if (beanProvider != null) {
+			return beanProvider.getIfUnique();
 		}
 		try {
 			return applicationContext.getBean(beanClass);
@@ -180,18 +194,14 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 	}
 
-	private CqlScript[] getScripts(Cql annotation, Class<?> testClass, ApplicationContext context) {
-		List<CqlScript> scripts = new ArrayList<>();
-		Environment environment = context.getEnvironment();
-		Charset charset = getCharset(environment, annotation.encoding());
-		for (URL url : ResourceUtils.getResources(context, testClass, getArray(environment, annotation.scripts()))) {
-			scripts.add(new UrlCqlScript(url, charset));
+	@Nullable
+	private <T> ObjectProvider<T> getBeanProvider(ApplicationContext applicationContext, Class<T> beanClass) {
+		try {
+			return applicationContext.getBeanProvider(beanClass);
 		}
-		List<String> statements = getStatements(annotation.statements());
-		if (!statements.isEmpty()) {
-			scripts.add(new CqlStatements(statements));
+		catch (NoSuchMethodError ex) {
+			return null;
 		}
-		return scripts.toArray(new CqlScript[0]);
 	}
 
 	private String[] getArray(Environment environment, String[] values) {
