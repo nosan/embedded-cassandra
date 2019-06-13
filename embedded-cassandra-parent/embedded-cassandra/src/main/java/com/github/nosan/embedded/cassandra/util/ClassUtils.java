@@ -93,7 +93,7 @@ public abstract class ClassUtils {
 			Class.forName(name, false, (classLoader != null) ? classLoader : getClassLoader());
 			return true;
 		}
-		catch (NoClassDefFoundError | ClassNotFoundException ex) {
+		catch (ClassNotFoundException ex) {
 			return false;
 		}
 	}

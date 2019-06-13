@@ -48,7 +48,7 @@ class ClassUtilsTests {
 
 	@Test
 	void classIsNotPresent() {
-		assertThat(ClassUtils.isPresent("text", getClass().getClassLoader())).isFalse();
+		assertThat(ClassUtils.isPresent("org.springframework.util.StringUtils", getClass().getClassLoader())).isFalse();
 	}
 
 	private static final class MyClass {
