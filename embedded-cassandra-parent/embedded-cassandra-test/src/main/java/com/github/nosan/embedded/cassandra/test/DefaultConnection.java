@@ -79,7 +79,7 @@ public class DefaultConnection implements Connection {
 		@Override
 		public void execute(CqlScript... scripts) {
 			Objects.requireNonNull(scripts, "Scripts must not be null");
-			throw new IllegalStateException(String.format("There is no way to execute '%s'."
+			throw new IllegalStateException(String.format("Failed to execute CQL scripts: '%s'."
 							+ " '%s' and '%s' classes are not present in the classpath.",
 					Arrays.stream(scripts).map(String::valueOf).collect(Collectors.joining(",")),
 					CQL_SESSION_CLASS, CLUSTER_CLASS));
