@@ -60,6 +60,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraContextCustomizer.class);
 
+	private static final String BEAN_NAME = TestCassandra.class.getName();
+
 	private final Class<?> testClass;
 
 	private final EmbeddedCassandra annotation;
@@ -73,11 +75,11 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	public void customizeContext(ConfigurableApplicationContext applicationContext,
 			MergedContextConfiguration mergedConfig) {
 		BeanDefinitionRegistry registry = getRegistry(applicationContext);
-		if (registry.containsBeanDefinition(TestCassandra.class.getName())) {
-			registry.removeBeanDefinition(TestCassandra.class.getName());
+		if (registry.containsBeanDefinition(BEAN_NAME)) {
+			registry.removeBeanDefinition(BEAN_NAME);
 		}
-		BeanDefinition bd = getBeanDefinition(this.testClass, this.annotation, applicationContext);
-		registry.registerBeanDefinition(TestCassandra.class.getName(), bd);
+		BeanDefinition bd = getBeanDefinition(applicationContext);
+		registry.registerBeanDefinition(BEAN_NAME, bd);
 	}
 
 	@Override
@@ -104,21 +106,22 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 				applicationContext));
 	}
 
-	private BeanDefinition getBeanDefinition(Class<?> testClass, EmbeddedCassandra annotation,
-			ConfigurableApplicationContext applicationContext) {
+	private BeanDefinition getBeanDefinition(ConfigurableApplicationContext applicationContext) {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(TestCassandra.class);
 		bd.setInitMethodName("start");
 		bd.setDestroyMethodName("stop");
 		bd.setLazyInit(false);
+		bd.setScope(BeanDefinition.SCOPE_SINGLETON);
 		bd.setInstanceSupplier(() -> {
 			TestCassandraFactory testCassandraFactory = getUniqueBean(applicationContext, TestCassandraFactory.class)
 					.orElseGet(() -> TestCassandra::new);
 			CassandraFactory cassandraFactory = getUniqueBean(applicationContext, CassandraFactory.class)
-					.orElseGet(() -> getCassandraFactory(testClass, annotation, applicationContext));
+					.orElseGet(() -> getCassandraFactory(this.testClass, this.annotation, applicationContext));
 			getBeans(applicationContext, CassandraFactoryCustomizer.class)
 					.forEach(customizer -> customizeFactory(cassandraFactory, customizer));
-			return testCassandraFactory.create(cassandraFactory, getScripts(testClass, annotation, applicationContext));
+			CqlScript[] scripts = getScripts(this.testClass, this.annotation, applicationContext);
+			return testCassandraFactory.create(cassandraFactory, scripts);
 		});
 		return bd;
 	}
