@@ -65,7 +65,7 @@ class UrlCqlScriptTests {
 
 	@Test
 	void assertExceptionThrown() throws IOException {
-		assertThatThrownBy(new UrlCqlScript(new URL("http://localhost.unknown.net:8080"))::getStatements)
+		assertThatThrownBy(new UrlCqlScript(new URL("http://unknown"))::getStatements)
 				.isInstanceOf(UncheckedIOException.class);
 	}
 
