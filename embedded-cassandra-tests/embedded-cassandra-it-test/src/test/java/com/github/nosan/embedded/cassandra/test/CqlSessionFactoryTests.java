@@ -56,7 +56,7 @@ class CqlSessionFactoryTests {
 				sessionFactory.setPassword("cassandra");
 				sessionFactory.setKeystorePath(keystoreFile);
 				sessionFactory.setTruststorePath(truststoreFile);
-				sessionFactory.setHostNameValidation(false);
+				sessionFactory.setHostnameValidation(false);
 				sessionFactory.setTruststorePassword("cassandra");
 				sessionFactory.setKeystorePassword("cassandra");
 				return new CqlSessionConnection(sessionFactory.create(getSettings()));

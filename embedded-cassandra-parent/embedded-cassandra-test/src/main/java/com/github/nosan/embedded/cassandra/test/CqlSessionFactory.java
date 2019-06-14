@@ -68,7 +68,7 @@ public class CqlSessionFactory {
 	@Nullable
 	private String[] cipherSuites;
 
-	private boolean hostNameValidation;
+	private boolean hostnameValidation;
 
 	private boolean sslEnabled;
 
@@ -86,11 +86,11 @@ public class CqlSessionFactory {
 	 * Whether or not to require validation that the hostname of the server certificate's common
 	 * name matches the hostname of the server being connected to.
 	 *
-	 * @param hostNameValidation whether hostname validation should be enabled
+	 * @param hostnameValidation whether hostname validation should be enabled
 	 * @since 2.0.3
 	 */
-	public void setHostNameValidation(boolean hostNameValidation) {
-		this.hostNameValidation = hostNameValidation;
+	public void setHostnameValidation(boolean hostnameValidation) {
+		this.hostnameValidation = hostnameValidation;
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class CqlSessionFactory {
 								com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider.class);
 			}
 			if (this.sslEnabled) {
-				driverBuilder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, this.hostNameValidation)
+				driverBuilder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, this.hostnameValidation)
 						.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class);
 				if (this.cipherSuites != null) {
 					driverBuilder.withStringList(DefaultDriverOption.SSL_CIPHER_SUITES,

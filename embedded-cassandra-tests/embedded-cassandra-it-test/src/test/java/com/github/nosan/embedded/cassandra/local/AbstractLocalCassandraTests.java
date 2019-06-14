@@ -196,7 +196,7 @@ abstract class AbstractLocalCassandraTests {
 		sessionFactory.setSslEnabled(true);
 		sessionFactory.setKeystorePath(keystoreFile);
 		sessionFactory.setTruststorePath(truststoreFile);
-		sessionFactory.setHostNameValidation(false);
+		sessionFactory.setHostnameValidation(false);
 		sessionFactory.setTruststorePassword("cassandra");
 		sessionFactory.setKeystorePassword("cassandra");
 		runner.run(assertCreateKeyspace(sessionFactory));
