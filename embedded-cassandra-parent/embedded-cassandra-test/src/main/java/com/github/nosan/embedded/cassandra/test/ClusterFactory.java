@@ -16,13 +16,28 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import java.io.InputStream;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.RemoteEndpointAwareJdkSSLOptions;
 import com.datastax.driver.core.SocketOptions;
 
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
  * {@link Cluster} factory with a default strategy.
@@ -32,9 +47,145 @@ import com.github.nosan.embedded.cassandra.Settings;
  */
 public class ClusterFactory {
 
-	private static final String USERNAME = "cassandra";
+	private final List<ClusterBuilderCustomizer> clusterBuilderCustomizers = new ArrayList<>();
 
-	private static final String PASSWORD = "cassandra";
+	@Nullable
+	private String username = "cassandra";
+
+	@Nullable
+	private String password = "cassandra";
+
+	@Nullable
+	private Path truststorePath;
+
+	@Nullable
+	private String truststorePassword;
+
+	@Nullable
+	private Path keystorePath;
+
+	@Nullable
+	private String keystorePassword;
+
+	@Nullable
+	private String[] cipherSuites;
+
+	private boolean metricsEnabled;
+
+	private boolean jmxEnabled;
+
+	private boolean sslEnabled;
+
+	/**
+	 * The path to the truststore.
+	 *
+	 * @param truststorePath the path
+	 * @since 2.0.3
+	 */
+	public void setTruststorePath(@Nullable Path truststorePath) {
+		this.truststorePath = truststorePath;
+	}
+
+	/**
+	 * The password to truststore.
+	 *
+	 * @param truststorePassword the password
+	 * @since 2.0.3
+	 */
+	public void setTruststorePassword(@Nullable String truststorePassword) {
+		this.truststorePassword = truststorePassword;
+	}
+
+	/**
+	 * The path to the keystore.
+	 *
+	 * @param keystorePath the path
+	 * @since 2.0.3
+	 */
+	public void setKeystorePath(@Nullable Path keystorePath) {
+		this.keystorePath = keystorePath;
+	}
+
+	/**
+	 * The password to keystore.
+	 *
+	 * @param keystorePassword the password
+	 * @since 2.0.3
+	 */
+	public void setKeystorePassword(@Nullable String keystorePassword) {
+		this.keystorePassword = keystorePassword;
+	}
+
+	/**
+	 * Set the cipher suites to use. The default is to present all the eligible client ciphers to the server.
+	 *
+	 * @param cipherSuites the cipher suites to use
+	 * @since 2.0.3
+	 */
+	public void setCipherSuites(String... cipherSuites) {
+		this.cipherSuites = cipherSuites;
+	}
+
+	/**
+	 * Enables metrics collection for the created cluster.
+	 *
+	 * @param metricsEnabled whether metrics should be enabled
+	 * @since 2.0.3
+	 */
+	public void setMetricsEnabled(boolean metricsEnabled) {
+		this.metricsEnabled = metricsEnabled;
+	}
+
+	/**
+	 * Enables JMX reporting of the metrics.
+	 *
+	 * @param jmxEnabled whether JMX reporting should be enabled
+	 * @since 2.0.3
+	 */
+	public void setJmxEnabled(boolean jmxEnabled) {
+		this.jmxEnabled = jmxEnabled;
+	}
+
+	/**
+	 * Enables the use of SSL for the created Cluster.
+	 *
+	 * @param sslEnabled whether SSL should be enabled
+	 * @since 2.0.3
+	 */
+	public void setSslEnabled(boolean sslEnabled) {
+		this.sslEnabled = sslEnabled;
+	}
+
+	/**
+	 * The username to use to login to Cassandra hosts.
+	 *
+	 * @param username the username
+	 * @since 2.0.3
+	 */
+	public void setUsername(@Nullable String username) {
+		this.username = username;
+	}
+
+	/**
+	 * The password corresponding to username.
+	 *
+	 * @param password the password
+	 * @since 2.0.3
+	 */
+	public void setPassword(@Nullable String password) {
+		this.password = password;
+	}
+
+	/**
+	 * Add customizer to customize the {@link Cluster.Builder}.
+	 *
+	 * @param clusterBuilderCustomizer the customizer.
+	 * @since 2.0.3
+	 */
+	public void addClusterBuilderCustomizer(ClusterBuilderCustomizer clusterBuilderCustomizer) {
+		Objects.requireNonNull(clusterBuilderCustomizer, "ClusterBuilderCustomizer must not be null");
+		this.clusterBuilderCustomizers.add(clusterBuilderCustomizer);
+	}
 
 	/**
 	 * Creates a new configured {@link Cluster}.
@@ -45,18 +196,19 @@ public class ClusterFactory {
 	public Cluster create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
 		Integer port = settings.portOrSslPort().orElse(null);
+		Integer sslPort = settings.sslPort().orElse(null);
 		InetAddress address = settings.address().orElse(null);
 		if (address != null && port != null) {
 			SocketOptions socketOptions = new SocketOptions();
 			socketOptions.setConnectTimeoutMillis(30000);
 			socketOptions.setReadTimeoutMillis(30000);
-			Cluster.Builder builder = Cluster.builder()
-					.addContactPoints(address)
-					.withPort(port)
-					.withCredentials(USERNAME, PASSWORD)
-					.withSocketOptions(socketOptions)
-					.withoutJMXReporting()
-					.withoutMetrics();
+			Cluster.Builder builder = Cluster.builder().addContactPoints(address)
+					.withPort((this.sslEnabled && sslPort != null) ? sslPort : port)
+					.withSocketOptions(socketOptions);
+			configureCredentials(builder);
+			configureMetrics(builder);
+			configureSsl(builder);
+			this.clusterBuilderCustomizers.forEach(customizer -> customizer.customize(builder));
 			Cluster cluster = buildCluster(builder);
 			return Objects.requireNonNull(cluster, "Cluster must not be null");
 		}
@@ -73,6 +225,85 @@ public class ClusterFactory {
 	 */
 	protected Cluster buildCluster(Cluster.Builder builder) {
 		return builder.build();
+	}
+
+	private void configureMetrics(Cluster.Builder builder) {
+		if (!this.metricsEnabled) {
+			builder.withoutMetrics();
+		}
+		if (!this.jmxEnabled) {
+			builder.withoutJMXReporting();
+		}
+	}
+
+	private void configureCredentials(Cluster.Builder builder) {
+		if (this.username != null && this.password != null) {
+			builder.withCredentials(this.username, this.password);
+		}
+	}
+
+	private void configureSsl(Cluster.Builder builder) {
+		if (this.sslEnabled) {
+			RemoteEndpointAwareJdkSSLOptions.Builder sslOptionsBuilder = RemoteEndpointAwareJdkSSLOptions.builder();
+			if (this.keystorePath != null || this.truststorePath != null) {
+				sslOptionsBuilder.withSSLContext(getSslContext());
+			}
+			if (this.cipherSuites != null) {
+				sslOptionsBuilder.withCipherSuites(this.cipherSuites);
+			}
+			builder.withSSL(sslOptionsBuilder.build());
+		}
+	}
+
+	private SSLContext getSslContext() {
+		try {
+			SSLContext context = SSLContext.getInstance("SSL");
+			TrustManagerFactory tmf = null;
+			if (this.truststorePath != null) {
+				try (InputStream tsf = Files.newInputStream(this.truststorePath)) {
+					KeyStore ts = KeyStore.getInstance("JKS");
+					char[] password =
+							(this.truststorePassword != null) ? this.truststorePassword.toCharArray() : null;
+					ts.load(tsf, password);
+					tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+					tmf.init(ts);
+				}
+			}
+			KeyManagerFactory kmf = null;
+			if (this.keystorePath != null) {
+				try (InputStream ksf = Files.newInputStream(this.keystorePath)) {
+					KeyStore ks = KeyStore.getInstance("JKS");
+					char[] password = (this.keystorePassword != null) ? this.keystorePassword.toCharArray() : null;
+					ks.load(ksf, password);
+					kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+					kmf.init(ks, password);
+				}
+			}
+			KeyManager[] keyManagers = (kmf != null) ? kmf.getKeyManagers() : null;
+			TrustManager[] trustManagers = (tmf != null) ? tmf.getTrustManagers() : null;
+			context.init(keyManagers, trustManagers, new SecureRandom());
+			return context;
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Can not initialize SSL Context", ex);
+		}
+	}
+
+	/**
+	 * Callback interface to customize the {@link Cluster} via a {@link Cluster.Builder}.
+	 *
+	 * @since 2.0.3
+	 */
+	@FunctionalInterface
+	public interface ClusterBuilderCustomizer {
+
+		/**
+		 * Customize the {@link Cluster.Builder}.
+		 *
+		 * @param clusterBuilder the builder to customize
+		 */
+		void customize(Cluster.Builder clusterBuilder);
+
 	}
 
 }

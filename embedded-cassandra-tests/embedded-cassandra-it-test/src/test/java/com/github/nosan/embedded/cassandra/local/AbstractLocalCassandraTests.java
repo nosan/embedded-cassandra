@@ -47,10 +47,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
-import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
-import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
-import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
@@ -196,21 +192,14 @@ abstract class AbstractLocalCassandraTests {
 			Files.copy(truststoreFile, workDir.resolve("conf").resolve("truststore.node0"));
 		});
 		CassandraRunner runner = new CassandraRunner(this.factory);
-		runner.run(assertCreateKeyspace(new CqlSessionFactory() {
-
-			@Override
-			protected DriverConfigLoader buildDriverConfigLoader(ProgrammaticDriverConfigLoaderBuilder builder) {
-				return builder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, false)
-						.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class)
-						.withString(DefaultDriverOption.SSL_KEYSTORE_PATH, keystoreFile.toString())
-						.withString(DefaultDriverOption.SSL_TRUSTSTORE_PATH, truststoreFile.toString())
-						.withString(DefaultDriverOption.SSL_KEYSTORE_PASSWORD, "cassandra")
-						.withString(DefaultDriverOption.SSL_TRUSTSTORE_PASSWORD, "cassandra")
-						.build();
-			}
-
-		}));
-
+		CqlSessionFactory sessionFactory = new CqlSessionFactory();
+		sessionFactory.setSslEnabled(true);
+		sessionFactory.setKeystorePath(keystoreFile);
+		sessionFactory.setTruststorePath(truststoreFile);
+		sessionFactory.setHostNameValidation(false);
+		sessionFactory.setTruststorePassword("cassandra");
+		sessionFactory.setKeystorePassword("cassandra");
+		runner.run(assertCreateKeyspace(sessionFactory));
 	}
 
 	@Test

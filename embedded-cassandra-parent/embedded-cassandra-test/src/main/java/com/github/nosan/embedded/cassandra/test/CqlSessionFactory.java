@@ -18,7 +18,11 @@ package com.github.nosan.embedded.cassandra.test;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -28,8 +32,10 @@ import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
 import com.datastax.oss.driver.api.core.context.DriverContext;
 import com.datastax.oss.driver.api.core.metadata.EndPoint;
+import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
 
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
  * {@link CqlSession} factory with a default strategy.
@@ -39,11 +45,161 @@ import com.github.nosan.embedded.cassandra.Settings;
  */
 public class CqlSessionFactory {
 
-	private static final String USERNAME = "cassandra";
+	private final List<DriverConfigLoaderBuilderCustomizer> driverBuilderCustomizers = new ArrayList<>();
 
-	private static final String PASSWORD = "cassandra";
+	private final List<CqlSessionBuilderCustomizer> sessionBuilderCustomizers = new ArrayList<>();
 
-	private static final String DATACENTER = "datacenter1";
+	@Nullable
+	private String username = "cassandra";
+
+	@Nullable
+	private String password = "cassandra";
+
+	@Nullable
+	private String localDataCenter = "datacenter1";
+
+	@Nullable
+	private Path truststorePath;
+
+	@Nullable
+	private String truststorePassword;
+
+	@Nullable
+	private Path keystorePath;
+
+	@Nullable
+	private String keystorePassword;
+
+	@Nullable
+	private String[] cipherSuites;
+
+	private boolean hostNameValidation;
+
+	private boolean sslEnabled;
+
+	/**
+	 * Specifies the data center that is considered "local" by the load balancing policy.
+	 *
+	 * @param localDataCenter the data center
+	 * @since 2.0.3
+	 */
+	public void setLocalDataCenter(@Nullable String localDataCenter) {
+		this.localDataCenter = localDataCenter;
+	}
+
+	/**
+	 * Whether or not to require validation that the hostname of the server certificate's common
+	 * name matches the hostname of the server being connected to.
+	 *
+	 * @param hostNameValidation whether hostname validation should be enabled
+	 * @since 2.0.3
+	 */
+	public void setHostNameValidation(boolean hostNameValidation) {
+		this.hostNameValidation = hostNameValidation;
+	}
+
+	/**
+	 * Enables the use of SSL for the created Session.
+	 *
+	 * @param sslEnabled whether SSL should be enabled
+	 * @since 2.0.3
+	 */
+	public void setSslEnabled(boolean sslEnabled) {
+		this.sslEnabled = sslEnabled;
+	}
+
+	/**
+	 * The path to the truststore.
+	 *
+	 * @param truststorePath the path
+	 * @since 2.0.3
+	 */
+	public void setTruststorePath(@Nullable Path truststorePath) {
+		this.truststorePath = truststorePath;
+	}
+
+	/**
+	 * The password to truststore.
+	 *
+	 * @param truststorePassword the password
+	 * @since 2.0.3
+	 */
+	public void setTruststorePassword(@Nullable String truststorePassword) {
+		this.truststorePassword = truststorePassword;
+	}
+
+	/**
+	 * The path to the keystore.
+	 *
+	 * @param keystorePath the path
+	 * @since 2.0.3
+	 */
+	public void setKeystorePath(@Nullable Path keystorePath) {
+		this.keystorePath = keystorePath;
+	}
+
+	/**
+	 * The password to keystore.
+	 *
+	 * @param keystorePassword the password
+	 * @since 2.0.3
+	 */
+	public void setKeystorePassword(@Nullable String keystorePassword) {
+		this.keystorePassword = keystorePassword;
+	}
+
+	/**
+	 * Set the cipher suites to use. The default is to present all the eligible client ciphers to the server.
+	 *
+	 * @param cipherSuites the cipher suites to use
+	 * @since 2.0.3
+	 */
+	public void setCipherSuites(String... cipherSuites) {
+		this.cipherSuites = cipherSuites;
+	}
+
+	/**
+	 * The username to use to login to Cassandra hosts.
+	 *
+	 * @param username the username
+	 * @since 2.0.3
+	 */
+	public void setUsername(@Nullable String username) {
+		this.username = username;
+	}
+
+	/**
+	 * The password corresponding to username.
+	 *
+	 * @param password the password
+	 * @since 2.0.3
+	 */
+	public void setPassword(@Nullable String password) {
+		this.password = password;
+	}
+
+	/**
+	 * Add customizer to customize the {@link ProgrammaticDriverConfigLoaderBuilder}.
+	 *
+	 * @param driverConfigLoaderBuilderCustomizer the customizer.
+	 * @since 2.0.3
+	 */
+	public void addDriverBuilderCustomizer(DriverConfigLoaderBuilderCustomizer driverConfigLoaderBuilderCustomizer) {
+		Objects.requireNonNull(driverConfigLoaderBuilderCustomizer,
+				"DriverConfigLoaderBuilderCustomizer must not be null");
+		this.driverBuilderCustomizers.add(driverConfigLoaderBuilderCustomizer);
+	}
+
+	/**
+	 * Add customizer to customize the {@link CqlSessionBuilder}.
+	 *
+	 * @param cqlSessionBuilderCustomizer the customizer.
+	 * @since 2.0.3
+	 */
+	public void addCqlSessionBuilderCustomizer(CqlSessionBuilderCustomizer cqlSessionBuilderCustomizer) {
+		Objects.requireNonNull(cqlSessionBuilderCustomizer, "CqlSessionBuilderCustomizer must not be null");
+		this.sessionBuilderCustomizers.add(cqlSessionBuilderCustomizer);
+	}
 
 	/**
 	 * Creates a new configured {@link CqlSession}.
@@ -54,19 +210,24 @@ public class CqlSessionFactory {
 	public CqlSession create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
 		Integer port = settings.portOrSslPort().orElse(null);
+		Integer sslPort = settings.sslPort().orElse(null);
 		InetAddress address = settings.address().orElse(null);
 		if (address != null && port != null) {
-			DriverConfigLoader driverConfigLoader = buildDriverConfigLoader(DriverConfigLoader.programmaticBuilder()
-					.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, USERNAME)
-					.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, PASSWORD)
-					.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class)
+			ProgrammaticDriverConfigLoaderBuilder driverBuilder = DriverConfigLoader.programmaticBuilder()
 					.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
-					.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3)));
+					.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3));
+			configureAuthentication(driverBuilder);
+			configureSsl(driverBuilder);
+			this.driverBuilderCustomizers.forEach(customizer -> customizer.customize(driverBuilder));
+			DriverConfigLoader driverConfigLoader = buildDriverConfigLoader(driverBuilder);
 			Objects.requireNonNull(driverConfigLoader, "Driver Config must not be null");
-			CqlSession cqlSession = buildCqlSession(CqlSession.builder().addContactPoint(
-					new InetSocketAddress(address, port))
-					.withLocalDatacenter(DATACENTER)
-					.withConfigLoader(driverConfigLoader));
+			InetSocketAddress contactPoint = new InetSocketAddress(address,
+					(this.sslEnabled && sslPort != null) ? sslPort : port);
+			CqlSessionBuilder sessionBuilder = CqlSession.builder().addContactPoint(contactPoint)
+					.withConfigLoader(driverConfigLoader);
+			configureDataCenter(sessionBuilder);
+			this.sessionBuilderCustomizers.forEach(customizer -> customizer.customize(sessionBuilder));
+			CqlSession cqlSession = buildCqlSession(sessionBuilder);
 			return Objects.requireNonNull(cqlSession, "Cql Session must not be null");
 		}
 		throw new IllegalStateException(String.format("Cql Session can not be created from %s", settings));
@@ -75,28 +236,99 @@ public class CqlSessionFactory {
 	/**
 	 * Creates a new configured {@link CqlSession}.
 	 *
-	 * @param builder a session builder
+	 * @param sessionBuilder a session builder
 	 * @return a session
 	 * @since 2.0.1
 	 */
-	protected CqlSession buildCqlSession(CqlSessionBuilder builder) {
-		return builder.build();
+	protected CqlSession buildCqlSession(CqlSessionBuilder sessionBuilder) {
+		return sessionBuilder.build();
 	}
 
 	/**
 	 * Creates a new configured {@link DriverConfigLoader}.
 	 *
-	 * @param builder a driver builder
+	 * @param driverBuilder a driver builder
 	 * @return a driver config
 	 * @since 2.0.1
 	 */
-	protected DriverConfigLoader buildDriverConfigLoader(ProgrammaticDriverConfigLoaderBuilder builder) {
-		return builder.build();
+	protected DriverConfigLoader buildDriverConfigLoader(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
+		return driverBuilder.build();
+	}
+
+	private void configureAuthentication(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
+		if (this.username != null && this.password != null) {
+			driverBuilder.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, this.username)
+					.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, this.password)
+					.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class);
+		}
+	}
+
+	private void configureDataCenter(CqlSessionBuilder sessionBuilder) {
+		if (this.localDataCenter != null) {
+			sessionBuilder.withLocalDatacenter(this.localDataCenter);
+		}
+	}
+
+	private void configureSsl(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
+		if (this.sslEnabled) {
+			driverBuilder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, this.hostNameValidation)
+					.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class);
+			if (this.cipherSuites != null) {
+				driverBuilder.withStringList(DefaultDriverOption.SSL_CIPHER_SUITES, Arrays.asList(this.cipherSuites));
+			}
+			if (this.truststorePath != null) {
+				driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PATH, this.truststorePath.toString());
+			}
+			if (this.truststorePassword != null) {
+				driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PASSWORD, this.truststorePassword);
+			}
+			if (this.keystorePath != null) {
+				driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PATH, this.keystorePath.toString());
+			}
+			if (this.keystorePassword != null) {
+				driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PASSWORD, this.keystorePassword);
+			}
+		}
+	}
+
+	/**
+	 * Callback interface to customize the {@link CqlSession} via a {@link CqlSessionBuilder}.
+	 *
+	 * @since 2.0.3
+	 */
+	@FunctionalInterface
+	public interface CqlSessionBuilderCustomizer {
+
+		/**
+		 * Customize the {@link CqlSessionBuilder}.
+		 *
+		 * @param sessionBuilder the builder to customize
+		 */
+		void customize(CqlSessionBuilder sessionBuilder);
+
+	}
+
+	/**
+	 * Callback interface to customize the {@link DriverConfigLoader} via a
+	 * {@link ProgrammaticDriverConfigLoaderBuilder}.
+	 *
+	 * @since 2.0.3
+	 */
+	@FunctionalInterface
+	public interface DriverConfigLoaderBuilderCustomizer {
+
+		/**
+		 * Customize the {@link ProgrammaticDriverConfigLoaderBuilder}.
+		 *
+		 * @param driverBuilder the builder to customize
+		 */
+		void customize(ProgrammaticDriverConfigLoaderBuilder driverBuilder);
+
 	}
 
 	/**
 	 * A simple authentication provider that extends
-	 * {@link com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider} and disables log warning message.
+	 * {@link com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider} and do not print a warn message.
 	 */
 	public static class PlainTextAuthProvider extends com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider {
 
