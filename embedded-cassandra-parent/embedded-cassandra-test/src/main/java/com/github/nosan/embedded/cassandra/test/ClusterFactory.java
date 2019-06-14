@@ -205,10 +205,11 @@ public class ClusterFactory {
 			Cluster.Builder builder = Cluster.builder().addContactPoints(address)
 					.withPort((this.sslEnabled && sslPort != null) ? sslPort : port)
 					.withSocketOptions(socketOptions);
-			configureCredentials(builder);
-			configureMetrics(builder);
-			configureSsl(builder);
+			applyCredentials(builder);
+			applyMetrics(builder);
+			applySsl(builder);
 			this.clusterBuilderCustomizers.forEach(customizer -> customizer.customize(builder));
+
 			Cluster cluster = buildCluster(builder);
 			return Objects.requireNonNull(cluster, "Cluster must not be null");
 		}
@@ -227,7 +228,7 @@ public class ClusterFactory {
 		return builder.build();
 	}
 
-	private void configureMetrics(Cluster.Builder builder) {
+	private void applyMetrics(Cluster.Builder builder) {
 		if (!this.metricsEnabled) {
 			builder.withoutMetrics();
 		}
@@ -236,13 +237,13 @@ public class ClusterFactory {
 		}
 	}
 
-	private void configureCredentials(Cluster.Builder builder) {
+	private void applyCredentials(Cluster.Builder builder) {
 		if (this.username != null && this.password != null) {
 			builder.withCredentials(this.username, this.password);
 		}
 	}
 
-	private void configureSsl(Cluster.Builder builder) {
+	private void applySsl(Cluster.Builder builder) {
 		if (this.sslEnabled) {
 			RemoteEndpointAwareJdkSSLOptions.Builder sslOptionsBuilder = RemoteEndpointAwareJdkSSLOptions.builder();
 			if (this.keystorePath != null || this.truststorePath != null) {

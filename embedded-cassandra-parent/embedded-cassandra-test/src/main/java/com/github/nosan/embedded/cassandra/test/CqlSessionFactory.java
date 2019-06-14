@@ -216,17 +216,20 @@ public class CqlSessionFactory {
 			ProgrammaticDriverConfigLoaderBuilder driverBuilder = DriverConfigLoader.programmaticBuilder()
 					.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
 					.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3));
-			configureAuthentication(driverBuilder);
-			configureSsl(driverBuilder);
+			applyCredentials(driverBuilder);
+			applySsl(driverBuilder);
 			this.driverBuilderCustomizers.forEach(customizer -> customizer.customize(driverBuilder));
+
 			DriverConfigLoader driverConfigLoader = buildDriverConfigLoader(driverBuilder);
 			Objects.requireNonNull(driverConfigLoader, "Driver Config must not be null");
+
 			InetSocketAddress contactPoint = new InetSocketAddress(address,
 					(this.sslEnabled && sslPort != null) ? sslPort : port);
 			CqlSessionBuilder sessionBuilder = CqlSession.builder().addContactPoint(contactPoint)
 					.withConfigLoader(driverConfigLoader);
-			configureDataCenter(sessionBuilder);
+			applyDataCenter(sessionBuilder);
 			this.sessionBuilderCustomizers.forEach(customizer -> customizer.customize(sessionBuilder));
+
 			CqlSession cqlSession = buildCqlSession(sessionBuilder);
 			return Objects.requireNonNull(cqlSession, "Cql Session must not be null");
 		}
@@ -255,7 +258,7 @@ public class CqlSessionFactory {
 		return driverBuilder.build();
 	}
 
-	private void configureAuthentication(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
+	private void applyCredentials(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
 		if (this.username != null && this.password != null) {
 			driverBuilder.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, this.username)
 					.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, this.password)
@@ -264,13 +267,13 @@ public class CqlSessionFactory {
 		}
 	}
 
-	private void configureDataCenter(CqlSessionBuilder sessionBuilder) {
+	private void applyDataCenter(CqlSessionBuilder sessionBuilder) {
 		if (this.localDataCenter != null) {
 			sessionBuilder.withLocalDatacenter(this.localDataCenter);
 		}
 	}
 
-	private void configureSsl(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
+	private void applySsl(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
 		if (this.sslEnabled) {
 			driverBuilder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, this.hostNameValidation)
 					.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class);
