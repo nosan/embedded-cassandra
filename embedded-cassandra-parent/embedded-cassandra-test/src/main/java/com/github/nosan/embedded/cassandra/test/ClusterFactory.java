@@ -119,7 +119,7 @@ public class ClusterFactory {
 	 * @param cipherSuites the cipher suites to use
 	 * @since 2.0.3
 	 */
-	public void setCipherSuites(String... cipherSuites) {
+	public void setCipherSuites(@Nullable String... cipherSuites) {
 		this.cipherSuites = cipherSuites;
 	}
 
