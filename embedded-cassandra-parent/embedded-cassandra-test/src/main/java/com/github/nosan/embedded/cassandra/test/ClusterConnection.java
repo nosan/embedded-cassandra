@@ -55,7 +55,7 @@ public class ClusterConnection implements Connection {
 	 * @param settings the settings
 	 */
 	public ClusterConnection(Settings settings) {
-		this(new ClusterFactory().create(Objects.requireNonNull(settings, "Settings must not be null")));
+		this(new ClusterFactory().create(settings));
 	}
 
 	@Override

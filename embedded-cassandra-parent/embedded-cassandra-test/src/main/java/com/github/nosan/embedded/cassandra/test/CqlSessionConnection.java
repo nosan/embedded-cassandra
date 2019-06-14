@@ -51,7 +51,7 @@ public class CqlSessionConnection implements Connection {
 	 * @param settings the settings
 	 */
 	public CqlSessionConnection(Settings settings) {
-		this(new CqlSessionFactory().create(Objects.requireNonNull(settings, "Settings must not be null")));
+		this(new CqlSessionFactory().create(settings));
 	}
 
 	@Override
