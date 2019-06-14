@@ -23,8 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import javax.net.ssl.KeyManager;
@@ -47,8 +45,6 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @since 1.0.0
  */
 public class ClusterFactory {
-
-	private final List<ClusterBuilderCustomizer> clusterBuilderCustomizers = new ArrayList<>();
 
 	@Nullable
 	private String username;
@@ -178,17 +174,6 @@ public class ClusterFactory {
 	}
 
 	/**
-	 * Add customizer to customize the {@link Cluster.Builder}.
-	 *
-	 * @param clusterBuilderCustomizer the customizer.
-	 * @since 2.0.3
-	 */
-	public void addClusterBuilderCustomizer(ClusterBuilderCustomizer clusterBuilderCustomizer) {
-		Objects.requireNonNull(clusterBuilderCustomizer, "ClusterBuilderCustomizer must not be null");
-		this.clusterBuilderCustomizers.add(clusterBuilderCustomizer);
-	}
-
-	/**
 	 * Creates a new configured {@link Cluster}.
 	 *
 	 * @param settings the settings
@@ -206,11 +191,25 @@ public class ClusterFactory {
 			Cluster.Builder builder = Cluster.builder().addContactPoints(address)
 					.withPort((this.sslEnabled && sslPort != null) ? sslPort : port)
 					.withSocketOptions(socketOptions);
-			applyCredentials(builder);
-			applyMetrics(builder);
-			applySsl(builder);
-			this.clusterBuilderCustomizers.forEach(customizer -> customizer.customize(builder));
-
+			if (!this.metricsEnabled) {
+				builder.withoutMetrics();
+			}
+			if (!this.jmxEnabled) {
+				builder.withoutJMXReporting();
+			}
+			if (this.username != null && this.password != null) {
+				builder.withCredentials(this.username, this.password);
+			}
+			if (this.sslEnabled) {
+				RemoteEndpointAwareJdkSSLOptions.Builder sslOptionsBuilder = RemoteEndpointAwareJdkSSLOptions.builder();
+				if (this.keystorePath != null || this.truststorePath != null) {
+					sslOptionsBuilder.withSSLContext(getSslContext());
+				}
+				if (this.cipherSuites != null) {
+					sslOptionsBuilder.withCipherSuites(this.cipherSuites);
+				}
+				builder.withSSL(sslOptionsBuilder.build());
+			}
 			Cluster cluster = buildCluster(builder);
 			return Objects.requireNonNull(cluster, "Cluster must not be null");
 		}
@@ -227,34 +226,6 @@ public class ClusterFactory {
 	 */
 	protected Cluster buildCluster(Cluster.Builder builder) {
 		return builder.build();
-	}
-
-	private void applyMetrics(Cluster.Builder builder) {
-		if (!this.metricsEnabled) {
-			builder.withoutMetrics();
-		}
-		if (!this.jmxEnabled) {
-			builder.withoutJMXReporting();
-		}
-	}
-
-	private void applyCredentials(Cluster.Builder builder) {
-		if (this.username != null && this.password != null) {
-			builder.withCredentials(this.username, this.password);
-		}
-	}
-
-	private void applySsl(Cluster.Builder builder) {
-		if (this.sslEnabled) {
-			RemoteEndpointAwareJdkSSLOptions.Builder sslOptionsBuilder = RemoteEndpointAwareJdkSSLOptions.builder();
-			if (this.keystorePath != null || this.truststorePath != null) {
-				sslOptionsBuilder.withSSLContext(getSslContext());
-			}
-			if (this.cipherSuites != null) {
-				sslOptionsBuilder.withCipherSuites(this.cipherSuites);
-			}
-			builder.withSSL(sslOptionsBuilder.build());
-		}
 	}
 
 	private SSLContext getSslContext() {
@@ -288,23 +259,6 @@ public class ClusterFactory {
 		catch (Exception ex) {
 			throw new IllegalStateException("Can not initialize SSL Context", ex);
 		}
-	}
-
-	/**
-	 * Callback interface to customize the {@link Cluster} via a {@link Cluster.Builder}.
-	 *
-	 * @since 2.0.3
-	 */
-	@FunctionalInterface
-	public interface ClusterBuilderCustomizer {
-
-		/**
-		 * Customize the {@link Cluster.Builder}.
-		 *
-		 * @param clusterBuilder the builder to customize
-		 */
-		void customize(Cluster.Builder clusterBuilder);
-
 	}
 
 }

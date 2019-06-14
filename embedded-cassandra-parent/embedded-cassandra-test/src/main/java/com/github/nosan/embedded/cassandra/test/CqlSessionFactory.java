@@ -20,9 +20,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -44,10 +42,6 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @since 2.0.0
  */
 public class CqlSessionFactory {
-
-	private final List<DriverConfigLoaderBuilderCustomizer> driverBuilderCustomizers = new ArrayList<>();
-
-	private final List<CqlSessionBuilderCustomizer> sessionBuilderCustomizers = new ArrayList<>();
 
 	@Nullable
 	private String username;
@@ -179,29 +173,6 @@ public class CqlSessionFactory {
 	}
 
 	/**
-	 * Add customizer to customize the {@link ProgrammaticDriverConfigLoaderBuilder}.
-	 *
-	 * @param driverConfigLoaderBuilderCustomizer the customizer.
-	 * @since 2.0.3
-	 */
-	public void addDriverBuilderCustomizer(DriverConfigLoaderBuilderCustomizer driverConfigLoaderBuilderCustomizer) {
-		Objects.requireNonNull(driverConfigLoaderBuilderCustomizer,
-				"DriverConfigLoaderBuilderCustomizer must not be null");
-		this.driverBuilderCustomizers.add(driverConfigLoaderBuilderCustomizer);
-	}
-
-	/**
-	 * Add customizer to customize the {@link CqlSessionBuilder}.
-	 *
-	 * @param cqlSessionBuilderCustomizer the customizer.
-	 * @since 2.0.3
-	 */
-	public void addCqlSessionBuilderCustomizer(CqlSessionBuilderCustomizer cqlSessionBuilderCustomizer) {
-		Objects.requireNonNull(cqlSessionBuilderCustomizer, "CqlSessionBuilderCustomizer must not be null");
-		this.sessionBuilderCustomizers.add(cqlSessionBuilderCustomizer);
-	}
-
-	/**
 	 * Creates a new configured {@link CqlSession}.
 	 *
 	 * @param settings the settings
@@ -216,20 +187,41 @@ public class CqlSessionFactory {
 			ProgrammaticDriverConfigLoaderBuilder driverBuilder = DriverConfigLoader.programmaticBuilder()
 					.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
 					.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3));
-			applyCredentials(driverBuilder);
-			applySsl(driverBuilder);
-			this.driverBuilderCustomizers.forEach(customizer -> customizer.customize(driverBuilder));
-
+			if (this.username != null && this.password != null) {
+				driverBuilder.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, this.username)
+						.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, this.password)
+						.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS,
+								com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider.class);
+			}
+			if (this.sslEnabled) {
+				driverBuilder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, this.hostNameValidation)
+						.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class);
+				if (this.cipherSuites != null) {
+					driverBuilder.withStringList(DefaultDriverOption.SSL_CIPHER_SUITES,
+							Arrays.asList(this.cipherSuites));
+				}
+				if (this.truststorePath != null) {
+					driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PATH, this.truststorePath.toString());
+				}
+				if (this.truststorePassword != null) {
+					driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PASSWORD, this.truststorePassword);
+				}
+				if (this.keystorePath != null) {
+					driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PATH, this.keystorePath.toString());
+				}
+				if (this.keystorePassword != null) {
+					driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PASSWORD, this.keystorePassword);
+				}
+			}
 			DriverConfigLoader driverConfigLoader = buildDriverConfigLoader(driverBuilder);
 			Objects.requireNonNull(driverConfigLoader, "Driver Config must not be null");
-
 			InetSocketAddress contactPoint = new InetSocketAddress(address,
 					(this.sslEnabled && sslPort != null) ? sslPort : port);
 			CqlSessionBuilder sessionBuilder = CqlSession.builder().addContactPoint(contactPoint)
 					.withConfigLoader(driverConfigLoader);
-			applyDataCenter(sessionBuilder);
-			this.sessionBuilderCustomizers.forEach(customizer -> customizer.customize(sessionBuilder));
-
+			if (this.localDataCenter != null) {
+				sessionBuilder.withLocalDatacenter(this.localDataCenter);
+			}
 			CqlSession cqlSession = buildCqlSession(sessionBuilder);
 			return Objects.requireNonNull(cqlSession, "Cql Session must not be null");
 		}
@@ -256,78 +248,6 @@ public class CqlSessionFactory {
 	 */
 	protected DriverConfigLoader buildDriverConfigLoader(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
 		return driverBuilder.build();
-	}
-
-	private void applyCredentials(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
-		if (this.username != null && this.password != null) {
-			driverBuilder.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, this.username)
-					.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, this.password)
-					.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS,
-							com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider.class);
-		}
-	}
-
-	private void applyDataCenter(CqlSessionBuilder sessionBuilder) {
-		if (this.localDataCenter != null) {
-			sessionBuilder.withLocalDatacenter(this.localDataCenter);
-		}
-	}
-
-	private void applySsl(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
-		if (this.sslEnabled) {
-			driverBuilder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, this.hostNameValidation)
-					.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class);
-			if (this.cipherSuites != null) {
-				driverBuilder.withStringList(DefaultDriverOption.SSL_CIPHER_SUITES, Arrays.asList(this.cipherSuites));
-			}
-			if (this.truststorePath != null) {
-				driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PATH, this.truststorePath.toString());
-			}
-			if (this.truststorePassword != null) {
-				driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PASSWORD, this.truststorePassword);
-			}
-			if (this.keystorePath != null) {
-				driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PATH, this.keystorePath.toString());
-			}
-			if (this.keystorePassword != null) {
-				driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PASSWORD, this.keystorePassword);
-			}
-		}
-	}
-
-	/**
-	 * Callback interface to customize the {@link CqlSession} via a {@link CqlSessionBuilder}.
-	 *
-	 * @since 2.0.3
-	 */
-	@FunctionalInterface
-	public interface CqlSessionBuilderCustomizer {
-
-		/**
-		 * Customize the {@link CqlSessionBuilder}.
-		 *
-		 * @param sessionBuilder the builder to customize
-		 */
-		void customize(CqlSessionBuilder sessionBuilder);
-
-	}
-
-	/**
-	 * Callback interface to customize the {@link DriverConfigLoader} via a
-	 * {@link ProgrammaticDriverConfigLoaderBuilder}.
-	 *
-	 * @since 2.0.3
-	 */
-	@FunctionalInterface
-	public interface DriverConfigLoaderBuilderCustomizer {
-
-		/**
-		 * Customize the {@link ProgrammaticDriverConfigLoaderBuilder}.
-		 *
-		 * @param driverBuilder the builder to customize
-		 */
-		void customize(ProgrammaticDriverConfigLoaderBuilder driverBuilder);
-
 	}
 
 	/**
