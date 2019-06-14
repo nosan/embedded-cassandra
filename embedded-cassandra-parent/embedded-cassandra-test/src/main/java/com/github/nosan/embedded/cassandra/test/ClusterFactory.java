@@ -50,10 +50,10 @@ public class ClusterFactory {
 	private final List<ClusterBuilderCustomizer> clusterBuilderCustomizers = new ArrayList<>();
 
 	@Nullable
-	private String username = "cassandra";
+	private String username;
 
 	@Nullable
-	private String password = "cassandra";
+	private String password;
 
 	@Nullable
 	private Path truststorePath;

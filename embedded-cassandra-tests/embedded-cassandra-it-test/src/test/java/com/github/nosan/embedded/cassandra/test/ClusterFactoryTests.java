@@ -51,6 +51,8 @@ class ClusterFactoryTests {
 			@Override
 			protected Connection createConnection() {
 				ClusterFactory clusterFactory = new ClusterFactory();
+				clusterFactory.setUsername("cassandra");
+				clusterFactory.setPassword("cassandra");
 				clusterFactory.setSslEnabled(true);
 				clusterFactory.setKeystorePath(keystoreFile);
 				clusterFactory.setTruststorePath(truststoreFile);

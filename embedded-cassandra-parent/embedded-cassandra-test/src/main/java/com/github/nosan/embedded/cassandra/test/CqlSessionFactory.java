@@ -50,10 +50,10 @@ public class CqlSessionFactory {
 	private final List<CqlSessionBuilderCustomizer> sessionBuilderCustomizers = new ArrayList<>();
 
 	@Nullable
-	private String username = "cassandra";
+	private String username;
 
 	@Nullable
-	private String password = "cassandra";
+	private String password;
 
 	@Nullable
 	private String localDataCenter = "datacenter1";
@@ -259,7 +259,8 @@ public class CqlSessionFactory {
 		if (this.username != null && this.password != null) {
 			driverBuilder.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, this.username)
 					.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, this.password)
-					.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class);
+					.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS,
+							com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider.class);
 		}
 	}
 
@@ -329,7 +330,10 @@ public class CqlSessionFactory {
 	/**
 	 * A simple authentication provider that extends
 	 * {@link com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider} and do not print a warn message.
+	 *
+	 * @deprecated since 2.0.3 in favor of {@link com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider}.
 	 */
+	@Deprecated
 	public static class PlainTextAuthProvider extends com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider {
 
 		public PlainTextAuthProvider(DriverContext context) {
