@@ -20,6 +20,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -198,7 +199,7 @@ public class CqlSessionFactory {
 						.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class);
 				if (this.cipherSuites != null) {
 					driverBuilder.withStringList(DefaultDriverOption.SSL_CIPHER_SUITES,
-							Arrays.asList(this.cipherSuites));
+							new ArrayList<>(Arrays.asList(this.cipherSuites)));
 				}
 				if (this.truststorePath != null) {
 					driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PATH, this.truststorePath.toString());

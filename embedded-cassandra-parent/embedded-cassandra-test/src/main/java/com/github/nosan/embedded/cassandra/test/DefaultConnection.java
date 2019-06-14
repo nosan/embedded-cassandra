@@ -74,7 +74,7 @@ public class DefaultConnection implements Connection {
 		return new NoOpConnection();
 	}
 
-	private static final class NoOpConnection implements Connection {
+	private static class NoOpConnection implements Connection {
 
 		@Override
 		public void execute(CqlScript... scripts) {

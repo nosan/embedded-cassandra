@@ -212,7 +212,7 @@ class LocalCassandra implements Cassandra {
 
 	}
 
-	private static final class RunnableExecutable implements Runnable {
+	private static class RunnableExecutable implements Runnable {
 
 		private final Executable executable;
 

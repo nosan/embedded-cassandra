@@ -170,7 +170,7 @@ class RemoteArtifact implements Artifact {
 		return urlConnection;
 	}
 
-	private static final class FileProgress {
+	private static class FileProgress {
 
 		private static final long MIN_STEP_PERCENT = 10;
 
