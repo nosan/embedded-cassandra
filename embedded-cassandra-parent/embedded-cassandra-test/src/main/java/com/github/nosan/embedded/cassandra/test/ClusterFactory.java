@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test;
 
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -261,10 +262,9 @@ public class ClusterFactory {
 			SSLContext context = SSLContext.getInstance("SSL");
 			TrustManagerFactory tmf = null;
 			if (this.truststorePath != null) {
-				try (InputStream tsf = Files.newInputStream(this.truststorePath)) {
+				try (InputStream tsf = new BufferedInputStream(Files.newInputStream(this.truststorePath))) {
 					KeyStore ts = KeyStore.getInstance("JKS");
-					char[] password =
-							(this.truststorePassword != null) ? this.truststorePassword.toCharArray() : null;
+					char[] password = (this.truststorePassword != null) ? this.truststorePassword.toCharArray() : null;
 					ts.load(tsf, password);
 					tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 					tmf.init(ts);
@@ -272,7 +272,7 @@ public class ClusterFactory {
 			}
 			KeyManagerFactory kmf = null;
 			if (this.keystorePath != null) {
-				try (InputStream ksf = Files.newInputStream(this.keystorePath)) {
+				try (InputStream ksf = new BufferedInputStream(Files.newInputStream(this.keystorePath))) {
 					KeyStore ks = KeyStore.getInstance("JKS");
 					char[] password = (this.keystorePassword != null) ? this.keystorePassword.toCharArray() : null;
 					ks.load(ksf, password);
