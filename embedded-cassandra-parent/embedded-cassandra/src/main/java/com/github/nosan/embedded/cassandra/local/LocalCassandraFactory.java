@@ -628,7 +628,7 @@ public class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	private CassandraNode createCassandraNode(Path workingDirectory, Version version) {
-		List<String> jvmOptions = getJvmOptions();
+		List<String> jvmOptions = new ArrayList<>(getJvmOptions());
 		if (getPort() != null) {
 			jvmOptions.add(JvmParameters.NATIVE_TRANSPORT_PORT + JvmParameters.PROPERTY_SEPARATOR + getPort());
 		}
