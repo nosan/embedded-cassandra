@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
 /**
@@ -37,32 +36,29 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  */
 class JvmParameters {
 
-	private static final String JMX_LOCAL_PORT = "-Dcassandra.jmx.local.port";
+	static final String JMX_LOCAL_PORT = "-Dcassandra.jmx.local.port";
 
-	private static final String STORAGE_PORT = "-Dcassandra.storage_port";
+	static final String STORAGE_PORT = "-Dcassandra.storage_port";
 
-	private static final String SSL_STORAGE_PORT = "-Dcassandra.ssl_storage_port";
+	static final String SSL_STORAGE_PORT = "-Dcassandra.ssl_storage_port";
 
-	private static final String NATIVE_TRANSPORT_PORT = "-Dcassandra.native_transport_port";
+	static final String NATIVE_TRANSPORT_PORT = "-Dcassandra.native_transport_port";
 
-	private static final String RPC_PORT = "-Dcassandra.rpc_port";
+	static final String RPC_PORT = "-Dcassandra.rpc_port";
+
+	static final String PROPERTY_SEPARATOR = "=";
 
 	private static final String JMX_REMOTE_PORT = "-Dcassandra.jmx.remote.port";
 
 	private static final String JMX_REMOTE_RMI_PORT = "-Dcom.sun.management.jmxremote.port";
 
-	private static final String PROPERTY_SEPARATOR = "=";
-
 	private final Supplier<Integer> portSupplier;
 
 	private final JvmOptions jvmOptions;
 
-	private final Ports ports;
-
-	JvmParameters(JvmOptions jvmOptions, Ports ports, Supplier<Integer> portSupplier) {
+	JvmParameters(JvmOptions jvmOptions, Supplier<Integer> portSupplier) {
 		this.jvmOptions = jvmOptions;
 		this.portSupplier = portSupplier;
-		this.ports = ports;
 	}
 
 	/**
@@ -71,26 +67,15 @@ class JvmParameters {
 	 * @return {@code Cassandra} startup parameters.
 	 */
 	List<String> getParameters() {
-		Ports ports = this.ports;
-		JvmOptions jvmOptions = this.jvmOptions;
-		Map<String, String> systemProperties = new LinkedHashMap<>(jvmOptions.getSystemProperties());
-
+		Map<String, String> systemProperties = new LinkedHashMap<>(this.jvmOptions.getSystemProperties());
 		List<String> parameters = new ArrayList<>();
-
-		addProperty(JMX_LOCAL_PORT, ports.getJmxLocalPort(), systemProperties);
-		addProperty(STORAGE_PORT, ports.getStoragePort(), systemProperties);
-		addProperty(SSL_STORAGE_PORT, ports.getSslStoragePort(), systemProperties);
-		addProperty(NATIVE_TRANSPORT_PORT, ports.getPort(), systemProperties);
-		addProperty(RPC_PORT, ports.getRpcPort(), systemProperties);
-
-		setPort(NATIVE_TRANSPORT_PORT, systemProperties);
-		setPort(RPC_PORT, systemProperties);
-		setPort(STORAGE_PORT, systemProperties);
-		setPort(SSL_STORAGE_PORT, systemProperties);
-		setPort(JMX_LOCAL_PORT, systemProperties);
-		setPort(JMX_REMOTE_PORT, systemProperties);
-		setPort(JMX_REMOTE_RMI_PORT, systemProperties);
-
+		randomizePort(NATIVE_TRANSPORT_PORT, systemProperties);
+		randomizePort(RPC_PORT, systemProperties);
+		randomizePort(STORAGE_PORT, systemProperties);
+		randomizePort(SSL_STORAGE_PORT, systemProperties);
+		randomizePort(JMX_LOCAL_PORT, systemProperties);
+		randomizePort(JMX_REMOTE_PORT, systemProperties);
+		randomizePort(JMX_REMOTE_RMI_PORT, systemProperties);
 		for (Map.Entry<String, String> entry : systemProperties.entrySet()) {
 			String name = entry.getKey();
 			String value = entry.getValue();
@@ -101,17 +86,11 @@ class JvmParameters {
 				parameters.add(name + PROPERTY_SEPARATOR + value);
 			}
 		}
-		parameters.addAll(jvmOptions.getOptions());
+		parameters.addAll(this.jvmOptions.getOptions());
 		return Collections.unmodifiableList(parameters);
 	}
 
-	private void addProperty(String name, @Nullable Object value, Map<String, String> jvmOptions) {
-		if (value != null) {
-			jvmOptions.put(name, value.toString());
-		}
-	}
-
-	private void setPort(String name, Map<String, String> jvmOptions) {
+	private void randomizePort(String name, Map<String, String> jvmOptions) {
 		Integer port = getInteger(name, jvmOptions).orElse(null);
 		if (port != null && port == 0) {
 			jvmOptions.put(name, Integer.toString(this.portSupplier.get()));

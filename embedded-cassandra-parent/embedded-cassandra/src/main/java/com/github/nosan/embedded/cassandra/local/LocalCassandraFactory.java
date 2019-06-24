@@ -628,9 +628,23 @@ public class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	private CassandraNode createCassandraNode(Path workingDirectory, Version version) {
-		Ports ports = new Ports(getPort(), getRpcPort(), getStoragePort(), getSslStoragePort(), getJmxLocalPort());
-		JvmOptions jvmOptions = new JvmOptions(new ArrayList<>(getJvmOptions()));
-		JvmParameters jvmParameters = new JvmParameters(jvmOptions, ports, RandomPortSupplier.INSTANCE);
+		List<String> jvmOptions = getJvmOptions();
+		if (getPort() != null) {
+			jvmOptions.add(JvmParameters.NATIVE_TRANSPORT_PORT + JvmParameters.PROPERTY_SEPARATOR + getPort());
+		}
+		if (getRpcPort() != null) {
+			jvmOptions.add(JvmParameters.RPC_PORT + JvmParameters.PROPERTY_SEPARATOR + getRpcPort());
+		}
+		if (getStoragePort() != null) {
+			jvmOptions.add(JvmParameters.STORAGE_PORT + JvmParameters.PROPERTY_SEPARATOR + getStoragePort());
+		}
+		if (getSslStoragePort() != null) {
+			jvmOptions.add(JvmParameters.SSL_STORAGE_PORT + JvmParameters.PROPERTY_SEPARATOR + getSslStoragePort());
+		}
+		if (getJmxLocalPort() != null) {
+			jvmOptions.add(JvmParameters.JMX_LOCAL_PORT + JvmParameters.PROPERTY_SEPARATOR + getJmxLocalPort());
+		}
+		JvmParameters jvmParameters = new JvmParameters(new JvmOptions(jvmOptions), RandomPortSupplier.INSTANCE);
 		Duration timeout = getStartupTimeout();
 		if (timeout == null || timeout.getSeconds() <= 0) {
 			timeout = Duration.ofMinutes(1);

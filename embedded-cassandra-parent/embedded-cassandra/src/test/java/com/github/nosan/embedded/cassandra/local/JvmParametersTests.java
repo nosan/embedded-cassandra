@@ -43,7 +43,7 @@ class JvmParametersTests {
 		options.add("-Dcassandra.start_rpc");
 		options.add("-Dcassandra.start_native_transport=true");
 		options.add("-X512m");
-		JvmParameters jvmParameters = new JvmParameters(new JvmOptions(options), new Ports(0, null, null, null, null),
+		JvmParameters jvmParameters = new JvmParameters(new JvmOptions(options),
 				new RandomPortSupplier(InetAddress::getLoopbackAddress));
 		assertThat(toString(jvmParameters)).matches("-Dcom.sun.management.jmxremote.port=\\d{4,5}"
 				+ " -Dcassandra.jmx.remote.port=\\d{4,5}"
@@ -51,7 +51,7 @@ class JvmParametersTests {
 				+ " -Dcassandra.rpc_port=\\d{4,5}"
 				+ " -Dcassandra.storage_port=\\d{4,5} -Dcassandra.ssl_storage_port=\\d{4,5}"
 				+ " -Dcassandra.start_rpc"
-				+ " -Dcassandra.start_native_transport=true -Dcassandra.native_transport_port=\\d{4,5} -X512m");
+				+ " -Dcassandra.start_native_transport=true -X512m");
 	}
 
 	private String toString(JvmParameters jvmParameters) {
