@@ -61,11 +61,11 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		Path file = workingDirectory.resolve("conf/cassandra.yaml");
 		Yaml yaml = new Yaml();
 		Map<Object, Object> properties = load(yaml, file);
-		setPort(PORT, properties);
-		setPort(SSL_PORT, properties);
-		setPort(RPC_PORT, properties);
-		setPort(STORAGE_PORT, properties);
-		setPort(SSL_STORAGE_PORT, properties);
+		randomizePort(PORT, properties);
+		randomizePort(SSL_PORT, properties);
+		randomizePort(RPC_PORT, properties);
+		randomizePort(STORAGE_PORT, properties);
+		randomizePort(SSL_STORAGE_PORT, properties);
 		dump(yaml, file, properties);
 	}
 
@@ -90,7 +90,7 @@ class ConfigurationFileRandomPortCustomizer implements WorkingDirectoryCustomize
 		return Optional.ofNullable(properties.get(name)).map(Object::toString);
 	}
 
-	private void setPort(String name, Map<Object, Object> properties) {
+	private void randomizePort(String name, Map<Object, Object> properties) {
 		Integer port = getInteger(name, properties).orElse(null);
 		if (port != null && port == 0) {
 			properties.put(name, this.portSupplier.get());
