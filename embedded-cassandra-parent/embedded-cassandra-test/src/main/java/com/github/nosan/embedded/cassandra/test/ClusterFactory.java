@@ -23,6 +23,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import javax.net.ssl.KeyManager;
@@ -32,8 +35,10 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.CodecRegistry;
 import com.datastax.driver.core.RemoteEndpointAwareJdkSSLOptions;
 import com.datastax.driver.core.SocketOptions;
+import com.datastax.driver.core.TypeCodec;
 
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
@@ -45,6 +50,8 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @since 1.0.0
  */
 public class ClusterFactory {
+
+	private final List<TypeCodec<?>> typeCodecs = new ArrayList<>();
 
 	@Nullable
 	private String username;
@@ -174,6 +181,17 @@ public class ClusterFactory {
 	}
 
 	/**
+	 * Registers additional codecs for custom type mappings.
+	 *
+	 * @param typeCodecs type codes
+	 * @since 2.0.4
+	 */
+	public void addTypeCodecs(TypeCodec<?>... typeCodecs) {
+		Objects.requireNonNull(typeCodecs, "TypeCodec must not be null");
+		this.typeCodecs.addAll(Arrays.asList(typeCodecs));
+	}
+
+	/**
 	 * Creates a new configured {@link Cluster}.
 	 *
 	 * @param settings the settings
@@ -209,6 +227,9 @@ public class ClusterFactory {
 					sslOptionsBuilder.withCipherSuites(this.cipherSuites);
 				}
 				builder.withSSL(sslOptionsBuilder.build());
+			}
+			if (!this.typeCodecs.isEmpty()) {
+				builder.withCodecRegistry(new CodecRegistry().register(this.typeCodecs));
 			}
 			Cluster cluster = buildCluster(builder);
 			return Objects.requireNonNull(cluster, "Cluster must not be null");

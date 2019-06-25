@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -31,6 +32,7 @@ import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
 import com.datastax.oss.driver.api.core.context.DriverContext;
 import com.datastax.oss.driver.api.core.metadata.EndPoint;
+import com.datastax.oss.driver.api.core.type.codec.TypeCodec;
 import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
 
 import com.github.nosan.embedded.cassandra.Settings;
@@ -43,6 +45,8 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
  * @since 2.0.0
  */
 public class CqlSessionFactory {
+
+	private final List<TypeCodec<?>> typeCodecs = new ArrayList<>();
 
 	@Nullable
 	private String username;
@@ -174,6 +178,17 @@ public class CqlSessionFactory {
 	}
 
 	/**
+	 * Registers additional codecs for custom type mappings.
+	 *
+	 * @param typeCodecs type codes
+	 * @since 2.0.4
+	 */
+	public void addTypeCodecs(TypeCodec<?>... typeCodecs) {
+		Objects.requireNonNull(typeCodecs, "TypeCodec must not be null");
+		this.typeCodecs.addAll(Arrays.asList(typeCodecs));
+	}
+
+	/**
 	 * Creates a new configured {@link CqlSession}.
 	 *
 	 * @param settings the settings
@@ -222,6 +237,9 @@ public class CqlSessionFactory {
 					.withConfigLoader(driverConfigLoader);
 			if (this.localDataCenter != null) {
 				sessionBuilder.withLocalDatacenter(this.localDataCenter);
+			}
+			if (!this.typeCodecs.isEmpty()) {
+				sessionBuilder.addTypeCodecs(this.typeCodecs.toArray(new TypeCodec[0]));
 			}
 			CqlSession cqlSession = buildCqlSession(sessionBuilder);
 			return Objects.requireNonNull(cqlSession, "Cql Session must not be null");
