@@ -16,10 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.local;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -64,11 +67,18 @@ class ArtifactWorkingDirectoryCustomizer implements WorkingDirectoryCustomizer {
 				if (!Files.exists(artifactFile)) {
 					extract(getArchive(version), artifactDirectory);
 					findCassandraHome(artifactDirectory);
-					Files.createFile(artifactFile);
+					createArtifactFile(artifactFile);
 				}
 			}
 		}
-		copy(findCassandraHome(artifactDirectory), workingDirectory);
+		Path cassandraHome = findCassandraHome(artifactDirectory);
+		copy(cassandraHome, workingDirectory);
+	}
+
+	private void createArtifactFile(Path artifactFile) throws IOException {
+		try (BufferedWriter bw = Files.newBufferedWriter(artifactFile, StandardOpenOption.CREATE)) {
+			bw.write(ZonedDateTime.now().toString());
+		}
 	}
 
 	private Path getArchive(Version version) throws IOException {
