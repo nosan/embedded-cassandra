@@ -5,7 +5,7 @@ You can find more information _here_:
  - [Embedded Cassandra 2.X.X](https://github.com/nosan/embedded-cassandra/wiki).
  - [Embedded Cassandra 1.X.X](https://github.com/nosan/embedded-cassandra/wiki/1.X.X).
 
-Here is a quick example how to run `Apache Cassandra` in few lines:
+Here is a quick example how to run `Apache Cassandra`:
 
 ```java
 import com.github.nosan.embedded.cassandra.Cassandra;
