@@ -247,6 +247,22 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
+	 * Returns the {@link Connection#get() native connection} to the underlying {@code Cassandra}.
+	 * The shortcut for {@code <T>.class.cast(getConnection().get())}.
+	 *
+	 * @param <T> the native connection type
+	 * @param connectionType the connection type
+	 * @return a native connection
+	 * @throws ClassCastException if the native {@code connection} is not assignable to the type {@code T}.
+	 * @see #getConnection()
+	 * @since 2.0.4
+	 */
+	public <T> T getNativeConnection(Class<? extends T> connectionType) throws ClassCastException {
+		Objects.requireNonNull(connectionType, "Connection Type must not be null");
+		return connectionType.cast(getConnection().get());
+	}
+
+	/**
 	 * Executes the given {@link CqlScript scripts} using the {@link #getConnection() connection}.
 	 *
 	 * @param scripts the scripts

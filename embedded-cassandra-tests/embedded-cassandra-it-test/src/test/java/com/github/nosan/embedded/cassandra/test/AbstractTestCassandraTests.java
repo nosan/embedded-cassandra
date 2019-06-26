@@ -57,7 +57,7 @@ abstract class AbstractTestCassandraTests {
 
 	@Test
 	void shouldCountRows() {
-		CqlSession session = (CqlSession) this.cassandra.getConnection().get();
+		CqlSession session = this.cassandra.getNativeConnection(CqlSession.class);
 		Row resultSet = session.execute("SELECT COUNT(*) FROM test.users").one();
 		assertThat(resultSet).isNotNull();
 		assertThat(resultSet.getLong(0)).isEqualTo(1);
