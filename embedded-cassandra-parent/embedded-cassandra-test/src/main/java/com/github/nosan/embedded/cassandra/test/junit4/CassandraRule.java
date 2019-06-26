@@ -27,6 +27,7 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.test.Connection;
 import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
+import com.github.nosan.embedded.cassandra.test.TestCassandraBuilder;
 
 /**
  * JUnit {@link TestRule} that allows the Cassandra to be {@link Cassandra#start() started} and {@link
@@ -35,6 +36,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @author Dmytro Nosan
  * @see CqlScript
  * @see CassandraFactory
+ * @see TestCassandraBuilder
  * @since 1.0.0
  */
 public class CassandraRule extends TestCassandra implements TestRule {

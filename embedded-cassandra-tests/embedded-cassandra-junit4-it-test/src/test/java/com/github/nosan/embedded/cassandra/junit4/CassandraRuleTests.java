@@ -21,6 +21,9 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.test.CqlSessionConnectionFactory;
+import com.github.nosan.embedded.cassandra.test.TestCassandraBuilder;
 import com.github.nosan.embedded.cassandra.test.junit4.CassandraRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +36,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CassandraRuleTests {
 
 	@ClassRule
-	public static final CassandraRule cassandra = new CassandraRule(CqlScript.classpath("init.cql"));
+	public static final CassandraRule cassandra = new TestCassandraBuilder()
+			.scripts(CqlScript.classpath("init.cql"))
+			.connectionFactory(new CqlSessionConnectionFactory())
+			.cassandraFactory(() -> {
+				LocalCassandraFactory factory = new LocalCassandraFactory();
+				factory.setVersion("3.11.3");
+				return factory.create();
+			}).build(CassandraRule.class);
 
 	@Test
 	public void selectRoles() {
