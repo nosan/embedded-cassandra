@@ -134,7 +134,7 @@ public class TestCassandra implements Cassandra {
 		this.scripts = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(scripts)));
 		Cassandra cassandra = ((cassandraFactory != null) ? cassandraFactory : new LocalCassandraFactory()).create();
 		this.cassandra = Objects.requireNonNull(cassandra, "Cassandra must not be null");
-		this.connectionFactory = (connectionFactory != null) ? connectionFactory : DefaultConnection::new;
+		this.connectionFactory = (connectionFactory != null) ? connectionFactory : new DefaultConnectionFactory();
 	}
 
 	/**
