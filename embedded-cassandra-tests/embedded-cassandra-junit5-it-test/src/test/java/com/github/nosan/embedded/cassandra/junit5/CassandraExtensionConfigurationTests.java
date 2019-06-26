@@ -18,13 +18,13 @@ package com.github.nosan.embedded.cassandra.junit5;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 import com.github.nosan.embedded.cassandra.test.CqlSessionConnection;
 import com.github.nosan.embedded.cassandra.test.CqlSessionConnectionFactory;
-import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.test.TestCassandraBuilder;
 import com.github.nosan.embedded.cassandra.test.junit5.CassandraExtension;
 
@@ -37,14 +37,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CassandraExtensionConfigurationTests {
 
-	private static final TestCassandra cassandra = new TestCassandraBuilder()
+	@RegisterExtension
+	static final CassandraExtension cassandra = new TestCassandraBuilder()
 			.scripts(CqlScript.classpath("init.cql"))
 			.connectionFactory(new CqlSessionConnectionFactory())
 			.cassandraFactory(() -> {
 				LocalCassandraFactory factory = new LocalCassandraFactory();
 				factory.setVersion("3.11.3");
 				return factory.create();
-			}).build();
+			}).build(CassandraExtension.class);
 
 	@Test
 	void testConfiguration() {
