@@ -5,7 +5,6 @@ exemptLabels:
   - bug
   - documentation
   - enhancement
-  - question
   - task
   - invalid
 staleLabel: invalid
