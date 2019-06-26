@@ -58,7 +58,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	/**
 	 * Creates a {@link CassandraExtension} with the given scripts.
 	 *
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraExtension} startup.
+	 * @param scripts CQL scripts to execute.
 	 */
 	public CassandraExtension(CqlScript... scripts) {
 		super(scripts);
@@ -68,7 +68,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 * Creates a {@link CassandraExtension} with the given scripts and cassandra factory.
 	 *
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraExtension} startup.
+	 * @param scripts CQL scripts to execute.
 	 */
 	public CassandraExtension(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
 		super(cassandraFactory, scripts);
@@ -78,7 +78,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 * Creates a {@link CassandraExtension} with the given scripts and connection factory.
 	 *
 	 * @param connectionFactory factory that creates {@link Connection}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraExtension} startup.
+	 * @param scripts CQL scripts to execute.
 	 * @since 2.0.4
 	 */
 	public CassandraExtension(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
@@ -91,7 +91,7 @@ public class CassandraExtension extends TestCassandra implements BeforeAllCallba
 	 *
 	 * @param connectionFactory factory that creates {@link Connection}
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraExtension} startup.
+	 * @param scripts CQL scripts to execute.
 	 * @since 2.0.4
 	 */
 	public CassandraExtension(@Nullable CassandraFactory cassandraFactory,

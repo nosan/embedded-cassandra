@@ -51,7 +51,7 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	/**
 	 * Creates a {@link CassandraRule} with the given scripts.
 	 *
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraRule} startup.
+	 * @param scripts CQL scripts to execute.
 	 */
 	public CassandraRule(CqlScript... scripts) {
 		super(scripts);
@@ -61,7 +61,7 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 * Creates a {@link CassandraRule} with the given scripts and cassandra factory.
 	 *
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraRule} startup.
+	 * @param scripts CQL scripts to execute.
 	 */
 	public CassandraRule(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
 		super(cassandraFactory, scripts);
@@ -71,7 +71,7 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 * Creates a {@link CassandraRule} with the given scripts and connection factory.
 	 *
 	 * @param connectionFactory factory that creates {@link Connection}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraRule} startup.
+	 * @param scripts CQL scripts to execute.
 	 * @since 2.0.4
 	 */
 	public CassandraRule(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
@@ -83,7 +83,7 @@ public class CassandraRule extends TestCassandra implements TestRule {
 	 *
 	 * @param connectionFactory factory that creates {@link Connection}
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraRule} startup.
+	 * @param scripts CQL scripts to execute.
 	 * @since 2.0.4
 	 */
 	public CassandraRule(@Nullable CassandraFactory cassandraFactory, @Nullable ConnectionFactory connectionFactory,

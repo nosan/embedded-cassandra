@@ -93,7 +93,7 @@ public class TestCassandra implements Cassandra {
 	/**
 	 * Creates a {@link TestCassandra} with the given scripts.
 	 *
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
+	 * @param scripts CQL scripts to execute.
 	 */
 	public TestCassandra(CqlScript... scripts) {
 		this(null, null, scripts);
@@ -103,7 +103,7 @@ public class TestCassandra implements Cassandra {
 	 * Creates a {@link TestCassandra} with the given scripts and cassandra factory.
 	 *
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
+	 * @param scripts CQL scripts to execute.
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
 		this(cassandraFactory, null, scripts);
@@ -113,7 +113,7 @@ public class TestCassandra implements Cassandra {
 	 * Creates a {@link TestCassandra} with the given scripts and connection factory.
 	 *
 	 * @param connectionFactory factory that creates {@link Connection}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
+	 * @param scripts CQL scripts to execute.
 	 * @since 2.0.4
 	 */
 	public TestCassandra(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
@@ -125,7 +125,7 @@ public class TestCassandra implements Cassandra {
 	 *
 	 * @param connectionFactory factory that creates {@link Connection}
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
+	 * @param scripts CQL scripts to execute.
 	 * @since 2.0.4
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory, @Nullable ConnectionFactory connectionFactory,

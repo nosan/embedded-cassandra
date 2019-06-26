@@ -49,7 +49,7 @@ public class CassandraTestNG extends TestCassandra {
 	/**
 	 * Creates a {@link CassandraTestNG} with the given scripts.
 	 *
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraTestNG} startup.
+	 * @param scripts CQL scripts to execute.
 	 */
 	public CassandraTestNG(CqlScript... scripts) {
 		super(scripts);
@@ -59,7 +59,7 @@ public class CassandraTestNG extends TestCassandra {
 	 * Creates a {@link CassandraTestNG} with the given scripts and cassandra factory.
 	 *
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraTestNG} startup.
+	 * @param scripts CQL scripts to execute.
 	 */
 	public CassandraTestNG(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
 		super(cassandraFactory, scripts);
@@ -69,7 +69,7 @@ public class CassandraTestNG extends TestCassandra {
 	 * Creates a {@link CassandraTestNG} with the given scripts and connection factory.
 	 *
 	 * @param connectionFactory factory that creates {@link Connection}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraTestNG} startup.
+	 * @param scripts CQL scripts to execute.
 	 * @since 2.0.4
 	 */
 	public CassandraTestNG(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
@@ -82,7 +82,7 @@ public class CassandraTestNG extends TestCassandra {
 	 *
 	 * @param connectionFactory factory that creates {@link Connection}
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraTestNG} startup.
+	 * @param scripts CQL scripts to execute.
 	 * @since 2.0.4
 	 */
 	public CassandraTestNG(@Nullable CassandraFactory cassandraFactory, @Nullable ConnectionFactory connectionFactory,
