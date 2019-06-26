@@ -24,6 +24,8 @@ import com.github.nosan.embedded.cassandra.CassandraException;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.test.Connection;
+import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -38,29 +40,54 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 public class CassandraTestNG extends TestCassandra {
 
 	/**
-	 * Creates a {@link CassandraTestNG}.
+	 * Creates a {@link CassandraTestNG} with default settings.
 	 */
 	public CassandraTestNG() {
 		super();
 	}
 
 	/**
-	 * Creates a {@link CassandraTestNG}.
+	 * Creates a {@link CassandraTestNG} with the given scripts.
 	 *
-	 * @param scripts CQL scripts to execute
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraTestNG} startup.
 	 */
 	public CassandraTestNG(CqlScript... scripts) {
 		super(scripts);
 	}
 
 	/**
-	 * Creates a {@link CassandraTestNG}.
+	 * Creates a {@link CassandraTestNG} with the given scripts and cassandra factory.
 	 *
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraTestNG} startup.
 	 */
 	public CassandraTestNG(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
 		super(cassandraFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraTestNG} with the given scripts and connection factory.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraTestNG} startup.
+	 * @since 2.0.4
+	 */
+	public CassandraTestNG(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
+		super(connectionFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraTestNG} with the given scripts , connection factory and {@code
+	 * CassandraFactory}.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param cassandraFactory factory that creates {@link Cassandra}
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraTestNG} startup.
+	 * @since 2.0.4
+	 */
+	public CassandraTestNG(@Nullable CassandraFactory cassandraFactory, @Nullable ConnectionFactory connectionFactory,
+			CqlScript... scripts) {
+		super(cassandraFactory, connectionFactory, scripts);
 	}
 
 	@BeforeClass(alwaysRun = true)

@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.Version;
@@ -47,6 +50,8 @@ import com.github.nosan.embedded.cassandra.cql.CqlStatements;
 import com.github.nosan.embedded.cassandra.cql.UrlCqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
+import com.github.nosan.embedded.cassandra.test.DefaultConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import com.github.nosan.embedded.cassandra.util.StringUtils;
 
@@ -56,6 +61,7 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * @author Dmytro Nosan
  * @since 1.0.0
  */
+@SuppressWarnings("deprecation")
 class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraContextCustomizer.class);
@@ -115,15 +121,31 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		bd.setScope(BeanDefinition.SCOPE_SINGLETON);
 		bd.setInstanceSupplier(() -> {
 			TestCassandraFactory testCassandraFactory = getUniqueBean(applicationContext, TestCassandraFactory.class)
-					.orElseGet(() -> TestCassandra::new);
+					.orElse(null);
+			ConnectionFactory connectionFactory = getUniqueBean(applicationContext, ConnectionFactory.class).
+					orElseGet(DefaultConnectionFactory::new);
 			CassandraFactory cassandraFactory = getUniqueBean(applicationContext, CassandraFactory.class)
 					.orElseGet(() -> getCassandraFactory(this.testClass, this.annotation, applicationContext));
 			getBeans(applicationContext, CassandraFactoryCustomizer.class)
 					.forEach(customizer -> customizeFactory(cassandraFactory, customizer));
 			CqlScript[] scripts = getScripts(this.testClass, this.annotation, applicationContext);
-			return testCassandraFactory.create(cassandraFactory, scripts);
+			if (testCassandraFactory != null) {
+				return create(testCassandraFactory, connectionFactory, cassandraFactory, scripts);
+			}
+			return new TestCassandra(cassandraFactory, connectionFactory, scripts);
 		});
 		return bd;
+	}
+
+	private TestCassandra create(TestCassandraFactory testCassandraFactory, ConnectionFactory connectionFactory,
+			CassandraFactory cassandraFactory, CqlScript[] scripts) {
+		TestCassandra testCassandra = testCassandraFactory.create(cassandraFactory, scripts);
+		Assert.state(testCassandra != null, "TestCassandra must not be null");
+		Field connectionFactoryField = ReflectionUtils.findField(testCassandra.getClass(), "connectionFactory");
+		Assert.state(connectionFactoryField != null, "'connectionFactory' field does not exist.");
+		ReflectionUtils.makeAccessible(connectionFactoryField);
+		ReflectionUtils.setField(connectionFactoryField, testCassandra, connectionFactory);
+		return testCassandra;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.CassandraRunner;
@@ -32,36 +33,44 @@ import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
  *
  * @author Dmytro Nosan
  */
-class ClusterFactoryTests {
 
-	@Test
-	void configureCluster() throws URISyntaxException {
-		LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
+class ClusterConnectionTests {
+
+	private final LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
+
+	private final ClusterFactory clusterFactory = new ClusterFactory();
+
+	@BeforeEach
+	void setUp() throws URISyntaxException {
 		Path keystoreFile = Paths.get(getClass().getResource("/cert/keystore.node0").toURI());
 		Path truststoreFile = Paths.get(getClass().getResource("/cert/truststore.node0").toURI());
-		cassandraFactory.setConfigurationFile(getClass().getResource("/cassandra-secure.yaml"));
-		cassandraFactory.getWorkingDirectoryCustomizers().add((workDir, v) -> {
+		this.cassandraFactory.setConfigurationFile(getClass().getResource("/cassandra-secure.yaml"));
+		this.cassandraFactory.getWorkingDirectoryCustomizers().add((workDir, v) -> {
 			Files.copy(keystoreFile, workDir.resolve("conf").resolve("keystore.node0"));
 			Files.copy(truststoreFile, workDir.resolve("conf").resolve("truststore.node0"));
 		});
-		cassandraFactory.getJvmOptions().add("-Dcassandra.superuser_setup_delay_ms=0");
+		this.cassandraFactory.getJvmOptions().add("-Dcassandra.superuser_setup_delay_ms=0");
+		this.clusterFactory.setUsername("cassandra");
+		this.clusterFactory.setPassword("cassandra");
+		this.clusterFactory.setSslEnabled(true);
+		this.clusterFactory.setKeystorePath(keystoreFile);
+		this.clusterFactory.setTruststorePath(truststoreFile);
+		this.clusterFactory.setTruststorePassword("cassandra");
+		this.clusterFactory.setKeystorePassword("cassandra");
+	}
 
-		TestCassandra testCassandra = new TestCassandra(cassandraFactory, CqlScript.classpath("init.cql")) {
+	@Test
+	void configureSessionConnection() {
+		TestCassandra testCassandra = new TestCassandra(this.cassandraFactory,
+				new SessionConnectionFactory(this.clusterFactory), CqlScript.classpath("init.cql"));
+		new CassandraRunner(testCassandra).run();
 
-			@Override
-			protected Connection createConnection() {
-				ClusterFactory clusterFactory = new ClusterFactory();
-				clusterFactory.setUsername("cassandra");
-				clusterFactory.setPassword("cassandra");
-				clusterFactory.setSslEnabled(true);
-				clusterFactory.setKeystorePath(keystoreFile);
-				clusterFactory.setTruststorePath(truststoreFile);
-				clusterFactory.setTruststorePassword("cassandra");
-				clusterFactory.setKeystorePassword("cassandra");
-				return new ClusterConnection(clusterFactory.create(getSettings()));
-			}
-		};
+	}
 
+	@Test
+	void configureClusterConnection() {
+		TestCassandra testCassandra = new TestCassandra(this.cassandraFactory,
+				new ClusterConnectionFactory(this.clusterFactory), CqlScript.classpath("init.cql"));
 		new CassandraRunner(testCassandra).run();
 	}
 

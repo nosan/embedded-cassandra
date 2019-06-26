@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
+package com.github.nosan.embedded.cassandra.test;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import org.testng.annotations.Test;
+import java.util.Objects;
 
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
-import com.github.nosan.embedded.cassandra.test.testng.CassandraTestNG;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.nosan.embedded.cassandra.Settings;
 
 /**
- * Tests for {@link CassandraTestNG}.
+ * {@link ConnectionFactory} that creates {@link DefaultConnection}.
  *
  * @author Dmytro Nosan
+ * @since 2.0.4
  */
-public class CassandraTestNGTests extends CassandraTestNG {
+public class DefaultConnectionFactory implements ConnectionFactory {
 
-	public CassandraTestNGTests() {
-		super(new ClassPathCqlScript("init.cql"));
-	}
-
-	@Test
-	public void selectRoles() {
-		assertThat(getNativeConnection(CqlSession.class).execute("SELECT * FROM  test.roles")).isEmpty();
+	@Override
+	public DefaultConnection create(Settings settings) {
+		Objects.requireNonNull(settings, "Settings must not be null");
+		return new DefaultConnection(settings);
 	}
 
 }

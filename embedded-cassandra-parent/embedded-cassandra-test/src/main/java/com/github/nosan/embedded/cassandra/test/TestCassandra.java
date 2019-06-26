@@ -47,44 +47,25 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * 		TestCassandra cassandra = new TestCassandra(CqlScript.classpath("schema.cql"));
  * 		cassandra.start();
  * 		try {
- * 			Connection connection = cassandra.getConnection();
  * 			//if com.datastax.oss:java-driver-core:4.0.1 is present
- * 			CqlSession session = (CqlSession) connection.get();
+ * 			CqlSession session = cassandra.getNativeConnection(CqlSession.class);
  * 			//if com.datastax.cassandra:cassandra-driver-core:3.7.1 is present
- * 			Cluster cluster = (Cluster) connection.get();
+ * 			Cluster cluster = cassandra.getNativeConnection(Cluster.class);
  *                }
  * 		finally {
  * 			cassandra.stop();
  *        }        }
  * }</pre>
- * By default {@link DefaultConnection} is used. This connection detects the client
- * implementation based on the classpath. You can override the {@link DefaultConnection} if you need this. The following
- * lines shows how to do this:
- * <pre>
- * class Scratch {
- *     public static void main(String[] args) {
- *         TestCassandra cassandra = new TestCassandra(CqlScript.classpath("schema.cql")) {
- *             &#064;Override
- *             protected Connection createConnection() {
- *                 return new CqlSessionConnection(getSettings());
- *             }
- *         };
- *         cassandra.start();
- *         try {
- *             Connection connection = cassandra.getConnection();
- *             CqlSession session = (CqlSession) connection.get();
- *         }
- *         finally {
- *             cassandra.stop();
- *         }
- *     }
- * }
- * </pre>
+ * <p>
+ * By default {@link DefaultConnectionFactory} is used. This factory detects the client
+ * implementation based on the classpath. {@link DefaultConnectionFactory} can be overridden via constructor.
+ * </p>
+ * {@link LocalCassandraFactory} is a default factory, use constructor to override it with your own factory.
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
+ * @see ConnectionFactory
  * @see CqlScript
- * @see Connection
  * @since 1.0.0
  */
 public class TestCassandra implements Cassandra {
@@ -93,7 +74,9 @@ public class TestCassandra implements Cassandra {
 
 	private final Cassandra cassandra;
 
-	private final List<CqlScript> scripts;
+	private final List<? extends CqlScript> scripts;
+
+	private final ConnectionFactory connectionFactory;
 
 	private volatile boolean started = false;
 
@@ -101,32 +84,57 @@ public class TestCassandra implements Cassandra {
 	private volatile Connection connection;
 
 	/**
-	 * Creates a {@link TestCassandra}.
+	 * Creates a {@link TestCassandra} with default settings.
 	 */
 	public TestCassandra() {
-		this(null, new CqlScript[0]);
+		this(new CqlScript[0]);
 	}
 
 	/**
-	 * Creates a {@link TestCassandra}.
+	 * Creates a {@link TestCassandra} with the given scripts.
 	 *
 	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
 	 */
 	public TestCassandra(CqlScript... scripts) {
-		this(null, scripts);
+		this(null, null, scripts);
 	}
 
 	/**
-	 * Creates a {@link TestCassandra}.
+	 * Creates a {@link TestCassandra} with the given scripts and cassandra factory.
 	 *
 	 * @param cassandraFactory factory that creates {@link Cassandra}
 	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
 	 */
 	public TestCassandra(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
+		this(cassandraFactory, null, scripts);
+	}
+
+	/**
+	 * Creates a {@link TestCassandra} with the given scripts and connection factory.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
+	 * @since 2.0.4
+	 */
+	public TestCassandra(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
+		this(null, connectionFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link TestCassandra} with the given scripts , connection factory and cassandra factory.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param cassandraFactory factory that creates {@link Cassandra}
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code TestCassandra} startup.
+	 * @since 2.0.4
+	 */
+	public TestCassandra(@Nullable CassandraFactory cassandraFactory, @Nullable ConnectionFactory connectionFactory,
+			CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
 		this.scripts = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(scripts)));
 		Cassandra cassandra = ((cassandraFactory != null) ? cassandraFactory : new LocalCassandraFactory()).create();
 		this.cassandra = Objects.requireNonNull(cassandra, "Cassandra must not be null");
+		this.connectionFactory = (connectionFactory != null) ? connectionFactory : DefaultConnection::new;
 	}
 
 	/**
@@ -285,13 +293,13 @@ public class TestCassandra implements Cassandra {
 	}
 
 	/**
-	 * Creates a new connection to the underlying {@code Cassandra}.
+	 * Creates a new connection to the underlying {@code Cassandra} using the {@link ConnectionFactory}.
 	 *
 	 * @return a connection
 	 * @since 2.0.2
 	 */
 	protected Connection createConnection() {
-		return new DefaultConnection(getSettings());
+		return this.connectionFactory.create(getSettings());
 	}
 
 	private void doStart() {

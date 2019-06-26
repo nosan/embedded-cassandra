@@ -27,8 +27,10 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  *
  * @author Dmytro Nosan
  * @since 2.0.0
+ * @deprecated since 2.0.4 with no replacement
  */
 @FunctionalInterface
+@Deprecated
 public interface TestCassandraFactory {
 
 	/**

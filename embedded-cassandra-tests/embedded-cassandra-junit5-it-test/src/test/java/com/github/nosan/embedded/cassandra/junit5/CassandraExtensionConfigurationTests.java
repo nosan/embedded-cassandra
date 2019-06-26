@@ -17,12 +17,14 @@
 package com.github.nosan.embedded.cassandra.junit5;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.test.TestCassandra;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.test.CqlSessionConnection;
+import com.github.nosan.embedded.cassandra.test.CqlSessionConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.junit5.CassandraExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,17 +34,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@ExtendWith(CassandraExtension.class)
-class CassandraExtensionTests {
+class CassandraExtensionConfigurationTests {
 
-	@BeforeEach
-	void setUp(TestCassandra cassandra) {
-		cassandra.executeScripts(CqlScript.classpath("init.cql"));
-	}
+	@RegisterExtension
+	static final CassandraExtension cassandra = new CassandraExtension(() -> {
+		LocalCassandraFactory factory = new LocalCassandraFactory();
+		factory.setVersion("3.11.3");
+		return factory.create();
+	}, new CqlSessionConnectionFactory(), CqlScript.classpath("init.cql"));
 
 	@Test
-	void selectRoles(TestCassandra cassandra) {
-		assertThat(cassandra.getNativeConnection(CqlSession.class).execute("SELECT * FROM  test.roles")).isEmpty();
+	void testConfiguration() {
+		assertThat(cassandra.getVersion()).isEqualTo(Version.parse("3.11.3"));
+		assertThat(cassandra.getConnection()).isInstanceOf(CqlSessionConnection.class);
+		CqlSession session = cassandra.getNativeConnection(CqlSession.class);
+		assertThat(session.execute("SELECT * FROM  test.roles")).isEmpty();
 	}
 
 }

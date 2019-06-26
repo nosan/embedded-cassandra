@@ -40,14 +40,14 @@ public interface Connection extends AutoCloseable {
 	void execute(CqlScript... scripts);
 
 	/**
-	 * Returns the underlying {@code connection} or {@code this}.
+	 * Returns the native {@code connection} or {@code this}.
 	 *
 	 * @return a connection, never {@code null}
 	 */
 	Object get();
 
 	/**
-	 * Closes the current connection.
+	 * Closes the current {@code connection}.
 	 */
 	@Override
 	void close();

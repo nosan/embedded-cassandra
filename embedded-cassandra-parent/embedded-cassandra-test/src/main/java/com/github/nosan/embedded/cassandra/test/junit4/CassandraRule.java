@@ -24,6 +24,8 @@ import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraFactory;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
+import com.github.nosan.embedded.cassandra.test.Connection;
+import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 /**
@@ -38,29 +40,53 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 public class CassandraRule extends TestCassandra implements TestRule {
 
 	/**
-	 * Creates a {@link CassandraRule}.
+	 * Creates a {@link CassandraRule} with default settings.
 	 */
 	public CassandraRule() {
 		super();
 	}
 
 	/**
-	 * Creates a {@link CassandraRule}.
+	 * Creates a {@link CassandraRule} with the given scripts.
 	 *
-	 * @param scripts CQL scripts to execute
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraRule} startup.
 	 */
 	public CassandraRule(CqlScript... scripts) {
 		super(scripts);
 	}
 
 	/**
-	 * Creates a {@link CassandraRule}.
+	 * Creates a {@link CassandraRule} with the given scripts and cassandra factory.
 	 *
 	 * @param cassandraFactory factory that creates {@link Cassandra}
-	 * @param scripts CQL scripts to execute
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraRule} startup.
 	 */
 	public CassandraRule(@Nullable CassandraFactory cassandraFactory, CqlScript... scripts) {
 		super(cassandraFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraRule} with the given scripts and connection factory.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraRule} startup.
+	 * @since 2.0.4
+	 */
+	public CassandraRule(@Nullable ConnectionFactory connectionFactory, CqlScript... scripts) {
+		super(connectionFactory, scripts);
+	}
+
+	/**
+	 * Creates a {@link CassandraRule} with the given scripts , connection factory and cassandra factory.
+	 *
+	 * @param connectionFactory factory that creates {@link Connection}
+	 * @param cassandraFactory factory that creates {@link Cassandra}
+	 * @param scripts CQL scripts to execute. These scripts will be executed during {@code CassandraRule} startup.
+	 * @since 2.0.4
+	 */
+	public CassandraRule(@Nullable CassandraFactory cassandraFactory, @Nullable ConnectionFactory connectionFactory,
+			CqlScript... scripts) {
+		super(cassandraFactory, connectionFactory, scripts);
 	}
 
 	@Override

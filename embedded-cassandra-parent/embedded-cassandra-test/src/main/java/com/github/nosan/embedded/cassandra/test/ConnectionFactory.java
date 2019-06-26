@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.testng;
+package com.github.nosan.embedded.cassandra.test;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import org.testng.annotations.Test;
-
-import com.github.nosan.embedded.cassandra.cql.ClassPathCqlScript;
-import com.github.nosan.embedded.cassandra.test.testng.CassandraTestNG;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.nosan.embedded.cassandra.Settings;
 
 /**
- * Tests for {@link CassandraTestNG}.
+ * Factory that creates a {@link Connection}.
  *
  * @author Dmytro Nosan
+ * @see Connection
+ * @see ClusterConnectionFactory
+ * @see SessionConnectionFactory
+ * @see CqlSessionConnectionFactory
+ * @see DefaultConnectionFactory
+ * @since 2.0.4
  */
-public class CassandraTestNGTests extends CassandraTestNG {
+@FunctionalInterface
+public interface ConnectionFactory {
 
-	public CassandraTestNGTests() {
-		super(new ClassPathCqlScript("init.cql"));
-	}
-
-	@Test
-	public void selectRoles() {
-		assertThat(getNativeConnection(CqlSession.class).execute("SELECT * FROM  test.roles")).isEmpty();
-	}
+	/**
+	 * Creates a new configured {@link Connection}.
+	 *
+	 * @param settings the settings
+	 * @return a configured {@code connection}
+	 */
+	Connection create(Settings settings);
 
 }

@@ -28,6 +28,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.test.ClusterConnection;
+import com.github.nosan.embedded.cassandra.test.ClusterConnectionFactory;
+import com.github.nosan.embedded.cassandra.test.ConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.TestCassandra;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,6 +56,7 @@ class EmbeddedCassandraTests {
 	@Test
 	void shouldSelectFromRoles() {
 		assertThat(this.cassandra.getVersion()).isEqualTo(Version.parse("3.11.3"));
+		assertThat(this.cassandra.getConnection()).isInstanceOf(ClusterConnection.class);
 		assertThat(this.session.execute("SELECT * FROM test.roles").wasApplied()).isTrue();
 	}
 
@@ -65,6 +69,11 @@ class EmbeddedCassandraTests {
 			LocalCassandraFactory factory = new LocalCassandraFactory();
 			factory.setVersion(Version.parse("3.11.3"));
 			return factory;
+		}
+
+		@Bean
+		public ConnectionFactory clusterConnectionFactory() {
+			return new ClusterConnectionFactory();
 		}
 
 	}

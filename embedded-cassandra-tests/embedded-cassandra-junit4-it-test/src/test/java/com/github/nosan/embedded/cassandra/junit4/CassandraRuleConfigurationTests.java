@@ -20,7 +20,11 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+import com.github.nosan.embedded.cassandra.test.CqlSessionConnection;
+import com.github.nosan.embedded.cassandra.test.CqlSessionConnectionFactory;
 import com.github.nosan.embedded.cassandra.test.junit4.CassandraRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,14 +34,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-public class CassandraRuleTests {
+public class CassandraRuleConfigurationTests {
 
 	@ClassRule
-	public static final CassandraRule cassandra = new CassandraRule(CqlScript.classpath("init.cql"));
+	public static final CassandraRule cassandra = new CassandraRule(() -> {
+		LocalCassandraFactory factory = new LocalCassandraFactory();
+		factory.setVersion("3.11.3");
+		return factory.create();
+	}, new CqlSessionConnectionFactory(), CqlScript.classpath("init.cql"));
 
 	@Test
-	public void selectRoles() {
-		assertThat(cassandra.getNativeConnection(CqlSession.class).execute("SELECT * FROM  test.roles")).isEmpty();
+	public void testConfiguration() {
+		assertThat(cassandra.getVersion()).isEqualTo(Version.parse("3.11.3"));
+		assertThat(cassandra.getConnection()).isInstanceOf(CqlSessionConnection.class);
+		CqlSession session = cassandra.getNativeConnection(CqlSession.class);
+		assertThat(session.execute("SELECT * FROM  test.roles")).isEmpty();
 	}
 
 }
