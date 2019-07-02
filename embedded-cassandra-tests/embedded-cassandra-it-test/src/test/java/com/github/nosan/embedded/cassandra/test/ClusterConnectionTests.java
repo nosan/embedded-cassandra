@@ -60,14 +60,6 @@ class ClusterConnectionTests {
 	}
 
 	@Test
-	void configureSessionConnection() {
-		TestCassandra testCassandra = new TestCassandra(this.cassandraFactory,
-				new SessionConnectionFactory(this.clusterFactory), CqlScript.classpath("init.cql"));
-		new CassandraRunner(testCassandra).run();
-
-	}
-
-	@Test
 	void configureClusterConnection() {
 		TestCassandra testCassandra = new TestCassandra(this.cassandraFactory,
 				new ClusterConnectionFactory(this.clusterFactory), CqlScript.classpath("init.cql"));

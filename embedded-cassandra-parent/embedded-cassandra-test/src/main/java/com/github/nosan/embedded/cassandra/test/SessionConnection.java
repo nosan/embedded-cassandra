@@ -29,7 +29,9 @@ import com.github.nosan.embedded.cassandra.test.util.SessionUtils;
  *
  * @author Dmytro Nosan
  * @since 2.0.2
+ * @deprecated since 2.0.4 with no replacement. Use {@link ClusterConnection} instead.
  */
+@Deprecated
 public class SessionConnection implements Connection {
 
 	private final Session session;

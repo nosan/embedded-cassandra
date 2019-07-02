@@ -24,7 +24,6 @@ import com.github.nosan.embedded.cassandra.Settings;
  * @author Dmytro Nosan
  * @see Connection
  * @see ClusterConnectionFactory
- * @see SessionConnectionFactory
  * @see CqlSessionConnectionFactory
  * @see DefaultConnectionFactory
  * @since 2.0.4
