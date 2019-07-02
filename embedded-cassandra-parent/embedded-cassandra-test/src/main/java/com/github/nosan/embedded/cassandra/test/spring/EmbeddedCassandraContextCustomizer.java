@@ -22,6 +22,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -248,8 +249,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		if (beanProvider != null) {
 			return beanProvider.orderedStream().collect(Collectors.toList());
 		}
-		List<T> beans = new ArrayList<>(BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, beanClass,
-				true, true).values());
+		Map<String, T> beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, beanClass);
+		List<T> beans = new ArrayList<>(beansOfType.values());
 		AnnotationAwareOrderComparator.sort(beans);
 		return beans;
 	}
