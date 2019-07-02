@@ -10,6 +10,7 @@ matrix:
         - mkdir $HOME/openjdk8
         - curl -L 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk8?openjdk_impl=hotspot&os=linux&type=jdk&release=latest&arch=x64' | tar zx --strip-components=1 --directory $HOME/openjdk8
         - export JAVA_HOME=$HOME/openjdk8
+
     - os: osx
       before_install:
         - mkdir $HOME/openjdk8
@@ -18,6 +19,8 @@ matrix:
 
 install:
   - ./mvnw clean install -B -V -DskipTests
+
+script:
   - ./mvnw clean install
 
 after_failure:
