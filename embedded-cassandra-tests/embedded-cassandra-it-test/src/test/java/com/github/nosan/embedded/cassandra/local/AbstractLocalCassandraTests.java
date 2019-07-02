@@ -236,7 +236,7 @@ abstract class AbstractLocalCassandraTests {
 				}));
 			}
 			for (Future<?> future : futures) {
-				future.get(2, TimeUnit.MINUTES);
+				future.get(5, TimeUnit.MINUTES);
 			}
 		}
 		finally {
