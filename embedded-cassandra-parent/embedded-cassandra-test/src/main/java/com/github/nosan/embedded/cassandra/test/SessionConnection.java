@@ -59,7 +59,11 @@ public class SessionConnection implements Connection {
 	@Override
 	public void close() {
 		this.session.close();
+	}
 
+	@Override
+	public boolean isClosed() {
+		return this.session.isClosed();
 	}
 
 }

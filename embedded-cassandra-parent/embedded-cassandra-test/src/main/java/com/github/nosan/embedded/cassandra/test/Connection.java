@@ -40,9 +40,10 @@ public interface Connection extends AutoCloseable {
 	void execute(CqlScript... scripts);
 
 	/**
-	 * Returns the native {@code connection} or {@code this}.
+	 * Returns the native {@code connection}, e.g. {@code Session}, {@code Cluster},
+	 * or {@code CqlSession} instance. If there is no underlying connection then {@code this} will be returned.
 	 *
-	 * @return a connection, never {@code null}
+	 * @return a native connection, never {@code null}
 	 */
 	Object get();
 
@@ -50,6 +51,17 @@ public interface Connection extends AutoCloseable {
 	 * Closes the current {@code connection}.
 	 */
 	@Override
-	void close();
+	default void close() {
+	}
+
+	/**
+	 * Whether this connection instance has been closed.
+	 *
+	 * @return {@code true} if this connection has been closed, {@code false} otherwise.
+	 * @since 2.0.4
+	 */
+	default boolean isClosed() {
+		return false;
+	}
 
 }

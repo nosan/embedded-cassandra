@@ -70,4 +70,9 @@ public class CqlSessionConnection implements Connection {
 		this.session.close();
 	}
 
+	@Override
+	public boolean isClosed() {
+		return this.session.isClosed();
+	}
+
 }

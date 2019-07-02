@@ -247,11 +247,11 @@ public class TestCassandra implements Cassandra {
 				connection = this.connection;
 				if (connection == null) {
 					connection = createConnection();
-					this.connection = Objects.requireNonNull(connection, "Connection must not be null");
+					this.connection = checkConnectionNotClosed(connection);
 				}
 			}
 		}
-		return connection;
+		return checkConnectionNotClosed(connection);
 	}
 
 	/**
@@ -263,6 +263,7 @@ public class TestCassandra implements Cassandra {
 	 * @return a native connection
 	 * @throws ClassCastException if the native {@code connection} is not assignable to the type {@code T}.
 	 * @see #getConnection()
+	 * @see Connection#get()
 	 * @since 2.0.4
 	 */
 	public <T> T getNativeConnection(Class<? extends T> connectionType) throws ClassCastException {
@@ -299,7 +300,15 @@ public class TestCassandra implements Cassandra {
 	 * @since 2.0.2
 	 */
 	protected Connection createConnection() {
-		return this.connectionFactory.create(getSettings());
+		return checkConnectionNotClosed(this.connectionFactory.create(getSettings()));
+	}
+
+	private static Connection checkConnectionNotClosed(@Nullable Connection connection) {
+		Objects.requireNonNull(connection, "Connection must not be null");
+		if (connection.isClosed()) {
+			throw new IllegalStateException("A connection '%s' is closed");
+		}
+		return connection;
 	}
 
 	private void doStart() {
@@ -320,7 +329,7 @@ public class TestCassandra implements Cassandra {
 			log.debug("Stop {}", toString());
 		}
 		Connection connection = this.connection;
-		if (connection != null) {
+		if (connection != null && !connection.isClosed()) {
 			try {
 				connection.close();
 			}

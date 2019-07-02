@@ -20,13 +20,17 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.datastax.driver.core.Cluster;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.CassandraRunner;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link ClusterFactory}.
@@ -63,7 +67,10 @@ class ClusterConnectionTests {
 	void configureClusterConnection() {
 		TestCassandra testCassandra = new TestCassandra(this.cassandraFactory,
 				new ClusterConnectionFactory(this.clusterFactory), CqlScript.classpath("init.cql"));
-		new CassandraRunner(testCassandra).run();
+		AtomicReference<Cluster> cluster = new AtomicReference<>();
+		new CassandraRunner(testCassandra).run(
+				cassandra -> cluster.set(((TestCassandra) cassandra).getNativeConnection(Cluster.class)));
+		assertThat(cluster.get().isClosed()).isTrue();
 	}
 
 }

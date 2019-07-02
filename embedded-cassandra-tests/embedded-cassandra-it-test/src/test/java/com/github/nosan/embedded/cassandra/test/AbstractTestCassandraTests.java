@@ -25,6 +25,7 @@ import org.junit.jupiter.api.TestInstance;
 
 import com.github.nosan.embedded.cassandra.Version;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,6 +40,9 @@ abstract class AbstractTestCassandraTests {
 
 	private final TestCassandra cassandra;
 
+	@Nullable
+	private Connection connection;
+
 	AbstractTestCassandraTests(Version version) {
 		LocalCassandraFactory factory = new LocalCassandraFactory();
 		factory.setVersion(version);
@@ -48,11 +52,15 @@ abstract class AbstractTestCassandraTests {
 	@BeforeAll
 	void startCassandra() {
 		this.cassandra.start();
+		this.connection = this.cassandra.getConnection();
 	}
 
 	@AfterAll
 	void stopCassandra() {
 		this.cassandra.stop();
+		if (this.connection != null) {
+			assertThat(this.connection.isClosed()).isTrue();
+		}
 	}
 
 	@Test

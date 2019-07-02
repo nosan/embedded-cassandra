@@ -20,13 +20,17 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.datastax.oss.driver.api.core.CqlSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.CassandraRunner;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link CqlSessionFactory}.
@@ -62,7 +66,10 @@ class CqlSessionConnectionTests {
 	void configureCqlSession() {
 		TestCassandra testCassandra = new TestCassandra(this.cassandraFactory,
 				new CqlSessionConnectionFactory(this.sessionFactory), CqlScript.classpath("init.cql"));
-		new CassandraRunner(testCassandra).run();
+		AtomicReference<CqlSession> session = new AtomicReference<>();
+		new CassandraRunner(testCassandra)
+				.run(cassandra -> session.set(((TestCassandra) cassandra).getNativeConnection(CqlSession.class)));
+		assertThat(session.get().isClosed()).isTrue();
 	}
 
 }

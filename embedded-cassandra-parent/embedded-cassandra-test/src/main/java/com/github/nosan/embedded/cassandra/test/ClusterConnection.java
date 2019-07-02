@@ -71,13 +71,12 @@ public class ClusterConnection implements Connection {
 
 	@Override
 	public void close() {
-		try {
-			this.session.close();
-		}
-		catch (Throwable ex) {
-			//ignore
-		}
 		this.cluster.close();
+	}
+
+	@Override
+	public boolean isClosed() {
+		return this.cluster.isClosed();
 	}
 
 }

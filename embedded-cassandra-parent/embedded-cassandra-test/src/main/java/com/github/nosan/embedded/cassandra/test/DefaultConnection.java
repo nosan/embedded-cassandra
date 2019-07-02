@@ -63,6 +63,11 @@ public class DefaultConnection implements Connection {
 		this.connection.close();
 	}
 
+	@Override
+	public boolean isClosed() {
+		return this.connection.isClosed();
+	}
+
 	private static Connection create(ClassLoader cl, Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
 		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl)) {
@@ -88,11 +93,6 @@ public class DefaultConnection implements Connection {
 		@Override
 		public Object get() {
 			return this;
-		}
-
-		@Override
-		public void close() {
-
 		}
 
 	}
