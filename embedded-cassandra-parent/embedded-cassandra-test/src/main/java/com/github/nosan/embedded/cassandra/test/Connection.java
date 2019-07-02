@@ -27,7 +27,6 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
  * @see DefaultConnection
  * @see CqlSessionConnection
  * @see ClusterConnection
- * @see SessionConnection
  * @since 2.0.2
  */
 public interface Connection extends AutoCloseable {

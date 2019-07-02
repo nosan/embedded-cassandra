@@ -306,7 +306,7 @@ public class TestCassandra implements Cassandra {
 	private static Connection checkConnectionNotClosed(@Nullable Connection connection) {
 		Objects.requireNonNull(connection, "Connection must not be null");
 		if (connection.isClosed()) {
-			throw new IllegalStateException("A connection '%s' is closed");
+			throw new IllegalStateException(String.format("A connection '%s' is closed", connection));
 		}
 		return connection;
 	}
