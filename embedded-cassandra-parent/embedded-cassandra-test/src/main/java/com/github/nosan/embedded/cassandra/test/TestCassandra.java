@@ -336,8 +336,8 @@ public class TestCassandra implements Cassandra {
 			catch (Throwable ex) {
 				log.error(String.format("Can not close a connection '%s'", connection), ex);
 			}
-			this.connection = null;
 		}
+		this.connection = null;
 		this.cassandra.stop();
 		if (log.isDebugEnabled()) {
 			log.debug("{} is stopped", toString());
