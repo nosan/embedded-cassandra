@@ -232,8 +232,8 @@ public class TestCassandra implements Cassandra {
 	/**
 	 * Returns the <b>singleton</b> {@link Connection connection} to the underlying {@code Cassandra}. This connection
 	 * is managed by {@code TestCassandra} and will be closed when {@link #stop()} is called.
-	 * There is only one connection per {@code TestCassandra}. By default, {@link DefaultConnection} is used.
-	 * The native session such as {@code com.datastax.driver.core.Cluster} or {@code
+	 * There is only one connection per {@code TestCassandra}. By default, {@code Connection} is created by {@link
+	 * DefaultConnectionFactory}. The native session such as {@code com.datastax.driver.core.Cluster} or {@code
 	 * com.datastax.oss.driver.api.core.CqlSession} can be obtained by a {@link Connection#get()} method.
 	 *
 	 * @return a connection

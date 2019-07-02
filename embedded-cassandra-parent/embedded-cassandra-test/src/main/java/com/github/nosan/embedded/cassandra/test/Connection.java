@@ -24,7 +24,6 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
  * To get a {@code native} connection, {@link #get()} method can be used.
  *
  * @author Dmytro Nosan
- * @see DefaultConnection
  * @see CqlSessionConnection
  * @see ClusterConnection
  * @since 2.0.2
@@ -39,8 +38,7 @@ public interface Connection extends AutoCloseable {
 	void execute(CqlScript... scripts);
 
 	/**
-	 * Returns the native {@code connection}, e.g. {@code Session}, {@code Cluster},
-	 * or {@code CqlSession} instance. If there is no underlying connection then {@code this} will be returned.
+	 * Returns the native {@code connection}, e.g. a {@code Cluster} or a {@code CqlSession} instance.
 	 *
 	 * @return a native connection, never {@code null}
 	 */

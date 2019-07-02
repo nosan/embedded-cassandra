@@ -19,19 +19,32 @@ package com.github.nosan.embedded.cassandra.test;
 import java.util.Objects;
 
 import com.github.nosan.embedded.cassandra.Settings;
+import com.github.nosan.embedded.cassandra.util.ClassUtils;
 
 /**
- * {@link ConnectionFactory} that creates {@link DefaultConnection}.
+ * {@link ConnectionFactory} that creates a {@code Connection} based on the classpath.
  *
  * @author Dmytro Nosan
  * @since 2.0.4
  */
 public class DefaultConnectionFactory implements ConnectionFactory {
 
+	private static final String CQL_SESSION_CLASS = "com.datastax.oss.driver.api.core.CqlSession";
+
+	private static final String CLUSTER_CLASS = "com.datastax.driver.core.Cluster";
+
 	@Override
-	public DefaultConnection create(Settings settings) {
+	public Connection create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
-		return new DefaultConnection(settings);
+		if (ClassUtils.isPresent(CQL_SESSION_CLASS, getClass().getClassLoader())) {
+			return new CqlSessionConnection(settings);
+		}
+		if (ClassUtils.isPresent(CLUSTER_CLASS, getClass().getClassLoader())) {
+			return new ClusterConnection(settings);
+		}
+		throw new IllegalStateException(
+				String.format("Can not create a Connection.  '%s' and '%s' classes are not present in the classpath.",
+						CQL_SESSION_CLASS, CLUSTER_CLASS));
 	}
 
 }

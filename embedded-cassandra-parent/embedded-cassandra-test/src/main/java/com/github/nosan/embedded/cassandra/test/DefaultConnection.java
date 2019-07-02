@@ -29,7 +29,9 @@ import com.github.nosan.embedded.cassandra.util.ClassUtils;
  *
  * @author Dmytro Nosan
  * @since 2.0.2
+ * @deprecated since 2.0.4 in favor of {@link DefaultConnectionFactory}.
  */
+@Deprecated
 public class DefaultConnection implements Connection {
 
 	private static final String CQL_SESSION_CLASS = "com.datastax.oss.driver.api.core.CqlSession";
