@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextCustomizer;
@@ -71,11 +73,11 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	private final Class<?> testClass;
 
-	private final EmbeddedCassandra annotation;
+	private final AnnotationAttributes attributes;
 
-	EmbeddedCassandraContextCustomizer(Class<?> testClass, EmbeddedCassandra annotation) {
+	EmbeddedCassandraContextCustomizer(Class<?> testClass, AnnotationAttributes attributes) {
 		this.testClass = testClass;
-		this.annotation = annotation;
+		this.attributes = attributes;
 	}
 
 	@Override
@@ -91,12 +93,19 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other != null && getClass() == other.getClass()));
+		if (this == other) {
+			return true;
+		}
+		if (other == null || getClass() != other.getClass()) {
+			return false;
+		}
+		EmbeddedCassandraContextCustomizer that = (EmbeddedCassandraContextCustomizer) other;
+		return this.attributes.equals(that.attributes);
 	}
 
 	@Override
 	public int hashCode() {
-		return getClass().hashCode();
+		return Objects.hash(this.attributes);
 	}
 
 	private BeanDefinitionRegistry getRegistry(ConfigurableApplicationContext applicationContext) {
@@ -108,7 +117,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			return ((BeanDefinitionRegistry) beanFactory);
 		}
 		throw new IllegalStateException(String.format("'@%s' is not supported because "
-						+ "'%s' is not found in the '%s'", EmbeddedCassandra.class.getTypeName(),
+						+ "'%s' is not found in the '%s'", EmbeddedCassandra.class.getName(),
 				BeanDefinitionRegistry.class.getTypeName(),
 				applicationContext));
 	}
@@ -126,10 +135,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			ConnectionFactory connectionFactory = getUniqueBean(applicationContext, ConnectionFactory.class).
 					orElseGet(DefaultConnectionFactory::new);
 			CassandraFactory cassandraFactory = getUniqueBean(applicationContext, CassandraFactory.class)
-					.orElseGet(() -> getCassandraFactory(this.testClass, this.annotation, applicationContext));
+					.orElseGet(() -> getCassandraFactory(applicationContext));
 			getBeans(applicationContext, CassandraFactoryCustomizer.class)
 					.forEach(customizer -> customizeFactory(cassandraFactory, customizer));
-			CqlScript[] scripts = getScripts(this.testClass, this.annotation, applicationContext);
+			CqlScript[] scripts = getScripts(applicationContext);
 			if (testCassandraFactory != null) {
 				return create(testCassandraFactory, connectionFactory, cassandraFactory, scripts);
 			}
@@ -166,30 +175,29 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		}
 	}
 
-	private CassandraFactory getCassandraFactory(Class<?> testClass, EmbeddedCassandra annotation,
-			ApplicationContext applicationContext) {
+	private CassandraFactory getCassandraFactory(ApplicationContext applicationContext) {
 		Environment environment = applicationContext.getEnvironment();
 		LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
-		cassandraFactory.setVersion(getVersion(annotation.version(), environment));
-		cassandraFactory.setConfigurationFile(getURL(annotation.configurationFile(), testClass, applicationContext));
-		cassandraFactory.setJvmOptions(getArray(annotation.jvmOptions(), environment));
-		cassandraFactory.setJmxLocalPort(getPort(annotation.jmxLocalPort(), environment));
-		cassandraFactory.setPort(getPort(annotation.port(), environment));
-		cassandraFactory.setStoragePort(getPort(annotation.storagePort(), environment));
-		cassandraFactory.setSslStoragePort(getPort(annotation.sslStoragePort(), environment));
-		cassandraFactory.setRpcPort(getPort(annotation.rpcPort(), environment));
+		cassandraFactory.setVersion(getVersion(this.attributes.getString("version"), environment));
+		cassandraFactory.setConfigurationFile(getURL(this.attributes.getString("configurationFile"),
+				this.testClass, applicationContext));
+		cassandraFactory.setJvmOptions(getArray(this.attributes.getStringArray("jvmOptions"), environment));
+		cassandraFactory.setJmxLocalPort(getPort(this.attributes.getString("jmxLocalPort"), environment));
+		cassandraFactory.setPort(getPort(this.attributes.getString("port"), environment));
+		cassandraFactory.setStoragePort(getPort(this.attributes.getString("storagePort"), environment));
+		cassandraFactory.setSslStoragePort(getPort(this.attributes.getString("sslStoragePort"), environment));
+		cassandraFactory.setRpcPort(getPort(this.attributes.getString("rpcPort"), environment));
 		return cassandraFactory;
 	}
 
-	private CqlScript[] getScripts(Class<?> testClass, EmbeddedCassandra annotation,
-			ApplicationContext applicationContext) {
+	private CqlScript[] getScripts(ApplicationContext applicationContext) {
 		Environment environment = applicationContext.getEnvironment();
 		List<CqlScript> scripts = new ArrayList<>();
-		for (URL url : ResourceUtils.getResources(applicationContext, testClass,
-				getArray(annotation.scripts(), environment))) {
-			scripts.add(new UrlCqlScript(url, getCharset(annotation.encoding(), environment)));
+		for (URL url : ResourceUtils.getResources(applicationContext, this.testClass,
+				getArray(this.attributes.getStringArray("scripts"), environment))) {
+			scripts.add(new UrlCqlScript(url, getCharset(this.attributes.getString("encoding"), environment)));
 		}
-		List<String> statements = getStatements(annotation.statements());
+		List<String> statements = getStatements(this.attributes.getStringArray("statements"));
 		if (!statements.isEmpty()) {
 			scripts.add(new CqlStatements(statements));
 		}
