@@ -47,9 +47,9 @@ import com.github.nosan.embedded.cassandra.util.StringUtils;
  * 		TestCassandra cassandra = new TestCassandra(CqlScript.classpath("schema.cql"));
  * 		cassandra.start();
  * 		try {
- * 			//if com.datastax.oss:java-driver-core:4.0.1 is present
+ * 			//if com.datastax.oss:java-driver-core is present
  * 			CqlSession session = cassandra.getNativeConnection(CqlSession.class);
- * 			//if com.datastax.cassandra:cassandra-driver-core:3.7.1 is present
+ * 			//if com.datastax.cassandra:cassandra-driver-core is present
  * 			Cluster cluster = cassandra.getNativeConnection(Cluster.class);
  *                }
  * 		finally {
@@ -306,7 +306,7 @@ public class TestCassandra implements Cassandra {
 	private static Connection checkConnectionNotClosed(@Nullable Connection connection) {
 		Objects.requireNonNull(connection, "Connection must not be null");
 		if (connection.isClosed()) {
-			throw new IllegalStateException(String.format("A connection '%s' is closed", connection));
+			throw new IllegalStateException(String.format("Connection '%s' is closed", connection));
 		}
 		return connection;
 	}
