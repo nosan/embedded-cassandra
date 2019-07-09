@@ -43,8 +43,8 @@ public class DefaultConnectionFactory implements ConnectionFactory {
 			return new ClusterConnection(settings);
 		}
 		throw new IllegalStateException(
-				String.format("Can not create a Connection.  '%s' and '%s' classes are not present in the classpath.",
-						CQL_SESSION_CLASS, CLUSTER_CLASS));
+				String.format("Can not create a Connection. Both '%s' and '%s' classes "
+						+ "are not present in the classpath.", CQL_SESSION_CLASS, CLUSTER_CLASS));
 	}
 
 }
