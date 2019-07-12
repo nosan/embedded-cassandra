@@ -36,11 +36,12 @@ public class DefaultConnectionFactory implements ConnectionFactory {
 	@Override
 	public Connection create(Settings settings) {
 		Objects.requireNonNull(settings, "Settings must not be null");
-		if (ClassUtils.isPresent(CQL_SESSION_CLASS, getClass().getClassLoader())) {
-			return new CqlSessionConnection(settings);
+		ClassLoader classLoader = getClass().getClassLoader();
+		if (ClassUtils.isPresent(CQL_SESSION_CLASS, classLoader)) {
+			return new CqlSessionConnectionFactory().create(settings);
 		}
-		if (ClassUtils.isPresent(CLUSTER_CLASS, getClass().getClassLoader())) {
-			return new ClusterConnection(settings);
+		if (ClassUtils.isPresent(CLUSTER_CLASS, classLoader)) {
+			return new ClusterConnectionFactory().create(settings);
 		}
 		throw new IllegalStateException(
 				String.format("Can not create a Connection. Both '%s' and '%s' classes "
