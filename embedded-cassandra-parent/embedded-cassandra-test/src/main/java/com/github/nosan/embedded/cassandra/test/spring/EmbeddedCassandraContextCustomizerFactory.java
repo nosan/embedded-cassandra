@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.test.spring;
 import java.util.List;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
@@ -38,10 +37,9 @@ class EmbeddedCassandraContextCustomizerFactory implements ContextCustomizerFact
 	@Override
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
-		AnnotationAttributes attributes = AnnotatedElementUtils
-				.findMergedAnnotationAttributes(testClass, EmbeddedCassandra.class.getName(), false, false);
-		if (attributes != null) {
-			return new EmbeddedCassandraContextCustomizer(testClass, attributes);
+		EmbeddedCassandra annotation = AnnotatedElementUtils.findMergedAnnotation(testClass, EmbeddedCassandra.class);
+		if (annotation != null) {
+			return new EmbeddedCassandraContextCustomizer(testClass, annotation);
 		}
 		return null;
 	}
