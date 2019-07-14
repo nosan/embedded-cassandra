@@ -74,7 +74,6 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * @see CassandraFactory
  * @see ConnectionFactory
  * @see CassandraFactoryCustomizer
- * @see DirtiesContext
  * @since 1.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)

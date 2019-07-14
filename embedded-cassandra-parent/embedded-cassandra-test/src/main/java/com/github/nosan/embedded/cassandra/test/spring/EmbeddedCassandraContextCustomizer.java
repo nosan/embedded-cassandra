@@ -91,12 +91,19 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other != null && getClass() == other.getClass()));
+		if (this == other) {
+			return true;
+		}
+		if (other == null || getClass() != other.getClass()) {
+			return false;
+		}
+		EmbeddedCassandraContextCustomizer that = (EmbeddedCassandraContextCustomizer) other;
+		return this.annotation.equals(that.annotation);
 	}
 
 	@Override
 	public int hashCode() {
-		return getClass().hashCode();
+		return this.annotation.hashCode();
 	}
 
 	private BeanDefinitionRegistry getRegistry(ConfigurableApplicationContext applicationContext) {
@@ -107,8 +114,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			return ((BeanDefinitionRegistry) beanFactory);
 		}
-		throw new IllegalStateException(String.format("'@%s' is not supported because "
-						+ "'%s' is not found in the '%s'", EmbeddedCassandra.class.getTypeName(),
+		throw new IllegalStateException(String.format("'%s' is not supported because "
+						+ "'%s' is not found in the '%s'", EmbeddedCassandra.class.getName(),
 				BeanDefinitionRegistry.class.getTypeName(),
 				applicationContext));
 	}
