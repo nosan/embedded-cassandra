@@ -19,6 +19,9 @@ package com.github.nosan.embedded.cassandra.test.spring;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ContextCustomizer;
+
+import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,20 +32,32 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class EmbeddedCassandraContextCustomizerFactoryTests {
 
-	private final EmbeddedCassandraContextCustomizerFactory factory = new EmbeddedCassandraContextCustomizerFactory();
+	private final EmbeddedCassandraContextCustomizerFactory factory =
+			new EmbeddedCassandraContextCustomizerFactory();
 
 	@Test
-	void shouldCreateContextCustomizer() {
-		assertThat(this.factory.createContextCustomizer(Annotated.class, Collections.emptyList())).isNotNull();
+	void shouldCreateContextCustomizerWhenEmbeddedCassandraAnnotation() {
+		assertThat(createContextCustomizer(EmbeddedCassandraAnnotated.class)).isNotNull();
 	}
 
 	@Test
 	void shouldNotCreateContextCustomizer() {
-		assertThat(this.factory.createContextCustomizer(NotAnnotated.class, Collections.emptyList())).isNull();
+		assertThat(createContextCustomizer(NotAnnotated.class)).isNull();
 	}
 
-	@EmbeddedCassandra
-	private static class Annotated {
+	@Test
+	void contextCustomizerShouldBeEqualed() {
+		assertThat(createContextCustomizer(EmbeddedCassandraAnnotated.class))
+				.isEqualTo(createContextCustomizer(EmbeddedCassandraAnnotated.class));
+	}
+
+	@Nullable
+	private ContextCustomizer createContextCustomizer(Class<?> testClass) {
+		return this.factory.createContextCustomizer(testClass, Collections.emptyList());
+	}
+
+	@EmbeddedCassandra(scripts = {"/schema.cql"}, jmxLocalPort = "0")
+	private static class EmbeddedCassandraAnnotated {
 
 	}
 

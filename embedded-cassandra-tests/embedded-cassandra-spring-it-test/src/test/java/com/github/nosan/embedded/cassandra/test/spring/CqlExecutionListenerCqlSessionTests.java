@@ -32,9 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @SuppressWarnings("NullableProblems")
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = CqlSessionConfiguration.class)
-@EmbeddedCassandra(scripts = "/init.cql")
+@ExtendWith(SpringExtension.class)
+@EmbeddedCassandra(scripts = "/schema.cql")
+@ExtendWith(SpringExtension.class)
 @Cql(statements = "TRUNCATE test.users", executionPhase = Cql.ExecutionPhase.AFTER_TEST_METHOD)
 class CqlExecutionListenerCqlSessionTests {
 
@@ -43,12 +44,12 @@ class CqlExecutionListenerCqlSessionTests {
 
 	@Test
 	@Cql(scripts = "/users-data.cql")
-	void shouldHaveUser() {
+	void userShouldExist() {
 		assertThat(getCount()).isEqualTo(1);
 	}
 
 	@Test
-	void shouldNotHaveUser() {
+	void userShouldNotExist() {
 		assertThat(getCount()).isZero();
 	}
 

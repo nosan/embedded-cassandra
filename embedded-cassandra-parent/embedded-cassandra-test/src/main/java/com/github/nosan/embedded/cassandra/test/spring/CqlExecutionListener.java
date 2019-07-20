@@ -16,24 +16,28 @@
 
 package com.github.nosan.embedded.cassandra.test.spring;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.datastax.driver.core.Session;
 import com.datastax.oss.driver.api.core.CqlSession;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.util.Assert;
+import org.springframework.test.context.util.TestContextResourceUtils;
 
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.cql.CqlStatements;
@@ -61,6 +65,12 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 
 	private static final String SESSION_CLASS = "com.datastax.driver.core.Session";
 
+	private static final boolean CQL_SESSION_PRESENT = ClassUtils
+			.isPresent(CQL_SESSION_CLASS, CqlExecutionListener.class.getClassLoader());
+
+	private static final boolean SESSION_PRESENT = ClassUtils
+			.isPresent(SESSION_CLASS, CqlExecutionListener.class.getClassLoader());
+
 	@Override
 	public int getOrder() {
 		return 5000;
@@ -86,48 +96,45 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		executeScripts(testContext, ExecutionPhase.AFTER_TEST_METHOD);
 	}
 
-	private void executeScripts(TestContext testContext, ExecutionPhase phase) {
-		Set<Cql> methodAnnotations = AnnotatedElementUtils
-				.findMergedRepeatableAnnotations(testContext.getTestMethod(), Cql.class, CqlGroup.class);
-		Set<Cql> classAnnotations = AnnotatedElementUtils
-				.findMergedRepeatableAnnotations(testContext.getTestClass(), Cql.class, CqlGroup.class);
-
+	private static void executeScripts(TestContext testContext, ExecutionPhase phase) {
+		Set<Definition> definitions = new LinkedHashSet<>();
+		Class<?> testClass = testContext.getTestClass();
+		Method testMethod = testContext.getTestMethod();
 		if (phase == ExecutionPhase.BEFORE_TEST_METHOD || phase == ExecutionPhase.BEFORE_TEST_EXECUTION) {
-			executeScripts(classAnnotations, phase, testContext);
-			executeScripts(methodAnnotations, phase, testContext);
+			definitions.addAll(findDefinitions(testClass, testClass, phase));
+			definitions.addAll(findDefinitions(testMethod, testClass, phase));
 		}
 		else if (phase == ExecutionPhase.AFTER_TEST_METHOD || phase == ExecutionPhase.AFTER_TEST_EXECUTION) {
-			executeScripts(methodAnnotations, phase, testContext);
-			executeScripts(classAnnotations, phase, testContext);
+			definitions.addAll(findDefinitions(testMethod, testClass, phase));
+			definitions.addAll(findDefinitions(testClass, testClass, phase));
 		}
+		executeScripts(definitions, testContext.getApplicationContext());
 	}
 
-	private void executeScripts(Set<Cql> cqlAnnotations, ExecutionPhase phase, TestContext testContext) {
-		ApplicationContext applicationContext = testContext.getApplicationContext();
-		Environment environment = applicationContext.getEnvironment();
-		for (Cql cql : cqlAnnotations) {
-			List<ExecutionPhase> phases = Arrays.asList(cql.executionPhase());
-			Assert.notEmpty(phases, "@Cql annotation does not have an execution phase");
-			if (phases.contains(phase)) {
-				CqlScript[] scripts = getScripts(cql, testContext.getTestClass(), applicationContext);
+	private static Set<Definition> findDefinitions(AnnotatedElement element, Class<?> testClass, ExecutionPhase phase) {
+		return AnnotatedElementUtils.findMergedRepeatableAnnotations(element, Cql.class, CqlGroup.class)
+				.stream().map(cql -> new Definition(testClass, cql))
+				.filter(definition -> definition.hasPhase(phase))
+				.collect(Collectors.toCollection(LinkedHashSet::new));
+	}
+
+	private static void executeScripts(Set<Definition> definitions, ApplicationContext applicationContext) {
+		for (Definition definition : definitions) {
+			CqlScript[] scripts = getScripts(definition, applicationContext);
 				if (scripts.length > 0) {
-					String name = environment.resolvePlaceholders(cql.session());
-					executeScripts(name, applicationContext, scripts);
-				}
+					executeScripts(getSession(definition.session(), applicationContext), scripts);
 			}
 		}
 	}
 
-	private void executeScripts(String name, ApplicationContext applicationContext, CqlScript... scripts) {
-		ClassLoader cl = getClass().getClassLoader();
-		Object session = getSession(name, applicationContext);
+	private static void executeScripts(@Nullable Object session, CqlScript... scripts) {
 		if (session instanceof Connection) {
 			((Connection) session).execute(scripts);
 		}
-		else if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl) && session instanceof CqlSession) {
+		else if (CQL_SESSION_PRESENT && session instanceof CqlSession) {
 			CqlSessionUtils.execute(((CqlSession) session), scripts);
 		}
-		else if (ClassUtils.isPresent(SESSION_CLASS, cl) && session instanceof Session) {
+		else if (SESSION_PRESENT && session instanceof Session) {
 			SessionUtils.execute(((Session) session), scripts);
 		}
 		else {
@@ -138,85 +145,136 @@ public final class CqlExecutionListener extends AbstractTestExecutionListener {
 		}
 	}
 
-	private CqlScript[] getScripts(Cql annotation, Class<?> testClass, ApplicationContext applicationContext) {
+	@Nullable
+	private static Object getSession(String name, ApplicationContext applicationContext) {
+		return Optional.ofNullable(getAttribute(name, applicationContext.getEnvironment(), Function.identity()))
+				.map(applicationContext::getBean).orElseGet(() -> getSession(applicationContext));
+	}
+
+	@Nullable
+	private static Object getSession(ApplicationContext applicationContext) {
+		Connection connection = BeanUtils.getUniqueBean(applicationContext, Connection.class).orElse(null);
+		if (connection != null) {
+			return connection;
+		}
+		if (CQL_SESSION_PRESENT) {
+			CqlSession session = BeanUtils.getUniqueBean(applicationContext, CqlSession.class).orElse(null);
+			if (session != null) {
+				return session;
+			}
+		}
+		if (SESSION_PRESENT) {
+			return BeanUtils.getUniqueBean(applicationContext, Session.class).orElse(null);
+		}
+		return null;
+	}
+
+	private static CqlScript[] getScripts(Definition definition, ApplicationContext applicationContext) {
 		List<CqlScript> scripts = new ArrayList<>();
 		Environment environment = applicationContext.getEnvironment();
-		Charset charset = getCharset(environment, annotation.encoding());
-		for (URL url : ResourceUtils.getResources(applicationContext, testClass,
-				getArray(environment, annotation.scripts()))) {
-			scripts.add(new UrlCqlScript(url, charset));
+		Charset encoding = getAttribute(definition.encoding(), environment, Charset::forName);
+		for (URL url : getScriptsAttribute(definition, applicationContext)) {
+			scripts.add(new UrlCqlScript(url, encoding));
 		}
-		List<String> statements = getStatements(annotation.statements());
-		if (!statements.isEmpty()) {
+		String[] statements = definition.statements();
+		if (statements.length > 0) {
 			scripts.add(new CqlStatements(statements));
 		}
 		return scripts.toArray(new CqlScript[0]);
 	}
 
-	@Nullable
-	private Object getSession(String name, ApplicationContext applicationContext) {
-		if (StringUtils.hasText(name)) {
-			return applicationContext.getBean(name);
-		}
-		return getSession(applicationContext);
+	private static URL[] getScriptsAttribute(Definition definition, ApplicationContext applicationContext) {
+		Environment environment = applicationContext.getEnvironment();
+		return ResourceUtils.getResources(applicationContext, definition.getTestClass(),
+				Arrays.stream(definition.scripts())
+						.map(script -> getAttribute(script, environment, Function.identity()))
+						.filter(Objects::nonNull).toArray(String[]::new));
 	}
 
 	@Nullable
-	private Object getSession(ApplicationContext applicationContext) {
-		Connection connection = getUniqueBean(applicationContext, Connection.class);
-		if (connection != null) {
-			return connection;
+	private static <T> T getAttribute(String source, Environment environment, Function<String, T> mapper) {
+		return Optional.of(source).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
+				.map(mapper).orElse(null);
+	}
+
+	private static class Definition {
+
+		private final String[] scripts;
+
+		private final String[] statements;
+
+		private final String encoding;
+
+		private final String session;
+
+		private final Set<ExecutionPhase> executionPhases;
+
+		private final Class<?> testClass;
+
+		Definition(Class<?> testClass, Cql annotation) {
+			this.scripts = Arrays.stream(annotation.scripts()).filter(StringUtils::hasText).map(String::trim)
+					.distinct().toArray(String[]::new);
+			this.statements = Arrays.stream(annotation.statements()).filter(StringUtils::hasText).map(String::trim)
+					.distinct().toArray(String[]::new);
+			this.encoding = annotation.encoding().trim();
+			this.session = annotation.session().trim();
+			this.executionPhases = Arrays.stream(annotation.executionPhase()).collect(Collectors.toSet());
+			this.testClass = testClass;
 		}
-		ClassLoader cl = getClass().getClassLoader();
-		if (ClassUtils.isPresent(CQL_SESSION_CLASS, cl)) {
-			CqlSession session = getUniqueBean(applicationContext, CqlSession.class);
-			if (session != null) {
-				return session;
+
+		@Override
+		public int hashCode() {
+			return hashCode(convertToResourcePath(this.testClass, this.scripts), this.statements, this.encoding,
+					this.session);
+		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			if (this == other) {
+				return true;
 			}
+			if (other == null || getClass() != other.getClass()) {
+				return false;
+			}
+			Definition that = (Definition) other;
+			return Arrays.equals(convertToResourcePath(this.testClass, this.scripts),
+					convertToResourcePath(that.testClass, that.scripts))
+					&& Arrays.equals(this.statements, that.statements)
+					&& this.encoding.equals(that.encoding)
+					&& this.session.equals(that.session);
 		}
-		if (ClassUtils.isPresent(SESSION_CLASS, cl)) {
-			return getUniqueBean(applicationContext, Session.class);
-		}
-		return null;
-	}
 
-	@Nullable
-	private <T> T getUniqueBean(ApplicationContext applicationContext, Class<T> beanClass) {
-		ObjectProvider<T> beanProvider = getBeanProvider(applicationContext, beanClass);
-		if (beanProvider != null) {
-			return beanProvider.getIfUnique();
+		boolean hasPhase(ExecutionPhase phase) {
+			return this.executionPhases.contains(phase);
 		}
-		try {
-			return applicationContext.getBean(beanClass);
+
+		String[] scripts() {
+			return this.scripts;
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			return null;
+
+		String[] statements() {
+			return this.statements;
 		}
-	}
 
-	@Nullable
-	private <T> ObjectProvider<T> getBeanProvider(ApplicationContext applicationContext, Class<T> beanClass) {
-		try {
-			return applicationContext.getBeanProvider(beanClass);
+		String encoding() {
+			return this.encoding;
 		}
-		catch (NoSuchMethodError ex) {
-			return null;
+
+		String session() {
+			return this.session;
 		}
-	}
 
-	private String[] getArray(Environment environment, String[] values) {
-		return Arrays.stream(values).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
-				.toArray(String[]::new);
-	}
+		Class<?> getTestClass() {
+			return this.testClass;
+		}
 
-	private List<String> getStatements(String[] statements) {
-		return Arrays.stream(statements).filter(StringUtils::hasText).collect(Collectors.toList());
-	}
+		private static int hashCode(Object... values) {
+			return Arrays.deepHashCode(values);
+		}
 
-	@Nullable
-	private Charset getCharset(Environment environment, String value) {
-		String charset = environment.resolvePlaceholders(value);
-		return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
-	}
+		private static String[] convertToResourcePath(Class<?> clazz, String... locations) {
+			return TestContextResourceUtils.convertToClasspathResourcePaths(clazz, locations);
+		}
 
+	}
 }

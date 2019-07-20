@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.Version;
@@ -36,15 +35,14 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandraContextCustomizer}.
+ * Tests for {@link EmbeddedCassandra}.
  *
  * @author Dmytro Nosan
  */
 @SuppressWarnings("NullableProblems")
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration
-@EmbeddedCassandra(scripts = "/init.cql",
+@EmbeddedCassandra(scripts = "/schema.cql",
 		statements = "CREATE TABLE IF NOT EXISTS test.roles (   id text PRIMARY  KEY );")
+@ExtendWith(SpringExtension.class)
 class EmbeddedCassandraTests {
 
 	@Autowired
@@ -54,7 +52,7 @@ class EmbeddedCassandraTests {
 	private CqlSession session;
 
 	@Test
-	void shouldSelectFromRoles() {
+	void rolesTableShouldBePresent() {
 		assertThat(this.cassandra.getVersion()).isEqualTo(Version.parse("3.11.3"));
 		assertThat(this.cassandra.getConnection()).isInstanceOf(ClusterConnection.class);
 		assertThat(this.session.execute("SELECT * FROM test.roles").wasApplied()).isTrue();

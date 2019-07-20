@@ -36,9 +36,9 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * Annotation that can be specified on a test class that runs Apache Cassandra based tests.
  * <p>The typical usage of this annotation is like:
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class)
+ * &#064;RunWith(SpringRunner.class) // for JUnit4
  * &#064;EmbeddedCassandra
- * public class CassandraTests {
+ * public class EmbeddedCassandraTests {
  * 	&#064;Test
  * 	void testMe(){
  *    }
@@ -47,15 +47,13 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * If you would like to override some properties which annotation does not have, {@link
  * CassandraFactoryCustomizer customizers}  can be used. Here is a quick example:
  * <pre class="code">
- * &#064;RunWith(SpringRunner.class)
- * &#064;ContextConfiguration
  * &#064;EmbeddedCassandra
  * class EmbeddedCassandraCustomizerTests {
  *    &#064;Test
  *    void testMe() {
  *    }
  *    &#064;Configuration
- *    static class TestConfiguration {
+ *    static class EmbeddedCassandraCustomizerConfiguration {
  *        &#064;Bean
  *        public CassandraFactoryCustomizer&lt;LocalCassandraFactory&gt; allowRootCustomizer() {
  * 			return factory -&gt; factory.setAllowRoot(true);
@@ -65,10 +63,7 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
  * </pre>
  * Also, it is possible to define you own {@link CassandraFactory}, {@link ConnectionFactory} bean(s) to control
  * {@link TestCassandra} instance.
- * <p>
- * In case if you registered your own {@link CassandraFactory}, annotation attributes will be ignored.
- * <p>
- * This annotation is handled by {@link EmbeddedCassandraContextCustomizer}.
+ *
  *
  * @author Dmytro Nosan
  * @see CassandraFactory
@@ -112,6 +107,18 @@ public @interface EmbeddedCassandra {
 	 * @see #scripts
 	 */
 	String[] statements() default {};
+
+	/**
+	 * JVM options that should be associated with Cassandra.
+	 * <p>
+	 * These values will be added as {@code $JVM_EXTRA_OPTS} environment variable.
+	 * <p>
+	 * The placeholder {@code ${...}} can be used
+	 *
+	 * @return jvm options
+	 * @since 2.0.0
+	 */
+	String[] jvmOptions() default {};
 
 	/**
 	 * The encoding for the supplied CQL scripts, if different from the platform encoding.
@@ -204,17 +211,5 @@ public @interface EmbeddedCassandra {
 	 * @since 2.0.0
 	 */
 	String jmxLocalPort() default "";
-
-	/**
-	 * JVM options that should be associated with Cassandra.
-	 * <p>
-	 * These values will be added as {@code $JVM_EXTRA_OPTS} environment variable.
-	 * <p>
-	 * The placeholder {@code ${...}} can be used
-	 *
-	 * @return jvm options
-	 * @since 2.0.0
-	 */
-	String[] jvmOptions() default {};
 
 }

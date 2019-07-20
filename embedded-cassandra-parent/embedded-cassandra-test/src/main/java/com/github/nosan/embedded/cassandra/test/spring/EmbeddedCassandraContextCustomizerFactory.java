@@ -26,7 +26,7 @@ import org.springframework.test.context.ContextCustomizerFactory;
 import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 
 /**
- * {@link ContextCustomizerFactory} to create {@link EmbeddedCassandraContextCustomizer}.
+ * {@link ContextCustomizerFactory} to support {@link EmbeddedCassandra}.
  *
  * @author Dmytro Nosan
  * @since 1.0.0

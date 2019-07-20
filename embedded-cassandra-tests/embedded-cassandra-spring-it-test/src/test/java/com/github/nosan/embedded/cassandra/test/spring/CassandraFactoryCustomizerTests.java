@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 
@@ -43,15 +42,14 @@ import com.github.nosan.embedded.cassandra.test.TestCassandra;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandraContextCustomizer}.
+ * Tests for {@link CassandraFactoryCustomizer}.
  *
  * @author Dmytro Nosan
  */
 @SuppressWarnings({"NullableProblems", "deprecation"})
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration
 @EmbeddedCassandra
-class EmbeddedCassandraCustomizerTests {
+@ExtendWith(SpringExtension.class)
+class CassandraFactoryCustomizerTests {
 
 	@Autowired
 	private TestCassandra cassandra;
@@ -60,14 +58,14 @@ class EmbeddedCassandraCustomizerTests {
 	private CqlSession session;
 
 	@Test
-	void shouldSelectFromRoles() {
+	void rolesTableShouldBePresent() {
 		assertThat(this.session.execute("SELECT * FROM test.roles").wasApplied()).isTrue();
 		assertThat(getSession(this.cassandra.getConnection()).execute("SELECT * FROM test.roles").wasApplied())
 				.isTrue();
 	}
 
 	@Test
-	void customizerWasInvoked() {
+	void cassandraFactoryShouldBeInvoked() {
 		assertThat(this.cassandra.getVersion()).isEqualTo(Version.parse("3.11.3"));
 	}
 
@@ -79,7 +77,7 @@ class EmbeddedCassandraCustomizerTests {
 
 	@Import(CqlSessionConfiguration.class)
 	@Configuration
-	static class TestConfiguration {
+	static class Config {
 
 		@Order(0)
 		@Bean
@@ -109,7 +107,8 @@ class EmbeddedCassandraCustomizerTests {
 
 		@Bean
 		public TestCassandraFactory testCassandraFactory() {
-			return (cassandraFactory, scripts) -> new TestCassandra(cassandraFactory, CqlScript.classpath("init.cql"));
+			return (cassandraFactory, scripts) -> new TestCassandra(cassandraFactory,
+					CqlScript.classpath("schema.cql"));
 		}
 
 		private static final class TestFactory implements CassandraFactory {

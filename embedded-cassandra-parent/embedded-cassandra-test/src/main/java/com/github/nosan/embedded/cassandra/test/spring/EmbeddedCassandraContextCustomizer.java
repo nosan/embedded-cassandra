@@ -22,25 +22,23 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
@@ -69,13 +67,10 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	private static final String BEAN_NAME = TestCassandra.class.getName();
 
-	private final Class<?> testClass;
-
-	private final EmbeddedCassandra annotation;
+	private final Definition definition;
 
 	EmbeddedCassandraContextCustomizer(Class<?> testClass, EmbeddedCassandra annotation) {
-		this.testClass = testClass;
-		this.annotation = annotation;
+		this.definition = new Definition(testClass, annotation);
 	}
 
 	@Override
@@ -85,7 +80,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		if (registry.containsBeanDefinition(BEAN_NAME)) {
 			registry.removeBeanDefinition(BEAN_NAME);
 		}
-		BeanDefinition bd = getBeanDefinition(applicationContext);
+		BeanDefinition bd = getBeanDefinition(new TestCassandraSupplier(applicationContext, this.definition));
 		registry.registerBeanDefinition(BEAN_NAME, bd);
 	}
 
@@ -98,15 +93,15 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 			return false;
 		}
 		EmbeddedCassandraContextCustomizer that = (EmbeddedCassandraContextCustomizer) other;
-		return this.annotation.equals(that.annotation);
+		return this.definition.equals(that.definition);
 	}
 
 	@Override
 	public int hashCode() {
-		return this.annotation.hashCode();
+		return this.definition.hashCode();
 	}
 
-	private BeanDefinitionRegistry getRegistry(ConfigurableApplicationContext applicationContext) {
+	private static BeanDefinitionRegistry getRegistry(ConfigurableApplicationContext applicationContext) {
 		if (applicationContext instanceof BeanDefinitionRegistry) {
 			return ((BeanDefinitionRegistry) applicationContext);
 		}
@@ -114,162 +109,262 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			return ((BeanDefinitionRegistry) beanFactory);
 		}
-		throw new IllegalStateException(String.format("'%s' is not supported because "
-						+ "'%s' is not found in the '%s'", EmbeddedCassandra.class.getName(),
-				BeanDefinitionRegistry.class.getTypeName(),
-				applicationContext));
+		throw new IllegalStateException(String.format("'%s' cannot be casted to '%s'",
+				applicationContext, BeanDefinitionRegistry.class));
 	}
 
-	private BeanDefinition getBeanDefinition(ConfigurableApplicationContext applicationContext) {
+	private static BeanDefinition getBeanDefinition(TestCassandraSupplier supplier) {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(TestCassandra.class);
 		bd.setInitMethodName("start");
 		bd.setDestroyMethodName("stop");
 		bd.setLazyInit(false);
 		bd.setScope(BeanDefinition.SCOPE_SINGLETON);
-		bd.setInstanceSupplier(() -> {
-			TestCassandraFactory testCassandraFactory = getUniqueBean(applicationContext, TestCassandraFactory.class)
-					.orElse(null);
-			ConnectionFactory connectionFactory = getUniqueBean(applicationContext, ConnectionFactory.class).
-					orElseGet(DefaultConnectionFactory::new);
-			CassandraFactory cassandraFactory = getUniqueBean(applicationContext, CassandraFactory.class)
-					.orElseGet(() -> getCassandraFactory(this.testClass, this.annotation, applicationContext));
-			getBeans(applicationContext, CassandraFactoryCustomizer.class)
+		bd.setInstanceSupplier(supplier);
+		return bd;
+	}
+
+	private static class TestCassandraSupplier implements Supplier<TestCassandra> {
+
+		private final ApplicationContext applicationContext;
+
+		private final Definition definition;
+
+		TestCassandraSupplier(ApplicationContext applicationContext, Definition definition) {
+			this.applicationContext = applicationContext;
+			this.definition = definition;
+		}
+
+		@Override
+		public TestCassandra get() {
+			TestCassandraFactory testCassandraFactory = BeanUtils
+					.getUniqueBean(this.applicationContext, TestCassandraFactory.class).orElse(null);
+			ConnectionFactory connectionFactory = BeanUtils.getUniqueBean(this.applicationContext,
+					ConnectionFactory.class).orElseGet(DefaultConnectionFactory::new);
+			CassandraFactory cassandraFactory = BeanUtils.getUniqueBean(this.applicationContext, CassandraFactory.class)
+					.orElseGet(() -> getCassandraFactory(this.applicationContext, this.definition));
+			BeanUtils.getBeans(this.applicationContext, CassandraFactoryCustomizer.class)
 					.forEach(customizer -> customizeFactory(cassandraFactory, customizer));
-			CqlScript[] scripts = getScripts(this.testClass, this.annotation, applicationContext);
+			CqlScript[] scripts = getScripts(this.applicationContext, this.definition);
 			if (testCassandraFactory != null) {
 				return create(testCassandraFactory, connectionFactory, cassandraFactory, scripts);
 			}
 			return new TestCassandra(cassandraFactory, connectionFactory, scripts);
-		});
-		return bd;
-	}
-
-	private TestCassandra create(TestCassandraFactory testCassandraFactory, ConnectionFactory connectionFactory,
-			CassandraFactory cassandraFactory, CqlScript[] scripts) {
-		TestCassandra testCassandra = testCassandraFactory.create(cassandraFactory, scripts);
-		Assert.state(testCassandra != null, "TestCassandra must not be null");
-		Field connectionFactoryField = ReflectionUtils.findField(testCassandra.getClass(), "connectionFactory");
-		Assert.state(connectionFactoryField != null, "'connectionFactory' field does not exist.");
-		ReflectionUtils.makeAccessible(connectionFactoryField);
-		ReflectionUtils.setField(connectionFactoryField, testCassandra, connectionFactory);
-		return testCassandra;
-	}
-
-	@SuppressWarnings("unchecked")
-	private void customizeFactory(CassandraFactory cassandraFactory, CassandraFactoryCustomizer customizer) {
-		try {
-			customizer.customize(cassandraFactory);
 		}
-		catch (ClassCastException ex) {
-			String message = ex.getMessage();
-			if (message == null || !message.contains(cassandraFactory.getClass().getName())) {
-				throw ex;
+
+		private static TestCassandra create(TestCassandraFactory testCassandraFactory,
+				ConnectionFactory connectionFactory,
+				CassandraFactory cassandraFactory, CqlScript[] scripts) {
+			TestCassandra testCassandra = testCassandraFactory.create(cassandraFactory, scripts);
+			Assert.state(testCassandra != null, "TestCassandra must not be null");
+			Field connectionFactoryField = ReflectionUtils.findField(testCassandra.getClass(), "connectionFactory");
+			Assert.state(connectionFactoryField != null, "'connectionFactory' field does not exist.");
+			ReflectionUtils.makeAccessible(connectionFactoryField);
+			ReflectionUtils.setField(connectionFactoryField, testCassandra, connectionFactory);
+			return testCassandra;
+		}
+
+		@SuppressWarnings("unchecked")
+		private static void customizeFactory(CassandraFactory cassandraFactory, CassandraFactoryCustomizer customizer) {
+			try {
+				customizer.customize(cassandraFactory);
 			}
-			if (log.isDebugEnabled()) {
-				log.error(String.format("'%s' can not customize '%s' due to type mismatch.", customizer,
-						cassandraFactory), ex);
+			catch (ClassCastException ex) {
+				String message = ex.getMessage();
+				if (message == null || !message.contains(cassandraFactory.getClass().getName())) {
+					throw ex;
+				}
+				if (log.isDebugEnabled()) {
+					log.error(String.format("'%s' can not customize '%s' due to type mismatch.", customizer,
+							cassandraFactory), ex);
+				}
 			}
 		}
-	}
 
-	private CassandraFactory getCassandraFactory(Class<?> testClass, EmbeddedCassandra annotation,
-			ApplicationContext applicationContext) {
-		Environment environment = applicationContext.getEnvironment();
-		LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
-		cassandraFactory.setVersion(getVersion(annotation.version(), environment));
-		cassandraFactory.setConfigurationFile(getURL(annotation.configurationFile(), testClass, applicationContext));
-		cassandraFactory.setJvmOptions(getArray(annotation.jvmOptions(), environment));
-		cassandraFactory.setJmxLocalPort(getPort(annotation.jmxLocalPort(), environment));
-		cassandraFactory.setPort(getPort(annotation.port(), environment));
-		cassandraFactory.setStoragePort(getPort(annotation.storagePort(), environment));
-		cassandraFactory.setSslStoragePort(getPort(annotation.sslStoragePort(), environment));
-		cassandraFactory.setRpcPort(getPort(annotation.rpcPort(), environment));
-		return cassandraFactory;
-	}
-
-	private CqlScript[] getScripts(Class<?> testClass, EmbeddedCassandra annotation,
-			ApplicationContext applicationContext) {
-		Environment environment = applicationContext.getEnvironment();
-		List<CqlScript> scripts = new ArrayList<>();
-		for (URL url : ResourceUtils.getResources(applicationContext, testClass,
-				getArray(annotation.scripts(), environment))) {
-			scripts.add(new UrlCqlScript(url, getCharset(annotation.encoding(), environment)));
+		private static CassandraFactory getCassandraFactory(ApplicationContext applicationContext,
+				Definition definition) {
+			Environment environment = applicationContext.getEnvironment();
+			LocalCassandraFactory cassandraFactory = new LocalCassandraFactory();
+			cassandraFactory.setVersion(getAttribute(definition.version(), environment, Version::parse));
+			cassandraFactory.setConfigurationFile(getAttribute(definition.configurationFile(), environment,
+					location -> ResourceUtils.getResource(applicationContext, definition.getTestClass(), location)));
+			cassandraFactory.setJvmOptions(getJvmOptionsAttribute(definition, environment));
+			cassandraFactory.setJmxLocalPort(getAttribute(definition.jmxLocalPort(), environment, Integer::parseInt));
+			cassandraFactory.setPort(getAttribute(definition.port(), environment, Integer::parseInt));
+			cassandraFactory.setStoragePort(getAttribute(definition.storagePort(), environment, Integer::parseInt));
+			cassandraFactory.setSslStoragePort(getAttribute(definition.sslStoragePort(), environment,
+					Integer::parseInt));
+			cassandraFactory.setRpcPort(getAttribute(definition.rpcPort(), environment, Integer::parseInt));
+			return cassandraFactory;
 		}
-		List<String> statements = getStatements(annotation.statements());
-		if (!statements.isEmpty()) {
-			scripts.add(new CqlStatements(statements));
+
+		private static CqlScript[] getScripts(ApplicationContext applicationContext, Definition definition) {
+			List<CqlScript> scripts = new ArrayList<>();
+			Charset encoding = getAttribute(definition.encoding(), applicationContext.getEnvironment(),
+					Charset::forName);
+			for (URL url : getScriptsAttribute(applicationContext, definition)) {
+				scripts.add(new UrlCqlScript(url, encoding));
+			}
+			String[] statements = definition.statements();
+			if (statements.length > 0) {
+				scripts.add(new CqlStatements(statements));
+			}
+			return scripts.toArray(new CqlScript[0]);
 		}
-		return scripts.toArray(new CqlScript[0]);
-	}
 
-	private List<String> getStatements(String[] statements) {
-		return Arrays.stream(statements).filter(StringUtils::hasText).collect(Collectors.toList());
-	}
-
-	private String[] getArray(String[] values, Environment environment) {
-		return Arrays.stream(values).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
-				.toArray(String[]::new);
-	}
-
-	@Nullable
-	private Version getVersion(String value, Environment environment) {
-		String version = environment.resolvePlaceholders(value);
-		return StringUtils.hasText(version) ? Version.parse(version) : null;
-	}
-
-	@Nullable
-	private Charset getCharset(String value, Environment environment) {
-		String charset = environment.resolvePlaceholders(value);
-		return StringUtils.hasText(charset) ? Charset.forName(charset) : null;
-	}
-
-	@Nullable
-	private Integer getPort(String value, Environment environment) {
-		String port = environment.resolvePlaceholders(value);
-		return StringUtils.hasText(port) ? Integer.parseInt(port) : null;
-	}
-
-	@Nullable
-	private URL getURL(String value, Class<?> testClass, ApplicationContext applicationContext) {
-		Environment environment = applicationContext.getEnvironment();
-		String location = environment.resolvePlaceholders(value);
-		return StringUtils.hasText(location) ? ResourceUtils.getResource(applicationContext, testClass,
-				location) : null;
-	}
-
-	private <T> Optional<T> getUniqueBean(ApplicationContext applicationContext, Class<T> beanClass) {
-		ObjectProvider<T> beanProvider = getBeanProvider(applicationContext, beanClass);
-		if (beanProvider != null) {
-			return Optional.ofNullable(beanProvider.getIfUnique());
+		private static String[] getJvmOptionsAttribute(Definition definition, Environment environment) {
+			return Arrays.stream(definition.jvmOptions())
+					.map(jvmOption -> getAttribute(jvmOption, environment, Function.identity()))
+					.filter(Objects::nonNull).toArray(String[]::new);
 		}
-		try {
-			return Optional.of(applicationContext.getBean(beanClass));
+
+		private static URL[] getScriptsAttribute(ApplicationContext applicationContext, Definition definition) {
+			Environment environment = applicationContext.getEnvironment();
+			return ResourceUtils.getResources(applicationContext, definition.getTestClass(),
+					Arrays.stream(definition.scripts())
+							.map(script -> getAttribute(script, environment, Function.identity()))
+							.filter(Objects::nonNull).toArray(String[]::new));
 		}
-		catch (NoSuchBeanDefinitionException ex) {
-			return Optional.empty();
+
+		@Nullable
+		private static <T> T getAttribute(String source, Environment environment, Function<String, T> mapper) {
+			return Optional.of(source).map(environment::resolvePlaceholders).filter(StringUtils::hasText)
+					.map(mapper).orElse(null);
 		}
+
 	}
 
-	private <T> List<T> getBeans(ApplicationContext applicationContext, Class<T> beanClass) {
-		ObjectProvider<T> beanProvider = getBeanProvider(applicationContext, beanClass);
-		if (beanProvider != null) {
-			return beanProvider.orderedStream().collect(Collectors.toList());
-		}
-		Map<String, T> beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(applicationContext, beanClass);
-		List<T> beans = new ArrayList<>(beansOfType.values());
-		AnnotationAwareOrderComparator.sort(beans);
-		return beans;
-	}
+	private static class Definition {
 
-	@Nullable
-	private <T> ObjectProvider<T> getBeanProvider(ApplicationContext applicationContext, Class<T> beanClass) {
-		try {
-			return applicationContext.getBeanProvider(beanClass);
+		private final String[] scripts;
+
+		private final String[] statements;
+
+		private final String[] jvmOptions;
+
+		private final String encoding;
+
+		private final String version;
+
+		private final String configurationFile;
+
+		private final String port;
+
+		private final String rpcPort;
+
+		private final String storagePort;
+
+		private final String sslStoragePort;
+
+		private final String jmxLocalPort;
+
+		private final Class<?> testClass;
+
+		Definition(Class<?> testClass, EmbeddedCassandra annotation) {
+			this.scripts = Arrays.stream(annotation.scripts()).filter(StringUtils::hasText).map(String::trim)
+					.distinct().toArray(String[]::new);
+			this.jvmOptions = Arrays.stream(annotation.jvmOptions()).filter(StringUtils::hasText).map(String::trim)
+					.distinct().toArray(String[]::new);
+			this.statements = Arrays.stream(annotation.statements()).filter(StringUtils::hasText).map(String::trim)
+					.distinct().toArray(String[]::new);
+			this.configurationFile = annotation.configurationFile().trim();
+			this.encoding = annotation.encoding().trim();
+			this.version = annotation.version().trim();
+			this.port = annotation.port().trim();
+			this.rpcPort = annotation.rpcPort().trim();
+			this.jmxLocalPort = annotation.jmxLocalPort().trim();
+			this.storagePort = annotation.storagePort().trim();
+			this.sslStoragePort = annotation.sslStoragePort().trim();
+			this.testClass = testClass;
 		}
-		catch (NoSuchMethodError ex) {
-			return null;
+
+		@Override
+		public int hashCode() {
+			return hashCode(convertToResourcePath(this.testClass, this.scripts), this.statements, this.jvmOptions,
+					this.encoding, this.version, convertToResourcePath(this.testClass, this.configurationFile),
+					this.port, this.rpcPort, this.storagePort, this.sslStoragePort, this.jmxLocalPort);
 		}
+
+		@Override
+		public boolean equals(@Nullable Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (other == null || getClass() != other.getClass()) {
+				return false;
+			}
+			Definition that = (Definition) other;
+			return Arrays.equals(convertToResourcePath(this.testClass, this.scripts),
+					convertToResourcePath(that.testClass, that.scripts))
+					&& Arrays.equals(this.statements, that.statements)
+					&& Arrays.equals(this.jvmOptions, that.jvmOptions)
+					&& this.encoding.equals(that.encoding)
+					&& this.version.equals(that.version)
+					&& Arrays.equals(convertToResourcePath(this.testClass, this.configurationFile),
+					convertToResourcePath(that.testClass, that.configurationFile))
+					&& this.port.equals(that.port)
+					&& this.rpcPort.equals(that.rpcPort)
+					&& this.storagePort.equals(that.storagePort)
+					&& this.sslStoragePort.equals(that.sslStoragePort)
+					&& this.jmxLocalPort.equals(that.jmxLocalPort);
+		}
+
+		String[] scripts() {
+			return this.scripts;
+		}
+
+		String[] statements() {
+			return this.statements;
+		}
+
+		String[] jvmOptions() {
+			return this.jvmOptions;
+		}
+
+		String encoding() {
+			return this.encoding;
+		}
+
+		String version() {
+			return this.version;
+		}
+
+		String configurationFile() {
+			return this.configurationFile;
+		}
+
+		String port() {
+			return this.port;
+		}
+
+		String rpcPort() {
+			return this.rpcPort;
+		}
+
+		String storagePort() {
+			return this.storagePort;
+		}
+
+		String sslStoragePort() {
+			return this.sslStoragePort;
+		}
+
+		String jmxLocalPort() {
+			return this.jmxLocalPort;
+		}
+
+		Class<?> getTestClass() {
+			return this.testClass;
+		}
+
+		private static int hashCode(Object... values) {
+			return Arrays.deepHashCode(values);
+		}
+
+		private static String[] convertToResourcePath(Class<?> clazz, String... locations) {
+			return TestContextResourceUtils.convertToClasspathResourcePaths(clazz, locations);
+		}
+
 	}
 
 }
