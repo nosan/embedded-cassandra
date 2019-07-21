@@ -205,7 +205,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		Deque<String> lines = new ConcurrentLinkedDeque<>();
 		Thread thread = this.threadFactory.newThread(() -> ProcessUtils.read(process, line -> {
 			if (capture.get()) {
-				if (lines.size() == 20) {
+				if (lines.size() == 30) {
 					lines.removeFirst();
 				}
 				lines.addLast(line);
