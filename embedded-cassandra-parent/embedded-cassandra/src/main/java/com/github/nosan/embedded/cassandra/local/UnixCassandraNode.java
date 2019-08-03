@@ -35,8 +35,9 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	private final boolean allowRoot;
 
 	UnixCassandraNode(Path workingDirectory, Version version, Duration startupTimeout, boolean daemon,
-			@Nullable Path javaHome, JvmParameters jvmParameters, boolean allowRoot) {
-		super(workingDirectory, version, startupTimeout, daemon, javaHome, jvmParameters);
+			@Nullable Path javaHome, JvmParameters jvmParameters, Map<String, String> environmentVariables,
+			boolean allowRoot) {
+		super(workingDirectory, version, startupTimeout, daemon, javaHome, jvmParameters, environmentVariables);
 		this.allowRoot = allowRoot;
 	}
 
@@ -54,20 +55,24 @@ class UnixCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	int terminate(ProcessId processId) throws InterruptedException {
+	int terminate(ProcessId processId, Map<String, String> environment) throws InterruptedException {
 		long pid = processId.getPid();
 		if (pid != -1) {
-			return new RunProcess(newBuilder().command("kill", Long.toString(pid)))
+			ProcessBuilder builder = newBuilder();
+			builder.environment().putAll(environment);
+			return new RunProcess(builder.command("kill", Long.toString(pid)))
 					.runAndWait(this.threadFactory, this.log::info);
 		}
 		return -1;
 	}
 
 	@Override
-	int kill(ProcessId processId) throws InterruptedException {
+	int kill(ProcessId processId, Map<String, String> environment) throws InterruptedException {
 		long pid = processId.getPid();
 		if (pid != -1) {
-			return new RunProcess(newBuilder().command("kill", "-SIGKILL", Long.toString(pid)))
+			ProcessBuilder builder = newBuilder();
+			builder.environment().putAll(environment);
+			return new RunProcess(builder.command("kill", "-SIGKILL", Long.toString(pid)))
 					.runAndWait(this.threadFactory, this.log::info);
 		}
 		return -1;

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,6 +88,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	final ThreadFactory threadFactory;
 
+	private final Map<String, String> environmentVariables;
+
 	private final JvmParameters jvmParameters;
 
 	private final Duration startupTimeout;
@@ -100,8 +103,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Nullable
 	private volatile ProcessId processId;
 
-	AbstractCassandraNode(Path workingDirectory, Version version, Duration startupTimeout,
-			boolean daemon, @Nullable Path javaHome, JvmParameters jvmParameters) {
+	AbstractCassandraNode(Path workingDirectory, Version version, Duration startupTimeout, boolean daemon,
+			@Nullable Path javaHome, JvmParameters jvmParameters, Map<String, String> environmentVariables) {
 		this.version = version;
 		this.workingDirectory = workingDirectory;
 		this.startupTimeout = startupTimeout;
@@ -109,11 +112,12 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		this.jvmParameters = jvmParameters;
 		this.threadFactory = new MDCThreadFactory(String.format("cassandra-%d-db", nodeNumber.incrementAndGet()),
 				daemon);
+		this.environmentVariables = Collections.unmodifiableMap(new LinkedHashMap<>(environmentVariables));
 	}
 
 	@Override
 	public void start() throws IOException, InterruptedException {
-		Map<String, String> environment = new LinkedHashMap<>();
+		Map<String, String> environment = new LinkedHashMap<>(this.environmentVariables);
 		Path javaHome = Optional.ofNullable(this.javaHome)
 				.orElseGet(() -> SystemUtils.getJavaHomeDirectory().orElse(null));
 		if (javaHome != null) {
@@ -132,14 +136,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Override
 	public void stop() throws IOException, InterruptedException {
 		ProcessId processId = this.processId;
+		Map<String, String> environment = new LinkedHashMap<>(this.environmentVariables);
 		Process process = (processId != null) ? processId.getProcess() : null;
 		if (processId != null && process.isAlive()) {
 			long pid = processId.getPid();
-			if (terminate(processId) != 0) {
+			if (terminate(processId, environment) != 0) {
 				process.destroy();
 			}
 			if (!process.waitFor(5, TimeUnit.SECONDS)) {
-				if (kill(processId) != 0) {
+				if (kill(processId, environment) != 0) {
 					process.destroy();
 				}
 				if (!process.waitFor(5, TimeUnit.SECONDS)) {
@@ -181,21 +186,24 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * Terminates the Apache Cassandra.
 	 *
 	 * @param processId the process that handles {@code Cassandra} process
+	 * @param environment the environment variables
 	 * @return the exit code
 	 * @throws IOException in the case of I/O errors
 	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	abstract int terminate(ProcessId processId) throws IOException, InterruptedException;
+	abstract int terminate(ProcessId processId, Map<String, String> environment)
+			throws IOException, InterruptedException;
 
 	/**
 	 * Kills the Apache Cassandra.
 	 *
 	 * @param processId the process that handles {@code Cassandra} process
+	 * @param environment the environment variables
 	 * @return the exit code
 	 * @throws IOException in the case of I/O errors
 	 * @throws InterruptedException if the current thread is {@link Thread#interrupt() interrupted} by another thread
 	 */
-	abstract int kill(ProcessId processId) throws IOException, InterruptedException;
+	abstract int kill(ProcessId processId, Map<String, String> environment) throws IOException, InterruptedException;
 
 	private NodeSettings awaitStart(ProcessId processId) throws InterruptedException, IOException {
 		Logger logger = LoggerFactory.getLogger(Cassandra.class);

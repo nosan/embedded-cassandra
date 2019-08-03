@@ -119,6 +119,17 @@ abstract class AbstractLocalCassandraTests {
 	}
 
 	@Test
+	void shouldUseEnvironmentVariables() {
+		LocalCassandraFactory factory = this.factory;
+		factory.getEnvironmentVariables().put("JVM_OPTS", "-Dcassandra.native_transport_port=9142");
+		CassandraRunner runner = new CassandraRunner(factory);
+		runner.run(assertCreateKeyspace().andThen(cassandra -> {
+			Settings settings = cassandra.getSettings();
+			assertThat(settings.getPortOrSslPort()).isEqualTo(9142);
+		}));
+	}
+
+	@Test
 	void shouldOverrideConfigurationFileWithPorts() {
 		LocalCassandraFactory factory = this.factory;
 		factory.setPort(0);

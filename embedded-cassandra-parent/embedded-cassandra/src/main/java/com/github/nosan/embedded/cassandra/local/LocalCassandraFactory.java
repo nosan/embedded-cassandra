@@ -21,7 +21,9 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,6 +48,8 @@ public class LocalCassandraFactory implements CassandraFactory {
 	private static final String SNAKEYAML_YAML_CLASS = "org.yaml.snakeyaml.Yaml";
 
 	private final List<String> jvmOptions = new ArrayList<>();
+
+	private final Map<String, String> environmentVariables = new LinkedHashMap<>();
 
 	private final List<WorkingDirectoryCustomizer> workingDirectoryCustomizers = new ArrayList<>();
 
@@ -506,6 +510,16 @@ public class LocalCassandraFactory implements CassandraFactory {
 	}
 
 	/**
+	 * Environment variables that should be associated with Cassandra.
+	 *
+	 * @return The value of the {@code environmentVariables} attribute
+	 * @since 2.0.4
+	 */
+	public Map<String, String> getEnvironmentVariables() {
+		return this.environmentVariables;
+	}
+
+	/**
 	 * Customizers that should be applied during working directory initialization.
 	 *
 	 * @return the customizers
@@ -651,10 +665,10 @@ public class LocalCassandraFactory implements CassandraFactory {
 		}
 		if (SystemUtils.isWindows()) {
 			return new WindowsCassandraNode(workingDirectory, version, timeout, isDaemon(), getJavaHome(),
-					jvmParameters);
+					jvmParameters, getEnvironmentVariables());
 		}
 		return new UnixCassandraNode(workingDirectory, version, timeout, isDaemon(), getJavaHome(),
-				jvmParameters, isAllowRoot());
+				jvmParameters, getEnvironmentVariables(), isAllowRoot());
 	}
 
 	private Path getTempDir() {

@@ -35,8 +35,8 @@ import com.github.nosan.embedded.cassandra.lang.annotation.Nullable;
 class WindowsCassandraNode extends AbstractCassandraNode {
 
 	WindowsCassandraNode(Path workingDirectory, Version version, Duration startupTimeout, boolean daemon,
-			@Nullable Path javaHome, JvmParameters jvmParameters) {
-		super(workingDirectory, version, startupTimeout, daemon, javaHome, jvmParameters);
+			@Nullable Path javaHome, JvmParameters jvmParameters, Map<String, String> environmentVariables) {
+		super(workingDirectory, version, startupTimeout, daemon, javaHome, jvmParameters, environmentVariables);
 	}
 
 	@Override
@@ -57,31 +57,33 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	}
 
 	@Override
-	int terminate(ProcessId processId) throws InterruptedException {
+	int terminate(ProcessId processId, Map<String, String> environment) throws InterruptedException {
 		long pid = processId.getPid();
 		Path pidFile = processId.getPidFile();
-		int exit = kill(pidFile, false);
+		int exit = kill(pidFile, false, environment);
 		if (exit != 0) {
-			return kill(pid, false);
+			return kill(pid, false, environment);
 		}
 		return exit;
 	}
 
 	@Override
-	int kill(ProcessId processId) throws InterruptedException {
+	int kill(ProcessId processId, Map<String, String> environment) throws InterruptedException {
 		long pid = processId.getPid();
 		Path pidFile = processId.getPidFile();
-		int exit = kill(pidFile, true);
+		int exit = kill(pidFile, true, environment);
 		if (exit != 0) {
-			return kill(pid, true);
+			return kill(pid, true, environment);
 		}
 		return exit;
 	}
 
-	private int kill(@Nullable Path pidFile, boolean force) throws InterruptedException {
+	private int kill(@Nullable Path pidFile, boolean force, Map<String, String> environment)
+			throws InterruptedException {
 		Path stopFile = this.workingDirectory.resolve("bin/stop-server.ps1");
 		if (pidFile != null && Files.exists(pidFile) && Files.exists(stopFile)) {
 			ProcessBuilder builder = newBuilder();
+			builder.environment().putAll(environment);
 			builder.command("powershell", "-ExecutionPolicy", "Unrestricted");
 			builder.command().add(stopFile.toString());
 			builder.command().add("-p");
@@ -94,9 +96,10 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 		return -1;
 	}
 
-	private int kill(long pid, boolean force) throws InterruptedException {
+	private int kill(long pid, boolean force, Map<String, String> environment) throws InterruptedException {
 		if (pid != -1) {
 			ProcessBuilder builder = newBuilder();
+			builder.environment().putAll(environment);
 			builder.command("taskkill");
 			if (force) {
 				builder.command().add("/f");
