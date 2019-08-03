@@ -1,0 +1,126 @@
+[[getting-started]]
+= Getting Started
+
+[[getting-started-overview]]
+== Overview
+
+The goal of this document is to provide comprehensive reference documentation for programmers using Embedded Cassandra.
+
+[[getting-started-introducing]]
+=== Introducing
+
+Embedded Cassandra provides an easy way to start and stop {apache-cassandra-ref}[Apache Cassandra] as an embedded database.
+
+Primary features are:
+
+* Support different versions.
+* Supports multiple platforms: `Windows`, `Linux` and `OSX`.
+* Provides different extensions for popular frameworks: `JUnit4`, `JUnit5`, `TestNG`, `Spring Framework`.
+
+[[getting-started-getting-help]]
+=== Getting Help
+
+Ask Embedded Cassandra related questions on https://stackoverflow.com/questions/tagged/embedded-cassandra[Stack Overflow].
+
+[[getting-started-issues]]
+=== Issues
+
+Embedded Cassandra uses GitHub's issue tracking system to report bugs and feature requests.
+If you want to raise an issue, please follow this {github-issues}[link]
+
+[[getting-started-license]]
+=== License
+
+Embedded Cassandra is released under the https://www.apache.org/licenses/LICENSE-2.0[Apache License 2.0]
+
+[[getting-started-get-source]]
+=== Get Source
+
+Embedded Cassandra repository can be found {github-code}[here]
+
+[[getting-started-build]]
+=== Build Source
+
+Embedded Cassandra can be easily built with the https://github.com/takari/maven-wrapper[maven wrapper].
+You also need `JDK 1.8`.
+
+[source,bash]
+----
+$ ./mvnw clean install
+----
+
+[[getting-started-modules]]
+=== Modules
+
+[cols="s,e"]
+|===
+
+|Name |Description
+| embedded-cassandra | This module contains items that allows the Apache Cassandra to be started and stopped.
+| embedded-cassandra-annotations | This module contains JSR305 annotations.
+| embedded-cassandra-api |This module contains Embedded Cassandra API classes
+| embedded-cassandra-commons |This module contains Embedded Cassandra common classes
+| embedded-cassandra-docs |This module contains Embedded Cassandra Reference Documentation
+| embedded-cassandra-junit4-test |This module contains Embedded Cassandra JUnit4 classes
+| embedded-cassandra-junit5-test |This module contains Embedded Cassandra JUnit5 classes
+| embedded-cassandra-spring-test |This module contains Embedded Cassandra Spring classes
+| embedded-cassandra-testng-test |This module contains Embedded Cassandra TestNG classes
+| embedded-cassandra-mock |This module contains Embedded Cassandra *Mock* classes
+
+|===
+
+[[getting-started-contributing]]
+=== Contributing to Embedded Cassandra
+
+Embedded Cassandra welcomes contributions from everyone.
+
+Contributions to Embedded Cassandra should be made in the form of `GitHub pull requests`.
+
+[[getting-started-pull-request-checklist]]
+==== Pull Request Checklist
+
+* Branch from the `master` branch and, if needed, rebase to the current `master` branch before submitting your pull request.
+* Commits should be as small as possible.
+* Add tests relevant to the fixed bug or new feature.
+
+[[getting-started-quck-start]]
+== Quick Start
+
+[[getting-started-system-requirements]]
+=== System Requirements
+
+Embedded Cassandra {project-version} requires https://www.java.com[Java 8]
+
+[[getting-started-maven]]
+=== Maven
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+        <dependency>
+            <groupId>com.github.nosan</groupId>
+            <artifactId>embedded-cassandra</artifactId>
+            <version>{project-version}</version>
+        </dependency>
+----
+
+[[getting-started-gradle]]
+=== Gradle
+
+[source,groovy,indent=0,subs="verbatim,quotes,attributes"]
+----
+compile group: 'com.github.nosan', name: 'embedded-cassandra', version: '{project-version}'
+----
+
+[[getting-started-example]]
+=== First example
+
+The Apache Cassandra can be started using the following lines of code:
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/FirstExample.java[tag=source]
+----
+
+NOTE: The first start can take a while because Apache Casandra has to be initialized.
+Default implementation downloads and extracts an archive just once and then using it to initialize Apache Cassandra each time.
+

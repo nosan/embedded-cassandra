@@ -1,0 +1,10 @@
+[[extensions]]
+= Extensions
+
+|===
+|Name |Description
+
+|https://github.com/nosan/embedded-cassandra-spring-boot[embedded-cassandra-spring-boot-starter]
+|Spring Boot Starter for Embedded Cassandra
+
+|===

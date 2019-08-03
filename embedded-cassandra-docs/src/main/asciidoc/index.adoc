@@ -1,0 +1,30 @@
+[[embedded-cassandra-reference-documentation]]
+= Embedded Cassandra Reference Documentation {project-version}
+Dmytro Nosan
+:doctype: book
+:idprefix:
+:idseparator: -
+:toc: left
+:toclevels: 4
+:tabsize: 4
+:numbered:
+:sectanchors:
+:sectnums:
+:icons: font
+:hide-uri-scheme:
+:docinfo: shared,private
+
+:apache-cassandra-ref: https://cassandra.apache.org
+:github-repo: nosan/embedded-cassandra
+:github-code: https://github.com/{github-repo}/tree/master
+:github-issues: https://github.com/{github-repo}/issues/
+:apache-cassandra-configuration-ref: https://cassandra.apache.org/doc/latest/configuration/cassandra_config_file.html
+:apache-cassandra-parameters-ref: https://docs.datastax.com/en/dse/6.0/dse-dev/datastax_enterprise/config/cassandraSystemProperties.html
+
+include::legal.adoc[leveloffset=+1]
+include::getting-started.adoc[leveloffset=+1]
+include::configuration.adoc[leveloffset=+1]
+include::testing.adoc[leveloffset=+1]
+include::extensions.adoc[leveloffset=+1]
+include::howto.adoc[leveloffset=+1]
+

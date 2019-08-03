@@ -8,4 +8,4 @@ charset = utf-8
 [{*.java, xml, yaml, yml}]
 indent_style = tab
 indent_size = 4
-continuation_indent_size = 8
+ij_continuation_indent_size = 8

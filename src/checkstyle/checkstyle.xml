@@ -11,6 +11,8 @@
         <property name="lineSeparator" value="lf"/>
     </module>
 
+    <module name="JavadocPackage"/>
+
     <module name="com.puppycrawl.tools.checkstyle.TreeWalker">
         <module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationUseStyleCheck">
             <property name="elementStyle" value="compact"/>
@@ -18,8 +20,9 @@
         <module name="com.puppycrawl.tools.checkstyle.checks.annotation.MissingOverrideCheck"/>
         <module name="com.puppycrawl.tools.checkstyle.checks.annotation.PackageAnnotationCheck"/>
         <module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationLocationCheck">
-            <property name="allowSamelineSingleParameterlessAnnotation"
-                      value="false"/>
+            <property name="tokens"
+                      value="CLASS_DEF, INTERFACE_DEF, ENUM_CONSTANT_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF"/>
+            <property name="allowSamelineSingleParameterlessAnnotation" value="false"/>
         </module>
         <module name="OperatorWrap"/>
         <module name="LineLength">

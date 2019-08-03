@@ -1,0 +1,135 @@
+[[configuration]]
+== Configuration
+
+This section covers how to configure Embedded Cassandra.
+
+[[configuration-artifact]]
+=== Configure Cassandra's Version
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraVersion.java[tag=source]
+----
+
+TIP: Default version is *3.11.4*
+
+[[configure-configuration-file]]
+=== Configure Configuration File
+
+Sets the Cassandra's configuration file.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraFile.java[tag=source]
+----
+
+[[configure-properties]]
+=== Configure Cassandra's Properties
+
+Properties used to set cassandra properties (`cassandra.yaml`) that should be associated with Cassandra.
+These properties replace any properties in (`cassandra.yaml`).
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraProperties.java[tag=source]
+----
+
+TIP: More about configuration properties {apache-cassandra-configuration-ref}[here]
+
+[[configure-system-properties]]
+=== Configure System Properties
+
+System properties that should be passed to Cassandra's process.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraSystemProperties.java[tag=source]
+----
+
+TIP: More about startup parameters you can read {apache-cassandra-parameters-ref}[here]
+
+[[configure-environment-variables]]
+=== Configure Environment Variables
+
+Environment variables that should be passed to Cassandra's process.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraEnvironmentVariables.java[tag=source]
+----
+
+[[configure-jvm-options]]
+=== Configure JVM Options
+
+JVM options that should be passed to Cassandra's process.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraJvmOptions.java[tag=source]
+----
+
+[[configure-java-home]]
+=== Configure Java Home
+
+Sets the `java home` path.
+This home used by Cassandra's process.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraJavaHome.java[tag=source]
+----
+
+[[configure-exposed-properties]]
+=== Configure Exposed Properties
+
+The following properties will be exposed as `System Properties` after Cassandra has started:
+
+* embedded.cassandra.version
+* embedded.cassandra.address
+* embedded.cassandra.port
+* embedded.cassandra.ssl-port
+* embedded.cassandra.rpc-port
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraExposedProperties.java[tag=source]
+----
+
+TIP: `setExposedPropertiesPrefix(String)` can be used to add a prefix before property names.
+
+[[configuration-ssl]]
+=== Configure SSL
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraSsl.java[tag=source]
+----
+
+[[configuration-auth]]
+=== Configure Authentication/Authorization
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraAuthentication.java[tag=source]
+----
+
+[[configuration-ports]]
+=== Configure Ports
+
+By default, EmbeddedCassandra is running on default ports.
+There are several methods that can be used to set ports, such as `setPort(int)`.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraPorts.java[tag=source]
+----
+
+TIP: Use `0` for a random port.
+
+[[configure-proxy]]
+=== Configure Proxy
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraProxy.java[tag=source]
+----

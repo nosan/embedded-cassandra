@@ -1,50 +1,21 @@
 # Embedded Cassandra [![Build Status OSX/Linux](https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?logo=travis&logoColor=white&style=flat)](https://travis-ci.org/nosan/embedded-cassandra) [![Build Status Windows](https://img.shields.io/appveyor/ci/nosan/embedded-cassandra/master.svg?logo=appveyor&logoColor=white&style=flat)](https://ci.appveyor.com/project/nosan/embedded-cassandra)
-`Embedded Cassandra` provides an easy way to run [Apache Cassandra](https://cassandra.apache.org/) and extensions to test your code.
+Embedded Cassandra provides an easy way to start and stop [Apache Cassandra](https://cassandra.apache.org/) as an embedded database.
 
-You can find more information [here](https://github.com/nosan/embedded-cassandra/wiki)
+To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra/).
 
-Here is a quick example how to run `Apache Cassandra`:
+Embedded Cassandra _2.x.x_ documentation is [here](https://github.com/nosan/embedded-cassandra/wiki)
 
-```java
-import com.github.nosan.embedded.cassandra.Cassandra;
-import com.github.nosan.embedded.cassandra.CassandraFactory;
-import com.github.nosan.embedded.cassandra.Settings;
-import com.github.nosan.embedded.cassandra.local.LocalCassandraFactory;
-
-class Scratch {
-
-	public static void main(String[] args) {
-		CassandraFactory cassandraFactory = new LocalCassandraFactory();
-		Cassandra cassandra = cassandraFactory.create();
-		cassandra.start();
-		try {
-			Settings settings = cassandra.getSettings();
-		}
-		finally {
-			cassandra.stop();
-		}
-	}
-
-}
-```
-
-
-#### Issues
+## Issues
 
 `Embedded Cassandra` uses GitHub's issue tracking system to report bugs and feature
 requests. If you want to raise an issue, please follow this [link](https://github.com/nosan/embedded-cassandra/issues)
-and use predefined `GitHub` templates.
 
 Also see [CONTRIBUTING.md](CONTRIBUTING.md) if you wish to submit pull requests.
 
-#### Build
+## Build
 
 `Embedded Cassandra` can be easily built with the [maven wrapper](https://github.com/takari/maven-wrapper). You also need `JDK 1.8`.
 
-```bash
-$ ./mvnw clean install
-```
+## License
 
-#### License
-
-This project uses [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+Embedded Cassandra is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)

@@ -1,0 +1,111 @@
+[[testing]]
+= Testing
+
+Embedded Cassandra provides a number of extensions to help when testing your application.
+
+[[testing-junit5]]
+== Using JUnit5
+
+Cassandra can be easily started using `CassandraExtension`.
+This extension allows the Cassandra to be started and stopped.
+Cassandra will be started only once before any test method is executed and stopped after the last test method has executed.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/junit5/CassandraTests.java[tag=source]
+----
+
+WARNING: `CassandraExtension` configures Cassandra on the random ports.
+
+In contrast to `@ExtendWith` which is used to register extensions declaratively, `@RegisterExtension`
+can be used to register an extension programmatically to pass arguments to the `CassandraExtension's` constructor.
+In the following example, there is a showcase of how to change Cassandra's version.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/junit5/configuration/CassandraTests.java[tag=source]
+----
+
+WARNING: `CassandraExtension` with a default constructor configures Cassandra on the random ports.
+
+[[testing-junit4]]
+== Using JUnit4
+
+Cassandra can be started via `CassandraRule`. `CassandraRule` is `TestRule` that allows the Cassandra to be started and stopped.
+Cassandra declared as static field with a `@ClassRule` annotation will be started only once before any test method is executed and stopped after the last test method has executed.
+Cassandra declared as instance field with a `@Rule` annotation will be started and stopped for every test method.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/junit4/CassandraTests.java[tag=source]
+----
+
+WARNING: `CassandraRule` with a default constructor configures Cassandra on the random ports.
+
+`CassandraRule` could be customized via constructor.
+Here is a small example of how to override a logger:
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/junit4/configuration/CassandraTests.java[tag=source]
+----
+
+[[testing-testng]]
+== Using TestNG
+
+To run Cassandra using `TestNG`, `AbstractCassandraTests` class has to be extended.
+`AbstractCassandraTests` class allows the Cassandra to be started and stopped.
+Cassandra will be started only once before any test method is executed and stopped after the last test method has executed.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/testng/CassandraTests.java[tag=source]
+----
+
+WARNING: `AbstractCassandraTests` with a default constructor configures Cassandra on the random ports.
+
+The same as for `JUnit4` and `JUnit5` it is possible to set your own `CassandraFactory` through the constructor.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/testng/configuration/CassandraTests.java[tag=source]
+----
+
+[[testing-spring]]
+== Using Spring Test
+
+For running Apache Cassandra using Spring Test, `@EmbeddedCassandra` annotation has to be used.
+This annotation allows the Cassandra to be started and stopped.
+Cassandra will be registered as a bean named
+`Cassandra.class.getName()`.
+By default, `EmbeddedCassandraFactory` used, which is configured to use random ports.
+However, it still exists a way to register your own `CassandraFactory` to control Cassandra instance by your own wish.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/spring/CassandraTests.java[tag=source]
+----
+
+WARNING: By default, `@EmbeddedCassandra` configures Cassandra on the random ports.
+
+It is possible to register you own factory to control Cassandra instance.
+Here is a small example:
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/spring/configuration/CassandraTests.java[tag=source]
+----
+
+[[testing-spring-boot]]
+=== Using Spring Boot Test
+
+There is no much difference between `Spring Boot Test` and `Spring Test`, hence, to run Cassandra, `@EmbeddedCassandra` can be used.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/spring/boot/CassandraTests.java[tag=source]
+----
+
+TIP: `${embedded.cassandra.port`} and `${embedded.cassandra.address}` properties are exposed by `EmbeddedCassandra`.
+
+TIP: `@SpringBootTest(properties=)` can be replaced with  `application.yml` or `application.properties`.

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.nosan</groupId>
     <artifactId>embedded-cassandra-project</artifactId>
-    <version>2.0.5-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>Embedded Cassandra Project</description>
@@ -38,98 +37,36 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <assertj.version>3.13.2</assertj.version>
-        <junit.version>4.12</junit.version>
-        <testng.version>6.14.3</testng.version>
-        <cassandra-driver-core.version>3.7.1</cassandra-driver-core.version>
-        <junit.jupiter.version>5.5.1</junit.jupiter.version>
+        <junit5.version>5.5.1</junit5.version>
         <checkstyle.version>8.23</checkstyle.version>
-        <slf4j-api.version>1.7.26</slf4j-api.version>
+        <slf4j-api.version>1.7.28</slf4j-api.version>
         <logback-classic.version>1.2.3</logback-classic.version>
-        <spring.version>5.1.9.RELEASE</spring.version>
         <jsr305.version>3.0.2</jsr305.version>
         <snakeyaml.version>1.24</snakeyaml.version>
-        <commons-compress.version>1.18</commons-compress.version>
-        <xz.version>1.8</xz.version>
-        <spring-boot.version>2.1.6.RELEASE</spring-boot.version>
-        <java-driver-core.version>4.1.0</java-driver-core.version>
+        <jarchivelib.version>1.0.0</jarchivelib.version>
+        <cassandra-driver-core.version>3.7.2</cassandra-driver-core.version>
+        <junit.version>4.12</junit.version>
+        <testng.version>6.14.3</testng.version>
+        <spring.version>5.1.9.RELEASE</spring.version>
+        <spring-boot.version>2.1.7.RELEASE</spring-boot.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-compress</artifactId>
-                <version>${commons-compress.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-cassandra</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-cassandra-reactive</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.nosan</groupId>
-                <artifactId>embedded-cassandra</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.nosan</groupId>
-                <artifactId>embedded-cassandra-test</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.nosan</groupId>
-                <artifactId>embedded-cassandra-test-support</artifactId>
-                <version>${project.version}</version>
+                <groupId>org.rauschig</groupId>
+                <artifactId>jarchivelib</artifactId>
+                <version>${jarchivelib.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.datastax.oss</groupId>
-                <artifactId>java-driver-core</artifactId>
-                <version>${java-driver-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.datastax.cassandra</groupId>
-                <artifactId>cassandra-driver-core</artifactId>
-                <version>${cassandra-driver-core.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
@@ -142,24 +79,19 @@
                 <version>${logback-classic.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit5.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
-                <version>${junit.jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit.jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit.jupiter.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
@@ -167,19 +99,39 @@
                 <version>${jsr305.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.tukaani</groupId>
-                <artifactId>xz</artifactId>
-                <version>${xz.version}</version>
+                <groupId>com.datastax.cassandra</groupId>
+                <artifactId>cassandra-driver-core</artifactId>
+                <version>${cassandra-driver-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-cass</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-cassandra</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -199,7 +151,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                     <dependencies>
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
@@ -211,12 +163,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>3.8.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -226,7 +178,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -236,7 +188,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.20</version>
+                    <version>2.22.2</version>
                     <executions>
                         <execution>
                             <goals>
@@ -254,12 +206,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.1.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
+                    <version>2.22.2</version>
                     <configuration>
                         <skipAfterFailureCount>1</skipAfterFailureCount>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
@@ -271,32 +223,40 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
-                    <version>1.0.0</version>
+                    <version>1.1.0</version>
                     <configuration>
                         <updatePomFile>true</updatePomFile>
-                        <flattenMode>oss</flattenMode>
-                        <pomElements>
-                            <parent>remove</parent>
-                            <distributionManagement>remove</distributionManagement>
-                            <repositories>remove</repositories>
-                        </pomElements>
+                        <flattenMode>ossrh</flattenMode>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.asciidoctor</groupId>
+                    <artifactId>asciidoctor-maven-plugin</artifactId>
+                    <version>1.6.0</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.asciidoctor</groupId>
+                            <artifactId>asciidoctorj</artifactId>
+                            <version>1.6.2</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+
             </plugins>
         </pluginManagement>
 
@@ -350,9 +310,16 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <show>package</show>
+                    <show>protected</show>
                     <failOnWarnings>true</failOnWarnings>
                     <failOnError>true</failOnError>
+                    <additionalDependencies>
+                        <additionalDependency>
+                            <groupId>com.google.code.findbugs</groupId>
+                            <artifactId>jsr305</artifactId>
+                            <version>${jsr305.version}</version>
+                        </additionalDependency>
+                    </additionalDependencies>
                 </configuration>
             </plugin>
             <plugin>
@@ -376,12 +343,20 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <inherited>true</inherited>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
     <profiles>
         <profile>
-            <id>deploy</id>
+            <id>release</id>
             <build>
                 <plugins>
                     <plugin>
@@ -413,14 +388,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-deploy-plugin</artifactId>
-                        <inherited>true</inherited>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </plugin>
                 </plugins>
             </build>
             <distributionManagement>
@@ -439,9 +406,16 @@
     </profiles>
 
     <modules>
-        <module>embedded-cassandra-test-support</module>
-        <module>embedded-cassandra-parent</module>
-        <module>embedded-cassandra-tests</module>
+        <module>embedded-cassandra-annotations</module>
+        <module>embedded-cassandra-commons</module>
+        <module>embedded-cassandra-api</module>
+        <module>embedded-cassandra</module>
+        <module>embedded-cassandra-mock</module>
+        <module>embedded-cassandra-junit5-test</module>
+        <module>embedded-cassandra-junit4-test</module>
+        <module>embedded-cassandra-testng-test</module>
+        <module>embedded-cassandra-spring-test</module>
+        <module>embedded-cassandra-docs</module>
     </modules>
 
 </project>
