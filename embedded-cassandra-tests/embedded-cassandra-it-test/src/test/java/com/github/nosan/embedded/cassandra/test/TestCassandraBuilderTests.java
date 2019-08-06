@@ -40,9 +40,9 @@ class TestCassandraBuilderTests {
 				.cassandraFactory(MockCassandra::new)
 				.connectionFactory(new MockConnectionFactory())
 				.build();
-		assertThat(testCassandra).extracting("cassandra").first().isInstanceOf(MockCassandra.class);
-		assertThat(testCassandra).extracting("connectionFactory").first().isInstanceOf(MockConnectionFactory.class);
-		assertThat(testCassandra).extracting("scripts").first().asList()
+		assertThat(testCassandra).extracting("cassandra").isInstanceOf(MockCassandra.class);
+		assertThat(testCassandra).extracting("connectionFactory").isInstanceOf(MockConnectionFactory.class);
+		assertThat(testCassandra).extracting("scripts").asList()
 				.containsExactly(CqlScript.classpath("schema.cql"));
 	}
 
