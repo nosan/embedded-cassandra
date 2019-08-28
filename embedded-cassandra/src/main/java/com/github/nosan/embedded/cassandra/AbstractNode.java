@@ -130,23 +130,23 @@ abstract class AbstractNode implements Node {
 	}
 
 	private void configureProperties(Map<String, Object> properties) throws IOException {
-		configurePortProperty(properties, "native_transport_port");
-		configurePortProperty(properties, "native_transport_port_ssl");
-		configurePortProperty(properties, "rpc_port");
-		configurePortProperty(properties, "storage_port");
-		configurePortProperty(properties, "ssl_storage_port");
+		randomizePort(properties, "native_transport_port");
+		randomizePort(properties, "native_transport_port_ssl");
+		randomizePort(properties, "rpc_port");
+		randomizePort(properties, "storage_port");
+		randomizePort(properties, "ssl_storage_port");
 	}
 
 	private void configureSystemProperties(Map<String, Object> systemProperties) throws IOException {
-		configurePortProperty(systemProperties, "cassandra.jmx.remote.port");
-		configurePortProperty(systemProperties, "cassandra.jmx.local.port");
-		configurePortProperty(systemProperties, "cassandra.native_transport_port");
-		configurePortProperty(systemProperties, "cassandra.rpc_port");
-		configurePortProperty(systemProperties, "cassandra.storage_port");
-		configurePortProperty(systemProperties, "cassandra.ssl_storage_port");
+		randomizePort(systemProperties, "cassandra.jmx.remote.port");
+		randomizePort(systemProperties, "cassandra.jmx.local.port");
+		randomizePort(systemProperties, "cassandra.native_transport_port");
+		randomizePort(systemProperties, "cassandra.rpc_port");
+		randomizePort(systemProperties, "cassandra.storage_port");
+		randomizePort(systemProperties, "cassandra.ssl_storage_port");
 	}
 
-	private void configurePortProperty(Map<String, Object> properties, String name) throws IOException {
+	private void randomizePort(Map<String, Object> properties, String name) throws IOException {
 		Object port = properties.get(name);
 		if (!Objects.toString(port, "").trim().equals("0")) {
 			return;
