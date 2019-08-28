@@ -49,23 +49,6 @@ class EmbeddedCassandraTests {
 	private final CassandraRunner runner = new CassandraRunner(this.cassandraFactory);
 
 	@Test
-	void testSuccessExposedPropertiesPrefix() throws Throwable {
-		this.cassandraFactory.setExposedPropertiesPrefix("my");
-		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
-			assertStarted(cassandra, true);
-			try (Cluster cluster = new ClusterFactory().create(cassandra)) {
-				createKeyspace(cluster.connect());
-			}
-			int port = cassandra.getPort();
-			InetAddress address = cassandra.getAddress();
-			assertThat(address).isNotNull();
-			hasSystemProperty("my.embedded.cassandra.port", port);
-			hasSystemProperty("my.embedded.cassandra.address", address.getHostAddress());
-		});
-	}
-
-	@Test
 	void testSuccessWhenDefault() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNull();

@@ -92,7 +92,7 @@ import com.github.nosan.embedded.cassandra.commons.util.SystemUtils;
  * as {@link #setPort(int)}.
  * <p> Use {@code '0'} for a random port.
  * <p><strong>Exposed properties:</strong>
- * The following properties will be exposed after {@link Cassandra} has started:
+ * The following properties will be exposed as {@code System Properties} after {@link Cassandra} has started:
  * <pre>
  *     - embedded.cassandra.version
  *     - embedded.cassandra.address
@@ -100,7 +100,6 @@ import com.github.nosan.embedded.cassandra.commons.util.SystemUtils;
  *     - embedded.cassandra.ssl-port
  *     - embedded.cassandra.rpc-port
  * </pre>
- * TIP: {@link #setExposedPropertiesPrefix(String)} can be used to add a prefix before property names.
  *
  * @author Dmytro Nosan
  * @see Cassandra
@@ -139,9 +138,6 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 
 	@Nullable
 	private Path workingDirectory;
-
-	@Nullable
-	private String exposedPropertiesPrefix;
 
 	/**
 	 * Returns Cassandra's name. Defaults to {@code 'cassandra'}.
@@ -541,33 +537,6 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 		this.registerShutdownHook = registerShutdownHook;
 	}
 
-	/**
-	 * Returns the prefix which will be used for exposed properties, such as {@code embedded.cassandra.port}, if it is
-	 * not null or not empty.
-	 *
-	 * @return the prefix to use
-	 */
-	@Nullable
-	public String getExposedPropertiesPrefix() {
-		return this.exposedPropertiesPrefix;
-	}
-
-	/**
-	 * Sets the prefix used for exposed properties, such as {@code embedded.cassandra.port}. If the prefix is not null
-	 * and not empty it will be added before the property name.
-	 * <p> Example:
-	 * <pre>{@code
-	 * exposedPropertiesPrefix=<null> | embedded.cassandra.port
-	 * exposedPropertiesPrefix=<empty> | embedded.cassandra.port
-	 * exposedPropertiesPrefix='spring' | spring.embedded.cassandra.port
-	 * }</pre>
-	 *
-	 * @param exposedPropertiesPrefix the prefix to use
-	 */
-	public void setExposedPropertiesPrefix(@Nullable String exposedPropertiesPrefix) {
-		this.exposedPropertiesPrefix = exposedPropertiesPrefix;
-	}
-
 	@Override
 	public Cassandra create() throws CassandraCreationException {
 		try {
@@ -605,9 +574,8 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 		}
 		Node node = createNode(version, workingDirectory);
 		Database database = new EmbeddedDatabase(name, version, isDaemon(), getLogger(), getTimeout(), node);
-		String exposedPropertiesPrefix = Objects.toString(getExposedPropertiesPrefix(), "").trim();
-		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, exposedPropertiesPrefix, artifactDirectory,
-				workingDirectory, version, database);
+		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, artifactDirectory, workingDirectory, version,
+				database);
 		if (isRegisterShutdownHook()) {
 			Runtime.getRuntime().addShutdownHook(new Thread(cassandra::stop, name + "-sh"));
 		}

@@ -126,15 +126,13 @@ include::{test-sources}/examples/configuration/CassandraProxy.java[tag=source]
 
 The following properties will be exposed as `System Properties` after Cassandra has started:
 
-* embedded.cassandra.version
-* embedded.cassandra.address
-* embedded.cassandra.port
-* embedded.cassandra.ssl-port
-* embedded.cassandra.rpc-port
+* `embedded.cassandra.version`
+* `embedded.cassandra.address`
+* `embedded.cassandra.port`
+* `embedded.cassandra.ssl-port`
+* `embedded.cassandra.rpc-port`
 
 [source,java,indent=0]
 ----
 include::{test-sources}/examples/configuration/CassandraExposedProperties.java[tag=source]
 ----
-
-TIP: `setExposedPropertiesPrefix(String)` can be used to add a prefix before property names.

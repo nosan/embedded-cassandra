@@ -21,7 +21,6 @@ import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ import com.github.nosan.embedded.cassandra.api.CassandraException;
 import com.github.nosan.embedded.cassandra.api.CassandraInterruptedException;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
-import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
  * Embedded {@link Cassandra}.
@@ -55,8 +53,6 @@ class EmbeddedCassandra implements Cassandra {
 
 	private final String name;
 
-	private final Function<String, String> propertyNameMapper;
-
 	private final Path artifactDirectory;
 
 	private final Path workingDirectory;
@@ -67,11 +63,8 @@ class EmbeddedCassandra implements Cassandra {
 
 	private volatile boolean started = false;
 
-	EmbeddedCassandra(String name, String exposedPropertiesPrefix, Path artifactDirectory, Path workingDirectory,
-			Version version, Database database) {
+	EmbeddedCassandra(String name, Path artifactDirectory, Path workingDirectory, Version version, Database database) {
 		this.name = name;
-		this.propertyNameMapper = StringUtils.hasText(exposedPropertiesPrefix) ? (source) -> String
-				.format("%s.%s", exposedPropertiesPrefix, source) : Function.identity();
 		this.artifactDirectory = artifactDirectory;
 		this.workingDirectory = workingDirectory;
 		this.version = version;
@@ -202,31 +195,31 @@ class EmbeddedCassandra implements Cassandra {
 	}
 
 	private void setSystemProperties() {
-		setSystemProperty(this.propertyNameMapper.apply(VERSION_PROPERTY), getVersion());
+		setSystemProperty(VERSION_PROPERTY, getVersion());
 		InetAddress address = this.database.getAddress();
 		if (address != null) {
-			setSystemProperty(this.propertyNameMapper.apply(ADDRESS_PROPERTY), address.getHostAddress());
+			setSystemProperty(ADDRESS_PROPERTY, address.getHostAddress());
 		}
 		int port = this.database.getPort();
 		if (port != -1) {
-			setSystemProperty(this.propertyNameMapper.apply(PORT_PROPERTY), port);
+			setSystemProperty(PORT_PROPERTY, port);
 		}
 		int sslPort = this.database.getSslPort();
 		if (sslPort != -1) {
-			setSystemProperty(this.propertyNameMapper.apply(SSL_PORT_PROPERTY), sslPort);
+			setSystemProperty(SSL_PORT_PROPERTY, sslPort);
 		}
 		int rpcPort = this.database.getRpcPort();
 		if (rpcPort != -1) {
-			setSystemProperty(this.propertyNameMapper.apply(RPC_PORT_PROPERTY), rpcPort);
+			setSystemProperty(RPC_PORT_PROPERTY, rpcPort);
 		}
 	}
 
 	private void clearSystemProperties() {
-		clearSystemProperty(this.propertyNameMapper.apply(VERSION_PROPERTY));
-		clearSystemProperty(this.propertyNameMapper.apply(ADDRESS_PROPERTY));
-		clearSystemProperty(this.propertyNameMapper.apply(PORT_PROPERTY));
-		clearSystemProperty(this.propertyNameMapper.apply(SSL_PORT_PROPERTY));
-		clearSystemProperty(this.propertyNameMapper.apply(RPC_PORT_PROPERTY));
+		clearSystemProperty(VERSION_PROPERTY);
+		clearSystemProperty(ADDRESS_PROPERTY);
+		clearSystemProperty(PORT_PROPERTY);
+		clearSystemProperty(SSL_PORT_PROPERTY);
+		clearSystemProperty(RPC_PORT_PROPERTY);
 	}
 
 	private static void setSystemProperty(String name, Object value) {
