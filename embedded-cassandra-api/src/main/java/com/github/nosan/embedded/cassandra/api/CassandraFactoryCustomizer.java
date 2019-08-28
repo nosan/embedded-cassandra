@@ -17,7 +17,7 @@
 package com.github.nosan.embedded.cassandra.api;
 
 /**
- * Strategy interface for customizing {@link CassandraFactory }. Any instances of this type will get a callback with the
+ * Strategy interface for customizing {@link CassandraFactory}. Any instances of this type will get a callback with the
  * {@link CassandraFactory} before the {@link Cassandra} itself is started, so you can set the port, version, etc.
  *
  * @param <T> the configurable {@link CassandraFactory}
