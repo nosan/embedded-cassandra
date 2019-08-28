@@ -234,6 +234,13 @@ class EmbeddedCassandraFactoryTests {
 	}
 
 	@Test
+	void testExposeProperties() {
+		this.cassandraFactory.setExposeProperties(false);
+		Cassandra cassandra = this.cassandraFactory.create();
+		assertThat(cassandra).hasFieldOrPropertyWithValue("exposeProperties", false);
+	}
+
+	@Test
 	@SuppressWarnings("unchecked")
 	void testShutdownHook() throws Exception {
 		this.cassandraFactory.setRegisterShutdownHook(true);

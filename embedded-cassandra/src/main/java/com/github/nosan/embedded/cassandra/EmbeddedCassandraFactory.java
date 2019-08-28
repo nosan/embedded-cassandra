@@ -128,6 +128,8 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 
 	private boolean registerShutdownHook = true;
 
+	private boolean exposeProperties = true;
+
 	private Duration timeout = Duration.ofSeconds(90);
 
 	@Nullable
@@ -506,7 +508,7 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Returns whether shutdown hook should be registered or not.
+	 * Whether shutdown hook should be registered or not.
 	 *
 	 * @return {@code true} if shutdown hook should be registered
 	 */
@@ -522,6 +524,25 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 	 */
 	public void setRegisterShutdownHook(boolean registerShutdownHook) {
 		this.registerShutdownHook = registerShutdownHook;
+	}
+
+	/**
+	 * Whether {@link Cassandra} properties such as {@code embedded.cassandra.port} should be exposed as {@code System
+	 * Properties} or not.
+	 *
+	 * @return {@code true} if properties should be exposed
+	 */
+	public boolean isExposeProperties() {
+		return this.exposeProperties;
+	}
+
+	/**
+	 * Sets if the created Cassandra should expose its properties as System Properties. Defaults to {@code true}.
+	 *
+	 * @param exposeProperties if the properties should be exposed
+	 */
+	public void setExposeProperties(boolean exposeProperties) {
+		this.exposeProperties = exposeProperties;
 	}
 
 	@Override
@@ -561,8 +582,8 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 		}
 		Node node = createNode(version, workingDirectory);
 		Database database = new EmbeddedDatabase(name, version, isDaemon(), getLogger(), getTimeout(), node);
-		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, artifactDirectory, workingDirectory, version,
-				database);
+		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, isExposeProperties(), artifactDirectory,
+				workingDirectory, version, database);
 		if (isRegisterShutdownHook()) {
 			Runtime.getRuntime().addShutdownHook(new Thread(cassandra::stop, name + "-sh"));
 		}

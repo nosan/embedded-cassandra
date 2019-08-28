@@ -53,6 +53,8 @@ class EmbeddedCassandra implements Cassandra {
 
 	private final String name;
 
+	private final boolean exposeProperties;
+
 	private final Path artifactDirectory;
 
 	private final Path workingDirectory;
@@ -63,8 +65,10 @@ class EmbeddedCassandra implements Cassandra {
 
 	private volatile boolean started = false;
 
-	EmbeddedCassandra(String name, Path artifactDirectory, Path workingDirectory, Version version, Database database) {
+	EmbeddedCassandra(String name, boolean exposeProperties, Path artifactDirectory, Path workingDirectory,
+			Version version, Database database) {
 		this.name = name;
+		this.exposeProperties = exposeProperties;
 		this.artifactDirectory = artifactDirectory;
 		this.workingDirectory = workingDirectory;
 		this.version = version;
@@ -88,7 +92,9 @@ class EmbeddedCassandra implements Cassandra {
 			}
 			throw ex;
 		}
-		setSystemProperties();
+		if (this.exposeProperties) {
+			setSystemProperties();
+		}
 		this.started = true;
 	}
 
@@ -98,7 +104,9 @@ class EmbeddedCassandra implements Cassandra {
 			return;
 		}
 		doStop();
-		clearSystemProperties();
+		if (this.exposeProperties) {
+			clearSystemProperties();
+		}
 		this.started = false;
 	}
 

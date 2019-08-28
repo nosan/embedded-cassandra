@@ -86,6 +86,20 @@ class EmbeddedCassandraTests {
 	}
 
 	@Test
+	void testSuccessWhenPropertiesNotExposed() throws Throwable {
+		this.cassandraFactory.setExposeProperties(false);
+		this.runner.run((cassandra, throwable) -> {
+			assertThat(throwable).isNull();
+			assertStarted(cassandra, true);
+			doesNotContainSystemProperty("embedded.cassandra.address");
+			doesNotContainSystemProperty("embedded.cassandra.port");
+			doesNotContainSystemProperty("embedded.cassandra.ssl-port");
+			doesNotContainSystemProperty("embedded.cassandra.rpc-port");
+			doesNotContainSystemProperty("embedded.cassandra.version");
+		});
+	}
+
+	@Test
 	void testSuccessWhenOnlyNativeEnabled() throws Throwable {
 		this.properties.put("start_rpc", false);
 		this.properties.put("start_native_transport", true);

@@ -29,6 +29,9 @@ class CassandraExposedProperties {
 		try {
 			String port = System.getProperty("embedded.cassandra.port");
 			String address = System.getProperty("embedded.cassandra.address");
+			String version = System.getProperty("embedded.cassandra.version");
+			String sslPort = System.getProperty("embedded.cassandra.ssl-port");
+			String rpcPort = System.getProperty("embedded.cassandra.rpc-port");
 			//...
 		}
 		finally {
