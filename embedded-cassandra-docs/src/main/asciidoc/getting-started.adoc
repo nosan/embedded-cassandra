@@ -52,7 +52,7 @@ $ ./mvnw clean install
 [[getting-started-modules]]
 === Modules
 
-[cols="s,e"]
+[cols="m,m"]
 |===
 
 |Name |Description
@@ -122,5 +122,5 @@ include::{test-sources}/examples/FirstExample.java[tag=source]
 ----
 
 NOTE: The first start can take a while because Apache Casandra has to be initialized.
-Default implementation downloads and extracts an archive just once and then using it to initialize Apache Cassandra each time.
+Default implementation downloads and extracts an archive just once and then using it to initialize Apache Cassandra.
 

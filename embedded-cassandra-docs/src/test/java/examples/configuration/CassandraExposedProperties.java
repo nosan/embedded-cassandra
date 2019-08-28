@@ -17,13 +17,24 @@
 package examples.configuration;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.api.Cassandra;
 
 class CassandraExposedProperties {
 
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		String port = System.getProperty("embedded.cassandra.port");
+		Cassandra cassandra = cassandraFactory.create();
+		cassandra.start();
+		try {
+			String port = System.getProperty("embedded.cassandra.port");
+			String address = System.getProperty("embedded.cassandra.address");
+			//...
+		}
+		finally {
+			cassandra.stop();
+		}
+
 		// end::source[]
 	}
 

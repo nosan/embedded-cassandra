@@ -1,3 +1,8 @@
+[[features]]
+= Features
+
+This section describes key features that you may want to use and customize.
+
 [[configuration]]
 == Configuration
 
@@ -79,24 +84,6 @@ This home used by Cassandra's process.
 include::{test-sources}/examples/configuration/CassandraJavaHome.java[tag=source]
 ----
 
-[[configure-exposed-properties]]
-=== Configure Exposed Properties
-
-The following properties will be exposed as `System Properties` after Cassandra has started:
-
-* embedded.cassandra.version
-* embedded.cassandra.address
-* embedded.cassandra.port
-* embedded.cassandra.ssl-port
-* embedded.cassandra.rpc-port
-
-[source,java,indent=0]
-----
-include::{test-sources}/examples/configuration/CassandraExposedProperties.java[tag=source]
-----
-
-TIP: `setExposedPropertiesPrefix(String)` can be used to add a prefix before property names.
-
 [[configuration-ssl]]
 === Configure SSL
 
@@ -133,3 +120,21 @@ TIP: Use `0` for a random port.
 ----
 include::{test-sources}/examples/configuration/CassandraProxy.java[tag=source]
 ----
+
+[[exposed-properties]]
+== Exposed Properties
+
+The following properties will be exposed as `System Properties` after Cassandra has started:
+
+* embedded.cassandra.version
+* embedded.cassandra.address
+* embedded.cassandra.port
+* embedded.cassandra.ssl-port
+* embedded.cassandra.rpc-port
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraExposedProperties.java[tag=source]
+----
+
+TIP: `setExposedPropertiesPrefix(String)` can be used to add a prefix before property names.

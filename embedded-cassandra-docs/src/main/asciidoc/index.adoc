@@ -21,10 +21,11 @@ Dmytro Nosan
 :apache-cassandra-configuration-ref: https://cassandra.apache.org/doc/latest/configuration/cassandra_config_file.html
 :apache-cassandra-parameters-ref: https://docs.datastax.com/en/dse/6.0/dse-dev/datastax_enterprise/config/cassandraSystemProperties.html
 
-include::legal.adoc[leveloffset=+1]
 include::getting-started.adoc[leveloffset=+1]
-include::configuration.adoc[leveloffset=+1]
+include::features.adoc[leveloffset=+1]
 include::testing.adoc[leveloffset=+1]
 include::extensions.adoc[leveloffset=+1]
 include::howto.adoc[leveloffset=+1]
 
+[.text-right]
+Copyright &#169; 2012-{docyear}
