@@ -27,7 +27,7 @@ class CassandraPorts {
 		cassandraFactory.setSslPort(0);
 		cassandraFactory.setRpcPort(0);
 		cassandraFactory.setStoragePort(0);
-		cassandraFactory.setStorageSslPort(0);
+		cassandraFactory.setSslStoragePort(0);
 		cassandraFactory.setJmxLocalPort(0);
 		// end::source[]
 	}

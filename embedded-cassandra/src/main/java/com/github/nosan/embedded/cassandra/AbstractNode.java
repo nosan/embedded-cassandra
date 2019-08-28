@@ -35,7 +35,6 @@ import java.util.Objects;
 
 import org.yaml.snakeyaml.Yaml;
 
-import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.RunProcess;
 
 /**
@@ -47,12 +46,7 @@ abstract class AbstractNode implements Node {
 
 	private static final String JVM_EXTRA_OPTS = "JVM_EXTRA_OPTS";
 
-	private static final String JAVA_HOME = "JAVA_HOME";
-
 	private final Path workingDirectory;
-
-	@Nullable
-	private final Path javaHome;
 
 	private final Map<String, Object> properties;
 
@@ -62,10 +56,9 @@ abstract class AbstractNode implements Node {
 
 	private final Map<String, Object> environmentVariables;
 
-	AbstractNode(Path workingDirectory, @Nullable Path javaHome, Map<String, Object> properties,
-			List<String> jvmOptions, Map<String, Object> systemProperties, Map<String, Object> environmentVariables) {
+	AbstractNode(Path workingDirectory, Map<String, Object> properties, List<String> jvmOptions,
+			Map<String, Object> systemProperties, Map<String, Object> environmentVariables) {
 		this.workingDirectory = workingDirectory;
-		this.javaHome = javaHome;
 		this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 		this.systemProperties = Collections.unmodifiableMap(new LinkedHashMap<>(systemProperties));
@@ -88,10 +81,7 @@ abstract class AbstractNode implements Node {
 			jvmOptions.add(String.format("-D%s=%s", entry.getKey(), entry.getValue()));
 		}
 		runProcess.getEnvironment().putAll(this.environmentVariables);
-		Path javaHome = this.javaHome;
-		if (javaHome != null) {
-			runProcess.putEnvironment(JAVA_HOME, javaHome.toString());
-		}
+
 		runProcess.putEnvironment(JVM_EXTRA_OPTS, String.join(" ", jvmOptions));
 		return doStart(runProcess);
 	}

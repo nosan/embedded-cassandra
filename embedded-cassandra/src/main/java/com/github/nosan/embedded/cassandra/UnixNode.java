@@ -25,7 +25,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.ProcessId;
 import com.github.nosan.embedded.cassandra.commons.RunProcess;
@@ -43,10 +42,9 @@ class UnixNode extends AbstractNode {
 
 	private final boolean allowRoot;
 
-	UnixNode(Version version, Path workingDirectory, @Nullable Path javaHome, List<String> jvmOptions,
-			Map<String, Object> systemProperties, Map<String, Object> environmentVariables,
-			Map<String, Object> properties, boolean allowRoot) {
-		super(workingDirectory, javaHome, properties, jvmOptions, systemProperties, environmentVariables);
+	UnixNode(Version version, Path workingDirectory, List<String> jvmOptions, Map<String, Object> systemProperties,
+			Map<String, Object> environmentVariables, Map<String, Object> properties, boolean allowRoot) {
+		super(workingDirectory, properties, jvmOptions, systemProperties, environmentVariables);
 		this.version = version;
 		this.workingDirectory = workingDirectory;
 		this.allowRoot = allowRoot;

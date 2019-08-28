@@ -34,6 +34,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.artifact.Artifact;
+import com.github.nosan.embedded.cassandra.commons.PathSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -88,7 +89,9 @@ class EmbeddedCassandraFactoryTests {
 		this.cassandraFactory.setJavaHome(() -> temporaryFolder);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
-		assertThat(node).hasFieldOrPropertyWithValue("javaHome", temporaryFolder);
+		assertThat(node).hasFieldOrPropertyWithValue("environmentVariables",
+				Collections.singletonMap("JAVA_HOME", temporaryFolder));
+
 	}
 
 	@Test
@@ -136,6 +139,7 @@ class EmbeddedCassandraFactoryTests {
 	@Test
 	void getEnvironmentVariables() {
 		this.cassandraFactory.getEnvironmentVariables().put("key", "value");
+		this.cassandraFactory.setJavaHome(PathSupplier.NULL);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("environmentVariables", Collections.singletonMap("key", "value"));
@@ -195,7 +199,7 @@ class EmbeddedCassandraFactoryTests {
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",
-				Collections.singletonMap("cassandra.config", file.toUri().toURL().toString()));
+				Collections.singletonMap("cassandra.config", file.toUri().toURL()));
 
 	}
 
@@ -211,8 +215,8 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void testStoragePortSsl() {
-		this.cassandraFactory.setStorageSslPort(7001);
-		assertThat(this.cassandraFactory.getStorageSslPort()).isEqualTo(7001);
+		this.cassandraFactory.setSslStoragePort(7001);
+		assertThat(this.cassandraFactory.getSslStoragePort()).isEqualTo(7001);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",

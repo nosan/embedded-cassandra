@@ -17,11 +17,13 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.net.InetAddress;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
@@ -65,6 +67,21 @@ class EmbeddedCassandraTests {
 			doesNotContainSystemProperty("embedded.cassandra.port");
 			doesNotContainSystemProperty("embedded.cassandra.address");
 			assertStarted(cassandra, false);
+		});
+	}
+
+	@Test
+	void testSuccessWhenCustomCassandraYaml() throws Throwable {
+		URL configurationFile = getClass().getResource("/cassandra.yaml");
+		Objects.requireNonNull(configurationFile);
+		this.cassandraFactory.setConfigurationFile(configurationFile);
+		this.runner.run((cassandra, throwable) -> {
+			assertThat(throwable).isNull();
+			assertStarted(cassandra, true);
+			try (Cluster cluster = new ClusterFactory().create(cassandra)) {
+				createKeyspace(cluster.connect());
+			}
+			assertThat(cassandra.getPort()).isEqualTo(9142);
 		});
 	}
 
