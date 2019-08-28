@@ -154,8 +154,8 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 	 *
 	 * @param name name of Cassandra's instance
 	 */
-	public void setName(String name) {
-		this.name = Objects.requireNonNull(name, "'name' must not be null");
+	public void setName(@Nullable String name) {
+		this.name = name;
 	}
 
 	/**
@@ -174,8 +174,8 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 	 *
 	 * @param workingDirectory the working directory
 	 */
-	public void setWorkingDirectory(Path workingDirectory) {
-		this.workingDirectory = Objects.requireNonNull(workingDirectory, "'workingDirectory' must not be null");
+	public void setWorkingDirectory(@Nullable Path workingDirectory) {
+		this.workingDirectory = workingDirectory;
 	}
 
 	/**
@@ -198,8 +198,8 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 	 * @see ArchiveArtifact
 	 * @see DefaultArtifact
 	 */
-	public void setArtifact(Artifact artifact) {
-		this.artifact = Objects.requireNonNull(artifact, "'artifact' must not be null");
+	public void setArtifact(@Nullable Artifact artifact) {
+		this.artifact = artifact;
 	}
 
 	/**
