@@ -22,66 +22,66 @@
             <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra-junit5-test</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra-junit4-test</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra-testng-test</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra-spring-test</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-cassandra</artifactId>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
@@ -113,7 +113,7 @@
                                         <sourceDocumentExtension>index.adoc</sourceDocumentExtension>
                                     </sourceDocumentExtensions>
                                     <outputDirectory>${project.build.directory}/generated-docs/</outputDirectory>
-                                    <sourceHighlighter>highlight.js</sourceHighlighter>
+                                    <sourceHighlighter>coderay</sourceHighlighter>
                                     <doctype>book</doctype>
                                     <attributes>
                                         <highlightjs-theme>agate</highlightjs-theme>
@@ -148,6 +148,15 @@
                 <artifactId>maven-source-plugin</artifactId>
                 <configuration>
                     <skipSource>true</skipSource>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

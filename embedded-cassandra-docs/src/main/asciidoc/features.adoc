@@ -137,5 +137,5 @@ The following properties will be exposed as `System Properties` after Cassandra 
 include::{test-sources}/examples/configuration/CassandraExposedProperties.java[tag=source]
 ----
 
-TIP: Exposed properties can be disable by `EmbeddedCassandraFactory.setExposeProperties(false)`
+TIP: Exposed properties can be disabled by `EmbeddedCassandraFactory.setExposeProperties(false)`
 
