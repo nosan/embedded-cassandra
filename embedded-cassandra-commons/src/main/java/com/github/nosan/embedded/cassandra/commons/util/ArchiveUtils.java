@@ -47,21 +47,21 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
  */
 public final class ArchiveUtils {
 
-	private static final Map<String, FileType> ARCHIVES;
+	private static final Map<String, FileType> archives;
 
 	static {
-		Map<String, FileType> types = new LinkedHashMap<>();
-		types.put(".tar.gz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
-		types.put(".tar.bz2", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
-		types.put(".tar.xz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
-		types.put(".tbz2", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
-		types.put(".tgz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
-		types.put(".txz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
-		types.put(".jar", new FileType(ArchiveStreamFactory.JAR));
-		types.put(".tar", new FileType(ArchiveStreamFactory.TAR));
-		types.put(".zip", new FileType(ArchiveStreamFactory.ZIP));
-		types.put(".zipx", new FileType(ArchiveStreamFactory.ZIP));
-		ARCHIVES = Collections.unmodifiableMap(types);
+		Map<String, FileType> candidates = new LinkedHashMap<>();
+		candidates.put(".tar.gz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
+		candidates.put(".tar.bz2", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
+		candidates.put(".tar.xz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
+		candidates.put(".tbz2", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
+		candidates.put(".tgz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
+		candidates.put(".txz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
+		candidates.put(".jar", new FileType(ArchiveStreamFactory.JAR));
+		candidates.put(".tar", new FileType(ArchiveStreamFactory.TAR));
+		candidates.put(".zip", new FileType(ArchiveStreamFactory.ZIP));
+		candidates.put(".zipx", new FileType(ArchiveStreamFactory.ZIP));
+		archives = Collections.unmodifiableMap(candidates);
 	}
 
 	private ArchiveUtils() {
@@ -98,18 +98,18 @@ public final class ArchiveUtils {
 			}
 		}
 		catch (ArchiveException | CompressorException ex) {
-			throw new IOException(String.format("Can not create a stream for archive '%s'", archiveFile), ex);
+			throw new IOException(String.format("Can not create a stream for an archive '%s'", archiveFile), ex);
 		}
 	}
 
 	private static ArchiveInputStream createArchiveStream(Path archiveFile)
 			throws ArchiveException, CompressorException, IOException {
-		for (Map.Entry<String, FileType> entry : ARCHIVES.entrySet()) {
+		for (Map.Entry<String, FileType> entry : archives.entrySet()) {
 			if (archiveFile.getFileName().toString().endsWith(entry.getKey())) {
 				return entry.getValue().create(archiveFile);
 			}
 		}
-		throw new IllegalArgumentException(String.format("Archive '%s' is not supported", archiveFile));
+		throw new IllegalArgumentException(String.format("Archive File '%s' is not supported", archiveFile));
 	}
 
 	private abstract static class FileModeUtils {
@@ -119,17 +119,17 @@ public final class ArchiveUtils {
 		private static final Map<Integer, PosixFilePermission> permissions;
 
 		static {
-			Map<Integer, PosixFilePermission> values = new LinkedHashMap<>();
-			values.put(256, PosixFilePermission.OWNER_READ);
-			values.put(128, PosixFilePermission.OWNER_WRITE);
-			values.put(64, PosixFilePermission.OWNER_EXECUTE);
-			values.put(32, PosixFilePermission.GROUP_READ);
-			values.put(16, PosixFilePermission.GROUP_WRITE);
-			values.put(8, PosixFilePermission.GROUP_EXECUTE);
-			values.put(4, PosixFilePermission.OTHERS_READ);
-			values.put(2, PosixFilePermission.OTHERS_WRITE);
-			values.put(1, PosixFilePermission.OTHERS_EXECUTE);
-			permissions = Collections.unmodifiableMap(values);
+			Map<Integer, PosixFilePermission> candidates = new LinkedHashMap<>();
+			candidates.put(256, PosixFilePermission.OWNER_READ);
+			candidates.put(128, PosixFilePermission.OWNER_WRITE);
+			candidates.put(64, PosixFilePermission.OWNER_EXECUTE);
+			candidates.put(32, PosixFilePermission.GROUP_READ);
+			candidates.put(16, PosixFilePermission.GROUP_WRITE);
+			candidates.put(8, PosixFilePermission.GROUP_EXECUTE);
+			candidates.put(4, PosixFilePermission.OTHERS_READ);
+			candidates.put(2, PosixFilePermission.OTHERS_WRITE);
+			candidates.put(1, PosixFilePermission.OTHERS_EXECUTE);
+			permissions = Collections.unmodifiableMap(candidates);
 		}
 
 		static void set(ArchiveEntry entry, Path path) {
