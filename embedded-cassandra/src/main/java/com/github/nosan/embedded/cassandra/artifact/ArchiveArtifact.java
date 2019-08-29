@@ -21,8 +21,6 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import org.rauschig.jarchivelib.Archiver;
-import org.rauschig.jarchivelib.ArchiverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +28,7 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.FileLock;
 import com.github.nosan.embedded.cassandra.commons.PathSupplier;
+import com.github.nosan.embedded.cassandra.commons.util.ArchiveUtils;
 import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 
 /**
@@ -138,9 +137,8 @@ public class ArchiveArtifact implements Artifact {
 				if (archiveFile == null) {
 					throw new IllegalStateException("Archive file must not be null");
 				}
-				Archiver archiver = ArchiverFactory.createArchiver(archiveFile.toFile());
 				log.info("Extracts '{}' file into '{}' directory", archiveFile, archiveDir);
-				archiver.extract(archiveFile.toFile(), archiveDir.toFile());
+				ArchiveUtils.extract(archiveFile, archiveDir);
 				Resource resource = artifact.getResource();
 				FileUtils.createIfNotExists(archiveDir.resolve(".extracted"));
 				return resource;
