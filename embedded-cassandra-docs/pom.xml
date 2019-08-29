@@ -115,9 +115,6 @@
                                     <outputDirectory>${project.build.directory}/generated-docs/</outputDirectory>
                                     <sourceHighlighter>coderay</sourceHighlighter>
                                     <doctype>book</doctype>
-                                    <attributes>
-                                        <highlightjs-theme>agate</highlightjs-theme>
-                                    </attributes>
                                 </configuration>
                             </execution>
                         </executions>
