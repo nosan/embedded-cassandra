@@ -53,10 +53,8 @@ public final class ArchiveUtils {
 		Map<String, FileType> candidates = new LinkedHashMap<>();
 		candidates.put(".tar.gz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
 		candidates.put(".tar.bz2", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
-		candidates.put(".tar.xz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
 		candidates.put(".tbz2", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
 		candidates.put(".tgz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
-		candidates.put(".txz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.XZ));
 		candidates.put(".jar", new FileType(ArchiveStreamFactory.JAR));
 		candidates.put(".tar", new FileType(ArchiveStreamFactory.TAR));
 		candidates.put(".zip", new FileType(ArchiveStreamFactory.ZIP));

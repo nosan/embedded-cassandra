@@ -147,8 +147,7 @@ abstract class AbstractNode implements Node {
 	}
 
 	private void randomizePort(Map<String, Object> properties, String name) throws IOException {
-		Object port = properties.get(name);
-		if (!Objects.toString(port, "").trim().equals("0")) {
+		if (!Objects.toString(properties.get(name), "").trim().equals("0")) {
 			return;
 		}
 		try (ServerSocket ss = new ServerSocket(0)) {
