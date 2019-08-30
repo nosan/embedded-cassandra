@@ -88,6 +88,7 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  *
  * @author Dmytro Nosan
  * @see EmbeddedCassandraFactory
+ * @see CassandraFactoryCustomizer
  * @since 3.0.0
  */
 public class CassandraExtension implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
