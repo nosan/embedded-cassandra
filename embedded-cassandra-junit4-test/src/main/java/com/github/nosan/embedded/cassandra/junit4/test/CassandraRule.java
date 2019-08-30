@@ -34,7 +34,39 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * with a {@code Rule} annotation will be started and stopped for every test method.
  * <p>Example:
  * <pre>
- * class MyCassandraTests {
+ * class CassandraTests {
+ *
+ *     &#64;ClassRule
+ *     public static final CassandraRule cassandraRule = new CassandraRule();
+ *
+ *     &#64;Test
+ *     public void test() {
+ *       Cassandra cassandra = cassandraRule.getCassandra();
+ *       //
+ *     }
+ * }
+ * </pre>
+ * Default {@link EmbeddedCassandraFactory} could be customized via {@link CassandraFactoryCustomizer
+ * CassandraFactoryCustomizers}.
+ * <p>Example:
+ * <pre>
+ * class CassandraTests {
+ *
+ *     &#64;ClassRule
+ *     public static final CassandraRule cassandraRule = new CassandraRule(factory -&gt; factory.setPort(9042));
+ *
+ *     &#64;Test
+ *     public void test() {
+ *       Cassandra cassandra = cassandraRule.getCassandra();
+ *       //
+ *     }
+ * }
+ * </pre>
+ *
+ * It is possible to register you own factory to control Cassandra instance.
+ * <p>Example:
+ * <pre>
+ * class CassandraTests {
  *
  *     &#64;ClassRule
  *     public static final CassandraRule cassandraRule = new CassandraRule(createCassandraFactory());

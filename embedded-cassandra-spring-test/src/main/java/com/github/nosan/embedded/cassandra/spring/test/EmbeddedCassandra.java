@@ -38,10 +38,19 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * &#64;ExtendWith(SpringExtension.class)
  * class CassandraTests {
  *
- *
- *      &#64;BeforeAll
- *      static void prepare(@Autowired Cassandra cassandra) {
+ *      &#64;Test
+ *      void test(&#64;Autowired Cassandra cassandra) {
  *      }
+ * }
+ * </pre>
+ * It is possible to register you own factory to control Cassandra instance.
+ * <p>Example:
+ * <pre>
+ * &#64;EmbeddedCassandra
+ * &#64;ExtendWith(SpringExtension.class)
+ * class CassandraTests {
+ *
+ *
  *
  *      &#64;Test
  *      void test(&#64;Autowired Cassandra cassandra) {
@@ -67,9 +76,6 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * &#64;ExtendWith(SpringExtension.class)
  * class CassandraTests {
  *
- *      &#64;BeforeAll
- *      static void prepare(@Autowired Cassandra cassandra) {
- *      }
  *
  *      &#64;Test
  *      void test(&#64;Autowired Cassandra cassandra) {

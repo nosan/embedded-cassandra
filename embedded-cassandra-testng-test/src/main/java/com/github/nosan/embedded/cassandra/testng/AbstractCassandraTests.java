@@ -32,9 +32,39 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * the last test method has executed.
  * <p>Example:
  * <pre>
- * class MyCassandraTests extends AbstractCassandraTests {
+ * class CassandraTests extends AbstractCassandraTests {
  *
- *     public MyCassandraTests(){
+ *     &#64;Test
+ *     public void test() {
+ *        Cassandra cassandra = getCassandra();
+ *        //
+ *     }
+ *
+ * }
+ * </pre>
+ * Default {@link EmbeddedCassandraFactory} could be customized via {@link CassandraFactoryCustomizer
+ * CassandraFactoryCustomizers}.
+ * <pre>
+ * class CassandraTests extends AbstractCassandraTests {
+ *
+ *     public CassandraTests(){
+ *         super(factory -&gt; factory.setPort(9042));
+ *     }
+ *
+ *     &#64;Test
+ *     public void test() {
+ *        Cassandra cassandra = getCassandra();
+ *        //
+ *     }
+ *
+ * }
+ * </pre>
+ * It is possible to register you own factory to control Cassandra instance.
+ * <p>Example:
+ * <pre>
+ * class CassandraTests extends AbstractCassandraTests {
+ *
+ *     public CassandraTests(){
  *         super(createCassandraFactory());
  *     }
  *

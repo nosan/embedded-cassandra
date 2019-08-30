@@ -52,7 +52,22 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * be used to register an extension programmatically to pass arguments to the {@code CassandraExtension's} constructor.
  * <p>Example:</p>
  * <pre>
- * class MyCassandraTests {
+ * class CassandraTests {
+ *
+ *     &#64;RegisterExtension
+ *     static final CassandraExtension cassandraExtension = new CassandraExtension(factory -&gt; factory.setPort(9042));
+ *
+ *     &#64;Test
+ *     void test() {
+ *      Cassandra cassandra = cassandraExtension.getCassandra();
+ *      //
+ *     }
+ * }
+ * </pre>
+ * It is possible to register you own factory to control Cassandra instance.
+ * <p>Example:</p>
+ * <pre>
+ * class CassandraTests {
  *
  *     &#64;RegisterExtension
  *     static final CassandraExtension cassandraExtension = new CassandraExtension(createCassandraFactory());
