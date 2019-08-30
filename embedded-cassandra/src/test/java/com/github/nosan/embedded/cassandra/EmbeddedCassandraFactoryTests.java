@@ -251,4 +251,15 @@ class EmbeddedCassandraFactoryTests {
 		assertThat(hooks.keySet()).anyMatch(thread -> thread.getName().equals("myname-sh"));
 	}
 
+	@Test
+	void tetRandom() {
+		EmbeddedCassandraFactory cassandraFactory = EmbeddedCassandraFactory.random();
+		assertThat(cassandraFactory.getPort()).isEqualTo(0);
+		assertThat(cassandraFactory.getRpcPort()).isEqualTo(0);
+		assertThat(cassandraFactory.getStoragePort()).isEqualTo(0);
+		assertThat(cassandraFactory.getJmxLocalPort()).isEqualTo(0);
+		assertThat(cassandraFactory.getSslStoragePort()).isEqualTo(0);
+		assertThat(cassandraFactory.getSslPort()).isNull();
+	}
+
 }
