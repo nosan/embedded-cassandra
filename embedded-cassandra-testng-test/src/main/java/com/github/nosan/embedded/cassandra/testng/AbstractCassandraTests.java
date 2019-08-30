@@ -132,7 +132,7 @@ public abstract class AbstractCassandraTests {
 	 */
 	@BeforeClass(alwaysRun = true)
 	public final void startCassandra() {
-		this.cassandra.start();
+		getCassandra().start();
 	}
 
 	/**
@@ -140,7 +140,7 @@ public abstract class AbstractCassandraTests {
 	 */
 	@AfterClass(alwaysRun = true)
 	public final void stopCassandra() {
-		this.cassandra.stop();
+		getCassandra().stop();
 	}
 
 	/**
@@ -153,7 +153,7 @@ public abstract class AbstractCassandraTests {
 	}
 
 	public String toString() {
-		return "AbstractCassandraTests [" + this.cassandra + "]";
+		return "AbstractCassandraTests [" + getCassandra() + "]";
 	}
 
 }

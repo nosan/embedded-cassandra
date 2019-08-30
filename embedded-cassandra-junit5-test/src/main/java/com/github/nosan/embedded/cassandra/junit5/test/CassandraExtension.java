@@ -133,12 +133,12 @@ public class CassandraExtension implements BeforeAllCallback, AfterAllCallback, 
 
 	@Override
 	public void beforeAll(ExtensionContext context) {
-		this.cassandra.start();
+		getCassandra().start();
 	}
 
 	@Override
 	public void afterAll(ExtensionContext context) {
-		this.cassandra.stop();
+		getCassandra().stop();
 	}
 
 	@Override
@@ -152,7 +152,7 @@ public class CassandraExtension implements BeforeAllCallback, AfterAllCallback, 
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
-		return this.cassandra;
+		return getCassandra();
 	}
 
 	/**
@@ -166,7 +166,7 @@ public class CassandraExtension implements BeforeAllCallback, AfterAllCallback, 
 
 	@Override
 	public String toString() {
-		return "CassandraExtension [" + this.cassandra + "]";
+		return "CassandraExtension [" + getCassandra() + "]";
 	}
 
 }

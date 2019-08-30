@@ -132,17 +132,16 @@ public class CassandraRule implements TestRule {
 
 	@Override
 	public Statement apply(Statement base, Description description) {
-		Cassandra cassandra = this.cassandra;
 		return new Statement() {
 
 			@Override
 			public void evaluate() throws Throwable {
-				cassandra.start();
+				getCassandra().start();
 				try {
 					base.evaluate();
 				}
 				finally {
-					cassandra.stop();
+					getCassandra().stop();
 				}
 			}
 		};
@@ -159,7 +158,7 @@ public class CassandraRule implements TestRule {
 
 	@Override
 	public String toString() {
-		return "CassandraRule [" + this.cassandra + "]";
+		return "CassandraRule [" + getCassandra() + "]";
 	}
 
 }
