@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
 
 /**
  * Annotation that allows the {@link Cassandra} to be started and stopped. Cassandra will be registered as a bean named
@@ -35,13 +36,15 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
  * <pre>
  * &#64;EmbeddedCassandra
  * &#64;ExtendWith(SpringExtension.class)
- * class EmbeddedCassandraTests {
+ * class CassandraTests {
  *
- *      &#64;Autowired
- *      private Cassandra cassandra;
+ *
+ *      &#64;BeforeAll
+ *      static void prepare(@Autowired Cassandra cassandra) {
+ *      }
  *
  *      &#64;Test
- *      void test() {
+ *      void test(&#64;Autowired Cassandra cassandra) {
  *      }
  *
  *      &#64;Configuration
@@ -56,9 +59,36 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
  *     }
  * }
  * </pre>
+ * Additional to the above, there is also possible to register {@link CassandraFactoryCustomizer} beans to customize a
+ * default {@link EmbeddedCassandraFactory} before the {@link Cassandra} itself is started.
+ * <p>Example:
+ * <pre>
+ * &#64;EmbeddedCassandra
+ * &#64;ExtendWith(SpringExtension.class)
+ * class CassandraTests {
+ *
+ *      &#64;BeforeAll
+ *      static void prepare(@Autowired Cassandra cassandra) {
+ *      }
+ *
+ *      &#64;Test
+ *      void test(&#64;Autowired Cassandra cassandra) {
+ *      }
+ *
+ *      &#64;Configuration
+ *      static class TestConfig {
+ *
+ *         &#64;Bean
+ *         public CassandraFactoryCustomizer&lt;EmbeddedCassandraFactory&gt; versionCustomizer() {
+ *            return cassandraFactory -&gt; cassandraFactory.setArtifact(Artifact.of("3.0.0"));
+ *         }
+ *     }
+ * }
+ * </pre>
  *
  * @author Dmytro Nosan
  * @see EmbeddedCassandraFactory
+ * @see CassandraFactoryCustomizer
  * @since 3.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)

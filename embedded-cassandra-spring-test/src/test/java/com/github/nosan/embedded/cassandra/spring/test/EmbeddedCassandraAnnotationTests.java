@@ -14,42 +14,42 @@
  * limitations under the License.
  */
 
-package examples.spring.configuration;
+package com.github.nosan.embedded.cassandra.spring.test;
 
-// tag::source[]
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.api.CassandraFactory;
-import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Tests for {@link EmbeddedCassandra}.
+ *
+ * @author Dmytro Nosan
+ */
 @EmbeddedCassandra
 @ExtendWith(SpringExtension.class)
-class CassandraTests {
+class EmbeddedCassandraAnnotationTests {
 
-	@Test
-	void testCassandra(@Autowired Cassandra cassandra) {
-		//
+	private final Cassandra cassandra;
+
+	EmbeddedCassandraAnnotationTests(@Autowired Cassandra cassandra) {
+		this.cassandra = cassandra;
 	}
 
-	@Configuration
-	static class TestConfig {
-
-		@Bean
-		CassandraFactory cassandraFactory() {
-			EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-			//customize cassandra factory
-			return cassandraFactory;
+	@Test
+	void testCassandra() throws Exception {
+		assertThat(this.cassandra.getPort()).isNotEqualTo(-1);
+		assertThat(this.cassandra.getAddress()).isNotNull();
+		try (Socket socket = new Socket()) {
+			socket.connect(new InetSocketAddress(this.cassandra.getAddress(), this.cassandra.getPort()));
 		}
-
 	}
 
 }
-// end::source[]

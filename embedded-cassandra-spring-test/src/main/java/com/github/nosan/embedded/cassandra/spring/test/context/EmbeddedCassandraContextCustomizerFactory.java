@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.spring.test;
+package com.github.nosan.embedded.cassandra.spring.test.context;
 
 import java.util.List;
 
@@ -24,6 +24,7 @@ import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
+import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 /**
  * {@link ContextCustomizerFactory} to support {@link EmbeddedCassandra} annotation.

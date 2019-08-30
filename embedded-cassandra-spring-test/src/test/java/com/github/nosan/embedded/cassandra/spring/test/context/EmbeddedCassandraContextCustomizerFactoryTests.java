@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.spring.test;
+package com.github.nosan.embedded.cassandra.spring.test.context;
 
 import java.util.Collections;
 
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextCustomizer;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
+import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

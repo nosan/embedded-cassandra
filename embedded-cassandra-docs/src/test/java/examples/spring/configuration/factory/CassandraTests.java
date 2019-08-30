@@ -14,39 +14,42 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.spring.test;
+package examples.spring.configuration.factory;
+
+// tag::source[]
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.mock.MockCassandra;
-import com.github.nosan.embedded.cassandra.mock.MockCassandraFactory;
+import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Tests for {@link EmbeddedCassandra}.
- *
- * @author Dmytro Nosan
- */
 @EmbeddedCassandra
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = MockCassandraFactory.class)
-class EmbeddedCassandraCustomFactoryTests {
-
-	private final Cassandra cassandra;
-
-	EmbeddedCassandraCustomFactoryTests(@Autowired Cassandra cassandra) {
-		this.cassandra = cassandra;
-	}
+class CassandraTests {
 
 	@Test
-	void testCustomFactory() {
-		assertThat(this.cassandra).isEqualTo(MockCassandra.INSTANCE);
+	void testCassandra(@Autowired Cassandra cassandra) {
+		//
+	}
+
+	@Configuration
+	static class TestConfig {
+
+		@Bean
+		CassandraFactory cassandraFactory() {
+			EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+			//customize cassandra factory
+			return cassandraFactory;
+		}
+
 	}
 
 }
+// end::source[]

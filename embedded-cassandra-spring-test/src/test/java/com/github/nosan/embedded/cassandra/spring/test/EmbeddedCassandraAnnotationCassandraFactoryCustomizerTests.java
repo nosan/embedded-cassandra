@@ -16,40 +16,41 @@
 
 package com.github.nosan.embedded.cassandra.spring.test;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandra}.
+ * Tests for {@link EmbeddedCassandra} with a custom {@link CassandraFactoryCustomizer}.
  *
  * @author Dmytro Nosan
  */
 @EmbeddedCassandra
 @ExtendWith(SpringExtension.class)
-class EmbeddedCassandraTests {
-
-	private final Cassandra cassandra;
-
-	EmbeddedCassandraTests(@Autowired Cassandra cassandra) {
-		this.cassandra = cassandra;
-	}
+class EmbeddedCassandraAnnotationCassandraFactoryCustomizerTests {
 
 	@Test
-	void testCassandra() throws Exception {
-		assertThat(this.cassandra.getPort()).isNotEqualTo(-1);
-		assertThat(this.cassandra.getAddress()).isNotNull();
-		try (Socket socket = new Socket()) {
-			socket.connect(new InetSocketAddress(this.cassandra.getAddress(), this.cassandra.getPort()));
+	void test(@Autowired Cassandra cassandra) {
+		assertThat(cassandra.getPort()).isEqualTo(9042);
+	}
+
+	@Configuration
+	static class TestConfig {
+
+		@Bean
+		public CassandraFactoryCustomizer<EmbeddedCassandraFactory> portFactoryCustomizer() {
+			return cassandraFactory -> cassandraFactory.setPort(9042);
 		}
+
 	}
 
 }
