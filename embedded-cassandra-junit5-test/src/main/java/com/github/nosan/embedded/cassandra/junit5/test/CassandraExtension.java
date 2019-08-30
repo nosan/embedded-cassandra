@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
 
 /**
  * JUnit5 {@link RegisterExtension Extension} that allows the Cassandra to be {@link Cassandra#start() started} and
@@ -83,11 +84,24 @@ public class CassandraExtension implements BeforeAllCallback, AfterAllCallback, 
 	 * EmbeddedCassandraFactory} which is configured to use random ports.
 	 */
 	public CassandraExtension() {
-		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setPort(0);
-		cassandraFactory.setRpcPort(0);
-		cassandraFactory.setJmxLocalPort(0);
-		cassandraFactory.setStoragePort(0);
+		this(EmbeddedCassandraFactory.random());
+	}
+
+	/**
+	 * Constructs a new {@link CassandraExtension} with a default {@link CassandraFactory} with the specified {@link
+	 * CassandraFactoryCustomizer CassandraFactoryCustomizers}. Defaults to {@link EmbeddedCassandraFactory} which is
+	 * configured to use random ports.
+	 *
+	 * @param customizers Any instances of this type will get a callback with the {@link EmbeddedCassandraFactory}
+	 * before the {@link Cassandra} itself is started
+	 */
+	@SafeVarargs
+	public CassandraExtension(CassandraFactoryCustomizer<? super EmbeddedCassandraFactory>... customizers) {
+		Objects.requireNonNull(customizers, "'customizers' must not be null");
+		EmbeddedCassandraFactory cassandraFactory = EmbeddedCassandraFactory.random();
+		for (CassandraFactoryCustomizer<? super EmbeddedCassandraFactory> customizer : customizers) {
+			customizer.customize(cassandraFactory);
+		}
 		this.cassandra = cassandraFactory.create();
 	}
 

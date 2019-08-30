@@ -19,14 +19,19 @@ WARNING: `CassandraExtension` configures Cassandra on the random ports.
 
 In contrast to `@ExtendWith` which is used to register extensions declaratively, `@RegisterExtension`
 can be used to register an extension programmatically to pass arguments to the `CassandraExtension's` constructor.
-In the following example, there is a showcase of how to change Cassandra's version.
+In the following example, there is a showcase of how to change Cassandra's port using (`CassandraFactoryCustomizer<T>`) customizers.
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/junit5/configuration/CassandraTests.java[tag=source]
+include::{test-sources}/examples/junit5/configuration/customizer/CassandraTests.java[tag=source]
 ----
 
-WARNING: `CassandraExtension` with a default constructor configures Cassandra on the random ports.
+Besides that, custom `CassandraFactory` also can be used to control the `Cassandra` instance.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/junit5/configuration/factory/CassandraTests.java[tag=source]
+----
 
 [[testing-junit4]]
 == Using JUnit4
@@ -42,12 +47,18 @@ include::{test-sources}/examples/junit4/CassandraTests.java[tag=source]
 
 WARNING: `CassandraRule` with a default constructor configures Cassandra on the random ports.
 
-`CassandraRule` could be customized via constructor.
-Here is a small example of how to override a logger:
+Default `CassandraFactory` can be customized via (`CassandraFactoryCustomizer<T>`) customizers.
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/junit4/configuration/CassandraTests.java[tag=source]
+include::{test-sources}/examples/junit4/configuration/customizer/CassandraTests.java[tag=source]
+----
+
+There is also possible to use your own `CassandraFactory`. Just pass it to the constructor.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/junit4/configuration/factory/CassandraTests.java[tag=source]
 ----
 
 [[testing-testng]]
@@ -64,11 +75,18 @@ include::{test-sources}/examples/testng/CassandraTests.java[tag=source]
 
 WARNING: `AbstractCassandraTests` with a default constructor configures Cassandra on the random ports.
 
+`AbstractCassandraTests` also provides a way to customize a default `CassandraFactory` via (`CassandraFactoryCustomizer<T>`) customizers.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/testng/configuration/customizer/CassandraTests.java[tag=source]
+----
+
 The same as for `JUnit4` and `JUnit5` it is possible to set your own `CassandraFactory` through the constructor.
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/testng/configuration/CassandraTests.java[tag=source]
+include::{test-sources}/examples/testng/configuration/factory/CassandraTests.java[tag=source]
 ----
 
 [[testing-spring]]

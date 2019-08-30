@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-package examples.configuration;
+package examples.junit5.configuration.customizer;
+// tag::source[]
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
-public class CassandraMoreOneInstance {
+class CassandraTests {
 
-	void source() {
-		// tag::source[]
-		EmbeddedCassandraFactory cassandraFactory = EmbeddedCassandraFactory.random();
+	@RegisterExtension
+	static final CassandraExtension extension =
+			new CassandraExtension(cassandraFactory -> cassandraFactory.setPort(9042));
 
-		Cassandra cassandra1 = cassandraFactory.create();
-		Cassandra cassandra2 = cassandraFactory.create();
-
-		cassandra1.start();
-		cassandra2.start();
-
-		try {
-			//...
-		}
-		finally {
-			cassandra1.stop();
-			cassandra2.stop();
-		}
-		// end::source[]
+	@Test
+	void test() {
+		Cassandra cassandra = extension.getCassandra();
+		//cassandra.getPort() == 9042
 	}
 
 }
+
+// end::source[]
+

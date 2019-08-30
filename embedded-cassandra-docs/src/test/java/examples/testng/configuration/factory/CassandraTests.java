@@ -14,31 +14,34 @@
  * limitations under the License.
  */
 
-package examples.configuration;
+package examples.testng.configuration.factory;
+// tag::source[]
+
+import org.testng.annotations.Test;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.testng.AbstractCassandraTests;
 
-public class CassandraMoreOneInstance {
+public class CassandraTests extends AbstractCassandraTests {
 
-	void source() {
-		// tag::source[]
-		EmbeddedCassandraFactory cassandraFactory = EmbeddedCassandraFactory.random();
+	public CassandraTests() {
+		super(createCassandraFactory());
+	}
 
-		Cassandra cassandra1 = cassandraFactory.create();
-		Cassandra cassandra2 = cassandraFactory.create();
+	@Test
+	public void test() {
+		Cassandra cassandra = getCassandra();
+		//
+	}
 
-		cassandra1.start();
-		cassandra2.start();
-
-		try {
-			//...
-		}
-		finally {
-			cassandra1.stop();
-			cassandra2.stop();
-		}
-		// end::source[]
+	private static CassandraFactory createCassandraFactory() {
+		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+		cassandraFactory.setPort(0);
+		return cassandraFactory;
 	}
 
 }
+
+// end::source[]

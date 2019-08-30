@@ -14,31 +14,26 @@
  * limitations under the License.
  */
 
-package examples.configuration;
+package examples.junit4.configuration.customizer;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+// tag::source[]
+
+import org.junit.ClassRule;
+import org.junit.Test;
+
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.junit4.test.CassandraRule;
 
-public class CassandraMoreOneInstance {
+public class CassandraTests {
 
-	void source() {
-		// tag::source[]
-		EmbeddedCassandraFactory cassandraFactory = EmbeddedCassandraFactory.random();
+	@ClassRule
+	public static final CassandraRule rule = new CassandraRule(cassandraFactory -> cassandraFactory.setPort(9042));
 
-		Cassandra cassandra1 = cassandraFactory.create();
-		Cassandra cassandra2 = cassandraFactory.create();
-
-		cassandra1.start();
-		cassandra2.start();
-
-		try {
-			//...
-		}
-		finally {
-			cassandra1.stop();
-			cassandra2.stop();
-		}
-		// end::source[]
+	@Test
+	public void testCassandra() {
+		Cassandra cassandra = rule.getCassandra();
+		//cassandra.getPort() == 9042
 	}
 
 }
+// end::source[]

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package examples.junit4.configuration;
+package examples.junit4.configuration.factory;
 
 // tag::source[]
 
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
@@ -40,7 +39,7 @@ public class CassandraTests {
 
 	private static CassandraFactory createCassandraFactory() {
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setLogger(LoggerFactory.getLogger("mylogger"));
+		//configure me
 		return cassandraFactory;
 	}
 

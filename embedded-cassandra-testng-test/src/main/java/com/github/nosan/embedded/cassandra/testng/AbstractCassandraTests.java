@@ -24,6 +24,7 @@ import org.testng.annotations.BeforeClass;
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
 
 /**
  * Abstract TestNG {@code class} that allows the Cassandra to be {@link Cassandra#start() started} and {@link
@@ -53,6 +54,7 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactory;
  *
  * @author Dmytro Nosan
  * @see EmbeddedCassandraFactory
+ * @see CassandraFactoryCustomizer
  * @since 3.0.0
  */
 public abstract class AbstractCassandraTests {
@@ -64,11 +66,24 @@ public abstract class AbstractCassandraTests {
 	 * EmbeddedCassandraFactory} which is configured to use random ports.
 	 */
 	public AbstractCassandraTests() {
-		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setPort(0);
-		cassandraFactory.setRpcPort(0);
-		cassandraFactory.setJmxLocalPort(0);
-		cassandraFactory.setStoragePort(0);
+		this(EmbeddedCassandraFactory.random());
+	}
+
+	/**
+	 * Constructs a new {@link AbstractCassandraTests} with a default {@link CassandraFactory} with the specified {@link
+	 * CassandraFactoryCustomizer CassandraFactoryCustomizers}. Defaults to {@link EmbeddedCassandraFactory} which is
+	 * configured to use random ports.
+	 *
+	 * @param customizers Any instances of this type will get a callback with the {@link EmbeddedCassandraFactory}
+	 * before the {@link Cassandra} itself is started
+	 */
+	@SafeVarargs
+	public AbstractCassandraTests(CassandraFactoryCustomizer<? super EmbeddedCassandraFactory>... customizers) {
+		Objects.requireNonNull(customizers, "'customizers' must not be null");
+		EmbeddedCassandraFactory cassandraFactory = EmbeddedCassandraFactory.random();
+		for (CassandraFactoryCustomizer<? super EmbeddedCassandraFactory> customizer : customizers) {
+			customizer.customize(cassandraFactory);
+		}
 		this.cassandra = cassandraFactory.create();
 	}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package examples.junit5.configuration;
+package examples.junit5.configuration.factory;
 // tag::source[]
 
 import org.junit.jupiter.api.Test;
