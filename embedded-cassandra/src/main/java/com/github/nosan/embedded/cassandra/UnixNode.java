@@ -40,14 +40,14 @@ class UnixNode extends AbstractNode {
 
 	private final Path workingDirectory;
 
-	private final boolean allowRoot;
+	private final boolean rootAllowed;
 
 	UnixNode(Version version, Path workingDirectory, List<String> jvmOptions, Map<String, Object> systemProperties,
-			Map<String, Object> environmentVariables, Map<String, Object> properties, boolean allowRoot) {
+			Map<String, Object> environmentVariables, Map<String, Object> properties, boolean rootAllowed) {
 		super(workingDirectory, properties, jvmOptions, systemProperties, environmentVariables);
 		this.version = version;
 		this.workingDirectory = workingDirectory;
-		this.allowRoot = allowRoot;
+		this.rootAllowed = rootAllowed;
 	}
 
 	@Override
@@ -58,7 +58,7 @@ class UnixNode extends AbstractNode {
 			executableFile.toFile().setExecutable(true);
 		}
 		runProcess.setArguments(executableFile, "-f");
-		if (this.allowRoot && this.version.compareTo(Version.of("3.1")) > 0) {
+		if (this.rootAllowed && this.version.compareTo(Version.of("3.1")) > 0) {
 			runProcess.addArguments("-R");
 		}
 		return new UnixProcess(workDir, runProcess.start());
