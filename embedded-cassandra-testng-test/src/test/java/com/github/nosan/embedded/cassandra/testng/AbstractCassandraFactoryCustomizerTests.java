@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AbstractCassandraFactoryCustomizerTests extends AbstractCassandraTests {
 
 	public AbstractCassandraFactoryCustomizerTests() {
-		super(cassandraFactory -> cassandraFactory.setPort(0));
+		super(cassandraFactory -> cassandraFactory.setPort(9042));
 	}
 
 	@Test
