@@ -117,7 +117,7 @@ class EmbeddedCassandraFactoryTests {
 		this.cassandraFactory.setRootAllowed(true);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
-		assertThat(node).hasFieldOrPropertyWithValue("allowRoot", true);
+		assertThat(node).hasFieldOrPropertyWithValue("rootAllowed", true);
 	}
 
 	@Test
