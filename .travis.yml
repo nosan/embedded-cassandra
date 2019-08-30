@@ -33,6 +33,7 @@ jobs:
       os: linux
       script:
         - ./mvnw clean verify -Pdocs
+      after_success:
         - rm -rf $HOME/docs
         - cp -a embedded-cassandra-docs/target/generated-docs/. $HOME/docs
       after_failure: ./surefire-reports.sh
