@@ -18,6 +18,8 @@ package examples.junit4;
 
 // tag::source[]
 
+import com.datastax.driver.core.Cluster;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -28,6 +30,16 @@ public class CassandraTests {
 
 	@ClassRule
 	public static final CassandraRule rule = new CassandraRule();
+
+	@BeforeClass
+	public static void prepare() {
+		Cassandra cassandra = rule.getCassandra();
+		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(cassandra.getPort())
+				.build()) {
+			cluster.connect().execute(
+					"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
+		}
+	}
 
 	@Test
 	public void testCassandra() {

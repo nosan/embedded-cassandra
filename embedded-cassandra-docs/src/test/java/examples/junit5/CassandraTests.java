@@ -17,6 +17,8 @@
 package examples.junit5;
 // tag::source[]
 
+import com.datastax.driver.core.Cluster;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -25,6 +27,15 @@ import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
 @ExtendWith(CassandraExtension.class)
 class CassandraTests {
+
+	@BeforeAll
+	static void prepare(Cassandra cassandra) {
+		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(cassandra.getPort())
+				.build()) {
+			cluster.connect().execute(
+					"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
+		}
+	}
 
 	@Test
 	void test(Cassandra cassandra) {

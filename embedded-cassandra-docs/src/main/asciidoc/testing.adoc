@@ -121,17 +121,3 @@ Additional to the above, there is also possible to register `CassandraFactoryCus
 ----
 include::{test-sources}/examples/spring/configuration/customizer/CassandraTests.java[tag=source]
 ----
-
-[[testing-spring-boot]]
-=== Using Spring Boot Test
-
-There is no much difference between `Spring Boot Test` and `Spring Test`, hence, to run Cassandra, `@EmbeddedCassandra` can be used.
-
-[source,java,indent=0]
-----
-include::{test-sources}/examples/spring/boot/CassandraTests.java[tag=source]
-----
-
-TIP: `${embedded.cassandra.port`} and `${embedded.cassandra.address}` properties are exposed by `EmbeddedCassandra`.
-
-TIP: `@SpringBootTest(properties=)` can be replaced with  `application.yml` or `application.properties`.
