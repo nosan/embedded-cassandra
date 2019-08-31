@@ -5,11 +5,8 @@ environment:
   matrix:
     - JAVA_HOME: C:/Program Files/Java/jdk1.8.0
 
-before_build:
-  - mvnw.cmd clean verify -B -V -DskipTests
-
 build_script:
-  - mvnw.cmd clean verify
+  - mvnw.cmd clean verify -B -V
 
 on_failure:
   - ps: |

@@ -32,14 +32,14 @@ jobs:
     - stage: test
       os: linux
       script:
-        - ./mvnw clean verify -Pdocs
+        - ./mvnw clean verify -B -V -Pdocs
       after_success:
         - rm -rf $HOME/docs
         - cp -a embedded-cassandra-docs/target/generated-docs/. $HOME/docs
       after_failure: ./surefire-reports.sh
     - os: osx
       script:
-        - ./mvnw clean verify -Pdocs
+        - ./mvnw clean verify -B -V -Pdocs
       after_failure: ./surefire-reports.sh
     - stage: deploy
       os: linux
