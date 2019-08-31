@@ -22,6 +22,7 @@ import java.net.Socket;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @EmbeddedCassandra
 @ExtendWith(SpringExtension.class)
+@DirtiesContext
 class EmbeddedCassandraAnnotationTests {
 
 	private final Cassandra cassandra;

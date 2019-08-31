@@ -90,7 +90,7 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * @see CassandraFactoryCustomizer
  * @since 3.0.0
  */
-public class CassandraRule implements TestRule {
+public final class CassandraRule implements TestRule {
 
 	private final Cassandra cassandra;
 
@@ -132,16 +132,17 @@ public class CassandraRule implements TestRule {
 
 	@Override
 	public Statement apply(Statement base, Description description) {
+		Cassandra cassandra = this.cassandra;
 		return new Statement() {
 
 			@Override
 			public void evaluate() throws Throwable {
-				getCassandra().start();
+				cassandra.start();
 				try {
 					base.evaluate();
 				}
 				finally {
-					getCassandra().stop();
+					cassandra.stop();
 				}
 			}
 		};
@@ -152,13 +153,13 @@ public class CassandraRule implements TestRule {
 	 *
 	 * @return the cassandra
 	 */
-	public final Cassandra getCassandra() {
+	public Cassandra getCassandra() {
 		return this.cassandra;
 	}
 
 	@Override
 	public String toString() {
-		return "CassandraRule [" + getCassandra() + "]";
+		return "CassandraRule [" + this.cassandra + "]";
 	}
 
 }

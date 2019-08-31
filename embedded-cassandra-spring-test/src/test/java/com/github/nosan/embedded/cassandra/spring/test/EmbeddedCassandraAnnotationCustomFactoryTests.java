@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.spring.test;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -37,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EmbeddedCassandra
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = MockCassandraFactory.class)
+@DirtiesContext
 class EmbeddedCassandraAnnotationCustomFactoryTests {
 
 	private final Cassandra cassandra;

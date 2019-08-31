@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.junit5.test;
 
-import java.lang.reflect.Parameter;
 import java.util.Objects;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -91,7 +90,7 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * @see CassandraFactoryCustomizer
  * @since 3.0.0
  */
-public class CassandraExtension implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
+public final class CassandraExtension implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
 
 	private final Cassandra cassandra;
 
@@ -133,26 +132,24 @@ public class CassandraExtension implements BeforeAllCallback, AfterAllCallback, 
 
 	@Override
 	public void beforeAll(ExtensionContext context) {
-		getCassandra().start();
+		this.cassandra.start();
 	}
 
 	@Override
 	public void afterAll(ExtensionContext context) {
-		getCassandra().stop();
+		this.cassandra.stop();
 	}
 
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
-		Parameter parameter = parameterContext.getParameter();
-		Class<?> type = parameter.getType();
-		return type.isAssignableFrom(Cassandra.class);
+		return parameterContext.getParameter().getType().isAssignableFrom(Cassandra.class);
 	}
 
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 			throws ParameterResolutionException {
-		return getCassandra();
+		return this.cassandra;
 	}
 
 	/**
@@ -160,13 +157,13 @@ public class CassandraExtension implements BeforeAllCallback, AfterAllCallback, 
 	 *
 	 * @return the cassandra
 	 */
-	public final Cassandra getCassandra() {
+	public Cassandra getCassandra() {
 		return this.cassandra;
 	}
 
 	@Override
 	public String toString() {
-		return "CassandraExtension [" + getCassandra() + "]";
+		return "CassandraExtension [" + this.cassandra + "]";
 	}
 
 }
