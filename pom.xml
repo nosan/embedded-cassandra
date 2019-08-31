@@ -222,7 +222,8 @@
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
                         <failIfNoTests>false</failIfNoTests>
-                        <argLine>-Xms256m -Xmx512m</argLine>
+                        <argLine>-Xms512m -Xmx512m</argLine>
+                        <trimStackTrace>false</trimStackTrace>
                     </configuration>
                 </plugin>
                 <plugin>
