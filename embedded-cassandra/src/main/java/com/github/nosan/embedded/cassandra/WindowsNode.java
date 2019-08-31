@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ class WindowsNode extends AbstractNode {
 	}
 
 	@Override
-	protected NodeProcess doStart(RunProcess runProcess) throws IOException {
+	protected NodeProcess doStart(RunProcess runProcess) throws IOException, InterruptedException {
 		Path workDir = this.workingDirectory;
 		Version version = this.version;
 		Path pidFile = Files.createTempFile(workDir, "", ".pid");
@@ -59,7 +60,15 @@ class WindowsNode extends AbstractNode {
 		if (version.compareTo(Version.of("2.1")) > 0) {
 			runProcess.addArguments("-a");
 		}
-		return new WindowsProcess(runProcess.start(), pidFile, workDir);
+		WindowsProcess process = new WindowsProcess(runProcess.start(), pidFile, workDir);
+		long timeout = TimeUnit.SECONDS.toNanos(1);
+		long start = System.nanoTime();
+		long rem = timeout;
+		do {
+			Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 10));
+			rem = timeout - (System.nanoTime() - start);
+		} while (rem > 0 && process.getPid() == -1);
+		return process;
 	}
 
 	private static final class WindowsProcess extends AbstractNodeProcess {

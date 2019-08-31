@@ -92,8 +92,9 @@ abstract class AbstractNode implements Node {
 	 * @param runProcess configured process
 	 * @return a new {@link NodeProcess}
 	 * @throws IOException if the {@code Cassandra's} node cannot be started
+	 * @throws InterruptedException if the {@code Cassandra's} node has been interrupted.
 	 */
-	protected abstract NodeProcess doStart(RunProcess runProcess) throws IOException;
+	protected abstract NodeProcess doStart(RunProcess runProcess) throws IOException, InterruptedException;
 
 	private Map<String, Object> loadProperties() throws IOException {
 		try (InputStream is = new BufferedInputStream(getConfigurationFile().openStream())) {

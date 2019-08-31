@@ -175,9 +175,7 @@ class EmbeddedDatabase implements Database {
 						String.format("'%s' is not alive. Please see logs for more details%n\t%s", process,
 								String.join(String.format("%n\t"), lines)));
 			}
-			if (rem > 0) {
-				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
-			}
+			Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
 			rem = this.timeout.toNanos() - (System.nanoTime() - start);
 		} while (rem > 0 && !isReady(readinessConsumers));
 		if (rem <= 0) {
