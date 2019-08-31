@@ -31,8 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CassandraExtensionFactoryCustomizerTests {
 
 	@RegisterExtension
-	static final CassandraExtension extension =
-			new CassandraExtension(cassandraFactory -> cassandraFactory.setPort(9042));
+	static final CassandraExtension extension = new CassandraExtension(
+			cassandraFactory -> cassandraFactory.setPort(9042));
 
 	@Test
 	void testCustomFactoryCustomizer() {

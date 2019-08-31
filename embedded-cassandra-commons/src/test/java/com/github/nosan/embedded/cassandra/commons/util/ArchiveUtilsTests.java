@@ -46,18 +46,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
  */
 class ArchiveUtilsTests {
 
-	@ParameterizedTest
-	@MethodSource("archives")
-	void extract(String name, String archiveFormat, String compression, @TempDir Path temporaryFolder)
-			throws Exception {
-		Path archiveFile = Files.createTempFile(temporaryFolder, "", "." + name);
-		File file = new File(getClass().getResource("/text.txt").toURI());
-		archive(archiveFormat, archiveFile, file);
-		compress(compression, archiveFile);
-		ArchiveUtils.extract(archiveFile, temporaryFolder);
-		assertThat(temporaryFolder.resolve("text.txt").toFile()).hasSameContentAs(file);
-	}
-
 	static Stream<Arguments> archives() {
 		List<Arguments> parameters = new ArrayList<>();
 		parameters.add(arguments("tar.gz", ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
@@ -69,6 +57,18 @@ class ArchiveUtilsTests {
 		parameters.add(arguments("zip", ArchiveStreamFactory.ZIP, ""));
 		parameters.add(arguments("zipx", ArchiveStreamFactory.ZIP, ""));
 		return parameters.stream();
+	}
+
+	@ParameterizedTest
+	@MethodSource("archives")
+	void extract(String name, String archiveFormat, String compression, @TempDir Path temporaryFolder)
+			throws Exception {
+		Path archiveFile = Files.createTempFile(temporaryFolder, "", "." + name);
+		File file = new File(getClass().getResource("/text.txt").toURI());
+		archive(archiveFormat, archiveFile, file);
+		compress(compression, archiveFile);
+		ArchiveUtils.extract(archiveFile, temporaryFolder);
+		assertThat(temporaryFolder.resolve("text.txt").toFile()).hasSameContentAs(file);
 	}
 
 	private static void archive(String archiveFormat, Path archive, File file) throws Exception {

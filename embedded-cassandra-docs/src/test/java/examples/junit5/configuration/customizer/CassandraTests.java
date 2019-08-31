@@ -26,8 +26,8 @@ import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 class CassandraTests {
 
 	@RegisterExtension
-	static final CassandraExtension extension =
-			new CassandraExtension(cassandraFactory -> cassandraFactory.setPort(9042));
+	static final CassandraExtension extension = new CassandraExtension(
+			cassandraFactory -> cassandraFactory.setPort(9042));
 
 	@Test
 	void test() {

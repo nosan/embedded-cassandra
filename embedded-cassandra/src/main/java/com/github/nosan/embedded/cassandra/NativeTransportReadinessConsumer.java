@@ -38,11 +38,11 @@ class NativeTransportReadinessConsumer implements ReadinessConsumer {
 
 	private static final Logger log = LoggerFactory.getLogger(NativeTransportReadinessConsumer.class);
 
-	private static final Pattern TRANSPORT_START_PATTERN = Pattern
-			.compile("(?i).*listening\\s*for\\s*cql\\s*clients\\s*on.*/(.+):(\\d+).*");
+	private static final Pattern TRANSPORT_START_PATTERN = Pattern.compile(
+			"(?i).*listening\\s*for\\s*cql\\s*clients\\s*on.*/(.+):(\\d+).*");
 
-	private static final Pattern TRANSPORT_NOT_START_PATTERN = Pattern
-			.compile("(?i).*((not\\s*starting\\s*client\\s*transports)|(not\\s*starting\\s*native\\s*transport)).*");
+	private static final Pattern TRANSPORT_NOT_START_PATTERN = Pattern.compile(
+			"(?i).*((not\\s*starting\\s*client\\s*transports)|(not\\s*starting\\s*native\\s*transport)).*");
 
 	private static final String ENCRYPTED = "(encrypted)";
 

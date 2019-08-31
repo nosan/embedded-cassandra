@@ -600,9 +600,8 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 		}
 		Node node = createNode(version, workingDirectory);
 		Database database = new EmbeddedDatabase(name, version, isDaemon(), getLogger(), getTimeout(), node);
-		EmbeddedCassandra cassandra =
-				new EmbeddedCassandra(name, isExposeProperties(), artifactDirectory, workingDirectory, version,
-						database);
+		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, isExposeProperties(), artifactDirectory,
+				workingDirectory, version, database);
 		if (isRegisterShutdownHook()) {
 			Runtime.getRuntime().addShutdownHook(new Thread(cassandra::stop, name + "-sh"));
 		}

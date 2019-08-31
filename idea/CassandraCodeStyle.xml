@@ -1,4 +1,7 @@
 <code_scheme name="CassandraProject" version="173">
+    <AsciiDocCodeStyleSettings>
+        <option name="ONE_SENTENCE_PER_LINE" value="false"/>
+    </AsciiDocCodeStyleSettings>
     <JavaCodeStyleSettings>
         <option name="TEST_NAME_SUFFIX" value="Tests"/>
         <option name="ANNOTATION_PARAMETER_WRAP" value="1"/>
@@ -53,6 +56,7 @@
         <option name="ALIGN_MULTILINE_RESOURCES" value="false"/>
         <option name="ALIGN_MULTILINE_FOR" value="false"/>
         <option name="CALL_PARAMETERS_WRAP" value="1"/>
+        <option name="PREFER_PARAMETERS_WRAP" value="true"/>
         <option name="METHOD_PARAMETERS_WRAP" value="1"/>
         <option name="RESOURCE_LIST_WRAP" value="1"/>
         <option name="EXTENDS_LIST_WRAP" value="1"/>
@@ -66,6 +70,7 @@
         <option name="TERNARY_OPERATION_SIGNS_ON_NEXT_LINE" value="true"/>
         <option name="FOR_STATEMENT_WRAP" value="1"/>
         <option name="ARRAY_INITIALIZER_WRAP" value="1"/>
+        <option name="ASSIGNMENT_WRAP" value="1"/>
         <option name="WRAP_COMMENTS" value="true"/>
         <option name="ASSERT_STATEMENT_WRAP" value="1"/>
         <option name="IF_BRACE_FORCE" value="3"/>

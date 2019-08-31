@@ -47,8 +47,8 @@ class EmbeddedCassandraContextCustomizerFactoryTests {
 
 	@Test
 	void contextCustomizerShouldBeEqualed() {
-		assertThat(createContextCustomizer(EmbeddedCassandraAnnotated.class))
-				.isEqualTo(createContextCustomizer(EmbeddedCassandraAnnotated.class));
+		assertThat(createContextCustomizer(EmbeddedCassandraAnnotated.class)).isEqualTo(
+				createContextCustomizer(EmbeddedCassandraAnnotated.class));
 	}
 
 	@Nullable

@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
@@ -44,22 +45,11 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  */
 public final class RunProcess {
 
-	private static final boolean SLF4J_PRESENT = isSlf4jPresent();
+	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
 
-	private static final ThreadFactory threadFactory;
+	private static final ThreadFactory threadFactory = new MDCThreadFactory();
 
 	private static final AtomicLong number = new AtomicLong();
-
-	static {
-		ThreadFactory tf;
-		if (SLF4J_PRESENT) {
-			tf = new MDCThreadFactory();
-		}
-		else {
-			tf = Thread::new;
-		}
-		threadFactory = tf;
-	}
 
 	private final List<Object> arguments = new ArrayList<>();
 
@@ -167,15 +157,15 @@ public final class RunProcess {
 	 */
 	public ProcessId start() throws IOException {
 		Path workDir = this.workingDirectory;
-		List<String> arguments = this.arguments.stream().filter(Objects::nonNull).map(Object::toString)
-				.filter(StringUtils::hasText).collect(Collectors.toList());
+		List<String> arguments = this.arguments.stream().filter(Objects::nonNull).map(Object::toString).filter(
+				StringUtils::hasText).collect(Collectors.toList());
 		ProcessBuilder builder = new ProcessBuilder(arguments).redirectErrorStream(true);
 		if (workDir != null) {
 			builder.directory(workDir.toFile());
 		}
-		Map<String, String> environment = this.environment.entrySet().stream()
-				.filter(entry -> Objects.nonNull(entry.getKey()))
-				.collect(Collectors.toMap(Map.Entry::getKey, entry -> Objects.toString(entry.getValue(), "")));
+		Map<String, String> environment = this.environment.entrySet().stream().filter(
+				entry -> Objects.nonNull(entry.getKey())).collect(
+				Collectors.toMap(Map.Entry::getKey, entry -> Objects.toString(entry.getValue(), "")));
 		builder.environment().putAll(environment);
 		printCommand(workDir, arguments, environment);
 		Process process = builder.start();
@@ -206,16 +196,9 @@ public final class RunProcess {
 		Objects.requireNonNull(consumer, "'consumer' must not be null");
 		ProcessId processId = start();
 		Process process = processId.getProcess();
-		Thread thread = threadFactory
-				.newThread(() -> StreamUtils.lines(process.getInputStream(), StandardCharsets.UTF_8, consumer));
-		thread.setUncaughtExceptionHandler((t, ex) -> {
-			if (SLF4J_PRESENT) {
-				LoggerFactory.getLogger(RunProcess.class).error("Exception in thread " + t, ex);
-			}
-			else {
-				ex.printStackTrace();
-			}
-		});
+		Thread thread = threadFactory.newThread(
+				() -> StreamUtils.lines(process.getInputStream(), StandardCharsets.UTF_8, consumer));
+		thread.setUncaughtExceptionHandler((t, ex) -> log.error("Exception in thread " + t, ex));
 		thread.setName("process-" + number.getAndIncrement());
 		thread.start();
 		int exit = process.waitFor();
@@ -225,26 +208,14 @@ public final class RunProcess {
 	}
 
 	private static void printCommand(@Nullable Path workDir, List<String> arguments, Map<String, String> environment) {
-		if (SLF4J_PRESENT) {
-			StringBuilder msg = new StringBuilder(String.format("Run a command '%s'", String.join(" ", arguments)));
-			if (workDir != null) {
-				msg.append(String.format(" within the directory '%s'", workDir));
-			}
-			if (!environment.isEmpty()) {
-				msg.append(String.format(" using the environment %s", environment));
-			}
-			LoggerFactory.getLogger(RunProcess.class).info(msg.toString());
+		StringBuilder msg = new StringBuilder(String.format("Run a command '%s'", String.join(" ", arguments)));
+		if (workDir != null) {
+			msg.append(String.format(" within the directory '%s'", workDir));
 		}
-	}
-
-	private static boolean isSlf4jPresent() {
-		try {
-			Class.forName("org.slf4j.LoggerFactory", false, RunProcess.class.getClassLoader());
-			return true;
+		if (!environment.isEmpty()) {
+			msg.append(String.format(" using the environment %s", environment));
 		}
-		catch (ClassNotFoundException ex) {
-			return false;
-		}
+		log.info(msg.toString());
 	}
 
 }

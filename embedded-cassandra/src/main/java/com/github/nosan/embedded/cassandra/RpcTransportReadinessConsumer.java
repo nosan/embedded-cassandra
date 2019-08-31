@@ -37,11 +37,11 @@ class RpcTransportReadinessConsumer implements ReadinessConsumer {
 
 	private static final Logger log = LoggerFactory.getLogger(RpcTransportReadinessConsumer.class);
 
-	private static final Pattern RPC_TRANSPORT_START_PATTERN = Pattern
-			.compile("(?i).*binding\\s*thrift\\s*service\\s*to.*/(.+):(\\d+).*");
+	private static final Pattern RPC_TRANSPORT_START_PATTERN = Pattern.compile(
+			"(?i).*binding\\s*thrift\\s*service\\s*to.*/(.+):(\\d+).*");
 
-	private static final Pattern RPC_TRANSPORT_NOT_START_PATTERN = Pattern
-			.compile("(?i).*not\\s*starting\\s*rpc\\s*server.*");
+	private static final Pattern RPC_TRANSPORT_NOT_START_PATTERN = Pattern.compile(
+			"(?i).*not\\s*starting\\s*rpc\\s*server.*");
 
 	private final Version version;
 

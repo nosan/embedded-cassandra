@@ -177,8 +177,8 @@ class EmbeddedCassandraFactoryTests {
 		assertThat(this.cassandraFactory.getSslPort()).isEqualTo(9042);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
-		assertThat(node)
-				.hasFieldOrPropertyWithValue("properties", Collections.singletonMap("native_transport_port_ssl", 9042));
+		assertThat(node).hasFieldOrPropertyWithValue("properties",
+				Collections.singletonMap("native_transport_port_ssl", 9042));
 	}
 
 	@Test
@@ -187,8 +187,8 @@ class EmbeddedCassandraFactoryTests {
 		assertThat(this.cassandraFactory.getRpcPort()).isEqualTo(9160);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
-		assertThat(node)
-				.hasFieldOrPropertyWithValue("systemProperties", Collections.singletonMap("cassandra.rpc_port", 9160));
+		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",
+				Collections.singletonMap("cassandra.rpc_port", 9160));
 	}
 
 	@Test
@@ -246,8 +246,8 @@ class EmbeddedCassandraFactoryTests {
 		this.cassandraFactory.setRegisterShutdownHook(true);
 		this.cassandraFactory.setName("myname");
 		Cassandra cassandra = this.cassandraFactory.create();
-		Map<Thread, Thread> hooks = (Map<Thread, Thread>) ReflectionTestUtils
-				.getField(Class.forName("java.lang.ApplicationShutdownHooks"), "hooks");
+		Map<Thread, Thread> hooks = (Map<Thread, Thread>) ReflectionTestUtils.getField(
+				Class.forName("java.lang.ApplicationShutdownHooks"), "hooks");
 		assertThat(hooks.keySet()).anyMatch(thread -> thread.getName().equals("myname-sh"));
 	}
 

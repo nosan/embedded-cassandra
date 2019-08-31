@@ -122,8 +122,8 @@ public class DefaultArtifact implements Artifact {
 	private static boolean isCassandraHome(Path path, BasicFileAttributes attributes) {
 		if (attributes.isDirectory()) {
 			return Files.isDirectory(path.resolve("bin")) && Files.isDirectory(path.resolve("lib")) && Files
-					.isDirectory(path.resolve("conf")) && Files
-					.isRegularFile(path.resolve("conf").resolve("cassandra.yaml"));
+					.isDirectory(path.resolve("conf")) && Files.isRegularFile(
+					path.resolve("conf").resolve("cassandra.yaml"));
 		}
 		return false;
 	}

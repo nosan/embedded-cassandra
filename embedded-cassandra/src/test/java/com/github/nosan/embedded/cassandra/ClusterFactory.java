@@ -140,9 +140,9 @@ class ClusterFactory {
 		SocketOptions socketOptions = new SocketOptions();
 		socketOptions.setConnectTimeoutMillis(30000);
 		socketOptions.setReadTimeoutMillis(30000);
-		Cluster.Builder builder = Cluster.builder().addContactPoints(address)
-				.withPort((this.sslEnabled && sslPort != -1) ? sslPort : port).withSocketOptions(socketOptions)
-				.withoutMetrics().withoutJMXReporting();
+		Cluster.Builder builder = Cluster.builder().addContactPoints(address).withPort(
+				(this.sslEnabled && sslPort != -1) ? sslPort : port).withSocketOptions(socketOptions).withoutMetrics()
+				.withoutJMXReporting();
 		if (this.username != null && this.password != null) {
 			builder.withCredentials(this.username, this.password);
 		}

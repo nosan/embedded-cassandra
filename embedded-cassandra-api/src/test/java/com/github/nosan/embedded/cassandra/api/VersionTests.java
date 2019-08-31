@@ -75,8 +75,8 @@ class VersionTests {
 
 	@Test
 	void shouldNotParseInvalid() {
-		assertThatThrownBy(() -> Version.of("3.")).hasStackTraceContaining("is invalid")
-				.isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> Version.of("3.")).hasStackTraceContaining("is invalid").isInstanceOf(
+				IllegalArgumentException.class);
 	}
 
 	private static Version of(int major, int minor, int patch) {

@@ -167,8 +167,8 @@ class FileLockTests {
 	private static String readFromProcesses(List<Process> processes) {
 		StringBuilder builder = new StringBuilder();
 		for (Process process : processes) {
-			builder.append(process).append(String.format("%n")).append(readAll(process.getInputStream()))
-					.append(String.format("%n%n%n"));
+			builder.append(process).append(String.format("%n")).append(readAll(process.getInputStream())).append(
+					String.format("%n%n%n"));
 		}
 		return builder.toString();
 	}

@@ -54,8 +54,8 @@ class CassandraTests {
 
 		@Override
 		protected String getContactPoints() {
-			return Optional.ofNullable(this.cassandra.getAddress()).map(InetAddress::getHostAddress)
-					.orElse(super.getContactPoints());
+			return Optional.ofNullable(this.cassandra.getAddress()).map(InetAddress::getHostAddress).orElse(
+					super.getContactPoints());
 		}
 
 		@Override
