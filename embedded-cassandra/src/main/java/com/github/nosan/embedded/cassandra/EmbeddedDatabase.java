@@ -87,7 +87,7 @@ class EmbeddedDatabase implements Database {
 		NativeTransportReadinessConsumer nativeTransportReadiness = new NativeTransportReadinessConsumer(this.version);
 		RpcTransportReadinessConsumer rpcTransportReadiness = new RpcTransportReadinessConsumer(this.version);
 
-		awaitForConnections(process, nativeTransportReadiness, rpcTransportReadiness);
+		awaitForReadiness(process, nativeTransportReadiness, rpcTransportReadiness);
 		log.info("{} is running and ready for connections", toString());
 
 		int sslPort = nativeTransportReadiness.getSslPort();
@@ -141,7 +141,7 @@ class EmbeddedDatabase implements Database {
 				this.process);
 	}
 
-	private void awaitForConnections(NodeProcess process, ReadinessConsumer... readinessConsumers)
+	private void awaitForReadiness(NodeProcess process, ReadinessConsumer... readinessConsumers)
 			throws IOException, InterruptedException {
 		CompositeConsumer<String> compositeConsumer = new CompositeConsumer<>();
 		CacheConsumer<String> cacheConsumer = new CacheConsumer<>(30);
@@ -159,28 +159,18 @@ class EmbeddedDatabase implements Database {
 
 		long start = System.nanoTime();
 		long rem = this.timeout.toNanos();
-		do {
-			if (!process.isAlive()) {
-				try {
-					thread.join(1000);
-				}
-				catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
-				}
-				//closes I/O streams
-				process.getProcess().destroy();
-				List<String> lines = new ArrayList<>(cacheConsumer.get());
-				Collections.reverse(lines);
-				throw new IOException(
-						String.format("'%s' is not alive. Please see logs for more details%n\t%s", process,
-								String.join(String.format("%n\t"), lines)));
-			}
+		while (rem > 0 && process.isAlive() && !isReady(readinessConsumers)) {
 			Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
 			rem = this.timeout.toNanos() - (System.nanoTime() - start);
-		} while (rem > 0 && !isReady(readinessConsumers));
+		}
+		if (!process.isAlive()) {
+			thread.join(100);
+			List<String> lines = new ArrayList<>(cacheConsumer.get());
+			Collections.reverse(lines);
+			throw new IOException(String.format("'%s' is not alive. Please see logs for more details%n\t%s", process,
+					String.join(String.format("%n\t"), lines)));
+		}
 		if (rem <= 0) {
-			//closes I/O streams
-			process.getProcess().destroy();
 			throw new IllegalStateException(
 					toString() + " couldn't be started within " + this.timeout.toMillis() + "ms");
 		}

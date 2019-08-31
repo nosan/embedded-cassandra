@@ -169,18 +169,7 @@ public final class RunProcess {
 		builder.environment().putAll(environment);
 		printCommand(workDir, arguments, environment);
 		Process process = builder.start();
-		try {
-			return new ProcessId(process);
-		}
-		catch (RuntimeException ex) {
-			try {
-				process.destroy();
-			}
-			catch (Throwable swallow) {
-				ex.addSuppressed(swallow);
-			}
-			throw ex;
-		}
+		return new ProcessId(process);
 	}
 
 	/**
@@ -202,8 +191,7 @@ public final class RunProcess {
 		thread.setName("process-" + number.getAndIncrement());
 		thread.start();
 		int exit = process.waitFor();
-		thread.join(1000);
-		process.destroy();
+		thread.join(100);
 		return exit;
 	}
 
