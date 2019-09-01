@@ -60,6 +60,18 @@ public final class ProcessId {
 	}
 
 	/**
+	 * Constructs a new {@link ProcessId} with the specified process and its pid.
+	 *
+	 * @param process the process
+	 * @param pid the PID
+	 */
+	public ProcessId(Process process, long pid) {
+		Objects.requireNonNull(process, "'process' must not be null");
+		this.process = process;
+		this.pid = (pid > 0) ? pid : -1;
+	}
+
+	/**
 	 * Returns the {@link Process}.
 	 *
 	 * @return the process

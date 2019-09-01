@@ -169,7 +169,13 @@ public final class RunProcess {
 		builder.environment().putAll(environment);
 		printCommand(workDir, arguments, environment);
 		Process process = builder.start();
-		return new ProcessId(process);
+		try {
+			return new ProcessId(process);
+		}
+		catch (Throwable ex) {
+			log.error(String.format("ProcessId for '%s' cannot be constructed", process), ex);
+			return new ProcessId(process, -1);
+		}
 	}
 
 	/**
