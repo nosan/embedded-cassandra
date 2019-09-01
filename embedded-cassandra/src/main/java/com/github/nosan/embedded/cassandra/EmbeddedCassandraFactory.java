@@ -50,8 +50,7 @@ import com.github.nosan.embedded.cassandra.commons.util.SystemUtils;
 
 /**
  * {@link CassandraFactory} that can be used to create and configure an {@code EmbeddedCassandra}. {@code
- * EmbeddedCassandra} runs Apache Cassandra as a separate {@link Process}. Working directory will be initialized using
- * the specified {@link Artifact}.
+ * EmbeddedCassandra} runs Apache Cassandra as a separate {@link Process}.
  * <p><strong>Example:</strong>
  * <pre>
  * class Scratch {
@@ -210,8 +209,8 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Sets Cassandra's working directory. This directory will be initialized on start and deleted on stop. Defaults to
-	 * {@code temporary dir}.
+	 * Sets Cassandra's working directory. This directory will be initialized on start and <strong>deleted</strong> on
+	 * stop. Defaults to {@code tmp dir}.
 	 *
 	 * @param workingDirectory the working directory
 	 */
