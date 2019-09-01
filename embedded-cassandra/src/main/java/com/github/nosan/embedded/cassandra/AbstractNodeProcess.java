@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import com.github.nosan.embedded.cassandra.commons.ProcessId;
 
@@ -60,18 +59,9 @@ abstract class AbstractNodeProcess implements NodeProcess {
 		Process process = processId.getProcess();
 		if (process.isAlive()) {
 			doStop();
-			if (!process.waitFor(5, TimeUnit.SECONDS)) {
-				//retry to stop
-				doStop();
-				if (!process.waitFor(5, TimeUnit.SECONDS)) {
-					process.destroy();
-				}
-			}
 			if (process.isAlive()) {
-				throw new IOException(String.format("'%s' has not been stopped and still running", toString()));
+				throw new IOException(String.format("'%s' is still alive.", toString()));
 			}
-			//closes I/O streams.
-			process.destroy();
 		}
 	}
 

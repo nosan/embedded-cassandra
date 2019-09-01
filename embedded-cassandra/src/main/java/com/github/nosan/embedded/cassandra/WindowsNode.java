@@ -55,8 +55,8 @@ class WindowsNode extends AbstractNode {
 		Path workDir = this.workingDirectory;
 		Version version = this.version;
 		Path pidFile = Files.createTempFile(workDir, "", ".pid");
-		runProcess.setArguments("powershell", "-ExecutionPolicy", "Unrestricted", workDir.resolve("bin/cassandra.ps1"),
-				"-f", "-p", pidFile);
+		Path executableFile = workDir.resolve("bin/cassandra.ps1");
+		runProcess.setArguments("powershell", "-ExecutionPolicy", "Unrestricted", executableFile, "-f", "-p", pidFile);
 		if (version.compareTo(Version.of("2.1")) > 0) {
 			runProcess.addArguments("-a");
 		}
@@ -64,10 +64,11 @@ class WindowsNode extends AbstractNode {
 		long timeout = TimeUnit.SECONDS.toNanos(1);
 		long start = System.nanoTime();
 		long rem = timeout;
-		do {
+		while (rem > 0 && process.getPid() == -1) {
 			Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 10));
 			rem = timeout - (System.nanoTime() - start);
-		} while (rem > 0 && process.getPid() == -1);
+
+		}
 		return process;
 	}
 
@@ -103,38 +104,43 @@ class WindowsNode extends AbstractNode {
 
 		@Override
 		void doStop() throws IOException, InterruptedException {
-			Process process = this.processId.getProcess();
-			Path stopServer = this.workingDirectory.resolve("bin/stop-server.ps1");
 			long pid = getPid();
-			if (Files.exists(this.pidFile) && Files.exists(stopServer)) {
-				if (doStop(this.pidFile, stopServer) != 0) {
-					if (pid > 0) {
-						if (doStop(pid) != 0) {
-							process.destroy();
-						}
+			Path pidFile = this.pidFile;
+			Process process = this.processId.getProcess();
+			Path executableFile = this.workingDirectory.resolve("bin/stop-server.ps1");
+			if (!Files.exists(executableFile) && pid <= 0) {
+				return;
+			}
+			if (Files.exists(executableFile) && Files.exists(pidFile)) {
+				doStop(process, executableFile, pidFile, pid);
+			}
+			else if (pid > 0) {
+				doStop(process, pid);
+			}
+		}
+
+		private void doStop(Process process, long pid) throws IOException, InterruptedException {
+			if (taskKill(pid, false) == 0) {
+				if (!process.waitFor(5, TimeUnit.SECONDS)) {
+					if (taskKill(pid, true) == 0) {
+						process.waitFor(5, TimeUnit.SECONDS);
 					}
-					else {
-						process.destroy();
+				}
+			}
+		}
+
+		private void doStop(Process process, Path executableFile, Path pidFile, long pid)
+				throws IOException, InterruptedException {
+			if (stop(executableFile, pidFile) == 0) {
+				if (!process.waitFor(5, TimeUnit.SECONDS)) {
+					if (pid > 0) {
+						doStop(process, pid);
 					}
 				}
 			}
 			else if (pid > 0) {
-				if (doStop(pid) != 0) {
-					process.destroy();
-				}
+				doStop(process, pid);
 			}
-			else {
-				process.destroy();
-			}
-		}
-
-		private int doStop(Path pidFile, Path stopServer) throws InterruptedException, IOException {
-			return new RunProcess(this.workingDirectory, "powershell", "-ExecutionPolicy", "Unrestricted", stopServer,
-					"-p", pidFile).run(log::info);
-		}
-
-		private int doStop(long pid) throws InterruptedException, IOException {
-			return new RunProcess(this.workingDirectory, "taskkill", "/pid", pid).run(log::info);
 		}
 
 		private long getPid(Path pidFile) {
@@ -142,9 +148,19 @@ class WindowsNode extends AbstractNode {
 				String pid = new String(Files.readAllBytes(pidFile), StandardCharsets.UTF_8).replaceAll("\\D+", "");
 				return StringUtils.hasText(pid) ? Long.parseLong(pid) : -1;
 			}
-			catch (IOException ex) {
+			catch (Exception ex) {
 				return -1;
 			}
+		}
+
+		private int stop(Path executableFile, Path pidFile) throws InterruptedException, IOException {
+			return new RunProcess(this.workingDirectory, "powershell", "-ExecutionPolicy", "Unrestricted",
+					executableFile, "-p", pidFile).run(log::info);
+		}
+
+		private int taskKill(long pid, boolean forceful) throws InterruptedException, IOException {
+			return new RunProcess(this.workingDirectory, "taskkill", forceful ? "/F" : "", "/T", "/PID", pid).run(
+					log::info);
 		}
 
 	}

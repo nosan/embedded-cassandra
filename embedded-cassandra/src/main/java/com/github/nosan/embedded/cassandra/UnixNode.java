@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,9 +83,17 @@ class UnixNode extends AbstractNode {
 		void doStop() throws IOException, InterruptedException {
 			Process process = this.processId.getProcess();
 			long pid = getPid();
-			if (pid > 0) {
-				if (doStop(pid) != 0) {
-					process.destroy();
+			if (pid <= 0) {
+				process.destroy();
+				return;
+			}
+			if (kill(pid) == 0) {
+				if (!process.waitFor(5, TimeUnit.SECONDS)) {
+					if (sigkill(pid) == 0) {
+						if (!process.waitFor(5, TimeUnit.SECONDS)) {
+							process.destroyForcibly();
+						}
+					}
 				}
 			}
 			else {
@@ -92,8 +101,12 @@ class UnixNode extends AbstractNode {
 			}
 		}
 
-		private int doStop(long pid) throws InterruptedException, IOException {
-			return new RunProcess(this.workingDirectory, "kill", pid).run(log::info);
+		private int kill(long pid) throws InterruptedException, IOException {
+			return new RunProcess(this.workingDirectory, "kill", "-SIGINT", pid).run(log::info);
+		}
+
+		private int sigkill(long pid) throws InterruptedException, IOException {
+			return new RunProcess(this.workingDirectory, "kill", "-SIGKILL", pid).run(log::info);
 		}
 
 	}
