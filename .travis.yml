@@ -5,7 +5,8 @@ sudo: true
 stages:
   - install
   - test
-  - deploy
+  - name: deploy
+    if: tag IS present
 
 cache:
   directories:
