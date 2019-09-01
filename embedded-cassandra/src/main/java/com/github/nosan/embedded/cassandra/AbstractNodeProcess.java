@@ -66,10 +66,8 @@ abstract class AbstractNodeProcess implements NodeProcess {
 		if (process.isAlive()) {
 			doStop();
 			if (!process.waitFor(5, TimeUnit.SECONDS)) {
-				this.logger.warn(
-						"java.lang.Process.destroyForcibly() has been called for '{}'. The behavior of this method is "
-								+ "undefined, hence Cassandra's node could be still alive",
-						toString());
+				this.logger.warn("java.lang.Process.destroyForcibly() has been called for '{}'. The behavior of this "
+						+ "method is undefined, hence Cassandra's node could be still alive", toString());
 				process.destroyForcibly();
 			}
 			if (process.isAlive()) {

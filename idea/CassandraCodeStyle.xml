@@ -70,7 +70,6 @@
         <option name="TERNARY_OPERATION_SIGNS_ON_NEXT_LINE" value="true"/>
         <option name="FOR_STATEMENT_WRAP" value="1"/>
         <option name="ARRAY_INITIALIZER_WRAP" value="1"/>
-        <option name="ASSIGNMENT_WRAP" value="1"/>
         <option name="WRAP_COMMENTS" value="true"/>
         <option name="ASSERT_STATEMENT_WRAP" value="1"/>
         <option name="IF_BRACE_FORCE" value="3"/>
@@ -317,6 +316,7 @@
                             <AND>
                                 <METHOD>true</METHOD>
                                 <PACKAGE_PRIVATE>true</PACKAGE_PRIVATE>
+                                <STATIC>true</STATIC>
                             </AND>
                         </match>
                     </rule>
@@ -327,7 +327,6 @@
                             <AND>
                                 <METHOD>true</METHOD>
                                 <PACKAGE_PRIVATE>true</PACKAGE_PRIVATE>
-                                <STATIC>true</STATIC>
                             </AND>
                         </match>
                     </rule>
