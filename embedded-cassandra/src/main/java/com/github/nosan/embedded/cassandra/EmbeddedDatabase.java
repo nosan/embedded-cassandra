@@ -87,7 +87,8 @@ class EmbeddedDatabase implements Database {
 		NativeTransportReadinessConsumer nativeTransportReadiness = new NativeTransportReadinessConsumer(this.version);
 		RpcTransportReadinessConsumer rpcTransportReadiness = new RpcTransportReadinessConsumer(this.version);
 
-		awaitForReadiness(process, nativeTransportReadiness, rpcTransportReadiness);
+		await(process, nativeTransportReadiness, rpcTransportReadiness);
+
 		log.info("{} is running and ready for connections", toString());
 
 		int sslPort = nativeTransportReadiness.getSslPort();
@@ -141,7 +142,7 @@ class EmbeddedDatabase implements Database {
 				this.process);
 	}
 
-	private void awaitForReadiness(NodeProcess process, ReadinessConsumer... readinessConsumers)
+	private void await(NodeProcess process, ReadinessConsumer... readinessConsumers)
 			throws IOException, InterruptedException {
 		CompositeConsumer<String> compositeConsumer = new CompositeConsumer<>();
 		CacheConsumer<String> cacheConsumer = new CacheConsumer<>(30);
