@@ -17,6 +17,10 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.commons.ProcessId;
 
@@ -26,6 +30,8 @@ import com.github.nosan.embedded.cassandra.commons.ProcessId;
  * @author Dmytro Nosan
  */
 abstract class AbstractNodeProcess implements NodeProcess {
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final ProcessId processId;
 
@@ -59,6 +65,13 @@ abstract class AbstractNodeProcess implements NodeProcess {
 		Process process = processId.getProcess();
 		if (process.isAlive()) {
 			doStop();
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
+				this.logger.warn(
+						"java.lang.Process.destroyForcibly() has been called for '{}'. The behavior of this method is "
+								+ "undefined, hence Cassandra's node could be still alive",
+						toString());
+				process.destroyForcibly();
+			}
 			if (process.isAlive()) {
 				throw new IOException(String.format("'%s' is still alive.", toString()));
 			}

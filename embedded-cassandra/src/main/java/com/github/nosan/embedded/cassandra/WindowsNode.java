@@ -67,7 +67,6 @@ class WindowsNode extends AbstractNode {
 		while (rem > 0 && process.getPid() == -1) {
 			Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 10));
 			rem = timeout - (System.nanoTime() - start);
-
 		}
 		return process;
 	}
@@ -108,9 +107,6 @@ class WindowsNode extends AbstractNode {
 			Path pidFile = this.pidFile;
 			Process process = this.processId.getProcess();
 			Path executableFile = this.workingDirectory.resolve("bin/stop-server.ps1");
-			if (!Files.exists(executableFile) && pid <= 0) {
-				return;
-			}
 			if (Files.exists(executableFile) && Files.exists(pidFile)) {
 				doStop(process, executableFile, pidFile, pid);
 			}
@@ -122,9 +118,7 @@ class WindowsNode extends AbstractNode {
 		private void doStop(Process process, long pid) throws IOException, InterruptedException {
 			if (taskKill(pid, false) == 0) {
 				if (!process.waitFor(5, TimeUnit.SECONDS)) {
-					if (taskKill(pid, true) == 0) {
-						process.waitFor(5, TimeUnit.SECONDS);
-					}
+					taskKill(pid, true);
 				}
 			}
 		}

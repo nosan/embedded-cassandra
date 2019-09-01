@@ -83,17 +83,9 @@ class UnixNode extends AbstractNode {
 		void doStop() throws IOException, InterruptedException {
 			Process process = this.processId.getProcess();
 			long pid = getPid();
-			if (pid <= 0) {
-				process.destroy();
-				return;
-			}
-			if (kill(pid) == 0) {
+			if (pid > 0 && kill(pid) == 0) {
 				if (!process.waitFor(5, TimeUnit.SECONDS)) {
-					if (sigkill(pid) == 0) {
-						if (!process.waitFor(5, TimeUnit.SECONDS)) {
-							process.destroyForcibly();
-						}
-					}
+					sigkill(pid);
 				}
 			}
 			else {
@@ -105,8 +97,8 @@ class UnixNode extends AbstractNode {
 			return new RunProcess(this.workingDirectory, "kill", "-SIGINT", pid).run(log::info);
 		}
 
-		private int sigkill(long pid) throws InterruptedException, IOException {
-			return new RunProcess(this.workingDirectory, "kill", "-SIGKILL", pid).run(log::info);
+		private void sigkill(long pid) throws InterruptedException, IOException {
+			new RunProcess(this.workingDirectory, "kill", "-SIGKILL", pid).run(log::info);
 		}
 
 	}
