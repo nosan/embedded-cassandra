@@ -16,7 +16,10 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -33,16 +36,18 @@ import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.CacheConsumer;
 import com.github.nosan.embedded.cassandra.commons.CompositeConsumer;
 import com.github.nosan.embedded.cassandra.commons.MDCThreadFactory;
-import com.github.nosan.embedded.cassandra.commons.util.StreamUtils;
+import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
  * Embedded {@link Database}.
  *
  * @author Dmytro Nosan
  */
-class EmbeddedDatabase implements Database {
+class DefaultDatabase implements Database {
 
-	private static final Logger log = LoggerFactory.getLogger(EmbeddedDatabase.class);
+	private static final Logger log = LoggerFactory.getLogger(DefaultDatabase.class);
+
+	private static final MDCThreadFactory threadFactory = new MDCThreadFactory();
 
 	private final String name;
 
@@ -68,7 +73,7 @@ class EmbeddedDatabase implements Database {
 
 	private volatile int rpcPort = -1;
 
-	EmbeddedDatabase(String name, Version version, boolean daemon, Logger logger, Duration timeout, Node node) {
+	DefaultDatabase(String name, Version version, boolean daemon, Logger logger, Duration timeout, Node node) {
 		this.name = name;
 		this.version = version;
 		this.daemon = daemon;
@@ -151,8 +156,22 @@ class EmbeddedDatabase implements Database {
 		for (ReadinessConsumer readinessConsumer : readinessConsumers) {
 			compositeConsumer.add(readinessConsumer);
 		}
-		Thread thread = new MDCThreadFactory().newThread(() -> StreamUtils
-				.lines(process.getProcess().getInputStream(), StandardCharsets.UTF_8, compositeConsumer));
+		Thread thread = threadFactory.newThread(() -> {
+			try (BufferedReader reader = new BufferedReader(
+					new InputStreamReader(process.getProcess().getInputStream(), StandardCharsets.UTF_8))) {
+				try {
+					reader.lines().filter(StringUtils::hasText).forEach(compositeConsumer);
+				}
+				catch (UncheckedIOException ex) {
+					if (!ex.getMessage().contains("Stream closed")) {
+						throw ex;
+					}
+				}
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException("Stream cannot be closed", ex);
+			}
+		});
 		thread.setName(this.name);
 		thread.setDaemon(this.daemon);
 		thread.setUncaughtExceptionHandler((t, ex) -> log.error("Exception in thread " + t, ex));

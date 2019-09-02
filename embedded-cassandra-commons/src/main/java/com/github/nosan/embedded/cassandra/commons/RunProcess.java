@@ -16,7 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.commons;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -34,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
-import com.github.nosan.embedded.cassandra.commons.util.StreamUtils;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
@@ -191,8 +193,22 @@ public final class RunProcess {
 		Objects.requireNonNull(consumer, "'consumer' must not be null");
 		ProcessId processId = start();
 		Process process = processId.getProcess();
-		Thread thread = threadFactory.newThread(
-				() -> StreamUtils.lines(process.getInputStream(), StandardCharsets.UTF_8, consumer));
+		Thread thread = threadFactory.newThread(() -> {
+			try (BufferedReader reader = new BufferedReader(
+					new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+				try {
+					reader.lines().filter(StringUtils::hasText).forEach(consumer);
+				}
+				catch (UncheckedIOException ex) {
+					if (!ex.getMessage().contains("Stream closed")) {
+						throw ex;
+					}
+				}
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException("Stream cannot be closed", ex);
+			}
+		});
 		thread.setUncaughtExceptionHandler((t, ex) -> log.error("Exception in thread " + t, ex));
 		thread.setName("process-" + number.getAndIncrement());
 		thread.start();
