@@ -132,7 +132,7 @@ public final class ArchiveArtifact implements Artifact {
 		if (destination == null) {
 			throw new IllegalStateException("'destination' must not be null");
 		}
-		return destination.resolve(".embedded-cassandra/artifact/" + this.version);
+		return destination.resolve(".embedded-cassandra/artifact/local/" + this.version);
 	}
 
 	private void extract(Resource archiveResource, Path destination) throws IOException {
