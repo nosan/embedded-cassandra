@@ -14,33 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.commons;
-
-import java.nio.file.Path;
-import java.util.Objects;
-
 /**
- * {@link PathSupplier} that returns the specified path.
- *
- * @author Dmytro Nosan
- * @since 3.0.0
+ * Resource classes.
  */
-public class DefaultPathSupplier implements PathSupplier {
 
-	private final Path path;
+@NonNullFields @NonNullApi
+package com.github.nosan.embedded.cassandra.commons.io;
 
-	/**
-	 * Constructs a {@link DefaultPathSupplier} with a specified path.
-	 *
-	 * @param path path to the directory
-	 */
-	public DefaultPathSupplier(Path path) {
-		this.path = Objects.requireNonNull(path, "'path' must not be null");
-	}
-
-	@Override
-	public Path get() {
-		return this.path;
-	}
-
-}
+import com.github.nosan.embedded.cassandra.annotations.NonNullApi;
+import com.github.nosan.embedded.cassandra.annotations.NonNullFields;
