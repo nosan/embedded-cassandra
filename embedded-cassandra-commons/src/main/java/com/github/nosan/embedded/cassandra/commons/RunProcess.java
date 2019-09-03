@@ -40,7 +40,7 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
- * This class is used to create a {@link Process}.
+ * This class is used to create and run a {@link Process}.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
@@ -211,6 +211,7 @@ public final class RunProcess {
 		});
 		thread.setUncaughtExceptionHandler((t, ex) -> log.error("Exception in thread " + t, ex));
 		thread.setName("process-" + number.getAndIncrement());
+		thread.setDaemon(true);
 		thread.start();
 		int exit = process.waitFor();
 		thread.join(100);
