@@ -32,7 +32,6 @@ public class CassandraTests {
 	@Test
 	public void testCassandra() {
 		Cassandra cassandra = rule.getCassandra();
-		//cassandra.getPort() == 9042
 	}
 
 }

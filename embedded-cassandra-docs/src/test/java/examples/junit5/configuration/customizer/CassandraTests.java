@@ -32,7 +32,6 @@ class CassandraTests {
 	@Test
 	void test() {
 		Cassandra cassandra = extension.getCassandra();
-		//cassandra.getPort() == 9042
 	}
 
 }

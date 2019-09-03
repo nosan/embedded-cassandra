@@ -121,6 +121,3 @@ The Apache Cassandra can be started using the following lines of code:
 include::{test-sources}/examples/FirstExample.java[tag=source]
 ----
 
-NOTE: The first start can take a while because Apache Casandra has to be initialized.
-Default implementation downloads and extracts an archive just once and then using it to initialize Apache Cassandra.
-

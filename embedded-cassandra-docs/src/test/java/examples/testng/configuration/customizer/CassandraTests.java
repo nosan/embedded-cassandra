@@ -31,7 +31,6 @@ public class CassandraTests extends AbstractCassandraTests {
 	@Test
 	public void test() {
 		Cassandra cassandra = getCassandra();
-		//cassandra.getPort() == 9042
 	}
 
 }

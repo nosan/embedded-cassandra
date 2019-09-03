@@ -24,7 +24,6 @@ Dmytro Nosan
 include::getting-started.adoc[leveloffset=+1]
 include::features.adoc[leveloffset=+1]
 include::testing.adoc[leveloffset=+1]
-include::extensions.adoc[leveloffset=+1]
 include::howto.adoc[leveloffset=+1]
 
 [.text-right]
