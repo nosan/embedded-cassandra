@@ -15,7 +15,7 @@
  */
 
 /**
- * Cassandra common classes.
+ * Common classes.
  */
 
 @NonNullFields @NonNullApi
