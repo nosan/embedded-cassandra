@@ -135,7 +135,7 @@ public class ClassPathResource implements Resource {
 	}
 
 	private static String cleanPath(String name) {
-		String path = name.replace('\\', '/').trim();
+		String path = name.replace('\\', '/').replaceAll("/+", "/").trim();
 		return path.startsWith("/") ? path.substring(1) : path;
 	}
 
