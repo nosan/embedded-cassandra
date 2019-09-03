@@ -17,13 +17,14 @@
 package examples.configuration;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 
 class CassandraFile {
 
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setConfigurationFile(getClass().getResource("/cassandra.yaml"));
+		cassandraFactory.setConfig(new ClassPathResource("cassandra.yaml"));
 		// end::source[]
 	}
 

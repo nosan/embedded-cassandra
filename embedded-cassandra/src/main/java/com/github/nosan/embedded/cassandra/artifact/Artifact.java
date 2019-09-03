@@ -16,19 +16,21 @@
 
 package com.github.nosan.embedded.cassandra.artifact;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 import com.github.nosan.embedded.cassandra.api.Version;
 
 /**
- * This interface provides a {@link Resource}.
+ * This interface provides a {@link Descriptor}.
  *
  * @author Dmytro Nosan
  * @see DefaultArtifact
- * @see RemoteArtifact
  * @see ArchiveArtifact
+ * @see RemoteArtifact
  * @since 3.0.0
  */
+@FunctionalInterface
 public interface Artifact {
 
 	/**
@@ -52,17 +54,17 @@ public interface Artifact {
 	}
 
 	/**
-	 * Returns the {@link Resource}.
+	 * Returns the {@link Descriptor}.
 	 *
-	 * @return the resource
-	 * @throws Exception in the case of any errors
+	 * @return the descriptor
+	 * @throws IOException if an I/O error occurs
 	 */
-	Resource getResource() throws Exception;
+	Descriptor getDescriptor() throws IOException;
 
 	/**
 	 * This interface provides a path to {@code Cassandra's} directory and {@code Cassandra's} version.
 	 */
-	interface Resource {
+	interface Descriptor {
 
 		/**
 		 * Returns the path to Cassandra's directory.

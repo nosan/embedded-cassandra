@@ -28,8 +28,6 @@ Sets the Cassandra's configuration file.
 include::{test-sources}/examples/configuration/CassandraFile.java[tag=source]
 ----
 
-CAUTION: Configuration file property has much priority than `System Properties` and `Properties`.
-
 [[configure-properties]]
 === Configure Cassandra's Properties
 
@@ -115,7 +113,7 @@ include::{test-sources}/examples/configuration/CassandraPorts.java[tag=source]
 
 TIP: Use `0` for a random port.
 
-CAUTION: Any port properties have much priority than `System Properties` and `Properties`.
+TIP: `EmbeddedCassandraFactory.random()` can be used to create a new factory with  preconfigured random ports.
 
 [[configure-proxy]]
 === Configure Proxy

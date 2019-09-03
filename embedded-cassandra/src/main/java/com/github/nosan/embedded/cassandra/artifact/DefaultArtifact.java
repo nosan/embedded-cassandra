@@ -26,40 +26,29 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.nosan.embedded.cassandra.api.Version;
-import com.github.nosan.embedded.cassandra.commons.DefaultPathSupplier;
-import com.github.nosan.embedded.cassandra.commons.PathSupplier;
 
 /**
- * An artifact that provides a {@link Artifact.Resource} based on the specified directory and version.
+ * An {@link Artifact} that provides a {@link Descriptor} based on the specified Cassandra's directory and Cassandra's
+ * version.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
  */
-public class DefaultArtifact implements Artifact {
+public final class DefaultArtifact implements Artifact {
 
 	private final Version version;
 
-	private final PathSupplier directorySupplier;
+	private final Path directory;
 
 	/**
 	 * Constructs a new {@link DefaultArtifact} with the specified version and directory.
 	 *
-	 * @param version the version
-	 * @param directory the directory ({@code Cassandra's home directory})
+	 * @param version Cassandra's version
+	 * @param directory Cassandra's directory ({@code Cassandra's home directory})
 	 */
 	public DefaultArtifact(Version version, Path directory) {
-		this(version, new DefaultPathSupplier(directory));
-	}
-
-	/**
-	 * Constructs a new {@link DefaultArtifact} with the specified version and directory.
-	 *
-	 * @param version the version
-	 * @param directorySupplier the directory ({@code Cassandra's home directory}) supplier
-	 */
-	public DefaultArtifact(Version version, PathSupplier directorySupplier) {
 		this.version = Objects.requireNonNull(version, "'version' must not be null");
-		this.directorySupplier = Objects.requireNonNull(directorySupplier, "'directorySupplier' must not be null");
+		this.directory = Objects.requireNonNull(directory, "'directory' must not be null");
 	}
 
 	/**
@@ -72,24 +61,20 @@ public class DefaultArtifact implements Artifact {
 	}
 
 	/**
-	 * Returns the directory supplier.
+	 * Returns the path where Cassandra's directory is located.
 	 *
-	 * @return the directory ({@code Cassandra's home directory}) supplier
+	 * @return the directory ({@code Cassandra's home directory})
 	 */
-	public PathSupplier getDirectorySupplier() {
-		return this.directorySupplier;
+	public Path getDirectory() {
+		return this.directory;
 	}
 
 	@Override
-	public Resource getResource() throws Exception {
-		Path directory = this.directorySupplier.get();
-		if (directory == null) {
-			throw new IllegalStateException("Directory must not be null");
-		}
+	public Descriptor getDescriptor() throws IOException {
 		Version version = this.version;
-		Path cassandraHome = findCassandraHome(directory);
+		Path cassandraHome = findCassandraHome(this.directory);
 
-		return new Resource() {
+		return new Descriptor() {
 
 			@Override
 			public Path getDirectory() {

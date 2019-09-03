@@ -11,11 +11,16 @@ This section provides answers to some common ‘how do I do that…​’ questi
 include::{test-sources}/examples/configuration/CassandraMoreOneInstance.java[tag=source]
 ----
 
-== Running Cassandra using an archive file
-
-Sometimes it can be useful to create your own Cassandra package with all configurations and then reuse it.
+== Running Cassandra with a custom Archive File
 
 [source,java,indent=0]
 ----
 include::{test-sources}/examples/configuration/CassandraArchiveFile.java[tag=source]
+----
+
+== Running Cassandra with a custom Directory
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraDirectory.java[tag=source]
 ----

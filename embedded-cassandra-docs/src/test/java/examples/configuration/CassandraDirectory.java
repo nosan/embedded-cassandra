@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.commons;
+package examples.configuration;
 
-import org.junit.jupiter.api.Test;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.api.Version;
+import com.github.nosan.embedded.cassandra.artifact.DefaultArtifact;
 
-/**
- * Tests for {@link PathSupplier}.
- *
- * @author Dmytro Nosan
- */
-class PathSupplierTests {
+public class CassandraDirectory {
 
-	@Test
-	void getPath() throws Exception {
-		assertThat(PathSupplier.NULL.get()).isEqualTo(null);
+	void source() {
+		// tag::source[]
+		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+		Path directory = Paths.get("<path to Cassandra's home>");
+		Version version = Version.of("3.11.4");
+		cassandraFactory.setArtifact(new DefaultArtifact(version, directory));
+		// end::source[]
 	}
 
 }

@@ -16,8 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.artifact;
 
-import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
@@ -25,37 +27,37 @@ import java.net.URLConnection;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import org.rauschig.jarchivelib.Archiver;
+import org.rauschig.jarchivelib.ArchiverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
-import com.github.nosan.embedded.cassandra.commons.MDCThreadFactory;
-import com.github.nosan.embedded.cassandra.commons.PathSupplier;
+import com.github.nosan.embedded.cassandra.commons.FileLock;
+import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
+import com.github.nosan.embedded.cassandra.commons.io.Resource;
+import com.github.nosan.embedded.cassandra.commons.io.UrlResource;
+import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
- * An artifact that downloads Apache Cassandra from the specified URLs and extracts the archive to the specified
- * directory. The latter used for determines {@code Cassandra's} home directory.
+ * An {@link Artifact} that downloads an archive from the {@code Internet} and then extracts it to the {@code
+ * destination} directory. Archive will be extracted and downloaded only once.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
  */
-public class RemoteArtifact implements Artifact {
+public final class RemoteArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(RemoteArtifact.class);
-
-	private final List<URL> urls = new ArrayList<>();
 
 	private final Version version;
 
@@ -65,8 +67,10 @@ public class RemoteArtifact implements Artifact {
 
 	private Proxy proxy = Proxy.NO_PROXY;
 
+	private UrlFactory urlFactory = new DefaultUrlFactory();
+
 	@Nullable
-	private Path extractDirectory;
+	private Path destination;
 
 	/**
 	 * Constructs a new {@link RemoteArtifact} with the specified version.
@@ -78,35 +82,12 @@ public class RemoteArtifact implements Artifact {
 	}
 
 	/**
-	 * Constructs a new {@link RemoteArtifact} with the specified version and extract directory.
-	 *
-	 * @param version the version
-	 * @param extractDirectory the directory to extract an archive file
-	 */
-	public RemoteArtifact(Version version, @Nullable Path extractDirectory) {
-		this.version = Objects.requireNonNull(version, "'version' must not be null");
-		this.extractDirectory = extractDirectory;
-	}
-
-	/**
 	 * Returns Cassandra's version.
 	 *
 	 * @return the version
 	 */
 	public Version getVersion() {
 		return this.version;
-	}
-
-	/**
-	 * URLs to download an archive file. Defaults to
-	 * <pre>{@code https://apache.org/dyn/closer.cgi/...
-	 * https://dist.apache.org/repos/dist/release/cassandra/...
-	 * https://archive.apache.org/dist/cassandra/...}</pre>
-	 *
-	 * @return the URLs
-	 */
-	public List<URL> getUrls() {
-		return this.urls;
 	}
 
 	/**
@@ -128,22 +109,40 @@ public class RemoteArtifact implements Artifact {
 	}
 
 	/**
-	 * Directory used to extract an archive file. Defaults to {@code {user.home}/.embeddedCassandra/artifact}
+	 * Returns {@link UrlFactory}. Defaults to {@link DefaultUrlFactory}.
 	 *
-	 * @return the directory
+	 * @return the UrlFactory
 	 */
-	@Nullable
-	public Path getExtractDirectory() {
-		return this.extractDirectory;
+	public UrlFactory getUrlFactory() {
+		return this.urlFactory;
 	}
 
 	/**
-	 * Sets directory used to extract an archive file.
+	 * Sets {@link UrlFactory}.
 	 *
-	 * @param extractDirectory the directory to extract an archive file
+	 * @param urlFactory the UrlFactory
 	 */
-	public void setExtractDirectory(@Nullable Path extractDirectory) {
-		this.extractDirectory = extractDirectory;
+	public void setUrlFactory(UrlFactory urlFactory) {
+		this.urlFactory = Objects.requireNonNull(urlFactory, "'urlFactory' must not be null");
+	}
+
+	/**
+	 * Directory used to extract an archive file. Defaults to {@code user.home}
+	 *
+	 * @return the destination directory
+	 */
+	@Nullable
+	public Path getDestination() {
+		return this.destination;
+	}
+
+	/**
+	 * Sets directory to extract an archive file.
+	 *
+	 * @param destination the path to the directory
+	 */
+	public void setDestination(@Nullable Path destination) {
+		this.destination = destination;
 	}
 
 	/**
@@ -184,26 +183,115 @@ public class RemoteArtifact implements Artifact {
 	}
 
 	@Override
-	public Resource getResource() throws Exception {
-		Version version = getVersion();
-		List<URL> urls = new ArrayList<>(getUrls());
-		if (urls.isEmpty()) {
-			urls.add(new URL(String.format("https://apache.org/dyn/closer.cgi?action=download"
-					+ "&filename=cassandra/%1$s/apache-cassandra-%1$s-bin.tar.gz", version)));
-			urls.add(new URL(String.format("https://dist.apache.org/repos/dist/release/cassandra/"
-					+ "%1$s/apache-cassandra-%1$s-bin.tar.gz", version)));
-			urls.add(new URL(String
-					.format("https://archive.apache.org/dist/cassandra/%1$s/apache-cassandra-%1$s-bin.tar.gz",
-							version)));
+	public Descriptor getDescriptor() throws IOException {
+		Path destination = getRealDestination();
+		Artifact artifact = new DefaultArtifact(this.version, destination);
+		if (!Files.exists(destination.resolve(".extracted"))) {
+			Files.createDirectories(destination);
+			Path lockFile = destination.resolve(".lock");
+			try (FileLock fileLock = FileLock.of(lockFile)) {
+				log.info("Acquires a lock to the file '{}' ...", lockFile);
+				if (!fileLock.tryLock(2, TimeUnit.MINUTES)) {
+					throw new IllegalStateException("File lock cannot be acquired for a file '" + lockFile + "'");
+				}
+				log.info("The lock to the file '{}' was acquired", lockFile);
+				if (!Files.exists(destination.resolve(".extracted"))) {
+					Resource resource = download();
+					extract(resource, destination);
+					Descriptor descriptor = artifact.getDescriptor();
+					FileUtils.createIfNotExists(destination.resolve(".extracted"));
+					return descriptor;
+				}
+			}
 		}
-		UrlArchiveFileSupplier archiveFileSupplier = new UrlArchiveFileSupplier(version, getReadTimeout(),
-				getConnectTimeout(), getProxy(), urls);
-		return new ArchiveArtifact(version, getExtractDirectory(), archiveFileSupplier).getResource();
+		return artifact.getDescriptor();
 	}
 
-	private static final class UrlArchiveFileSupplier implements PathSupplier {
+	private Path getRealDestination() {
+		Path destination = Optional.ofNullable(this.destination).orElseGet(FileUtils::getUserHome);
+		if (destination == null) {
+			throw new IllegalStateException("'destination' must not be null");
+		}
+		return destination.resolve(".embedded-cassandra/artifact/remote/" + this.version);
+	}
+
+	private Resource download() throws IOException {
+		List<Exception> exceptions = new ArrayList<>();
+		List<URL> urls = this.urlFactory.create(this.version);
+		FileDownloader downloader = new FileDownloader(this.readTimeout, this.connectTimeout, this.proxy);
+		for (URL url : urls) {
+			try {
+				return downloader.download(url, new DefaultProgressListener(url, this.version));
+			}
+			catch (ClosedByInterruptException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				exceptions.add(ex);
+			}
+		}
+		IOException ex = new IOException("Apache Cassandra cannot be downloaded from " + urls);
+		exceptions.forEach(ex::addSuppressed);
+		throw ex;
+	}
+
+	private void extract(Resource archiveResource, Path destination) throws IOException {
+		log.info("Extracts '{}' into '{}' directory", archiveResource, destination);
+		File archive = archiveResource.toFile();
+		Archiver archiver = ArchiverFactory.createArchiver(archive);
+		archiver.extract(archive, destination.toFile());
+		if (Thread.interrupted()) {
+			throw new ClosedByInterruptException();
+		}
+	}
+
+	private interface ProgressListener {
+
+		void start();
+
+		void update(long readBytes, long totalBytes);
+
+		void finish();
+
+	}
+
+	private static final class DefaultProgressListener implements ProgressListener {
+
+		private static final long MB = 1024 * 1024;
+
+		private final URL url;
 
 		private final Version version;
+
+		private long lastPercent;
+
+		DefaultProgressListener(URL url, Version version) {
+			this.url = url;
+			this.version = version;
+		}
+
+		@Override
+		public void start() {
+			log.info("Downloading Apache Cassandra '{}' from '{}'", this.version, this.url);
+		}
+
+		@Override
+		public void update(long readBytes, long totalBytes) {
+			long percent = readBytes * 100 / totalBytes;
+			if (percent - this.lastPercent >= 5) {
+				this.lastPercent = percent;
+				log.info("Downloaded {}MB / {}MB  {}%", (readBytes / MB), (totalBytes / MB), percent);
+			}
+		}
+
+		@Override
+		public void finish() {
+			log.info("Apache Cassandra '{}' is downloaded from '{}'", this.version, this.url);
+		}
+
+	}
+
+	private static final class FileDownloader {
 
 		private final Duration readTimeout;
 
@@ -211,155 +299,83 @@ public class RemoteArtifact implements Artifact {
 
 		private final Proxy proxy;
 
-		private final List<URL> urls;
-
-		UrlArchiveFileSupplier(Version version, Duration readTimeout, Duration connectTimeout, Proxy proxy,
-				List<URL> urls) {
-			this.version = version;
+		FileDownloader(Duration readTimeout, Duration connectTimeout, Proxy proxy) {
 			this.readTimeout = readTimeout;
 			this.connectTimeout = connectTimeout;
 			this.proxy = proxy;
-			this.urls = Collections.unmodifiableList(new ArrayList<>(urls));
 		}
 
-		@Override
-		public Path get() throws IOException {
-			List<IOException> exceptions = new ArrayList<>();
-			for (URL url : this.urls) {
-				try {
-					return downloadFile(url);
-				}
-				catch (ClosedByInterruptException ex) {
-					throw ex;
-				}
-				catch (IOException ex) {
-					exceptions.add(ex);
-				}
-			}
-			IOException ex = new IOException("Apache Cassandra cannot be downloaded from " + this.urls);
-			exceptions.forEach(ex::addSuppressed);
-			throw ex;
-		}
-
-		private Path downloadFile(URL url) throws IOException {
-			URLConnection connection = openConnection(url, 20);
-			try (BufferedInputStream stream = new BufferedInputStream(connection.getInputStream())) {
-				long expectedSize = connection.getContentLengthLong();
-				Path tempFile = createTempFile(url, connection.getURL());
-				FileProgress fileProgress = new FileProgress(tempFile, expectedSize);
-				ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new MDCThreadFactory());
-				log.info("Downloading Apache Cassandra '{}' from '{}'", this.version, connection.getURL());
-				long start = System.currentTimeMillis();
-				scheduler.scheduleAtFixedRate(fileProgress::update, 0, 1, TimeUnit.SECONDS);
-				try {
-					Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
-				}
-				finally {
-					scheduler.shutdown();
-				}
-				long elapsed = System.currentTimeMillis() - start;
-				log.info("Apache Cassandra '{}' is downloaded ({} ms)", this.version, elapsed);
-				return tempFile;
-			}
-		}
-
-		private URLConnection openConnection(URL url, int maxRedirects) throws IOException {
-			URLConnection connection = url.openConnection(this.proxy);
-			connection.setConnectTimeout(Math.toIntExact(this.connectTimeout.toMillis()));
-			connection.setReadTimeout(Math.toIntExact(this.readTimeout.toMillis()));
-			if (connection instanceof HttpURLConnection) {
-				HttpURLConnection httpConnection = (HttpURLConnection) connection;
-				httpConnection.setInstanceFollowRedirects(false);
-				int status = httpConnection.getResponseCode();
-				if (status >= 200 && status < 300) {
-					return httpConnection;
-				}
-				else if (status >= 300 && status <= 307 && status != 306 && status != 304) {
-					if (maxRedirects > 0) {
-						String location = httpConnection.getHeaderField("Location");
-						if (StringUtils.hasText(location)) {
-							return openConnection(new URL(httpConnection.getURL(), location), maxRedirects - 1);
+		Resource download(URL url, ProgressListener progressListener) throws IOException {
+			URLConnection connection = connect(url);
+			try (InputStream is = connection.getInputStream()) {
+				long totalSize = connection.getContentLengthLong();
+				Path tempFile = createTempFile(url);
+				progressListener.start();
+				try (OutputStream os = Files.newOutputStream(tempFile)) {
+					byte[] buffer = new byte[8192];
+					long readBytes = 0;
+					int read;
+					while ((read = is.read(buffer)) != -1) {
+						os.write(buffer, 0, read);
+						readBytes += read;
+						if (totalSize > 0 && readBytes > 0) {
+							progressListener.update(readBytes, totalSize);
 						}
 					}
-					else {
-						throw new IOException("Too many redirects for URL '" + url + "'");
-					}
 				}
-				else if (status >= 400 || status < 200) {
+				progressListener.finish();
+				return new FileSystemResource(tempFile);
+			}
+		}
+
+		private URLConnection connect(URL url) throws IOException {
+			int maxRedirects = 10;
+			URL target = url;
+			for (; ; ) {
+				URLConnection connection = connect(target, this.readTimeout, this.connectTimeout, this.proxy);
+				if (connection instanceof HttpURLConnection) {
+					HttpURLConnection httpConnection = (HttpURLConnection) connection;
+					httpConnection.setInstanceFollowRedirects(false);
+					int status = httpConnection.getResponseCode();
+					if (status >= 300 && status <= 307 && status != 306 && status != 304) {
+						if (maxRedirects < 0) {
+							throw new IOException("Too many redirects for URL '" + url + "'");
+						}
+						String location = httpConnection.getHeaderField("Location");
+						if (location != null) {
+							httpConnection.disconnect();
+							maxRedirects--;
+							target = new URL(url, location);
+							continue;
+						}
+					}
+					if (status == HttpURLConnection.HTTP_OK) {
+						return connection;
+					}
 					throw new IOException("HTTP Status '" + status + "' is invalid for URL '" + url + "'");
 				}
-				return httpConnection;
+				return connection;
 			}
+
+		}
+
+		private static URLConnection connect(URL url, Duration readTimeout, Duration connectTimeout, Proxy proxy)
+				throws IOException {
+			URLConnection connection = url.openConnection(proxy);
+			connection.setConnectTimeout(Math.toIntExact(connectTimeout.toMillis()));
+			connection.setReadTimeout(Math.toIntExact(readTimeout.toMillis()));
 			return connection;
 		}
 
-		private static Path createTempFile(URL original, URL connection) throws IOException {
-			String fileName = getFileName(connection);
-			if (!StringUtils.hasText(fileName)) {
-				fileName = getFileName(original);
-			}
+		private static Path createTempFile(URL url) throws IOException {
+			String fileName = new UrlResource(url).getFileName();
 			if (!StringUtils.hasText(fileName)) {
 				throw new IllegalArgumentException(
-						String.format("There is no way to determine a file name from '%s' and '%s'", original,
-								connection));
+						String.format("There is no way to determine a file name from a '%s'", url));
 			}
 			Path tempFile = Files.createTempFile("", "-" + fileName);
 			tempFile.toFile().deleteOnExit();
 			return tempFile;
-		}
-
-		@Nullable
-		private static String getFileName(URL url) {
-			String fileName = url.getFile();
-			if (StringUtils.hasText(fileName) && fileName.contains("/")) {
-				fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
-			}
-			return fileName;
-		}
-
-		private static class FileProgress {
-
-			private static final int MB = 1024 * 1024;
-
-			private final Path file;
-
-			private final long expectedSize;
-
-			private long lastPercent;
-
-			FileProgress(Path file, long expectedSize) {
-				this.file = file;
-				this.expectedSize = expectedSize;
-			}
-
-			void update() {
-				if (this.expectedSize > 0) {
-					long currentSize = getSize(this.file);
-					if (currentSize > 0) {
-						long percent = currentSize * 100 / this.expectedSize;
-						if ((percent - this.lastPercent) >= 5) {
-							this.lastPercent = percent;
-							log.info("Downloaded {} / {}  {}%", formatSize(currentSize), formatSize(this.expectedSize),
-									percent);
-						}
-					}
-				}
-			}
-
-			private static long getSize(Path file) {
-				try {
-					return Files.size(file);
-				}
-				catch (IOException ex) {
-					return -1;
-				}
-			}
-
-			private static String formatSize(long bytes) {
-				long mb = bytes / MB;
-				return (mb > 0) ? mb + "MB" : bytes + "B";
-			}
-
 		}
 
 	}

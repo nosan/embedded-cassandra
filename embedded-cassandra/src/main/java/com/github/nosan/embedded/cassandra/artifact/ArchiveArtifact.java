@@ -16,79 +16,53 @@
 
 package com.github.nosan.embedded.cassandra.artifact;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import org.rauschig.jarchivelib.Archiver;
+import org.rauschig.jarchivelib.ArchiverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.FileLock;
-import com.github.nosan.embedded.cassandra.commons.PathSupplier;
-import com.github.nosan.embedded.cassandra.commons.util.ArchiveUtils;
+import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 
 /**
- * An artifact that provides {@link Artifact.Resource} based on the specified archive file and version.
+ * An {@link Artifact} that provides a {@link Descriptor} based on the specified archive resource and Cassandra's
+ * version. Archive will be extracted only once into the {@code destination}.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
  */
-public class ArchiveArtifact implements Artifact {
+public final class ArchiveArtifact implements Artifact {
 
 	private static final Logger log = LoggerFactory.getLogger(ArchiveArtifact.class);
 
 	private final Version version;
 
-	private final PathSupplier archiveSupplier;
+	private final Resource archiveResource;
 
 	@Nullable
-	private Path extractDirectory;
+	private Path destination;
 
 	/**
-	 * Constructs a new {@link ArchiveArtifact} with the specified archive file and version.
+	 * Constructs a new {@link ArchiveArtifact} with the specified archive resource and Cassandra's version.
 	 *
-	 * @param version the version
-	 * @param archiveSupplier the supplier to get a path to the archive
+	 * @param version Cassandra's version
+	 * @param archiveResource the archive resource
 	 */
-	public ArchiveArtifact(Version version, PathSupplier archiveSupplier) {
+	public ArchiveArtifact(Version version, Resource archiveResource) {
 		this.version = Objects.requireNonNull(version, "'version' must not be null");
-		this.archiveSupplier = Objects.requireNonNull(archiveSupplier, "'archiveSupplier' must not be null");
-	}
-
-	/**
-	 * Constructs a new {@link ArchiveArtifact} with the specified archive file, version and extract directory.
-	 *
-	 * @param version the version
-	 * @param archiveSupplier the supplier to get a path to the archive
-	 * @param extractDirectory the directory to extract an archive file
-	 */
-	public ArchiveArtifact(Version version, @Nullable Path extractDirectory, PathSupplier archiveSupplier) {
-		this.version = Objects.requireNonNull(version, "'version' must not be null");
-		this.archiveSupplier = Objects.requireNonNull(archiveSupplier, "'archiveSupplier' must not be null");
-		this.extractDirectory = extractDirectory;
-	}
-
-	/**
-	 * Directory used to extract an archive file. Defaults to {@code {user.home}/.embeddedCassandra/artifact}
-	 *
-	 * @return the directory
-	 */
-	@Nullable
-	public Path getExtractDirectory() {
-		return this.extractDirectory;
-	}
-
-	/**
-	 * Sets directory used to extract an archive file.
-	 *
-	 * @param extractDirectory the directory to extract an archive file
-	 */
-	public void setExtractDirectory(@Nullable Path extractDirectory) {
-		this.extractDirectory = extractDirectory;
+		this.archiveResource = Objects.requireNonNull(archiveResource, "'archiveResource' must not be null");
 	}
 
 	/**
@@ -101,50 +75,74 @@ public class ArchiveArtifact implements Artifact {
 	}
 
 	/**
-	 * Returns archive supplier.
+	 * Returns archive file.
 	 *
-	 * @return the supplier to get a path to the archive
+	 * @return the archive file
 	 */
-	public PathSupplier getArchiveSupplier() {
-		return this.archiveSupplier;
+	public Resource getArchiveResource() {
+		return this.archiveResource;
+	}
+
+	/**
+	 * Directory used to extract an archive file. Defaults to {@code user.home}
+	 *
+	 * @return the directory
+	 */
+	@Nullable
+	public Path getDestination() {
+		return this.destination;
+	}
+
+	/**
+	 * Sets directory to extract an archive file.
+	 *
+	 * @param destination the path to the directory
+	 */
+	public void setDestination(@Nullable Path destination) {
+		this.destination = destination;
 	}
 
 	@Override
-	public Resource getResource() throws Exception {
-		Path archiveDirectory = this.extractDirectory;
-		if (archiveDirectory == null) {
-			archiveDirectory = FileUtils.getUserHome().resolve(".embeddedCassandra/artifact");
+	public Artifact.Descriptor getDescriptor() throws IOException {
+		Path destination = getRealDestination();
+
+		Artifact artifact = new DefaultArtifact(this.version, destination);
+
+		if (!Files.exists(destination.resolve(".extracted"))) {
+			Files.createDirectories(destination);
+			Path lockFile = destination.resolve(".lock");
+			try (FileLock fileLock = FileLock.of(lockFile)) {
+				if (!fileLock.tryLock(30, TimeUnit.SECONDS)) {
+					throw new IllegalStateException("File lock cannot be acquired for a file '" + lockFile + "'");
+				}
+				if (!Files.exists(destination.resolve(".extracted"))) {
+					extract(this.archiveResource, destination);
+					Artifact.Descriptor descriptor = artifact.getDescriptor();
+					FileUtils.createIfNotExists(destination.resolve(".extracted"));
+					return descriptor;
+				}
+			}
 		}
-		Path archiveDir = archiveDirectory.resolve(this.version.toString());
-		DefaultArtifact artifact = new DefaultArtifact(this.version, archiveDir);
-		if (!Files.exists(archiveDir.resolve(".extracted"))) {
-			return extract(archiveDir, artifact);
-		}
-		return artifact.getResource();
+
+		return artifact.getDescriptor();
 	}
 
-	private Resource extract(Path archiveDir, DefaultArtifact artifact) throws Exception {
-		Files.createDirectories(archiveDir);
-		Path lockFile = archiveDir.resolve(".lock");
-		try (FileLock fileLock = FileLock.of(lockFile)) {
-			log.info("Acquires a lock to the file '{}' ...", lockFile);
-			if (!fileLock.tryLock(5, TimeUnit.MINUTES)) {
-				throw new IllegalStateException("File lock cannot be acquired for a file '" + lockFile + "'");
-			}
-			log.info("The lock to the file '{}' was acquired", lockFile);
-			if (!Files.exists(archiveDir.resolve(".extracted"))) {
-				Path archiveFile = this.archiveSupplier.get();
-				if (archiveFile == null) {
-					throw new IllegalStateException("Archive file must not be null");
-				}
-				log.info("Extracts '{}' file into '{}' directory", archiveFile, archiveDir);
-				ArchiveUtils.extract(archiveFile, archiveDir);
-				Resource resource = artifact.getResource();
-				FileUtils.createIfNotExists(archiveDir.resolve(".extracted"));
-				return resource;
-			}
+	private Path getRealDestination() {
+		Path destination = Optional.ofNullable(this.destination).orElseGet(FileUtils::getUserHome);
+		if (destination == null) {
+			throw new IllegalStateException("'destination' must not be null");
 		}
-		return artifact.getResource();
+		return destination.resolve(".embedded-cassandra/artifact/" + this.version);
+	}
+
+	private void extract(Resource archiveResource, Path destination) throws IOException {
+		log.info("Extracts '{}' into '{}' directory", archiveResource, destination);
+		File archive = archiveResource.toFile();
+		Archiver archiver = ArchiverFactory.createArchiver(archive);
+		archiver.extract(archive, destination.toFile());
+		if (Thread.interrupted()) {
+			throw new ClosedByInterruptException();
+		}
 	}
 
 }

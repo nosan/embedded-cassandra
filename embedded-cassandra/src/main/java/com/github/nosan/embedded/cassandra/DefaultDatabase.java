@@ -88,14 +88,10 @@ class DefaultDatabase implements Database {
 		NodeProcess process = this.node.start();
 		this.process = process;
 		log.info("{} has been started", toString());
-
 		NativeTransportReadinessConsumer nativeTransportReadiness = new NativeTransportReadinessConsumer(this.version);
 		RpcTransportReadinessConsumer rpcTransportReadiness = new RpcTransportReadinessConsumer(this.version);
-
 		await(process, nativeTransportReadiness, rpcTransportReadiness);
-
 		log.info("{} is running and ready for connections", toString());
-
 		int sslPort = nativeTransportReadiness.getSslPort();
 		int port = nativeTransportReadiness.getPort();
 		this.port = (port != -1) ? port : sslPort;

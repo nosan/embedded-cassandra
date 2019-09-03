@@ -16,13 +16,10 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.ServerSocket;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +32,11 @@ import java.util.Objects;
 
 import org.yaml.snakeyaml.Yaml;
 
+import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.RunProcess;
+import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
+import com.github.nosan.embedded.cassandra.commons.io.Resource;
+import com.github.nosan.embedded.cassandra.commons.io.UrlResource;
 
 /**
  * Abstract {@link Node} that configures startup parameters before start.
@@ -48,6 +49,9 @@ abstract class AbstractNode implements Node {
 
 	private final Path workingDirectory;
 
+	@Nullable
+	private final Resource config;
+
 	private final Map<String, Object> properties;
 
 	private final List<String> jvmOptions;
@@ -56,13 +60,14 @@ abstract class AbstractNode implements Node {
 
 	private final Map<String, Object> environmentVariables;
 
-	AbstractNode(Path workingDirectory, Map<String, Object> properties, List<String> jvmOptions,
-			Map<String, Object> systemProperties, Map<String, Object> environmentVariables) {
+	AbstractNode(Path workingDirectory, @Nullable Resource config, Map<String, Object> properties,
+			List<String> jvmOptions, Map<String, Object> systemProperties, Map<String, Object> environmentVariables) {
 		this.workingDirectory = workingDirectory;
 		this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 		this.systemProperties = Collections.unmodifiableMap(new LinkedHashMap<>(systemProperties));
 		this.environmentVariables = Collections.unmodifiableMap(new LinkedHashMap<>(environmentVariables));
+		this.config = config;
 	}
 
 	@Override
@@ -97,30 +102,23 @@ abstract class AbstractNode implements Node {
 	protected abstract NodeProcess doStart(RunProcess runProcess) throws IOException, InterruptedException;
 
 	private Map<String, Object> loadProperties() throws IOException {
-		try (InputStream is = new BufferedInputStream(getConfigurationFile().openStream())) {
+		try (InputStream is = getConfig().getInputStream()) {
 			Yaml yaml = new Yaml();
 			Map<String, Object> properties = yaml.load(is);
 			return (properties != null) ? new LinkedHashMap<>(properties) : new LinkedHashMap<>(0);
 		}
 	}
 
-	private URL getConfigurationFile() throws MalformedURLException {
+	private Resource getConfig() throws IOException {
+		Resource config = this.config;
+		if (config != null) {
+			return config;
+		}
 		Object url = this.systemProperties.get("cassandra.config");
 		if (url != null) {
-			try {
-				return new URL(url.toString());
-			}
-			catch (MalformedURLException ex) {
-				try {
-					return URI.create(url.toString()).toURL();
-				}
-				catch (Exception swallow) {
-					ex.addSuppressed(swallow);
-					throw ex;
-				}
-			}
+			return new UrlResource(new URL(url.toString()));
 		}
-		return this.workingDirectory.resolve("conf/cassandra.yaml").toUri().toURL();
+		return new FileSystemResource(this.workingDirectory.resolve("conf/cassandra.yaml"));
 	}
 
 	private void dumpProperties(Map<String, Object> properties, Path file) throws IOException {

@@ -16,8 +16,10 @@
 
 package com.github.nosan.embedded.cassandra.artifact;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,7 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.github.nosan.embedded.cassandra.api.Version;
-import com.github.nosan.embedded.cassandra.commons.PathSupplier;
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
+import com.github.nosan.embedded.cassandra.commons.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,31 +46,32 @@ class ArchiveArtifactTests {
 
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) throws Exception {
-		ArchiveArtifact artifact = new ArchiveArtifact(VERSION, new OncePathSupplier());
-		artifact.setExtractDirectory(temporaryFolder);
-		assertResource(artifact.getResource());
+		ArchiveArtifact artifact = new ArchiveArtifact(VERSION, new OnceResource());
+		artifact.setDestination(temporaryFolder);
+		assertDescriptor(artifact.getDescriptor());
 		//reuse
-		assertResource(artifact.getResource());
+		assertDescriptor(artifact.getDescriptor());
 	}
 
 	@Test
 	void testArtifactThreads(@TempDir Path temporaryFolder) throws Exception {
 		ExecutorService executorService = Executors.newFixedThreadPool(2);
-		ArchiveArtifact artifact = new ArchiveArtifact(VERSION, new OncePathSupplier());
-		artifact.setExtractDirectory(temporaryFolder);
+		ArchiveArtifact artifact = new ArchiveArtifact(VERSION, new OnceResource());
+		artifact.setDestination(temporaryFolder);
+
 		try {
 			CountDownLatch latch = new CountDownLatch(2);
-			Future<Artifact.Resource> dir = executorService.submit(() -> {
+			Future<Artifact.Descriptor> dir = executorService.submit(() -> {
 				latch.countDown();
-				return artifact.getResource();
+				return artifact.getDescriptor();
 			});
-			Future<Artifact.Resource> dir1 = executorService.submit(() -> {
+			Future<Artifact.Descriptor> dir1 = executorService.submit(() -> {
 				latch.countDown();
-				return artifact.getResource();
+				return artifact.getDescriptor();
 			});
 			latch.await();
-			assertResource(dir.get());
-			assertResource(dir1.get());
+			assertDescriptor(dir.get());
+			assertDescriptor(dir1.get());
 		}
 		finally {
 			executorService.shutdown();
@@ -75,24 +79,41 @@ class ArchiveArtifactTests {
 
 	}
 
-	private void assertResource(Artifact.Resource resource) {
-		Path directory = resource.getDirectory();
-		assertThat(resource.getVersion()).isEqualTo(VERSION);
+	private void assertDescriptor(Artifact.Descriptor descriptor) {
+		Path directory = descriptor.getDirectory();
+		assertThat(descriptor.getVersion()).isEqualTo(VERSION);
 		assertThat(directory.resolve("bin")).exists();
 		assertThat(directory.resolve("lib")).exists();
 		assertThat(directory.resolve("conf")).exists();
 	}
 
-	private static final class OncePathSupplier implements PathSupplier {
+	private static final class OnceResource implements Resource {
 
 		private final AtomicBoolean alreadyCalled = new AtomicBoolean(false);
 
+		private final ClassPathResource resource = new ClassPathResource("apache-cassandra-3.11.4-bin.tar.gz");
+
 		@Override
-		public Path get() throws Exception {
+		public String getFileName() {
+			return this.resource.getFileName();
+		}
+
+		@Override
+		public boolean exists() {
+			return this.resource.exists();
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
 			if (this.alreadyCalled.compareAndSet(false, true)) {
-				return Paths.get(getClass().getResource("/apache-cassandra-3.11.4-bin.tar.gz").toURI());
+				return this.resource.getInputStream();
 			}
-			throw new IllegalStateException("Path Supplier is called more than one time");
+			throw new IllegalStateException("Already called");
+		}
+
+		@Override
+		public URL toURL() throws IOException {
+			return this.resource.toURL();
 		}
 
 	}

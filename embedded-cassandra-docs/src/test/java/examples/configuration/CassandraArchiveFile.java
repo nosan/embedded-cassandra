@@ -16,19 +16,19 @@
 
 package examples.configuration;
 
-import java.nio.file.Paths;
-
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.artifact.ArchiveArtifact;
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 
 public class CassandraArchiveFile {
 
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setArtifact(new ArchiveArtifact(Version.of("3.11.4"),
-				() -> Paths.get(getClass().getResource("/apache-cassandra-3.11.4-bin.tar.gz").toURI())));
+		Version version = Version.of("3.11.4");
+		ClassPathResource archiveFile = new ClassPathResource("apache-cassandra-3.11.4-bin.tar.gz");
+		cassandraFactory.setArtifact(new ArchiveArtifact(version, archiveFile));
 		// end::source[]
 	}
 

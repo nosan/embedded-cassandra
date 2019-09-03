@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.io.TempDir;
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link FileUtils}.
@@ -52,16 +50,8 @@ class FileUtilsTests {
 	}
 
 	@Test
-	void shouldThrowIllegalStateExceptionWhenUserHomeDirNotPresent() {
-		Properties properties = new Properties();
-		properties.putAll(System.getProperties());
-		try {
-			System.clearProperty("user.home");
-			assertThatIllegalStateException().isThrownBy(FileUtils::getUserHome);
-		}
-		finally {
-			System.setProperties(properties);
-		}
+	void getJavaHomeDirectory() {
+		assertThat(FileUtils.getJavaHome()).isEqualTo(Paths.get(System.getProperty("java.home")));
 	}
 
 	@Test

@@ -34,7 +34,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.artifact.Artifact;
-import com.github.nosan.embedded.cassandra.commons.PathSupplier;
+import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,7 +65,7 @@ class EmbeddedCassandraFactoryTests {
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) {
 		final Version version = Version.of("3.11.4");
-		Artifact artifact = () -> new Artifact.Resource() {
+		Artifact artifact = () -> new Artifact.Descriptor() {
 
 			@Override
 			public Path getDirectory() {
@@ -86,7 +86,7 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void testJavaHome(@TempDir Path temporaryFolder) {
-		this.cassandraFactory.setJavaHome(() -> temporaryFolder);
+		this.cassandraFactory.setJavaHome(temporaryFolder);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("environmentVariables",
@@ -139,7 +139,7 @@ class EmbeddedCassandraFactoryTests {
 	@Test
 	void getEnvironmentVariables() {
 		this.cassandraFactory.getEnvironmentVariables().put("key", "value");
-		this.cassandraFactory.setJavaHome(PathSupplier.NULL);
+		this.cassandraFactory.setJavaHome(null);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("environmentVariables", Collections.singletonMap("key", "value"));
@@ -192,15 +192,14 @@ class EmbeddedCassandraFactoryTests {
 	}
 
 	@Test
-	void testConfigurationFile(@TempDir Path temporaryFolder) throws IOException {
+	void testConfigFile(@TempDir Path temporaryFolder) throws IOException {
 		Path file = Files.createFile(temporaryFolder.resolve("cassandra.yaml"));
-		this.cassandraFactory.setConfigurationFile(file.toUri());
-		assertThat(this.cassandraFactory.getConfigurationFile()).isEqualTo(file.toUri().toURL());
+		FileSystemResource config = new FileSystemResource(file);
+		this.cassandraFactory.setConfig(config);
+		assertThat(this.cassandraFactory.getConfig()).isEqualTo(config);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
-		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",
-				Collections.singletonMap("cassandra.config", file.toUri().toURL()));
-
+		assertThat(node).hasFieldOrPropertyWithValue("config", config);
 	}
 
 	@Test

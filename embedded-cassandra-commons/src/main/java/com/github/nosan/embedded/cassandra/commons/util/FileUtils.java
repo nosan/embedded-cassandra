@@ -32,7 +32,7 @@ import java.util.function.BiPredicate;
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 
 /**
- * Simple utility methods for dealing with files/directories.
+ * Simple utility methods for dealing with a {@link Path}.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
@@ -40,6 +40,28 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
 public final class FileUtils {
 
 	private FileUtils() {
+	}
+
+	/**
+	 * Returns the path to user home.
+	 *
+	 * @return a path, or {@code null} if {@code user.home} system property is not present
+	 */
+	@Nullable
+	public static Path getUserHome() {
+		String dir = System.getProperty("user.home");
+		return (dir != null) ? Paths.get(dir) : null;
+	}
+
+	/**
+	 * Returns the path to java home.
+	 *
+	 * @return a path, or {@code null} if {@code java.home} system property is not present
+	 */
+	@Nullable
+	public static Path getJavaHome() {
+		String dir = System.getProperty("java.home");
+		return (dir != null) ? Paths.get(dir) : null;
 	}
 
 	/**
@@ -60,19 +82,6 @@ public final class FileUtils {
 		catch (FileAlreadyExistsException ex) {
 			return file;
 		}
-	}
-
-	/**
-	 * Returns the user home directory as a {@code Path}.
-	 *
-	 * @return a directory
-	 */
-	public static Path getUserHome() {
-		String dir = System.getProperty("user.home");
-		if (dir == null) {
-			throw new IllegalStateException("'user.home' is not defined. Please set 'user.home' system property");
-		}
-		return Paths.get(dir);
 	}
 
 	/**

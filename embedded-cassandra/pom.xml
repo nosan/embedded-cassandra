@@ -47,8 +47,8 @@
             <artifactId>snakeyaml</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
+            <groupId>org.rauschig</groupId>
+            <artifactId>jarchivelib</artifactId>
         </dependency>
         <dependency>
             <groupId>com.datastax.cassandra</groupId>

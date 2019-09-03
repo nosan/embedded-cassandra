@@ -14,32 +14,30 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.commons.util;
+package com.github.nosan.embedded.cassandra.artifact;
 
-import java.util.Locale;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+
+import com.github.nosan.embedded.cassandra.api.Version;
 
 /**
- * Utility classes for {@code java.lang.System}.
+ * Factory interface that can be used to create a list of URLs to the Apache Cassandra repositories.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
  */
-public final class SystemUtils {
-
-	private SystemUtils() {
-	}
+@FunctionalInterface
+public interface UrlFactory {
 
 	/**
-	 * Returns {@code true} if this is Windows.
+	 * Returns list of URLs for the specified version.
 	 *
-	 * @return {@code true} if Windows otherwise {@code false}.
+	 * @param version Cassandra's version
+	 * @return URLs to  to the Apache Cassandra repositories
+	 * @throws MalformedURLException if {@code URL} cannot be built
 	 */
-	public static boolean isWindows() {
-		String name = System.getProperty("os.name");
-		if (name == null) {
-			throw new IllegalStateException("'os.name' is not defined. Please set 'os.name' system property");
-		}
-		return name.toLowerCase(Locale.ENGLISH).contains("windows");
-	}
+	List<URL> create(Version version) throws MalformedURLException;
 
 }

@@ -16,15 +16,13 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -41,12 +39,9 @@ import com.github.nosan.embedded.cassandra.artifact.ArchiveArtifact;
 import com.github.nosan.embedded.cassandra.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.artifact.DefaultArtifact;
 import com.github.nosan.embedded.cassandra.artifact.RemoteArtifact;
-import com.github.nosan.embedded.cassandra.commons.DefaultPathSupplier;
-import com.github.nosan.embedded.cassandra.commons.EnvironmentPathSupplier;
-import com.github.nosan.embedded.cassandra.commons.PathSupplier;
-import com.github.nosan.embedded.cassandra.commons.SystemPathSupplier;
+import com.github.nosan.embedded.cassandra.commons.io.Resource;
+import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
-import com.github.nosan.embedded.cassandra.commons.util.SystemUtils;
 
 /**
  * {@link CassandraFactory} that can be used to create and configure an {@code EmbeddedCassandra}. {@code
@@ -108,7 +103,7 @@ import com.github.nosan.embedded.cassandra.commons.util.SystemUtils;
  * @see CassandraFactory
  * @since 3.0.0
  */
-public class EmbeddedCassandraFactory implements CassandraFactory {
+public final class EmbeddedCassandraFactory implements CassandraFactory {
 
 	private static final AtomicLong number = new AtomicLong();
 
@@ -124,8 +119,6 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 
 	private boolean daemon = true;
 
-	private PathSupplier javaHome = new SystemPathSupplier("java.home");
-
 	private Logger logger = LoggerFactory.getLogger(Cassandra.class);
 
 	private boolean registerShutdownHook = true;
@@ -135,10 +128,16 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 	private Duration timeout = Duration.ofSeconds(90);
 
 	@Nullable
+	private Path javaHome = FileUtils.getJavaHome();
+
+	@Nullable
 	private String name;
 
 	@Nullable
 	private Artifact artifact;
+
+	@Nullable
+	private Resource config;
 
 	@Nullable
 	private Path workingDirectory;
@@ -160,9 +159,6 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 
 	@Nullable
 	private Integer jmxLocalPort;
-
-	@Nullable
-	private URL configurationFile;
 
 	/**
 	 * Constructs a new {@link EmbeddedCassandraFactory} with preconfigured random ports.
@@ -243,25 +239,22 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Returns the java's directory provider.
+	 * Returns the path to java directory. Defaults to {@code java.home}.
 	 *
-	 * @return the java provider
+	 * @return the path to java directory
 	 */
-	public PathSupplier getJavaHome() {
+	@Nullable
+	public Path getJavaHome() {
 		return this.javaHome;
 	}
 
 	/**
-	 * Sets the java home path. Defaults to {@link SystemPathSupplier}.
+	 * Sets the path to java directory.
 	 *
-	 * @param javaHomeSupplier the java home supplier
-	 * @see DefaultPathSupplier
-	 * @see EnvironmentPathSupplier
-	 * @see SystemPathSupplier
-	 * @see PathSupplier#NULL
+	 * @param javaHome the path to java directory
 	 */
-	public void setJavaHome(PathSupplier javaHomeSupplier) {
-		this.javaHome = Objects.requireNonNull(javaHomeSupplier, "'javaHome' must not be null");
+	public void setJavaHome(@Nullable Path javaHome) {
+		this.javaHome = javaHome;
 	}
 
 	/**
@@ -497,31 +490,18 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 	 * @return the configuration file (or null if none)
 	 */
 	@Nullable
-	public URL getConfigurationFile() {
-		return this.configurationFile;
+	public Resource getConfig() {
+		return this.config;
 	}
 
 	/**
 	 * Sets the Cassandra's configuration file.
 	 *
-	 * @param configurationFile the configuration file ({@code cassandra.yaml})
+	 * @param config the configuration file ({@code cassandra.yaml})
+	 * @see Resource
 	 */
-	public void setConfigurationFile(@Nullable URL configurationFile) {
-		this.configurationFile = configurationFile;
-	}
-
-	/**
-	 * Sets the Cassandra's configuration file.
-	 *
-	 * @param configurationFile the configuration file ({@code cassandra.yaml})
-	 */
-	public void setConfigurationFile(@Nullable URI configurationFile) {
-		try {
-			setConfigurationFile((configurationFile != null) ? configurationFile.toURL() : null);
-		}
-		catch (MalformedURLException ex) {
-			throw new IllegalArgumentException(ex);
-		}
+	public void setConfig(@Nullable Resource config) {
+		this.config = config;
 	}
 
 	/**
@@ -581,8 +561,8 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 		if (artifact == null) {
 			artifact = Artifact.of("3.11.4");
 		}
-		Artifact.Resource resource = artifact.getResource();
-		Version version = resource.getVersion();
+		Artifact.Descriptor descriptor = artifact.getDescriptor();
+		Version version = descriptor.getVersion();
 		Path workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null) {
 			workingDirectory = Files.createTempDirectory("apache-cassandra-" + version + "-");
@@ -590,7 +570,7 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 		if (Files.exists(workingDirectory) && !Files.isDirectory(workingDirectory)) {
 			throw new IllegalArgumentException(workingDirectory + " is not a directory");
 		}
-		Path artifactDirectory = resource.getDirectory();
+		Path artifactDirectory = descriptor.getDirectory();
 		if (!Files.exists(artifactDirectory)) {
 			throw new IllegalStateException(artifactDirectory + " does not exist");
 		}
@@ -607,7 +587,7 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 		return cassandra;
 	}
 
-	private Node createNode(Version version, Path workingDirectory) throws Exception {
+	private Node createNode(Version version, Path workingDirectory) {
 		Map<String, Object> systemProperties = new LinkedHashMap<>(getSystemProperties());
 		Integer port = getPort();
 		if (port != null) {
@@ -634,21 +614,25 @@ public class EmbeddedCassandraFactory implements CassandraFactory {
 		if (jmxLocalPort != null) {
 			systemProperties.put("cassandra.jmx.local.port", jmxLocalPort);
 		}
-		URL configurationFile = getConfigurationFile();
-		if (configurationFile != null) {
-			systemProperties.put("cassandra.config", configurationFile);
-		}
 		Map<String, Object> environmentVariables = new LinkedHashMap<>(getEnvironmentVariables());
-		Path javaHome = getJavaHome().get();
+		Path javaHome = getJavaHome();
 		if (javaHome != null) {
 			environmentVariables.put("JAVA_HOME", javaHome);
 		}
-		if (SystemUtils.isWindows()) {
-			return new WindowsNode(version, workingDirectory, getJvmOptions(), systemProperties, environmentVariables,
-					properties);
+		if (isWindows()) {
+			return new WindowsNode(version, workingDirectory, getConfig(), getJvmOptions(), systemProperties,
+					environmentVariables, properties);
 		}
-		return new UnixNode(version, workingDirectory, getJvmOptions(), systemProperties, environmentVariables,
-				properties, isRootAllowed());
+		return new UnixNode(version, workingDirectory, getConfig(), getJvmOptions(), systemProperties,
+				environmentVariables, properties, isRootAllowed());
+	}
+
+	private static boolean isWindows() {
+		String name = System.getProperty("os.name");
+		if (name == null) {
+			throw new IllegalStateException("System Property 'os.name' is not defined");
+		}
+		return name.toLowerCase(Locale.ENGLISH).contains("windows");
 	}
 
 }

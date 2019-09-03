@@ -16,15 +16,16 @@
 
 package examples.configuration;
 
+import java.nio.file.Paths;
+
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
-import com.github.nosan.embedded.cassandra.commons.SystemPathSupplier;
 
 class CassandraJavaHome {
 
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setJavaHome(new SystemPathSupplier("java.home"));
+		cassandraFactory.setJavaHome(Paths.get(System.getenv("JAVA_HOME")));
 		// end::source[]
 	}
 

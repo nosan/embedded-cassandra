@@ -17,19 +17,19 @@
 package examples.configuration;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 
 class CassandraSsl {
 
 	void source() throws Exception {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		Path keystore = Paths.get(getClass().getResource("/keystore.node0").toURI());
-		Path truststore = Paths.get(getClass().getResource("/truststore.node0").toURI());
+		Path keystore = new ClassPathResource("keystore.node0").toPath();
+		Path truststore = new ClassPathResource("truststore.node0").toPath();
 		Map<String, Object> sslOptions = new LinkedHashMap<>();
 		sslOptions.put("enabled", true);
 		sslOptions.put("require_client_auth", true);

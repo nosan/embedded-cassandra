@@ -119,7 +119,7 @@ public interface Resource {
 	default byte[] getBytes() throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try (InputStream is = getInputStream()) {
-			byte[] buffer = new byte[4096];
+			byte[] buffer = new byte[8192];
 			int read;
 			while ((read = is.read(buffer)) != -1) {
 				out.write(buffer, 0, read);

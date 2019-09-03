@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -39,8 +40,7 @@ class FileSystemResourceTests {
 
 	private final URL url = getClass().getResource("/text.txt");
 
-	private final FileSystemResource resource = new FileSystemResource(
-			this.url.toString().substring(this.url.getProtocol().length() + 1));
+	private final FileSystemResource resource = new FileSystemResource(Paths.get(getUri()));
 
 	@Test
 	void getInputStream() throws IOException {
@@ -50,18 +50,18 @@ class FileSystemResourceTests {
 	}
 
 	@Test
-	void toURI() throws IOException, URISyntaxException {
-		assertThat(this.resource.toURI()).isEqualTo(this.url.toURI());
+	void toURI() {
+		assertThat(this.resource.toURI()).isEqualTo(getUri());
 	}
 
 	@Test
-	void toPath() throws IOException, URISyntaxException {
-		assertThat(this.resource.toPath()).isEqualTo(Paths.get(this.url.toURI()));
+	void toPath() {
+		assertThat(this.resource.toPath()).isEqualTo(Paths.get(getUri()));
 	}
 
 	@Test
-	void toFile() throws IOException, URISyntaxException {
-		assertThat(this.resource.toFile()).isEqualTo(new File(this.url.toURI()));
+	void toFile() {
+		assertThat(this.resource.toFile()).isEqualTo(new File(getUri()));
 	}
 
 	@Test
@@ -98,8 +98,17 @@ class FileSystemResourceTests {
 
 	@Test
 	void testToString() {
-		assertThat(this.resource.toString()).isEqualTo(String.format("FileSystemResource [path='%s']",
-				this.url.toString().substring(this.url.getProtocol().length() + 1)));
+		assertThat(this.resource.toString()).isEqualTo(
+				String.format("FileSystemResource [path='%s']", Paths.get(getUri())));
+	}
+
+	private URI getUri() {
+		try {
+			return this.url.toURI();
+		}
+		catch (URISyntaxException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 }
