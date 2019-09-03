@@ -92,7 +92,11 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 				return this.context.getBean(CassandraFactory.class).create();
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				EmbeddedCassandraFactory cassandraFactory = EmbeddedCassandraFactory.random();
+				EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+				cassandraFactory.setPort(0);
+				cassandraFactory.setRpcPort(0);
+				cassandraFactory.setJmxLocalPort(0);
+				cassandraFactory.setStoragePort(0);
 				for (CassandraFactoryCustomizer<? super EmbeddedCassandraFactory> customizer : getCustomizers(
 						this.context)) {
 					customizer.customize(cassandraFactory);

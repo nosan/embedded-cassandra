@@ -23,7 +23,13 @@ public class CassandraMoreOneInstance {
 
 	void source() {
 		// tag::source[]
-		EmbeddedCassandraFactory cassandraFactory = EmbeddedCassandraFactory.random();
+		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+		cassandraFactory.setPort(0);
+		cassandraFactory.setSslPort(0); // if SSL client options enabled
+		cassandraFactory.setRpcPort(0);
+		cassandraFactory.setJmxLocalPort(0);
+		cassandraFactory.setStoragePort(0);
+		cassandraFactory.setSslStoragePort(0); // // if SSL server options enabled
 
 		Cassandra cassandra1 = cassandraFactory.create();
 		Cassandra cassandra2 = cassandraFactory.create();

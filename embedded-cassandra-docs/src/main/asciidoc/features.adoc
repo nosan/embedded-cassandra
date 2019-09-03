@@ -113,8 +113,6 @@ include::{test-sources}/examples/configuration/CassandraPorts.java[tag=source]
 
 TIP: Use `0` for a random port.
 
-TIP: `EmbeddedCassandraFactory.random()` can be used to create a new factory with  preconfigured random ports.
-
 [[configure-proxy]]
 === Configure Proxy
 

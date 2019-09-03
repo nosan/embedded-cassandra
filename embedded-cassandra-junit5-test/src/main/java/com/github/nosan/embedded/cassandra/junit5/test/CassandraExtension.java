@@ -98,8 +98,9 @@ public final class CassandraExtension implements BeforeAllCallback, AfterAllCall
 	 * Constructs a new {@link CassandraExtension} with a default {@link CassandraFactory}. Defaults to {@link
 	 * EmbeddedCassandraFactory} which is configured to use random ports.
 	 */
+	@SuppressWarnings("unchecked")
 	public CassandraExtension() {
-		this(EmbeddedCassandraFactory.random());
+		this(new CassandraFactoryCustomizer[0]);
 	}
 
 	/**
@@ -113,7 +114,11 @@ public final class CassandraExtension implements BeforeAllCallback, AfterAllCall
 	@SafeVarargs
 	public CassandraExtension(CassandraFactoryCustomizer<? super EmbeddedCassandraFactory>... customizers) {
 		Objects.requireNonNull(customizers, "'customizers' must not be null");
-		EmbeddedCassandraFactory cassandraFactory = EmbeddedCassandraFactory.random();
+		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+		cassandraFactory.setPort(0);
+		cassandraFactory.setRpcPort(0);
+		cassandraFactory.setJmxLocalPort(0);
+		cassandraFactory.setStoragePort(0);
 		for (CassandraFactoryCustomizer<? super EmbeddedCassandraFactory> customizer : customizers) {
 			customizer.customize(cassandraFactory);
 		}
