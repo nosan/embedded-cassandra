@@ -57,7 +57,7 @@ class RemoteArtifactTests {
 
 	private final TeeOutputStream out = new TeeOutputStream(System.out, this.output);
 
-	private final HttpServer httpServer = create();
+	private final HttpServer httpServer = createHttpServer();
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -70,15 +70,7 @@ class RemoteArtifactTests {
 		}
 		this.httpServer.createContext("/apache-cassandra-3.11.4-bin.tar.gz", exchange -> {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, content.length);
-			for (int i = 0; i < content.length; i += Short.MAX_VALUE) {
-				exchange.getResponseBody().write(content, i, Math.min(Short.MAX_VALUE, content.length - i));
-				try {
-					Thread.sleep(5);
-				}
-				catch (InterruptedException ex) {
-					Thread.currentThread().interrupt();
-				}
-			}
+			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
 		this.httpServer.createContext("/dist/apache-cassandra-3.11.4-bin.tar.gz", exchange -> {
@@ -194,7 +186,7 @@ class RemoteArtifactTests {
 		assertThat(directory.resolve("conf")).exists();
 	}
 
-	private static HttpServer create() {
+	private static HttpServer createHttpServer() {
 		try {
 			return HttpServer.create();
 		}
