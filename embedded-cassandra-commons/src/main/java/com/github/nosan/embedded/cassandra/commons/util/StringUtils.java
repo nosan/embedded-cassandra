@@ -19,7 +19,7 @@ package com.github.nosan.embedded.cassandra.commons.util;
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 
 /**
- * Simple utility methods for dealing with strings.
+ * Simple utility methods for dealing with a {@link String}.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
