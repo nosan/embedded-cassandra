@@ -13,7 +13,7 @@
     <artifactId>embedded-cassandra-commons</artifactId>
 
 
-    <description>Embedded Cassandra Commons</description>
+    <description>Embedded Cassandra Commons. This module contains Embedded Cassandra common classes.</description>
     <name>Embedded Cassandra Commons</name>
 
 

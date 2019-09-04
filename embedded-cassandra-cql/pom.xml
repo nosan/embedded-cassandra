@@ -12,7 +12,7 @@
 
     <artifactId>embedded-cassandra-cql</artifactId>
 
-    <description>Embedded Cassandra CQL Support</description>
+    <description>Embedded Cassandra CQL Support. This module contains `Cql` Support Classes.</description>
     <name>Embedded Cassandra CQL Support</name>
 
 

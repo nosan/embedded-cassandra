@@ -12,7 +12,7 @@
 
     <artifactId>embedded-cassandra-junit4-test</artifactId>
 
-    <description>Embedded Cassandra JUnit4 Test</description>
+    <description>Embedded Cassandra JUnit4 Test. This module contains Embedded Cassandra JUnit4 classes.</description>
 
     <name>Embedded Cassandra JUnit4 Test</name>
 

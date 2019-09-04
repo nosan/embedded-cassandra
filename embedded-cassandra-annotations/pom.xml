@@ -12,7 +12,7 @@
 
     <artifactId>embedded-cassandra-annotations</artifactId>
 
-    <description>Embedded Cassandra Annotations</description>
+    <description>Embedded Cassandra Annotations. This module contains JSR305 annotations.</description>
     <name>Embedded Cassandra Annotations</name>
 
 

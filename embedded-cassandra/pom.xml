@@ -12,7 +12,9 @@
 
     <artifactId>embedded-cassandra</artifactId>
 
-    <description>Embedded Cassandra</description>
+    <description>Embedded Cassandra. This module contains items that allows the Apache Cassandra to be started and
+        stopped.
+    </description>
 
     <name>Embedded Cassandra</name>
 

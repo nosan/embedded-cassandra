@@ -12,7 +12,7 @@
 
     <artifactId>embedded-cassandra-spring-test</artifactId>
 
-    <description>Embedded Cassandra Spring Test</description>
+    <description>Embedded Cassandra Spring Test. This module contains Embedded Cassandra Spring classes.</description>
 
     <name>Embedded Cassandra Spring Test</name>
 

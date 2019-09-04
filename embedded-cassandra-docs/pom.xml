@@ -12,7 +12,7 @@
 
     <artifactId>embedded-cassandra-docs</artifactId>
 
-    <description>Embedded Cassandra Docs</description>
+    <description>Embedded Cassandra Docs. This module contains Embedded Cassandra Reference Documentation.</description>
 
     <name>Embedded Cassandra Docs</name>
 

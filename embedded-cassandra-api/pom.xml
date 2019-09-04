@@ -12,7 +12,7 @@
 
     <artifactId>embedded-cassandra-api</artifactId>
 
-    <description>Embedded Cassandra API</description>
+    <description>Embedded Cassandra API. This module contains Embedded Cassandra API classes.</description>
     <name>Embedded Cassandra API</name>
 
 

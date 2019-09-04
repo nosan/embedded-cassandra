@@ -12,7 +12,7 @@
 
     <artifactId>embedded-cassandra-testng-test</artifactId>
 
-    <description>Embedded Cassandra TestNG Test</description>
+    <description>Embedded Cassandra TestNG Test. This module contains Embedded Cassandra TestNG classes.</description>
 
     <name>Embedded Cassandra TestNG Test</name>
 

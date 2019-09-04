@@ -11,9 +11,17 @@
     </parent>
 
     <artifactId>embedded-cassandra-mock</artifactId>
-    <description>Embedded Cassandra Mock</description>
+    <description>Embedded Cassandra Mock. This module contains Embedded Cassandra Mock classes.</description>
 
     <name>Embedded Cassandra Mock</name>
+
+
+    <url>https://github.com/nosan/embedded-cassandra</url>
+
+    <scm>
+        <url>https://github.com/nosan/embedded-cassandra.git</url>
+    </scm>
+
 
     <dependencies>
         <dependency>
@@ -28,37 +36,5 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <configuration>
-                    <skipSource>true</skipSource>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
