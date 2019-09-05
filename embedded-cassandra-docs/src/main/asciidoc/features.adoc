@@ -177,3 +177,5 @@ include::{test-sources}/examples/cql/CqlScripts.java[tag=source]
 ----
 include::{test-resources}/schema.cql[]
 ----
+
+TIP: More about *CQL* you can find {apache-cassandra-cql-ref}[here]

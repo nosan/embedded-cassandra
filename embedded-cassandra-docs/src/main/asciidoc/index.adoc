@@ -20,6 +20,7 @@ Dmytro Nosan
 :github-issues: https://github.com/{github-repo}/issues/
 :apache-cassandra-configuration-ref: https://cassandra.apache.org/doc/latest/configuration/cassandra_config_file.html
 :apache-cassandra-parameters-ref: https://docs.datastax.com/en/dse/6.0/dse-dev/datastax_enterprise/config/cassandraSystemProperties.html
+:apache-cassandra-cql-ref: https://cassandra.apache.org/doc/latest/cql/
 
 include::getting-started.adoc[leveloffset=+1]
 include::features.adoc[leveloffset=+1]

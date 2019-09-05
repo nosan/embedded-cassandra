@@ -87,11 +87,6 @@ Contributions to Embedded Cassandra should be made in the form of `GitHub pull r
 [[getting-started-quck-start]]
 == Quick Start
 
-[[getting-started-system-requirements]]
-=== System Requirements
-
-Embedded Cassandra {project-version} requires `Java 8`
-
 [[getting-started-maven]]
 === Maven
 
