@@ -25,8 +25,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
-import org.apache.commons.compress.utils.IOUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +44,8 @@ class UrlResourceTests {
 	@Test
 	void getInputStream() throws IOException {
 		try (InputStream inputStream = this.resource.getInputStream()) {
-			assertThat(IOUtils.toByteArray(inputStream)).isEqualTo("Text File\n".getBytes(StandardCharsets.UTF_8));
+			assertThat(StreamUtils.copyToByteArray(inputStream)).isEqualTo(
+					"Text File\n".getBytes(StandardCharsets.UTF_8));
 		}
 	}
 
@@ -97,7 +98,7 @@ class UrlResourceTests {
 
 	@Test
 	void testToString() {
-		assertThat(this.resource.toString()).isEqualTo(String.format("UrlResource [url='%s']", this.url));
+		assertThat(this.resource.toString()).contains(this.url.toString());
 	}
 
 }

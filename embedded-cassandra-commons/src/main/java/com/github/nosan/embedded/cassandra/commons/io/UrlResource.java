@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
@@ -93,7 +94,7 @@ public class UrlResource implements Resource {
 
 	@Override
 	public String toString() {
-		return String.format("UrlResource [url='%s']", this.url);
+		return new StringJoiner(", ", UrlResource.class.getSimpleName() + "[", "]").add("url=" + this.url).toString();
 	}
 
 }

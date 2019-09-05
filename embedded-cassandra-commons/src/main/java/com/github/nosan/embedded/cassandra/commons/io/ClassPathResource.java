@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.commons.io;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
@@ -118,7 +119,8 @@ public class ClassPathResource implements Resource {
 
 	@Override
 	public String toString() {
-		return String.format("ClassPathResource [path='%s']", this.path);
+		return new StringJoiner(", ", ClassPathResource.class.getSimpleName() + "[", "]").add(
+				"path='" + this.path + "'").toString();
 	}
 
 	@Nullable

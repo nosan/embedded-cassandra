@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.commons.io;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -27,20 +26,22 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.UrlResource;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ClassPathResource}.
+ * Tests for {@link SpringResource}.
  *
  * @author Dmytro Nosan
  */
-class ClassPathResourceTests {
+class SpringResourceTests {
 
 	private final URL url = getClass().getResource("/text.txt");
 
-	private final ClassPathResource resource = new ClassPathResource("text.txt");
+	private final SpringResource resource = new SpringResource(
+			new org.springframework.core.io.ClassPathResource("text.txt"));
 
 	@Test
 	void getInputStream() throws IOException {
@@ -71,7 +72,7 @@ class ClassPathResourceTests {
 	}
 
 	@Test
-	void toURL() throws FileNotFoundException {
+	void toURL() throws IOException {
 		assertThat(this.resource.toURL()).isEqualTo(this.url);
 	}
 
@@ -88,9 +89,8 @@ class ClassPathResourceTests {
 	@Test
 	void testEquals() throws MalformedURLException {
 		assertThat(this.resource).isEqualTo(this.resource);
-		assertThat(this.resource).isEqualTo(
-				new ClassPathResource(this.resource.getPath(), this.resource.getClassLoader()));
-		assertThat(this.resource).isNotEqualTo(new UrlResource(new URL("http://localhost:8080")));
+		assertThat(this.resource).isEqualTo(new SpringResource(this.resource.getResource()));
+		assertThat(this.resource).isNotEqualTo(new SpringResource(new UrlResource(new URL("http://localhost:8080"))));
 	}
 
 	@Test

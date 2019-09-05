@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 
@@ -122,7 +123,8 @@ public class FileSystemResource implements Resource {
 
 	@Override
 	public String toString() {
-		return String.format("FileSystemResource [path='%s']", this.path);
+		return new StringJoiner(", ", FileSystemResource.class.getSimpleName() + "[", "]").add("path=" + this.path)
+				.toString();
 	}
 
 }
