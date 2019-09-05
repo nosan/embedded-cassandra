@@ -278,4 +278,4 @@ include::{test-sources}/examples/spring/boot/CassandraSpringBootTests.java[tag=s
 include::{test-resources}/schema.cql[]
 ----
 
-TIP: `${embedded.cassandra.port`} and `${embedded.cassandra.address}` properties are exposed by `EmbeddedCassandra`.
+TIP: `${embedded.cassandra.port}` and `${embedded.cassandra.address}` properties are exposed by `EmbeddedCassandra`.
