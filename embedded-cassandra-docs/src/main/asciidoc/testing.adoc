@@ -30,7 +30,7 @@ Cassandra will be started only once before any test method is executed and stopp
 compile group: 'com.github.nosan', name: 'embedded-cassandra-junit5-test', version: '{project-version}'
 ----
 
-=== Run Cassandra with JUnit5
+=== Run Cassandra JUnit5
 
 [source,java,indent=0]
 ----
@@ -93,7 +93,7 @@ Cassandra declared as instance field with a `@Rule` annotation will be started a
 compile group: 'com.github.nosan', name: 'embedded-cassandra-junit4-test', version: '{project-version}'
 ----
 
-=== Run Cassandra with JUnit4
+=== Run Cassandra JUnit4
 
 [source,java,indent=0]
 ----
@@ -153,7 +153,7 @@ Cassandra will be started only once before any test method is executed and stopp
 compile group: 'com.github.nosan', name: 'embedded-cassandra-testng-test', version: '{project-version}'
 ----
 
-=== Run Cassandra with TestNG
+=== Run Cassandra TestNG
 
 [source,java,indent=0]
 ----
@@ -215,7 +215,7 @@ However, it still exists a way to register your own `CassandraFactory` to contro
 compile group: 'com.github.nosan', name: 'embedded-cassandra-spring-test', version: '{project-version}'
 ----
 
-=== Run Cassandra with Spring Test
+=== Run Cassandra Spring Test
 
 [source,java,indent=0]
 ----

@@ -11,14 +11,14 @@ This section provides answers to some common ‘how do I do that…​’ questi
 include::{test-sources}/examples/configuration/CassandraMoreOneInstance.java[tag=source]
 ----
 
-== Running Cassandra with a custom Archive File
+== Running Cassandra Custom Archive File
 
 [source,java,indent=0]
 ----
 include::{test-sources}/examples/configuration/CassandraArchiveFile.java[tag=source]
 ----
 
-== Running Cassandra with a custom Directory
+== Running Cassandra Custom Directory
 
 [source,java,indent=0]
 ----

@@ -163,7 +163,7 @@ Embedded Cassandra project provides high-level support for `CQL` scripts.
 compile group: 'com.github.nosan', name: 'embedded-cassandra-cql', version: '{project-version}'
 ----
 
-=== Load Cql Statements from a Resource
+=== Load Cql Statements from __Resource__
 
 CQL statements can be easily loaded from a `Resource` via __static method__ `ofResource`:
 
