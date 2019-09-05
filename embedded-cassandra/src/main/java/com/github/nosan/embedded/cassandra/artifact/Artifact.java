@@ -39,8 +39,8 @@ public interface Artifact {
 	 * @param version the version
 	 * @return a new {@link Artifact}
 	 */
-	static Artifact of(String version) {
-		return of(Version.of(version));
+	static Artifact ofVersion(String version) {
+		return ofVersion(Version.of(version));
 	}
 
 	/**
@@ -49,7 +49,7 @@ public interface Artifact {
 	 * @param version the version
 	 * @return a new {@link Artifact}
 	 */
-	static Artifact of(Version version) {
+	static Artifact ofVersion(Version version) {
 		return new RemoteArtifact(version);
 	}
 

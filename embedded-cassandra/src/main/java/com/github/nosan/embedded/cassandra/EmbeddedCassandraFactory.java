@@ -212,8 +212,8 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 * Sets {@link Artifact} that provides a path to Cassandra's directory and Cassandra's version.
 	 *
 	 * @param artifact an artifact
-	 * @see Artifact#of(String)
-	 * @see Artifact#of(Version)
+	 * @see Artifact#ofVersion(String)
+	 * @see Artifact#ofVersion(Version)
 	 * @see RemoteArtifact
 	 * @see ArchiveArtifact
 	 * @see DefaultArtifact
@@ -543,7 +543,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		}
 		Artifact artifact = getArtifact();
 		if (artifact == null) {
-			artifact = Artifact.of("3.11.4");
+			artifact = Artifact.ofVersion("3.11.4");
 		}
 		Artifact.Descriptor descriptor = artifact.getDescriptor();
 		Version version = descriptor.getVersion();
