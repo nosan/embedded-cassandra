@@ -35,25 +35,25 @@ import com.github.nosan.embedded.cassandra.mock.MockCassandraFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CqlScripts}.
+ * Tests for {@link CassandraScripts}.
  *
  * @author Dmytro Nosan
  */
 @EmbeddedCassandra
-@CqlScripts("schema.cql")
+@CassandraScripts("schema.cql")
 @ExtendWith(SpringExtension.class)
 @DirtiesContext
-@ContextConfiguration(
-		classes = {MockCassandraFactory.class, CqlScriptsCustomExecutorTests.CustomCqlScriptsExecutor.class})
-class CqlScriptsCustomExecutorTests {
+@ContextConfiguration(classes = {MockCassandraFactory.class,
+		CassandraScriptsCustomExecutorTests.CustomCassandraScriptsExecutor.class})
+class CassandraScriptsCustomExecutorTests {
 
 	@Test
-	void testCqlScriptsCustomExecutor(@Autowired CustomCqlScriptsExecutor cqlScriptsExecutor) {
-		assertThat(cqlScriptsExecutor.scripts).containsExactly(
+	void testCqlScriptsCustomExecutor(@Autowired CustomCassandraScriptsExecutor executor) {
+		assertThat(executor.scripts).containsExactly(
 				CqlScript.ofResource(new SpringResource(new ClassPathResource("schema.cql"))));
 	}
 
-	static final class CustomCqlScriptsExecutor implements CqlScriptsExecutor {
+	static final class CustomCassandraScriptsExecutor implements CassandraScriptsExecutor {
 
 		private final List<CqlScript> scripts = new ArrayList<>();
 

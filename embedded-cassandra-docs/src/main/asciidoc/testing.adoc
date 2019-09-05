@@ -252,10 +252,10 @@ include::{test-sources}/examples/spring/configuration/customizer/CassandraDefaul
 
 === Customize Cql Scripts Executor
 
-By default, `CqlScriptsExecutor` implementation is detected based on the classpath, e.g. if `com.datastax.driver.core.Cluster`
+By default, `CassandraScriptsExecutor` implementation is detected based on the classpath, e.g. if `com.datastax.driver.core.Cluster`
 or `com.datastax.oss.driver.api.core.CqlSession` classes are present, then one of them will be used. Both classes
 are configured with default settings, and sometimes default settings are not suitable for your case,
-therefore, `CqlScriptsExecutor` could be registered as a `@Bean` to control scripts execution.
+therefore, `CassandraScriptsExecutor` could be registered as a `@Bean` to control scripts execution.
 
 [source,java,indent=0]
 ----

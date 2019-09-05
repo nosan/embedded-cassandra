@@ -30,10 +30,10 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
 /**
- * {@link CqlScripts} annotation is used to annotate a test class to execute CQL {@link #scripts} against {@link
+ * {@link CassandraScripts} annotation is used to annotate a test class to execute CQL {@link #scripts} against {@link
  * Cassandra}.
  * <p>
- * {@link CqlScriptsExecutor} bean could be registered to control {@link CqlScript CqlScripts} execution.
+ * {@link CassandraScriptsExecutor} bean could be registered to control {@link CqlScript CassandraScripts} execution.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
@@ -42,7 +42,7 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 @Target(ElementType.TYPE)
 @Documented
 @Inherited
-public @interface CqlScripts {
+public @interface CassandraScripts {
 
 	/**
 	 * The paths to the CQL scripts to execute. Each path will be interpreted as a Spring {@link Resource}. A plain path

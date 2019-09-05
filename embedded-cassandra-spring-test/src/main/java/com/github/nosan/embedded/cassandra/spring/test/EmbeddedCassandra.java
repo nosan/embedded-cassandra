@@ -37,7 +37,7 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * <pre>
  * &#64;EmbeddedCassandra
  * &#64;ExtendWith(SpringExtension.class)
- * &#64;CqlScripts("schema.cql")
+ * &#64;CassandraScripts("schema.cql")
  * class CassandraTests {
  *
  *      &#64;Test
@@ -50,7 +50,7 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * <pre>
  * &#64;EmbeddedCassandra
  * &#64;ExtendWith(SpringExtension.class)
- * &#64;CqlScripts("schema.cql")
+ * &#64;CassandraScripts("schema.cql")
  * class CassandraTests {
  *
  *      &#64;Test
@@ -75,7 +75,7 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * <pre>
  * &#64;EmbeddedCassandra
  * &#64;ExtendWith(SpringExtension.class)
- * &#64;CqlScripts("schema.cql")
+ * &#64;CassandraScripts("schema.cql")
  * class CassandraTests {
  *
  *      &#64;Test
@@ -96,7 +96,7 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * @author Dmytro Nosan
  * @see EmbeddedCassandraFactory
  * @see CassandraFactoryCustomizer
- * @see CqlScripts
+ * @see CassandraScripts
  * @since 3.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)

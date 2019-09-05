@@ -30,11 +30,11 @@ import org.springframework.data.cassandra.config.AbstractCassandraConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.spring.test.CqlScripts;
+import com.github.nosan.embedded.cassandra.spring.test.CassandraScripts;
 import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 @EmbeddedCassandra
-@CqlScripts("schema.cql")
+@CassandraScripts("schema.cql")
 @ExtendWith(SpringExtension.class)
 class CassandraSpringTests {
 

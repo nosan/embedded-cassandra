@@ -25,22 +25,23 @@ import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
-import com.github.nosan.embedded.cassandra.spring.test.CqlScripts;
+import com.github.nosan.embedded.cassandra.spring.test.CassandraScripts;
 
 /**
- * {@link ContextCustomizerFactory} to support {@link CqlScripts} annotation.
+ * {@link ContextCustomizerFactory} to support {@link CassandraScripts} annotation.
  *
  * @author Dmytro Nosan
  */
-class CqlScriptsContextCustomizerFactory implements ContextCustomizerFactory {
+class CassandraScriptsContextCustomizerFactory implements ContextCustomizerFactory {
 
 	@Override
 	@Nullable
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
-		Set<CqlScripts> scripts = AnnotatedElementUtils.findAllMergedAnnotations(testClass, CqlScripts.class);
+		Set<CassandraScripts> scripts = AnnotatedElementUtils.findAllMergedAnnotations(testClass,
+				CassandraScripts.class);
 		if (!scripts.isEmpty()) {
-			return new CqlScriptsContextCustomizer(scripts);
+			return new CassandraScriptsContextCustomizer(scripts);
 		}
 		return null;
 	}

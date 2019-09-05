@@ -29,14 +29,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.spring.test.CqlScripts;
-import com.github.nosan.embedded.cassandra.spring.test.CqlScriptsExecutor;
+import com.github.nosan.embedded.cassandra.spring.test.CassandraScripts;
+import com.github.nosan.embedded.cassandra.spring.test.CassandraScriptsExecutor;
 import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 @EmbeddedCassandra
-@CqlScripts("schema.cql")
+@CassandraScripts("schema.cql")
 @ExtendWith(SpringExtension.class)
-class CassandraCustomScriptExecutorSpringTests {
+class CassandraCustomCassandraScriptsExecutorSpringTests {
 
 	@Test
 	void testCassandra(@Autowired Cassandra cassandra) {
@@ -47,7 +47,7 @@ class CassandraCustomScriptExecutorSpringTests {
 	static class TestConfig {
 
 		@Bean
-		CqlScriptsExecutor cqlScriptsExecutor() {
+		CassandraScriptsExecutor cassandraScriptsExecutor() {
 			return (cassandra, scripts) -> {
 				try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(
 						cassandra.getPort()).build()) {

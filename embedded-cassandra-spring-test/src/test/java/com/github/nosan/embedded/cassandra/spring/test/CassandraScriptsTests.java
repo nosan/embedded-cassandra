@@ -33,19 +33,19 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CqlScripts}.
+ * Tests for {@link CassandraScripts}.
  *
  * @author Dmytro Nosan
  */
 @EmbeddedCassandra
-@CqlScripts("schema.cql")
+@CassandraScripts("schema.cql")
 @ExtendWith(SpringExtension.class)
 @DirtiesContext
-class CqlScriptsTests {
+class CassandraScriptsTests {
 
 	private final Cluster cluster;
 
-	CqlScriptsTests(@Autowired Cluster cluster) {
+	CassandraScriptsTests(@Autowired Cluster cluster) {
 		this.cluster = cluster;
 	}
 

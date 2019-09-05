@@ -24,11 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.spring.test.CqlScripts;
+import com.github.nosan.embedded.cassandra.spring.test.CassandraScripts;
 import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 @EmbeddedCassandra
-@CqlScripts("schema.cql")
+@CassandraScripts("schema.cql")
 @SpringBootTest(properties = {"spring.data.cassandra.port=${embedded.cassandra.port}",
 		"spring.data.cassandra.contract-points=${embedded.cassandra.address}",
 		"spring.data.cassandra.keyspace-name=test"})

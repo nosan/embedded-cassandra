@@ -22,18 +22,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextCustomizer;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
-import com.github.nosan.embedded.cassandra.spring.test.CqlScripts;
+import com.github.nosan.embedded.cassandra.spring.test.CassandraScripts;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CqlScriptsContextCustomizerFactory}.
+ * Tests for {@link CassandraScriptsContextCustomizerFactory}.
  *
  * @author Dmytro Nosan
  */
-class CqlScriptsContextCustomizerFactoryTests {
+class CassandraScriptsContextCustomizerFactoryTests {
 
-	private final CqlScriptsContextCustomizerFactory factory = new CqlScriptsContextCustomizerFactory();
+	private final CassandraScriptsContextCustomizerFactory factory = new CassandraScriptsContextCustomizerFactory();
 
 	@Test
 	void shouldCreateContextCustomizerWhenCqlScriptsAnnotation() {
@@ -56,7 +56,7 @@ class CqlScriptsContextCustomizerFactoryTests {
 		return this.factory.createContextCustomizer(testClass, Collections.emptyList());
 	}
 
-	@CqlScripts("schema.cql")
+	@CassandraScripts("schema.cql")
 	private static class CqlScriptsAnnotated {
 
 	}

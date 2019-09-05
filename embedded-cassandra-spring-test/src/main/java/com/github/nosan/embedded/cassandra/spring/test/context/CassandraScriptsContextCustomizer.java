@@ -45,26 +45,26 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.io.SpringResource;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.spring.test.CqlScripts;
-import com.github.nosan.embedded.cassandra.spring.test.CqlScriptsExecutor;
+import com.github.nosan.embedded.cassandra.spring.test.CassandraScripts;
+import com.github.nosan.embedded.cassandra.spring.test.CassandraScriptsExecutor;
 
 /**
- * {@link ContextCustomizer} to support {@link CqlScripts} annotation.
+ * {@link ContextCustomizer} to support {@link CassandraScripts} annotation.
  *
  * @author Dmytro Nosan
  */
-class CqlScriptsContextCustomizer implements ContextCustomizer {
+class CassandraScriptsContextCustomizer implements ContextCustomizer {
 
-	private final Set<CqlScripts> scripts;
+	private final Set<CassandraScripts> scripts;
 
-	CqlScriptsContextCustomizer(Set<CqlScripts> scripts) {
+	CassandraScriptsContextCustomizer(Set<CassandraScripts> scripts) {
 		this.scripts = scripts;
 	}
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		List<CqlScript> scripts = new ArrayList<>();
-		for (CqlScripts annotation : this.scripts) {
+		for (CassandraScripts annotation : this.scripts) {
 			Charset charset = Charset.forName(annotation.encoding());
 			Resource[] resources = getResources(context, annotation);
 			for (Resource resource : resources) {
@@ -74,11 +74,11 @@ class CqlScriptsContextCustomizer implements ContextCustomizer {
 		if (!scripts.isEmpty()) {
 			BeanDefinitionRegistry registry = getRegistry(context);
 			GenericBeanDefinition bd = new GenericBeanDefinition();
-			bd.setBeanClass(CqlScriptsInitializer.class);
+			bd.setBeanClass(CassandraScriptsInitializer.class);
 			bd.setLazyInit(false);
 			bd.setScope(BeanDefinition.SCOPE_SINGLETON);
-			bd.setInstanceSupplier(() -> new CqlScriptsInitializer(context, scripts));
-			registry.registerBeanDefinition(CqlScriptsInitializer.class.getName(), bd);
+			bd.setInstanceSupplier(() -> new CassandraScriptsInitializer(context, scripts));
+			registry.registerBeanDefinition(CassandraScriptsInitializer.class.getName(), bd);
 		}
 	}
 
@@ -91,7 +91,7 @@ class CqlScriptsContextCustomizer implements ContextCustomizer {
 			return false;
 		}
 
-		CqlScriptsContextCustomizer that = (CqlScriptsContextCustomizer) other;
+		CassandraScriptsContextCustomizer that = (CassandraScriptsContextCustomizer) other;
 		return this.scripts.equals(that.scripts);
 	}
 
@@ -107,7 +107,7 @@ class CqlScriptsContextCustomizer implements ContextCustomizer {
 		return ((BeanDefinitionRegistry) applicationContext.getBeanFactory());
 	}
 
-	private static Resource[] getResources(ConfigurableApplicationContext context, CqlScripts annotation) {
+	private static Resource[] getResources(ConfigurableApplicationContext context, CassandraScripts annotation) {
 		List<Resource> resources = new ArrayList<>();
 		for (String script : annotation.scripts()) {
 			resources.add(new SpringResource(context.getResource(script)));
@@ -115,13 +115,13 @@ class CqlScriptsContextCustomizer implements ContextCustomizer {
 		return resources.toArray(new Resource[0]);
 	}
 
-	private static final class CqlScriptsInitializer implements InitializingBean {
+	private static final class CassandraScriptsInitializer implements InitializingBean {
 
 		private final ConfigurableApplicationContext context;
 
 		private final List<CqlScript> scripts;
 
-		private CqlScriptsInitializer(ConfigurableApplicationContext context, List<CqlScript> scripts) {
+		private CassandraScriptsInitializer(ConfigurableApplicationContext context, List<CqlScript> scripts) {
 			this.context = context;
 			this.scripts = Collections.unmodifiableList(scripts);
 		}
@@ -129,27 +129,27 @@ class CqlScriptsContextCustomizer implements ContextCustomizer {
 		@Override
 		public void afterPropertiesSet() {
 			Cassandra cassandra = this.context.getBean(Cassandra.class.getName(), Cassandra.class);
-			getCqlScriptsExecutor().execute(cassandra, this.scripts);
+			getCassandraScriptsExecutor().execute(cassandra, this.scripts);
 		}
 
-		private CqlScriptsExecutor getCqlScriptsExecutor() {
+		private CassandraScriptsExecutor getCassandraScriptsExecutor() {
 			try {
 
-				return this.context.getBean(CqlScriptsExecutor.class);
+				return this.context.getBean(CassandraScriptsExecutor.class);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				ClassLoader cl = getClass().getClassLoader();
 				if (ClassUtils.isPresent("com.datastax.driver.core.Cluster", cl)) {
-					return new ClusterCqlScriptsExecutor();
+					return new ClusterCassandraScriptsExecutor();
 				}
 				else if (ClassUtils.isPresent("com.datastax.oss.driver.api.core.CqlSession", cl)) {
-					return new CqlSessionCqlScriptsExecutor();
+					return new CqlSessionCassandraScriptsExecutor();
 				}
 				throw ex;
 			}
 		}
 
-		private static final class ClusterCqlScriptsExecutor implements CqlScriptsExecutor {
+		private static final class ClusterCassandraScriptsExecutor implements CassandraScriptsExecutor {
 
 			@Override
 			public void execute(Cassandra cassandra, List<? extends CqlScript> scripts) {
@@ -165,7 +165,7 @@ class CqlScriptsContextCustomizer implements ContextCustomizer {
 
 		}
 
-		private static final class CqlSessionCqlScriptsExecutor implements CqlScriptsExecutor {
+		private static final class CqlSessionCassandraScriptsExecutor implements CassandraScriptsExecutor {
 
 			@Override
 			public void execute(Cassandra cassandra, List<? extends CqlScript> scripts) {

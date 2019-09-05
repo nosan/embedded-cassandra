@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Dmytro Nosan
  */
 @EmbeddedCassandra
-@CqlScripts("schema.cql")
+@CassandraScripts("schema.cql")
 @ExtendWith(SpringExtension.class)
 @DirtiesContext
 class EmbeddedCassandraAnnotationTests {
