@@ -19,47 +19,67 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
 
+import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 
 /**
- * {@link CqlStatements} for {@link Resource Resources}.
+ * {@link CqlScript} for {@link Resource Resources}.
  *
  * @author Dmytro Nosan
  */
-final class ResourceCqlStatements implements CqlStatements {
+final class ResourceCqlScript implements CqlScript {
 
 	private final Charset charset;
 
-	private final List<? extends Resource> resources;
+	private final Resource resource;
 
 	/**
-	 * Constructs a new {@link ResourceCqlStatements} with the specified {@link Resource} and {@link Charset}.
+	 * Constructs a new {@link ResourceCqlScript} with the specified {@link Resource} and {@link Charset}.
 	 *
-	 * @param resources the resource
+	 * @param resource the resource
 	 * @param charset the charset
 	 */
-	ResourceCqlStatements(Charset charset, Resource... resources) {
+	ResourceCqlScript(Charset charset, Resource resource) {
 		this.charset = charset;
-		this.resources = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(resources)));
+		this.resource = resource;
 	}
 
 	@Override
-	public Iterator<String> iterator() {
-		return this.resources.stream().map(resource -> getScript(resource, this.charset)).flatMap(script -> new Parser(
-				script).getStatements().stream()).iterator();
+	public List<String> getStatements() {
+		return new Parser(getScript(this.resource, this.charset)).getStatements();
 	}
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ResourceCqlStatements.class.getSimpleName() + "[", "]").add(
-				"charset=" + this.charset).add("resources=" + this.resources).toString();
+		return new StringJoiner(", ", ResourceCqlScript.class.getSimpleName() + "[", "]").add("charset=" + this.charset)
+				.add("resource=" + this.resource).toString();
+	}
+
+	@Override
+	public boolean equals(@Nullable Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other == null || getClass() != other.getClass()) {
+			return false;
+		}
+
+		ResourceCqlScript that = (ResourceCqlScript) other;
+
+		if (!this.charset.equals(that.charset)) {
+			return false;
+		}
+		return this.resource.equals(that.resource);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = this.charset.hashCode();
+		result = 31 * result + this.resource.hashCode();
+		return result;
 	}
 
 	private static String getScript(Resource resource, Charset charset) {

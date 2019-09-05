@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package examples.junit4.configuration.customizer;
-
+package examples.junit5.configuration.customizer;
 // tag::source[]
 
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.junit4.test.CassandraRule;
+import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
-public class CassandraTests {
+class CassandraDefaultFactoryCustomizerJUnit5Tests {
 
-	@ClassRule
-	public static final CassandraRule rule = new CassandraRule(cassandraFactory -> cassandraFactory.setPort(9042));
+	@RegisterExtension
+	static final CassandraExtension extension = new CassandraExtension(
+			cassandraFactory -> cassandraFactory.setPort(9042));
 
 	@Test
-	public void testCassandra() {
-		Cassandra cassandra = rule.getCassandra();
+	void test() {
+		Cassandra cassandra = extension.getCassandra();
 	}
 
 }
+
 // end::source[]
+

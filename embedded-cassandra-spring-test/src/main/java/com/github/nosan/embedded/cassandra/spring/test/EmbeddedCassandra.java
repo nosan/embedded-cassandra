@@ -29,13 +29,15 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
 
 /**
  * Annotation that allows the {@link Cassandra} to be started and stopped. Cassandra will be registered as a bean named
- * Cassandra.class.getName(). By default, {@link EmbeddedCassandraFactory} used, which is configured to use random
- * ports. However, it still exists a way to register your own CassandraFactory to control Cassandra instance by your own
- * wish.
+ * <strong>{@code Cassandra.class.getName()}</strong>.
+ * <p>By default, {@link EmbeddedCassandraFactory} is used, which is configured to use random
+ * ports.
+ *
  * <p>Example:
  * <pre>
  * &#64;EmbeddedCassandra
  * &#64;ExtendWith(SpringExtension.class)
+ * &#64;CqlScripts("schema.cql")
  * class CassandraTests {
  *
  *      &#64;Test
@@ -48,9 +50,8 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * <pre>
  * &#64;EmbeddedCassandra
  * &#64;ExtendWith(SpringExtension.class)
+ * &#64;CqlScripts("schema.cql")
  * class CassandraTests {
- *
- *
  *
  *      &#64;Test
  *      void test(&#64;Autowired Cassandra cassandra) {
@@ -74,8 +75,8 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * <pre>
  * &#64;EmbeddedCassandra
  * &#64;ExtendWith(SpringExtension.class)
+ * &#64;CqlScripts("schema.cql")
  * class CassandraTests {
- *
  *
  *      &#64;Test
  *      void test(&#64;Autowired Cassandra cassandra) {
@@ -95,12 +96,13 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * @author Dmytro Nosan
  * @see EmbeddedCassandraFactory
  * @see CassandraFactoryCustomizer
+ * @see CqlScripts
  * @since 3.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Documented
 @Inherited
+@Documented
 public @interface EmbeddedCassandra {
 
 }

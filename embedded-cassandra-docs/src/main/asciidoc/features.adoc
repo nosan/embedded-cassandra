@@ -3,12 +3,12 @@
 
 This section describes key features that you may want to use and customize.
 
-[[configuration]]
+[[features-configuration]]
 == Configuration
 
 This section covers how to configure Embedded Cassandra.
 
-[[configuration-artifact]]
+[[features-configuration-artifact]]
 === Configure Cassandra's Version
 
 [source,java,indent=0]
@@ -18,7 +18,7 @@ include::{test-sources}/examples/configuration/CassandraVersion.java[tag=source]
 
 TIP: Default version is *3.11.4*
 
-[[configure-configuration-file]]
+[[features-configure-configuration-file]]
 === Configure Configuration File
 
 Sets the Cassandra's configuration file.
@@ -28,7 +28,7 @@ Sets the Cassandra's configuration file.
 include::{test-sources}/examples/configuration/CassandraFile.java[tag=source]
 ----
 
-[[configure-properties]]
+[[features-configure-properties]]
 === Configure Cassandra's Properties
 
 Properties used to set cassandra properties (`cassandra.yaml`) that should be associated with Cassandra.
@@ -41,7 +41,7 @@ include::{test-sources}/examples/configuration/CassandraProperties.java[tag=sour
 
 TIP: More about configuration properties {apache-cassandra-configuration-ref}[here]
 
-[[configure-system-properties]]
+[[features-configure-system-properties]]
 === Configure System Properties
 
 System properties that should be passed to Cassandra's process.
@@ -53,7 +53,7 @@ include::{test-sources}/examples/configuration/CassandraSystemProperties.java[ta
 
 TIP: More about startup parameters you can read {apache-cassandra-parameters-ref}[here]
 
-[[configure-environment-variables]]
+[[features-configure-environment-variables]]
 === Configure Environment Variables
 
 Environment variables that should be passed to Cassandra's process.
@@ -63,7 +63,7 @@ Environment variables that should be passed to Cassandra's process.
 include::{test-sources}/examples/configuration/CassandraEnvironmentVariables.java[tag=source]
 ----
 
-[[configure-jvm-options]]
+[[features-configure-jvm-options]]
 === Configure JVM Options
 
 JVM options that should be passed to Cassandra's process.
@@ -73,18 +73,17 @@ JVM options that should be passed to Cassandra's process.
 include::{test-sources}/examples/configuration/CassandraJvmOptions.java[tag=source]
 ----
 
-[[configure-java-home]]
+[[features-configure-java-home]]
 === Configure Java Home
 
-Sets the `java home` path.
-This home used by Cassandra's process.
+Sets the `java home` path. This home used by Cassandra's process.
 
 [source,java,indent=0]
 ----
 include::{test-sources}/examples/configuration/CassandraJavaHome.java[tag=source]
 ----
 
-[[configuration-ssl]]
+[[features-configuration-ssl]]
 === Configure SSL
 
 [source,java,indent=0]
@@ -92,7 +91,7 @@ include::{test-sources}/examples/configuration/CassandraJavaHome.java[tag=source
 include::{test-sources}/examples/configuration/CassandraSsl.java[tag=source]
 ----
 
-[[configuration-auth]]
+[[features-configuration-auth]]
 === Configure Authentication/Authorization
 
 [source,java,indent=0]
@@ -113,7 +112,7 @@ include::{test-sources}/examples/configuration/CassandraPorts.java[tag=source]
 
 TIP: Use `0` for a random port.
 
-[[configure-proxy]]
+[[features-configure-proxy]]
 === Configure Proxy
 
 [source,java,indent=0]
@@ -121,7 +120,7 @@ TIP: Use `0` for a random port.
 include::{test-sources}/examples/configuration/CassandraProxy.java[tag=source]
 ----
 
-[[exposed-properties]]
+[[features-exposed-properties]]
 == Exposed Properties
 
 The following properties will be exposed as `System Properties` after Cassandra has started:
@@ -139,3 +138,42 @@ include::{test-sources}/examples/configuration/CassandraExposedProperties.java[t
 
 TIP: Exposed properties can be disabled by `EmbeddedCassandraFactory.setExposeProperties(false)`
 
+[[features-cql]]
+== CQL Support
+
+Embedded Cassandra project provides high-level support for `CQL` scripts.
+
+[[features-cql-maven]]
+=== Maven
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+        <dependency>
+            <groupId>com.github.nosan</groupId>
+            <artifactId>embedded-cassandra-cql</artifactId>
+            <version>{project-version}</version>
+        </dependency>
+----
+
+[[features-cql-gradle]]
+=== Gradle
+
+[source,groovy,indent=0,subs="verbatim,quotes,attributes"]
+----
+compile group: 'com.github.nosan', name: 'embedded-cassandra-cql', version: '{project-version}'
+----
+
+=== Loading Cql Statements from a Resource
+
+CQL statements can be easily loaded from a `Resource` via __static method__ `ofResource`:
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/cql/CqlScripts.java[tag=source]
+----
+
+.schema.cql
+[source,cql,indent=0]
+----
+include::{test-resources}/schema.cql[]
+----

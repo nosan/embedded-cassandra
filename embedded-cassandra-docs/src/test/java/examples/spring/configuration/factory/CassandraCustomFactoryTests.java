@@ -14,24 +14,40 @@
  * limitations under the License.
  */
 
-package examples.spring.boot;
+package examples.spring.configuration.factory;
 
 // tag::source[]
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.CassandraFactory;
 import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 @EmbeddedCassandra
-@SpringBootTest(properties = {"spring.data.cassandra.port=${embedded.cassandra.port}",
-		"spring.data.cassandra.contract-points=${embedded.cassandra.address}"})
-class CassandraTests {
+@ExtendWith(SpringExtension.class)
+class CassandraCustomFactoryTests {
 
 	@Test
 	void testCassandra(@Autowired Cassandra cassandra) {
+		//
+	}
+
+	@Configuration
+	static class TestConfig {
+
+		@Bean
+		CassandraFactory cassandraFactory() {
+			EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+			//customize cassandra factory
+			return cassandraFactory;
+		}
 
 	}
 

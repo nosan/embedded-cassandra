@@ -16,21 +16,26 @@
 
 package com.github.nosan.embedded.cassandra.spring.test;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.commons.io.SpringResource;
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.mock.MockCassandraFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandra}.
+ * Tests for {@link CqlScripts}.
  *
  * @author Dmytro Nosan
  */
@@ -38,21 +43,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 @CqlScripts("schema.cql")
 @ExtendWith(SpringExtension.class)
 @DirtiesContext
-class EmbeddedCassandraAnnotationTests {
-
-	private final Cassandra cassandra;
-
-	EmbeddedCassandraAnnotationTests(@Autowired Cassandra cassandra) {
-		this.cassandra = cassandra;
-	}
+@ContextConfiguration(
+		classes = {MockCassandraFactory.class, CqlScriptsCustomExecutorTests.CustomCqlScriptsExecutor.class})
+class CqlScriptsCustomExecutorTests {
 
 	@Test
-	void testCassandra() throws Exception {
-		assertThat(this.cassandra.getPort()).isNotEqualTo(-1);
-		assertThat(this.cassandra.getAddress()).isNotNull();
-		try (Socket socket = new Socket()) {
-			socket.connect(new InetSocketAddress(this.cassandra.getAddress(), this.cassandra.getPort()));
+	void testCqlScriptsCustomExecutor(@Autowired CustomCqlScriptsExecutor cqlScriptsExecutor) {
+		assertThat(cqlScriptsExecutor.scripts).containsExactly(
+				CqlScript.ofResource(new SpringResource(new ClassPathResource("schema.cql"))));
+	}
+
+	static final class CustomCqlScriptsExecutor implements CqlScriptsExecutor {
+
+		private final List<CqlScript> scripts = new ArrayList<>();
+
+		@Override
+		public void execute(Cassandra cassandra, List<? extends CqlScript> scripts) {
+			this.scripts.addAll(scripts);
 		}
+
 	}
 
 }

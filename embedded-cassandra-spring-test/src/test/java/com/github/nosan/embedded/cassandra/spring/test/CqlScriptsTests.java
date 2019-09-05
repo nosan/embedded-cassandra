@@ -16,12 +16,15 @@
 
 package com.github.nosan.embedded.cassandra.spring.test;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.InetAddress;
+import java.util.Optional;
 
+import com.datastax.driver.core.Cluster;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.cassandra.config.AbstractCassandraConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -30,7 +33,7 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandra}.
+ * Tests for {@link CqlScripts}.
  *
  * @author Dmytro Nosan
  */
@@ -38,21 +41,44 @@ import static org.assertj.core.api.Assertions.assertThat;
 @CqlScripts("schema.cql")
 @ExtendWith(SpringExtension.class)
 @DirtiesContext
-class EmbeddedCassandraAnnotationTests {
+class CqlScriptsTests {
 
-	private final Cassandra cassandra;
+	private final Cluster cluster;
 
-	EmbeddedCassandraAnnotationTests(@Autowired Cassandra cassandra) {
-		this.cassandra = cassandra;
+	CqlScriptsTests(@Autowired Cluster cluster) {
+		this.cluster = cluster;
 	}
 
 	@Test
-	void testCassandra() throws Exception {
-		assertThat(this.cassandra.getPort()).isNotEqualTo(-1);
-		assertThat(this.cassandra.getAddress()).isNotNull();
-		try (Socket socket = new Socket()) {
-			socket.connect(new InetSocketAddress(this.cassandra.getAddress(), this.cassandra.getPort()));
+	void testCqlScripts() {
+		assertThat(this.cluster.getMetadata().getKeyspace("test")).isNotNull();
+	}
+
+	@Configuration
+	static class TestCassandraConfiguration extends AbstractCassandraConfiguration {
+
+		private final Cassandra cassandra;
+
+		TestCassandraConfiguration(Cassandra cassandra) {
+			this.cassandra = cassandra;
 		}
+
+		@Override
+		protected String getContactPoints() {
+			return Optional.ofNullable(this.cassandra.getAddress()).map(InetAddress::getHostAddress).orElse(
+					super.getContactPoints());
+		}
+
+		@Override
+		protected int getPort() {
+			return this.cassandra.getPort();
+		}
+
+		@Override
+		protected String getKeyspaceName() {
+			return "test";
+		}
+
 	}
 
 }

@@ -33,6 +33,7 @@ import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraFactory;
 import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
@@ -43,14 +44,11 @@ import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
  *
  * @author Dmytro Nosan
  */
-class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
+class EmbeddedCassandraTestContextCustomizer implements ContextCustomizer {
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		BeanDefinitionRegistry registry = getRegistry(context);
-		if (registry.containsBeanDefinition(Cassandra.class.getName())) {
-			registry.removeBeanDefinition(Cassandra.class.getName());
-		}
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(Cassandra.class);
 		bd.setInitMethodName("start");
@@ -62,8 +60,8 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return (obj != null && obj.getClass() == getClass());
+	public boolean equals(@Nullable Object other) {
+		return (other != null && other.getClass() == getClass());
 	}
 
 	@Override

@@ -19,27 +19,27 @@ package examples.spring;
 // tag::source[]
 
 import java.net.InetAddress;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
+import com.datastax.driver.core.Cluster;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.cassandra.config.AbstractCassandraConfiguration;
-import org.springframework.data.cassandra.core.cql.keyspace.CreateKeyspaceSpecification;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.spring.test.CqlScripts;
 import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 @EmbeddedCassandra
+@CqlScripts("schema.cql")
 @ExtendWith(SpringExtension.class)
-class CassandraTests {
+class CassandraSpringTests {
 
 	@Test
-	void testCassandra(@Autowired Cassandra cassandra) {
+	void testCassandra(@Autowired Cassandra cassandra, @Autowired Cluster cluster) {
 		//
 	}
 
@@ -66,11 +66,6 @@ class CassandraTests {
 		@Override
 		protected String getKeyspaceName() {
 			return "test";
-		}
-
-		@Override
-		protected List<CreateKeyspaceSpecification> getKeyspaceCreations() {
-			return Collections.singletonList(CreateKeyspaceSpecification.createKeyspace(getKeyspaceName()));
 		}
 
 	}

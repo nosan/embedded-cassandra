@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package examples.spring.configuration.customizer;
+package examples.spring.configuration.cql;
+
 // tag::source[]
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,25 +27,36 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.spring.test.CqlScripts;
+import com.github.nosan.embedded.cassandra.spring.test.CqlScriptsExecutor;
 import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 @EmbeddedCassandra
+@CqlScripts("schema.cql")
 @ExtendWith(SpringExtension.class)
-class CassandraTests {
+class CassandraCustomScriptExecutorSpringTests {
 
 	@Test
-	void test(@Autowired Cassandra cassandra) {
+	void testCassandra(@Autowired Cassandra cassandra) {
+		//
 	}
 
 	@Configuration
 	static class TestConfig {
 
 		@Bean
-		public CassandraFactoryCustomizer<EmbeddedCassandraFactory> portCasandraFactoryCustomizer() {
-			return cassandraFactory -> cassandraFactory.setPort(9042);
+		CqlScriptsExecutor cqlScriptsExecutor() {
+			return (cassandra, scripts) -> {
+				try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(
+						cassandra.getPort()).build()) {
+					Session session = cluster.connect();
+					for (CqlScript script : scripts) {
+						script.forEach(session::execute);
+					}
+				}
+			};
 		}
 
 	}

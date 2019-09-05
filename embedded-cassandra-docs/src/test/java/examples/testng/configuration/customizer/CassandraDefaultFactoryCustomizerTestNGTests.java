@@ -14,32 +14,23 @@
  * limitations under the License.
  */
 
-package examples.testng.configuration.factory;
+package examples.testng.configuration.customizer;
 // tag::source[]
 
 import org.testng.annotations.Test;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.api.CassandraFactory;
 import com.github.nosan.embedded.cassandra.testng.AbstractCassandraTests;
 
-public class CassandraTests extends AbstractCassandraTests {
+public class CassandraDefaultFactoryCustomizerTestNGTests extends AbstractCassandraTests {
 
-	public CassandraTests() {
-		super(createCassandraFactory());
+	public CassandraDefaultFactoryCustomizerTestNGTests() {
+		super(cassandraFactory -> cassandraFactory.setPort(9042));
 	}
 
 	@Test
 	public void test() {
 		Cassandra cassandra = getCassandra();
-		//
-	}
-
-	private static CassandraFactory createCassandraFactory() {
-		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setPort(0);
-		return cassandraFactory;
 	}
 
 }

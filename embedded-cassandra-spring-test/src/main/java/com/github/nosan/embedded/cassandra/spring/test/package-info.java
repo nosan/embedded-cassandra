@@ -15,7 +15,7 @@
  */
 
 /**
- * Embedded Cassandra Spring test classes.
+ * Embedded Cassandra Spring Test Classes and Annotations.
  */
 
 @NonNullApi @NonNullFields

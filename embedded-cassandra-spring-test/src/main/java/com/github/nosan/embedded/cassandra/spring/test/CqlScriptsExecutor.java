@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package examples.testng.configuration.customizer;
-// tag::source[]
+package com.github.nosan.embedded.cassandra.spring.test;
 
-import org.testng.annotations.Test;
+import java.util.List;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.testng.AbstractCassandraTests;
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
-public class CassandraTests extends AbstractCassandraTests {
+/**
+ * Strategy interface for executing {@link CqlScript CqlScripts}  against {@link Cassandra}.
+ *
+ * @author Dmytro Nosan
+ * @since 3.0.0
+ */
+@FunctionalInterface
+public interface CqlScriptsExecutor {
 
-	public CassandraTests() {
-		super(cassandraFactory -> cassandraFactory.setPort(9042));
-	}
-
-	@Test
-	public void test() {
-		Cassandra cassandra = getCassandra();
-	}
+	/**
+	 * Executes the given {@link CqlScript CqlScripts} against {@link Cassandra}.
+	 *
+	 * @param cassandra {@link Cassandra} instance
+	 * @param scripts CQL scripts
+	 */
+	void execute(Cassandra cassandra, List<? extends CqlScript> scripts);
 
 }
-
-// end::source[]

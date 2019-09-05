@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package examples.spring.configuration.factory;
-
+package examples.spring.configuration.customizer;
 // tag::source[]
 
 import org.junit.jupiter.api.Test;
@@ -27,26 +26,23 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
 import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 @EmbeddedCassandra
 @ExtendWith(SpringExtension.class)
-class CassandraTests {
+class CassandraDefaultFactoryCustomizerSpringTests {
 
 	@Test
-	void testCassandra(@Autowired Cassandra cassandra) {
-		//
+	void test(@Autowired Cassandra cassandra) {
 	}
 
 	@Configuration
 	static class TestConfig {
 
 		@Bean
-		CassandraFactory cassandraFactory() {
-			EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-			//customize cassandra factory
-			return cassandraFactory;
+		public CassandraFactoryCustomizer<EmbeddedCassandraFactory> portCasandraFactoryCustomizer() {
+			return cassandraFactory -> cassandraFactory.setPort(9042);
 		}
 
 	}

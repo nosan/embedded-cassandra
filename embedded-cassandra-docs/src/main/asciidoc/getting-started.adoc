@@ -58,14 +58,15 @@ $ ./mvnw clean install
 |Name |Description
 | embedded-cassandra | This module contains items that allows the Apache Cassandra to be started and stopped.
 | embedded-cassandra-annotations | This module contains JSR305 annotations.
-| embedded-cassandra-api |This module contains Embedded Cassandra API classes
-| embedded-cassandra-commons |This module contains Embedded Cassandra common classes
-| embedded-cassandra-docs |This module contains Embedded Cassandra Reference Documentation
-| embedded-cassandra-junit4-test |This module contains Embedded Cassandra JUnit4 classes
-| embedded-cassandra-junit5-test |This module contains Embedded Cassandra JUnit5 classes
-| embedded-cassandra-spring-test |This module contains Embedded Cassandra Spring classes
-| embedded-cassandra-testng-test |This module contains Embedded Cassandra TestNG classes
-| embedded-cassandra-mock |This module contains Embedded Cassandra *Mock* classes
+| embedded-cassandra-api |This module contains Embedded Cassandra API classes.
+| embedded-cassandra-cql |This module contains `Cql` Support Classes.
+| embedded-cassandra-commons |This module contains Embedded Cassandra common classes.
+| embedded-cassandra-docs |This module contains Embedded Cassandra Reference Documentation.
+| embedded-cassandra-junit4-test |This module contains Embedded Cassandra JUnit4 classes.
+| embedded-cassandra-junit5-test |This module contains Embedded Cassandra JUnit5 classes.
+| embedded-cassandra-spring-test |This module contains Embedded Cassandra Spring classes.
+| embedded-cassandra-testng-test |This module contains Embedded Cassandra TestNG classes.
+| embedded-cassandra-mock |This module contains Embedded Cassandra *Mock* classes.
 
 |===
 

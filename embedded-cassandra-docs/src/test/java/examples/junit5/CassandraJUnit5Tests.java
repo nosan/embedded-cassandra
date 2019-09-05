@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
-package examples.junit5.configuration.factory;
+package examples.junit5;
 // tag::source[]
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.api.CassandraFactory;
-import com.github.nosan.embedded.cassandra.artifact.Artifact;
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
-class CassandraTests {
+@ExtendWith(CassandraExtension.class)
+class CassandraJUnit5Tests {
 
-	@RegisterExtension
-	static final CassandraExtension extension = new CassandraExtension(createCassandraFactory());
-
-	@Test
-	void test() {
-		Cassandra cassandra = extension.getCassandra();
-		//
+	@BeforeAll
+	static void prepare(Cassandra cassandra) {
+		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(cassandra.getPort())
+				.build()) {
+			Session session = cluster.connect();
+			CqlScript.ofResource(new ClassPathResource("schema.cql")).forEach(session::execute);
+		}
 	}
 
-	private static CassandraFactory createCassandraFactory() {
-		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setArtifact(Artifact.ofVersion("3.11.4"));
-		return cassandraFactory;
+	@Test
+	void test(Cassandra cassandra) {
 	}
 
 }
-
 // end::source[]
-

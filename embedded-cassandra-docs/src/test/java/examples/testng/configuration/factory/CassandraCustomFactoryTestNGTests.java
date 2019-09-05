@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-package examples.testng;
+package examples.testng.configuration.factory;
 // tag::source[]
 
-import com.datastax.driver.core.Cluster;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.CassandraFactory;
 import com.github.nosan.embedded.cassandra.testng.AbstractCassandraTests;
 
-public class CassandraTests extends AbstractCassandraTests {
+public class CassandraCustomFactoryTestNGTests extends AbstractCassandraTests {
 
-	@BeforeClass
-	public void prepare() {
-		Cassandra cassandra = getCassandra();
-		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(cassandra.getPort())
-				.build()) {
-			cluster.connect().execute(
-					"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
-		}
+	public CassandraCustomFactoryTestNGTests() {
+		super(createCassandraFactory());
 	}
 
 	@Test
 	public void test() {
 		Cassandra cassandra = getCassandra();
 		//
+	}
+
+	private static CassandraFactory createCassandraFactory() {
+		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+		cassandraFactory.setPort(0);
+		return cassandraFactory;
 	}
 
 }

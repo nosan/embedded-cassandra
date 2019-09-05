@@ -14,32 +14,36 @@
  * limitations under the License.
  */
 
-package examples.junit5;
+package examples.junit5.configuration.factory;
 // tag::source[]
 
-import com.datastax.driver.core.Cluster;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
-@ExtendWith(CassandraExtension.class)
-class CassandraTests {
+class CassandraCustomFactoryJUnit5Tests {
 
-	@BeforeAll
-	static void prepare(Cassandra cassandra) {
-		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(cassandra.getPort())
-				.build()) {
-			cluster.connect().execute(
-					"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
-		}
-	}
+	@RegisterExtension
+	static final CassandraExtension extension = new CassandraExtension(createCassandraFactory());
 
 	@Test
-	void test(Cassandra cassandra) {
+	void test() {
+		Cassandra cassandra = extension.getCassandra();
+		//
+	}
+
+	private static CassandraFactory createCassandraFactory() {
+		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+		cassandraFactory.setArtifact(Artifact.ofVersion("3.11.4"));
+		return cassandraFactory;
 	}
 
 }
+
 // end::source[]
+

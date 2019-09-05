@@ -26,7 +26,7 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraFactory;
 import com.github.nosan.embedded.cassandra.junit4.test.CassandraRule;
 
-public class CassandraTests {
+public class CassandraCustomFactoryJUnit4Tests {
 
 	@ClassRule
 	public static final CassandraRule rule = new CassandraRule(createCassandraFactory());

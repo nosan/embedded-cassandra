@@ -14,11 +14,25 @@
  * limitations under the License.
  */
 
-package examples.spring.boot;
+package examples.junit4.configuration.customizer;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+// tag::source[]
 
-@SpringBootApplication
-class CassandraApplication {
+import org.junit.ClassRule;
+import org.junit.Test;
+
+import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.junit4.test.CassandraRule;
+
+public class CassandraDefaultFactoryCustomizerJUnit4Tests {
+
+	@ClassRule
+	public static final CassandraRule rule = new CassandraRule(cassandraFactory -> cassandraFactory.setPort(9042));
+
+	@Test
+	public void testCassandra() {
+		Cassandra cassandra = rule.getCassandra();
+	}
 
 }
+// end::source[]

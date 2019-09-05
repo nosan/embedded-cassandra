@@ -14,27 +14,11 @@
  * limitations under the License.
  */
 
-package examples.junit5.configuration.customizer;
-// tag::source[]
+package examples.spring.boot;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
-
-class CassandraTests {
-
-	@RegisterExtension
-	static final CassandraExtension extension = new CassandraExtension(
-			cassandraFactory -> cassandraFactory.setPort(9042));
-
-	@Test
-	void test() {
-		Cassandra cassandra = extension.getCassandra();
-	}
+@SpringBootApplication
+class CassandraSpringBootApplication {
 
 }
-
-// end::source[]
-

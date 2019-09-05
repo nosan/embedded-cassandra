@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-/**
- * Embedded Cassandra Spring Test Context Classes.
- */
+package examples.cql;
 
-@NonNullApi @NonNullFields
-package com.github.nosan.embedded.cassandra.spring.test.context;
+import java.util.List;
 
-import com.github.nosan.embedded.cassandra.annotations.NonNullApi;
-import com.github.nosan.embedded.cassandra.annotations.NonNullFields;
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
+
+public class CqlScripts {
+
+	void cqlResource() {
+		// tag::source[]
+		CqlScript script = CqlScript.ofResource(new ClassPathResource("schema.cql"));
+		List<String> statements = script.getStatements();
+		// end::source[]
+	}
+
+}

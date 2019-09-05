@@ -1,1 +1,3 @@
-org.springframework.test.context.ContextCustomizerFactory=com.github.nosan.embedded.cassandra.spring.test.context.EmbeddedCassandraContextCustomizerFactory
+org.springframework.test.context.ContextCustomizerFactory=\
+com.github.nosan.embedded.cassandra.spring.test.context.EmbeddedCassandraContextCustomizerFactory,\
+com.github.nosan.embedded.cassandra.spring.test.context.CqlScriptsContextCustomizerFactory

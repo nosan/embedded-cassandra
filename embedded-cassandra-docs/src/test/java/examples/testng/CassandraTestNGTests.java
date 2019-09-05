@@ -14,38 +14,37 @@
  * limitations under the License.
  */
 
-package examples.junit4;
-
+package examples.testng;
 // tag::source[]
 
 import com.datastax.driver.core.Cluster;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import com.datastax.driver.core.Session;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.junit4.test.CassandraRule;
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.testng.AbstractCassandraTests;
 
-public class CassandraTests {
-
-	@ClassRule
-	public static final CassandraRule rule = new CassandraRule();
+public class CassandraTestNGTests extends AbstractCassandraTests {
 
 	@BeforeClass
-	public static void prepare() {
-		Cassandra cassandra = rule.getCassandra();
+	public void prepare() {
+		Cassandra cassandra = getCassandra();
 		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(cassandra.getPort())
 				.build()) {
-			cluster.connect().execute(
-					"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
+			Session session = cluster.connect();
+			CqlScript.ofResource(new ClassPathResource("schema.cql")).forEach(session::execute);
 		}
 	}
 
 	@Test
-	public void testCassandra() {
-		Cassandra cassandra = rule.getCassandra();
+	public void test() {
+		Cassandra cassandra = getCassandra();
 		//
 	}
 
 }
+
 // end::source[]
