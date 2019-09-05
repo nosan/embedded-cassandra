@@ -18,7 +18,8 @@
  * Embedded Cassandra Spring Test Context Classes.
  */
 
-@NonNullApi @NonNullFields
+@NonNullFields
+@NonNullApi
 package com.github.nosan.embedded.cassandra.spring.test.context;
 
 import com.github.nosan.embedded.cassandra.annotations.NonNullApi;

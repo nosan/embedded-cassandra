@@ -18,7 +18,8 @@
  * CQL support classes.
  */
 
-@NonNullFields @NonNullApi
+@NonNullFields
+@NonNullApi
 package com.github.nosan.embedded.cassandra.cql;
 
 import com.github.nosan.embedded.cassandra.annotations.NonNullApi;

@@ -18,7 +18,8 @@
  * Artifact classes.
  */
 
-@NonNullFields @NonNullApi
+@NonNullFields
+@NonNullApi
 package com.github.nosan.embedded.cassandra.artifact;
 
 import com.github.nosan.embedded.cassandra.annotations.NonNullApi;

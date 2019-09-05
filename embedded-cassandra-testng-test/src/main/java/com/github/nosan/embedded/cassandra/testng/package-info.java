@@ -18,7 +18,8 @@
  * Embedded Cassandra TestNG test classes.
  */
 
-@NonNullApi @NonNullFields
+@NonNullFields
+@NonNullApi
 package com.github.nosan.embedded.cassandra.testng;
 
 import com.github.nosan.embedded.cassandra.annotations.NonNullApi;

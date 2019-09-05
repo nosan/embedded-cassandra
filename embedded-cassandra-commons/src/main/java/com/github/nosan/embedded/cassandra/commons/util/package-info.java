@@ -18,7 +18,8 @@
  * Utility classes.
  */
 
-@NonNullFields @NonNullApi
+@NonNullFields
+@NonNullApi
 package com.github.nosan.embedded.cassandra.commons.util;
 
 import com.github.nosan.embedded.cassandra.annotations.NonNullApi;

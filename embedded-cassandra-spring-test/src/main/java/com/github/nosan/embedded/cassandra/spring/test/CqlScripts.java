@@ -52,7 +52,8 @@ public @interface CqlScripts {
 	 *
 	 * @return CQL Scripts
 	 */
-	@AliasFor("scripts") String[] value() default {};
+	@AliasFor("scripts")
+	String[] value() default {};
 
 	/**
 	 * The paths to the CQL scripts to execute. Each path will be interpreted as a Spring {@link Resource}. A plain path
@@ -62,7 +63,8 @@ public @interface CqlScripts {
 	 *
 	 * @return CQL Scripts
 	 */
-	@AliasFor("value") String[] scripts() default {};
+	@AliasFor("value")
+	String[] scripts() default {};
 
 	/**
 	 * The encoding for the supplied CQL scripts.

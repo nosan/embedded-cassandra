@@ -18,7 +18,8 @@
  * Resource classes.
  */
 
-@NonNullFields @NonNullApi
+@NonNullFields
+@NonNullApi
 package com.github.nosan.embedded.cassandra.commons.io;
 
 import com.github.nosan.embedded.cassandra.annotations.NonNullApi;

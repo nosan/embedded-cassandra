@@ -18,7 +18,8 @@
  * Embedded Cassandra JUnit4 test classes.
  */
 
-@NonNullApi @NonNullFields
+@NonNullFields
+@NonNullApi
 package com.github.nosan.embedded.cassandra.junit4.test;
 
 import com.github.nosan.embedded.cassandra.annotations.NonNullApi;

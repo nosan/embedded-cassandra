@@ -18,7 +18,8 @@
  * Mock Cassandra classes.
  */
 
-@NonNullFields @NonNullApi
+@NonNullFields
+@NonNullApi
 package com.github.nosan.embedded.cassandra.mock;
 
 import com.github.nosan.embedded.cassandra.annotations.NonNullApi;
