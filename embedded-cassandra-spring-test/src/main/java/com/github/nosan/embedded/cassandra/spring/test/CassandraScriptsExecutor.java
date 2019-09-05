@@ -22,7 +22,7 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
 /**
- * Strategy interface for executing {@link CqlScript CassandraScripts}  against {@link Cassandra}.
+ * Strategy interface for executing {@link CqlScript}(s)  against {@link Cassandra}.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
@@ -31,7 +31,7 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 public interface CassandraScriptsExecutor {
 
 	/**
-	 * Executes the given {@link CqlScript CassandraScripts} against {@link Cassandra}.
+	 * Executes the given {@link CqlScript}(s) against {@link Cassandra}.
 	 *
 	 * @param cassandra {@link Cassandra} instance
 	 * @param scripts CQL scripts

@@ -58,7 +58,7 @@ class CassandraScriptsContextCustomizer implements ContextCustomizer {
 	private final Set<CassandraScripts> scripts;
 
 	CassandraScriptsContextCustomizer(Set<CassandraScripts> scripts) {
-		this.scripts = scripts;
+		this.scripts = Collections.unmodifiableSet(scripts);
 	}
 
 	@Override
