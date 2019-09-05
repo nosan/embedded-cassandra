@@ -53,17 +53,17 @@ class EmbeddedCassandra implements Cassandra {
 
 	private final String name;
 
-	private final boolean exposeProperties;
-
-	private final Path artifactDirectory;
+	private final Version version;
 
 	private final Path workingDirectory;
 
-	private final Version version;
+	private final Path artifactDirectory;
 
-	private final Database database;
+	private final boolean exposeProperties;
 
 	private volatile boolean started = false;
+
+	private final Database database;
 
 	EmbeddedCassandra(String name, boolean exposeProperties, Path artifactDirectory, Path workingDirectory,
 			Version version, Database database) {
