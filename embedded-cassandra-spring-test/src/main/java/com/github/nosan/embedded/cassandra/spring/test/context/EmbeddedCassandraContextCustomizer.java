@@ -44,7 +44,7 @@ import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
  *
  * @author Dmytro Nosan
  */
-class EmbeddedCassandraTestContextCustomizer implements ContextCustomizer {
+class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
