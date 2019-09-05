@@ -259,7 +259,7 @@ therefore, `CassandraScriptsExecutor` could be registered as a `@Bean` to contro
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/spring/configuration/cql/CassandraCustomScriptExecutorSpringTests.java[tag=source]
+include::{test-sources}/examples/spring/configuration/cql/CassandraCustomCassandraScriptsExecutorSpringTests.java[tag=source]
 ----
 
 [[testing-spring-boot]]
