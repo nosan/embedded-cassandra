@@ -1,4 +1,3 @@
-[[embedded-cassandra-reference-documentation]]
 = Embedded Cassandra Reference Documentation {project-version}
 Dmytro Nosan
 :doctype: book

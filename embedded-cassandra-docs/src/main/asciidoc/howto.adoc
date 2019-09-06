@@ -1,9 +1,7 @@
-[[how-to]]
 = ‘How-to’ guides
 
 This section provides answers to some common ‘how do I do that…​’ questions that often arise when using Embedded Cassandra.
 
-[[how-to-more-than-one-Cassandra]]
 == Running more than one Cassandra instance
 
 [source,java,indent=0]
@@ -11,16 +9,21 @@ This section provides answers to some common ‘how do I do that…​’ questi
 include::{test-sources}/examples/configuration/CassandraMoreOneInstance.java[tag=source]
 ----
 
-== Running Cassandra Custom Archive File
+== Using Local Archive
+
+Cassandra can be started with your own archive file.
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/configuration/CassandraArchiveFile.java[tag=source]
+include::{test-sources}/examples/configuration/CassandraArchiveArtifact.java[tag=source]
 ----
 
-== Running Cassandra Custom Directory
+== Using Local Directory
+
+There is also possible to initialize Cassandra with a local directory. In case if you have downloaded Cassandra
+by yourself and extracted it into the local directory.
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/configuration/CassandraDirectory.java[tag=source]
+include::{test-sources}/examples/configuration/CassandraDefaultArtifact.java[tag=source]
 ----

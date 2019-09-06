@@ -1,14 +1,11 @@
-[[features]]
 = Features
 
 This section describes key features that you may want to use and customize.
 
-[[features-configuration]]
 == Configuration
 
 This section covers how to configure Embedded Cassandra.
 
-[[features-configuration-artifact]]
 === Configure Version
 
 [source,java,indent=0]
@@ -18,7 +15,6 @@ include::{test-sources}/examples/configuration/CassandraVersion.java[tag=source]
 
 TIP: Default version is *3.11.4*
 
-[[features-configure-configuration-file]]
 === Configure Config
 
 Sets Cassandra's configuration file (`cassandra.yaml`)
@@ -28,7 +24,6 @@ Sets Cassandra's configuration file (`cassandra.yaml`)
 include::{test-sources}/examples/configuration/CassandraConfig.java[tag=source]
 ----
 
-[[features-configure-properties]]
 === Configure Config Properties
 
 These properties override any Cassandra's properties in the (`cassandra.yaml`).
@@ -40,7 +35,6 @@ include::{test-sources}/examples/configuration/CassandraConfigProperties.java[ta
 
 TIP: More about configuration properties {apache-cassandra-configuration-ref}[here]
 
-[[features-configure-rack-file]]
 === Configure Rack Config
 
 Sets Cassandra's rack properties (`cassandra-rackdc.properties`)
@@ -50,7 +44,6 @@ Sets Cassandra's rack properties (`cassandra-rackdc.properties`)
 include::{test-sources}/examples/configuration/CassandraRackConfig.java[tag=source]
 ----
 
-[[features-configure-topology-file]]
 === Configure Topology Config
 
 Sets Cassandra's topology properties (`cassandra-topology.properties`)
@@ -60,7 +53,6 @@ Sets Cassandra's topology properties (`cassandra-topology.properties`)
 include::{test-sources}/examples/configuration/CassandraTopologyConfig.java[tag=source]
 ----
 
-[[features-configure-system-properties]]
 === Configure System Properties
 
 System properties that should be passed to Cassandra's process.
@@ -72,7 +64,6 @@ include::{test-sources}/examples/configuration/CassandraSystemProperties.java[ta
 
 TIP: More about startup parameters you can read {apache-cassandra-parameters-ref}[here]
 
-[[features-configure-environment-variables]]
 === Configure Environment Variables
 
 Environment variables that should be passed to Cassandra's process.
@@ -82,7 +73,6 @@ Environment variables that should be passed to Cassandra's process.
 include::{test-sources}/examples/configuration/CassandraEnvironmentVariables.java[tag=source]
 ----
 
-[[features-configure-jvm-options]]
 === Configure JVM Options
 
 JVM options that should be passed to Cassandra's process.
@@ -92,7 +82,6 @@ JVM options that should be passed to Cassandra's process.
 include::{test-sources}/examples/configuration/CassandraJvmOptions.java[tag=source]
 ----
 
-[[features-configure-java-home]]
 === Configure Java Home
 
 Sets the Java Home. This home used by Cassandra's process.
@@ -102,7 +91,6 @@ Sets the Java Home. This home used by Cassandra's process.
 include::{test-sources}/examples/configuration/CassandraJavaHome.java[tag=source]
 ----
 
-[[features-configuration-ssl]]
 === Configure SSL
 
 [source,java,indent=0]
@@ -110,7 +98,6 @@ include::{test-sources}/examples/configuration/CassandraJavaHome.java[tag=source
 include::{test-sources}/examples/configuration/CassandraSsl.java[tag=source]
 ----
 
-[[features-configuration-auth]]
 === Configure Authentication/Authorization
 
 [source,java,indent=0]
@@ -118,7 +105,6 @@ include::{test-sources}/examples/configuration/CassandraSsl.java[tag=source]
 include::{test-sources}/examples/configuration/CassandraAuthentication.java[tag=source]
 ----
 
-[[configuration-ports]]
 === Configure Ports
 
 By default, EmbeddedCassandra is running on default ports. There are several methods that can be used to set ports.
@@ -130,7 +116,6 @@ include::{test-sources}/examples/configuration/CassandraPorts.java[tag=source]
 
 TIP: Use `0` for a random port.
 
-[[features-configure-proxy]]
 === Configure Proxy
 
 [source,java,indent=0]
@@ -138,7 +123,6 @@ TIP: Use `0` for a random port.
 include::{test-sources}/examples/configuration/CassandraProxy.java[tag=source]
 ----
 
-[[features-exposed-properties]]
 == Exposed Properties
 
 The following properties will be exposed as `System Properties` after Cassandra has started:
@@ -156,12 +140,10 @@ include::{test-sources}/examples/configuration/CassandraExposedProperties.java[t
 
 TIP: Exposed properties can be disabled by `EmbeddedCassandraFactory.setExposeProperties(false)`
 
-[[features-cql]]
 == CQL Support
 
 Embedded Cassandra project provides high-level support for `CQL` scripts.
 
-[[features-cql-maven]]
 === Maven
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
@@ -173,7 +155,6 @@ Embedded Cassandra project provides high-level support for `CQL` scripts.
         </dependency>
 ----
 
-[[features-cql-gradle]]
 === Gradle
 
 [source,groovy,indent=0,subs="verbatim,quotes,attributes"]

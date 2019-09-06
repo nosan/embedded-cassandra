@@ -1,16 +1,13 @@
-[[testing]]
 = Testing
 
 Embedded Cassandra provides a number of extensions to help when testing your application.
 
-[[testing-junit5]]
 == Using JUnit5
 
 Cassandra can be easily started using `CassandraExtension`.
 This extension allows the Cassandra to be started and stopped.
 Cassandra will be started only once before any test method is executed and stopped after the last test method has executed.
 
-[[testing-junit5-maven]]
 === Maven
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
@@ -22,7 +19,6 @@ Cassandra will be started only once before any test method is executed and stopp
         </dependency>
 ----
 
-[[testing-junit5-gradle]]
 === Gradle
 
 [source,groovy,indent=0,subs="verbatim,quotes,attributes"]
@@ -57,7 +53,7 @@ In the following example, there is a showcase of how to change Cassandra's port 
 include::{test-sources}/examples/junit5/configuration/customizer/CassandraDefaultFactoryCustomizerJUnit5Tests.java[tag=source]
 ----
 
-=== Use Custom Cassandra Factory
+=== Configure Custom Cassandra Factory
 
 Besides that, custom `CassandraFactory` also can be used to control the `Cassandra` instance.
 
@@ -66,14 +62,12 @@ Besides that, custom `CassandraFactory` also can be used to control the `Cassand
 include::{test-sources}/examples/junit5/configuration/factory/CassandraCustomFactoryJUnit5Tests.java[tag=source]
 ----
 
-[[testing-junit4]]
 == Using JUnit4
 
 Cassandra can be started via `CassandraRule`. `CassandraRule` is `TestRule` that allows the Cassandra to be started and stopped.
 Cassandra declared as static field with a `@ClassRule` annotation will be started only once before any test method is executed and stopped after the last test method has executed.
 Cassandra declared as instance field with a `@Rule` annotation will be started and stopped for every test method.
 
-[[testing-junit4-maven]]
 === Maven
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
@@ -85,7 +79,6 @@ Cassandra declared as instance field with a `@Rule` annotation will be started a
         </dependency>
 ----
 
-[[testing-junit4-gradle]]
 === Gradle
 
 [source,groovy,indent=0,subs="verbatim,quotes,attributes"]
@@ -117,7 +110,7 @@ Default `CassandraFactory` can be customized via (`CassandraFactoryCustomizer<T>
 include::{test-sources}/examples/junit4/configuration/customizer/CassandraDefaultFactoryCustomizerJUnit4Tests.java[tag=source]
 ----
 
-=== Use Custom Cassandra Factory
+=== Configure Custom Cassandra Factory
 
 There is also possible to use your own `CassandraFactory`. Just pass it to the constructor.
 
@@ -126,14 +119,12 @@ There is also possible to use your own `CassandraFactory`. Just pass it to the c
 include::{test-sources}/examples/junit4/configuration/factory/CassandraCustomFactoryJUnit4Tests.java[tag=source]
 ----
 
-[[testing-testng]]
 == Using TestNG
 
-To run Cassandra using `TestNG`, `AbstractCassandraTests` class has to be extended.
+To start Cassandra with `TestNG`, `AbstractCassandraTests` class has to be extended.
 `AbstractCassandraTests` class allows the Cassandra to be started and stopped.
 Cassandra will be started only once before any test method is executed and stopped after the last test method has executed.
 
-[[testing-testng-maven]]
 === Maven
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
@@ -145,7 +136,6 @@ Cassandra will be started only once before any test method is executed and stopp
         </dependency>
 ----
 
-[[testing-testng-gradle]]
 === Gradle
 
 [source,groovy,indent=0,subs="verbatim,quotes,attributes"]
@@ -177,7 +167,7 @@ WARNING: `AbstractCassandraTests` with a default constructor configures Cassandr
 include::{test-sources}/examples/testng/configuration/customizer/CassandraDefaultFactoryCustomizerTestNGTests.java[tag=source]
 ----
 
-=== Use Custom Cassandra Factory
+=== Configure Custom Cassandra Factory
 
 The same as for `JUnit4` and `JUnit5` it is possible to set your own `CassandraFactory` through the constructor.
 
@@ -186,7 +176,6 @@ The same as for `JUnit4` and `JUnit5` it is possible to set your own `CassandraF
 include::{test-sources}/examples/testng/configuration/factory/CassandraCustomFactoryTestNGTests.java[tag=source]
 ----
 
-[[testing-spring]]
 == Using Spring Test
 
 For running Apache Cassandra using Spring Test, `@CassandraTest` annotation has to be used.
@@ -195,7 +184,6 @@ Cassandra will be registered as a bean named `Cassandra.class.getName()`.
 By default, `EmbeddedCassandraFactory` used, which is configured to use random ports.
 However, it still exists a way to register your own `CassandraFactory` to control Cassandra instance by your own wish.
 
-[[testing-spring-maven]]
 === Maven
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
@@ -207,7 +195,6 @@ However, it still exists a way to register your own `CassandraFactory` to contro
         </dependency>
 ----
 
-[[testing-spring-gradle]]
 === Gradle
 
 [source,groovy,indent=0,subs="verbatim,quotes,attributes"]
@@ -230,10 +217,11 @@ WARNING: By default, `@EmbeddedCassandra` configures Cassandra on the random por
 include::{test-resources}/schema.cql[]
 ----
 
-=== Use Custom Cassandra Factory
+`@CassandraScripts` annotation is used to annotate a test class to execute CQL scripts against Cassandra.
+
+=== Configure Custom Cassandra Factory
 
 It is possible to register you own factory to control Cassandra instance.
-Here is a small example:
 
 [source,java,indent=0]
 ----
@@ -250,8 +238,9 @@ Additional to the above, there is also possible to register `CassandraFactoryCus
 include::{test-sources}/examples/spring/configuration/customizer/CassandraDefaultFactoryCustomizerSpringTests.java[tag=source]
 ----
 
-=== Customize Cql Scripts Executor
+=== Configure Cql Scripts Executor
 
+CQL Scripts from `@CassandraScripts` annotation are executed by `CassandraScriptsExecutor`.
 By default, `CassandraScriptsExecutor` implementation is detected based on the classpath, e.g. if `com.datastax.driver.core.Cluster`
 or `com.datastax.oss.driver.api.core.CqlSession` classes are present, then one of them will be used. Both classes
 are configured with default settings, and sometimes default settings are not suitable for your case,
@@ -262,10 +251,9 @@ therefore, `CassandraScriptsExecutor` could be registered as a `@Bean` to contro
 include::{test-sources}/examples/spring/configuration/cql/CassandraCustomCassandraScriptsExecutorSpringTests.java[tag=source]
 ----
 
-[[testing-spring-boot]]
 === Using Spring Boot Test
 
-There is no much difference between `Spring Boot Test` and `Spring Test`, hence, to run Cassandra, `@EmbeddedCassandra` can be used.
+There is no much difference between `Spring Boot Test` and `Spring Test`, hence, to start Cassandra, `@EmbeddedCassandra` can be used.
 
 [source,java,indent=0]
 ----
