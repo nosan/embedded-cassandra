@@ -313,8 +313,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	}
 
 	/**
-	 * Returns Cassandra's properties ({@code cassandra.yaml}). These properties replace any properties in ({@code
-	 * cassandra.yaml}}.
+	 * These properties replace any properties in ({@code cassandra.yaml}}.
 	 *
 	 * @return the properties
 	 */
