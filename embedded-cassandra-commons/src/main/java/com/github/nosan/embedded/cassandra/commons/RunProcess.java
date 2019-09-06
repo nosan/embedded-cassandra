@@ -28,13 +28,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ThreadFactory;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
@@ -48,8 +49,6 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 public final class RunProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
-
-	private static final ThreadFactory threadFactory = new MDCThreadFactory();
 
 	private static final AtomicLong number = new AtomicLong();
 
@@ -193,7 +192,9 @@ public final class RunProcess {
 		Objects.requireNonNull(consumer, "'consumer' must not be null");
 		ProcessId processId = start();
 		Process process = processId.getProcess();
-		Thread thread = threadFactory.newThread(() -> {
+		Map<String, String> context = MDC.getCopyOfContextMap();
+		Thread thread = new Thread(() -> {
+			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
 			try (BufferedReader reader = new BufferedReader(
 					new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
 				try {

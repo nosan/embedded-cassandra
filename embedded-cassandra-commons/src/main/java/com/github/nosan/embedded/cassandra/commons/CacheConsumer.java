@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.commons;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
@@ -34,7 +33,7 @@ import java.util.function.Supplier;
  */
 public final class CacheConsumer<T> implements Consumer<T>, Supplier<List<T>> {
 
-	private final Deque<T> elements;
+	private final ConcurrentLinkedDeque<T> elements;
 
 	private final long count;
 
@@ -52,8 +51,8 @@ public final class CacheConsumer<T> implements Consumer<T>, Supplier<List<T>> {
 	}
 
 	@Override
-	public synchronized void accept(T element) {
-		while (this.elements.size() >= this.count) {
+	public void accept(T element) {
+		if (this.elements.size() >= this.count) {
 			this.elements.removeFirst();
 		}
 		this.elements.addLast(element);

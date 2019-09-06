@@ -26,16 +26,18 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.CacheConsumer;
 import com.github.nosan.embedded.cassandra.commons.CompositeConsumer;
-import com.github.nosan.embedded.cassandra.commons.MDCThreadFactory;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
@@ -46,8 +48,6 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 class DefaultDatabase implements Database {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultDatabase.class);
-
-	private static final MDCThreadFactory threadFactory = new MDCThreadFactory();
 
 	private final String name;
 
@@ -152,7 +152,9 @@ class DefaultDatabase implements Database {
 		for (ReadinessConsumer readinessConsumer : readinessConsumers) {
 			compositeConsumer.add(readinessConsumer);
 		}
-		Thread thread = threadFactory.newThread(() -> {
+		Map<String, String> context = MDC.getCopyOfContextMap();
+		Thread thread = new Thread(() -> {
+			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
 			try (BufferedReader reader = new BufferedReader(
 					new InputStreamReader(process.getProcess().getInputStream(), StandardCharsets.UTF_8))) {
 				try {
