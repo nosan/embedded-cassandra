@@ -12,7 +12,6 @@ cache:
   directories:
     - $HOME/.m2
     - $HOME/openjdk8
-    - $HOME/docs
 
 env:
   global: JAVA_HOME=$HOME/openjdk8
@@ -33,24 +32,21 @@ jobs:
     - stage: test
       os: linux
       script:
-        - ./mvnw clean verify -B -V -Pdocs
-      after_success:
-        - rm -rf $HOME/docs
-        - cp -a embedded-cassandra-docs/target/generated-docs/. $HOME/docs
+        - ./mvnw clean verify -B -V
       after_failure: ./surefire-reports.sh
     - os: osx
       script:
-        - ./mvnw clean verify -B -V -Pdocs
+        - ./mvnw clean verify -B -V
       after_failure: ./surefire-reports.sh
     - stage: deploy
       os: linux
-      script: skip
+      script:
+        - ./mvnw clean verify -DskipTests
+      after_failure: ./surefire-reports.sh
       deploy:
         provider: pages
         skip_cleanup: true
         github_token: $GITHUB_TOKEN
-        keep_history: false
-        local_dir: $HOME/docs
-        on:
-          tags: true
+        keep_history: true
+        local_dir: embedded-cassandra-docs/target/generated-docs/
 
