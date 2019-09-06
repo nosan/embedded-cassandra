@@ -323,6 +323,9 @@ public final class RemoteArtifact implements Artifact {
 						}
 					}
 				}
+				if (Thread.interrupted()) {
+					throw new ClosedByInterruptException();
+				}
 				progressListener.finish();
 				return new FileSystemResource(tempFile);
 			}
