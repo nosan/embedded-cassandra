@@ -20,10 +20,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.artifact.DefaultArtifact;
 
-public class CassandraDirectory {
+public class CassandraDefaultArtifact {
 
 	void source() {
 		// tag::source[]
@@ -31,6 +32,14 @@ public class CassandraDirectory {
 		Path directory = Paths.get("<path to Cassandra's home>");
 		Version version = Version.of("3.11.4");
 		cassandraFactory.setArtifact(new DefaultArtifact(version, directory));
+		Cassandra cassandra = cassandraFactory.create();
+		cassandra.start();
+		try {
+			//..
+		}
+		finally {
+			cassandra.stop();
+		}
 		// end::source[]
 	}
 

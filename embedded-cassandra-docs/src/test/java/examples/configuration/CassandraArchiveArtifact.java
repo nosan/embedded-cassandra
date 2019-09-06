@@ -17,11 +17,12 @@
 package examples.configuration;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.artifact.ArchiveArtifact;
 import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 
-public class CassandraArchiveFile {
+public class CassandraArchiveArtifact {
 
 	void source() {
 		// tag::source[]
@@ -29,6 +30,14 @@ public class CassandraArchiveFile {
 		Version version = Version.of("3.11.4");
 		ClassPathResource archiveFile = new ClassPathResource("apache-cassandra-3.11.4-bin.tar.gz");
 		cassandraFactory.setArtifact(new ArchiveArtifact(version, archiveFile));
+		Cassandra cassandra = cassandraFactory.create();
+		cassandra.start();
+		try {
+			//..
+		}
+		finally {
+			cassandra.stop();
+		}
 		// end::source[]
 	}
 
