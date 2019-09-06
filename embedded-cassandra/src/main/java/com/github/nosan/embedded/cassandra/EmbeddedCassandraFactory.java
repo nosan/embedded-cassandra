@@ -67,20 +67,18 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  *
  * }
  * </pre>
- * <p><strong>Properties:</strong>
- * This factory provides a way to configure {@code systemProperties}, {@code environmentVariables}, {@code jvmOptions}
- * and {@code properties}.
+ * <p><strong>Configuration:</strong>
  * <p>
- * <em>{@code -systemProperties:}</em> used to set system properties that should be associated with {@code
+ * <em>{@link #getSystemProperties()}</em> used to set system properties that should be associated with {@code
  * Cassandra}, e.g. {@code 'cassandra.start_rpc=true'}.
  * <p>
- * <em>{@code -environmentVariables:}</em> used to set environment variables that should be associated with
+ * <em>{@link #getEnvironmentVariables()}</em> used to set environment variables that should be associated with
  * {@code Cassandra}, e.g. {@code 'JAVA_HOME=<PATH>'}.
  * <p>
- * <em>{@code -jvmOptions:}</em>used to set jvm options that should be
+ * <em>{@link #getJvmOptions()}</em> used to set jvm options that should be
  * associated with {@code Cassandra}, e.g. {@code '-Xmx128m -Xms64m'}.
  * <p>
- * <em>{@code -properties:}</em>used to set {@code
+ * <em>{@link #getConfigProperties()}</em>used to set {@code
  * cassandra} properties (cassandra.yaml) that should be associated with {@code Cassandra}, e.g. {@code
  * 'start_rpc=true'}.
  * <p><strong>Ports:</strong>
