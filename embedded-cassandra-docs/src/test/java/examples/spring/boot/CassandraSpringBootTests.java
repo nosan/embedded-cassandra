@@ -30,7 +30,7 @@ import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 @EmbeddedCassandra
 @CassandraScripts("schema.cql")
 @SpringBootTest(properties = {"spring.data.cassandra.port=${embedded.cassandra.port}",
-		"spring.data.cassandra.contract-points=${embedded.cassandra.address}",
+		"spring.data.cassandra.contact-points=${embedded.cassandra.address}",
 		"spring.data.cassandra.keyspace-name=test"})
 class CassandraSpringBootTests {
 
