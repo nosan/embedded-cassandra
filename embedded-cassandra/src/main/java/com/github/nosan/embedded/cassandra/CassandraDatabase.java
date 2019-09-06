@@ -25,6 +25,7 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,7 +143,7 @@ class CassandraDatabase implements Database {
 		this.sslPort = -1;
 		this.rpcPort = -1;
 		this.address = null;
-		destroy();
+		FileUtils.delete(this.workingDirectory);
 	}
 
 	@Override
@@ -190,24 +191,21 @@ class CassandraDatabase implements Database {
 		});
 		if (this.config != null) {
 			try (InputStream is = this.config.getInputStream()) {
-				Files.copy(is, this.workingDirectory.resolve("conf/cassandra.yaml"));
+				Files.copy(is, this.workingDirectory.resolve("conf/cassandra.yaml"),
+						StandardCopyOption.REPLACE_EXISTING);
 			}
 		}
 		if (this.topologyConfig != null) {
 			try (InputStream is = this.topologyConfig.getInputStream()) {
-				Files.copy(is, this.workingDirectory.resolve("conf/cassandra-topology.properties"));
+				Files.copy(is, this.workingDirectory.resolve("conf/cassandra-topology.properties"),
+						StandardCopyOption.REPLACE_EXISTING);
 			}
 		}
 		if (this.rackConfig != null) {
 			try (InputStream is = this.rackConfig.getInputStream()) {
-				Files.copy(is, this.workingDirectory.resolve("conf/cassandra-rackdc.properties"));
+				Files.copy(is, this.workingDirectory.resolve("conf/cassandra-rackdc.properties"),
+						StandardCopyOption.REPLACE_EXISTING);
 			}
-		}
-	}
-
-	private void destroy() throws IOException {
-		if (FileUtils.delete(this.workingDirectory)) {
-			log.info("The working directory '{}' has been deleted", this.workingDirectory);
 		}
 	}
 

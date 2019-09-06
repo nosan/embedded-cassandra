@@ -51,7 +51,7 @@ class EmbeddedCassandraTests {
 	@Test
 	void testSuccessWhenDefault() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			try (Cluster cluster = new ClusterFactory().create(cassandra)) {
 				createKeyspace(cluster.connect());
@@ -72,7 +72,7 @@ class EmbeddedCassandraTests {
 	void testSuccessWhenCustomCassandraYaml() throws Throwable {
 		this.cassandraFactory.setConfig(new ClassPathResource("cassandra.yaml"));
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			try (Cluster cluster = new ClusterFactory().create(cassandra)) {
 				createKeyspace(cluster.connect());
@@ -85,7 +85,7 @@ class EmbeddedCassandraTests {
 	void testSuccessWhenPropertiesNotExposed() throws Throwable {
 		this.cassandraFactory.setExposeProperties(false);
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			doesNotContainSystemProperty("embedded.cassandra.address");
 			doesNotContainSystemProperty("embedded.cassandra.port");
@@ -100,7 +100,7 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("start_rpc", false);
 		this.configProperties.put("start_native_transport", true);
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			assertThat(cassandra.getAddress()).isNotNull();
 			assertThat(cassandra.getPort()).isEqualTo(9042);
@@ -115,7 +115,7 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("start_rpc", true);
 		this.configProperties.put("start_native_transport", false);
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			assertThat(cassandra.getAddress()).isNotNull();
 			assertThat(cassandra.getPort()).isEqualTo(-1);
@@ -129,7 +129,7 @@ class EmbeddedCassandraTests {
 	void testSuccessWhenTransportEnabled() throws Throwable {
 		this.configProperties.put("start_rpc", true);
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			assertThat(cassandra.getAddress()).isNotNull();
 			assertThat(cassandra.getPort()).isEqualTo(9042);
@@ -145,7 +145,7 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("start_rpc", false);
 		this.configProperties.put("start_native_transport", false);
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			assertThat(cassandra.getAddress()).isNull();
 			assertThat(cassandra.getPort()).isEqualTo(-1);
@@ -173,7 +173,7 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("native_transport_port_ssl", 9142);
 		this.configProperties.put("client_encryption_options", sslOptions);
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			assertThat(cassandra.getSslPort()).isEqualTo(9142);
 			ClusterFactory clusterFactory = new ClusterFactory();
@@ -195,7 +195,7 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("authorizer", "CassandraAuthorizer");
 		this.systemProperties.put("cassandra.superuser_setup_delay_ms", 0);
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			ClusterFactory clusterFactory = new ClusterFactory();
 			clusterFactory.setPassword("cassandra");
@@ -227,7 +227,7 @@ class EmbeddedCassandraTests {
 	@Test
 	void testFailPortsAreBusy() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).isNull();
+			assertThat(throwable).doesNotThrowAnyException();
 			assertStarted(cassandra, true);
 			this.runner.run((cassandra2, throwable2) -> {
 				assertThat(throwable2).isNotNull().hasStackTraceContaining("Address already in use");
