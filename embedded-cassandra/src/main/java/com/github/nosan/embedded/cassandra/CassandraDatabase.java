@@ -18,16 +18,21 @@ package com.github.nosan.embedded.cassandra;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -38,6 +43,8 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.CacheConsumer;
 import com.github.nosan.embedded.cassandra.commons.CompositeConsumer;
+import com.github.nosan.embedded.cassandra.commons.io.Resource;
+import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
@@ -45,13 +52,17 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  *
  * @author Dmytro Nosan
  */
-class DefaultDatabase implements Database {
+class CassandraDatabase implements Database {
 
-	private static final Logger log = LoggerFactory.getLogger(DefaultDatabase.class);
+	private static final Logger log = LoggerFactory.getLogger(CassandraDatabase.class);
 
 	private final String name;
 
 	private final Version version;
+
+	private final Path artifactDirectory;
+
+	private final Path workingDirectory;
 
 	private final boolean daemon;
 
@@ -60,6 +71,15 @@ class DefaultDatabase implements Database {
 	private final Duration timeout;
 
 	private final Node node;
+
+	@Nullable
+	private final Resource config;
+
+	@Nullable
+	private final Resource rackConfig;
+
+	@Nullable
+	private final Resource topologyConfig;
 
 	@Nullable
 	private volatile NodeProcess process;
@@ -73,17 +93,25 @@ class DefaultDatabase implements Database {
 
 	private volatile int rpcPort = -1;
 
-	DefaultDatabase(String name, Version version, boolean daemon, Logger logger, Duration timeout, Node node) {
+	CassandraDatabase(String name, Version version, Path artifactDirectory, Path workingDirectory, boolean daemon,
+			Logger logger, Duration timeout, @Nullable Resource config, @Nullable Resource rackConfig,
+			@Nullable Resource topologyConfig, Node node) {
 		this.name = name;
 		this.version = version;
+		this.artifactDirectory = artifactDirectory;
+		this.workingDirectory = workingDirectory;
 		this.daemon = daemon;
 		this.logger = logger;
 		this.timeout = timeout;
+		this.config = config;
+		this.rackConfig = rackConfig;
+		this.topologyConfig = topologyConfig;
 		this.node = node;
 	}
 
 	@Override
 	public void start() throws InterruptedException, IOException {
+		initialize();
 		log.info("Starts {}", toString());
 		NodeProcess process = this.node.start();
 		this.process = process;
@@ -114,6 +142,7 @@ class DefaultDatabase implements Database {
 		this.sslPort = -1;
 		this.rpcPort = -1;
 		this.address = null;
+		destroy();
 	}
 
 	@Override
@@ -139,8 +168,47 @@ class DefaultDatabase implements Database {
 
 	@Override
 	public String toString() {
-		return String.format("Cassandra Database (name='%s' version='%s' process='%s')", this.name, this.version,
-				this.process);
+		StringJoiner joiner = new StringJoiner(", ", CassandraDatabase.class.getSimpleName() + "[", "]")
+				.add("name='" + this.name + "'")
+				.add("version=" + this.version);
+		NodeProcess process = this.process;
+		if (process != null) {
+			return joiner.add("process=" + this.process).toString();
+		}
+		return joiner.toString();
+	}
+
+	private void initialize() throws IOException {
+		log.info("Initializes {}. It takes a while...", toString());
+		Files.createDirectories(this.workingDirectory);
+		FileUtils.copy(this.artifactDirectory, this.workingDirectory, (path, attributes) -> {
+			if (attributes.isDirectory()) {
+				String name = path.getFileName().toString().toLowerCase(Locale.ENGLISH);
+				return !name.equals("javadoc") && !name.equals("doc");
+			}
+			return true;
+		});
+		if (this.config != null) {
+			try (InputStream is = this.config.getInputStream()) {
+				Files.copy(is, this.workingDirectory.resolve("conf/cassandra.yaml"));
+			}
+		}
+		if (this.topologyConfig != null) {
+			try (InputStream is = this.topologyConfig.getInputStream()) {
+				Files.copy(is, this.workingDirectory.resolve("conf/cassandra-topology.properties"));
+			}
+		}
+		if (this.rackConfig != null) {
+			try (InputStream is = this.rackConfig.getInputStream()) {
+				Files.copy(is, this.workingDirectory.resolve("conf/cassandra-rackdc.properties"));
+			}
+		}
+	}
+
+	private void destroy() throws IOException {
+		if (FileUtils.delete(this.workingDirectory)) {
+			log.info("The working directory '{}' has been deleted", this.workingDirectory);
+		}
 	}
 
 	private void await(NodeProcess process, ReadinessConsumer... readinessConsumers)

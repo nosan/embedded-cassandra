@@ -32,7 +32,6 @@ import java.util.Objects;
 
 import org.yaml.snakeyaml.Yaml;
 
-import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.RunProcess;
 import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
@@ -49,25 +48,21 @@ abstract class AbstractNode implements Node {
 
 	private final Path workingDirectory;
 
-	@Nullable
-	private final Resource config;
-
 	private final Map<String, Object> properties;
-
-	private final List<String> jvmOptions;
 
 	private final Map<String, Object> systemProperties;
 
 	private final Map<String, Object> environmentVariables;
 
-	AbstractNode(Path workingDirectory, @Nullable Resource config, Map<String, Object> properties,
-			List<String> jvmOptions, Map<String, Object> systemProperties, Map<String, Object> environmentVariables) {
+	private final List<String> jvmOptions;
+
+	AbstractNode(Path workingDirectory, Map<String, Object> properties, List<String> jvmOptions,
+			Map<String, Object> systemProperties, Map<String, Object> environmentVariables) {
 		this.workingDirectory = workingDirectory;
 		this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
 		this.systemProperties = Collections.unmodifiableMap(new LinkedHashMap<>(systemProperties));
 		this.environmentVariables = Collections.unmodifiableMap(new LinkedHashMap<>(environmentVariables));
-		this.config = config;
 	}
 
 	@Override
@@ -78,9 +73,9 @@ abstract class AbstractNode implements Node {
 		Map<String, Object> systemProperties = new LinkedHashMap<>(this.systemProperties);
 		configureSystemProperties(systemProperties);
 		configureProperties(properties);
-		Path configurationFile = Files.createTempFile(this.workingDirectory.resolve("conf"), "", "-cassandra.yaml");
-		dumpProperties(properties, configurationFile);
-		systemProperties.put("cassandra.config", configurationFile.toUri().toString());
+		Path configFile = Files.createTempFile(this.workingDirectory.resolve("conf"), "", "-cassandra.yaml");
+		dumpProperties(properties, configFile);
+		systemProperties.put("cassandra.config", configFile.toUri().toString());
 		List<String> jvmOptions = new ArrayList<>(this.jvmOptions);
 		for (Map.Entry<String, Object> entry : systemProperties.entrySet()) {
 			jvmOptions.add(String.format("-D%s=%s", entry.getKey(), entry.getValue()));
@@ -110,10 +105,6 @@ abstract class AbstractNode implements Node {
 	}
 
 	private Resource getConfig() throws IOException {
-		Resource config = this.config;
-		if (config != null) {
-			return config;
-		}
 		Object url = this.systemProperties.get("cassandra.config");
 		if (url != null) {
 			return new UrlResource(new URL(url.toString()));

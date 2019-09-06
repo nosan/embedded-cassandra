@@ -42,7 +42,7 @@ class EmbeddedCassandraTests {
 
 	private final EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
 
-	private final Map<String, Object> properties = this.cassandraFactory.getProperties();
+	private final Map<String, Object> configProperties = this.cassandraFactory.getConfigProperties();
 
 	private final Map<String, Object> systemProperties = this.cassandraFactory.getSystemProperties();
 
@@ -97,8 +97,8 @@ class EmbeddedCassandraTests {
 
 	@Test
 	void testSuccessWhenOnlyNativeEnabled() throws Throwable {
-		this.properties.put("start_rpc", false);
-		this.properties.put("start_native_transport", true);
+		this.configProperties.put("start_rpc", false);
+		this.configProperties.put("start_native_transport", true);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNull();
 			assertStarted(cassandra, true);
@@ -112,8 +112,8 @@ class EmbeddedCassandraTests {
 
 	@Test
 	void testSuccessWhenOnlyRpcEnabled() throws Throwable {
-		this.properties.put("start_rpc", true);
-		this.properties.put("start_native_transport", false);
+		this.configProperties.put("start_rpc", true);
+		this.configProperties.put("start_native_transport", false);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNull();
 			assertStarted(cassandra, true);
@@ -127,7 +127,7 @@ class EmbeddedCassandraTests {
 
 	@Test
 	void testSuccessWhenTransportEnabled() throws Throwable {
-		this.properties.put("start_rpc", true);
+		this.configProperties.put("start_rpc", true);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNull();
 			assertStarted(cassandra, true);
@@ -142,8 +142,8 @@ class EmbeddedCassandraTests {
 
 	@Test
 	void testSuccessWhenTransportDisabled() throws Throwable {
-		this.properties.put("start_rpc", false);
-		this.properties.put("start_native_transport", false);
+		this.configProperties.put("start_rpc", false);
+		this.configProperties.put("start_native_transport", false);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNull();
 			assertStarted(cassandra, true);
@@ -170,8 +170,8 @@ class EmbeddedCassandraTests {
 		sslOptions.put("keystore_password", "cassandra");
 		sslOptions.put("truststore", truststore.toString());
 		sslOptions.put("truststore_password", "cassandra");
-		this.properties.put("native_transport_port_ssl", 9142);
-		this.properties.put("client_encryption_options", sslOptions);
+		this.configProperties.put("native_transport_port_ssl", 9142);
+		this.configProperties.put("client_encryption_options", sslOptions);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNull();
 			assertStarted(cassandra, true);
@@ -191,8 +191,8 @@ class EmbeddedCassandraTests {
 
 	@Test
 	void testSuccessWhenAuthenticatorEnabled() throws Throwable {
-		this.properties.put("authenticator", "PasswordAuthenticator");
-		this.properties.put("authorizer", "CassandraAuthorizer");
+		this.configProperties.put("authenticator", "PasswordAuthenticator");
+		this.configProperties.put("authorizer", "CassandraAuthorizer");
 		this.systemProperties.put("cassandra.superuser_setup_delay_ms", 0);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNull();
@@ -217,7 +217,7 @@ class EmbeddedCassandraTests {
 
 	@Test
 	void testFailInvalidProperty() throws Throwable {
-		this.properties.put("invalid_property", "");
+		this.configProperties.put("invalid_property", "");
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNotNull().hasStackTraceContaining("[invalid_property] from your cassandra.yaml");
 			assertStarted(cassandra, false);

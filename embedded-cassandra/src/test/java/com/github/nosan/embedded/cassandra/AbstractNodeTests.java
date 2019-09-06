@@ -35,7 +35,6 @@ import org.yaml.snakeyaml.Yaml;
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.RunProcess;
 import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
-import com.github.nosan.embedded.cassandra.commons.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,39 +67,21 @@ class AbstractNodeTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	void doStartWithConfigFile() throws Exception {
-		new AssertNode(this.workDir, new ClassPathResource("cassandra-random.yaml"), this.properties, this.jvmOptions,
-				this.systemProperties, this.environmentVariables, process -> {
-			Map<String, String> systemProperties = getJvmExtraOptions(process);
-			Yaml yaml = new Yaml();
-			try (InputStream inputStream = new URL(systemProperties.get("-Dcassandra.config")).openStream()) {
-				Map<String, Object> properties = yaml.loadAs(inputStream, Map.class);
-				assertThat(properties).doesNotContainEntry("native_transport_port_ssl", 0);
-				assertThat(properties).doesNotContainEntry("rpc_port", 0);
-				assertThat(properties).doesNotContainEntry("storage_port", 0);
-				assertThat(properties).doesNotContainEntry("ssl_storage_port", 0);
-				assertThat(properties).doesNotContainEntry("native_transport_port", 0);
-			}
-		}).start();
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
 	void doStartWithConfigFileViaProperties() throws Exception {
 		this.systemProperties.put("cassandra.config", new ClassPathResource("cassandra-random.yaml").toURL());
-		new AssertNode(this.workDir, null, this.properties, this.jvmOptions, this.systemProperties,
-				this.environmentVariables, process -> {
-			Map<String, String> systemProperties = getJvmExtraOptions(process);
-			Yaml yaml = new Yaml();
-			try (InputStream inputStream = new URL(systemProperties.get("-Dcassandra.config")).openStream()) {
-				Map<String, Object> properties = yaml.loadAs(inputStream, Map.class);
-				assertThat(properties).doesNotContainEntry("native_transport_port_ssl", 0);
-				assertThat(properties).doesNotContainEntry("rpc_port", 0);
-				assertThat(properties).doesNotContainEntry("storage_port", 0);
-				assertThat(properties).doesNotContainEntry("ssl_storage_port", 0);
-				assertThat(properties).doesNotContainEntry("native_transport_port", 0);
-			}
-		}).start();
+		new AssertNode(this.workDir, this.properties, this.jvmOptions, this.systemProperties, this.environmentVariables,
+				process -> {
+					Map<String, String> systemProperties = getJvmExtraOptions(process);
+					Yaml yaml = new Yaml();
+					try (InputStream inputStream = new URL(systemProperties.get("-Dcassandra.config")).openStream()) {
+						Map<String, Object> properties = yaml.loadAs(inputStream, Map.class);
+						assertThat(properties).doesNotContainEntry("native_transport_port_ssl", 0);
+						assertThat(properties).doesNotContainEntry("rpc_port", 0);
+						assertThat(properties).doesNotContainEntry("storage_port", 0);
+						assertThat(properties).doesNotContainEntry("ssl_storage_port", 0);
+						assertThat(properties).doesNotContainEntry("native_transport_port", 0);
+					}
+				}).start();
 	}
 
 	@Test
@@ -114,36 +95,35 @@ class AbstractNodeTests {
 		this.systemProperties.put("cassandra.jmx.local.port", 0);
 		this.systemProperties.put("cassandra.jmx.remote.port", 0);
 
-		new AssertNode(this.workDir, null, this.properties, this.jvmOptions, this.systemProperties,
-				this.environmentVariables, process -> {
-			Map<String, String> systemProperties = getJvmExtraOptions(process);
-			assertThat(systemProperties).doesNotContainEntry("-Dcassandra.native_transport_port", "0");
-			assertThat(systemProperties).doesNotContainEntry("-Dcassandra.rpc_port", "0");
-			assertThat(systemProperties).doesNotContainEntry("-Dcassandra.storage_port", "0");
-			assertThat(systemProperties).doesNotContainEntry("-Dcassandra.ssl_storage_port", "0");
-			assertThat(systemProperties).doesNotContainEntry("-Dcassandra.jmx.local.port", "0");
-			assertThat(systemProperties).doesNotContainEntry("-Dcassandra.jmx.remote.port", "0");
-			Yaml yaml = new Yaml();
-			try (InputStream inputStream = new URL(systemProperties.get("-Dcassandra.config")).openStream()) {
-				Map<String, Object> properties = yaml.loadAs(inputStream, Map.class);
-				assertThat(properties).doesNotContainEntry("native_transport_port_ssl", 0);
-			}
-		}).start();
+		new AssertNode(this.workDir, this.properties, this.jvmOptions, this.systemProperties, this.environmentVariables,
+				process -> {
+					Map<String, String> systemProperties = getJvmExtraOptions(process);
+					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.native_transport_port", "0");
+					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.rpc_port", "0");
+					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.storage_port", "0");
+					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.ssl_storage_port", "0");
+					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.jmx.local.port", "0");
+					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.jmx.remote.port", "0");
+					Yaml yaml = new Yaml();
+					try (InputStream inputStream = new URL(systemProperties.get("-Dcassandra.config")).openStream()) {
+						Map<String, Object> properties = yaml.loadAs(inputStream, Map.class);
+						assertThat(properties).doesNotContainEntry("native_transport_port_ssl", 0);
+					}
+				}).start();
 	}
 
 	@Test
 	void doStartWithJvmOptions() throws Exception {
 		this.jvmOptions.add("-Xmx512m");
-		new AssertNode(this.workDir, null, this.properties, this.jvmOptions, this.systemProperties,
-				this.environmentVariables, process -> assertThat(process.getEnvironment().get("JVM_EXTRA_OPTS"))
-				.asString().contains("-Xmx512m")).start();
+		new AssertNode(this.workDir, this.properties, this.jvmOptions, this.systemProperties, this.environmentVariables,
+				process -> assertThat(process.getEnvironment().get("JVM_EXTRA_OPTS"))
+						.asString().contains("-Xmx512m")).start();
 	}
 
 	@Test
 	void doStartWithEnvVariables() throws Exception {
 		this.environmentVariables.put("KEY", "VALUE");
-		new AssertNode(this.workDir, null, this.properties, this.jvmOptions, this.systemProperties,
-				this.environmentVariables,
+		new AssertNode(this.workDir, this.properties, this.jvmOptions, this.systemProperties, this.environmentVariables,
 				process -> assertThat(process.getEnvironment()).containsEntry("KEY", "VALUE")).start();
 	}
 
@@ -168,10 +148,10 @@ class AbstractNodeTests {
 
 		private final RunProcessConsumer consumer;
 
-		AssertNode(@Nullable Path workingDirectory, @Nullable Resource config, Map<String, Object> properties,
-				List<String> jvmOptions, Map<String, Object> systemProperties, Map<String, Object> environmentVariables,
+		AssertNode(@Nullable Path workingDirectory, Map<String, Object> properties, List<String> jvmOptions,
+				Map<String, Object> systemProperties, Map<String, Object> environmentVariables,
 				RunProcessConsumer consumer) {
-			super(Objects.requireNonNull(workingDirectory), config, properties, jvmOptions, systemProperties,
+			super(Objects.requireNonNull(workingDirectory), properties, jvmOptions, systemProperties,
 					environmentVariables);
 			this.consumer = consumer;
 		}

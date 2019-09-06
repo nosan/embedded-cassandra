@@ -21,7 +21,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -40,28 +39,6 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
 public final class FileUtils {
 
 	private FileUtils() {
-	}
-
-	/**
-	 * Returns the path to user home.
-	 *
-	 * @return a path, or {@code null} if {@code user.home} system property is not present
-	 */
-	@Nullable
-	public static Path getUserHome() {
-		String dir = System.getProperty("user.home");
-		return (dir != null) ? Paths.get(dir) : null;
-	}
-
-	/**
-	 * Returns the path to java home.
-	 *
-	 * @return a path, or {@code null} if {@code java.home} system property is not present
-	 */
-	@Nullable
-	public static Path getJavaHome() {
-		String dir = System.getProperty("java.home");
-		return (dir != null) ? Paths.get(dir) : null;
 	}
 
 	/**

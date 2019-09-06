@@ -23,8 +23,8 @@ class CassandraAuthentication {
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.getProperties().put("authenticator", "PasswordAuthenticator");
-		cassandraFactory.getProperties().put("authorizer", "CassandraAuthorizer");
+		cassandraFactory.getConfigProperties().put("authenticator", "PasswordAuthenticator");
+		cassandraFactory.getConfigProperties().put("authorizer", "CassandraAuthorizer");
 		cassandraFactory.getSystemProperties().put("cassandra.superuser_setup_delay_ms", 0);
 		// end::source[]
 	}

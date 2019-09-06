@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -128,7 +129,10 @@ public final class ArchiveArtifact implements Artifact {
 	}
 
 	private Path getRealDestination() {
-		Path destination = Optional.ofNullable(this.destination).orElseGet(FileUtils::getUserHome);
+		Path destination = this.destination;
+		if (destination == null) {
+			destination = Optional.ofNullable(System.getProperty("user.home")).map(Paths::get).orElse(null);
+		}
 		if (destination == null) {
 			throw new IllegalStateException("'destination' must not be null");
 		}

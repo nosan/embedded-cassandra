@@ -26,11 +26,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.ProcessId;
 import com.github.nosan.embedded.cassandra.commons.RunProcess;
-import com.github.nosan.embedded.cassandra.commons.io.Resource;
 
 /**
  * Unix {@link Node}.
@@ -45,10 +43,9 @@ class UnixNode extends AbstractNode {
 
 	private final boolean rootAllowed;
 
-	UnixNode(Version version, Path workingDirectory, @Nullable Resource config, List<String> jvmOptions,
-			Map<String, Object> systemProperties, Map<String, Object> environmentVariables,
-			Map<String, Object> properties, boolean rootAllowed) {
-		super(workingDirectory, config, properties, jvmOptions, systemProperties, environmentVariables);
+	UnixNode(Version version, Path workingDirectory, List<String> jvmOptions, Map<String, Object> systemProperties,
+			Map<String, Object> environmentVariables, Map<String, Object> properties, boolean rootAllowed) {
+		super(workingDirectory, properties, jvmOptions, systemProperties, environmentVariables);
 		this.version = version;
 		this.workingDirectory = workingDirectory;
 		this.rootAllowed = rootAllowed;

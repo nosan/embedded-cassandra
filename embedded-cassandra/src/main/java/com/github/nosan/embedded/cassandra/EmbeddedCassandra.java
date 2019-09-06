@@ -16,11 +16,8 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Locale;
+import java.util.StringJoiner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +27,6 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraException;
 import com.github.nosan.embedded.cassandra.api.CassandraInterruptedException;
 import com.github.nosan.embedded.cassandra.api.Version;
-import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 
 /**
  * Embedded {@link Cassandra}.
@@ -55,23 +51,16 @@ class EmbeddedCassandra implements Cassandra {
 
 	private final Version version;
 
-	private final Path workingDirectory;
-
-	private final Path artifactDirectory;
-
 	private final boolean exposeProperties;
-
-	private volatile boolean started = false;
 
 	private final Database database;
 
-	EmbeddedCassandra(String name, boolean exposeProperties, Path artifactDirectory, Path workingDirectory,
-			Version version, Database database) {
+	private volatile boolean started = false;
+
+	EmbeddedCassandra(String name, Version version, boolean exposeProperties, Database database) {
 		this.name = name;
-		this.exposeProperties = exposeProperties;
-		this.artifactDirectory = artifactDirectory;
-		this.workingDirectory = workingDirectory;
 		this.version = version;
+		this.exposeProperties = exposeProperties;
 		this.database = database;
 	}
 
@@ -155,12 +144,15 @@ class EmbeddedCassandra implements Cassandra {
 
 	@Override
 	public String toString() {
-		return String.format("Embedded Cassandra (name='%s' version='%s')", getName(), getVersion());
+		return new StringJoiner(", ", EmbeddedCassandra.class.getSimpleName() + "[", "]")
+				.add("name='" + this.name + "'")
+				.add("version=" + this.version)
+				.add("database=" + this.database)
+				.toString();
 	}
 
 	private void doStart() {
 		try {
-			initialize();
 			this.database.start();
 		}
 		catch (InterruptedException ex) {
@@ -171,34 +163,15 @@ class EmbeddedCassandra implements Cassandra {
 		}
 	}
 
-	private void initialize() throws IOException {
-		log.info("Initializes {}. It takes a while...", toString());
-		Files.createDirectories(this.workingDirectory);
-		FileUtils.copy(this.artifactDirectory, this.workingDirectory, (path, attributes) -> {
-			if (attributes.isDirectory()) {
-				String name = path.getFileName().toString().toLowerCase(Locale.ENGLISH);
-				return !name.equals("javadoc") && !name.equals("doc");
-			}
-			return true;
-		});
-	}
-
 	private void doStop() {
 		try {
 			this.database.stop();
-			destroy();
 		}
 		catch (InterruptedException ex) {
 			throw new CassandraInterruptedException("Cassandra stop interrupted", ex);
 		}
 		catch (Exception ex) {
 			throw new CassandraException("Unable to stop " + toString(), ex);
-		}
-	}
-
-	private void destroy() throws IOException {
-		if (FileUtils.delete(this.workingDirectory)) {
-			log.info("The working directory '{}' has been deleted", this.workingDirectory);
 		}
 	}
 

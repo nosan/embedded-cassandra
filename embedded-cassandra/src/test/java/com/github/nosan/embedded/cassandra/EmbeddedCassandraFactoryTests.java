@@ -53,13 +53,16 @@ class EmbeddedCassandraFactoryTests {
 		assertThat(this.cassandraFactory.getName()).isEqualTo("myname");
 		Cassandra cassandra = this.cassandraFactory.create();
 		assertThat(cassandra.getName()).isEqualTo("myname");
+		Object database = ReflectionTestUtils.getField(cassandra, "database");
+		assertThat(database).hasFieldOrPropertyWithValue("name", "myname");
 	}
 
 	@Test
 	void testWorkingDir(@TempDir Path temporaryFolder) {
 		this.cassandraFactory.setWorkingDirectory(temporaryFolder);
 		Cassandra cassandra = this.cassandraFactory.create();
-		assertThat(cassandra).hasFieldOrPropertyWithValue("workingDirectory", temporaryFolder);
+		Object database = ReflectionTestUtils.getField(cassandra, "database");
+		assertThat(database).hasFieldOrPropertyWithValue("workingDirectory", temporaryFolder);
 	}
 
 	@Test
@@ -79,14 +82,17 @@ class EmbeddedCassandraFactoryTests {
 		};
 		this.cassandraFactory.setArtifact(artifact);
 		Cassandra cassandra = this.cassandraFactory.create();
-		assertThat(cassandra).hasFieldOrPropertyWithValue("artifactDirectory", temporaryFolder)
-				.hasFieldOrPropertyWithValue("version", version);
+		Object database = ReflectionTestUtils.getField(cassandra, "database");
+		assertThat(cassandra).hasFieldOrPropertyWithValue("version", version);
+		assertThat(database).hasFieldOrPropertyWithValue("version", version)
+				.hasFieldOrPropertyWithValue("artifactDirectory", temporaryFolder);
 
 	}
 
 	@Test
 	void testJavaHome(@TempDir Path temporaryFolder) {
 		this.cassandraFactory.setJavaHome(temporaryFolder);
+		assertThat(this.cassandraFactory.getJavaHome()).isEqualTo(temporaryFolder);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("environmentVariables",
@@ -147,7 +153,7 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void getProperties() {
-		this.cassandraFactory.getProperties().put("key", "value");
+		this.cassandraFactory.getConfigProperties().put("key", "value");
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("properties", Collections.singletonMap("key", "value"));
@@ -192,14 +198,36 @@ class EmbeddedCassandraFactoryTests {
 	}
 
 	@Test
-	void testConfigFile(@TempDir Path temporaryFolder) throws IOException {
-		Path file = Files.createFile(temporaryFolder.resolve("cassandra.yaml"));
+	void testConfig(@TempDir Path temporaryFolder) throws IOException {
+		Path file = Files.createTempFile(temporaryFolder, "", "");
 		FileSystemResource config = new FileSystemResource(file);
 		this.cassandraFactory.setConfig(config);
 		assertThat(this.cassandraFactory.getConfig()).isEqualTo(config);
 		Cassandra cassandra = this.cassandraFactory.create();
-		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
-		assertThat(node).hasFieldOrPropertyWithValue("config", config);
+		Object database = ReflectionTestUtils.getField(cassandra, "database");
+		assertThat(database).hasFieldOrPropertyWithValue("config", config);
+	}
+
+	@Test
+	void testTopologyConfig(@TempDir Path temporaryFolder) throws IOException {
+		Path file = Files.createTempFile(temporaryFolder, "", "");
+		FileSystemResource config = new FileSystemResource(file);
+		this.cassandraFactory.setTopologyConfig(config);
+		assertThat(this.cassandraFactory.getTopologyConfig()).isEqualTo(config);
+		Cassandra cassandra = this.cassandraFactory.create();
+		Object database = ReflectionTestUtils.getField(cassandra, "database");
+		assertThat(database).hasFieldOrPropertyWithValue("topologyConfig", config);
+	}
+
+	@Test
+	void testRackConfig(@TempDir Path temporaryFolder) throws IOException {
+		Path file = Files.createTempFile(temporaryFolder, "", "");
+		FileSystemResource config = new FileSystemResource(file);
+		this.cassandraFactory.setRackConfig(config);
+		assertThat(this.cassandraFactory.getRackConfig()).isEqualTo(config);
+		Cassandra cassandra = this.cassandraFactory.create();
+		Object database = ReflectionTestUtils.getField(cassandra, "database");
+		assertThat(database).hasFieldOrPropertyWithValue("rackConfig", config);
 	}
 
 	@Test

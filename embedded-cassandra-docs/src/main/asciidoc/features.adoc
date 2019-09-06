@@ -9,7 +9,7 @@ This section describes key features that you may want to use and customize.
 This section covers how to configure Embedded Cassandra.
 
 [[features-configuration-artifact]]
-=== Configure Cassandra's Version
+=== Configure Version
 
 [source,java,indent=0]
 ----
@@ -19,27 +19,46 @@ include::{test-sources}/examples/configuration/CassandraVersion.java[tag=source]
 TIP: Default version is *3.11.4*
 
 [[features-configure-configuration-file]]
-=== Configure Configuration File
+=== Configure Config
 
-Sets the Cassandra's configuration file.
+Sets Cassandra's configuration file (`cassandra.yaml`)
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/configuration/CassandraFile.java[tag=source]
+include::{test-sources}/examples/configuration/CassandraConfig.java[tag=source]
 ----
 
 [[features-configure-properties]]
-=== Configure Cassandra's Properties
+=== Configure Config Properties
 
-Properties used to set cassandra properties (`cassandra.yaml`) that should be associated with Cassandra.
-These properties replace any properties in (`cassandra.yaml`).
+These properties override any Cassandra's properties in the (`cassandra.yaml`).
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/configuration/CassandraProperties.java[tag=source]
+include::{test-sources}/examples/configuration/CassandraConfigProperties.java[tag=source]
 ----
 
 TIP: More about configuration properties {apache-cassandra-configuration-ref}[here]
+
+[[features-configure-rack-file]]
+=== Configure Rack Config
+
+Sets Cassandra's rack properties (`cassandra-rackdc.properties`)
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraRackConfig.java[tag=source]
+----
+
+[[features-configure-topology-file]]
+=== Configure Topology Config
+
+Sets Cassandra's topology properties (`cassandra-topology.properties`)
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraTopologyConfig.java[tag=source]
+----
 
 [[features-configure-system-properties]]
 === Configure System Properties
@@ -76,7 +95,7 @@ include::{test-sources}/examples/configuration/CassandraJvmOptions.java[tag=sour
 [[features-configure-java-home]]
 === Configure Java Home
 
-Sets the `java home` path. This home used by Cassandra's process.
+Sets the Java Home. This home used by Cassandra's process.
 
 [source,java,indent=0]
 ----

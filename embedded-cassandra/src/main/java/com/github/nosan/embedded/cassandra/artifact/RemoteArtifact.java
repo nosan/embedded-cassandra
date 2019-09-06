@@ -27,6 +27,7 @@ import java.net.URLConnection;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -208,7 +209,10 @@ public final class RemoteArtifact implements Artifact {
 	}
 
 	private Path getRealDestination() {
-		Path destination = Optional.ofNullable(this.destination).orElseGet(FileUtils::getUserHome);
+		Path destination = this.destination;
+		if (destination == null) {
+			destination = Optional.ofNullable(System.getProperty("user.home")).map(Paths::get).orElse(null);
+		}
 		if (destination == null) {
 			throw new IllegalStateException("'destination' must not be null");
 		}

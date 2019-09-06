@@ -17,13 +17,14 @@
 package examples.configuration;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 
-class CassandraProperties {
+class CassandraTopologyConfig {
 
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.getProperties().put("start_rpc", false);
+		cassandraFactory.setTopologyConfig(new ClassPathResource("cassandra-topology.properties"));
 		// end::source[]
 	}
 

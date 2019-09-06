@@ -51,9 +51,7 @@ interface Database {
 	 * @return the address (or null if none)
 	 */
 	@Nullable
-	default InetAddress getAddress() {
-		return null;
-	}
+	InetAddress getAddress();
 
 	/**
 	 * Returns the native transport port ({@code native_transport_port}) or SSL port ({@code native_transport_port_ssl})
@@ -61,9 +59,7 @@ interface Database {
 	 *
 	 * @return the port or SSL port (or -1 if none)
 	 */
-	default int getPort() {
-		return -1;
-	}
+	int getPort();
 
 	/**
 	 * Returns the native transport SSL port ({@code native_transport_port_ssl}) this {@code Cassandra} is listening
@@ -71,17 +67,13 @@ interface Database {
 	 *
 	 * @return the SSL port (or -1 if none)
 	 */
-	default int getSslPort() {
-		return -1;
-	}
+	int getSslPort();
 
 	/**
 	 * Returns the RPC transport port ({@code rpc_port}) this {@code Cassandra} is listening on.
 	 *
 	 * @return the RPC port (or -1 if none)
 	 */
-	default int getRpcPort() {
-		return -1;
-	}
+	int getRpcPort();
 
 }

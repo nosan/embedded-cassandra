@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.commons.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,16 +41,6 @@ class FileUtilsTests {
 	@BeforeEach
 	void setUp(@TempDir Path temporaryFolder) {
 		this.temporaryFolder = temporaryFolder;
-	}
-
-	@Test
-	void getUserHomeDirectory() {
-		assertThat(FileUtils.getUserHome()).isEqualTo(Paths.get(System.getProperty("user.home")));
-	}
-
-	@Test
-	void getJavaHomeDirectory() {
-		assertThat(FileUtils.getJavaHome()).isEqualTo(Paths.get(System.getProperty("java.home")));
 	}
 
 	@Test
