@@ -41,7 +41,7 @@ jobs:
     - stage: deploy
       os: linux
       script:
-        - ./mvnw clean verify -DskipTests
+        - ./mvnw clean verify -DskipTests -Pdocs
       after_failure: ./surefire-reports.sh
       deploy:
         provider: pages
