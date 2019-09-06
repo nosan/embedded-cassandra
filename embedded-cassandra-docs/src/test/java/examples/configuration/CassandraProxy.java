@@ -16,6 +16,7 @@
 
 package examples.configuration;
 
+import java.net.InetSocketAddress;
 import java.net.Proxy;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
@@ -28,7 +29,7 @@ class CassandraProxy {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
 		RemoteArtifact artifact = new RemoteArtifact(Version.of("3.11.4"));
-		artifact.setProxy(Proxy.NO_PROXY);
+		artifact.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("my.proxy", 80)));
 		cassandraFactory.setArtifact(artifact);
 		// end::source[]
 	}

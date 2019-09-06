@@ -23,7 +23,7 @@ class CassandraEnvironmentVariables {
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.getEnvironmentVariables().put("JVM_OPTS", "-Dcassandra.native_transport_port=9042");
+		cassandraFactory.getEnvironmentVariables().put("JAVA_HOME", System.getenv("JAVA_HOME"));
 		// end::source[]
 	}
 

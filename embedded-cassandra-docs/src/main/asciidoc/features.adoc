@@ -121,8 +121,7 @@ include::{test-sources}/examples/configuration/CassandraAuthentication.java[tag=
 [[configuration-ports]]
 === Configure Ports
 
-By default, EmbeddedCassandra is running on default ports.
-There are several methods that can be used to set ports, such as `setPort(int)`.
+By default, EmbeddedCassandra is running on default ports. There are several methods that can be used to set ports.
 
 [source,java,indent=0]
 ----
