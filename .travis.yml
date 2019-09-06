@@ -49,4 +49,5 @@ jobs:
         github_token: $GITHUB_TOKEN
         keep_history: true
         local_dir: embedded-cassandra-docs/target/generated-docs/
-
+        on:
+          tags: true
