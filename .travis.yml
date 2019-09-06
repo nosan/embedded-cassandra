@@ -42,7 +42,6 @@ jobs:
       os: linux
       script:
         - ./mvnw clean verify -DskipTests -Pdocs
-      after_failure: ./surefire-reports.sh
       deploy:
         provider: pages
         skip_cleanup: true
