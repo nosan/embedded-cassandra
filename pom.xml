@@ -368,7 +368,7 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <inherited>false</inherited>
                 <configuration>
-                    <skip>false</skip>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
