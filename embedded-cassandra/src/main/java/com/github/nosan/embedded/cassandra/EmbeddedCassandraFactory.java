@@ -54,7 +54,7 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  *
  *   public static void main(String[] args) {
  *     EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
- *     cassandraFactory.setArtifact(Artifact.of("3.11.4"));
+ *     cassandraFactory.setArtifact(Artifact.ofVersion("3.11.4"));
  *     Cassandra cassandra = cassandraFactory.create();
  *     cassandra.start();
  *     try {
