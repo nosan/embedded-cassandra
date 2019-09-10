@@ -178,7 +178,7 @@ include::{test-sources}/examples/testng/configuration/factory/CassandraCustomFac
 
 == Using Spring Test
 
-For running Apache Cassandra using Spring Test, `@CassandraTest` annotation has to be used.
+For running Apache Cassandra using Spring Test, `@EmbeddedCassandra` annotation has to be used.
 This annotation allows the Cassandra to be started and stopped.
 Cassandra will be registered as a bean named `Cassandra.class.getName()`.
 By default, `EmbeddedCassandraFactory` used, which is configured to use random ports.
