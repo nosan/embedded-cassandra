@@ -61,7 +61,7 @@ class CassandraDatabase implements Database {
 
 	private final Version version;
 
-	private final Path artifactDirectory;
+	private final Path directory;
 
 	private final Path workingDirectory;
 
@@ -94,12 +94,12 @@ class CassandraDatabase implements Database {
 
 	private volatile int rpcPort = -1;
 
-	CassandraDatabase(String name, Version version, Path artifactDirectory, Path workingDirectory, boolean daemon,
+	CassandraDatabase(String name, Version version, Path directory, Path workingDirectory, boolean daemon,
 			Logger logger, Duration timeout, @Nullable Resource config, @Nullable Resource rackConfig,
 			@Nullable Resource topologyConfig, Node node) {
 		this.name = name;
 		this.version = version;
-		this.artifactDirectory = artifactDirectory;
+		this.directory = directory;
 		this.workingDirectory = workingDirectory;
 		this.daemon = daemon;
 		this.logger = logger;
@@ -182,7 +182,7 @@ class CassandraDatabase implements Database {
 	private void initialize() throws IOException {
 		log.info("Initializes {}. It takes a while...", toString());
 		Files.createDirectories(this.workingDirectory);
-		FileUtils.copy(this.artifactDirectory, this.workingDirectory, (path, attributes) -> {
+		FileUtils.copy(this.directory, this.workingDirectory, (path, attributes) -> {
 			if (attributes.isDirectory()) {
 				String name = path.getFileName().toString().toLowerCase(Locale.ENGLISH);
 				return !name.equals("javadoc") && !name.equals("doc");

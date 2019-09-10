@@ -598,15 +598,15 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		if (Files.exists(workingDirectory) && !Files.isDirectory(workingDirectory)) {
 			throw new IllegalArgumentException(workingDirectory + " is not a directory");
 		}
-		Path artifactDirectory = distribution.getDirectory();
-		if (!Files.exists(artifactDirectory)) {
-			throw new IllegalStateException(artifactDirectory + " does not exist");
+		Path directory = distribution.getDirectory();
+		if (!Files.exists(directory)) {
+			throw new IllegalStateException(directory + " does not exist");
 		}
-		if (!Files.isDirectory(artifactDirectory)) {
-			throw new IllegalStateException(artifactDirectory + " is not a directory");
+		if (!Files.isDirectory(directory)) {
+			throw new IllegalStateException(directory + " is not a directory");
 		}
 		Node node = createNode(version, workingDirectory);
-		Database database = new CassandraDatabase(name, version, artifactDirectory, workingDirectory, isDaemon(),
+		Database database = new CassandraDatabase(name, version, directory, workingDirectory, isDaemon(),
 				getLogger(), getTimeout(), getConfig(), getRackConfig(), getTopologyConfig(), node);
 		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, version, isExposeProperties(), database);
 		if (isRegisterShutdownHook()) {
