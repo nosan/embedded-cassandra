@@ -48,9 +48,9 @@ class ArchiveArtifactTests {
 	void testArtifact(@TempDir Path temporaryFolder) throws Exception {
 		ArchiveArtifact artifact = new ArchiveArtifact(VERSION, new OnceResource());
 		artifact.setDestination(temporaryFolder);
-		assertDescriptor(artifact.getDescriptor());
+		assertDistribution(artifact.getDistribution());
 		//reuse
-		assertDescriptor(artifact.getDescriptor());
+		assertDistribution(artifact.getDistribution());
 	}
 
 	@Test
@@ -61,17 +61,17 @@ class ArchiveArtifactTests {
 
 		try {
 			CountDownLatch latch = new CountDownLatch(2);
-			Future<Artifact.Descriptor> dir = executorService.submit(() -> {
+			Future<Artifact.Distribution> distribution1 = executorService.submit(() -> {
 				latch.countDown();
-				return artifact.getDescriptor();
+				return artifact.getDistribution();
 			});
-			Future<Artifact.Descriptor> dir1 = executorService.submit(() -> {
+			Future<Artifact.Distribution> distribution2 = executorService.submit(() -> {
 				latch.countDown();
-				return artifact.getDescriptor();
+				return artifact.getDistribution();
 			});
 			latch.await();
-			assertDescriptor(dir.get());
-			assertDescriptor(dir1.get());
+			assertDistribution(distribution1.get());
+			assertDistribution(distribution2.get());
 		}
 		finally {
 			executorService.shutdown();
@@ -79,9 +79,9 @@ class ArchiveArtifactTests {
 
 	}
 
-	private void assertDescriptor(Artifact.Descriptor descriptor) {
-		Path directory = descriptor.getDirectory();
-		assertThat(descriptor.getVersion()).isEqualTo(VERSION);
+	private void assertDistribution(Artifact.Distribution distribution) {
+		Path directory = distribution.getDirectory();
+		assertThat(distribution.getVersion()).isEqualTo(VERSION);
 		assertThat(directory.resolve("bin")).exists();
 		assertThat(directory.resolve("lib")).exists();
 		assertThat(directory.resolve("conf")).exists();

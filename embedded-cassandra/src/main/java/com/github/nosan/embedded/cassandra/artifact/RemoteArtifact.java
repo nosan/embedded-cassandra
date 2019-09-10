@@ -184,7 +184,7 @@ public final class RemoteArtifact implements Artifact {
 	}
 
 	@Override
-	public Descriptor getDescriptor() throws IOException {
+	public Distribution getDistribution() throws IOException {
 		Path destination = getRealDestination();
 		Artifact artifact = new DefaultArtifact(this.version, destination);
 		if (!Files.exists(destination.resolve(".extracted"))) {
@@ -199,13 +199,13 @@ public final class RemoteArtifact implements Artifact {
 				if (!Files.exists(destination.resolve(".extracted"))) {
 					Resource resource = download();
 					extract(resource, destination);
-					Descriptor descriptor = artifact.getDescriptor();
+					Distribution distribution = artifact.getDistribution();
 					FileUtils.createIfNotExists(destination.resolve(".extracted"));
-					return descriptor;
+					return distribution;
 				}
 			}
 		}
-		return artifact.getDescriptor();
+		return artifact.getDistribution();
 	}
 
 	private Path getRealDestination() {

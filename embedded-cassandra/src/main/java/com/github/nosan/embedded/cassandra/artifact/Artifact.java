@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import com.github.nosan.embedded.cassandra.api.Version;
 
 /**
- * This interface provides a {@link Descriptor}.
+ * This interface provides a {@link Distribution}.
  *
  * @author Dmytro Nosan
  * @see DefaultArtifact
@@ -54,17 +54,17 @@ public interface Artifact {
 	}
 
 	/**
-	 * Returns the {@link Descriptor}.
+	 * Returns the {@link Distribution}.
 	 *
-	 * @return the descriptor
+	 * @return the distribution
 	 * @throws IOException if an I/O error occurs
 	 */
-	Descriptor getDescriptor() throws IOException;
+	Distribution getDistribution() throws IOException;
 
 	/**
 	 * This interface provides a path to {@code Cassandra's} directory and {@code Cassandra's} version.
 	 */
-	interface Descriptor {
+	interface Distribution {
 
 		/**
 		 * Returns the path to Cassandra's directory.

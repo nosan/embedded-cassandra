@@ -94,10 +94,10 @@ class RemoteArtifactTests {
 		artifact.setDestination(temporaryFolder);
 		artifact.setUrlFactory(version -> Collections.singletonList(
 				new URL(String.format("http:/%s/apache-cassandra-3.11.4-bin.tar.gz", this.httpServer.getAddress()))));
-		assertDescriptor(artifact.getDescriptor());
+		assertDistribution(artifact.getDistribution());
 		assertThat(this.output.toString()).contains("Downloaded");
 		this.output.reset();
-		assertDescriptor(artifact.getDescriptor());
+		assertDistribution(artifact.getDistribution());
 		assertThat(this.output.toString()).doesNotContain("Downloaded");
 	}
 
@@ -107,7 +107,7 @@ class RemoteArtifactTests {
 		artifact.setDestination(temporaryFolder);
 		artifact.setUrlFactory(version -> Collections.singletonList(new URL(String
 				.format("http:/%s/dist/apache-cassandra-3.11.4-bin.tar.gz", this.httpServer.getAddress()))));
-		assertDescriptor(artifact.getDescriptor());
+		assertDistribution(artifact.getDistribution());
 		assertThat(this.output.toString()).contains("Downloaded");
 	}
 
@@ -123,7 +123,7 @@ class RemoteArtifactTests {
 		artifact.setDestination(temporaryFolder);
 		artifact.setUrlFactory(version -> Collections.singletonList(
 				new URL(String.format("http:/%s/dist/apache-cassandra-3.11.4.zip", this.httpServer.getAddress()))));
-		assertThatThrownBy(artifact::getDescriptor).hasStackTraceContaining("Too many redirects for URL");
+		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("Too many redirects for URL");
 	}
 
 	@Test
@@ -136,7 +136,7 @@ class RemoteArtifactTests {
 		artifact.setDestination(temporaryFolder);
 		artifact.setUrlFactory(version -> Collections.singletonList(
 				new URL(String.format("http:/%s/dist/apache-cassandra-3.11.4.zip", this.httpServer.getAddress()))));
-		assertThatThrownBy(artifact::getDescriptor).hasStackTraceContaining("HTTP Status '404' is invalid for URL");
+		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("HTTP Status '404' is invalid for URL");
 	}
 
 	@Test
@@ -155,7 +155,7 @@ class RemoteArtifactTests {
 		artifact.setReadTimeout(Duration.ofMillis(200));
 		artifact.setUrlFactory(version -> Collections.singletonList(
 				new URL(String.format("http:/%s/dist/apache-cassandra-3.11.4.zip", this.httpServer.getAddress()))));
-		assertThatThrownBy(artifact::getDescriptor).hasStackTraceContaining("Read timed out");
+		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("Read timed out");
 	}
 
 	@Test
@@ -165,7 +165,7 @@ class RemoteArtifactTests {
 		artifact.setConnectTimeout(Duration.ofSeconds(1));
 		artifact.setUrlFactory(
 				version -> Collections.singletonList(new URL("http://example.com:81/apache-cassandra-3.11.4.zip")));
-		assertThatThrownBy(artifact::getDescriptor).hasStackTraceContaining("connect timed out");
+		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("connect timed out");
 	}
 
 	@Test
@@ -175,12 +175,12 @@ class RemoteArtifactTests {
 		artifact.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
 		artifact.setUrlFactory(version -> Collections.singletonList(
 				new URL(String.format("http:/%s/apache-cassandra-3.11.4-bin.tar.gz", this.httpServer.getAddress()))));
-		assertThatThrownBy(artifact::getDescriptor).hasStackTraceContaining("Connection refused");
+		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("Connection refused");
 	}
 
-	private void assertDescriptor(Artifact.Descriptor descriptor) {
-		Path directory = descriptor.getDirectory();
-		assertThat(descriptor.getVersion()).isEqualTo(VERSION);
+	private void assertDistribution(Artifact.Distribution distribution) {
+		Path directory = distribution.getDirectory();
+		assertThat(distribution.getVersion()).isEqualTo(VERSION);
 		assertThat(directory.resolve("bin")).exists();
 		assertThat(directory.resolve("lib")).exists();
 		assertThat(directory.resolve("conf")).exists();

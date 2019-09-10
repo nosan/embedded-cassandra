@@ -44,7 +44,7 @@ class DefaultArtifactTests {
 		Files.createFile(home.resolve("conf/cassandra.yaml"));
 		Version version = Version.of("3.11.4");
 		Artifact artifact = new DefaultArtifact(version, temporaryFolder);
-		Artifact.Descriptor distribution = artifact.getDescriptor();
+		Artifact.Distribution distribution = artifact.getDistribution();
 		assertThat(distribution.getVersion()).isEqualTo(version);
 		Path directory = distribution.getDirectory();
 		assertThat(directory.resolve("bin")).exists();
@@ -58,7 +58,7 @@ class DefaultArtifactTests {
 		assertThatIllegalStateException().isThrownBy(() -> {
 			Version version = Version.of("3.11.4");
 			Artifact artifact = new DefaultArtifact(version, temporaryFolder);
-			artifact.getDescriptor();
+			artifact.getDistribution();
 		});
 	}
 
@@ -81,7 +81,7 @@ class DefaultArtifactTests {
 		assertThatIllegalStateException().isThrownBy(() -> {
 			Version version = Version.of("3.11.4");
 			Artifact artifact = new DefaultArtifact(version, temporaryFolder);
-			artifact.getDescriptor();
+			artifact.getDistribution();
 		});
 	}
 

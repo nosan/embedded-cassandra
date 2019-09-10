@@ -68,7 +68,7 @@ class EmbeddedCassandraFactoryTests {
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) {
 		final Version version = Version.of("3.11.4");
-		Artifact artifact = () -> new Artifact.Descriptor() {
+		Artifact artifact = () -> new Artifact.Distribution() {
 
 			@Override
 			public Path getDirectory() {

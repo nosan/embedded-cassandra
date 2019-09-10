@@ -87,7 +87,7 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  *
  *         &#64;Bean
  *         public CassandraFactoryCustomizer&lt;EmbeddedCassandraFactory&gt; versionCustomizer() {
- *            return cassandraFactory -&gt; cassandraFactory.setArtifact(Artifact.of("3.0.0"));
+ *            return cassandraFactory -&gt; cassandraFactory.setArtifact(Artifact.ofVersion("3.0.0"));
  *         }
  *     }
  * }

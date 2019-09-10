@@ -590,8 +590,8 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		if (artifact == null) {
 			artifact = Artifact.ofVersion("3.11.4");
 		}
-		Artifact.Descriptor descriptor = artifact.getDescriptor();
-		Version version = descriptor.getVersion();
+		Artifact.Distribution distribution = artifact.getDistribution();
+		Version version = distribution.getVersion();
 		Path workingDirectory = getWorkingDirectory();
 		if (workingDirectory == null) {
 			workingDirectory = Files.createTempDirectory("apache-cassandra-" + version + "-");
@@ -599,7 +599,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		if (Files.exists(workingDirectory) && !Files.isDirectory(workingDirectory)) {
 			throw new IllegalArgumentException(workingDirectory + " is not a directory");
 		}
-		Path artifactDirectory = descriptor.getDirectory();
+		Path artifactDirectory = distribution.getDirectory();
 		if (!Files.exists(artifactDirectory)) {
 			throw new IllegalStateException(artifactDirectory + " does not exist");
 		}

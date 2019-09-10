@@ -38,7 +38,7 @@ import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 
 /**
- * An {@link Artifact} that provides a {@link Descriptor} based on the specified archive resource and Cassandra's
+ * An {@link Artifact} that provides a {@link Distribution} based on the specified archive resource and Cassandra's
  * version. Archive will be extracted only once into the {@code destination}.
  *
  * @author Dmytro Nosan
@@ -104,7 +104,7 @@ public final class ArchiveArtifact implements Artifact {
 	}
 
 	@Override
-	public Artifact.Descriptor getDescriptor() throws IOException {
+	public Distribution getDistribution() throws IOException {
 		Path destination = getRealDestination();
 
 		Artifact artifact = new DefaultArtifact(this.version, destination);
@@ -118,14 +118,14 @@ public final class ArchiveArtifact implements Artifact {
 				}
 				if (!Files.exists(destination.resolve(".extracted"))) {
 					extract(this.archiveResource, destination);
-					Artifact.Descriptor descriptor = artifact.getDescriptor();
+					Distribution distribution = artifact.getDistribution();
 					FileUtils.createIfNotExists(destination.resolve(".extracted"));
-					return descriptor;
+					return distribution;
 				}
 			}
 		}
 
-		return artifact.getDescriptor();
+		return artifact.getDistribution();
 	}
 
 	private Path getRealDestination() {

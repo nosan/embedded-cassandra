@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 import com.github.nosan.embedded.cassandra.api.Version;
 
 /**
- * An {@link Artifact} that provides a {@link Descriptor} based on the specified Cassandra's directory and Cassandra's
+ * An {@link Artifact} that provides a {@link Distribution} based on the specified Cassandra's directory and Cassandra's
  * version.
  *
  * @author Dmytro Nosan
@@ -70,11 +70,11 @@ public final class DefaultArtifact implements Artifact {
 	}
 
 	@Override
-	public Descriptor getDescriptor() throws IOException {
+	public Distribution getDistribution() throws IOException {
 		Version version = this.version;
 		Path cassandraHome = findCassandraHome(this.directory);
 
-		return new Descriptor() {
+		return new Distribution() {
 
 			@Override
 			public Path getDirectory() {
