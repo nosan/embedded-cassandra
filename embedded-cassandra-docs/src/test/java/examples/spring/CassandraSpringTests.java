@@ -18,9 +18,16 @@ package examples.spring;
 
 // tag::source[]
 
+import java.net.InetAddress;
+import java.util.Optional;
+
+import com.datastax.driver.core.Cluster;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.cassandra.config.AbstractCassandraConfiguration;
+import org.springframework.data.cassandra.config.CassandraClusterFactoryBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
@@ -33,8 +40,35 @@ import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 class CassandraSpringTests {
 
 	@Test
-	void testCassandra(@Autowired Cassandra cassandra) {
+	void testCassandra(@Autowired Cassandra cassandra, @Autowired Cluster cluster) {
 		//
+	}
+
+	@Configuration
+	static class TestCassandraConfiguration extends AbstractCassandraConfiguration {
+
+		private final Cassandra cassandra;
+
+		TestCassandraConfiguration(Cassandra cassandra) {
+			this.cassandra = cassandra;
+		}
+
+		@Override
+		protected String getContactPoints() {
+			return Optional.ofNullable(this.cassandra.getAddress()).map(InetAddress::getHostAddress).orElse(
+					CassandraClusterFactoryBean.DEFAULT_CONTACT_POINTS);
+		}
+
+		@Override
+		protected int getPort() {
+			return this.cassandra.getPort();
+		}
+
+		@Override
+		protected String getKeyspaceName() {
+			return "test";
+		}
+
 	}
 
 }
