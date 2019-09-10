@@ -63,6 +63,8 @@ public interface Artifact {
 
 	/**
 	 * This interface provides a path to {@code Cassandra's} directory and {@code Cassandra's} version.
+	 *
+	 * @see DefaultDistribution
 	 */
 	interface Distribution {
 

@@ -54,7 +54,6 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  *
  *   public static void main(String[] args) {
  *     EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
- *     cassandraFactory.setArtifact(Artifact.ofVersion("3.11.4"));
  *     Cassandra cassandra = cassandraFactory.create();
  *     cassandra.start();
  *     try {
@@ -625,13 +624,15 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 				entry -> Objects.isNull(entry.getKey()) || Objects.isNull(entry.getValue()));
 		List<String> jvmOptions = new ArrayList<>(getJvmOptions());
 		jvmOptions.removeIf(Objects::isNull);
+		LinkedHashMap<String, Object> configProperties = new LinkedHashMap<>(getConfigProperties());
+		configProperties.keySet().removeIf(Objects::isNull);
 
 		if (isWindows()) {
 			return new WindowsNode(version, workingDirectory, jvmOptions, systemProperties, environmentVariables,
-					getConfigProperties());
+					configProperties);
 		}
 		return new UnixNode(version, workingDirectory, jvmOptions, systemProperties, environmentVariables,
-				getConfigProperties(), isRootAllowed());
+				configProperties, isRootAllowed());
 	}
 
 	@Nullable

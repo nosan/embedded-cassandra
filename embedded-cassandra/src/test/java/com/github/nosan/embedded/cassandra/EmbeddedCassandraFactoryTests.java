@@ -34,6 +34,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.artifact.Artifact;
+import com.github.nosan.embedded.cassandra.artifact.DefaultDistribution;
 import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,18 +69,7 @@ class EmbeddedCassandraFactoryTests {
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) {
 		final Version version = Version.of("3.11.4");
-		Artifact artifact = () -> new Artifact.Distribution() {
-
-			@Override
-			public Path getDirectory() {
-				return temporaryFolder;
-			}
-
-			@Override
-			public Version getVersion() {
-				return version;
-			}
-		};
+		Artifact artifact = () -> new DefaultDistribution(version, temporaryFolder);
 		this.cassandraFactory.setArtifact(artifact);
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");

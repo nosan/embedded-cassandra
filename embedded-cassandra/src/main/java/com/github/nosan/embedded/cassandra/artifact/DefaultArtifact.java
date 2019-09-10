@@ -71,21 +71,7 @@ public final class DefaultArtifact implements Artifact {
 
 	@Override
 	public Distribution getDistribution() throws IOException {
-		Version version = this.version;
-		Path cassandraHome = findCassandraHome(this.directory);
-
-		return new Distribution() {
-
-			@Override
-			public Path getDirectory() {
-				return cassandraHome;
-			}
-
-			@Override
-			public Version getVersion() {
-				return version;
-			}
-		};
+		return new DefaultDistribution(this.version, findCassandraHome(this.directory));
 	}
 
 	private static Path findCassandraHome(Path directory) throws IOException {

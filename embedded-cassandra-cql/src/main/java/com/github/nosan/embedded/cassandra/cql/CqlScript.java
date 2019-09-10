@@ -72,6 +72,7 @@ public interface CqlScript {
 	 * @param statementCallback The action to be performed for each statement
 	 */
 	default void forEach(Consumer<? super String> statementCallback) {
+		Objects.requireNonNull(statementCallback, "'statementCallback' must not be null");
 		getStatements().forEach(statementCallback);
 	}
 
