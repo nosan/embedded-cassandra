@@ -74,9 +74,8 @@ class EmbeddedCassandraFactoryTests {
 		Cassandra cassandra = this.cassandraFactory.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(cassandra).hasFieldOrPropertyWithValue("version", version);
-		assertThat(database).hasFieldOrPropertyWithValue("version", version)
-				.hasFieldOrPropertyWithValue("artifactDirectory", temporaryFolder);
-
+		assertThat(database).hasFieldOrPropertyWithValue("version", version).hasFieldOrPropertyWithValue("directory",
+				temporaryFolder);
 	}
 
 	@Test
