@@ -105,7 +105,7 @@
                                 <resources>${project.basedir}/src/main/resources</resources>
                                 <test-sources>${project.basedir}/src/test/java</test-sources>
                                 <test-resources>${project.basedir}/src/test/resources</test-resources>
-                                <project-version>3.0.0.RC2</project-version>
+                                <project-version>${project.version}</project-version>
                             </attributes>
                         </configuration>
                         <executions>
