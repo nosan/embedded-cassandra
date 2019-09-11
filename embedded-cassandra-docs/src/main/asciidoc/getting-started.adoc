@@ -38,7 +38,7 @@ You also need `JDK 1.8`.
 
 [source,bash]
 ----
-$ ./mvnw clean install
+$ ./mvnw clean verify
 ----
 
 === Modules

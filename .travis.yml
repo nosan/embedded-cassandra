@@ -3,7 +3,7 @@ dist: trusty
 sudo: true
 
 stages:
-  - install
+  - prepare
   - test
   - name: deploy
     if: tag IS present
@@ -18,7 +18,7 @@ env:
 
 jobs:
   include:
-    - stage: install
+    - stage: prepare
       os: linux
       script:
         - rm -rf $JAVA_HOME
