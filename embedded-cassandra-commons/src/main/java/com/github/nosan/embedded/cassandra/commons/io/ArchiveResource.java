@@ -103,6 +103,15 @@ public class ArchiveResource implements Resource {
 
 	}
 
+	/**
+	 * Returns the underlying resource.
+	 *
+	 * @return the underlying resource.
+	 */
+	public Resource getResource() {
+		return this.resource;
+	}
+
 	@Override
 	public String getFileName() {
 		return this.resource.getFileName();

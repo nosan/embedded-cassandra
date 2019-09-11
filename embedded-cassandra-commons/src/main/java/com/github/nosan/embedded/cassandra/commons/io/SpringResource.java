@@ -47,7 +47,7 @@ public class SpringResource implements Resource {
 	}
 
 	/**
-	 * Returns the {@link org.springframework.core.io.Resource Spring Resource}.
+	 * Returns the underlying {@link org.springframework.core.io.Resource Spring Resource}.
 	 *
 	 * @return the resource
 	 */
