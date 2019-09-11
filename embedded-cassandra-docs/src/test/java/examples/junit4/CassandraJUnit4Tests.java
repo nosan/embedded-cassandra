@@ -37,8 +37,8 @@ public class CassandraJUnit4Tests {
 	@BeforeClass
 	public static void prepare() {
 		Cassandra cassandra = rule.getCassandra();
-		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(cassandra.getPort())
-				.build()) {
+		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress())
+				.withPort(cassandra.getPort()).build()) {
 			Session session = cluster.connect();
 			CqlScript.ofResources(new ClassPathResource("schema.cql")).forEach(session::execute);
 		}

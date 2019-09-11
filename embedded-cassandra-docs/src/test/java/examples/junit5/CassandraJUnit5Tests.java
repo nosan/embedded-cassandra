@@ -33,8 +33,8 @@ class CassandraJUnit5Tests {
 
 	@BeforeAll
 	static void prepare(Cassandra cassandra) {
-		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(cassandra.getPort())
-				.build()) {
+		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress())
+				.withPort(cassandra.getPort()).build()) {
 			Session session = cluster.connect();
 			CqlScript.ofResources(new ClassPathResource("schema.cql")).forEach(session::execute);
 		}

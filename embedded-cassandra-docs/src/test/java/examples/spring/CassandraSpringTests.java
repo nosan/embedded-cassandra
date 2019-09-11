@@ -55,8 +55,9 @@ class CassandraSpringTests {
 
 		@Override
 		protected String getContactPoints() {
-			return Optional.ofNullable(this.cassandra.getAddress()).map(InetAddress::getHostAddress).orElse(
-					CassandraClusterFactoryBean.DEFAULT_CONTACT_POINTS);
+			return Optional.ofNullable(this.cassandra.getAddress())
+					.map(InetAddress::getHostAddress)
+					.orElse(CassandraClusterFactoryBean.DEFAULT_CONTACT_POINTS);
 		}
 
 		@Override
