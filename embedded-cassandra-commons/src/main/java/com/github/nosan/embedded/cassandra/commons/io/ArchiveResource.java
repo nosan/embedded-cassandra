@@ -133,7 +133,7 @@ public class ArchiveResource implements Resource {
 		try {
 			return this.archiveStream.open(is);
 		}
-		catch (CompressorException | ArchiveException ex) {
+		catch (Exception ex) {
 			try {
 				is.close();
 			}
@@ -236,7 +236,7 @@ public class ArchiveResource implements Resource {
 					return entry.getValue();
 				}
 			}
-			throw new IllegalArgumentException("Archive Type for '" + resource + "' cannot be detected");
+			throw new IllegalArgumentException("Archive Type for '" + resource + "' cannot be determined");
 		}
 
 		private static ArchiveStream create(String archiveType, String compressorType) {

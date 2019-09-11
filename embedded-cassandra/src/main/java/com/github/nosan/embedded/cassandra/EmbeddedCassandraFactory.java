@@ -102,7 +102,7 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  */
 public final class EmbeddedCassandraFactory implements CassandraFactory {
 
-	private static final AtomicLong number = new AtomicLong();
+	private static final AtomicLong NUMBER = new AtomicLong();
 
 	private final Map<String, Object> environmentVariables = new LinkedHashMap<>(
 			Collections.singletonMap("JAVA_HOME", javaHome()));
@@ -583,7 +583,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	private Cassandra doCreate() throws Exception {
 		String name = getName();
 		if (!StringUtils.hasText(name)) {
-			name = "cassandra-" + number.incrementAndGet();
+			name = "cassandra-" + NUMBER.incrementAndGet();
 		}
 		Artifact artifact = getArtifact();
 		if (artifact == null) {

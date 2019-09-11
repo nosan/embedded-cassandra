@@ -36,6 +36,7 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
  * @see ClassPathResource
  * @see UrlResource
  * @see FileSystemResource
+ * @see ArchiveResource
  * @since 3.0.0
  */
 public interface Resource {
