@@ -137,7 +137,6 @@ public class CompressedResource implements Resource {
 	public void extract(Path destination) throws IOException {
 		Objects.requireNonNull(destination, "'destination' must not be null");
 		try (InputStream is = getInputStream()) {
-			Files.createDirectories(destination);
 			if (!(is instanceof ArchiveInputStream)) {
 				throw new IOException("Stream '" + is + "' of resource '" + this.resource + "' cannot be casted to"
 						+ "'" + ArchiveInputStream.class.getName() + "'");
