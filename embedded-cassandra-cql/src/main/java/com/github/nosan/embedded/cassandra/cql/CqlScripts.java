@@ -16,32 +16,38 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 
 /**
- * {@link CqlScript} for a raw CQL scripts.
+ * {@link CqlScript} for composing {@link CqlScript CqlScripts}.
  *
  * @author Dmytro Nosan
  */
-final class ScriptCqlScript implements CqlScript {
+final class CqlScripts implements CqlScript {
 
-	private final String script;
+	private final List<CqlScript> scripts;
 
 	/**
-	 * Constructs a new {@link ScriptCqlScript} with the specified CQL script.
+	 * Constructs a new {@link CqlScripts} with the specified {@link CqlScript CqlScripts}.
 	 *
-	 * @param script the CQL script
+	 * @param scripts the scripts
 	 */
-	ScriptCqlScript(String script) {
-		this.script = script;
+	CqlScripts(List<CqlScript> scripts) {
+		this.scripts = Collections.unmodifiableList(new ArrayList<>(scripts));
 	}
 
 	@Override
 	public List<String> getStatements() {
-		return new Parser(this.script).getStatements();
+		List<String> statements = new ArrayList<>();
+		for (CqlScript script : this.scripts) {
+			statements.addAll(script.getStatements());
+		}
+		return Collections.unmodifiableList(statements);
 	}
 
 	@Override
@@ -53,19 +59,20 @@ final class ScriptCqlScript implements CqlScript {
 			return false;
 		}
 
-		ScriptCqlScript that = (ScriptCqlScript) other;
+		CqlScripts that = (CqlScripts) other;
 
-		return this.script.equals(that.script);
+		return this.scripts.equals(that.scripts);
 	}
 
 	@Override
 	public int hashCode() {
-		return this.script.hashCode();
+		return this.scripts.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ScriptCqlScript.class.getSimpleName() + "[", "]").add("script=" + this.script)
+		return new StringJoiner(", ", CqlScripts.class.getSimpleName() + "[", "]")
+				.add("scripts=" + this.scripts)
 				.toString();
 	}
 

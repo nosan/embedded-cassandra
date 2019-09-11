@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -49,13 +50,16 @@ final class ResourceCqlScript implements CqlScript {
 
 	@Override
 	public List<String> getStatements() {
-		return new Parser(getScript(this.resource, this.charset)).getStatements();
+		List<String> statements = new Parser(getScript(this.resource, this.charset)).getStatements();
+		return Collections.unmodifiableList(statements);
 	}
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ResourceCqlScript.class.getSimpleName() + "[", "]").add("charset=" + this.charset)
-				.add("resource=" + this.resource).toString();
+		return new StringJoiner(", ", ResourceCqlScript.class.getSimpleName() + "[", "]")
+				.add("charset=" + this.charset)
+				.add("resource=" + this.resource)
+				.toString();
 	}
 
 	@Override

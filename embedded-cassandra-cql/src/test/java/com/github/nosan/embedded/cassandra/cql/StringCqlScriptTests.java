@@ -16,29 +16,33 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ScriptCqlScript}.
+ * Tests for {@link StringCqlScript}.
  *
  * @author Dmytro Nosan
  */
-class ScriptCqlScriptTests {
+class StringCqlScriptTests {
 
-	private final CqlScript script = CqlScript.ofScript(
-			"CREATE KEYSPACE test WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };"
-					+ "CREATE TABLE test.roles ( id text PRIMARY KEY )");
+	private final CqlScript script = new CqlScripts(
+			Arrays.asList(CqlScript.ofString("CREATE TABLE test.users ( id text PRIMARY KEY )"),
+					CqlScript.ofResource(new ClassPathResource("schema.cql"))));
 
 	@Test
 	void testGetStatements() {
 		List<String> statements = this.script.getStatements();
-		assertThat(statements).contains(
+		assertThat(statements).hasSize(3).contains(
 				"CREATE KEYSPACE test WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }");
 		assertThat(statements).contains("CREATE TABLE test.roles ( id text PRIMARY KEY )");
+		assertThat(statements).contains("CREATE TABLE test.users ( id text PRIMARY KEY )");
 	}
 
 }

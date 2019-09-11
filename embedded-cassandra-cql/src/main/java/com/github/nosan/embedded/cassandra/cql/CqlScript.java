@@ -18,9 +18,12 @@ package com.github.nosan.embedded.cassandra.cql;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 
@@ -33,47 +36,63 @@ import com.github.nosan.embedded.cassandra.commons.io.Resource;
 public interface CqlScript {
 
 	/**
-	 * Constructs a new {@link CqlScript} with the specified CQL script.
+	 * Constructs a new {@link CqlScript} with the specified CQL ({@code string}) scripts.
 	 *
-	 * @param script the CQL script
+	 * @param scripts the CQL scripts
 	 * @return a new {@link CqlScript}
 	 */
-	static CqlScript ofScript(String script) {
-		Objects.requireNonNull(script, "'script' must not be null");
-		return new ScriptCqlScript(script);
+	static CqlScript ofString(String... scripts) {
+		Objects.requireNonNull(scripts, "'scripts' must not be null");
+		if (scripts.length == 0) {
+			return EmptyCqlScript.INSTANCE;
+		}
+		if (scripts.length == 1) {
+			return new StringCqlScript(scripts[0]);
+		}
+		return new CqlScripts(Arrays.stream(scripts).map(StringCqlScript::new).collect(Collectors.toList()));
 	}
 
 	/**
-	 * Constructs a new {@link CqlScript} with the specified {@link Resource}.
+	 * Constructs a new {@link CqlScript} with the specified {@link Resource Resources}.
 	 *
-	 * @param resource the resource
+	 * @param resources the resources
 	 * @return a new {@link CqlScript}
 	 */
-	static CqlScript ofResource(Resource resource) {
-		return ofResource(StandardCharsets.UTF_8, resource);
+	static CqlScript ofResource(Resource... resources) {
+		return ofResource(StandardCharsets.UTF_8, resources);
 	}
 
 	/**
-	 * Constructs a new {@link CqlScript} with the specified {@link Resource} and {@link Charset}.
+	 * Constructs a new {@link CqlScript} with the specified {@link Resource Resources} and {@link Charset}.
 	 *
-	 * @param resource the resource
+	 * @param resources the resources
 	 * @param charset the charset to use
 	 * @return a new {@link CqlScript}
 	 */
-	static CqlScript ofResource(Charset charset, Resource resource) {
-		Objects.requireNonNull(resource, "'resource' must not be null");
+	static CqlScript ofResource(Charset charset, Resource... resources) {
+		Objects.requireNonNull(resources, "'resources' must not be null");
 		Objects.requireNonNull(charset, "'charset' must not be null");
-		return new ResourceCqlScript(charset, resource);
+		if (resources.length == 0) {
+			return EmptyCqlScript.INSTANCE;
+		}
+		if (resources.length == 1) {
+			return new ResourceCqlScript(charset, resources[0]);
+		}
+		List<CqlScript> scripts = new ArrayList<>();
+		for (Resource resource : resources) {
+			scripts.add(new ResourceCqlScript(charset, resource));
+		}
+		return new CqlScripts(scripts);
 	}
 
 	/**
-	 * Performs the given {@code Callback} for each statement of the {@link CqlScript}.
+	 * Performs the given {@code callback} for each statement of the {@link CqlScript}.
 	 *
-	 * @param statementCallback The action to be performed for each statement
+	 * @param callback The action to be performed for each statement
 	 */
-	default void forEach(Consumer<? super String> statementCallback) {
-		Objects.requireNonNull(statementCallback, "'statementCallback' must not be null");
-		getStatements().forEach(statementCallback);
+	default void forEach(Consumer<? super String> callback) {
+		Objects.requireNonNull(callback, "'callback' must not be null");
+		getStatements().forEach(callback);
 	}
 
 	/**
