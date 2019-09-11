@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
+@SuppressWarnings("NullableProblems")
 class AbstractNodeTests {
 
 	private final Map<String, Object> properties = new LinkedHashMap<>();
@@ -53,35 +53,33 @@ class AbstractNodeTests {
 
 	private final Map<String, Object> environmentVariables = new LinkedHashMap<>();
 
-	@Nullable
-	private Path workDir;
+	private Path workingDirectory;
 
 	@BeforeEach
-	void initWorkDir(@TempDir Path workDir) throws Exception {
+	void initWorkingDirectory(@TempDir Path workDir) throws Exception {
 		Files.createDirectories(workDir.resolve("conf"));
-		try (InputStream inputStream = getClass().getResource("/cassandra.yaml").openStream()) {
-			Files.copy(inputStream, workDir.resolve("conf/cassandra.yaml"));
+		try (InputStream is = new ClassPathResource("cassandra.yaml").getInputStream()) {
+			Files.copy(is, workDir.resolve("conf/cassandra.yaml"));
 		}
-		this.workDir = workDir;
+		this.workingDirectory = workDir;
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	void doStartWithConfigFileViaProperties() throws Exception {
 		this.systemProperties.put("cassandra.config", new ClassPathResource("cassandra-random.yaml").toURL());
-		new AssertNode(this.workDir, this.properties, this.jvmOptions, this.systemProperties, this.environmentVariables,
-				process -> {
-					Map<String, String> systemProperties = getJvmExtraOptions(process);
-					Yaml yaml = new Yaml();
-					try (InputStream inputStream = new URL(systemProperties.get("-Dcassandra.config")).openStream()) {
-						Map<String, Object> properties = yaml.loadAs(inputStream, Map.class);
-						assertThat(properties).doesNotContainEntry("native_transport_port_ssl", 0);
-						assertThat(properties).doesNotContainEntry("rpc_port", 0);
-						assertThat(properties).doesNotContainEntry("storage_port", 0);
-						assertThat(properties).doesNotContainEntry("ssl_storage_port", 0);
-						assertThat(properties).doesNotContainEntry("native_transport_port", 0);
-					}
-				}).start();
+		run(process -> {
+			Map<String, String> systemProperties = getSystemProperties(process);
+			Yaml yaml = new Yaml();
+			try (InputStream inputStream = new URL(systemProperties.get("cassandra.config")).openStream()) {
+				Map<String, Object> properties = yaml.loadAs(inputStream, Map.class);
+				assertThat(properties).doesNotContainEntry("native_transport_port_ssl", 0);
+				assertThat(properties).doesNotContainEntry("rpc_port", 0);
+				assertThat(properties).doesNotContainEntry("storage_port", 0);
+				assertThat(properties).doesNotContainEntry("ssl_storage_port", 0);
+				assertThat(properties).doesNotContainEntry("native_transport_port", 0);
+			}
+		});
 	}
 
 	@Test
@@ -94,46 +92,66 @@ class AbstractNodeTests {
 		this.properties.put("native_transport_port_ssl", 0);
 		this.systemProperties.put("cassandra.jmx.local.port", 0);
 		this.systemProperties.put("cassandra.jmx.remote.port", 0);
-
-		new AssertNode(this.workDir, this.properties, this.jvmOptions, this.systemProperties, this.environmentVariables,
-				process -> {
-					Map<String, String> systemProperties = getJvmExtraOptions(process);
-					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.native_transport_port", "0");
-					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.rpc_port", "0");
-					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.storage_port", "0");
-					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.ssl_storage_port", "0");
-					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.jmx.local.port", "0");
-					assertThat(systemProperties).doesNotContainEntry("-Dcassandra.jmx.remote.port", "0");
-					Yaml yaml = new Yaml();
-					try (InputStream inputStream = new URL(systemProperties.get("-Dcassandra.config")).openStream()) {
-						Map<String, Object> properties = yaml.loadAs(inputStream, Map.class);
-						assertThat(properties).doesNotContainEntry("native_transport_port_ssl", 0);
-					}
-				}).start();
+		run(process -> {
+			Map<String, String> systemProperties = getSystemProperties(process);
+			assertThat(systemProperties).doesNotContainEntry("cassandra.native_transport_port", "0");
+			assertThat(systemProperties).doesNotContainEntry("cassandra.rpc_port", "0");
+			assertThat(systemProperties).doesNotContainEntry("cassandra.storage_port", "0");
+			assertThat(systemProperties).doesNotContainEntry("cassandra.ssl_storage_port", "0");
+			assertThat(systemProperties).doesNotContainEntry("cassandra.jmx.local.port", "0");
+			assertThat(systemProperties).doesNotContainEntry("cassandra.jmx.remote.port", "0");
+			Yaml yaml = new Yaml();
+			try (InputStream is = new URL(systemProperties.get("cassandra.config")).openStream()) {
+				Map<String, Object> properties = yaml.loadAs(is, Map.class);
+				assertThat(properties).doesNotContainEntry("native_transport_port_ssl", 0);
+			}
+		});
 	}
 
 	@Test
 	void doStartWithJvmOptions() throws Exception {
 		this.jvmOptions.add("-Xmx512m");
-		new AssertNode(this.workDir, this.properties, this.jvmOptions, this.systemProperties, this.environmentVariables,
-				process -> assertThat(process.getEnvironment().get("JVM_EXTRA_OPTS"))
-						.asString().contains("-Xmx512m")).start();
+		run(process -> assertThat(getJvmOptions(process)).containsExactly("-Xmx512m"));
 	}
 
 	@Test
 	void doStartWithEnvVariables() throws Exception {
 		this.environmentVariables.put("KEY", "VALUE");
-		new AssertNode(this.workDir, this.properties, this.jvmOptions, this.systemProperties, this.environmentVariables,
-				process -> assertThat(process.getEnvironment()).containsEntry("KEY", "VALUE")).start();
+		run(process -> assertThat(process.getEnvironment()).containsEntry("KEY", "VALUE"));
 	}
 
-	private Map<String, String> getJvmExtraOptions(RunProcess process) {
-		String opts = (String) process.getEnvironment().get("JVM_EXTRA_OPTS");
-		assertThat(opts).isNotNull();
-		String[] tokens = opts.split(" ");
-		Map<String, String> systemProperties = new LinkedHashMap<>();
+	private void run(RunProcessConsumer consumer) throws IOException, InterruptedException {
+		new AbstractNode(this.workingDirectory, this.properties, this.jvmOptions, this.systemProperties,
+				this.environmentVariables) {
+
+			@Nullable
+			@Override
+			protected NodeProcess doStart(RunProcess runProcess) throws IOException {
+				consumer.accept(runProcess);
+				return null;
+			}
+
+		}.start();
+	}
+
+	private static List<String> getJvmOptions(RunProcess process) {
+		List<String> jvmOptions = new ArrayList<>();
+		String[] tokens = process.getEnvironment().get("JVM_EXTRA_OPTS").toString().split(" ");
 		for (String token : tokens) {
-			systemProperties.put(token.split("=")[0], token.split("=")[1]);
+			if (!token.contains("-D")) {
+				jvmOptions.add(token);
+			}
+		}
+		return jvmOptions;
+	}
+
+	private static Map<String, String> getSystemProperties(RunProcess process) {
+		Map<String, String> systemProperties = new LinkedHashMap<>();
+		String[] tokens = process.getEnvironment().get("JVM_EXTRA_OPTS").toString().split(" ");
+		for (String token : tokens) {
+			if (token.contains("-D")) {
+				systemProperties.put(token.split("=")[0].substring("-D".length()), token.split("=")[1]);
+			}
 		}
 		return systemProperties;
 	}
@@ -141,26 +159,6 @@ class AbstractNodeTests {
 	private interface RunProcessConsumer {
 
 		void accept(RunProcess process) throws IOException;
-
-	}
-
-	private static final class AssertNode extends AbstractNode {
-
-		private final RunProcessConsumer consumer;
-
-		AssertNode(@Nullable Path workingDirectory, Map<String, Object> properties, List<String> jvmOptions,
-				Map<String, Object> systemProperties, Map<String, Object> environmentVariables,
-				RunProcessConsumer consumer) {
-			super(Objects.requireNonNull(workingDirectory), properties, jvmOptions, systemProperties,
-					environmentVariables);
-			this.consumer = consumer;
-		}
-
-		@Override
-		protected NodeProcess doStart(RunProcess runProcess) throws IOException {
-			this.consumer.accept(runProcess);
-			return null;
-		}
 
 	}
 
