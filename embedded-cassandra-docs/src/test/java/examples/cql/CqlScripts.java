@@ -25,7 +25,7 @@ public class CqlScripts {
 
 	void cqlResource() {
 		// tag::source[]
-		CqlScript script = CqlScript.ofResource(new ClassPathResource("schema.cql"));
+		CqlScript script = CqlScript.ofResources(new ClassPathResource("schema.cql"));
 		List<String> statements = script.getStatements();
 		// end::source[]
 	}

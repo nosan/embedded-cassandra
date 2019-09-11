@@ -68,7 +68,7 @@ class CassandraScriptsContextCustomizer implements ContextCustomizer {
 			Charset charset = Charset.forName(annotation.encoding());
 			Resource[] resources = getResources(context, annotation);
 			for (Resource resource : resources) {
-				scripts.add(CqlScript.ofResource(charset, resource));
+				scripts.add(CqlScript.ofResources(charset, resource));
 			}
 		}
 		if (!scripts.isEmpty()) {

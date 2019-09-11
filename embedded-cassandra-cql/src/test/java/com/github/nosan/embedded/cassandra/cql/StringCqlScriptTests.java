@@ -33,8 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class StringCqlScriptTests {
 
 	private final CqlScript script = new CqlScripts(
-			Arrays.asList(CqlScript.ofString("CREATE TABLE test.users ( id text PRIMARY KEY )"),
-					CqlScript.ofResource(new ClassPathResource("schema.cql"))));
+			Arrays.asList(CqlScript.ofStrings("CREATE TABLE test.users ( id text PRIMARY KEY )"),
+					CqlScript.ofResources(new ClassPathResource("schema.cql"))));
 
 	@Test
 	void testGetStatements() {

@@ -35,7 +35,7 @@ public class CassandraTestNGTests extends AbstractCassandraTests {
 		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress()).withPort(cassandra.getPort())
 				.build()) {
 			Session session = cluster.connect();
-			CqlScript.ofResource(new ClassPathResource("schema.cql")).forEach(session::execute);
+			CqlScript.ofResources(new ClassPathResource("schema.cql")).forEach(session::execute);
 		}
 	}
 

@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ResourceCqlScriptTests {
 
-	private final CqlScript script = CqlScript.ofResource(new ClassPathResource("schema.cql"));
+	private final CqlScript script = CqlScript.ofResources(new ClassPathResource("schema.cql"));
 
 	@Test
 	void testGetStatements() {

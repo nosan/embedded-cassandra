@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CqlScriptsTests {
 
-	private final CqlScript script = CqlScript.ofString(
+	private final CqlScript script = CqlScript.ofStrings(
 			"CREATE KEYSPACE test WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };"
 					+ "CREATE TABLE test.roles ( id text PRIMARY KEY )");
 

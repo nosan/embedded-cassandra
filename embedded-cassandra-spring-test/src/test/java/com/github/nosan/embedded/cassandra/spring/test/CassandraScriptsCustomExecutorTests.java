@@ -50,7 +50,7 @@ class CassandraScriptsCustomExecutorTests {
 	@Test
 	void testCqlScriptsCustomExecutor(@Autowired CustomCassandraScriptsExecutor executor) {
 		assertThat(executor.scripts).containsExactly(
-				CqlScript.ofResource(new SpringResource(new ClassPathResource("schema.cql"))));
+				CqlScript.ofResources(new SpringResource(new ClassPathResource("schema.cql"))));
 	}
 
 	static final class CustomCassandraScriptsExecutor implements CassandraScriptsExecutor {

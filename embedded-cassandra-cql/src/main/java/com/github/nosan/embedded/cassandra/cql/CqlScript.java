@@ -41,7 +41,7 @@ public interface CqlScript {
 	 * @param scripts the CQL scripts
 	 * @return a new {@link CqlScript}
 	 */
-	static CqlScript ofString(String... scripts) {
+	static CqlScript ofStrings(String... scripts) {
 		Objects.requireNonNull(scripts, "'scripts' must not be null");
 		if (scripts.length == 0) {
 			return EmptyCqlScript.INSTANCE;
@@ -58,8 +58,8 @@ public interface CqlScript {
 	 * @param resources the resources
 	 * @return a new {@link CqlScript}
 	 */
-	static CqlScript ofResource(Resource... resources) {
-		return ofResource(StandardCharsets.UTF_8, resources);
+	static CqlScript ofResources(Resource... resources) {
+		return ofResources(StandardCharsets.UTF_8, resources);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public interface CqlScript {
 	 * @param charset the charset to use
 	 * @return a new {@link CqlScript}
 	 */
-	static CqlScript ofResource(Charset charset, Resource... resources) {
+	static CqlScript ofResources(Charset charset, Resource... resources) {
 		Objects.requireNonNull(resources, "'resources' must not be null");
 		Objects.requireNonNull(charset, "'charset' must not be null");
 		if (resources.length == 0) {
