@@ -16,9 +16,7 @@
 
 package com.github.nosan.embedded.cassandra.artifact;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.channels.ClosedByInterruptException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,14 +24,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import org.rauschig.jarchivelib.Archiver;
-import org.rauschig.jarchivelib.ArchiverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.FileLock;
+import com.github.nosan.embedded.cassandra.commons.io.CompressedResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 
@@ -117,7 +114,9 @@ public final class ArchiveArtifact implements Artifact {
 					throw new IllegalStateException("File lock cannot be acquired for a file '" + lockFile + "'");
 				}
 				if (!Files.exists(destination.resolve(".extracted"))) {
-					extract(this.archiveResource, destination);
+					log.info("Extracts '{}' into '{}' directory", this.archiveResource, destination);
+					CompressedResource compressedResource = new CompressedResource(this.archiveResource);
+					compressedResource.extract(destination);
 					Distribution distribution = artifact.getDistribution();
 					FileUtils.createIfNotExists(destination.resolve(".extracted"));
 					return distribution;
@@ -137,16 +136,6 @@ public final class ArchiveArtifact implements Artifact {
 			throw new IllegalStateException("'destination' must not be null");
 		}
 		return destination.resolve(".embedded-cassandra/artifact/local/" + this.version);
-	}
-
-	private void extract(Resource archiveResource, Path destination) throws IOException {
-		log.info("Extracts '{}' into '{}' directory", archiveResource, destination);
-		File archive = archiveResource.toFile();
-		Archiver archiver = ArchiverFactory.createArchiver(archive);
-		archiver.extract(archive, destination.toFile());
-		if (Thread.interrupted()) {
-			throw new ClosedByInterruptException();
-		}
 	}
 
 }

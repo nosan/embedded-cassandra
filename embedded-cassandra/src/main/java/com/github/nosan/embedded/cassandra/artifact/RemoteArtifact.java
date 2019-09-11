@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra.artifact;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,14 +34,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import org.rauschig.jarchivelib.Archiver;
-import org.rauschig.jarchivelib.ArchiverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.FileLock;
+import com.github.nosan.embedded.cassandra.commons.io.CompressedResource;
 import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.io.UrlResource;
@@ -198,7 +196,9 @@ public final class RemoteArtifact implements Artifact {
 				log.info("The lock to the file '{}' was acquired", lockFile);
 				if (!Files.exists(destination.resolve(".extracted"))) {
 					Resource resource = download();
-					extract(resource, destination);
+					log.info("Extracts '{}' into '{}' directory", resource, destination);
+					CompressedResource compressedResource = new CompressedResource(resource);
+					compressedResource.extract(destination);
 					Distribution distribution = artifact.getDistribution();
 					FileUtils.createIfNotExists(destination.resolve(".extracted"));
 					return distribution;
@@ -237,16 +237,6 @@ public final class RemoteArtifact implements Artifact {
 		IOException ex = new IOException("Apache Cassandra cannot be downloaded from " + urls);
 		exceptions.forEach(ex::addSuppressed);
 		throw ex;
-	}
-
-	private void extract(Resource archiveResource, Path destination) throws IOException {
-		log.info("Extracts '{}' into '{}' directory", archiveResource, destination);
-		File archive = archiveResource.toFile();
-		Archiver archiver = ArchiverFactory.createArchiver(archive);
-		archiver.extract(archive, destination.toFile());
-		if (Thread.interrupted()) {
-			throw new ClosedByInterruptException();
-		}
 	}
 
 	private interface ProgressListener {
