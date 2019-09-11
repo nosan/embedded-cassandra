@@ -42,25 +42,25 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
- * {@link Resource} implementation for {@code 'compressed'} resources.
+ * {@link Resource} implementation for archives.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
  */
-public class CompressedResource implements Resource {
+public class ArchiveResource implements Resource {
 
 	private final Resource resource;
 
 	private final Handler handler;
 
 	/**
-	 * Constructs a new {@link CompressedResource} with the specified {@link Resource}.
+	 * Constructs a new {@link ArchiveResource} with the specified {@link Resource}.
 	 *
 	 * @param resource the {@link Resource}
 	 */
-	public CompressedResource(Resource resource) {
+	public ArchiveResource(Resource resource) {
 		this.resource = Objects.requireNonNull(resource, "'resource' must not be null");
-		this.handler = Handler.get(resource);
+		this.handler = Handler.detect(resource);
 	}
 
 	@Override
@@ -79,9 +79,9 @@ public class CompressedResource implements Resource {
 	}
 
 	@Override
-	public InputStream getInputStream() throws IOException {
+	public ArchiveInputStream getInputStream() throws IOException {
 		try {
-			return this.handler.open(this.resource.getInputStream());
+			return (ArchiveInputStream) this.handler.open(this.resource.getInputStream());
 		}
 		catch (CompressorException | ArchiveException ex) {
 			throw new IOException(ex);
@@ -112,13 +112,13 @@ public class CompressedResource implements Resource {
 			return false;
 		}
 
-		CompressedResource that = (CompressedResource) other;
+		ArchiveResource that = (ArchiveResource) other;
 		return this.resource.equals(that.resource);
 	}
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", CompressedResource.class.getSimpleName() + "[", "]")
+		return new StringJoiner(", ", ArchiveResource.class.getSimpleName() + "[", "]")
 				.add("resource=" + this.resource).toString();
 	}
 
@@ -128,36 +128,59 @@ public class CompressedResource implements Resource {
 	}
 
 	/**
+	 * Performs the given {@code callback} for each {@link ArchiveEntry}.
+	 *
+	 * @param callback The action to be performed for each {@link ArchiveEntry}.
+	 * @throws IOException if an I/O error occurs or the resource does not exist
+	 */
+	public void forEach(ArchiveEntryConsumer callback) throws IOException {
+		Objects.requireNonNull(callback, "'callback' must not be null");
+		try (ArchiveInputStream is = getInputStream()) {
+			ArchiveEntry entry;
+			while ((entry = is.getNextEntry()) != null) {
+				callback.accept(entry, is);
+			}
+		}
+	}
+
+	/**
 	 * Extracts this {@code Resource} into the given destination directory.
-	 * <strong>Note!</strong> Works only for archives.
 	 *
 	 * @param destination the directory to which to extract the files
 	 * @throws IOException if an I/O error occurs or the resource does not exist
 	 */
 	public void extract(Path destination) throws IOException {
 		Objects.requireNonNull(destination, "'destination' must not be null");
-		try (InputStream is = getInputStream()) {
-			if (!(is instanceof ArchiveInputStream)) {
-				throw new IOException("Stream '" + is + "' of resource '" + this.resource + "' cannot be casted to"
-						+ "'" + ArchiveInputStream.class.getName() + "'");
+		forEach((entry, stream) -> {
+			if (entry.isDirectory()) {
+				Path directory = destination.resolve(entry.getName());
+				Files.createDirectories(directory);
 			}
-			ArchiveInputStream archiveStream = (ArchiveInputStream) is;
-			ArchiveEntry entry;
-			while ((entry = archiveStream.getNextEntry()) != null) {
-				if (entry.isDirectory()) {
-					Path directory = destination.resolve(entry.getName());
+			else {
+				Path file = destination.resolve(entry.getName());
+				Path directory = file.getParent();
+				if (directory != null && !Files.exists(directory)) {
 					Files.createDirectories(directory);
 				}
-				else {
-					Path file = destination.resolve(entry.getName());
-					Path directory = file.getParent();
-					if (directory != null && !Files.exists(directory)) {
-						Files.createDirectories(directory);
-					}
-					Files.copy(archiveStream, file, StandardCopyOption.REPLACE_EXISTING);
-				}
+				Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
 			}
-		}
+		});
+
+	}
+
+	/**
+	 * Consumer that accepts {@link ArchiveEntry} and {@link ArchiveInputStream}.
+	 */
+	public interface ArchiveEntryConsumer {
+
+		/**
+		 * Performs this operation on the given {@link ArchiveEntry} and {@link ArchiveInputStream}.
+		 *
+		 * @param entry archive entry
+		 * @param stream the stream
+		 * @throws IOException if an I/O error occurs
+		 */
+		void accept(ArchiveEntry entry, ArchiveInputStream stream) throws IOException;
 
 	}
 
@@ -200,7 +223,7 @@ public class CompressedResource implements Resource {
 			this.handler = handler;
 		}
 
-		static Handler get(Resource resource) {
+		static Handler detect(Resource resource) {
 			String name = resource.getFileName();
 			if (!StringUtils.hasText(name)) {
 				return EMPTY;
@@ -216,6 +239,9 @@ public class CompressedResource implements Resource {
 					}
 				}
 				break;
+			}
+			if (handler.fileType.archive == null) {
+				throw new IllegalArgumentException("Archive Type for '" + resource + "' cannot be detected");
 			}
 			return handler;
 		}

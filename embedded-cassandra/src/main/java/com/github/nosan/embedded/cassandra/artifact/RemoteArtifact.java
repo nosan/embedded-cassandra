@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.FileLock;
-import com.github.nosan.embedded.cassandra.commons.io.CompressedResource;
+import com.github.nosan.embedded.cassandra.commons.io.ArchiveResource;
 import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.io.UrlResource;
@@ -197,8 +197,8 @@ public final class RemoteArtifact implements Artifact {
 				if (!Files.exists(destination.resolve(".extracted"))) {
 					Resource resource = download();
 					log.info("Extracts '{}' into '{}' directory", resource, destination);
-					CompressedResource compressedResource = new CompressedResource(resource);
-					compressedResource.extract(destination);
+					ArchiveResource archiveResource = new ArchiveResource(resource);
+					archiveResource.extract(destination);
 					Distribution distribution = artifact.getDistribution();
 					FileUtils.createIfNotExists(destination.resolve(".extracted"));
 					return distribution;

@@ -32,15 +32,15 @@ import org.springframework.util.StreamUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link CompressedResource}.
+ * Tests for {@link ArchiveResource}.
  *
  * @author Dmytro Nosan
  */
-class CompressedResourceTests {
+class ArchiveResourceTests {
 
 	private final URL url = getClass().getResource("/test.tar.gz");
 
-	private final CompressedResource resource = new CompressedResource(new UrlResource(this.url));
+	private final ArchiveResource resource = new ArchiveResource(new UrlResource(this.url));
 
 	@Test
 	void toURI() throws IOException, URISyntaxException {
@@ -82,8 +82,8 @@ class CompressedResourceTests {
 	@Test
 	void testEquals() throws MalformedURLException {
 		assertThat(this.resource).isEqualTo(this.resource);
-		assertThat(this.resource).isEqualTo(new CompressedResource(new UrlResource(this.url)));
-		assertThat(this.resource).isNotEqualTo(new CompressedResource(new UrlResource(new URL("http://localhost:8080"))));
+		assertThat(this.resource).isEqualTo(new ArchiveResource(new UrlResource(this.url)));
+		assertThat(this.resource).isNotEqualTo(new ArchiveResource(new UrlResource(new URL("http://localhost:8080"))));
 	}
 
 	@Test

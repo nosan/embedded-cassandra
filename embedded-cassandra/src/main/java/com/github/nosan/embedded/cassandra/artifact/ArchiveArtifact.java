@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.FileLock;
-import com.github.nosan.embedded.cassandra.commons.io.CompressedResource;
+import com.github.nosan.embedded.cassandra.commons.io.ArchiveResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 
@@ -115,8 +115,8 @@ public final class ArchiveArtifact implements Artifact {
 				}
 				if (!Files.exists(destination.resolve(".extracted"))) {
 					log.info("Extracts '{}' into '{}' directory", this.archiveResource, destination);
-					CompressedResource compressedResource = new CompressedResource(this.archiveResource);
-					compressedResource.extract(destination);
+					ArchiveResource archiveResource = new ArchiveResource(this.archiveResource);
+					archiveResource.extract(destination);
 					Distribution distribution = artifact.getDistribution();
 					FileUtils.createIfNotExists(destination.resolve(".extracted"));
 					return distribution;
