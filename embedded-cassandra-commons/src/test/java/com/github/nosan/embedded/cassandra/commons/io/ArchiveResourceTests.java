@@ -19,7 +19,6 @@ package com.github.nosan.embedded.cassandra.commons.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -80,10 +79,10 @@ class ArchiveResourceTests {
 	}
 
 	@Test
-	void testEquals() throws MalformedURLException {
+	void testEquals() {
 		assertThat(this.resource).isEqualTo(this.resource);
 		assertThat(this.resource).isEqualTo(new ArchiveResource(new UrlResource(this.url)));
-		assertThat(this.resource).isNotEqualTo(new ArchiveResource(new UrlResource(new URL("http://localhost:8080"))));
+		assertThat(this.resource).isNotEqualTo(new ArchiveResource(new ClassPathResource("test.tar.gz")));
 	}
 
 	@Test

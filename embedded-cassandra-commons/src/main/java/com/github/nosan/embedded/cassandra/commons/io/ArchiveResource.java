@@ -39,7 +39,6 @@ import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
-import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
  * {@link Resource} implementation for archives.
@@ -51,7 +50,7 @@ public class ArchiveResource implements Resource {
 
 	private final Resource resource;
 
-	private final Handler handler;
+	private final ArchiveStream archiveStream;
 
 	/**
 	 * Constructs a new {@link ArchiveResource} with the specified {@link Resource}.
@@ -60,7 +59,48 @@ public class ArchiveResource implements Resource {
 	 */
 	public ArchiveResource(Resource resource) {
 		this.resource = Objects.requireNonNull(resource, "'resource' must not be null");
-		this.handler = Handler.detect(resource);
+		this.archiveStream = ArchiveStreams.create(resource);
+	}
+
+	/**
+	 * Performs the given {@code callback} for each {@link ArchiveEntry}.
+	 *
+	 * @param callback The action to be performed for each {@link ArchiveEntry}.
+	 * @throws IOException if an I/O error occurs or the resource does not exist
+	 */
+	public void forEach(ArchiveEntryCallback callback) throws IOException {
+		Objects.requireNonNull(callback, "'callback' must not be null");
+		try (ArchiveInputStream is = getInputStream()) {
+			ArchiveEntry entry;
+			while ((entry = is.getNextEntry()) != null) {
+				callback.accept(entry, is);
+			}
+		}
+	}
+
+	/**
+	 * Extracts this {@code Resource} into the given destination directory.
+	 *
+	 * @param destination the directory to which to extract the files
+	 * @throws IOException if an I/O error occurs or the resource does not exist
+	 */
+	public void extract(Path destination) throws IOException {
+		Objects.requireNonNull(destination, "'destination' must not be null");
+		forEach((entry, stream) -> {
+			if (entry.isDirectory()) {
+				Path directory = destination.resolve(entry.getName());
+				Files.createDirectories(directory);
+			}
+			else {
+				Path file = destination.resolve(entry.getName());
+				Path directory = file.getParent();
+				if (directory != null && !Files.exists(directory)) {
+					Files.createDirectories(directory);
+				}
+				Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
+			}
+		});
+
 	}
 
 	@Override
@@ -80,10 +120,17 @@ public class ArchiveResource implements Resource {
 
 	@Override
 	public ArchiveInputStream getInputStream() throws IOException {
+		InputStream is = this.resource.getInputStream();
 		try {
-			return (ArchiveInputStream) this.handler.open(this.resource.getInputStream());
+			return this.archiveStream.open(is);
 		}
 		catch (CompressorException | ArchiveException ex) {
+			try {
+				is.close();
+			}
+			catch (Exception swallow) {
+				ex.addSuppressed(swallow);
+			}
 			throw new IOException(ex);
 		}
 	}
@@ -128,50 +175,9 @@ public class ArchiveResource implements Resource {
 	}
 
 	/**
-	 * Performs the given {@code callback} for each {@link ArchiveEntry}.
-	 *
-	 * @param callback The action to be performed for each {@link ArchiveEntry}.
-	 * @throws IOException if an I/O error occurs or the resource does not exist
+	 * Callback that accepts {@link ArchiveEntry} and {@link ArchiveInputStream}.
 	 */
-	public void forEach(ArchiveEntryConsumer callback) throws IOException {
-		Objects.requireNonNull(callback, "'callback' must not be null");
-		try (ArchiveInputStream is = getInputStream()) {
-			ArchiveEntry entry;
-			while ((entry = is.getNextEntry()) != null) {
-				callback.accept(entry, is);
-			}
-		}
-	}
-
-	/**
-	 * Extracts this {@code Resource} into the given destination directory.
-	 *
-	 * @param destination the directory to which to extract the files
-	 * @throws IOException if an I/O error occurs or the resource does not exist
-	 */
-	public void extract(Path destination) throws IOException {
-		Objects.requireNonNull(destination, "'destination' must not be null");
-		forEach((entry, stream) -> {
-			if (entry.isDirectory()) {
-				Path directory = destination.resolve(entry.getName());
-				Files.createDirectories(directory);
-			}
-			else {
-				Path file = destination.resolve(entry.getName());
-				Path directory = file.getParent();
-				if (directory != null && !Files.exists(directory)) {
-					Files.createDirectories(directory);
-				}
-				Files.copy(stream, file, StandardCopyOption.REPLACE_EXISTING);
-			}
-		});
-
-	}
-
-	/**
-	 * Consumer that accepts {@link ArchiveEntry} and {@link ArchiveInputStream}.
-	 */
-	public interface ArchiveEntryConsumer {
+	public interface ArchiveEntryCallback {
 
 		/**
 		 * Performs this operation on the given {@link ArchiveEntry} and {@link ArchiveInputStream}.
@@ -184,103 +190,59 @@ public class ArchiveResource implements Resource {
 
 	}
 
-	private static final class Handler {
+	@FunctionalInterface
+	private interface ArchiveStream {
 
-		private static final Map<String, FileType> FILE_TYPES;
+		ArchiveInputStream open(InputStream is) throws ArchiveException, CompressorException;
 
-		private static final Handler EMPTY = new Handler(new FileType(null, null), null);
+	}
+
+	private static final class ArchiveStreams {
+
+		private static final Map<String, ArchiveStream> STREAMS;
 
 		static {
-			Map<String, FileType> types = new LinkedHashMap<>();
-			types.put(".tgz", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
-			types.put(".tbz2", new FileType(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
-			types.put(".7z", new FileType(ArchiveStreamFactory.SEVEN_Z, null));
-			types.put(".a", new FileType(ArchiveStreamFactory.AR, null));
-			types.put(".ar", new FileType(ArchiveStreamFactory.AR, null));
-			types.put(".arj", new FileType(ArchiveStreamFactory.ARJ, null));
-			types.put(".cpio", new FileType(ArchiveStreamFactory.CPIO, null));
-			types.put(".dump", new FileType(ArchiveStreamFactory.DUMP, null));
-			types.put(".jar", new FileType(ArchiveStreamFactory.JAR, null));
-			types.put(".tar", new FileType(ArchiveStreamFactory.TAR, null));
-			types.put(".zip", new FileType(ArchiveStreamFactory.ZIP, null));
-			types.put(".zipx", new FileType(ArchiveStreamFactory.ZIP, null));
-			types.put(".bz2", new FileType(null, CompressorStreamFactory.BZIP2));
-			types.put(".gzip", new FileType(null, CompressorStreamFactory.GZIP));
-			types.put(".gz", new FileType(null, CompressorStreamFactory.GZIP));
-			types.put(".pack", new FileType(null, CompressorStreamFactory.PACK200));
-			types.put(".xz", new FileType(null, CompressorStreamFactory.XZ));
-			types.put(".z", new FileType(null, CompressorStreamFactory.Z));
-			FILE_TYPES = Collections.unmodifiableMap(types);
+			Map<String, ArchiveStream> streams = new LinkedHashMap<>();
+			streams.put(".tar.gz", create(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
+			streams.put(".tar.bz2", create(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
+			streams.put(".tgz", create(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
+			streams.put(".tbz2", create(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
+			streams.put(".7z", create(ArchiveStreamFactory.SEVEN_Z));
+			streams.put(".a", create(ArchiveStreamFactory.AR));
+			streams.put(".ar", create(ArchiveStreamFactory.AR));
+			streams.put(".arj", create(ArchiveStreamFactory.ARJ));
+			streams.put(".cpio", create(ArchiveStreamFactory.CPIO));
+			streams.put(".dump", create(ArchiveStreamFactory.DUMP));
+			streams.put(".jar", create(ArchiveStreamFactory.JAR));
+			streams.put(".tar", create(ArchiveStreamFactory.TAR));
+			streams.put(".zip", create(ArchiveStreamFactory.ZIP));
+			streams.put(".zipx", create(ArchiveStreamFactory.ZIP));
+			STREAMS = Collections.unmodifiableMap(streams);
 		}
 
-		private final FileType fileType;
-
-		@Nullable
-		private final Handler handler;
-
-		private Handler(FileType fileType, @Nullable Handler handler) {
-			this.fileType = fileType;
-			this.handler = handler;
+		static ArchiveStream create(Resource resource) {
+			String name = Objects.toString(resource.getFileName(), "");
+			for (Map.Entry<String, ArchiveStream> entry : STREAMS.entrySet()) {
+				if (name.endsWith(entry.getKey())) {
+					return entry.getValue();
+				}
+			}
+			throw new IllegalArgumentException("Archive Type for '" + resource + "' cannot be detected");
 		}
 
-		static Handler detect(Resource resource) {
-			String name = resource.getFileName();
-			if (!StringUtils.hasText(name)) {
-				return EMPTY;
-			}
-			Handler handler = EMPTY;
-			label:
-			for (; ; ) {
-				for (Map.Entry<String, FileType> entry : FILE_TYPES.entrySet()) {
-					if (name.endsWith(entry.getKey())) {
-						handler = new Handler(entry.getValue(), handler);
-						name = name.substring(0, name.length() - entry.getKey().length());
-						continue label;
-					}
-				}
-				break;
-			}
-			if (handler.fileType.archive == null) {
-				throw new IllegalArgumentException("Archive Type for '" + resource + "' cannot be detected");
-			}
-			return handler;
+		private static ArchiveStream create(String archiveType, String compressorType) {
+			return is -> {
+				ArchiveStreamFactory af = new ArchiveStreamFactory();
+				CompressorStreamFactory csf = new CompressorStreamFactory();
+				return af.createArchiveInputStream(archiveType, csf.createCompressorInputStream(compressorType, is));
+			};
 		}
 
-		InputStream open(InputStream is) throws CompressorException, ArchiveException {
-			return this.fileType.open((this.handler != null) ? this.handler.open(is) : is);
-		}
-
-		private static final class FileType {
-
-			@Nullable
-			private final String archive;
-
-			@Nullable
-			private final String compressor;
-
-			private FileType(@Nullable String archive, @Nullable String compressor) {
-				this.archive = archive;
-				this.compressor = compressor;
-			}
-
-			InputStream open(InputStream is) throws CompressorException, ArchiveException {
-				if (StringUtils.hasText(this.archive) && StringUtils.hasText(this.compressor)) {
-					CompressorStreamFactory csf = new CompressorStreamFactory();
-					ArchiveStreamFactory af = new ArchiveStreamFactory();
-					return af.createArchiveInputStream(this.archive,
-							csf.createCompressorInputStream(this.compressor, is));
-				}
-				if (StringUtils.hasText(this.archive)) {
-					ArchiveStreamFactory af = new ArchiveStreamFactory();
-					return af.createArchiveInputStream(this.archive, is);
-				}
-				if (StringUtils.hasText(this.compressor)) {
-					CompressorStreamFactory csf = new CompressorStreamFactory();
-					return csf.createCompressorInputStream(this.compressor, is);
-				}
-				return is;
-			}
-
+		private static ArchiveStream create(String archiveType) {
+			return is -> {
+				ArchiveStreamFactory af = new ArchiveStreamFactory();
+				return af.createArchiveInputStream(archiveType, is);
+			};
 		}
 
 	}
