@@ -52,7 +52,6 @@ class EmbeddedCassandraTests {
 	void testSuccessWhenDefault() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			try (Cluster cluster = new ClusterFactory().create(cassandra)) {
 				createKeyspace(cluster.connect());
 			}
@@ -64,7 +63,6 @@ class EmbeddedCassandraTests {
 			cassandra.stop();
 			doesNotContainSystemProperty("embedded.cassandra.port");
 			doesNotContainSystemProperty("embedded.cassandra.address");
-			assertStarted(cassandra, false);
 		});
 	}
 
@@ -73,7 +71,6 @@ class EmbeddedCassandraTests {
 		this.cassandraFactory.setConfig(new ClassPathResource("cassandra.yaml"));
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			try (Cluster cluster = new ClusterFactory().create(cassandra)) {
 				createKeyspace(cluster.connect());
 			}
@@ -86,7 +83,6 @@ class EmbeddedCassandraTests {
 		this.cassandraFactory.setExposeProperties(false);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			doesNotContainSystemProperty("embedded.cassandra.address");
 			doesNotContainSystemProperty("embedded.cassandra.port");
 			doesNotContainSystemProperty("embedded.cassandra.ssl-port");
@@ -101,7 +97,6 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("start_native_transport", true);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			assertThat(cassandra.getAddress()).isNotNull();
 			assertThat(cassandra.getPort()).isEqualTo(9042);
 			assertThat(cassandra.getRpcPort()).isEqualTo(-1);
@@ -116,7 +111,6 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("start_native_transport", false);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			assertThat(cassandra.getAddress()).isNotNull();
 			assertThat(cassandra.getPort()).isEqualTo(-1);
 			assertThat(cassandra.getRpcPort()).isEqualTo(9160);
@@ -130,7 +124,6 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("start_rpc", true);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			assertThat(cassandra.getAddress()).isNotNull();
 			assertThat(cassandra.getPort()).isEqualTo(9042);
 			assertThat(cassandra.getRpcPort()).isEqualTo(9160);
@@ -146,7 +139,6 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("start_native_transport", false);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			assertThat(cassandra.getAddress()).isNull();
 			assertThat(cassandra.getPort()).isEqualTo(-1);
 			assertThat(cassandra.getSslPort()).isEqualTo(-1);
@@ -174,7 +166,6 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("client_encryption_options", sslOptions);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			assertThat(cassandra.getSslPort()).isEqualTo(9142);
 			ClusterFactory clusterFactory = new ClusterFactory();
 			clusterFactory.setSslEnabled(true);
@@ -196,7 +187,6 @@ class EmbeddedCassandraTests {
 		this.systemProperties.put("cassandra.superuser_setup_delay_ms", 0);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			ClusterFactory clusterFactory = new ClusterFactory();
 			clusterFactory.setPassword("cassandra");
 			clusterFactory.setUsername("cassandra");
@@ -211,7 +201,6 @@ class EmbeddedCassandraTests {
 		this.cassandraFactory.setTimeout(Duration.ofSeconds(3));
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNotNull().hasStackTraceContaining("couldn't be started within 3000ms");
-			assertStarted(cassandra, false);
 		});
 	}
 
@@ -220,7 +209,6 @@ class EmbeddedCassandraTests {
 		this.configProperties.put("invalid_property", "");
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).isNotNull().hasStackTraceContaining("[invalid_property] from your cassandra.yaml");
-			assertStarted(cassandra, false);
 		});
 	}
 
@@ -228,10 +216,8 @@ class EmbeddedCassandraTests {
 	void testFailPortsAreBusy() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			assertStarted(cassandra, true);
 			this.runner.run((cassandra2, throwable2) -> {
 				assertThat(throwable2).isNotNull().hasStackTraceContaining("Address already in use");
-				assertStarted(cassandra2, false);
 			});
 		});
 	}
@@ -242,10 +228,6 @@ class EmbeddedCassandraTests {
 
 	private static void doesNotContainSystemProperty(String name) {
 		assertThat(System.getProperties()).doesNotContainKeys(name);
-	}
-
-	private static void assertStarted(Cassandra cassandra, boolean started) {
-		assertThat(cassandra).hasFieldOrPropertyWithValue("started", started);
 	}
 
 	private static void createKeyspace(Session session) {

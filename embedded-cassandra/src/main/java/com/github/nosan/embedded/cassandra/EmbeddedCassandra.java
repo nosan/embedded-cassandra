@@ -57,6 +57,8 @@ class EmbeddedCassandra implements Cassandra {
 
 	private volatile boolean started = false;
 
+	private volatile boolean running = false;
+
 	EmbeddedCassandra(String name, Version version, boolean exposeProperties, Database database) {
 		this.name = name;
 		this.version = version;
@@ -70,11 +72,14 @@ class EmbeddedCassandra implements Cassandra {
 			return;
 		}
 		try {
+			this.started = true;
 			doStart();
+			this.running = true;
 		}
 		catch (CassandraException ex) {
 			try {
 				doStop();
+				this.started = false;
 			}
 			catch (CassandraException swallow) {
 				ex.addSuppressed(swallow);
@@ -84,7 +89,6 @@ class EmbeddedCassandra implements Cassandra {
 		if (this.exposeProperties) {
 			setSystemProperties();
 		}
-		this.started = true;
 	}
 
 	@Override
@@ -93,10 +97,11 @@ class EmbeddedCassandra implements Cassandra {
 			return;
 		}
 		doStop();
+		this.started = false;
+		this.running = false;
 		if (this.exposeProperties) {
 			clearSystemProperties();
 		}
-		this.started = false;
 	}
 
 	@Override
@@ -112,7 +117,7 @@ class EmbeddedCassandra implements Cassandra {
 	@Override
 	@Nullable
 	public InetAddress getAddress() {
-		if (this.started) {
+		if (this.running) {
 			return this.database.getAddress();
 		}
 		return null;
@@ -120,7 +125,7 @@ class EmbeddedCassandra implements Cassandra {
 
 	@Override
 	public int getPort() {
-		if (this.started) {
+		if (this.running) {
 			return this.database.getPort();
 		}
 		return -1;
@@ -128,7 +133,7 @@ class EmbeddedCassandra implements Cassandra {
 
 	@Override
 	public int getSslPort() {
-		if (this.started) {
+		if (this.running) {
 			return this.database.getSslPort();
 		}
 		return -1;
@@ -136,7 +141,7 @@ class EmbeddedCassandra implements Cassandra {
 
 	@Override
 	public int getRpcPort() {
-		if (this.started) {
+		if (this.running) {
 			return this.database.getRpcPort();
 		}
 		return -1;
