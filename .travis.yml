@@ -5,6 +5,7 @@ sudo: true
 stages:
   - prepare
   - test
+    if: tag IS NOT present
   - name: deploy
     if: tag IS present
 
