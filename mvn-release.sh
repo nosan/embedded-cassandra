@@ -13,7 +13,6 @@ git reset HEAD --hard && git clean -df
 revesion=$(git rev-parse HEAD)
 
 release() {
-  echo "Release..."
   ./mvnw versions:set -DnewVersion="${releaseVersion}" && ./mvnw versions:commit &&
     git add . && git commit -m "Release: ${releaseVersion}" && git tag "${releaseVersion}" &&
     ./mvnw clean deploy -Prelease -B -V -DskipTests && ./mvnw clean &&
@@ -22,7 +21,6 @@ release() {
 }
 
 rollback() {
-  echo "Rollback...."
   git reset --hard "${revesion}" && git rev-parse -q --verify "refs/tags/${releaseVersion}" && git tag -d "${releaseVersion}"
 }
 
