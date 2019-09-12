@@ -9,16 +9,21 @@ if [ "${answer}" != "Y" ]; then
   exit 1
 fi
 
+git reset HEAD --hard && git clean -df
+revesion=$(git rev-parse HEAD)
+
 release() {
-  git reset HEAD --hard && git clean -df &&
-    ./mvnw release:prepare -Prelease -DautoVersionSubmodules=true \
-      -Dtag="${releaseVersion}" -DreleaseVersion="${releaseVersion}" \
-      -DdevelopmentVersion="${developmentVersion}" &&
-    ./mvnw release:perform -Prelease
+  echo "Release..."
+  ./mvnw versions:set -DnewVersion="${releaseVersion}" && ./mvnw versions:commit &&
+    git add . && git commit -m "Release: ${releaseVersion}" && git tag "${releaseVersion}" &&
+    ./mvnw clean deploy -Prelease -B -V -DskipTests && ./mvnw clean &&
+    ./mvnw versions:set -DnewVersion="${developmentVersion}" && ./mvnw versions:commit &&
+    git add . && git commit -m "Next Development Version: ${developmentVersion}"
 }
 
 rollback() {
-  ./mvnw release:rollback && ./mvnw release:clean && git tag -d "${releaseVersion}" && git push origin :refs/tags/"${releaseVersion}"
+  echo "Rollback...."
+  git reset --hard "${revesion}" && git rev-parse -q --verify "refs/tags/${releaseVersion}" && git tag -d "${releaseVersion}"
 }
 
 release || rollback
