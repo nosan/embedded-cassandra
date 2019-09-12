@@ -232,7 +232,6 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.0.0-M3</version>
                     <configuration>
-                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
                         <failIfNoTests>false</failIfNoTests>
                         <argLine>-Xms512m -Xmx512m</argLine>

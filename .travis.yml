@@ -34,11 +34,9 @@ jobs:
       os: linux
       script:
         - ./mvnw clean verify -B -V
-      after_failure: ./surefire-reports.sh
     - os: osx
       script:
         - ./mvnw clean verify -B -V
-      after_failure: ./surefire-reports.sh
     - stage: deploy
       os: linux
       script:

@@ -10,10 +10,5 @@ environment:
 build_script:
   - mvnw.cmd clean verify -B -V
 
-on_failure:
-  - ps: |
-      7z a -r surefire-reports.zip '**\target\surefire-reports\*'
-      Push-AppveyorArtifact surefire-reports.zip -DeploymentName 'Surefire Reports'
-
 cache:
   - C:/Users/appveyor/.m2
