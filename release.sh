@@ -15,7 +15,7 @@ deleteBranch() {
 }
 
 deploy() {
-  ./mvnw clean deploy -Prelease,docs -B -V -DskipTests
+  ./mvnw clean verify -Prelease,docs -B -V -DskipTests
 }
 
 nextRelease() {
@@ -29,71 +29,63 @@ nextDevevelopment() {
     git add . && git commit -m "Next development version: '${development_version}'"
 }
 
-pages() {
+ghPages() {
   docs="embedded-cassandra-docs/target/generated-docs/"
   git add -f "${docs}" && git stash push -- "${docs}" &&
-    deleteBranch "${pages_branch_name}" && git checkout -f "${pages_branch_name}" && git reset --hard HEAD && git clean -fd && rm -rf -- * &&
+    deleteBranch "${gh_pages_branch}" && git checkout -f "${gh_pages_branch}" && git reset --hard HEAD && git clean -fd && rm -rf -- * &&
     git add . && git commit -m "Prepare to Release: '${release_version}'" &&
     git stash pop && cp -r "${docs}" . && rm -rf "embedded-cassandra-docs" &&
     git add . && git commit -m "Release: '${release_version}'" &&
-    git checkout -f "${branch_name}" && git reset --hard HEAD && git clean -fd
+    git checkout -f "${branch}" && git reset --hard HEAD && git clean -fd
 }
 
-while [ $# -gt 0 ]; do
-  case "$1" in
-  --release)
-    release_version="$2"
-    shift
-    ;;
-  --development)
-    development_version="$2"
-    shift
-    ;;
-  *)
-    shift
-    ;;
-  esac
-done
+parseArgs() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    --release)
+      release_version="$2"
+      shift
+      ;;
+    --development)
+      development_version="$2"
+      shift
+      ;;
+    *)
+      shift
+      ;;
+    esac
+  done
 
-if [ ! "${release_version}" ]; then
-  printf "\e[1;91m--release option is absent\e[0m. Use --release <version>.\n"
-  exit 1
-fi
+  if [ ! "${release_version}" ]; then
+    printf "\e[1;91m--release option is absent\e[0m. Use --release <version>.\n"
+    exit 1
+  fi
 
-if [ ! "${development_version}" ]; then
-  printf "\e[1;91m--development option is absent\e[0m. Use --development <version>.\n"
-  exit 1
-fi
+  if [ ! "${development_version}" ]; then
+    printf "\e[1;91m--development option is absent\e[0m. Use --development <version>.\n"
+    exit 1
+  fi
 
-printf "\e[1;34mRelease Version: '%s' and Development Version: '%s'. 'YES' ? \e[0m\n" "${release_version}" "${development_version}"
-read -r answer
+  if [ "$(git status --porcelain)" ]; then
+    printf "\e[1;91mCommit or Revert following files:\e[0m\n%s\n" "$(git status --porcelain)"
+    exit 1
+  fi
 
-if [ "${answer}" != "YES" ]; then
-  printf "\e[1;91mAborted! Use 'YES' to procced a release!\e[0m\n"
-  exit 1
-fi
+}
 
-if [ "$(git status --porcelain)" ]; then
-  printf "\e[1;91mCommit or Revert following files:\e[0m\n%s\n" "$(git status --porcelain)"
-  exit 1
-fi
-
-branch_name=$(git branch | grep "\*" | cut -d ' ' -f2)
-pages_branch_name="gh-pages"
+parseArgs "$@"
+git fetch origin
+branch=$(git branch | grep "\*" | cut -d ' ' -f2)
+gh_pages_branch="gh-pages"
 revesion=$(git rev-parse HEAD)
 
-nextRelease && deploy && pages && nextDevevelopment
+nextRelease && deploy && ghPages && nextDevevelopment
 
 exitCode=$?
 
 if [ "${exitCode}" = "0" ]; then
-  printf "\e[1;34m'%s':\e[0m\n%s\n" "${pages_branch_name}" "$(git ls-tree -r --name-only "${pages_branch_name}")"
-  printf "\e[1;34mDeploy '%s', '%s' and '%s'. 'YES' ?\e[0m\n" "${pages_branch_name}" "${release_version}" "${branch_name}"
-  read -r answer
-  if [ "${answer}" = "YES" ]; then
-    git push "${branch_name}" && git push "${pages_branch_name}" && git push --tags
-  fi
+  git --no-pager log --stat --oneline "${branch}"...origin/"${branch}"
+  git --no-pager log --stat --oneline "${gh_pages_branch}"...origin/"${gh_pages_branch}"
 else
-  printf "\e[1;91mROLLBACK!\e[0m\n"
-  git reset --hard "${revesion}" && deleteTag "${release_version}" && deleteBranch "${pages_branch_name}"
+  git reset --hard "${revesion}" && deleteTag "${release_version}" && deleteBranch "${gh_pages_branch}"
 fi
