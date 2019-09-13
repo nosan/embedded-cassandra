@@ -19,20 +19,20 @@ deploy() {
 }
 
 nextRelease() {
-  ./mvnw clean -q && ./mvnw versions:set -DnewVersion="${release_version}" -q && ./mvnw versions:commit -q &&
+  ./mvnw clean && ./mvnw versions:set -DnewVersion="${release_version}" && ./mvnw versions:commit &&
     git add . && git commit -m "Release: '${release_version}'" && deleteTag "${release_version}" && git tag "${release_version}"
 
 }
 
 nextDevevelopment() {
-  ./mvnw clean -q && ./mvnw versions:set -DnewVersion="${development_version}" -q && ./mvnw versions:commit -q &&
+  ./mvnw clean && ./mvnw versions:set -DnewVersion="${development_version}" && ./mvnw versions:commit &&
     git add . && git commit -m "Next development version: '${development_version}'"
 }
 
 pages() {
   docs="embedded-cassandra-docs/target/generated-docs/"
   git add -f "${docs}" && git stash push -- "${docs}" &&
-    deleteBranch "gh-pages" && git checkout -f "gh-pages" && git reset --hard HEAD && git clean -fd && rm -rf -- * &&
+    deleteBranch "${pages_branch_name}" && git checkout -f "${pages_branch_name}" && git reset --hard HEAD && git clean -fd && rm -rf -- * &&
     git add . && git commit -m "Prepare to Release: '${release_version}'" &&
     git stash pop && cp -r "${docs}" . && rm -rf "embedded-cassandra-docs" &&
     git add . && git commit -m "Release: '${release_version}'" &&
@@ -79,6 +79,7 @@ if [ "$(git status --porcelain)" ]; then
 fi
 
 branch_name=$(git branch | grep "\*" | cut -d ' ' -f2)
+pages_branch_name="gh-pages"
 revesion=$(git rev-parse HEAD)
 
 nextRelease && deploy && pages && nextDevevelopment
@@ -86,12 +87,13 @@ nextRelease && deploy && pages && nextDevevelopment
 exitCode=$?
 
 if [ "${exitCode}" = "0" ]; then
-  printf "\e[1;34mDeploy 'gh-pages', '%s' and '%s'. 'YES' ?\e[0m\n" "${release_version}" "${branch_name}"
+  printf "\e[1;34m'%s':\e[0m\n%s\n" "${pages_branch_name}" "$(git ls-tree -r --name-only "${pages_branch_name}")"
+  printf "\e[1;34mDeploy '%s', '%s' and '%s'. 'YES' ?\e[0m\n" "${pages_branch_name}" "${release_version}" "${branch_name}"
   read -r answer
   if [ "${answer}" = "YES" ]; then
-    git push "${branch_name}" && git push "gh-pages" && git push --tags
+    git push "${branch_name}" && git push "${pages_branch_name}" && git push --tags
   fi
 else
   printf "\e[1;91mROLLBACK!\e[0m\n"
-  git reset --hard "${revesion}" && deleteTag "${release_version}" && deleteBranch "gh-pages"
+  git reset --hard "${revesion}" && deleteTag "${release_version}" && deleteBranch "${pages_branch_name}"
 fi

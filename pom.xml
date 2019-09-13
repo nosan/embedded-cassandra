@@ -32,12 +32,6 @@
         <url>https://github.com/nosan/embedded-cassandra/issues</url>
     </issueManagement>
 
-    <scm>
-        <connection>scm:git:ssh://github.com/nosan/embedded-cassandra.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/nosan/embedded-cassandra.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -57,7 +51,6 @@
         <asciidoctorj.version>2.1.0</asciidoctorj.version>
         <java-driver-core.version>4.2.0</java-driver-core.version>
         <commons-compress.version>1.19</commons-compress.version>
-        <scm.branch>master</scm.branch>
     </properties>
 
     <dependencyManagement>

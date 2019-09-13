@@ -5,9 +5,6 @@ sudo: true
 stages:
   - prepare
   - test
-    if: tag IS NOT present
-  - name: deploy
-    if: tag IS present
 
 cache:
   directories:
@@ -37,15 +34,3 @@ jobs:
     - os: osx
       script:
         - ./mvnw clean verify -B -V
-    - stage: deploy
-      os: linux
-      script:
-        - ./mvnw clean verify -DskipTests -Pdocs
-      deploy:
-        provider: pages
-        skip_cleanup: true
-        github_token: $GITHUB_TOKEN
-        keep_history: true
-        local_dir: embedded-cassandra-docs/target/generated-docs/
-        on:
-          tags: true
