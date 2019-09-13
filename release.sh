@@ -32,14 +32,14 @@ nextDevevelopment() {
 ghPages() {
   docs="embedded-cassandra-docs/target/generated-docs/"
   git add -f "${docs}" && git stash push -- "${docs}" &&
-    deleteBranch "${gh_pages_branch}" && git checkout -f "${gh_pages_branch}" && git reset --hard HEAD && git clean -fd && rm -rf -- * &&
+    deleteBranch gh-pages && git checkout -f gh-pages && git reset --hard HEAD && git clean -fd && rm -rf -- * &&
     git add . && git commit -m "Prepare to Release: '${release_version}'" &&
     git stash pop && cp -r "${docs}" . && rm -rf "embedded-cassandra-docs" &&
     git add . && git commit -m "Release: '${release_version}'" &&
-    git checkout -f "${branch}" && git reset --hard HEAD && git clean -fd
+    git checkout -f master && git reset --hard HEAD && git clean -fd
 }
 
-parseArgs() {
+inititialize() {
   while [ $# -gt 0 ]; do
     case "$1" in
     --release)
@@ -71,21 +71,21 @@ parseArgs() {
     exit 1
   fi
 
+  if [ "$(git branch | grep "\*" | cut -d ' ' -f2)" != "master" ]; then
+    printf "\e[1;91mWrong branch. Use'master' branch!\e[0m\n"
+    exit 1
+  fi
+
+  git fetch origin
+  revesion=$(git rev-parse HEAD)
+
 }
 
-parseArgs "$@"
-git fetch origin
-branch=$(git branch | grep "\*" | cut -d ' ' -f2)
-gh_pages_branch="gh-pages"
-revesion=$(git rev-parse HEAD)
-
-nextRelease && deploy && ghPages && nextDevevelopment
-
+inititialize "$@" && nextRelease && deploy && ghPages && nextDevevelopment
 exitCode=$?
-
 if [ "${exitCode}" = "0" ]; then
-  git --no-pager log --stat --oneline "${branch}"...origin/"${branch}"
-  git --no-pager log --stat --oneline "${gh_pages_branch}"...origin/"${gh_pages_branch}"
+  git --no-pager log --stat --oneline master...origin/master
+  git --no-pager log --stat --oneline gh-pages...origin/gh-pages
 else
-  git reset --hard "${revesion}" && deleteTag "${release_version}" && deleteBranch "${gh_pages_branch}"
+  git reset --hard "${revesion}" && deleteTag "${release_version}" && deleteBranch gh-pages
 fi
