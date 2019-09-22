@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.commons;
+package com.github.nosan.embedded.cassandra;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,9 +26,8 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
  * Representation of {@link Process} and its PID.
  *
  * @author Dmytro Nosan
- * @since 3.0.0
  */
-public final class ProcessId {
+class ProcessId {
 
 	@Nullable
 	private static final Method PID_METHOD;
@@ -53,7 +52,7 @@ public final class ProcessId {
 	 *
 	 * @param process the process
 	 */
-	public ProcessId(Process process) {
+	ProcessId(Process process) {
 		Objects.requireNonNull(process, "'process' must not be null");
 		this.process = process;
 		this.pid = getPid(process);
@@ -65,7 +64,7 @@ public final class ProcessId {
 	 * @param process the process
 	 * @param pid the PID
 	 */
-	public ProcessId(Process process, long pid) {
+	ProcessId(Process process, long pid) {
 		Objects.requireNonNull(process, "'process' must not be null");
 		this.process = process;
 		this.pid = (pid > 0) ? pid : -1;
@@ -76,7 +75,7 @@ public final class ProcessId {
 	 *
 	 * @return the process
 	 */
-	public Process getProcess() {
+	Process getProcess() {
 		return this.process;
 	}
 
@@ -85,7 +84,7 @@ public final class ProcessId {
 	 *
 	 * @return the pid (or -1 if none)
 	 */
-	public long getPid() {
+	long getPid() {
 		return this.pid;
 	}
 

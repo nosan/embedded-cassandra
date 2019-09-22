@@ -32,7 +32,6 @@ import java.util.Objects;
 
 import org.yaml.snakeyaml.Yaml;
 
-import com.github.nosan.embedded.cassandra.commons.RunProcess;
 import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.io.UrlResource;

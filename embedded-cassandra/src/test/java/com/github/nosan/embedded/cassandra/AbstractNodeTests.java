@@ -32,7 +32,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
-import com.github.nosan.embedded.cassandra.commons.RunProcess;
 import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -22,8 +22,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.nosan.embedded.cassandra.commons.ProcessId;
-
 /**
  * Abstract {@link NodeProcess} that pre-implements common methods.
  *

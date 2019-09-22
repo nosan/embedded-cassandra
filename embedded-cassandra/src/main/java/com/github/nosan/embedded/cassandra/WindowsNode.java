@@ -28,8 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.api.Version;
-import com.github.nosan.embedded.cassandra.commons.ProcessId;
-import com.github.nosan.embedded.cassandra.commons.RunProcess;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**

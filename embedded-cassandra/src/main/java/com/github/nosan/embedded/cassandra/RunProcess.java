@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.commons;
+package com.github.nosan.embedded.cassandra;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,9 +44,8 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  * This class is used to create and run a {@link Process}.
  *
  * @author Dmytro Nosan
- * @since 3.0.0
  */
-public final class RunProcess {
+class RunProcess {
 
 	private static final Logger log = LoggerFactory.getLogger(RunProcess.class);
 
@@ -64,7 +63,7 @@ public final class RunProcess {
 	 *
 	 * @param arguments the arguments
 	 */
-	public RunProcess(Object... arguments) {
+	RunProcess(Object... arguments) {
 		this(null, arguments);
 	}
 
@@ -74,7 +73,7 @@ public final class RunProcess {
 	 * @param arguments the arguments
 	 * @param workingDirectory the working directory
 	 */
-	public RunProcess(@Nullable Path workingDirectory, Object... arguments) {
+	RunProcess(@Nullable Path workingDirectory, Object... arguments) {
 		Objects.requireNonNull(arguments, "'arguments' must not be null");
 		this.workingDirectory = workingDirectory;
 		this.arguments.addAll(Arrays.asList(arguments));
@@ -85,7 +84,7 @@ public final class RunProcess {
 	 *
 	 * @return the arguments
 	 */
-	public List<Object> getArguments() {
+	List<Object> getArguments() {
 		return this.arguments;
 	}
 
@@ -94,7 +93,7 @@ public final class RunProcess {
 	 *
 	 * @param arguments the arguments
 	 */
-	public void setArguments(Object... arguments) {
+	void setArguments(Object... arguments) {
 		Objects.requireNonNull(arguments, "'arguments' must not be null");
 		this.arguments.clear();
 		this.arguments.addAll(Arrays.asList(arguments));
@@ -105,7 +104,7 @@ public final class RunProcess {
 	 *
 	 * @param arguments the arguments
 	 */
-	public void addArguments(Object... arguments) {
+	void addArguments(Object... arguments) {
 		Objects.requireNonNull(arguments, "'arguments' must not be null");
 		this.arguments.addAll(Arrays.asList(arguments));
 	}
@@ -115,7 +114,7 @@ public final class RunProcess {
 	 *
 	 * @return the environment variables
 	 */
-	public Map<String, Object> getEnvironment() {
+	Map<String, Object> getEnvironment() {
 		return this.environment;
 	}
 
@@ -125,7 +124,7 @@ public final class RunProcess {
 	 * @param name the name of the env variable
 	 * @param value the value of the env variable
 	 */
-	public void putEnvironment(String name, @Nullable Object value) {
+	void putEnvironment(String name, @Nullable Object value) {
 		Objects.requireNonNull(name, "'name' must not be null");
 		this.environment.put(name, value);
 	}
@@ -136,7 +135,7 @@ public final class RunProcess {
 	 * @return the working directory  (or null if none)
 	 */
 	@Nullable
-	public Path getWorkingDirectory() {
+	Path getWorkingDirectory() {
 		return this.workingDirectory;
 	}
 
@@ -145,7 +144,7 @@ public final class RunProcess {
 	 *
 	 * @param workingDirectory the working directory
 	 */
-	public void setWorkingDirectory(@Nullable Path workingDirectory) {
+	void setWorkingDirectory(@Nullable Path workingDirectory) {
 		this.workingDirectory = workingDirectory;
 	}
 
@@ -156,7 +155,7 @@ public final class RunProcess {
 	 * @throws IOException if an I/O error occurs
 	 * @see ProcessBuilder#start()
 	 */
-	public ProcessId start() throws IOException {
+	ProcessId start() throws IOException {
 		Path workDir = this.workingDirectory;
 		List<String> arguments = this.arguments.stream().filter(Objects::nonNull).map(Object::toString).filter(
 				StringUtils::hasText).collect(Collectors.toList());
@@ -188,7 +187,7 @@ public final class RunProcess {
 	 * @throws InterruptedException if the current thread is interrupted
 	 * @see ProcessBuilder#start()
 	 */
-	public int run(Consumer<? super String> consumer) throws InterruptedException, IOException {
+	int run(Consumer<? super String> consumer) throws InterruptedException, IOException {
 		Objects.requireNonNull(consumer, "'consumer' must not be null");
 		ProcessId processId = start();
 		Process process = processId.getProcess();

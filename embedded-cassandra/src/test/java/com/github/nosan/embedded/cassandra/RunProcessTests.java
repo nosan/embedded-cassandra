@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.nosan.embedded.cassandra.commons;
+package com.github.nosan.embedded.cassandra;
 
 import java.nio.file.Path;
 import java.util.Arrays;
