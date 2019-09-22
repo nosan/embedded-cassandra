@@ -1,91 +1,97 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
-deleteTag() {
-  if [ "$(git rev-parse -q --verify "refs/tags/$1")" ]; then
-    git tag -d "$1"
-  fi
+function abort() {
+  echo "$*" >&2
+  exit 1
 }
 
-deleteBranch() {
-  if [ "$(git rev-parse -q --verify "$1")" ]; then
-    git branch -D "$1"
-  fi
+function usage() {
+  echo "Usage: $0 [ -r RELEASE_VERSION -n NEXT_DEVELOPMENT_VERSION ]"
 }
 
-deploy() {
-  ./mvnw clean verify -Prelease,docs -B -V -DskipTests
-}
+while getopts ":r:d:" opt; do
+  case ${opt} in
+  r)
+    RELEASE_VERSION="${OPTARG}"
+    ;;
+  d)
+    DEVELOPMENT_VERSION="${OPTARG}"
+    ;;
+  \?)
+    usage
+    abort "Invalid option: '-${OPTARG}'" 1>&2
+    ;;
+  :)
+    usage
+    abort "Invalid option: '-${OPTARG}' requires an argument" 1>&2
+    ;;
+  esac
+done
+shift $((OPTIND - 1))
 
-nextRelease() {
-  ./mvnw clean && ./mvnw versions:set -DnewVersion="${release_version}" && ./mvnw versions:commit &&
-    git add . && git commit -m "Release: '${release_version}'" && deleteTag "${release_version}" && git tag "${release_version}"
-
-}
-
-nextDevevelopment() {
-  ./mvnw clean && ./mvnw versions:set -DnewVersion="${development_version}" && ./mvnw versions:commit &&
-    git add . && git commit -m "Next development version: '${development_version}'"
-}
-
-ghPages() {
-  docs="embedded-cassandra-docs/target/generated-docs/"
-  git add -f "${docs}" && git stash push -- "${docs}" &&
-    deleteBranch gh-pages && git checkout -f gh-pages && git reset --hard HEAD && git clean -fd && rm -rf -- * &&
-    git add . && git commit -m "Prepare to Release: '${release_version}'" &&
-    git stash pop && cp -r "${docs}" . && rm -rf "embedded-cassandra-docs" &&
-    git add . && git commit -m "Release: '${release_version}'" &&
-    git checkout -f master && git reset --hard HEAD && git clean -fd
-}
-
-inititialize() {
-  while [ $# -gt 0 ]; do
-    case "$1" in
-    --release)
-      release_version="$2"
-      shift
-      ;;
-    --development)
-      development_version="$2"
-      shift
-      ;;
-    *)
-      shift
-      ;;
-    esac
-  done
-
-  if [ ! "${release_version}" ]; then
-    printf "\e[1;91m--release option is absent\e[0m. Use --release <version>.\n"
-    exit 1
-  fi
-
-  if [ ! "${development_version}" ]; then
-    printf "\e[1;91m--development option is absent\e[0m. Use --development <version>.\n"
-    exit 1
-  fi
-
-  if [ "$(git status --porcelain)" ]; then
-    printf "\e[1;91mCommit or Revert following files:\e[0m\n%s\n" "$(git status --porcelain)"
-    exit 1
-  fi
-
-  if [ "$(git branch | grep "\*" | cut -d ' ' -f2)" != "master" ]; then
-    printf "\e[1;91mWrong branch. Use'master' branch!\e[0m\n"
-    exit 1
-  fi
-
-  git fetch origin
-  revesion=$(git rev-parse HEAD)
-
-}
-
-inititialize "$@" && nextRelease && deploy && ghPages && nextDevevelopment
-exitCode=$?
-if [ "${exitCode}" = "0" ]; then
-  git --no-pager log --stat --oneline master...origin/master
-  git --no-pager log --stat --oneline gh-pages...origin/gh-pages
-else
-  git reset --hard "${revesion}" && deleteTag "${release_version}" && deleteBranch gh-pages
+if [ -z "${RELEASE_VERSION}" ]; then
+  usage
+  abort "The Release version is not set"
 fi
+
+if [ -z "${DEVELOPMENT_VERSION}" ]; then
+  usage
+  abort "Next development version is not set"
+fi
+
+if [ "$(git status -s)" ]; then
+  git status -s
+  abort "There are uncommitted or untracked changes, please commit or stash them to continue with the release!"
+fi
+
+VCS_RELEASE_TAG="${RELEASE_VERSION}"
+GIT_REMOTE=$(git config remote.origin.url)
+BASE_DIRECTORY=$(pwd)
+PAGES_DIRECTORY="embedded-cassandra-docs/target/generated-docs/"
+
+if [ -z "${GIT_REMOTE}" ]; then
+  abort "'git config remote.origin.url' is not present"
+fi
+
+if [ -z "${BASE_DIRECTORY}" ]; then
+  abort "Directory is not detected!"
+fi
+
+if [ "$(git rev-parse -q --verify "refs/tags/${VCS_RELEASE_TAG}")" ]; then
+  abort "A tag '${VCS_RELEASE_TAG}' already exists. Use 'git tag -d ${VCS_RELEASE_TAG}' to delete a tag."
+fi
+
+#clean
+./mvnw -q clean
+
+#set release version
+./mvnw -q versions:set -DnewVersion="${RELEASE_VERSION}" versions:commit || abort "Failed to set release version!"
+git commit -a -m "Release version ${RELEASE_VERSION}" || abort "Failed to commit a release version!"
+
+#deploy to nexus
+./mvnw clean verify -V -B -Prelease,docs -DskipTests || (git reset --hard HEAD^1 || echo "Git reset command failed!")
+
+#create release tag
+git tag "${VCS_RELEASE_TAG}" || abort "Failed to create a tag ${VCS_RELEASE_TAG}!"
+
+cd "${PAGES_DIRECTORY}"
+git init || abort "Git cannot be initialized"
+git checkout --orphan gh-pages || abort "Git cannot checkout gh-pages branch"
+git remote add origin "${GIT_REMOTE}" || abort "Git cannot set origin for gh-pages branch"
+git add . || abort "Git cannot add gh-pages resources"
+git commit -m "Update Embedded Cassandra Reference Documentation ${VERSION}" || abort "Failed to commit gh-pages resources!"
+cd "${BASE_DIRECTORY}"
+
+#set next development version
+./mvnw -q versions:set -DnewVersion="${DEVELOPMENT_VERSION}" versions:commit || abort "Failed to set next development version!"
+git commit -a -m "Start next development version ${DEVELOPMENT_VERSION}" || abort "Failed to commit next development version!"
+
+cd "${PAGES_DIRECTORY}"
+git push -f --dry-run origin gh-pages || abort "Failed to push gh-pages!"
+cd "${BASE_DIRECTORY}"
+
+git push --dry-run || abort "Failed to push commits!"
+git push --dry-run --tags || abort "Failed to push tags!"
+
