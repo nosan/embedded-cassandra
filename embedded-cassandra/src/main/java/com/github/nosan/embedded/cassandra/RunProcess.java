@@ -74,7 +74,6 @@ class RunProcess {
 	 * @param workingDirectory the working directory
 	 */
 	RunProcess(@Nullable Path workingDirectory, Object... arguments) {
-		Objects.requireNonNull(arguments, "'arguments' must not be null");
 		this.workingDirectory = workingDirectory;
 		this.arguments.addAll(Arrays.asList(arguments));
 	}
@@ -94,7 +93,6 @@ class RunProcess {
 	 * @param arguments the arguments
 	 */
 	void setArguments(Object... arguments) {
-		Objects.requireNonNull(arguments, "'arguments' must not be null");
 		this.arguments.clear();
 		this.arguments.addAll(Arrays.asList(arguments));
 	}
@@ -105,7 +103,6 @@ class RunProcess {
 	 * @param arguments the arguments
 	 */
 	void addArguments(Object... arguments) {
-		Objects.requireNonNull(arguments, "'arguments' must not be null");
 		this.arguments.addAll(Arrays.asList(arguments));
 	}
 

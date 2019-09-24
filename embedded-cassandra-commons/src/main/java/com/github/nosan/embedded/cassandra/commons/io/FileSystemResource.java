@@ -105,6 +105,11 @@ public class FileSystemResource implements Resource {
 	}
 
 	@Override
+	public byte[] getBytes() throws IOException {
+		return Files.readAllBytes(this.path);
+	}
+
+	@Override
 	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;

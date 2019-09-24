@@ -63,7 +63,13 @@ class WindowsNode extends AbstractNode {
 		long start = System.nanoTime();
 		long rem = timeout;
 		while (rem > 0 && process.getPid() == -1) {
-			Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 10));
+			try {
+				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 10));
+			}
+			catch (InterruptedException ex) {
+				//we should not throw
+				Thread.currentThread().interrupt();
+			}
 			rem = timeout - (System.nanoTime() - start);
 		}
 		return process;
@@ -92,7 +98,7 @@ class WindowsNode extends AbstractNode {
 		public long getPid() {
 			if (this.pid == -1) {
 				this.pid = this.processId.getPid();
-				if (this.pid == -1 && Files.exists(this.pidFile)) {
+				if (this.pid == -1) {
 					this.pid = getPid(this.pidFile);
 				}
 			}
@@ -140,7 +146,7 @@ class WindowsNode extends AbstractNode {
 				String pid = new String(Files.readAllBytes(pidFile), StandardCharsets.UTF_8).replaceAll("\\D+", "");
 				return StringUtils.hasText(pid) ? Long.parseLong(pid) : -1;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				return -1;
 			}
 		}

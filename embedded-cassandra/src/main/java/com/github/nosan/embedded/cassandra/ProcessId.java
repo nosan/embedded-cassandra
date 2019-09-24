@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 
@@ -53,7 +52,6 @@ class ProcessId {
 	 * @param process the process
 	 */
 	ProcessId(Process process) {
-		Objects.requireNonNull(process, "'process' must not be null");
 		this.process = process;
 		this.pid = getPid(process);
 	}
@@ -65,7 +63,6 @@ class ProcessId {
 	 * @param pid the PID
 	 */
 	ProcessId(Process process, long pid) {
-		Objects.requireNonNull(process, "'process' must not be null");
 		this.process = process;
 		this.pid = (pid > 0) ? pid : -1;
 	}
