@@ -17,31 +17,22 @@
 package examples.junit5;
 // tag::source[]
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
-import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
-@ExtendWith(CassandraExtension.class)
 class CassandraJUnit5Tests {
 
-	@BeforeAll
-	static void prepare(Cassandra cassandra) {
-		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress())
-				.withPort(cassandra.getPort()).build()) {
-			Session session = cluster.connect();
-			CqlScript.ofResources(new ClassPathResource("schema.cql")).forEach(session::execute);
-		}
-	}
+	@RegisterExtension
+	static final CassandraExtension CASSANDRA_EXTENSION = new CassandraExtension();
 
 	@Test
-	void test(Cassandra cassandra) {
+	void test() {
+		Cassandra cassandra = CASSANDRA_EXTENSION.getCassandra();
+		CassandraConnection cassandraConnection = CASSANDRA_EXTENSION.getCassandraConnection();
 	}
 
 }

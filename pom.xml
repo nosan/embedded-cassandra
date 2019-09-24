@@ -462,7 +462,6 @@
         <module>embedded-cassandra-annotations</module>
         <module>embedded-cassandra-commons</module>
         <module>embedded-cassandra-api</module>
-        <module>embedded-cassandra-cql</module>
         <module>embedded-cassandra</module>
         <module>embedded-cassandra-mock</module>
         <module>embedded-cassandra-junit5-test</module>

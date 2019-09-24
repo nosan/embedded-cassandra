@@ -272,7 +272,7 @@ public final class RemoteArtifact implements Artifact {
 		@Override
 		public void update(long readBytes, long totalBytes) {
 			long percent = readBytes * 100 / totalBytes;
-			if (percent - this.lastPercent >= 5) {
+			if (percent - this.lastPercent >= 10) {
 				this.lastPercent = percent;
 				log.info("Downloaded {}MB / {}MB  {}%", (readBytes / MB), (totalBytes / MB), percent);
 			}

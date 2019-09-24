@@ -27,6 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
 @EmbeddedCassandra
@@ -34,7 +35,7 @@ import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 class CassandraDefaultFactoryCustomizerSpringTests {
 
 	@Test
-	void test(@Autowired Cassandra cassandra) {
+	void test(@Autowired Cassandra cassandra, @Autowired CassandraConnection cassandraConnection) {
 	}
 
 	@Configuration

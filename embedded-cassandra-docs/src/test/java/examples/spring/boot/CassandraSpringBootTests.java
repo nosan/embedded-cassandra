@@ -18,24 +18,22 @@ package examples.spring.boot;
 
 // tag::source[]
 
-import com.datastax.driver.core.Cluster;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.spring.test.CassandraScripts;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.spring.test.EmbeddedCassandra;
 
-@EmbeddedCassandra
-@CassandraScripts("schema.cql")
+@EmbeddedCassandra(scripts = "schema.cql")
 @SpringBootTest(properties = {"spring.data.cassandra.port=${embedded.cassandra.port}",
 		"spring.data.cassandra.contact-points=${embedded.cassandra.address}",
 		"spring.data.cassandra.keyspace-name=test"})
 class CassandraSpringBootTests {
 
 	@Test
-	void testCassandra(@Autowired Cassandra cassandra, @Autowired Cluster cluster) {
+	void testCassandra(@Autowired Cassandra cassandra, @Autowired CassandraConnection cassandraConnection) {
 
 	}
 

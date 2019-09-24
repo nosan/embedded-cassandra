@@ -20,6 +20,7 @@ package examples.testng.configuration.customizer;
 import org.testng.annotations.Test;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.testng.AbstractCassandraTests;
 
 public class CassandraDefaultFactoryCustomizerTestNGTests extends AbstractCassandraTests {
@@ -31,6 +32,7 @@ public class CassandraDefaultFactoryCustomizerTestNGTests extends AbstractCassan
 	@Test
 	public void test() {
 		Cassandra cassandra = getCassandra();
+		CassandraConnection cassandraConnection = getCassandraConnection();
 	}
 
 }

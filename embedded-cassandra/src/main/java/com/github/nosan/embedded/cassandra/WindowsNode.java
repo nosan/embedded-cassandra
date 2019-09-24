@@ -49,7 +49,7 @@ class WindowsNode extends AbstractNode {
 	}
 
 	@Override
-	protected NodeProcess doStart(RunProcess runProcess) throws IOException, InterruptedException {
+	protected NodeProcess doStart(RunProcess runProcess) throws IOException {
 		Path workDir = this.workingDirectory;
 		Version version = this.version;
 		Path pidFile = Files.createTempFile(workDir, "", ".pid");

@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AbstractCassandraTestsCustomFactoryTests extends AbstractCassandraTests {
 
 	public AbstractCassandraTestsCustomFactoryTests() {
-		super(new MockCassandraFactory());
+		setCassandraFactory(new MockCassandraFactory());
 	}
 
 	@Test

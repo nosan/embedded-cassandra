@@ -50,7 +50,6 @@ $ ./mvnw clean verify
 | embedded-cassandra | This module contains items that allows the Apache Cassandra to be started and stopped.
 | embedded-cassandra-annotations | This module contains JSR305 annotations.
 | embedded-cassandra-api |This module contains Embedded Cassandra API classes.
-| embedded-cassandra-cql |This module contains `Cql` Support Classes.
 | embedded-cassandra-commons |This module contains Embedded Cassandra common classes.
 | embedded-cassandra-docs |This module contains Embedded Cassandra Reference Documentation.
 | embedded-cassandra-junit4-test |This module contains Embedded Cassandra JUnit4 classes.
@@ -93,12 +92,18 @@ Contributions to Embedded Cassandra should be made in the form of `GitHub pull r
 compile group: 'com.github.nosan', name: 'embedded-cassandra', version: '{project-version}'
 ----
 
-=== First example
+=== First run
 
 The Apache Cassandra can be started using the following lines of code:
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/FirstExample.java[tag=source]
+include::{test-sources}/examples/FirstRun.java[tag=source]
+----
+
+.schema.cql
+[source,cql,indent=0]
+----
+include::{test-resources}/schema.cql[]
 ----
 

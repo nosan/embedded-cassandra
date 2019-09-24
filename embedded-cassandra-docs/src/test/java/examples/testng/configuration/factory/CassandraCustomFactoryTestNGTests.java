@@ -22,23 +22,24 @@ import org.testng.annotations.Test;
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.testng.AbstractCassandraTests;
 
 public class CassandraCustomFactoryTestNGTests extends AbstractCassandraTests {
 
 	public CassandraCustomFactoryTestNGTests() {
-		super(createCassandraFactory());
+		setCassandraFactory(createCassandraFactory());
 	}
 
 	@Test
 	public void test() {
 		Cassandra cassandra = getCassandra();
-		//
+		CassandraConnection cassandraConnection = getCassandraConnection();
 	}
 
 	private static CassandraFactory createCassandraFactory() {
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setPort(0);
+		//configure me
 		return cassandraFactory;
 	}
 

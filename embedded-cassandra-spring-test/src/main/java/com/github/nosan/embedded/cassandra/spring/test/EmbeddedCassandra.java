@@ -23,80 +23,27 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import org.springframework.core.io.Resource;
+
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
 
 /**
- * Annotation that allows the {@link Cassandra} to be started and stopped. Cassandra will be registered as a bean named
- * <strong>{@code Cassandra.class.getName()}</strong>.
- * <p>By default, {@link EmbeddedCassandraFactory} is used, which is configured to use random
- * ports.
+ * Annotation that allows the {@link Cassandra} to be started and stopped.
+ * <p>By default, {@link Cassandra} runs on the random ports.
  *
  * <p>Example:
  * <pre>
- * &#64;EmbeddedCassandra
+ * &#64;EmbeddedCassandra(scripts = "schema.cql")
  * &#64;ExtendWith(SpringExtension.class)
- * &#64;CassandraScripts("schema.cql")
  * class CassandraTests {
  *
  *      &#64;Test
- *      void test(&#64;Autowired Cassandra cassandra) {
+ *      void test() {
  *      }
- * }
- * </pre>
- * It is possible to register you own factory to control Cassandra instance.
- * <p>Example:
- * <pre>
- * &#64;EmbeddedCassandra
- * &#64;ExtendWith(SpringExtension.class)
- * &#64;CassandraScripts("schema.cql")
- * class CassandraTests {
- *
- *      &#64;Test
- *      void test(&#64;Autowired Cassandra cassandra) {
- *      }
- *
- *      &#64;Configuration
- *      static class TestConfig {
- *
- *         &#64;Bean
- *         public EmbeddedCassandraFactory createCassandraFactory() {
- *           EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
- *           //...
- *           return cassandraFactory;
- *          }
- *     }
- * }
- * </pre>
- * Additional to the above, there is also possible to register {@link CassandraFactoryCustomizer} beans to customize a
- * default {@link EmbeddedCassandraFactory} before the {@link Cassandra} itself is started.
- * <p>Example:
- * <pre>
- * &#64;EmbeddedCassandra
- * &#64;ExtendWith(SpringExtension.class)
- * &#64;CassandraScripts("schema.cql")
- * class CassandraTests {
- *
- *      &#64;Test
- *      void test(&#64;Autowired Cassandra cassandra) {
- *      }
- *
- *      &#64;Configuration
- *      static class TestConfig {
- *
- *         &#64;Bean
- *         public CassandraFactoryCustomizer&lt;EmbeddedCassandraFactory&gt; versionCustomizer() {
- *            return cassandraFactory -&gt; cassandraFactory.setArtifact(Artifact.ofVersion("3.0.0"));
- *         }
- *     }
  * }
  * </pre>
  *
  * @author Dmytro Nosan
- * @see EmbeddedCassandraFactory
- * @see CassandraFactoryCustomizer
- * @see CassandraScripts
  * @since 3.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -104,5 +51,22 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
 @Inherited
 @Documented
 public @interface EmbeddedCassandra {
+
+	/**
+	 * The paths to the CQL scripts to execute. Each path will be interpreted as a Spring {@link Resource}. A plain path
+	 * &mdash; for example, {@code "schema.cql"} &mdash;  will be treated as an <em>absolute</em> classpath resource. A
+	 * path which references a URL (e.g., a path prefixed with {@code http:}, etc.) will be loaded using the specified
+	 * resource protocol.
+	 *
+	 * @return CQL Scripts
+	 */
+	String[] scripts() default {};
+
+	/**
+	 * The encoding for the supplied CQL scripts.
+	 *
+	 * @return CQL scripts encoding.
+	 */
+	String encoding() default "UTF-8";
 
 }

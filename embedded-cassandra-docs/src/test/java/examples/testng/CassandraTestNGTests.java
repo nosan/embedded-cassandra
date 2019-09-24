@@ -17,32 +17,18 @@
 package examples.testng;
 // tag::source[]
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
-import com.github.nosan.embedded.cassandra.cql.CqlScript;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.testng.AbstractCassandraTests;
 
 public class CassandraTestNGTests extends AbstractCassandraTests {
 
-	@BeforeClass
-	public void prepare() {
-		Cassandra cassandra = getCassandra();
-		try (Cluster cluster = Cluster.builder().addContactPoints(cassandra.getAddress())
-				.withPort(cassandra.getPort()).build()) {
-			Session session = cluster.connect();
-			CqlScript.ofResources(new ClassPathResource("schema.cql")).forEach(session::execute);
-		}
-	}
-
 	@Test
 	public void test() {
 		Cassandra cassandra = getCassandra();
-		//
+		CassandraConnection cassandraConnection = getCassandraConnection();
 	}
 
 }

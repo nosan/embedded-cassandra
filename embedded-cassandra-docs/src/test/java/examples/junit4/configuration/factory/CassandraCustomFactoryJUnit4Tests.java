@@ -24,17 +24,19 @@ import org.junit.Test;
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.junit4.test.CassandraRule;
 
 public class CassandraCustomFactoryJUnit4Tests {
 
 	@ClassRule
-	public static final CassandraRule rule = new CassandraRule(createCassandraFactory());
+	public static final CassandraRule CASSANDRA_RULE = new CassandraRule()
+			.withCassandraFactory(createCassandraFactory());
 
 	@Test
 	public void testCassandra() {
-		Cassandra cassandra = rule.getCassandra();
-		//
+		Cassandra cassandra = CASSANDRA_RULE.getCassandra();
+		CassandraConnection cassandraConnection = CASSANDRA_RULE.getCassandraConnection();
 	}
 
 	private static CassandraFactory createCassandraFactory() {

@@ -23,23 +23,24 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraFactory;
-import com.github.nosan.embedded.cassandra.artifact.Artifact;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
 class CassandraCustomFactoryJUnit5Tests {
 
 	@RegisterExtension
-	static final CassandraExtension extension = new CassandraExtension(createCassandraFactory());
+	static final CassandraExtension CASSANDRA_EXTENSION = new CassandraExtension()
+			.withCassandraFactory(createCassandraFactory());
 
 	@Test
 	void test() {
-		Cassandra cassandra = extension.getCassandra();
-		//
+		Cassandra cassandra = CASSANDRA_EXTENSION.getCassandra();
+		CassandraConnection cassandraConnection = CASSANDRA_EXTENSION.getCassandraConnection();
 	}
 
 	private static CassandraFactory createCassandraFactory() {
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setArtifact(Artifact.ofVersion("3.11.4"));
+		//configure me
 		return cassandraFactory;
 	}
 

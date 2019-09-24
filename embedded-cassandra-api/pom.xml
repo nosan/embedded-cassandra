@@ -12,7 +12,7 @@
 
     <artifactId>embedded-cassandra-api</artifactId>
 
-    <description>Embedded Cassandra API. This module contains Embedded Cassandra API classes.</description>
+    <description>Embedded Cassandra API. This module contains Cassandra, Cql, Connection API classes</description>
     <name>Embedded Cassandra API</name>
 
 
@@ -27,6 +27,21 @@
             <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra-annotations</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.nosan</groupId>
+            <artifactId>embedded-cassandra-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-core</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

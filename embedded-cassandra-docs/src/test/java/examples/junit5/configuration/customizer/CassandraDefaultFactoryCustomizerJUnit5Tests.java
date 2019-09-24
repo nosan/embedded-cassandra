@@ -21,17 +21,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
 class CassandraDefaultFactoryCustomizerJUnit5Tests {
 
 	@RegisterExtension
-	static final CassandraExtension extension = new CassandraExtension(
+	static final CassandraExtension CASSANDRA_EXTENSION = new CassandraExtension(
 			cassandraFactory -> cassandraFactory.setPort(9042));
 
 	@Test
 	void test() {
-		Cassandra cassandra = extension.getCassandra();
+		Cassandra cassandra = CASSANDRA_EXTENSION.getCassandra();
+		CassandraConnection cassandraConnection = CASSANDRA_EXTENSION.getCassandraConnection();
 	}
 
 }

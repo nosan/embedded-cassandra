@@ -44,12 +44,6 @@
         </dependency>
         <dependency>
             <groupId>com.github.nosan</groupId>
-            <artifactId>embedded-cassandra-cql</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra-spring-test</artifactId>
             <version>${project.version}</version>
             <optional>true</optional>
@@ -87,6 +81,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-cassandra</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>

@@ -22,16 +22,19 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.junit4.test.CassandraRule;
 
 public class CassandraDefaultFactoryCustomizerJUnit4Tests {
 
 	@ClassRule
-	public static final CassandraRule rule = new CassandraRule(cassandraFactory -> cassandraFactory.setPort(9042));
+	public static final CassandraRule CASSANDRA_RULE = new CassandraRule(
+			cassandraFactory -> cassandraFactory.setPort(9042));
 
 	@Test
 	public void testCassandra() {
-		Cassandra cassandra = rule.getCassandra();
+		Cassandra cassandra = CASSANDRA_RULE.getCassandra();
+		CassandraConnection cassandraConnection = CASSANDRA_RULE.getCassandraConnection();
 	}
 
 }

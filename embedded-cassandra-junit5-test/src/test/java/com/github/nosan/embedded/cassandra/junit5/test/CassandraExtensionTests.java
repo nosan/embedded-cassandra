@@ -16,37 +16,31 @@
 
 package com.github.nosan.embedded.cassandra.junit5.test;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
-
+import com.datastax.oss.driver.api.core.CqlSession;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.github.nosan.embedded.cassandra.api.Cassandra;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.nosan.embedded.cassandra.api.connection.CqlSessionCassandraConnection;
+import com.github.nosan.embedded.cassandra.api.connection.CqlSessionCassandraConnectionFactory;
+import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
 
 /**
  * Tests for {@link CassandraExtension}.
  *
  * @author Dmytro Nosan
  */
-@ExtendWith(CassandraExtension.class)
 class CassandraExtensionTests {
 
-	private final Cassandra cassandra;
-
-	CassandraExtensionTests(Cassandra cassandra) {
-		this.cassandra = cassandra;
-	}
+	@RegisterExtension
+	static final CassandraExtension extension = new CassandraExtension()
+			.withCqlDataSet(CqlDataSet.ofClasspaths("schema.cql"))
+			.withCassandraConnectionFactory(new CqlSessionCassandraConnectionFactory());
 
 	@Test
-	void testCassandra() throws Exception {
-		assertThat(this.cassandra.getPort()).isNotEqualTo(-1);
-		assertThat(this.cassandra.getAddress()).isNotNull();
-		try (Socket socket = new Socket()) {
-			socket.connect(new InetSocketAddress(this.cassandra.getAddress(), this.cassandra.getPort()));
-		}
+	void testCassandra() {
+		CqlSessionCassandraConnection connection = (CqlSessionCassandraConnection) extension.getCassandraConnection();
+		CqlSession session = connection.getConnection();
+		session.execute("SELECT * FROM test.roles");
 	}
 
 }

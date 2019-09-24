@@ -33,7 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CassandraRuleCustomFactoryTests {
 
 	@ClassRule
-	public static final CassandraRule rule = new CassandraRule(new MockCassandraFactory());
+	public static final CassandraRule rule = new CassandraRule()
+			.withCassandraFactory(new MockCassandraFactory());
 
 	@Test
 	public void testCustomFactory() {

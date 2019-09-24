@@ -16,20 +16,27 @@
 
 package com.github.nosan.embedded.cassandra.junit5.test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.CassandraCreationException;
 import com.github.nosan.embedded.cassandra.api.CassandraFactory;
 import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnectionFactory;
+import com.github.nosan.embedded.cassandra.api.connection.DefaultCassandraConnectionFactory;
+import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
 
 /**
  * JUnit5 {@link RegisterExtension Extension} that allows the Cassandra to be {@link Cassandra#start() started} and
@@ -37,138 +44,188 @@ import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
  * after the last test method has executed.
  * <p>Example:</p>
  * <pre>
- * &#64;ExtendWith(CassandraExtension.class)
- * class MyCassandraTests {
- *
- *     &#64;Test
- *     void test(Cassandra cassandra) {
- *      //
- *     }
- *
- * }
- * </pre>
- * In contrast to {@code @ExtendWith} which is used to register extensions declaratively, {@code @RegisterExtension} can
- * be used to register an extension programmatically to pass arguments to the {@code CassandraExtension's} constructor.
- * <p>Example:</p>
- * <pre>
  * class CassandraTests {
  *
  *     &#64;RegisterExtension
- *     static final CassandraExtension cassandraExtension = new CassandraExtension(factory -&gt; factory.setPort(9042));
+ *     static final CassandraExtension CASSANDRA_EXTENSION = new CassandraExtension();
  *
  *     &#64;Test
  *     void test() {
- *      Cassandra cassandra = cassandraExtension.getCassandra();
  *      //
  *     }
- * }
- * </pre>
- * It is possible to register you own factory to control Cassandra instance.
- * <p>Example:</p>
- * <pre>
- * class CassandraTests {
- *
- *     &#64;RegisterExtension
- *     static final CassandraExtension cassandraExtension = new CassandraExtension(createCassandraFactory());
- *
- *     &#64;Test
- *     void test() {
- *      Cassandra cassandra = cassandraExtension.getCassandra();
- *      //
- *     }
- *
- *     private static EmbeddedCassandraFactory createCassandraFactory() {
- *         EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
- *         //...
- *         return cassandraFactory;
- *    }
  * }
  * </pre>
  *
  * @author Dmytro Nosan
- * @see EmbeddedCassandraFactory
- * @see CassandraFactoryCustomizer
  * @since 3.0.0
  */
-public final class CassandraExtension implements BeforeAllCallback, AfterAllCallback, ParameterResolver {
+public final class CassandraExtension implements BeforeAllCallback, AfterAllCallback {
 
-	private final Cassandra cassandra;
+	private CassandraFactory cassandraFactory;
 
-	/**
-	 * Constructs a new {@link CassandraExtension} with a default {@link CassandraFactory}. Defaults to {@link
-	 * EmbeddedCassandraFactory} which is configured to use random ports.
-	 */
-	@SuppressWarnings("unchecked")
-	public CassandraExtension() {
-		this(new CassandraFactoryCustomizer[0]);
-	}
+	private CassandraConnectionFactory cassandraConnectionFactory;
+
+	private CqlDataSet dataSet;
+
+	@Nullable
+	private volatile Cassandra cassandra;
+
+	@Nullable
+	private volatile CassandraConnection cassandraConnection;
 
 	/**
 	 * Constructs a new {@link CassandraExtension} with a default {@link CassandraFactory} with the specified {@link
-	 * CassandraFactoryCustomizer CassandraFactoryCustomizers}. Defaults to {@link EmbeddedCassandraFactory} which is
-	 * configured to use random ports.
+	 * CassandraFactoryCustomizer}(s). The default factory is {@link EmbeddedCassandraFactory} which is configured to
+	 * use random ports.
 	 *
 	 * @param customizers Any instances of this type will get a callback with the {@link EmbeddedCassandraFactory}
 	 * before the {@link Cassandra} itself is started
 	 */
 	@SafeVarargs
 	public CassandraExtension(CassandraFactoryCustomizer<? super EmbeddedCassandraFactory>... customizers) {
-		Objects.requireNonNull(customizers, "'customizers' must not be null");
-		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setPort(0);
-		cassandraFactory.setRpcPort(0);
-		cassandraFactory.setJmxLocalPort(0);
-		cassandraFactory.setStoragePort(0);
-		for (CassandraFactoryCustomizer<? super EmbeddedCassandraFactory> customizer : customizers) {
-			customizer.customize(cassandraFactory);
-		}
-		this.cassandra = cassandraFactory.create();
+		this.cassandraFactory = new DefaultCassandraFactory(customizers);
+		this.cassandraConnectionFactory = new DefaultCassandraConnectionFactory();
+		this.dataSet = Collections::emptyList;
 	}
 
 	/**
-	 * Constructs a new {@link CassandraExtension} with a specified {@link CassandraFactory}.
+	 * Set a {@link CassandraFactory}. This factory will be used to create a {@link Cassandra}.
 	 *
-	 * @param cassandraFactory {@link CassandraFactory} that creates and configure a {@link Cassandra}.
+	 * @param cassandraFactory factory that can be used to create and configure {@link Cassandra}
+	 * @return this instance
 	 */
-	public CassandraExtension(CassandraFactory cassandraFactory) {
+	public CassandraExtension withCassandraFactory(CassandraFactory cassandraFactory) {
 		Objects.requireNonNull(cassandraFactory, "'cassandraFactory' must not be null");
-		this.cassandra = Objects.requireNonNull(cassandraFactory.create(), "'cassandra' must not be null");
-	}
-
-	@Override
-	public void beforeAll(ExtensionContext context) {
-		this.cassandra.start();
-	}
-
-	@Override
-	public void afterAll(ExtensionContext context) {
-		this.cassandra.stop();
-	}
-
-	@Override
-	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-			throws ParameterResolutionException {
-		return parameterContext.getParameter().getType().isAssignableFrom(Cassandra.class);
-	}
-
-	@Override
-	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-			throws ParameterResolutionException {
-		return this.cassandra;
+		this.cassandraFactory = cassandraFactory;
+		return this;
 	}
 
 	/**
-	 * Returns the reference to the {@link Cassandra}.
+	 * Set a {@link CassandraConnectionFactory}. Factory will be used to create a {@link #getCassandraConnection()
+	 * connection}. The latest used for {@link CqlDataSet} execution.
+	 *
+	 * @param cassandraConnectionFactory factory that can be used to create and configure {@link CassandraConnection}
+	 * @return this instance
+	 */
+	public CassandraExtension withCassandraConnectionFactory(CassandraConnectionFactory cassandraConnectionFactory) {
+		Objects.requireNonNull(cassandraConnectionFactory, "'cassandraConnectionFactory' must not be null");
+		this.cassandraConnectionFactory = cassandraConnectionFactory;
+		return this;
+	}
+
+	/**
+	 * Set a {@link CqlDataSet}. CQL statements will be executed immediately after Cassandra start.
+	 *
+	 * @param dataSet a {@link CqlDataSet} to execute
+	 * @return this instance
+	 */
+	public CassandraExtension withCqlDataSet(CqlDataSet dataSet) {
+		Objects.requireNonNull(dataSet, "'dataSet' must not be null");
+		this.dataSet = dataSet;
+		return this;
+	}
+
+	/**
+	 * Returns the {@link Cassandra} instance.
 	 *
 	 * @return the cassandra
 	 */
 	public Cassandra getCassandra() {
-		return this.cassandra;
+		Cassandra cassandra = this.cassandra;
+		if (cassandra == null) {
+			synchronized (this) {
+				cassandra = this.cassandra;
+				if (cassandra == null) {
+					cassandra = this.cassandraFactory.create();
+					this.cassandra = cassandra;
+				}
+			}
+		}
+		return cassandra;
+	}
+
+	/**
+	 * Returns the {@link CassandraConnection} to the {@link Cassandra}.
+	 *
+	 * @return the connection
+	 */
+	public CassandraConnection getCassandraConnection() {
+		CassandraConnection connection = this.cassandraConnection;
+		if (connection == null) {
+			synchronized (this) {
+				connection = this.cassandraConnection;
+				if (connection == null) {
+					connection = this.cassandraConnectionFactory.create(getCassandra());
+					this.cassandraConnection = connection;
+				}
+			}
+		}
+		return connection;
+	}
+
+	/**
+	 * Returns the {@link CassandraConnection#getConnection()}.
+	 *
+	 * @param <T> the native connection type
+	 * @param connectionType the connection type
+	 * @return a native connection
+	 * @throws ClassCastException if the native connection is not assignable to the type {@code T}.
+	 */
+	public <T> T getConnection(Class<? extends T> connectionType) throws ClassCastException {
+		Objects.requireNonNull(connectionType, "'connectionType' must not be null");
+		CassandraConnection cassandraConnection = getCassandraConnection();
+		return connectionType.cast(cassandraConnection.getConnection());
 	}
 
 	@Override
-	public String toString() {
-		return "CassandraExtension [" + this.cassandra + "]";
+	public synchronized void beforeAll(ExtensionContext context) {
+		List<String> statements = this.dataSet.getStatements();
+		Cassandra cassandra = getCassandra();
+		cassandra.start();
+		if (!statements.isEmpty()) {
+			CassandraConnection cassandraConnection = getCassandraConnection();
+			statements.forEach(cassandraConnection::execute);
+		}
+	}
+
+	@Override
+	public synchronized void afterAll(ExtensionContext context) {
+		CassandraConnection connection = this.cassandraConnection;
+		if (connection != null) {
+			try {
+				connection.close();
+			}
+			catch (Throwable ex) {
+				//ignore
+			}
+		}
+		Cassandra cassandra = this.cassandra;
+		if (cassandra != null) {
+			cassandra.stop();
+		}
+	}
+
+	private static final class DefaultCassandraFactory implements CassandraFactory {
+
+		private final List<CassandraFactoryCustomizer<? super EmbeddedCassandraFactory>> customizers;
+
+		@SafeVarargs
+		DefaultCassandraFactory(CassandraFactoryCustomizer<? super EmbeddedCassandraFactory>... customizers) {
+			Objects.requireNonNull(customizers, "'customizers' must not be null");
+			this.customizers = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(customizers)));
+		}
+
+		@Override
+		public Cassandra create() throws CassandraCreationException {
+			EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+			cassandraFactory.setPort(0);
+			cassandraFactory.setRpcPort(0);
+			cassandraFactory.setJmxLocalPort(0);
+			cassandraFactory.setStoragePort(0);
+			this.customizers.forEach(customizer -> customizer.customize(cassandraFactory));
+			return cassandraFactory.create();
+		}
+
 	}
 
 }

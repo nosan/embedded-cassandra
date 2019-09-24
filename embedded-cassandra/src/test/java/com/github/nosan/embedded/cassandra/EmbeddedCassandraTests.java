@@ -17,19 +17,20 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.net.InetAddress;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
 import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
+import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnectionFactory;
+import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
 import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
+import com.github.nosan.embedded.cassandra.commons.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,8 +53,9 @@ class EmbeddedCassandraTests {
 	void testSuccessWhenDefault() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			try (Cluster cluster = new ClusterFactory().create(cassandra)) {
-				createKeyspace(cluster.connect());
+			ClusterCassandraConnectionFactory clusterFactory = new ClusterCassandraConnectionFactory();
+			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
+				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
 			}
 			int port = cassandra.getPort();
 			InetAddress address = cassandra.getAddress();
@@ -71,8 +73,9 @@ class EmbeddedCassandraTests {
 		this.cassandraFactory.setConfig(new ClassPathResource("cassandra.yaml"));
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			try (Cluster cluster = new ClusterFactory().create(cassandra)) {
-				createKeyspace(cluster.connect());
+			ClusterCassandraConnectionFactory clusterFactory = new ClusterCassandraConnectionFactory();
+			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
+				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
 			}
 			assertThat(cassandra.getPort()).isEqualTo(9142);
 		});
@@ -152,29 +155,29 @@ class EmbeddedCassandraTests {
 
 	@Test
 	void testSuccessWhenSslEnabled() throws Throwable {
-		Path keystore = new ClassPathResource("keystore.node0").toPath();
-		Path truststore = new ClassPathResource("truststore.node0").toPath();
+		Resource keystore = new ClassPathResource("keystore.node0");
+		Resource truststore = new ClassPathResource("truststore.node0");
 		Map<String, Object> sslOptions = new LinkedHashMap<>();
 		sslOptions.put("enabled", true);
 		sslOptions.put("require_client_auth", true);
 		sslOptions.put("optional", false);
-		sslOptions.put("keystore", keystore.toString());
+		sslOptions.put("keystore", keystore.toPath().toString());
 		sslOptions.put("keystore_password", "cassandra");
-		sslOptions.put("truststore", truststore.toString());
+		sslOptions.put("truststore", truststore.toPath().toString());
 		sslOptions.put("truststore_password", "cassandra");
 		this.configProperties.put("native_transport_port_ssl", 9142);
 		this.configProperties.put("client_encryption_options", sslOptions);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getSslPort()).isEqualTo(9142);
-			ClusterFactory clusterFactory = new ClusterFactory();
+			ClusterCassandraConnectionFactory clusterFactory = new ClusterCassandraConnectionFactory();
 			clusterFactory.setSslEnabled(true);
-			clusterFactory.setTruststorePath(truststore);
+			clusterFactory.setTruststore(truststore);
 			clusterFactory.setTruststorePassword("cassandra");
-			clusterFactory.setKeystorePath(keystore);
+			clusterFactory.setKeystore(keystore);
 			clusterFactory.setKeystorePassword("cassandra");
-			try (Cluster cluster = clusterFactory.create(cassandra)) {
-				createKeyspace(cluster.connect());
+			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
+				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
 			}
 			hasSystemProperty("embedded.cassandra.ssl-port", 9142);
 		});
@@ -187,11 +190,11 @@ class EmbeddedCassandraTests {
 		this.systemProperties.put("cassandra.superuser_setup_delay_ms", 0);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
-			ClusterFactory clusterFactory = new ClusterFactory();
+			ClusterCassandraConnectionFactory clusterFactory = new ClusterCassandraConnectionFactory();
 			clusterFactory.setPassword("cassandra");
 			clusterFactory.setUsername("cassandra");
-			try (Cluster cluster = clusterFactory.create(cassandra)) {
-				createKeyspace(cluster.connect());
+			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
+				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
 			}
 		});
 	}
@@ -228,10 +231,6 @@ class EmbeddedCassandraTests {
 
 	private static void doesNotContainSystemProperty(String name) {
 		assertThat(System.getProperties()).doesNotContainKeys(name);
-	}
-
-	private static void createKeyspace(Session session) {
-		session.execute("CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
 	}
 
 	private interface CassandraConsumer {

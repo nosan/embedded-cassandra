@@ -144,31 +144,13 @@ TIP: Exposed properties can be disabled by `EmbeddedCassandraFactory.setExposePr
 
 Embedded Cassandra project provides high-level support for `CQL` scripts.
 
-=== Maven
+=== Load Cql Statements
 
-[source,xml,indent=0,subs="verbatim,quotes,attributes"]
-----
-        <dependency>
-            <groupId>com.github.nosan</groupId>
-            <artifactId>embedded-cassandra-cql</artifactId>
-            <version>{project-version}</version>
-        </dependency>
-----
-
-=== Gradle
-
-[source,groovy,indent=0,subs="verbatim,quotes,attributes"]
-----
-compile group: 'com.github.nosan', name: 'embedded-cassandra-cql', version: '{project-version}'
-----
-
-=== Load Cql Statements from __Resource__
-
-CQL statements can be easily loaded from a `Resource` via __static method__ `ofResource`:
+CQL statements can be easily loaded from various sources.
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/cql/CqlScripts.java[tag=source]
+include::{test-sources}/examples/cql/CqlDataSetExample.java[tag=source]
 ----
 
 .schema.cql

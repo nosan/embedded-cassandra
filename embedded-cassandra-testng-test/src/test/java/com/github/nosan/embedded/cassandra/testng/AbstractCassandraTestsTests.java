@@ -16,14 +16,12 @@
 
 package com.github.nosan.embedded.cassandra.testng;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
-
+import com.datastax.driver.core.Cluster;
 import org.testng.annotations.Test;
 
-import com.github.nosan.embedded.cassandra.api.Cassandra;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnection;
+import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnectionFactory;
+import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
 
 /**
  * Tests for {@link AbstractCassandraTests}.
@@ -32,14 +30,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class AbstractCassandraTestsTests extends AbstractCassandraTests {
 
+	public AbstractCassandraTestsTests() {
+		setCqlDataSet(CqlDataSet.ofClasspaths("schema.cql"));
+		setCassandraConnectionFactory(new ClusterCassandraConnectionFactory());
+	}
+
 	@Test
-	public void testCassandra() throws Exception {
-		Cassandra cassandra = getCassandra();
-		assertThat(cassandra.getPort()).isNotEqualTo(-1);
-		assertThat(cassandra.getAddress()).isNotNull();
-		try (Socket socket = new Socket()) {
-			socket.connect(new InetSocketAddress(cassandra.getAddress(), cassandra.getPort()));
-		}
+	public void testCassandra() {
+		ClusterCassandraConnection connection = (ClusterCassandraConnection) getCassandraConnection();
+		Cluster cluster = connection.getConnection();
+		cluster.connect().execute("SELECT * FROM test.roles");
 	}
 
 }
