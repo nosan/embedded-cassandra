@@ -322,7 +322,6 @@ public class CqlSessionCassandraConnectionFactory implements CassandraConnection
 			}
 		}
 		customize(driverBuilder);
-
 		int port = cassandra.getPort();
 		int sslPort = cassandra.getSslPort();
 		InetSocketAddress contactPoint = new InetSocketAddress(cassandra.getAddress(),
@@ -337,6 +336,7 @@ public class CqlSessionCassandraConnectionFactory implements CassandraConnection
 		if (!typeCodecs.isEmpty()) {
 			sessionBuilder.addTypeCodecs(typeCodecs.toArray(new TypeCodec[0]));
 		}
+		customize(sessionBuilder);
 		return sessionBuilder.build();
 	}
 
