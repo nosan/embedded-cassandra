@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 function abort() {
   echo "$*" >&2
   exit 1
@@ -71,10 +69,9 @@ fi
 git commit -a -m "Release version ${RELEASE_VERSION}" || abort "Failed to commit a release version!"
 
 #deploy to nexus
-./mvnw clean deploy -V -B -Prelease,docs -DskipTests || (git reset --hard HEAD^1 || abort "Git reset command failed!")
+./mvnw clean deploy -V -B -Prelease,docs -DskipTests || (git reset --hard HEAD^1 || abort "Git reset command failed!" && abort "Aborted")
 
-#create release tag
-
+#prepare gh-pages
 cd "${PAGES_DIRECTORY}" || abort "Failed 'cd' to ${PAGES_DIRECTORY}"
 git init || abort "Git cannot be initialized"
 git checkout --orphan gh-pages || abort "Git cannot checkout gh-pages branch"
@@ -83,6 +80,7 @@ git add . || abort "Git cannot add gh-pages resources"
 git commit -m "Update Embedded Cassandra Reference Documentation ${VERSION}" || abort "Failed to commit gh-pages resources!"
 cd "${BASE_DIRECTORY}" || abort "Failed 'cd' to ${BASE_DIRECTORY}"
 
+#create release tag
 git tag "${VCS_RELEASE_TAG}" || abort "Failed to create a tag ${VCS_RELEASE_TAG}!"
 
 #set next development version
@@ -100,7 +98,8 @@ y | Y)
   git push --tags || abort "Failed to push tags!"
   ;;
 *)
-  git reset --hard HEAD^2 || abort "Git reset command failed!"
+  echo ""
+  git reset --hard HEAD~2 || abort "Git reset command failed!"
   git tag -d "${VCS_RELEASE_TAG}" || abort "Failed to delete a tag ${VCS_RELEASE_TAG}!"
   ./mvnw clean -q || abort "Failed to clean project!"
   ;;
