@@ -11,12 +11,12 @@ function usage() {
   echo "Usage: $0 [ -r RELEASE_VERSION -n NEXT_DEVELOPMENT_VERSION ]"
 }
 
-while getopts ":r:d:" opt; do
+while getopts ":r:n:" opt; do
   case ${opt} in
   r)
     RELEASE_VERSION="${OPTARG}"
     ;;
-  d)
+  n)
     DEVELOPMENT_VERSION="${OPTARG}"
     ;;
   \?)
@@ -71,10 +71,9 @@ fi
 git commit -a -m "Release version ${RELEASE_VERSION}" || abort "Failed to commit a release version!"
 
 #deploy to nexus
-./mvnw clean deploy -V -B -Prelease,docs -DskipTests || (git reset --hard HEAD^1 || echo "Git reset command failed!")
+./mvnw clean deploy -V -B -Prelease,docs -DskipTests || (git reset --hard HEAD^1 || abort "Git reset command failed!")
 
 #create release tag
-git tag "${VCS_RELEASE_TAG}" || abort "Failed to create a tag ${VCS_RELEASE_TAG}!"
 
 cd "${PAGES_DIRECTORY}" || abort "Failed 'cd' to ${PAGES_DIRECTORY}"
 git init || abort "Git cannot be initialized"
@@ -84,14 +83,25 @@ git add . || abort "Git cannot add gh-pages resources"
 git commit -m "Update Embedded Cassandra Reference Documentation ${VERSION}" || abort "Failed to commit gh-pages resources!"
 cd "${BASE_DIRECTORY}" || abort "Failed 'cd' to ${BASE_DIRECTORY}"
 
+git tag "${VCS_RELEASE_TAG}" || abort "Failed to create a tag ${VCS_RELEASE_TAG}!"
+
 #set next development version
 ./mvnw -q versions:set -DnewVersion="${DEVELOPMENT_VERSION}" versions:commit || abort "Failed to set next development version!"
 git commit -a -m "Start next development version ${DEVELOPMENT_VERSION}" || abort "Failed to commit next development version!"
 
-cd "${PAGES_DIRECTORY}" || abort "Failed 'cd' to ${PAGES_DIRECTORY}"
-git push -f origin gh-pages || abort "Failed to push gh-pages!"
-cd "${BASE_DIRECTORY}" || abort "Failed 'cd' to ${BASE_DIRECTORY}"
-rm -rf "${PAGES_DIRECTORY}" || abort "Failed 'rm -rf' ${PAGES_DIRECTORY}"
-
-git push || abort "Failed to push commits!"
-git push --tags || abort "Failed to push tags!"
+read -n1 -r -p "Proceed with deploy? [y]" proceed
+case $proceed in
+y | Y)
+  cd "${PAGES_DIRECTORY}" || abort "Failed 'cd' to ${PAGES_DIRECTORY}"
+  git push -f origin gh-pages || abort "Failed to push gh-pages!"
+  cd "${BASE_DIRECTORY}" || abort "Failed 'cd' to ${BASE_DIRECTORY}"
+  rm -rf "${PAGES_DIRECTORY}" || abort "Failed 'rm -rf' ${PAGES_DIRECTORY}"
+  git push || abort "Failed to push commits!"
+  git push --tags || abort "Failed to push tags!"
+  ;;
+*)
+  git reset --hard HEAD^2 || abort "Git reset command failed!"
+  git tag -d "${VCS_RELEASE_TAG}" || abort "Failed to delete a tag ${VCS_RELEASE_TAG}!"
+  ./mvnw clean -q || abort "Failed to clean project!"
+  ;;
+esac
