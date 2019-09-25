@@ -16,7 +16,6 @@
 
     <name>Embedded Cassandra Docs</name>
 
-
     <dependencies>
         <dependency>
             <groupId>com.github.nosan</groupId>

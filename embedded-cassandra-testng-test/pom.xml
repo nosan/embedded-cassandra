@@ -34,15 +34,15 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>com.github.nosan</groupId>
             <artifactId>embedded-cassandra-mock</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
