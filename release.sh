@@ -87,7 +87,7 @@ git tag "${VCS_RELEASE_TAG}" || abort "Failed to create a tag ${VCS_RELEASE_TAG}
 ./mvnw -q versions:set -DnewVersion="${DEVELOPMENT_VERSION}" versions:commit || abort "Failed to set next development version!"
 git commit -a -m "Start next development version ${DEVELOPMENT_VERSION}" || abort "Failed to commit next development version!"
 
-read -n1 -r -p "Proceed with deploy? [y]" proceed
+read -n1 -r -p "Proceed with Git deploy? [y]" proceed
 case $proceed in
 y | Y)
   cd "${PAGES_DIRECTORY}" || abort "Failed 'cd' to ${PAGES_DIRECTORY}"
