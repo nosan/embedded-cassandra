@@ -119,6 +119,7 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		bd.setBeanClass(CassandraConnection.class);
 		bd.setDestroyMethodName("close");
 		bd.setLazyInit(true);
+		bd.setDependsOn(Cassandra.class.getName());
 		bd.setScope(BeanDefinition.SCOPE_SINGLETON);
 		bd.setInstanceSupplier(new CassandraConnectionSupplier(context));
 		registry.registerBeanDefinition(CassandraConnection.class.getName(), bd);

@@ -21,29 +21,41 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnectionFactory;
 import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnection;
-import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
+import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnectionFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandra} with {@link CqlDataSet}.
+ * Tests for {@link EmbeddedCassandra} with a custom {@link CassandraConnectionFactory}.
  *
  * @author Dmytro Nosan
  */
-@EmbeddedCassandra(scripts = "schema.cql")
+@EmbeddedCassandra
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = EmbeddedCassandraCustomConnectionFactoryTests.MyCassandraConnectionFactory.class)
 @DirtiesContext
-class EmbeddedCassandraScriptsTests {
+class EmbeddedCassandraCustomConnectionFactoryTests {
 
 	@Test
-	void testCqlScripts(@Autowired CassandraConnection cassandraConnection) {
-		assertThat(cassandraConnection).isInstanceOf(ClusterCassandraConnection.class);
-		Cluster cluster = (Cluster) cassandraConnection.getConnection();
-		assertThat(cluster.getMetadata().getKeyspace("test")).isNotNull();
+	void testCustomConnectionFactory(@Autowired CassandraConnection connection) {
+		assertThat(connection).isInstanceOf(ClusterCassandraConnection.class);
+		Cluster cluster = (Cluster) connection.getConnection();
+		assertThat(cluster.getClusterName()).isEqualTo("sprin-test");
+	}
+
+	static class MyCassandraConnectionFactory extends ClusterCassandraConnectionFactory {
+
+		@Override
+		protected void customize(Cluster.Builder clusterBuilder) {
+			clusterBuilder.withClusterName("spring-test");
+		}
+
 	}
 
 }
