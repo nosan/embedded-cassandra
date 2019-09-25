@@ -46,7 +46,7 @@ class EmbeddedCassandraCustomConnectionFactoryTests {
 	void testCustomConnectionFactory(@Autowired CassandraConnection connection) {
 		assertThat(connection).isInstanceOf(ClusterCassandraConnection.class);
 		Cluster cluster = (Cluster) connection.getConnection();
-		assertThat(cluster.getClusterName()).isEqualTo("sprin-test");
+		assertThat(cluster.getClusterName()).isEqualTo("spring-test");
 	}
 
 	static class MyCassandraConnectionFactory extends ClusterCassandraConnectionFactory {
