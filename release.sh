@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 function abort() {
   echo "$*" >&2
   exit 1
