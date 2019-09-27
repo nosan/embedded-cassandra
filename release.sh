@@ -74,13 +74,13 @@ git commit -a -m "Release version ${RELEASE_VERSION}" || abort "Failed to commit
 ./mvnw clean deploy -V -B -Prelease,docs -DskipTests || (git reset --hard HEAD^1 || abort "Git reset command failed!" && abort "Aborted")
 
 #prepare gh-pages
-cd "${PAGES_DIRECTORY}" || abort "Failed 'cd' to ${PAGES_DIRECTORY}"
+cd "${PAGES_DIRECTORY}"
 git init || abort "Git cannot be initialized"
 git checkout --orphan gh-pages || abort "Git cannot checkout gh-pages branch"
 git remote add origin "${GIT_REMOTE}" || abort "Git cannot set origin for gh-pages branch"
 git add . || abort "Git cannot add gh-pages resources"
 git commit -m "Update Embedded Cassandra Reference Documentation ${VERSION}" || abort "Failed to commit gh-pages resources!"
-cd "${BASE_DIRECTORY}" || abort "Failed 'cd' to ${BASE_DIRECTORY}"
+cd "${BASE_DIRECTORY}"
 
 #create release tag
 git tag "${VCS_RELEASE_TAG}" || abort "Failed to create a tag ${VCS_RELEASE_TAG}!"
@@ -92,9 +92,9 @@ git commit -a -m "Start next development version ${DEVELOPMENT_VERSION}" || abor
 read -n1 -r -p "Proceed with Git deploy? [y]" proceed
 case $proceed in
 y | Y)
-  cd "${PAGES_DIRECTORY}" || abort "Failed 'cd' to ${PAGES_DIRECTORY}"
+  cd "${PAGES_DIRECTORY}"
   git push -f origin gh-pages || abort "Failed to push gh-pages!"
-  cd "${BASE_DIRECTORY}" || abort "Failed 'cd' to ${BASE_DIRECTORY}"
+  cd "${BASE_DIRECTORY}"
   rm -rf "${PAGES_DIRECTORY}" || abort "Failed 'rm -rf' ${PAGES_DIRECTORY}"
   git push || abort "Failed to push commits!"
   git push --tags || abort "Failed to push tags!"
