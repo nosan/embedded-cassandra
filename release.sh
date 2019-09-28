@@ -98,6 +98,7 @@ y | Y)
   rm -rf "${PAGES_DIRECTORY}" || abort "Failed 'rm -rf' ${PAGES_DIRECTORY}"
   git push || abort "Failed to push commits!"
   git push --tags || abort "Failed to push tags!"
+  ./mvnw clean -q || abort "Failed to clean project!"
   ;;
 *)
   echo ""
