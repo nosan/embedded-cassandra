@@ -222,17 +222,17 @@ public final class CassandraRule extends ExternalResource {
 			}
 			int port = cassandra.getPort();
 			if (port != -1) {
-				properties.put("embedded.cassandra.port", port);
+				properties.put("embedded.cassandra.port", Objects.toString(port));
 			}
 			int sslPort = cassandra.getSslPort();
 			if (sslPort != -1) {
-				properties.put("embedded.cassandra.ssl-port", sslPort);
+				properties.put("embedded.cassandra.ssl-port", Objects.toString(sslPort));
 			}
 			int rpcPort = cassandra.getRpcPort();
 			if (rpcPort != -1) {
-				properties.put("embedded.cassandra.rpc-port", rpcPort);
+				properties.put("embedded.cassandra.rpc-port", Objects.toString(rpcPort));
 			}
-			properties.put("embedded.cassandra.version", cassandra.getVersion().toString());
+			properties.put("embedded.cassandra.version", Objects.toString(cassandra.getVersion()));
 			System.getProperties().putAll(properties);
 		}
 	}
