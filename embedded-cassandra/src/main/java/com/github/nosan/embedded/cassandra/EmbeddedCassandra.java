@@ -19,9 +19,6 @@ package com.github.nosan.embedded.cassandra;
 import java.net.InetAddress;
 import java.util.StringJoiner;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraException;
@@ -35,23 +32,9 @@ import com.github.nosan.embedded.cassandra.api.Version;
  */
 class EmbeddedCassandra implements Cassandra {
 
-	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandra.class);
-
-	private static final String VERSION_PROPERTY = "embedded.cassandra.version";
-
-	private static final String ADDRESS_PROPERTY = "embedded.cassandra.address";
-
-	private static final String PORT_PROPERTY = "embedded.cassandra.port";
-
-	private static final String RPC_PORT_PROPERTY = "embedded.cassandra.rpc-port";
-
-	private static final String SSL_PORT_PROPERTY = "embedded.cassandra.ssl-port";
-
 	private final String name;
 
 	private final Version version;
-
-	private final boolean exposeProperties;
 
 	private final Database database;
 
@@ -59,10 +42,9 @@ class EmbeddedCassandra implements Cassandra {
 
 	private volatile boolean running = false;
 
-	EmbeddedCassandra(String name, Version version, boolean exposeProperties, Database database) {
+	EmbeddedCassandra(String name, Version version, Database database) {
 		this.name = name;
 		this.version = version;
-		this.exposeProperties = exposeProperties;
 		this.database = database;
 	}
 
@@ -86,9 +68,6 @@ class EmbeddedCassandra implements Cassandra {
 			}
 			throw ex;
 		}
-		if (this.exposeProperties) {
-			setSystemProperties();
-		}
 	}
 
 	@Override
@@ -99,9 +78,6 @@ class EmbeddedCassandra implements Cassandra {
 		doStop();
 		this.started = false;
 		this.running = false;
-		if (this.exposeProperties) {
-			clearSystemProperties();
-		}
 	}
 
 	@Override
@@ -174,52 +150,6 @@ class EmbeddedCassandra implements Cassandra {
 		}
 		catch (Exception ex) {
 			throw new CassandraException("Unable to stop " + toString(), ex);
-		}
-	}
-
-	private void setSystemProperties() {
-		setSystemProperty(VERSION_PROPERTY, getVersion());
-		InetAddress address = this.database.getAddress();
-		if (address != null) {
-			setSystemProperty(ADDRESS_PROPERTY, address.getHostAddress());
-		}
-		int port = this.database.getPort();
-		if (port != -1) {
-			setSystemProperty(PORT_PROPERTY, port);
-		}
-		int sslPort = this.database.getSslPort();
-		if (sslPort != -1) {
-			setSystemProperty(SSL_PORT_PROPERTY, sslPort);
-		}
-		int rpcPort = this.database.getRpcPort();
-		if (rpcPort != -1) {
-			setSystemProperty(RPC_PORT_PROPERTY, rpcPort);
-		}
-	}
-
-	private void clearSystemProperties() {
-		clearSystemProperty(VERSION_PROPERTY);
-		clearSystemProperty(ADDRESS_PROPERTY);
-		clearSystemProperty(PORT_PROPERTY);
-		clearSystemProperty(SSL_PORT_PROPERTY);
-		clearSystemProperty(RPC_PORT_PROPERTY);
-	}
-
-	private static void setSystemProperty(String name, Object value) {
-		try {
-			System.setProperty(name, value.toString());
-		}
-		catch (Exception ex) {
-			log.error(String.format("System Property '%s' cannot be set", name), ex);
-		}
-	}
-
-	private static void clearSystemProperty(String name) {
-		try {
-			System.clearProperty(name);
-		}
-		catch (Exception ex) {
-			log.error(String.format("System Property '%s' cannot be deleted", name), ex);
 		}
 	}
 

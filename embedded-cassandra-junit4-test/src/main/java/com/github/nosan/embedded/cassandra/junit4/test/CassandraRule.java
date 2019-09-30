@@ -16,10 +16,13 @@
 
 package com.github.nosan.embedded.cassandra.junit4.test;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.junit.rules.ExternalResource;
@@ -54,6 +57,17 @@ import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
  *     }
  * }
  * </pre>
+ * <p><strong>Exposed properties:</strong>
+ * The following properties will be added to {@code System Properties} after {@link Cassandra} has started:
+ * <pre>
+ *     - embedded.cassandra.version
+ *     - embedded.cassandra.address
+ *     - embedded.cassandra.port
+ *     - embedded.cassandra.ssl-port
+ *     - embedded.cassandra.rpc-port
+ * </pre>
+ * <p>
+ * Use {@link #withExposeProperties}  to disable properties exposing.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
@@ -65,6 +79,8 @@ public final class CassandraRule extends ExternalResource {
 	private CassandraConnectionFactory cassandraConnectionFactory;
 
 	private CqlDataSet dataSet;
+
+	private boolean exposeProperties;
 
 	@Nullable
 	private volatile Cassandra cassandra;
@@ -85,6 +101,7 @@ public final class CassandraRule extends ExternalResource {
 		this.cassandraFactory = new DefaultCassandraFactory(customizers);
 		this.cassandraConnectionFactory = new DefaultCassandraConnectionFactory();
 		this.dataSet = Collections::emptyList;
+		this.exposeProperties = true;
 	}
 
 	/**
@@ -121,6 +138,18 @@ public final class CassandraRule extends ExternalResource {
 	public CassandraRule withCqlDataSet(CqlDataSet dataSet) {
 		Objects.requireNonNull(dataSet, "'dataSet' must not be null");
 		this.dataSet = dataSet;
+		return this;
+	}
+
+	/**
+	 * Sets if {@link CassandraRule} should add {@link Cassandra}'s properties such as {@code embedded.cassandra.port}
+	 * to System Properties after start.
+	 *
+	 * @param exposeProperties if the properties should be added
+	 * @return this instance
+	 */
+	public CassandraRule withExposeProperties(boolean exposeProperties) {
+		this.exposeProperties = exposeProperties;
 		return this;
 	}
 
@@ -185,6 +214,27 @@ public final class CassandraRule extends ExternalResource {
 			CassandraConnection cassandraConnection = getCassandraConnection();
 			statements.forEach(cassandraConnection::execute);
 		}
+		if (this.exposeProperties) {
+			Map<String, Object> properties = new LinkedHashMap<>();
+			InetAddress address = cassandra.getAddress();
+			if (address != null) {
+				properties.put("embedded.cassandra.address", address.getHostAddress());
+			}
+			int port = cassandra.getPort();
+			if (port != -1) {
+				properties.put("embedded.cassandra.port", port);
+			}
+			int sslPort = cassandra.getSslPort();
+			if (sslPort != -1) {
+				properties.put("embedded.cassandra.ssl-port", sslPort);
+			}
+			int rpcPort = cassandra.getRpcPort();
+			if (rpcPort != -1) {
+				properties.put("embedded.cassandra.rpc-port", rpcPort);
+			}
+			properties.put("embedded.cassandra.version", cassandra.getVersion().toString());
+			System.getProperties().putAll(properties);
+		}
 	}
 
 	@Override
@@ -201,6 +251,13 @@ public final class CassandraRule extends ExternalResource {
 		Cassandra cassandra = this.cassandra;
 		if (cassandra != null) {
 			cassandra.stop();
+		}
+		if (this.exposeProperties) {
+			System.clearProperty("embedded.cassandra.address");
+			System.clearProperty("embedded.cassandra.port");
+			System.clearProperty("embedded.cassandra.ssl-port");
+			System.clearProperty("embedded.cassandra.rpc-port");
+			System.clearProperty("embedded.cassandra.version");
 		}
 	}
 

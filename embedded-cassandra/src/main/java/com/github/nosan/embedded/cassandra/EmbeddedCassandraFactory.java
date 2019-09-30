@@ -84,16 +84,6 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  * {@code EmbeddedCassandra} is running on default ports. There are several methods that can be used to set ports, such
  * as {@link #setPort(Integer)}.
  * <p> Use {@code '0'} for a random port.
- * <p><strong>Exposed properties:</strong>
- * The following properties will be exposed as {@code System Properties} after {@link Cassandra} has started:
- * <pre>
- *     - embedded.cassandra.version
- *     - embedded.cassandra.address
- *     - embedded.cassandra.port
- *     - embedded.cassandra.ssl-port
- *     - embedded.cassandra.rpc-port
- * </pre>
- * <p>{@link #setExposeProperties(boolean)} can be used to disable properties exposing.
  *
  * @author Dmytro Nosan
  * @see Cassandra
@@ -120,8 +110,6 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	private Logger logger = LoggerFactory.getLogger(Cassandra.class);
 
 	private boolean registerShutdownHook = true;
-
-	private boolean exposeProperties = true;
 
 	private Duration timeout = Duration.ofSeconds(90);
 
@@ -551,25 +539,6 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		this.registerShutdownHook = registerShutdownHook;
 	}
 
-	/**
-	 * Whether {@link Cassandra} properties such as {@code embedded.cassandra.port} should be exposed as {@code System
-	 * Properties} or not.
-	 *
-	 * @return {@code true} if properties should be exposed
-	 */
-	public boolean isExposeProperties() {
-		return this.exposeProperties;
-	}
-
-	/**
-	 * Sets if the created Cassandra should expose its properties as System Properties. Defaults to {@code true}.
-	 *
-	 * @param exposeProperties if the properties should be exposed
-	 */
-	public void setExposeProperties(boolean exposeProperties) {
-		this.exposeProperties = exposeProperties;
-	}
-
 	@Override
 	public Cassandra create() throws CassandraCreationException {
 		try {
@@ -608,7 +577,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		Node node = createNode(version, workingDirectory);
 		Database database = new CassandraDatabase(name, version, directory, workingDirectory, isDaemon(),
 				getLogger(), getTimeout(), getConfig(), getRackConfig(), getTopologyConfig(), node);
-		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, version, isExposeProperties(), database);
+		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, version, database);
 		if (isRegisterShutdownHook()) {
 			Runtime.getRuntime().addShutdownHook(new Thread(cassandra::stop, name + "-sh"));
 		}

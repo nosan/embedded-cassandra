@@ -16,7 +16,6 @@
 
 package com.github.nosan.embedded.cassandra;
 
-import java.net.InetAddress;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -57,14 +56,6 @@ class EmbeddedCassandraTests {
 			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
 				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
 			}
-			int port = cassandra.getPort();
-			InetAddress address = cassandra.getAddress();
-			assertThat(address).isNotNull();
-			hasSystemProperty("embedded.cassandra.port", port);
-			hasSystemProperty("embedded.cassandra.address", address.getHostAddress());
-			cassandra.stop();
-			doesNotContainSystemProperty("embedded.cassandra.port");
-			doesNotContainSystemProperty("embedded.cassandra.address");
 		});
 	}
 
@@ -82,19 +73,6 @@ class EmbeddedCassandraTests {
 	}
 
 	@Test
-	void testSuccessWhenPropertiesNotExposed() throws Throwable {
-		this.cassandraFactory.setExposeProperties(false);
-		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).doesNotThrowAnyException();
-			doesNotContainSystemProperty("embedded.cassandra.address");
-			doesNotContainSystemProperty("embedded.cassandra.port");
-			doesNotContainSystemProperty("embedded.cassandra.ssl-port");
-			doesNotContainSystemProperty("embedded.cassandra.rpc-port");
-			doesNotContainSystemProperty("embedded.cassandra.version");
-		});
-	}
-
-	@Test
 	void testSuccessWhenOnlyNativeEnabled() throws Throwable {
 		this.configProperties.put("start_rpc", false);
 		this.configProperties.put("start_native_transport", true);
@@ -104,7 +82,6 @@ class EmbeddedCassandraTests {
 			assertThat(cassandra.getPort()).isEqualTo(9042);
 			assertThat(cassandra.getRpcPort()).isEqualTo(-1);
 			assertThat(cassandra.getSslPort()).isEqualTo(-1);
-			hasSystemProperty("embedded.cassandra.port", 9042);
 		});
 	}
 
@@ -118,7 +95,6 @@ class EmbeddedCassandraTests {
 			assertThat(cassandra.getPort()).isEqualTo(-1);
 			assertThat(cassandra.getRpcPort()).isEqualTo(9160);
 			assertThat(cassandra.getSslPort()).isEqualTo(-1);
-			hasSystemProperty("embedded.cassandra.rpc-port", 9160);
 		});
 	}
 
@@ -131,8 +107,6 @@ class EmbeddedCassandraTests {
 			assertThat(cassandra.getPort()).isEqualTo(9042);
 			assertThat(cassandra.getRpcPort()).isEqualTo(9160);
 			assertThat(cassandra.getSslPort()).isEqualTo(-1);
-			hasSystemProperty("embedded.cassandra.port", 9042);
-			hasSystemProperty("embedded.cassandra.rpc-port", 9160);
 		});
 	}
 
@@ -146,10 +120,6 @@ class EmbeddedCassandraTests {
 			assertThat(cassandra.getPort()).isEqualTo(-1);
 			assertThat(cassandra.getSslPort()).isEqualTo(-1);
 			assertThat(cassandra.getRpcPort()).isEqualTo(-1);
-			doesNotContainSystemProperty("embedded.cassandra.port");
-			doesNotContainSystemProperty("embedded.cassandra.rpc-port");
-			doesNotContainSystemProperty("embedded.cassandra.address");
-			doesNotContainSystemProperty("embedded.cassandra.ssl-port");
 		});
 	}
 
@@ -179,7 +149,6 @@ class EmbeddedCassandraTests {
 			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
 				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
 			}
-			hasSystemProperty("embedded.cassandra.ssl-port", 9142);
 		});
 	}
 
@@ -223,14 +192,6 @@ class EmbeddedCassandraTests {
 				assertThat(throwable2).isNotNull().hasStackTraceContaining("Address already in use");
 			});
 		});
-	}
-
-	private static void hasSystemProperty(String name, Object value) {
-		assertThat(System.getProperties()).containsEntry(name, value.toString());
-	}
-
-	private static void doesNotContainSystemProperty(String name) {
-		assertThat(System.getProperties()).doesNotContainKeys(name);
 	}
 
 	private interface CassandraConsumer {

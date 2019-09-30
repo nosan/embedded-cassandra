@@ -29,6 +29,15 @@ compile group: 'com.github.nosan', name: 'embedded-cassandra-junit5-test', versi
 include::{test-sources}/examples/junit5/CassandraJUnit5Tests.java[tag=source]
 ----
 
+The following properties will be added to `System Properties` after Cassandra has started:
+
+* `embedded.cassandra.version`
+* `embedded.cassandra.address`
+* `embedded.cassandra.port`
+* `embedded.cassandra.ssl-port`
+* `embedded.cassandra.rpc-port`
+
+
 WARNING: By default, `CassandraExtension` runs Cassandra on the random ports.
 
 == Customize Default Cassandra Factory

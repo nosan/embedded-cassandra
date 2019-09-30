@@ -18,12 +18,15 @@ package com.github.nosan.embedded.cassandra.spring.test.context;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.InetAddress;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -36,6 +39,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.MergedContextConfiguration;
 
@@ -69,10 +73,11 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		BeanDefinitionRegistry registry = getRegistry(context);
-		Resource[] resources = getResources(this.annotation, context);
-		Charset charset = Charset.forName(this.annotation.encoding());
+		EmbeddedCassandra annotation = this.annotation;
+		Resource[] resources = getResources(annotation, context);
+		Charset charset = Charset.forName(annotation.encoding());
 		CqlDataSet dataSet = CqlDataSet.ofResources(charset, resources);
-		registerCassandraBeanDefinition(context, registry);
+		registerCassandraBeanDefinition(annotation.exposeProperties(), context, registry);
 		registerCassandraConnectionBeanDefinition(context, registry);
 		registerCassandraInitializerBeanDefinition(dataSet, context, registry);
 	}
@@ -101,15 +106,15 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		return ((BeanDefinitionRegistry) applicationContext.getBeanFactory());
 	}
 
-	private static void registerCassandraBeanDefinition(ConfigurableApplicationContext context,
+	private static void registerCassandraBeanDefinition(boolean exposeProperties,
+			ConfigurableApplicationContext context,
 			BeanDefinitionRegistry registry) {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClass(Cassandra.class);
-		bd.setInitMethodName("start");
 		bd.setDestroyMethodName("stop");
 		bd.setLazyInit(false);
 		bd.setScope(BeanDefinition.SCOPE_SINGLETON);
-		bd.setInstanceSupplier(new CassandraSupplier(context));
+		bd.setInstanceSupplier(new CassandraSupplier(exposeProperties, context));
 		registry.registerBeanDefinition(Cassandra.class.getName(), bd);
 	}
 
@@ -172,14 +177,45 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 
 	private static final class CassandraSupplier implements Supplier<Cassandra> {
 
+		private final boolean exposeProperties;
+
 		private final ConfigurableApplicationContext context;
 
-		CassandraSupplier(ConfigurableApplicationContext context) {
+		CassandraSupplier(boolean exposeProperties, ConfigurableApplicationContext context) {
+			this.exposeProperties = exposeProperties;
 			this.context = context;
 		}
 
 		@Override
 		public Cassandra get() {
+			Cassandra cassandra = create();
+			cassandra.start();
+			if (this.exposeProperties) {
+				Map<String, Object> properties = new LinkedHashMap<>();
+				InetAddress address = cassandra.getAddress();
+				if (address != null) {
+					properties.put("embedded.cassandra.address", address.getHostAddress());
+				}
+				int port = cassandra.getPort();
+				if (port != -1) {
+					properties.put("embedded.cassandra.port", port);
+				}
+				int sslPort = cassandra.getSslPort();
+				if (sslPort != -1) {
+					properties.put("embedded.cassandra.ssl-port", sslPort);
+				}
+				int rpcPort = cassandra.getRpcPort();
+				if (rpcPort != -1) {
+					properties.put("embedded.cassandra.rpc-port", rpcPort);
+				}
+				properties.put("embedded.cassandra.version", cassandra.getVersion().toString());
+				this.context.getEnvironment().getPropertySources().addFirst(
+						new MapPropertySource("@EmbeddedCassandra", properties));
+			}
+			return cassandra;
+		}
+
+		private Cassandra create() {
 			try {
 				return this.context.getBean(CassandraFactory.class).create();
 			}

@@ -23,9 +23,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
+import com.github.nosan.embedded.cassandra.api.CassandraFactory;
+import com.github.nosan.embedded.cassandra.api.CassandraFactoryCustomizer;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
+import com.github.nosan.embedded.cassandra.api.connection.CassandraConnectionFactory;
 
 /**
  * Annotation that allows the {@link Cassandra} to be started and stopped.
@@ -42,6 +47,22 @@ import com.github.nosan.embedded.cassandra.api.Cassandra;
  *      }
  * }
  * </pre>
+ * <p><strong>Exposed properties:</strong>
+ * The following properties will be added to {@link Environment} after {@link Cassandra} has started:
+ * <pre>
+ *     - embedded.cassandra.version
+ *     - embedded.cassandra.address
+ *     - embedded.cassandra.port
+ *     - embedded.cassandra.ssl-port
+ *     - embedded.cassandra.rpc-port
+ * </pre>
+ * <p>
+ * Use {@link #exposeProperties()}  to disable properties exposing.
+ *
+ * <p>
+ * It is possible to register your own {@link CassandraFactory}, {@link CassandraConnectionFactory} or {@link
+ * CassandraFactoryCustomizer CassandraFactoryCustomizers} bean(s) to control {@link Cassandra} and {@link
+ * CassandraConnection} instances.
  *
  * @author Dmytro Nosan
  * @since 3.0.0
@@ -68,5 +89,13 @@ public @interface EmbeddedCassandra {
 	 * @return CQL scripts encoding.
 	 */
 	String encoding() default "UTF-8";
+
+	/**
+	 * Whether {@link Cassandra} properties such as {@code 'embedded.cassandra.port'} should be added to {@link
+	 * Environment} or not.
+	 *
+	 * @return {@code true} if properties should be exposed
+	 */
+	boolean exposeProperties() default true;
 
 }

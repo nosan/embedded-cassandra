@@ -123,23 +123,6 @@ TIP: Use `0` for a random port.
 include::{test-sources}/examples/configuration/CassandraProxy.java[tag=source]
 ----
 
-== Exposed Properties
-
-The following properties will be exposed as `System Properties` after Cassandra has started:
-
-* `embedded.cassandra.version`
-* `embedded.cassandra.address`
-* `embedded.cassandra.port`
-* `embedded.cassandra.ssl-port`
-* `embedded.cassandra.rpc-port`
-
-[source,java,indent=0]
-----
-include::{test-sources}/examples/configuration/CassandraExposedProperties.java[tag=source]
-----
-
-TIP: Exposed properties can be disabled by `EmbeddedCassandraFactory.setExposeProperties(false)`
-
 == CQL Support
 
 Embedded Cassandra project provides high-level support for `CQL` scripts.
