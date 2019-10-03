@@ -410,7 +410,7 @@
                                     <version>1.8</version>
                                 </requireJavaVersion>
                                 <requireMavenVersion>
-                                    <version>3.5.0</version>
+                                    <version>3.6.0</version>
                                 </requireMavenVersion>
                                 <requireReleaseDeps>
                                     <onlyWhenRelease>true</onlyWhenRelease>
