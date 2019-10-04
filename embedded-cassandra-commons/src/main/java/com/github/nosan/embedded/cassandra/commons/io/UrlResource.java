@@ -56,6 +56,9 @@ public class UrlResource implements Resource {
 		if (!StringUtils.hasText(name)) {
 			return null;
 		}
+		if (name.endsWith("/")) {
+			name = name.substring(0, name.length() - 1);
+		}
 		int index = name.lastIndexOf('/');
 		return (index != -1) ? name.substring(index + 1) : name;
 	}
