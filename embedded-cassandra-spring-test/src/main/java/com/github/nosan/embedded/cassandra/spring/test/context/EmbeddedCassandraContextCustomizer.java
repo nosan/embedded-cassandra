@@ -29,10 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -80,6 +82,16 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		registerCassandraBeanDefinition(annotation.exposeProperties(), context, registry);
 		registerCassandraConnectionBeanDefinition(context, registry);
 		registerCassandraInitializerBeanDefinition(dataSet, context, registry);
+		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+				if (bean instanceof Cassandra) {
+					context.getBean(CassandraInitializer.class);
+				}
+				return bean;
+			}
+		});
 	}
 
 	@Override
