@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import org.springframework.beans.BeansException;
@@ -84,13 +85,16 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		registerCassandraInitializerBeanDefinition(dataSet, context, registry);
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 
+			private final AtomicBoolean initialized = new AtomicBoolean();
+
 			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-				if (bean instanceof Cassandra) {
+				if (bean instanceof Cassandra && this.initialized.compareAndSet(false, true)) {
 					context.getBean(CassandraInitializer.class);
 				}
 				return bean;
 			}
+
 		});
 	}
 
