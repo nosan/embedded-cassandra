@@ -18,21 +18,25 @@ package com.github.nosan.embedded.cassandra.api.cql;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 
 /**
- * {@link CqlDataSet} interface that contains a list of {@code CQL} statements.
+ * {@link CqlDataSet} interface that contains a list of {@link CqlScript}(s).
  *
  * @author Dmytro Nosan
  * @since 3.0.0
  */
-public interface CqlDataSet {
+@FunctionalInterface
+public interface CqlDataSet extends CqlScript {
 
 	/**
 	 * Constructs a new {@link CqlDataSet} with the specified CQL ({@code string}) scripts.
@@ -42,7 +46,13 @@ public interface CqlDataSet {
 	 */
 	static CqlDataSet ofStrings(String... scripts) {
 		Objects.requireNonNull(scripts, "'scripts' must not be null");
-		return new StringsCqlDataSet(scripts);
+		if (scripts.length == 0) {
+			return new DefaultCqlDataSet(Collections.emptyList());
+		}
+		if (scripts.length == 1) {
+			return new DefaultCqlDataSet(Collections.singletonList(CqlScript.ofString(scripts[0])));
+		}
+		return new DefaultCqlDataSet(Arrays.stream(scripts).map(CqlScript::ofString).collect(Collectors.toList()));
 	}
 
 	/**
@@ -63,9 +73,16 @@ public interface CqlDataSet {
 	 * @return a new {@link CqlDataSet}
 	 */
 	static CqlDataSet ofResources(Charset charset, Resource... resources) {
-		Objects.requireNonNull(resources, "'resources' must not be null");
 		Objects.requireNonNull(charset, "'charset' must not be null");
-		return new ResourcesCqlDataSet(charset, resources);
+		Objects.requireNonNull(resources, "'resources' must not be null");
+		if (resources.length == 0) {
+			return new DefaultCqlDataSet(Collections.emptyList());
+		}
+		if (resources.length == 1) {
+			return new DefaultCqlDataSet(Collections.singletonList(CqlScript.ofResource(charset, resources[0])));
+		}
+		return new DefaultCqlDataSet(Arrays.stream(resources).map(resource -> CqlScript.ofResource(charset, resource))
+				.collect(Collectors.toList()));
 	}
 
 	/**
@@ -92,13 +109,35 @@ public interface CqlDataSet {
 	}
 
 	/**
+	 * Constructs a new {@link CqlDataSet} with the specified {@link CqlScript}(s).
+	 *
+	 * @param scripts the list of the {@link CqlScript}(s)
+	 * @return a new {@link CqlDataSet}
+	 */
+	static CqlDataSet ofScripts(CqlScript... scripts) {
+		Objects.requireNonNull(scripts, "'scripts' must not be null");
+		return new DefaultCqlDataSet(Arrays.asList(scripts));
+	}
+
+	/**
 	 * Performs the given {@code callback} for each statement of the {@link CqlDataSet}.
 	 *
 	 * @param callback The action to be performed for each statement
 	 */
-	default void forEach(Consumer<? super String> callback) {
+	@Override
+	default void forEachStatement(Consumer<? super String> callback) {
 		Objects.requireNonNull(callback, "'callback' must not be null");
 		getStatements().forEach(callback);
+	}
+
+	/**
+	 * Performs the given {@code callback} for each script of the {@link CqlDataSet}.
+	 *
+	 * @param callback The action to be performed for each script
+	 */
+	default void forEachScript(Consumer<? super CqlScript> callback) {
+		Objects.requireNonNull(callback, "'callback' must not be null");
+		getScripts().forEach(callback);
 	}
 
 	/**
@@ -106,6 +145,18 @@ public interface CqlDataSet {
 	 *
 	 * @return {@code CQL} statements
 	 */
-	List<String> getStatements();
+	@Override
+	default List<String> getStatements() {
+		List<String> statements = new ArrayList<>();
+		getScripts().forEach(script -> statements.addAll(script.getStatements()));
+		return Collections.unmodifiableList(statements);
+	}
+
+	/**
+	 * Returns {@code CQL} scripts.
+	 *
+	 * @return {@code CQL} scripts
+	 */
+	List<? extends CqlScript> getScripts();
 
 }

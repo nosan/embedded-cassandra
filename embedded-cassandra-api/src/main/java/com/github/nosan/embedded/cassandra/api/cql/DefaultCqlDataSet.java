@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.api.cql;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
@@ -25,30 +24,26 @@ import java.util.StringJoiner;
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 
 /**
- * {@link CqlDataSet} for a raw CQL scripts.
+ * {@link CqlDataSet} that contains {@link CqlScript CqlScripts}.
  *
  * @author Dmytro Nosan
  */
-final class StringsCqlDataSet implements CqlDataSet {
+final class DefaultCqlDataSet implements CqlDataSet {
 
-	private final List<String> scripts;
+	private final List<CqlScript> scripts;
 
 	/**
-	 * Constructs a new {@link StringsCqlDataSet} with the specified CQL scripts.
+	 * Constructs a new {@link DefaultCqlDataSet} with the specified {@link CqlScript CqlScripts}.
 	 *
-	 * @param scripts the CQL scripts
+	 * @param scripts the scripts
 	 */
-	StringsCqlDataSet(String... scripts) {
-		this.scripts = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(scripts)));
+	DefaultCqlDataSet(List<CqlScript> scripts) {
+		this.scripts = Collections.unmodifiableList(new ArrayList<>(scripts));
 	}
 
 	@Override
-	public List<String> getStatements() {
-		List<String> statements = new ArrayList<>();
-		for (String script : this.scripts) {
-			statements.addAll(new Parser(script).getStatements());
-		}
-		return Collections.unmodifiableList(statements);
+	public List<? extends CqlScript> getScripts() {
+		return Collections.unmodifiableList(this.scripts);
 	}
 
 	@Override
@@ -59,7 +54,7 @@ final class StringsCqlDataSet implements CqlDataSet {
 		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
-		StringsCqlDataSet that = (StringsCqlDataSet) other;
+		DefaultCqlDataSet that = (DefaultCqlDataSet) other;
 		return this.scripts.equals(that.scripts);
 	}
 
@@ -70,7 +65,7 @@ final class StringsCqlDataSet implements CqlDataSet {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", StringsCqlDataSet.class.getSimpleName() + "[", "]")
+		return new StringJoiner(", ", DefaultCqlDataSet.class.getSimpleName() + "[", "]")
 				.add("scripts=" + this.scripts)
 				.toString();
 	}

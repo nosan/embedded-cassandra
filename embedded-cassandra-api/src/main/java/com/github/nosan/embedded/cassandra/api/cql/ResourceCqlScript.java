@@ -19,51 +19,38 @@ package com.github.nosan.embedded.cassandra.api.cql;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.StringJoiner;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 
 /**
- * {@link CqlDataSet} for {@link Resource}(s).
+ * {@link CqlScript} for {@link Resource Resources}.
  *
  * @author Dmytro Nosan
  */
-final class ResourcesCqlDataSet implements CqlDataSet {
+final class ResourceCqlScript extends AbstractCqlScript {
 
 	private final Charset charset;
 
-	private final List<Resource> resources;
+	private final Resource resource;
 
 	/**
-	 * Constructs a new {@link ResourcesCqlDataSet} with the specified {@link Resource}(s) and {@link Charset}.
+	 * Constructs a new {@link ResourceCqlScript} with the specified {@link Resource} and {@link Charset}.
 	 *
-	 * @param resources the resources
+	 * @param resource the resource
 	 * @param charset the charset
 	 */
-	ResourcesCqlDataSet(Charset charset, Resource... resources) {
+	ResourceCqlScript(Charset charset, Resource resource) {
 		this.charset = charset;
-		this.resources = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(resources)));
-	}
-
-	@Override
-	public List<String> getStatements() {
-		List<String> statements = new ArrayList<>();
-		for (Resource resource : this.resources) {
-			statements.addAll(new Parser(getScript(resource, this.charset)).getStatements());
-		}
-		return Collections.unmodifiableList(statements);
+		this.resource = resource;
 	}
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ResourcesCqlDataSet.class.getSimpleName() + "[", "]")
+		return new StringJoiner(", ", ResourceCqlScript.class.getSimpleName() + "[", "]")
 				.add("charset=" + this.charset)
-				.add("resources=" + this.resources)
+				.add("resource=" + this.resource)
 				.toString();
 	}
 
@@ -76,27 +63,28 @@ final class ResourcesCqlDataSet implements CqlDataSet {
 			return false;
 		}
 
-		ResourcesCqlDataSet that = (ResourcesCqlDataSet) other;
+		ResourceCqlScript that = (ResourceCqlScript) other;
 
 		if (!this.charset.equals(that.charset)) {
 			return false;
 		}
-		return this.resources.equals(that.resources);
+		return this.resource.equals(that.resource);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = this.charset.hashCode();
-		result = 31 * result + this.resources.hashCode();
+		result = 31 * result + this.resource.hashCode();
 		return result;
 	}
 
-	private static String getScript(Resource resource, Charset charset) {
+	@Override
+	protected String getScript() {
 		try {
-			return new String(resource.getBytes(), charset);
+			return new String(this.resource.getBytes(), this.charset);
 		}
 		catch (IOException ex) {
-			throw new UncheckedIOException(String.format("Cannot open a stream for '%s'", resource), ex);
+			throw new UncheckedIOException(String.format("Cannot open a stream for '%s'", this.resource), ex);
 		}
 	}
 

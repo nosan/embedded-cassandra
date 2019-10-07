@@ -16,27 +16,30 @@
 
 package com.github.nosan.embedded.cassandra.api.cql;
 
+import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.nosan.embedded.cassandra.annotations.Nullable;
 
 /**
- * Tests for {@link ResourceCqlScript} and {@link CqlDataSet}.
+ * Abstract {@link CqlScript} that parses a CQL script into the statements.
  *
  * @author Dmytro Nosan
+ * @since 3.0.0
  */
-class ResourcesCqlDataSetTests {
+public abstract class AbstractCqlScript implements CqlScript {
 
-	private final CqlDataSet dataSet = CqlDataSet.ofClasspaths("schema.cql");
-
-	@Test
-	void testGetStatements() {
-		List<String> statements = this.dataSet.getStatements();
-		assertThat(statements).contains(
-				"CREATE KEYSPACE test WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }");
-		assertThat(statements).contains("CREATE TABLE test.roles ( id text PRIMARY KEY )");
+	@Override
+	public final List<String> getStatements() {
+		return Collections.unmodifiableList(new Parser(getScript()).getStatements());
 	}
+
+	/**
+	 * Returns the {@code CQL} script.
+	 *
+	 * @return the script to be parsed.
+	 */
+	@Nullable
+	protected abstract String getScript();
 
 }

@@ -54,7 +54,7 @@ class EmbeddedCassandraTests {
 			assertThat(throwable).doesNotThrowAnyException();
 			ClusterCassandraConnectionFactory clusterFactory = new ClusterCassandraConnectionFactory();
 			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
-				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
+				CqlDataSet.ofClasspaths("schema.cql").forEachStatement(connection::execute);
 			}
 		});
 	}
@@ -66,7 +66,7 @@ class EmbeddedCassandraTests {
 			assertThat(throwable).doesNotThrowAnyException();
 			ClusterCassandraConnectionFactory clusterFactory = new ClusterCassandraConnectionFactory();
 			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
-				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
+				CqlDataSet.ofClasspaths("schema.cql").forEachStatement(connection::execute);
 			}
 			assertThat(cassandra.getPort()).isEqualTo(9142);
 		});
@@ -147,7 +147,7 @@ class EmbeddedCassandraTests {
 			clusterFactory.setKeystore(keystore);
 			clusterFactory.setKeystorePassword("cassandra");
 			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
-				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
+				CqlDataSet.ofClasspaths("schema.cql").forEachStatement(connection::execute);
 			}
 		});
 	}
@@ -163,7 +163,7 @@ class EmbeddedCassandraTests {
 			clusterFactory.setPassword("cassandra");
 			clusterFactory.setUsername("cassandra");
 			try (CassandraConnection connection = clusterFactory.create(cassandra)) {
-				CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
+				CqlDataSet.ofClasspaths("schema.cql").forEachStatement(connection::execute);
 			}
 		});
 	}

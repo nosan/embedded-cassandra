@@ -31,7 +31,7 @@ public class FirstRun {
 		cassandra.start();
 		DefaultCassandraConnectionFactory cassandraConnectionFactory = new DefaultCassandraConnectionFactory();
 		try (CassandraConnection connection = cassandraConnectionFactory.create(cassandra)) {
-			CqlDataSet.ofClasspaths("schema.cql").forEach(connection::execute);
+			CqlDataSet.ofClasspaths("schema.cql").forEachStatement(connection::execute);
 		}
 		finally {
 			cassandra.stop();
