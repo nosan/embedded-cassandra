@@ -19,6 +19,7 @@ package examples.cql;
 import java.util.List;
 
 import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
+import com.github.nosan.embedded.cassandra.api.cql.CqlScript;
 import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 
 public class CqlDataSetExample {
@@ -40,6 +41,13 @@ public class CqlDataSetExample {
 	void strings() {
 		CqlDataSet dataSet = CqlDataSet.ofStrings(
 				"CREATE KEYSPACE test WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}");
+		List<String> statements = dataSet.getStatements();
+		//...
+	}
+
+	void scripts() {
+		CqlDataSet dataSet = CqlDataSet.ofScripts(CqlScript.ofClasspath("schema.cql"),
+				CqlScript.ofClasspath("schema1.cql"));
 		List<String> statements = dataSet.getStatements();
 		//...
 	}
