@@ -23,9 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.nosan.embedded.cassandra.api.Version;
 
 /**
@@ -50,9 +47,8 @@ class UnixNode extends AbstractNode {
 	}
 
 	@Override
-	protected NodeProcess doStart(RunProcess runProcess) throws IOException {
-		Path workDir = this.workingDirectory;
-		Path executableFile = workDir.resolve("bin/cassandra");
+	Process doStart(RunProcess runProcess) throws IOException {
+		Path executableFile = this.workingDirectory.resolve("bin/cassandra");
 		if (!Files.isExecutable(executableFile)) {
 			executableFile.toFile().setExecutable(true);
 		}
@@ -60,45 +56,27 @@ class UnixNode extends AbstractNode {
 		if (this.rootAllowed && this.version.compareTo(Version.of("3.1")) > 0) {
 			runProcess.addArguments("-R");
 		}
-		return new UnixProcess(workDir, runProcess.start());
+		return runProcess.start();
 	}
 
-	private static final class UnixProcess extends AbstractNodeProcess {
-
-		private static final Logger log = LoggerFactory.getLogger(UnixProcess.class);
-
-		private final Path workingDirectory;
-
-		private final ProcessId processId;
-
-		private UnixProcess(Path workingDirectory, ProcessId processId) {
-			super(processId);
-			this.workingDirectory = workingDirectory;
-			this.processId = processId;
-		}
-
-		@Override
-		void doStop() throws IOException, InterruptedException {
-			Process process = this.processId.getProcess();
-			long pid = getPid();
-			if (pid > 0 && kill(pid) == 0) {
-				if (!process.waitFor(5, TimeUnit.SECONDS)) {
-					sigkill(pid);
-				}
-			}
-			else {
-				process.destroy();
+	@Override
+	void doStop(Process process, long pid) throws IOException, InterruptedException {
+		if (pid > 0 && kill(pid) == 0) {
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
+				sigkill(pid);
 			}
 		}
-
-		private int kill(long pid) throws InterruptedException, IOException {
-			return new RunProcess(this.workingDirectory, "kill", "-SIGINT", pid).run(log::info);
+		else {
+			process.destroy();
 		}
+	}
 
-		private void sigkill(long pid) throws InterruptedException, IOException {
-			new RunProcess(this.workingDirectory, "kill", "-SIGKILL", pid).run(log::info);
-		}
+	private int kill(long pid) throws InterruptedException, IOException {
+		return new RunProcess(this.workingDirectory, "kill", "-SIGINT", pid).run(this.logger::info);
+	}
 
+	private void sigkill(long pid) throws InterruptedException, IOException {
+		new RunProcess(this.workingDirectory, "kill", "-SIGKILL", pid).run(this.logger::info);
 	}
 
 }

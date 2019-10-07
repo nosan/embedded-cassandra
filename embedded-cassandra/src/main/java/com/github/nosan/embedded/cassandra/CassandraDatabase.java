@@ -83,9 +83,6 @@ class CassandraDatabase implements Database {
 	private final Resource topologyConfig;
 
 	@Nullable
-	private volatile NodeProcess process;
-
-	@Nullable
 	private volatile InetAddress address;
 
 	private volatile int port = -1;
@@ -114,12 +111,11 @@ class CassandraDatabase implements Database {
 	public void start() throws InterruptedException, IOException {
 		initialize();
 		log.info("Starts {}", toString());
-		NodeProcess process = this.node.start();
-		this.process = process;
+		this.node.start();
 		log.info("{} has been started", toString());
 		NativeTransportReadinessConsumer nativeTransportReadiness = new NativeTransportReadinessConsumer(this.version);
 		RpcTransportReadinessConsumer rpcTransportReadiness = new RpcTransportReadinessConsumer(this.version);
-		await(process, nativeTransportReadiness, rpcTransportReadiness);
+		await(this.node.getProcess(), nativeTransportReadiness, rpcTransportReadiness);
 		log.info("{} is running and ready for connections", toString());
 		int sslPort = nativeTransportReadiness.getSslPort();
 		int port = nativeTransportReadiness.getPort();
@@ -132,13 +128,11 @@ class CassandraDatabase implements Database {
 
 	@Override
 	public void stop() throws InterruptedException, IOException {
-		NodeProcess process = this.process;
-		if (process != null && process.isAlive()) {
+		if (this.node.isAlive()) {
 			log.info("Stops {}", toString());
-			process.stop();
+			this.node.stop();
 			log.info("{} has been stopped", toString());
 		}
-		this.process = null;
 		this.port = -1;
 		this.sslPort = -1;
 		this.rpcPort = -1;
@@ -171,11 +165,8 @@ class CassandraDatabase implements Database {
 	public String toString() {
 		StringJoiner joiner = new StringJoiner(", ", CassandraDatabase.class.getSimpleName() + "[", "]")
 				.add("name='" + this.name + "'")
-				.add("version=" + this.version);
-		NodeProcess process = this.process;
-		if (process != null) {
-			return joiner.add("process=" + this.process).toString();
-		}
+				.add("version=" + this.version)
+				.add("node=" + this.node);
 		return joiner.toString();
 	}
 
@@ -209,7 +200,7 @@ class CassandraDatabase implements Database {
 		}
 	}
 
-	private void await(NodeProcess process, ReadinessConsumer... readinessConsumers)
+	private void await(Process process, ReadinessConsumer... readinessConsumers)
 			throws IOException, InterruptedException {
 		CompositeConsumer<String> compositeConsumer = new CompositeConsumer<>();
 		CacheConsumer<String> cacheConsumer = new CacheConsumer<>(30);
@@ -222,7 +213,7 @@ class CassandraDatabase implements Database {
 		Thread thread = new Thread(() -> {
 			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
 			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(process.getProcess().getInputStream(), StandardCharsets.UTF_8))) {
+					new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
 				try {
 					reader.lines().filter(StringUtils::hasText).forEach(compositeConsumer);
 				}

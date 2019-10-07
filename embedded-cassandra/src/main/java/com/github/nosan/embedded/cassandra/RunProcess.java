@@ -148,11 +148,11 @@ class RunProcess {
 	/**
 	 * Starts a new process.
 	 *
-	 * @return a new {@link ProcessId}
+	 * @return a new {@link Pid}
 	 * @throws IOException if an I/O error occurs
 	 * @see ProcessBuilder#start()
 	 */
-	ProcessId start() throws IOException {
+	Process start() throws IOException {
 		Path workDir = this.workingDirectory;
 		List<String> arguments = this.arguments.stream().filter(Objects::nonNull).map(Object::toString).filter(
 				StringUtils::hasText).collect(Collectors.toList());
@@ -165,14 +165,7 @@ class RunProcess {
 				Collectors.toMap(Map.Entry::getKey, entry -> Objects.toString(entry.getValue(), "")));
 		builder.environment().putAll(environment);
 		printCommand(workDir, arguments, environment);
-		Process process = builder.start();
-		try {
-			return new ProcessId(process);
-		}
-		catch (Throwable ex) {
-			log.error(String.format("ProcessId for '%s' cannot be constructed", process), ex);
-			return new ProcessId(process, -1);
-		}
+		return builder.start();
 	}
 
 	/**
@@ -186,8 +179,7 @@ class RunProcess {
 	 */
 	int run(Consumer<? super String> consumer) throws InterruptedException, IOException {
 		Objects.requireNonNull(consumer, "'consumer' must not be null");
-		ProcessId processId = start();
-		Process process = processId.getProcess();
+		Process process = start();
 		Map<String, String> context = MDC.getCopyOfContextMap();
 		Thread thread = new Thread(() -> {
 			Optional.ofNullable(context).ifPresent(MDC::setContextMap);

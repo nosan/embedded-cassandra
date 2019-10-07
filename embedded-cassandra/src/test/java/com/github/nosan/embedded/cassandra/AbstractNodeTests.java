@@ -16,8 +16,11 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.yaml.snakeyaml.Yaml;
 
-import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,7 +69,7 @@ class AbstractNodeTests {
 	@SuppressWarnings("unchecked")
 	void doStartWithConfigFileViaProperties() throws Exception {
 		this.systemProperties.put("cassandra.config", new ClassPathResource("cassandra-random.yaml").toURL());
-		run(process -> {
+		start(process -> {
 			Map<String, String> systemProperties = getSystemProperties(process);
 			Yaml yaml = new Yaml();
 			try (InputStream inputStream = new URL(systemProperties.get("cassandra.config")).openStream()) {
@@ -91,7 +93,7 @@ class AbstractNodeTests {
 		this.properties.put("native_transport_port_ssl", 0);
 		this.systemProperties.put("cassandra.jmx.local.port", 0);
 		this.systemProperties.put("cassandra.jmx.remote.port", 0);
-		run(process -> {
+		start(process -> {
 			Map<String, String> systemProperties = getSystemProperties(process);
 			assertThat(systemProperties).doesNotContainEntry("cassandra.native_transport_port", "0");
 			assertThat(systemProperties).doesNotContainEntry("cassandra.rpc_port", "0");
@@ -110,27 +112,39 @@ class AbstractNodeTests {
 	@Test
 	void doStartWithJvmOptions() throws Exception {
 		this.jvmOptions.add("-Xmx512m");
-		run(process -> assertThat(getJvmOptions(process)).containsExactly("-Xmx512m"));
+		start(process -> assertThat(getJvmOptions(process)).containsExactly("-Xmx512m"));
 	}
 
 	@Test
 	void doStartWithEnvVariables() throws Exception {
 		this.environmentVariables.put("KEY", "VALUE");
-		run(process -> assertThat(process.getEnvironment()).containsEntry("KEY", "VALUE"));
+		start(process -> assertThat(process.getEnvironment()).containsEntry("KEY", "VALUE"));
 	}
 
-	private void run(RunProcessConsumer consumer) throws IOException, InterruptedException {
-		new AbstractNode(this.workingDirectory, this.properties, this.jvmOptions, this.systemProperties,
+	private void start(RunProcessConsumer consumer) throws IOException, InterruptedException {
+		MockProcess mockProcess = new MockProcess();
+		AbstractNode node = new AbstractNode(this.workingDirectory, this.properties, this.jvmOptions,
+				this.systemProperties,
 				this.environmentVariables) {
 
-			@Nullable
 			@Override
-			protected NodeProcess doStart(RunProcess runProcess) throws IOException {
+			protected Process doStart(RunProcess runProcess) throws IOException {
 				consumer.accept(runProcess);
-				return null;
+				return mockProcess;
 			}
 
-		}.start();
+			@Override
+			void doStop(Process process, long pid) throws IOException, InterruptedException {
+				assertThat(process).isEqualTo(mockProcess);
+				assertThat(pid).isEqualTo(mockProcess.pid);
+			}
+
+		};
+		node.start();
+		assertThat(node.getProcess()).isEqualTo(mockProcess);
+		assertThat(node.isAlive()).isEqualTo(mockProcess.isAlive());
+		assertThat(node.toString()).contains(":" + mockProcess.pid);
+		node.stop();
 	}
 
 	private static List<String> getJvmOptions(RunProcess process) {
@@ -158,6 +172,46 @@ class AbstractNodeTests {
 	private interface RunProcessConsumer {
 
 		void accept(RunProcess process) throws IOException;
+
+	}
+
+	private static final class MockProcess extends Process {
+
+		private static final ByteArrayOutputStream OUTPUTSTREAM = new ByteArrayOutputStream();
+
+		private static final ByteArrayInputStream INPUTSTREAM = new ByteArrayInputStream(new byte[0]);
+
+		private final long pid = 100;
+
+		@Override
+		public OutputStream getOutputStream() {
+			return OUTPUTSTREAM;
+		}
+
+		@Override
+		public InputStream getInputStream() {
+			return INPUTSTREAM;
+		}
+
+		@Override
+		public InputStream getErrorStream() {
+			return INPUTSTREAM;
+		}
+
+		@Override
+		public int waitFor() {
+			return 0;
+		}
+
+		@Override
+		public int exitValue() {
+			return 0;
+		}
+
+		@Override
+		public void destroy() {
+
+		}
 
 	}
 

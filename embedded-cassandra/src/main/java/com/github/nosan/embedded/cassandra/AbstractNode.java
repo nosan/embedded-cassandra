@@ -29,21 +29,27 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.io.UrlResource;
 
 /**
- * Abstract {@link Node} that configures startup parameters before start.
+ * Abstract {@link Node} that implements common logic for any subclasses.
  *
  * @author Dmytro Nosan
  */
 abstract class AbstractNode implements Node {
 
 	private static final String JVM_EXTRA_OPTS = "JVM_EXTRA_OPTS";
+
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final Path workingDirectory;
 
@@ -55,6 +61,11 @@ abstract class AbstractNode implements Node {
 
 	private final List<String> jvmOptions;
 
+	@Nullable
+	private volatile Process process;
+
+	private volatile long pid = -1;
+
 	AbstractNode(Path workingDirectory, Map<String, Object> properties, List<String> jvmOptions,
 			Map<String, Object> systemProperties, Map<String, Object> environmentVariables) {
 		this.workingDirectory = workingDirectory;
@@ -65,7 +76,7 @@ abstract class AbstractNode implements Node {
 	}
 
 	@Override
-	public final NodeProcess start() throws IOException, InterruptedException {
+	public final void start() throws IOException, InterruptedException {
 		RunProcess runProcess = new RunProcess(this.workingDirectory);
 		Map<String, Object> properties = loadProperties();
 		properties.putAll(this.properties);
@@ -82,18 +93,77 @@ abstract class AbstractNode implements Node {
 		runProcess.getEnvironment().putAll(this.environmentVariables);
 
 		runProcess.putEnvironment(JVM_EXTRA_OPTS, String.join(" ", jvmOptions));
-		return doStart(runProcess);
+		Process process = doStart(runProcess);
+		this.process = process;
+		this.pid = getPid(process);
+	}
+
+	@Override
+	public final void stop() throws IOException, InterruptedException {
+		Process process = this.process;
+		if (process != null && process.isAlive()) {
+			doStop(process, this.pid);
+			if (!process.waitFor(3, TimeUnit.SECONDS)) {
+				this.logger.warn("java.lang.Process.destroyForcibly() has been called for '{}'. The behavior of this "
+						+ "method is undefined, hence Cassandra's node could be still alive", toString());
+				if (!process.destroyForcibly().waitFor(1, TimeUnit.SECONDS)) {
+					throw new IOException(String.format("'%s' is still alive.", toString()));
+				}
+			}
+		}
+		this.process = null;
+		this.pid = -1;
+	}
+
+	@Override
+	public final Process getProcess() {
+		Process process = this.process;
+		if (process == null) {
+			throw new IllegalStateException("Process cannot be null!");
+		}
+		return process;
+	}
+
+	@Override
+	public final boolean isAlive() {
+		Process process = this.process;
+		return process != null && process.isAlive();
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s:%s", getClass().getSimpleName(), this.pid);
+	}
+
+	/**
+	 * Returns the pid of the current Node.
+	 *
+	 * @param process Cassandra's process
+	 * @return the pid or {@code -1}
+	 * @throws IOException in case of any I/O errors
+	 * @throws InterruptedException in case of interruption.
+	 */
+	long getPid(Process process) throws IOException, InterruptedException {
+		return Pid.get(process);
 	}
 
 	/**
 	 * Starts {@code Cassandra's} node.
 	 *
 	 * @param runProcess configured process
-	 * @return a new {@link NodeProcess}
+	 * @return a new {@link Process}
 	 * @throws IOException if the {@code Cassandra's} node cannot be started
 	 * @throws InterruptedException if the {@code Cassandra's} node has been interrupted.
 	 */
-	protected abstract NodeProcess doStart(RunProcess runProcess) throws IOException, InterruptedException;
+	abstract Process doStart(RunProcess runProcess) throws IOException, InterruptedException;
+
+	/**
+	 * Stops {@code Cassandra's} node.
+	 *
+	 * @throws IOException if  {@code Cassandra's} node cannot be stopped
+	 * @throws InterruptedException if  {@code Cassandra's} node has been interrupted.
+	 */
+	abstract void doStop(Process process, long pid) throws IOException, InterruptedException;
 
 	private Map<String, Object> loadProperties() throws IOException {
 		try (InputStream is = getConfig().getInputStream()) {

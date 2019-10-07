@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
@@ -41,6 +39,9 @@ class WindowsNode extends AbstractNode {
 
 	private final Path workingDirectory;
 
+	@Nullable
+	private volatile Path pidFile;
+
 	WindowsNode(Version version, Path workingDirectory, List<String> jvmOptions, Map<String, Object> systemProperties,
 			Map<String, Object> environmentVariables, Map<String, Object> properties) {
 		super(workingDirectory, properties, jvmOptions, systemProperties, environmentVariables);
@@ -49,7 +50,7 @@ class WindowsNode extends AbstractNode {
 	}
 
 	@Override
-	protected NodeProcess doStart(RunProcess runProcess) throws IOException {
+	Process doStart(RunProcess runProcess) throws IOException {
 		Path workDir = this.workingDirectory;
 		Version version = this.version;
 		Path pidFile = Files.createTempFile(workDir, "", ".pid");
@@ -58,109 +59,75 @@ class WindowsNode extends AbstractNode {
 		if (version.compareTo(Version.of("2.1")) > 0) {
 			runProcess.addArguments("-a");
 		}
-		WindowsProcess process = new WindowsProcess(runProcess.start(), pidFile, workDir);
+		this.pidFile = pidFile;
+		return runProcess.start();
+	}
+
+	@Override
+	void doStop(Process process, long pid) throws IOException, InterruptedException {
+		Path pidFile = this.pidFile;
+		Path executableFile = this.workingDirectory.resolve("bin/stop-server.ps1");
+		if (Files.exists(executableFile) && (pidFile != null && Files.exists(pidFile))) {
+			doStop(process, executableFile, pidFile, pid);
+		}
+		else if (pid > 0) {
+			doTaskKill(process, pid);
+		}
+		this.pidFile = null;
+	}
+
+	@Override
+	long getPid(Process process) throws IOException, InterruptedException {
 		long timeout = TimeUnit.SECONDS.toNanos(1);
 		long start = System.nanoTime();
 		long rem = timeout;
-		while (rem > 0 && process.getPid() == -1) {
-			try {
-				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 10));
-			}
-			catch (InterruptedException ex) {
-				//we should not throw
-				Thread.currentThread().interrupt();
-			}
+		long pid = super.getPid(process);
+		while (rem > 0 && pid == -1) {
+			Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 50));
 			rem = timeout - (System.nanoTime() - start);
+			Path pidFile = this.pidFile;
+			if (pidFile != null && Files.exists(pidFile)) {
+				pid = getPid(pidFile);
+			}
 		}
-		return process;
+		return pid;
 	}
 
-	private static final class WindowsProcess extends AbstractNodeProcess {
-
-		private static final Logger log = LoggerFactory.getLogger(WindowsProcess.class);
-
-		private final ProcessId processId;
-
-		private final Path pidFile;
-
-		private final Path workingDirectory;
-
-		private long pid = -1;
-
-		private WindowsProcess(ProcessId processId, Path pidFile, Path workingDirectory) {
-			super(processId);
-			this.processId = processId;
-			this.pidFile = pidFile;
-			this.workingDirectory = workingDirectory;
-		}
-
-		@Override
-		public long getPid() {
-			if (this.pid == -1) {
-				this.pid = this.processId.getPid();
-				if (this.pid == -1) {
-					this.pid = getPid(this.pidFile);
-				}
-			}
-			return this.pid;
-		}
-
-		@Override
-		void doStop() throws IOException, InterruptedException {
-			long pid = getPid();
-			Path pidFile = this.pidFile;
-			Process process = this.processId.getProcess();
-			Path executableFile = this.workingDirectory.resolve("bin/stop-server.ps1");
-			if (Files.exists(executableFile) && Files.exists(pidFile)) {
-				doStop(process, executableFile, pidFile, pid);
-			}
-			else if (pid > 0) {
-				doStop(process, pid);
+	private void doTaskKill(Process process, long pid) throws IOException, InterruptedException {
+		if (taskKill(pid, false) == 0) {
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
+				taskKill(pid, true);
 			}
 		}
+	}
 
-		private void doStop(Process process, long pid) throws IOException, InterruptedException {
-			if (taskKill(pid, false) == 0) {
-				if (!process.waitFor(5, TimeUnit.SECONDS)) {
-					taskKill(pid, true);
+	private void doStop(Process process, Path executableFile, Path pidFile, long pid)
+			throws IOException, InterruptedException {
+		if (stop(executableFile, pidFile) == 0) {
+			if (!process.waitFor(5, TimeUnit.SECONDS)) {
+				if (pid > 0) {
+					doStop(process, pid);
 				}
 			}
 		}
-
-		private void doStop(Process process, Path executableFile, Path pidFile, long pid)
-				throws IOException, InterruptedException {
-			if (stop(executableFile, pidFile) == 0) {
-				if (!process.waitFor(5, TimeUnit.SECONDS)) {
-					if (pid > 0) {
-						doStop(process, pid);
-					}
-				}
-			}
-			else if (pid > 0) {
-				doStop(process, pid);
-			}
+		else if (pid > 0) {
+			doStop(process, pid);
 		}
+	}
 
-		private long getPid(Path pidFile) {
-			try {
-				String pid = new String(Files.readAllBytes(pidFile), StandardCharsets.UTF_8).replaceAll("\\D+", "");
-				return StringUtils.hasText(pid) ? Long.parseLong(pid) : -1;
-			}
-			catch (Throwable ex) {
-				return -1;
-			}
-		}
+	private long getPid(Path pidFile) throws IOException {
+		String pid = new String(Files.readAllBytes(pidFile), StandardCharsets.UTF_8).replaceAll("\\D+", "");
+		return StringUtils.hasText(pid) ? Long.parseLong(pid) : -1;
+	}
 
-		private int stop(Path executableFile, Path pidFile) throws InterruptedException, IOException {
-			return new RunProcess(this.workingDirectory, "powershell", "-ExecutionPolicy", "Unrestricted",
-					executableFile, "-p", pidFile).run(log::info);
-		}
+	private int stop(Path executableFile, Path pidFile) throws InterruptedException, IOException {
+		return new RunProcess(this.workingDirectory, "powershell", "-ExecutionPolicy", "Unrestricted",
+				executableFile, "-p", pidFile).run(this.logger::info);
+	}
 
-		private int taskKill(long pid, boolean forceful) throws InterruptedException, IOException {
-			return new RunProcess(this.workingDirectory, "taskkill", forceful ? "/F" : "", "/T", "/PID", pid).run(
-					log::info);
-		}
-
+	private int taskKill(long pid, boolean forceful) throws InterruptedException, IOException {
+		return new RunProcess(this.workingDirectory, "taskkill", forceful ? "/F" : "", "/T", "/PID", pid)
+				.run(this.logger::info);
 	}
 
 }

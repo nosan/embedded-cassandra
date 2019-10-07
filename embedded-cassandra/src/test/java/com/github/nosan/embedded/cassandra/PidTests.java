@@ -29,19 +29,17 @@ import org.junit.jupiter.api.condition.OS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ProcessId}.
+ * Tests for {@link Pid}.
  *
  * @author Dmytro Nosan
  */
-class ProcessIdTests {
+class PidTests {
 
 	@Test
 	@DisabledOnOs(OS.WINDOWS)
 	void constructProcessIdUnix() throws IOException {
 		Process process = new ProcessBuilder("echo", "Hello world").start();
-		ProcessId processId = new ProcessId(process);
-		assertThat(processId.getProcess()).isSameAs(process);
-		assertThat(processId.getPid()).isGreaterThan(0);
+		assertThat(Pid.get(process)).isGreaterThan(0);
 	}
 
 	@Test
@@ -49,9 +47,7 @@ class ProcessIdTests {
 	@DisabledOnJre(JRE.JAVA_8)
 	void constructProcessIdWindowsJava9() throws IOException {
 		Process process = new ProcessBuilder("echo", "Hello world").start();
-		ProcessId processId = new ProcessId(process);
-		assertThat(processId.getProcess()).isSameAs(process);
-		assertThat(processId.getPid()).isGreaterThan(0);
+		assertThat(Pid.get(process)).isGreaterThan(0);
 	}
 
 	@Test
@@ -59,9 +55,7 @@ class ProcessIdTests {
 	@EnabledOnOs(OS.WINDOWS)
 	void constructProcessIdWindowsJava8() throws IOException {
 		Process process = new ProcessBuilder("echo", "Hello world").start();
-		ProcessId processId = new ProcessId(process);
-		assertThat(processId.getProcess()).isSameAs(process);
-		assertThat(processId.getPid()).isEqualTo(-1);
+		assertThat(Pid.get(process)).isEqualTo(-1);
 	}
 
 }

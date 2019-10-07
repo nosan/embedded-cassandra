@@ -18,15 +18,16 @@ package com.github.nosan.embedded.cassandra;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 
 /**
- * Representation of {@link Process} and its PID.
+ * A utility class to get a PID of the {@link Process}.
  *
  * @author Dmytro Nosan
  */
-class ProcessId {
+final class Pid {
 
 	@Nullable
 	private static final Method PID_METHOD;
@@ -42,64 +43,25 @@ class ProcessId {
 		PID_METHOD = method;
 	}
 
-	private final Process process;
-
-	private final long pid;
+	private Pid() {
+	}
 
 	/**
-	 * Constructs a new {@link ProcessId} with the specified process.
+	 * Determines the given process PID or {@code -1}.
 	 *
 	 * @param process the process
+	 * @return PID or -1
 	 */
-	ProcessId(Process process) {
-		this.process = process;
-		this.pid = getPid(process);
-	}
-
-	/**
-	 * Constructs a new {@link ProcessId} with the specified process and its pid.
-	 *
-	 * @param process the process
-	 * @param pid the PID
-	 */
-	ProcessId(Process process, long pid) {
-		this.process = process;
-		this.pid = (pid > 0) ? pid : -1;
-	}
-
-	/**
-	 * Returns the {@link Process}.
-	 *
-	 * @return the process
-	 */
-	Process getProcess() {
-		return this.process;
-	}
-
-	/**
-	 * Returns the pid.
-	 *
-	 * @return the pid (or -1 if none)
-	 */
-	long getPid() {
-		return this.pid;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("%s [%d]", this.process, this.pid);
-	}
-
-	private static long getPid(Process process) {
+	static long get(Process process) {
 		try {
 			if (PID_METHOD != null) {
-				return (long) PID_METHOD.invoke(process);
+				return getLong(PID_METHOD.invoke(process));
 			}
 			Field field = process.getClass().getDeclaredField("pid");
 			if (!field.isAccessible()) {
 				field.setAccessible(true);
 			}
-			return (int) field.get(process);
+			return getLong(field.get(process));
 		}
 		catch (NoSuchFieldException ex) {
 			return -1;
@@ -107,6 +69,10 @@ class ProcessId {
 		catch (ReflectiveOperationException ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+
+	private static long getLong(Object result) {
+		return Long.parseLong(Objects.toString(result, "-1"));
 	}
 
 }

@@ -19,19 +19,41 @@ package com.github.nosan.embedded.cassandra;
 import java.io.IOException;
 
 /**
- * Simple interface that allows the {@code Cassandra's} node to be  {@link #start() started}.
+ * Simple interface that allows the {@code Cassandra's} node to be  {@link #start() started} and {@link #stop()
+ * stopped}. This a light abstraction on {@link Process}.
  *
  * @author Dmytro Nosan
  */
 interface Node {
 
 	/**
+	 * Stops {@code Cassandra's} node.
+	 *
+	 * @throws IOException if  {@code Cassandra's} node cannot be stopped
+	 * @throws InterruptedException if  {@code Cassandra's} node has been interrupted.
+	 */
+	void stop() throws IOException, InterruptedException;
+
+	/**
 	 * Starts {@code Cassandra's} node.
 	 *
-	 * @return a new {@link NodeProcess}
 	 * @throws IOException if the {@code Cassandra's} node cannot be started
 	 * @throws InterruptedException if the {@code Cassandra's} node has been interrupted.
 	 */
-	NodeProcess start() throws IOException, InterruptedException;
+	void start() throws IOException, InterruptedException;
+
+	/**
+	 * Returns {@code Cassandra's} process.
+	 *
+	 * @return the process
+	 */
+	Process getProcess();
+
+	/**
+	 * Returns whether the node  is alive.
+	 *
+	 * @return {@code true} if the node has not yet terminated.
+	 */
+	boolean isAlive();
 
 }
