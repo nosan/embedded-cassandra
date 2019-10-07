@@ -53,9 +53,9 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  *
  * @author Dmytro Nosan
  */
-class CassandraDatabase implements Database {
+class DefaultDatabase implements Database {
 
-	private static final Logger log = LoggerFactory.getLogger(CassandraDatabase.class);
+	private static final Logger log = LoggerFactory.getLogger(DefaultDatabase.class);
 
 	private final String name;
 
@@ -91,7 +91,7 @@ class CassandraDatabase implements Database {
 
 	private volatile int rpcPort = -1;
 
-	CassandraDatabase(String name, Version version, Path directory, Path workingDirectory, boolean daemon,
+	DefaultDatabase(String name, Version version, Path directory, Path workingDirectory, boolean daemon,
 			Logger logger, Duration timeout, @Nullable Resource config, @Nullable Resource rackConfig,
 			@Nullable Resource topologyConfig, Node node) {
 		this.name = name;
@@ -110,7 +110,6 @@ class CassandraDatabase implements Database {
 	@Override
 	public void start() throws InterruptedException, IOException {
 		initialize();
-		log.info("Starts {}", toString());
 		this.node.start();
 		log.info("{} has been started", toString());
 		NativeTransportReadinessConsumer nativeTransportReadiness = new NativeTransportReadinessConsumer(this.version);
@@ -163,15 +162,11 @@ class CassandraDatabase implements Database {
 
 	@Override
 	public String toString() {
-		StringJoiner joiner = new StringJoiner(", ", CassandraDatabase.class.getSimpleName() + "[", "]")
-				.add("name='" + this.name + "'")
-				.add("version=" + this.version)
-				.add("node=" + this.node);
-		return joiner.toString();
+		return new StringJoiner(", ", DefaultDatabase.class.getSimpleName() + "[", "]")
+				.add("name='" + this.name + "'").add("version=" + this.version).add("node=" + this.node).toString();
 	}
 
 	private void initialize() throws IOException {
-		log.info("Initializes {}. It takes a while...", toString());
 		Files.createDirectories(this.workingDirectory);
 		FileUtils.copy(this.directory, this.workingDirectory, (path, attributes) -> {
 			if (attributes.isDirectory()) {

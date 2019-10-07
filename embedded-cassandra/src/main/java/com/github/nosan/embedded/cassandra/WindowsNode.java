@@ -54,12 +54,12 @@ class WindowsNode extends AbstractNode {
 		Path workDir = this.workingDirectory;
 		Version version = this.version;
 		Path pidFile = Files.createTempFile(workDir, "", ".pid");
+		this.pidFile = pidFile;
 		Path executableFile = workDir.resolve("bin/cassandra.ps1");
 		runProcess.setArguments("powershell", "-ExecutionPolicy", "Unrestricted", executableFile, "-f", "-p", pidFile);
 		if (version.compareTo(Version.of("2.1")) > 0) {
 			runProcess.addArguments("-a");
 		}
-		this.pidFile = pidFile;
 		return runProcess.start();
 	}
 
