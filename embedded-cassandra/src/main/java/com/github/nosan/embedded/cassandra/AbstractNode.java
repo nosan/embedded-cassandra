@@ -91,7 +91,6 @@ abstract class AbstractNode implements Node {
 			jvmOptions.add(String.format("-D%s=%s", entry.getKey(), entry.getValue()));
 		}
 		runProcess.getEnvironment().putAll(this.environmentVariables);
-
 		runProcess.putEnvironment(JVM_EXTRA_OPTS, String.join(" ", jvmOptions));
 		Process process = doStart(runProcess);
 		this.process = process;

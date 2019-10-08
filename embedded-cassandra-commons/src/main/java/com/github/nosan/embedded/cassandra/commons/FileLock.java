@@ -77,7 +77,7 @@ public final class FileLock implements AutoCloseable {
 	 *
 	 * @return The file channel
 	 */
-	public FileChannel channel() {
+	public FileChannel getChannel() {
 		return this.fileChannel;
 	}
 

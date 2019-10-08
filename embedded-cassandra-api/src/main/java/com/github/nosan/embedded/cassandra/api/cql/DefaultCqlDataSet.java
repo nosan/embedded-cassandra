@@ -43,7 +43,7 @@ final class DefaultCqlDataSet implements CqlDataSet {
 
 	@Override
 	public List<? extends CqlScript> getScripts() {
-		return Collections.unmodifiableList(this.scripts);
+		return this.scripts;
 	}
 
 	@Override
