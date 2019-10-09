@@ -574,9 +574,9 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		if (!Files.isDirectory(directory)) {
 			throw new IllegalStateException(directory + " is not a directory");
 		}
-		Node node = createNode(version, workingDirectory);
-		Database database = new EmbeddedCassandraDatabase(name, version, directory, workingDirectory, isDaemon(),
-				getLogger(), getTimeout(), getConfig(), getRackConfig(), getTopologyConfig(), node);
+		CassandraNode node = createNode(version, workingDirectory);
+		CassandraDatabase database = new EmbeddedCassandraDatabase(name, version, directory, workingDirectory,
+				isDaemon(), getLogger(), getTimeout(), getConfig(), getRackConfig(), getTopologyConfig(), node);
 		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, version, database);
 		if (isRegisterShutdownHook()) {
 			Runtime.getRuntime().addShutdownHook(new Thread(cassandra::stop, name + "-sh"));
@@ -584,7 +584,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		return cassandra;
 	}
 
-	private Node createNode(Version version, Path workingDirectory) {
+	private CassandraNode createNode(Version version, Path workingDirectory) {
 		Map<String, Object> systemProperties = new LinkedHashMap<>(getSystemProperties());
 		systemProperties.entrySet().removeIf(
 				entry -> Objects.isNull(entry.getKey()) || Objects.isNull(entry.getValue()));
@@ -597,10 +597,11 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		configProperties.keySet().removeIf(Objects::isNull);
 
 		if (isWindows()) {
-			return new WindowsNode(version, workingDirectory, jvmOptions, systemProperties, environmentVariables,
+			return new WindowsCassandraNode(version, workingDirectory, jvmOptions, systemProperties,
+					environmentVariables,
 					configProperties);
 		}
-		return new UnixNode(version, workingDirectory, jvmOptions, systemProperties, environmentVariables,
+		return new UnixCassandraNode(version, workingDirectory, jvmOptions, systemProperties, environmentVariables,
 				configProperties, isRootAllowed());
 	}
 

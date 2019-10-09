@@ -39,12 +39,12 @@ import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link AbstractNode}.
+ * Tests for {@link AbstractCassandraNode}.
  *
  * @author Dmytro Nosan
  */
 @SuppressWarnings("NullableProblems")
-class AbstractNodeTests {
+class AbstractCassandraNodeTests {
 
 	private final Map<String, Object> properties = new LinkedHashMap<>();
 
@@ -123,7 +123,7 @@ class AbstractNodeTests {
 
 	private void start(RunProcessConsumer consumer) throws IOException, InterruptedException {
 		MockProcess mockProcess = new MockProcess();
-		AbstractNode node = new AbstractNode(this.workingDirectory, this.properties, this.jvmOptions,
+		AbstractCassandraNode node = new AbstractCassandraNode(this.workingDirectory, this.properties, this.jvmOptions,
 				this.systemProperties,
 				this.environmentVariables) {
 

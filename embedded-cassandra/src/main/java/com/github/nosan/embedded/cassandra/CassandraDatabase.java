@@ -27,7 +27,7 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
  *
  * @author Dmytro Nosan
  */
-interface Database {
+interface CassandraDatabase {
 
 	/**
 	 * Starts the {@code Cassandra}.

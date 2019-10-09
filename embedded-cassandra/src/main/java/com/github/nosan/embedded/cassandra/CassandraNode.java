@@ -24,7 +24,7 @@ import java.io.IOException;
  *
  * @author Dmytro Nosan
  */
-interface Node {
+interface CassandraNode {
 
 	/**
 	 * Stops {@code Cassandra's} node.

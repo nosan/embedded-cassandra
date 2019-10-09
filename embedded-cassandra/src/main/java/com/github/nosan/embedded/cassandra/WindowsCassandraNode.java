@@ -29,11 +29,11 @@ import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
- * Windows {@link Node}.
+ * Windows {@link CassandraNode}.
  *
  * @author Dmytro Nosan
  */
-class WindowsNode extends AbstractNode {
+class WindowsCassandraNode extends AbstractCassandraNode {
 
 	private final Version version;
 
@@ -42,7 +42,8 @@ class WindowsNode extends AbstractNode {
 	@Nullable
 	private volatile Path pidFile;
 
-	WindowsNode(Version version, Path workingDirectory, List<String> jvmOptions, Map<String, Object> systemProperties,
+	WindowsCassandraNode(Version version, Path workingDirectory, List<String> jvmOptions,
+			Map<String, Object> systemProperties,
 			Map<String, Object> environmentVariables, Map<String, Object> properties) {
 		super(workingDirectory, properties, jvmOptions, systemProperties, environmentVariables);
 		this.version = version;

@@ -34,7 +34,7 @@ import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandra} and {@link Database}.
+ * Tests for {@link EmbeddedCassandra} and {@link CassandraDatabase}.
  *
  * @author Dmytro Nosan
  */

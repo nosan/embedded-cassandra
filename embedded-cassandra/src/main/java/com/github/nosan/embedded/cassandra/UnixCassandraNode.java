@@ -26,11 +26,11 @@ import java.util.concurrent.TimeUnit;
 import com.github.nosan.embedded.cassandra.api.Version;
 
 /**
- * Unix {@link Node}.
+ * Unix {@link CassandraNode}.
  *
  * @author Dmytro Nosan
  */
-class UnixNode extends AbstractNode {
+class UnixCassandraNode extends AbstractCassandraNode {
 
 	private final Version version;
 
@@ -38,7 +38,8 @@ class UnixNode extends AbstractNode {
 
 	private final boolean rootAllowed;
 
-	UnixNode(Version version, Path workingDirectory, List<String> jvmOptions, Map<String, Object> systemProperties,
+	UnixCassandraNode(Version version, Path workingDirectory, List<String> jvmOptions,
+			Map<String, Object> systemProperties,
 			Map<String, Object> environmentVariables, Map<String, Object> properties, boolean rootAllowed) {
 		super(workingDirectory, properties, jvmOptions, systemProperties, environmentVariables);
 		this.version = version;

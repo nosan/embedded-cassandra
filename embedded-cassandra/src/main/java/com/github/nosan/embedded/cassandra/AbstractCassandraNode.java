@@ -41,11 +41,11 @@ import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.io.UrlResource;
 
 /**
- * Abstract {@link Node} that implements common logic for any subclasses.
+ * Abstract {@link CassandraNode} that implements common logic for any subclasses.
  *
  * @author Dmytro Nosan
  */
-abstract class AbstractNode implements Node {
+abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final String JVM_EXTRA_OPTS = "JVM_EXTRA_OPTS";
 
@@ -66,7 +66,7 @@ abstract class AbstractNode implements Node {
 
 	private volatile long pid = -1;
 
-	AbstractNode(Path workingDirectory, Map<String, Object> properties, List<String> jvmOptions,
+	AbstractCassandraNode(Path workingDirectory, Map<String, Object> properties, List<String> jvmOptions,
 			Map<String, Object> systemProperties, Map<String, Object> environmentVariables) {
 		this.workingDirectory = workingDirectory;
 		this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));

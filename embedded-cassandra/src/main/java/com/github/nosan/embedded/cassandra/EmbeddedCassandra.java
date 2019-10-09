@@ -41,13 +41,13 @@ class EmbeddedCassandra implements Cassandra {
 
 	private final Version version;
 
-	private final Database database;
+	private final CassandraDatabase database;
 
 	private volatile boolean started = false;
 
 	private volatile boolean running = false;
 
-	EmbeddedCassandra(String name, Version version, Database database) {
+	EmbeddedCassandra(String name, Version version, CassandraDatabase database) {
 		this.name = name;
 		this.version = version;
 		this.database = database;

@@ -49,11 +49,11 @@ import com.github.nosan.embedded.cassandra.commons.util.FileUtils;
 import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
 
 /**
- * Embedded {@link Database}.
+ * Embedded {@link CassandraDatabase}.
  *
  * @author Dmytro Nosan
  */
-class EmbeddedCassandraDatabase implements Database {
+class EmbeddedCassandraDatabase implements CassandraDatabase {
 
 	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraDatabase.class);
 
@@ -71,7 +71,7 @@ class EmbeddedCassandraDatabase implements Database {
 
 	private final Duration timeout;
 
-	private final Node node;
+	private final CassandraNode node;
 
 	@Nullable
 	private final Resource config;
@@ -93,7 +93,7 @@ class EmbeddedCassandraDatabase implements Database {
 
 	EmbeddedCassandraDatabase(String name, Version version, Path directory, Path workingDirectory, boolean daemon,
 			Logger logger, Duration timeout, @Nullable Resource config, @Nullable Resource rackConfig,
-			@Nullable Resource topologyConfig, Node node) {
+			@Nullable Resource topologyConfig, CassandraNode node) {
 		this.name = name;
 		this.version = version;
 		this.directory = directory;
