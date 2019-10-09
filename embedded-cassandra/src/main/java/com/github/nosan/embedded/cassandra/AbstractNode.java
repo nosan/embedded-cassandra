@@ -110,8 +110,6 @@ abstract class AbstractNode implements Node {
 				}
 			}
 		}
-		this.process = null;
-		this.pid = -1;
 	}
 
 	@Override

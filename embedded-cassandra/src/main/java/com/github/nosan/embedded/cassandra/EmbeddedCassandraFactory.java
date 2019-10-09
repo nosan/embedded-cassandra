@@ -575,7 +575,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 			throw new IllegalStateException(directory + " is not a directory");
 		}
 		Node node = createNode(version, workingDirectory);
-		Database database = new DefaultDatabase(name, version, directory, workingDirectory, isDaemon(),
+		Database database = new EmbeddedCassandraDatabase(name, version, directory, workingDirectory, isDaemon(),
 				getLogger(), getTimeout(), getConfig(), getRackConfig(), getTopologyConfig(), node);
 		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, version, database);
 		if (isRegisterShutdownHook()) {

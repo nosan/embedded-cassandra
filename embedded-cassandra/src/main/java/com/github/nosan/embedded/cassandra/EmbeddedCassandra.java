@@ -19,6 +19,9 @@ package com.github.nosan.embedded.cassandra;
 import java.net.InetAddress;
 import java.util.StringJoiner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.CassandraException;
@@ -31,6 +34,8 @@ import com.github.nosan.embedded.cassandra.api.Version;
  * @author Dmytro Nosan
  */
 class EmbeddedCassandra implements Cassandra {
+
+	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandra.class);
 
 	private final String name;
 
@@ -55,8 +60,10 @@ class EmbeddedCassandra implements Cassandra {
 		}
 		try {
 			this.started = true;
+			log.info("Starts {}", toString());
 			doStart();
 			this.running = true;
+			log.info("{} has been started and ready for connections!", toString());
 		}
 		catch (CassandraException ex) {
 			try {
@@ -75,7 +82,9 @@ class EmbeddedCassandra implements Cassandra {
 		if (!this.started) {
 			return;
 		}
+		log.info("Stops {}", toString());
 		doStop();
+		log.info("{} has been stopped", toString());
 		this.started = false;
 		this.running = false;
 	}
@@ -126,7 +135,9 @@ class EmbeddedCassandra implements Cassandra {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", EmbeddedCassandra.class.getSimpleName() + "[", "]")
-				.add("database=" + this.database).toString();
+				.add("name='" + this.name + "'")
+				.add("version=" + this.version)
+				.toString();
 	}
 
 	private void doStart() {

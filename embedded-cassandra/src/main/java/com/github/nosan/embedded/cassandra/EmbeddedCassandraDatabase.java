@@ -53,9 +53,9 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  *
  * @author Dmytro Nosan
  */
-class DefaultDatabase implements Database {
+class EmbeddedCassandraDatabase implements Database {
 
-	private static final Logger log = LoggerFactory.getLogger(DefaultDatabase.class);
+	private static final Logger log = LoggerFactory.getLogger(EmbeddedCassandraDatabase.class);
 
 	private final String name;
 
@@ -91,7 +91,7 @@ class DefaultDatabase implements Database {
 
 	private volatile int rpcPort = -1;
 
-	DefaultDatabase(String name, Version version, Path directory, Path workingDirectory, boolean daemon,
+	EmbeddedCassandraDatabase(String name, Version version, Path directory, Path workingDirectory, boolean daemon,
 			Logger logger, Duration timeout, @Nullable Resource config, @Nullable Resource rackConfig,
 			@Nullable Resource topologyConfig, Node node) {
 		this.name = name;
@@ -115,7 +115,6 @@ class DefaultDatabase implements Database {
 		NativeTransportReadinessConsumer nativeTransportReadiness = new NativeTransportReadinessConsumer(this.version);
 		RpcTransportReadinessConsumer rpcTransportReadiness = new RpcTransportReadinessConsumer(this.version);
 		await(this.node.getProcess(), nativeTransportReadiness, rpcTransportReadiness);
-		log.info("{} is running and ready for connections", toString());
 		int sslPort = nativeTransportReadiness.getSslPort();
 		int port = nativeTransportReadiness.getPort();
 		this.port = (port != -1) ? port : sslPort;
@@ -128,14 +127,9 @@ class DefaultDatabase implements Database {
 	@Override
 	public void stop() throws InterruptedException, IOException {
 		if (this.node.isAlive()) {
-			log.info("Stops {}", toString());
 			this.node.stop();
 			log.info("{} has been stopped", toString());
 		}
-		this.port = -1;
-		this.sslPort = -1;
-		this.rpcPort = -1;
-		this.address = null;
 		FileUtils.delete(this.workingDirectory);
 	}
 
@@ -162,7 +156,7 @@ class DefaultDatabase implements Database {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", DefaultDatabase.class.getSimpleName() + "[", "]")
+		return new StringJoiner(", ", EmbeddedCassandraDatabase.class.getSimpleName() + "[", "]")
 				.add("name='" + this.name + "'").add("version=" + this.version).add("node=" + this.node).toString();
 	}
 
