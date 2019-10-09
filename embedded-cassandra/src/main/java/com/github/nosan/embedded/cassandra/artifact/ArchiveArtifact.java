@@ -56,7 +56,7 @@ public final class ArchiveArtifact implements Artifact {
 	 * Constructs a new {@link ArchiveArtifact} with the specified archive resource and Cassandra's version.
 	 *
 	 * @param version Cassandra's version
-	 * @param archiveResource the archive resource
+	 * @param archiveResource the archive resource (Can be {@link ArchiveResource}).
 	 */
 	public ArchiveArtifact(Version version, Resource archiveResource) {
 		this.version = Objects.requireNonNull(version, "'version' must not be null");
@@ -115,7 +115,7 @@ public final class ArchiveArtifact implements Artifact {
 				}
 				if (!Files.exists(destination.resolve(".extracted"))) {
 					log.info("Extracts '{}' into '{}' directory", this.archiveResource, destination);
-					ArchiveResource archiveResource = new ArchiveResource(this.archiveResource);
+					ArchiveResource archiveResource = createArchiveResource();
 					archiveResource.extract(destination);
 					Distribution distribution = artifact.getDistribution();
 					FileUtils.createIfNotExists(destination.resolve(".extracted"));
@@ -125,6 +125,13 @@ public final class ArchiveArtifact implements Artifact {
 		}
 
 		return artifact.getDistribution();
+	}
+
+	private ArchiveResource createArchiveResource() {
+		if (this.archiveResource instanceof ArchiveResource) {
+			return ((ArchiveResource) this.archiveResource);
+		}
+		return new ArchiveResource(this.archiveResource);
 	}
 
 	private Path getRealDestination() {

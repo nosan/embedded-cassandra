@@ -50,8 +50,6 @@ public class ArchiveResource implements Resource {
 
 	private final Resource resource;
 
-	private final ArchiveStream archiveStream;
-
 	/**
 	 * Constructs a new {@link ArchiveResource} with the specified {@link Resource}.
 	 *
@@ -59,7 +57,6 @@ public class ArchiveResource implements Resource {
 	 */
 	public ArchiveResource(Resource resource) {
 		this.resource = Objects.requireNonNull(resource, "'resource' must not be null");
-		this.archiveStream = ArchiveStreams.create(resource);
 	}
 
 	/**
@@ -129,9 +126,11 @@ public class ArchiveResource implements Resource {
 
 	@Override
 	public ArchiveInputStream getInputStream() throws IOException {
-		InputStream is = this.resource.getInputStream();
+		Resource resource = this.resource;
+		ArchiveInputStreamFactory archiveInputStreamFactory = createArchiveInputStreamFactory(resource);
+		InputStream is = resource.getInputStream();
 		try {
-			return this.archiveStream.open(is);
+			return archiveInputStreamFactory.create(is);
 		}
 		catch (Exception ex) {
 			try {
@@ -184,6 +183,16 @@ public class ArchiveResource implements Resource {
 	}
 
 	/**
+	 * Creates {@link ArchiveStreamFactory} for the given resource.
+	 *
+	 * @param resource the archive resource
+	 * @return a factory to create a {@link ArchiveInputStream}.
+	 */
+	protected ArchiveInputStreamFactory createArchiveInputStreamFactory(Resource resource) {
+		return ArchiveStreams.create(resource);
+	}
+
+	/**
 	 * Callback that accepts {@link ArchiveEntry} and {@link ArchiveInputStream}.
 	 */
 	public interface ArchiveEntryCallback {
@@ -199,19 +208,30 @@ public class ArchiveResource implements Resource {
 
 	}
 
+	/**
+	 * Factory to create {@link ArchiveInputStream}.
+	 */
 	@FunctionalInterface
-	private interface ArchiveStream {
+	protected interface ArchiveInputStreamFactory {
 
-		ArchiveInputStream open(InputStream is) throws ArchiveException, CompressorException;
+		/**
+		 * Creates {@link ArchiveInputStream} for the given stream.
+		 *
+		 * @param is the source stream.
+		 * @return the archive input stream
+		 * @throws ArchiveException if the archive name is not known or not available
+		 * @throws CompressorException if the compressor name is not known or not available
+		 */
+		ArchiveInputStream create(InputStream is) throws ArchiveException, CompressorException;
 
 	}
 
 	private static final class ArchiveStreams {
 
-		private static final Map<String, ArchiveStream> STREAMS;
+		private static final Map<String, ArchiveInputStreamFactory> STREAMS;
 
 		static {
-			Map<String, ArchiveStream> streams = new LinkedHashMap<>();
+			Map<String, ArchiveInputStreamFactory> streams = new LinkedHashMap<>();
 			streams.put(".tar.gz", create(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
 			streams.put(".tar.bz2", create(ArchiveStreamFactory.TAR, CompressorStreamFactory.BZIP2));
 			streams.put(".tgz", create(ArchiveStreamFactory.TAR, CompressorStreamFactory.GZIP));
@@ -229,9 +249,9 @@ public class ArchiveResource implements Resource {
 			STREAMS = Collections.unmodifiableMap(streams);
 		}
 
-		static ArchiveStream create(Resource resource) {
+		static ArchiveInputStreamFactory create(Resource resource) {
 			String name = Objects.toString(resource.getFileName(), "");
-			for (Map.Entry<String, ArchiveStream> entry : STREAMS.entrySet()) {
+			for (Map.Entry<String, ArchiveInputStreamFactory> entry : STREAMS.entrySet()) {
 				if (name.endsWith(entry.getKey())) {
 					return entry.getValue();
 				}
@@ -239,7 +259,7 @@ public class ArchiveResource implements Resource {
 			throw new IllegalArgumentException("Archive Type for '" + resource + "' cannot be determined");
 		}
 
-		private static ArchiveStream create(String archiveType, String compressorType) {
+		private static ArchiveInputStreamFactory create(String archiveType, String compressorType) {
 			return is -> {
 				ArchiveStreamFactory af = new ArchiveStreamFactory();
 				CompressorStreamFactory csf = new CompressorStreamFactory();
@@ -247,7 +267,7 @@ public class ArchiveResource implements Resource {
 			};
 		}
 
-		private static ArchiveStream create(String archiveType) {
+		private static ArchiveInputStreamFactory create(String archiveType) {
 			return is -> {
 				ArchiveStreamFactory af = new ArchiveStreamFactory();
 				return af.createArchiveInputStream(archiveType, is);
