@@ -21,12 +21,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
@@ -49,7 +48,7 @@ public interface CqlDataSet extends CqlScript {
 	static CqlDataSet ofStrings(String... scripts) {
 		Objects.requireNonNull(scripts, "'scripts' must not be null");
 		if (scripts.length == 0) {
-			return new DefaultCqlDataSet(Collections.emptyList());
+			return empty();
 		}
 		if (scripts.length == 1) {
 			return new DefaultCqlDataSet(Collections.singletonList(CqlScript.ofString(scripts[0])));
@@ -78,7 +77,7 @@ public interface CqlDataSet extends CqlScript {
 		Objects.requireNonNull(charset, "'charset' must not be null");
 		Objects.requireNonNull(resources, "'resources' must not be null");
 		if (resources.length == 0) {
-			return new DefaultCqlDataSet(Collections.emptyList());
+			return empty();
 		}
 		if (resources.length == 1) {
 			return new DefaultCqlDataSet(Collections.singletonList(CqlScript.ofResource(charset, resources[0])));
@@ -118,7 +117,19 @@ public interface CqlDataSet extends CqlScript {
 	 */
 	static CqlDataSet ofScripts(CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "'scripts' must not be null");
-		return new DefaultCqlDataSet(Arrays.asList(scripts));
+		if (scripts.length == 0) {
+			return empty();
+		}
+		List<CqlScript> result = new ArrayList<>();
+		for (CqlScript script : scripts) {
+			if (script instanceof CqlDataSet) {
+				result.addAll(((CqlDataSet) script).getScripts());
+			}
+			else {
+				result.add(script);
+			}
+		}
+		return new DefaultCqlDataSet(result);
 	}
 
 	/**
@@ -139,9 +150,7 @@ public interface CqlDataSet extends CqlScript {
 	 */
 	default CqlDataSet add(CqlDataSet dataSet) {
 		Objects.requireNonNull(dataSet, "'dataSet' must not be null");
-		Set<CqlScript> scripts = new LinkedHashSet<>(getScripts());
-		scripts.addAll(dataSet.getScripts());
-		return new DefaultCqlDataSet(new ArrayList<>(scripts));
+		return ofScripts(Stream.concat(getScripts().stream(), dataSet.getScripts().stream()).toArray(CqlScript[]::new));
 	}
 
 	/**
