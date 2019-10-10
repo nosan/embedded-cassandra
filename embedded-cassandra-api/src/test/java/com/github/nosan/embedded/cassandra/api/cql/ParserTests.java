@@ -126,9 +126,9 @@ class ParserTests {
 	@Test
 	void shouldNotTrimSpacesInQuotes() {
 		List<String> statements = parse("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
-				+ "  (201, \"Women's Tour   of New Zealand; New England\");");
+				+ "  (201, 'Women''s Tour   of New Zealand; New England');");
 		assertThat(statements).containsExactly("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
-				+ "(201, \"Women's Tour   of New Zealand; New England\")");
+				+ "(201, 'Women''s Tour   of New Zealand; New England')");
 	}
 
 	@Test
