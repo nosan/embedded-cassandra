@@ -40,6 +40,15 @@ import com.github.nosan.embedded.cassandra.commons.io.Resource;
 public interface CqlDataSet extends CqlScript {
 
 	/**
+	 * Constructs a new {@link CqlDataSet} with no {@link CqlScript}(s).
+	 *
+	 * @return a new empty {@link CqlDataSet}
+	 */
+	static CqlDataSet empty() {
+		return DefaultCqlDataSet.EMPTY;
+	}
+
+	/**
 	 * Constructs a new {@link CqlDataSet} with the specified CQL ({@code string}) scripts.
 	 *
 	 * @param scripts the CQL scripts
@@ -133,15 +142,6 @@ public interface CqlDataSet extends CqlScript {
 	}
 
 	/**
-	 * Constructs a new {@link CqlDataSet} with no {@link CqlScript}(s).
-	 *
-	 * @return a new empty {@link CqlDataSet}
-	 */
-	static CqlDataSet empty() {
-		return DefaultCqlDataSet.EMPTY;
-	}
-
-	/**
 	 * Appends all of the scripts in the specified {@link CqlDataSet} to the end of this {@link CqlDataSet} and returns
 	 * the new {@link CqlDataSet} that contains both of them.
 	 *
@@ -151,17 +151,6 @@ public interface CqlDataSet extends CqlScript {
 	default CqlDataSet add(CqlDataSet dataSet) {
 		Objects.requireNonNull(dataSet, "'dataSet' must not be null");
 		return ofScripts(Stream.concat(getScripts().stream(), dataSet.getScripts().stream()).toArray(CqlScript[]::new));
-	}
-
-	/**
-	 * Performs the given {@code callback} for each statement of the {@link CqlDataSet}.
-	 *
-	 * @param callback The action to be performed for each statement
-	 */
-	@Override
-	default void forEachStatement(Consumer<? super String> callback) {
-		Objects.requireNonNull(callback, "'callback' must not be null");
-		getStatements().forEach(callback);
 	}
 
 	/**
