@@ -21,8 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -117,6 +119,29 @@ public interface CqlDataSet extends CqlScript {
 	static CqlDataSet ofScripts(CqlScript... scripts) {
 		Objects.requireNonNull(scripts, "'scripts' must not be null");
 		return new DefaultCqlDataSet(Arrays.asList(scripts));
+	}
+
+	/**
+	 * Constructs a new {@link CqlDataSet} with no {@link CqlScript}(s).
+	 *
+	 * @return a new empty {@link CqlDataSet}
+	 */
+	static CqlDataSet empty() {
+		return DefaultCqlDataSet.EMPTY;
+	}
+
+	/**
+	 * Appends all of the scripts in the specified {@link CqlDataSet} to the end of this {@link CqlDataSet} and returns
+	 * the new {@link CqlDataSet} that contains both of them.
+	 *
+	 * @param dataSet {@link CqlDataSet} containing scripts to be added to this {@link CqlDataSet}
+	 * @return a new {@link CqlDataSet}
+	 */
+	default CqlDataSet add(CqlDataSet dataSet) {
+		Objects.requireNonNull(dataSet, "'dataSet' must not be null");
+		Set<CqlScript> scripts = new LinkedHashSet<>(getScripts());
+		scripts.addAll(dataSet.getScripts());
+		return new DefaultCqlDataSet(new ArrayList<>(scripts));
 	}
 
 	/**

@@ -30,6 +30,8 @@ import com.github.nosan.embedded.cassandra.annotations.Nullable;
  */
 final class DefaultCqlDataSet implements CqlDataSet {
 
+	static final CqlDataSet EMPTY = new DefaultCqlDataSet(Collections.emptyList());
+
 	private final List<CqlScript> scripts;
 
 	/**

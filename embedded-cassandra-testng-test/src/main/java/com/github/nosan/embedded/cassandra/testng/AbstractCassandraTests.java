@@ -98,7 +98,7 @@ public abstract class AbstractCassandraTests {
 	public AbstractCassandraTests(CassandraFactoryCustomizer<? super EmbeddedCassandraFactory>... customizers) {
 		this.cassandraFactory = new DefaultCassandraFactory(customizers);
 		this.cassandraConnectionFactory = new DefaultCassandraConnectionFactory();
-		this.dataSet = Collections::emptyList;
+		this.dataSet = CqlDataSet.empty();
 		this.exposeProperties = true;
 	}
 

@@ -100,7 +100,7 @@ public final class CassandraRule extends ExternalResource {
 	public CassandraRule(CassandraFactoryCustomizer<? super EmbeddedCassandraFactory>... customizers) {
 		this.cassandraFactory = new DefaultCassandraFactory(customizers);
 		this.cassandraConnectionFactory = new DefaultCassandraConnectionFactory();
-		this.dataSet = Collections::emptyList;
+		this.dataSet = CqlDataSet.empty();
 		this.exposeProperties = true;
 	}
 
