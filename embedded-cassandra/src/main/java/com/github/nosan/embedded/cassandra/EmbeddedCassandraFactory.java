@@ -598,8 +598,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 
 		if (isWindows()) {
 			return new WindowsCassandraNode(version, workingDirectory, jvmOptions, systemProperties,
-					environmentVariables,
-					configProperties);
+					environmentVariables, configProperties);
 		}
 		return new UnixCassandraNode(version, workingDirectory, jvmOptions, systemProperties, environmentVariables,
 				configProperties, isRootAllowed());
