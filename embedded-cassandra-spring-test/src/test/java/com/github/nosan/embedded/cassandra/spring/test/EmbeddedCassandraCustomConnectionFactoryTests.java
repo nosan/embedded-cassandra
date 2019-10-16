@@ -24,10 +24,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.api.connection.CassandraConnectionFactory;
 import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnection;
-import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnectionFactory;
+import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnectionBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,11 +50,12 @@ class EmbeddedCassandraCustomConnectionFactoryTests {
 		assertThat(cluster.getClusterName()).isEqualTo("spring-test");
 	}
 
-	static class MyCassandraConnectionFactory extends ClusterCassandraConnectionFactory {
+	static class MyCassandraConnectionFactory implements CassandraConnectionFactory {
 
 		@Override
-		protected void customize(Cluster.Builder clusterBuilder) {
-			clusterBuilder.withClusterName("spring-test");
+		public CassandraConnection create(Cassandra cassandra) {
+			return new ClusterCassandraConnectionBuilder().addClusterBuilderCustomizers(
+					builder -> builder.withClusterName("spring-test")).create(cassandra);
 		}
 
 	}

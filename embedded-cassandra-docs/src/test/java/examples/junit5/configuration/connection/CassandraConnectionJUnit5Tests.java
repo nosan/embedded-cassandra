@@ -22,14 +22,15 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
-import com.github.nosan.embedded.cassandra.api.connection.CqlSessionCassandraConnectionFactory;
+import com.github.nosan.embedded.cassandra.api.connection.CqlSessionCassandraConnectionBuilder;
 import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
 class CassandraConnectionJUnit5Tests {
 
 	@RegisterExtension
 	static final CassandraExtension CASSANDRA_EXTENSION = new CassandraExtension()
-			.withCassandraConnectionFactory(new CqlSessionCassandraConnectionFactory());
+			.withCassandraConnectionFactory(new CqlSessionCassandraConnectionBuilder()
+					.withSslEnabled(true));
 
 	@Test
 	void test() {

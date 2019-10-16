@@ -23,14 +23,16 @@ import org.junit.Test;
 
 import com.github.nosan.embedded.cassandra.api.Cassandra;
 import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
-import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnectionFactory;
+import com.github.nosan.embedded.cassandra.api.connection.ClusterCassandraConnectionBuilder;
 import com.github.nosan.embedded.cassandra.junit4.test.CassandraRule;
 
 public class CassandraConnectionJUnit4Tests {
 
 	@ClassRule
 	public static final CassandraRule CASSANDRA_RULE = new CassandraRule()
-			.withCassandraConnectionFactory(new ClusterCassandraConnectionFactory());
+			.withCassandraConnectionFactory(new ClusterCassandraConnectionBuilder()
+					.withUsername("cassandra")
+					.withPassword("cassandra"));
 
 	@Test
 	public void testCassandra() {

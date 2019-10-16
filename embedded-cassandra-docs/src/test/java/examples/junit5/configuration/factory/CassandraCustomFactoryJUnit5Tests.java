@@ -17,12 +17,13 @@
 package examples.junit5.configuration.factory;
 // tag::source[]
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraBuilder;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.api.CassandraFactory;
 import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.junit5.test.CassandraExtension;
 
@@ -30,18 +31,12 @@ class CassandraCustomFactoryJUnit5Tests {
 
 	@RegisterExtension
 	static final CassandraExtension CASSANDRA_EXTENSION = new CassandraExtension()
-			.withCassandraFactory(createCassandraFactory());
+			.withCassandraFactory(new EmbeddedCassandraBuilder().withTimeout(Duration.ofSeconds(30)));
 
 	@Test
 	void test() {
 		Cassandra cassandra = CASSANDRA_EXTENSION.getCassandra();
 		CassandraConnection cassandraConnection = CASSANDRA_EXTENSION.getCassandraConnection();
-	}
-
-	private static CassandraFactory createCassandraFactory() {
-		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		//configure me
-		return cassandraFactory;
 	}
 
 }

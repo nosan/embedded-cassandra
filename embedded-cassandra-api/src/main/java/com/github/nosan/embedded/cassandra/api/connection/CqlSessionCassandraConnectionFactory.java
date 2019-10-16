@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.CqlSessionBuilder;
@@ -42,13 +43,19 @@ import com.github.nosan.embedded.cassandra.commons.io.Resource;
  * {@link CassandraConnectionFactory} that can be used to create and configure a {@link CqlSessionCassandraConnection}.
  *
  * @author Dmytro Nosan
+ * @see CqlSessionCassandraConnectionBuilder
  * @since 3.0.0
  */
-public class CqlSessionCassandraConnectionFactory implements CassandraConnectionFactory {
+public final class CqlSessionCassandraConnectionFactory implements CassandraConnectionFactory {
 
 	private final List<TypeCodec<?>> typeCodecs = new ArrayList<>();
 
 	private final List<String> cipherSuites = new ArrayList<>();
+
+	private final List<Consumer<? super CqlSessionBuilder>> sessionBuilderCustomizers = new ArrayList<>();
+
+	private final List<Consumer<? super ProgrammaticDriverConfigLoaderBuilder>> driverConfigLoaderBuilderCustomizers =
+			new ArrayList<>();
 
 	@Nullable
 	private String username;
@@ -91,6 +98,14 @@ public class CqlSessionCassandraConnectionFactory implements CassandraConnection
 	 */
 	public List<String> getCipherSuites() {
 		return this.cipherSuites;
+	}
+
+	public List<Consumer<? super CqlSessionBuilder>> getSessionBuilderCustomizers() {
+		return this.sessionBuilderCustomizers;
+	}
+
+	public List<Consumer<? super ProgrammaticDriverConfigLoaderBuilder>> getDriverConfigLoaderBuilderCustomizers() {
+		return this.driverConfigLoaderBuilderCustomizers;
 	}
 
 	/**
@@ -264,26 +279,10 @@ public class CqlSessionCassandraConnectionFactory implements CassandraConnection
 	}
 
 	@Override
-	public final CqlSessionCassandraConnection create(Cassandra cassandra) {
+	public CqlSessionCassandraConnection create(Cassandra cassandra) {
 		Objects.requireNonNull(cassandra, "'cassandra' must not be null");
 		CqlSession session = createSession(cassandra);
 		return new CqlSessionCassandraConnection(session);
-	}
-
-	/**
-	 * Creates a new configured {@link CqlSession}.
-	 *
-	 * @param sessionBuilder a session builder
-	 */
-	protected void customize(CqlSessionBuilder sessionBuilder) {
-	}
-
-	/**
-	 * Creates a new configured {@link DriverConfigLoader}.
-	 *
-	 * @param driverBuilder a driver builder
-	 */
-	protected void customize(ProgrammaticDriverConfigLoaderBuilder driverBuilder) {
 	}
 
 	private CqlSession createSession(Cassandra cassandra) {
@@ -321,7 +320,9 @@ public class CqlSessionCassandraConnectionFactory implements CassandraConnection
 				driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PASSWORD, keystorePassword);
 			}
 		}
-		customize(driverBuilder);
+		List<Consumer<? super ProgrammaticDriverConfigLoaderBuilder>> driverConfigLoaderBuilderCustomizers =
+				getDriverConfigLoaderBuilderCustomizers();
+		driverConfigLoaderBuilderCustomizers.forEach(customizer -> customizer.accept(driverBuilder));
 		int port = cassandra.getPort();
 		int sslPort = cassandra.getSslPort();
 		InetSocketAddress contactPoint = new InetSocketAddress(cassandra.getAddress(),
@@ -336,7 +337,8 @@ public class CqlSessionCassandraConnectionFactory implements CassandraConnection
 		if (!typeCodecs.isEmpty()) {
 			sessionBuilder.addTypeCodecs(typeCodecs.toArray(new TypeCodec[0]));
 		}
-		customize(sessionBuilder);
+		List<Consumer<? super CqlSessionBuilder>> sessionBuilderCustomizers = getSessionBuilderCustomizers();
+		sessionBuilderCustomizers.forEach(customizer -> customizer.accept(sessionBuilder));
 		return sessionBuilder.build();
 	}
 

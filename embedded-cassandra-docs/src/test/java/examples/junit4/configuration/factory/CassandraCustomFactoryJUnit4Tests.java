@@ -21,28 +21,23 @@ package examples.junit4.configuration.factory;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraBuilder;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.api.CassandraFactory;
 import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
+import com.github.nosan.embedded.cassandra.artifact.Artifact;
 import com.github.nosan.embedded.cassandra.junit4.test.CassandraRule;
 
 public class CassandraCustomFactoryJUnit4Tests {
 
 	@ClassRule
 	public static final CassandraRule CASSANDRA_RULE = new CassandraRule()
-			.withCassandraFactory(createCassandraFactory());
+			.withCassandraFactory(new EmbeddedCassandraBuilder()
+					.withArtifact(Artifact.ofVersion("3.11.3")));
 
 	@Test
 	public void testCassandra() {
 		Cassandra cassandra = CASSANDRA_RULE.getCassandra();
 		CassandraConnection cassandraConnection = CASSANDRA_RULE.getCassandraConnection();
-	}
-
-	private static CassandraFactory createCassandraFactory() {
-		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		//configure me
-		return cassandraFactory;
 	}
 
 }

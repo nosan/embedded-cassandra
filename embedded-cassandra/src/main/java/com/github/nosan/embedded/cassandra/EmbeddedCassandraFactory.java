@@ -16,12 +16,12 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -88,14 +88,14 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  * @author Dmytro Nosan
  * @see Cassandra
  * @see CassandraFactory
+ * @see EmbeddedCassandraBuilder
  * @since 3.0.0
  */
 public final class EmbeddedCassandraFactory implements CassandraFactory {
 
 	private static final AtomicLong NUMBER = new AtomicLong();
 
-	private final Map<String, Object> environmentVariables = new LinkedHashMap<>(
-			Collections.singletonMap("JAVA_HOME", javaHome()));
+	private final Map<String, Object> environmentVariables = new LinkedHashMap<>();
 
 	private final List<String> jvmOptions = new ArrayList<>();
 
@@ -114,6 +114,9 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	private Duration timeout = Duration.ofSeconds(90);
 
 	@Nullable
+	private Path javaHome = Optional.ofNullable(System.getProperty("java.home")).map(Paths::get).orElse(null);
+
+	@Nullable
 	private String name;
 
 	@Nullable
@@ -130,6 +133,27 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 
 	@Nullable
 	private Path workingDirectory;
+
+	@Nullable
+	private Integer port;
+
+	@Nullable
+	private Integer sslPort;
+
+	@Nullable
+	private Integer storagePort;
+
+	@Nullable
+	private Integer sslStoragePort;
+
+	@Nullable
+	private Integer rpcPort;
+
+	@Nullable
+	private Integer jmxLocalPort;
+
+	@Nullable
+	private InetAddress address;
 
 	/**
 	 * Returns Cassandra's name. Defaults to {@code 'cassandra'}.
@@ -201,19 +225,16 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 */
 	@Nullable
 	public Path getJavaHome() {
-		Object javaHome = getEnvironmentVariables().get("JAVA_HOME");
-		return (javaHome != null) ? Paths.get(javaHome.toString()) : null;
+		return this.javaHome;
 	}
 
 	/**
 	 * Sets the path to java home.
-	 * <p>
-	 * Alias for {@link #getEnvironmentVariables()}{@code .put("JAVA_HOME", javaHome)}
 	 *
 	 * @param javaHome path to the java home
 	 */
 	public void setJavaHome(@Nullable Path javaHome) {
-		getEnvironmentVariables().put("JAVA_HOME", javaHome);
+		this.javaHome = javaHome;
 	}
 
 	/**
@@ -335,19 +356,16 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 */
 	@Nullable
 	public Integer getPort() {
-		Object port = getSystemProperties().get("cassandra.native_transport_port");
-		return (port != null) ? Integer.parseInt(port.toString()) : null;
+		return this.port;
 	}
 
 	/**
 	 * Sets the native transport port ({@code cassandra.native_transport_port}).
-	 * <p>
-	 * Alias for {@link #getSystemProperties()}{@code .put("cassandra.native_transport_port", port)}
 	 *
 	 * @param port the port number, or 0 to use a port number that is automatically allocated
 	 */
 	public void setPort(@Nullable Integer port) {
-		getSystemProperties().put("cassandra.native_transport_port", port);
+		this.port = port;
 	}
 
 	/**
@@ -357,19 +375,16 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 */
 	@Nullable
 	public Integer getSslPort() {
-		Object port = getConfigProperties().get("native_transport_port_ssl");
-		return (port != null) ? Integer.parseInt(port.toString()) : null;
+		return this.sslPort;
 	}
 
 	/**
 	 * Sets the native transport SSL port ({@code native_transport_port_ssl}).
-	 * <p>
-	 * Alias for {@link #getConfigProperties()}{@code .put("native_transport_port_ssl", port)}
 	 *
 	 * @param port the port number, or 0 to use a port number that is automatically allocated
 	 */
 	public void setSslPort(@Nullable Integer port) {
-		getConfigProperties().put("native_transport_port_ssl", port);
+		this.sslPort = port;
 	}
 
 	/**
@@ -379,19 +394,16 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 */
 	@Nullable
 	public Integer getRpcPort() {
-		Object port = getSystemProperties().get("cassandra.rpc_port");
-		return (port != null) ? Integer.parseInt(port.toString()) : null;
+		return this.rpcPort;
 	}
 
 	/**
 	 * Sets the RPC transport port ({@code cassandra.rpc_port}).
-	 * <p>
-	 * Alias for {@link #getSystemProperties()}{@code .put("cassandra.rpc_port", port)}
 	 *
 	 * @param port the port number, or 0 to use a port number that is automatically allocated
 	 */
 	public void setRpcPort(@Nullable Integer port) {
-		getSystemProperties().put("cassandra.rpc_port", port);
+		this.rpcPort = port;
 	}
 
 	/**
@@ -401,19 +413,16 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 */
 	@Nullable
 	public Integer getStoragePort() {
-		Object port = getSystemProperties().get("cassandra.storage_port");
-		return (port != null) ? Integer.parseInt(port.toString()) : null;
+		return this.storagePort;
 	}
 
 	/**
 	 * Sets the storage port ({@code cassandra.storage_port}).
-	 * <p>
-	 * Alias for {@link #getSystemProperties()}{@code .put("cassandra.storage_port", port)}
 	 *
 	 * @param port the port number, or 0 to use a port number that is automatically allocated
 	 */
 	public void setStoragePort(@Nullable Integer port) {
-		getSystemProperties().put("cassandra.storage_port", port);
+		this.storagePort = port;
 	}
 
 	/**
@@ -423,19 +432,16 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 */
 	@Nullable
 	public Integer getSslStoragePort() {
-		Object port = getSystemProperties().get("cassandra.ssl_storage_port");
-		return (port != null) ? Integer.parseInt(port.toString()) : null;
+		return this.sslStoragePort;
 	}
 
 	/**
 	 * Sets the storage SSL port ({@code cassandra.ssl_storage_port}).
-	 * <p>
-	 * Alias for {@link #getSystemProperties()}{@code .put("cassandra.ssl_storage_port", port)}
 	 *
 	 * @param port the port number, or 0 to use a port number that is automatically allocated
 	 */
 	public void setSslStoragePort(@Nullable Integer port) {
-		getSystemProperties().put("cassandra.ssl_storage_port", port);
+		this.sslStoragePort = port;
 	}
 
 	/**
@@ -445,19 +451,35 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 */
 	@Nullable
 	public Integer getJmxLocalPort() {
-		Object port = getSystemProperties().get("cassandra.jmx.local.port");
-		return (port != null) ? Integer.parseInt(port.toString()) : null;
+		return this.jmxLocalPort;
 	}
 
 	/**
 	 * Sets the JMX local port ({@code cassandra.jmx.local.port}).
-	 * <p>
-	 * Alias for {@link #getSystemProperties()}{@code .put("cassandra.jmx.local.port", port)}
 	 *
 	 * @param port the port number, or 0 to use a port number that is automatically allocated
 	 */
 	public void setJmxLocalPort(@Nullable Integer port) {
-		getSystemProperties().put("cassandra.jmx.local.port", port);
+		this.jmxLocalPort = port;
+	}
+
+	/**
+	 * Returns the RPC address ({@code rpc_address}).
+	 *
+	 * @return the address
+	 */
+	@Nullable
+	public InetAddress getAddress() {
+		return this.address;
+	}
+
+	/**
+	 * Sets the RPC address ({@code rpc_address}). The address to bind the Thrift RPC service and native transport.
+	 *
+	 * @param address the address
+	 */
+	public void setAddress(@Nullable InetAddress address) {
+		this.address = address;
 	}
 
 	/**
@@ -595,18 +617,44 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		jvmOptions.removeIf(Objects::isNull);
 		LinkedHashMap<String, Object> configProperties = new LinkedHashMap<>(getConfigProperties());
 		configProperties.keySet().removeIf(Objects::isNull);
-
+		Path javaHome = getJavaHome();
+		if (javaHome != null) {
+			environmentVariables.put("JAVA_HOME", javaHome);
+		}
+		Integer port = getPort();
+		if (port != null) {
+			systemProperties.put("cassandra.native_transport_port", port);
+		}
+		Integer sslPort = getSslPort();
+		if (sslPort != null) {
+			configProperties.put("native_transport_port_ssl", sslPort);
+		}
+		InetAddress address = getAddress();
+		if (address != null) {
+			configProperties.put("rpc_address", address.getHostAddress());
+		}
+		Integer rpcPort = getRpcPort();
+		if (rpcPort != null) {
+			systemProperties.put("cassandra.rpc_port", rpcPort);
+		}
+		Integer storagePort = getStoragePort();
+		if (storagePort != null) {
+			systemProperties.put("cassandra.storage_port", storagePort);
+		}
+		Integer sslStoragePort = getSslStoragePort();
+		if (sslStoragePort != null) {
+			systemProperties.put("cassandra.ssl_storage_port", sslStoragePort);
+		}
+		Integer jmxLocalPort = getJmxLocalPort();
+		if (jmxLocalPort != null) {
+			systemProperties.put("cassandra.jmx.local.port", jmxLocalPort);
+		}
 		if (isWindows()) {
 			return new WindowsCassandraNode(version, workingDirectory, jvmOptions, systemProperties,
 					environmentVariables, configProperties);
 		}
 		return new UnixCassandraNode(version, workingDirectory, jvmOptions, systemProperties, environmentVariables,
 				configProperties, isRootAllowed());
-	}
-
-	@Nullable
-	private static Path javaHome() {
-		return Optional.ofNullable(System.getProperty("java.home")).map(Paths::get).orElse(null);
 	}
 
 	private static boolean isWindows() {

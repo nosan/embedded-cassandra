@@ -22,6 +22,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -43,13 +44,16 @@ import com.github.nosan.embedded.cassandra.commons.io.Resource;
  * {@link CassandraConnectionFactory} that can be used to create and configure a {@link ClusterCassandraConnection}.
  *
  * @author Dmytro Nosan
+ * @see ClusterCassandraConnectionBuilder
  * @since 3.0.0
  */
-public class ClusterCassandraConnectionFactory implements CassandraConnectionFactory {
+public final class ClusterCassandraConnectionFactory implements CassandraConnectionFactory {
 
 	private final List<TypeCodec<?>> typeCodecs = new ArrayList<>();
 
 	private final List<String> cipherSuites = new ArrayList<>();
+
+	private final List<Consumer<? super Cluster.Builder>> clusterBuilderCustomizers = new ArrayList<>();
 
 	@Nullable
 	private String username;
@@ -109,6 +113,15 @@ public class ClusterCassandraConnectionFactory implements CassandraConnectionFac
 	 */
 	public void setJmxEnabled(boolean jmxEnabled) {
 		this.jmxEnabled = jmxEnabled;
+	}
+
+	/**
+	 * Additional {@link Cluster.Builder} customizers.
+	 *
+	 * @return builder customizers.
+	 */
+	public List<Consumer<? super Cluster.Builder>> getClusterBuilderCustomizers() {
+		return this.clusterBuilderCustomizers;
 	}
 
 	/**
@@ -253,7 +266,7 @@ public class ClusterCassandraConnectionFactory implements CassandraConnectionFac
 	}
 
 	/**
-	 * Enables the use of SSL for the created Session.
+	 * Enables the use of SSL for the created Cluster.
 	 *
 	 * @param sslEnabled whether SSL should be enabled
 	 */
@@ -262,18 +275,10 @@ public class ClusterCassandraConnectionFactory implements CassandraConnectionFac
 	}
 
 	@Override
-	public final ClusterCassandraConnection create(Cassandra cassandra) {
+	public ClusterCassandraConnection create(Cassandra cassandra) {
 		Objects.requireNonNull(cassandra, "'cassandra' must not be null");
 		Cluster cluster = createCluster(cassandra);
 		return new ClusterCassandraConnection(cluster);
-	}
-
-	/**
-	 * Customize a {@link Cluster.Builder}.
-	 *
-	 * @param clusterBuilder a cluster builder
-	 */
-	protected void customize(Cluster.Builder clusterBuilder) {
 	}
 
 	private Cluster createCluster(Cassandra cassandra) {
@@ -311,9 +316,8 @@ public class ClusterCassandraConnectionFactory implements CassandraConnectionFac
 		if (!typeCodecs.isEmpty()) {
 			builder.withCodecRegistry(new CodecRegistry().register(typeCodecs));
 		}
-		customize(builder);
+		this.clusterBuilderCustomizers.forEach(customizer -> customizer.accept(builder));
 		return builder.build();
-
 	}
 
 	private SSLContext getSslContext() {

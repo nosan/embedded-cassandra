@@ -17,6 +17,8 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -247,6 +249,17 @@ class EmbeddedCassandraFactoryTests {
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",
 				Collections.singletonMap("cassandra.jmx.local.port", 7199));
+	}
+
+	@Test
+	void testAddress() throws UnknownHostException {
+		InetAddress localhost = InetAddress.getByName("localhost");
+		this.cassandraFactory.setAddress(localhost);
+		assertThat(this.cassandraFactory.getAddress()).isEqualTo(localhost);
+		Cassandra cassandra = this.cassandraFactory.create();
+		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
+		assertThat(node).hasFieldOrPropertyWithValue("properties",
+				Collections.singletonMap("rpc_address", localhost.getHostAddress()));
 	}
 
 	@Test

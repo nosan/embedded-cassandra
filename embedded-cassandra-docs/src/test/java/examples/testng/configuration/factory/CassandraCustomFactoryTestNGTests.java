@@ -19,28 +19,23 @@ package examples.testng.configuration.factory;
 
 import org.testng.annotations.Test;
 
-import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
+import com.github.nosan.embedded.cassandra.EmbeddedCassandraBuilder;
 import com.github.nosan.embedded.cassandra.api.Cassandra;
-import com.github.nosan.embedded.cassandra.api.CassandraFactory;
 import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
+import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 import com.github.nosan.embedded.cassandra.testng.AbstractCassandraTests;
 
 public class CassandraCustomFactoryTestNGTests extends AbstractCassandraTests {
 
 	public CassandraCustomFactoryTestNGTests() {
-		setCassandraFactory(createCassandraFactory());
+		setCassandraFactory(new EmbeddedCassandraBuilder()
+				.withConfig(new ClassPathResource("cassandra.yaml")));
 	}
 
 	@Test
 	public void test() {
 		Cassandra cassandra = getCassandra();
 		CassandraConnection cassandraConnection = getCassandraConnection();
-	}
-
-	private static CassandraFactory createCassandraFactory() {
-		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		//configure me
-		return cassandraFactory;
 	}
 
 }
