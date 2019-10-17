@@ -416,7 +416,7 @@ public final class EmbeddedCassandraBuilder implements CassandraFactory {
 	 * @param options JVM options
 	 * @return this builder
 	 */
-	public EmbeddedCassandraBuilder addJvmOptions(String... options) {
+	public EmbeddedCassandraBuilder withJvmOptions(String... options) {
 		Objects.requireNonNull(options, "'options' must not be null");
 		this.jvmOptions.addAll(Arrays.asList(options));
 		return this;

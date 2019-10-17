@@ -42,20 +42,19 @@ import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link EmbeddedCassandraFactory}.
+ * Tests for {@link EmbeddedCassandraBuilder}.
  *
  * @author Dmytro Nosan
  */
 @SuppressWarnings("all")
-class EmbeddedCassandraFactoryTests {
+class EmbeddedCassandraBuilderTests {
 
-	private final EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+	private final EmbeddedCassandraBuilder builder = new EmbeddedCassandraBuilder();
 
 	@Test
 	void testName() {
-		this.cassandraFactory.setName("myname");
-		assertThat(this.cassandraFactory.getName()).isEqualTo("myname");
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withName("myname");
+		Cassandra cassandra = this.builder.create();
 		assertThat(cassandra.getName()).isEqualTo("myname");
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(database).hasFieldOrPropertyWithValue("name", "myname");
@@ -63,8 +62,8 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void testWorkingDir(@TempDir Path temporaryFolder) {
-		this.cassandraFactory.setWorkingDirectory(temporaryFolder);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withWorkingDirectory(temporaryFolder);
+		Cassandra cassandra = this.builder.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(database).hasFieldOrPropertyWithValue("workingDirectory", temporaryFolder);
 	}
@@ -73,8 +72,8 @@ class EmbeddedCassandraFactoryTests {
 	void testArtifact(@TempDir Path temporaryFolder) {
 		final Version version = Version.of("3.11.4");
 		Artifact artifact = () -> new DefaultDistribution(version, temporaryFolder);
-		this.cassandraFactory.setArtifact(artifact);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withArtifact(artifact);
+		Cassandra cassandra = this.builder.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(cassandra).hasFieldOrPropertyWithValue("version", version);
 		assertThat(database).hasFieldOrPropertyWithValue("version", version).hasFieldOrPropertyWithValue("directory",
@@ -83,9 +82,8 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void testJavaHome(@TempDir Path temporaryFolder) {
-		this.cassandraFactory.setJavaHome(temporaryFolder);
-		assertThat(this.cassandraFactory.getJavaHome()).isEqualTo(temporaryFolder);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withJavaHome(temporaryFolder);
+		Cassandra cassandra = this.builder.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("environmentVariables",
 				Collections.singletonMap("JAVA_HOME", temporaryFolder));
@@ -95,16 +93,16 @@ class EmbeddedCassandraFactoryTests {
 	@Test
 	void testLogger() {
 		Logger mylogger = LoggerFactory.getLogger("mylogger");
-		this.cassandraFactory.setLogger(mylogger);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withLogger(mylogger);
+		Cassandra cassandra = this.builder.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(database).hasFieldOrPropertyWithValue("logger", mylogger);
 	}
 
 	@Test
 	void testDaemon() {
-		this.cassandraFactory.setDaemon(true);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withDaemon(true);
+		Cassandra cassandra = this.builder.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(database).hasFieldOrPropertyWithValue("daemon", true);
 	}
@@ -112,32 +110,29 @@ class EmbeddedCassandraFactoryTests {
 	@Test
 	@DisabledOnOs(OS.WINDOWS)
 	void testRootAllowed() {
-		this.cassandraFactory.setRootAllowed(true);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withRootAllowed(true);
+		Cassandra cassandra = this.builder.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("rootAllowed", true);
 	}
 
 	@Test
 	void getJvmOptions() {
-		this.cassandraFactory.getJvmOptions().add("-Xmx512m");
-		Cassandra cassandra = this.cassandraFactory.create();
+		Cassandra cassandra = this.builder.withJvmOptions("-Xmx512m").create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("jvmOptions", Collections.singletonList("-Xmx512m"));
 	}
 
 	@Test
 	void getSystemProperties() {
-		this.cassandraFactory.getSystemProperties().put("key", "value");
-		Cassandra cassandra = this.cassandraFactory.create();
+		Cassandra cassandra = this.builder.withSystemProperty("key", "value").create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("systemProperties", Collections.singletonMap("key", "value"));
 	}
 
 	@Test
 	void getEnvironmentVariables() {
-		this.cassandraFactory.getEnvironmentVariables().put("key", "value");
-		Cassandra cassandra = this.cassandraFactory.create();
+		Cassandra cassandra = this.builder.withEnvironmentVariable("key", "value").create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		Map<String, Object> environmentVariables = (Map<String, Object>) ReflectionTestUtils.getField(node,
 				"environmentVariables");
@@ -146,25 +141,23 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void getProperties() {
-		this.cassandraFactory.getConfigProperties().put("key", "value");
-		Cassandra cassandra = this.cassandraFactory.create();
+		Cassandra cassandra = this.builder.withConfigProperty("key", "value").create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("properties", Collections.singletonMap("key", "value"));
 	}
 
 	@Test
 	void testTimeout() {
-		this.cassandraFactory.setTimeout(Duration.ofSeconds(60));
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withTimeout(Duration.ofSeconds(60));
+		Cassandra cassandra = this.builder.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(database).hasFieldOrPropertyWithValue("timeout", Duration.ofSeconds(60));
 	}
 
 	@Test
 	void testPort() {
-		this.cassandraFactory.setPort(9042);
-		assertThat(this.cassandraFactory.getPort()).isEqualTo(9042);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withPort(9042);
+		Cassandra cassandra = this.builder.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",
 				Collections.singletonMap("cassandra.native_transport_port", 9042));
@@ -172,9 +165,8 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void testSslPort() {
-		this.cassandraFactory.setSslPort(9042);
-		assertThat(this.cassandraFactory.getSslPort()).isEqualTo(9042);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withSslPort(9042);
+		Cassandra cassandra = this.builder.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("properties",
 				Collections.singletonMap("native_transport_port_ssl", 9042));
@@ -182,9 +174,8 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void testRpcPort() {
-		this.cassandraFactory.setRpcPort(9160);
-		assertThat(this.cassandraFactory.getRpcPort()).isEqualTo(9160);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withRpcPort(9160);
+		Cassandra cassandra = this.builder.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",
 				Collections.singletonMap("cassandra.rpc_port", 9160));
@@ -194,9 +185,8 @@ class EmbeddedCassandraFactoryTests {
 	void testConfig(@TempDir Path temporaryFolder) throws IOException {
 		Path file = Files.createTempFile(temporaryFolder, "", "");
 		FileSystemResource config = new FileSystemResource(file);
-		this.cassandraFactory.setConfig(config);
-		assertThat(this.cassandraFactory.getConfig()).isEqualTo(config);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withConfig(config);
+		Cassandra cassandra = this.builder.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(database).hasFieldOrPropertyWithValue("config", config);
 	}
@@ -205,9 +195,8 @@ class EmbeddedCassandraFactoryTests {
 	void testTopologyConfig(@TempDir Path temporaryFolder) throws IOException {
 		Path file = Files.createTempFile(temporaryFolder, "", "");
 		FileSystemResource config = new FileSystemResource(file);
-		this.cassandraFactory.setTopologyConfig(config);
-		assertThat(this.cassandraFactory.getTopologyConfig()).isEqualTo(config);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withTopologyConfig(config);
+		Cassandra cassandra = this.builder.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(database).hasFieldOrPropertyWithValue("topologyConfig", config);
 	}
@@ -216,18 +205,16 @@ class EmbeddedCassandraFactoryTests {
 	void testRackConfig(@TempDir Path temporaryFolder) throws IOException {
 		Path file = Files.createTempFile(temporaryFolder, "", "");
 		FileSystemResource config = new FileSystemResource(file);
-		this.cassandraFactory.setRackConfig(config);
-		assertThat(this.cassandraFactory.getRackConfig()).isEqualTo(config);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withRackConfig(config);
+		Cassandra cassandra = this.builder.create();
 		Object database = ReflectionTestUtils.getField(cassandra, "database");
 		assertThat(database).hasFieldOrPropertyWithValue("rackConfig", config);
 	}
 
 	@Test
 	void testStoragePort() {
-		this.cassandraFactory.setStoragePort(7000);
-		assertThat(this.cassandraFactory.getStoragePort()).isEqualTo(7000);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withStoragePort(7000);
+		Cassandra cassandra = this.builder.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",
 				Collections.singletonMap("cassandra.storage_port", 7000));
@@ -235,9 +222,8 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void testStoragePortSsl() {
-		this.cassandraFactory.setSslStoragePort(7001);
-		assertThat(this.cassandraFactory.getSslStoragePort()).isEqualTo(7001);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withSslStoragePort(7001);
+		Cassandra cassandra = this.builder.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",
 				Collections.singletonMap("cassandra.ssl_storage_port", 7001));
@@ -245,9 +231,8 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void testJmxLocal() {
-		this.cassandraFactory.setJmxLocalPort(7199);
-		assertThat(this.cassandraFactory.getJmxLocalPort()).isEqualTo(7199);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withJmxLocalPort(7199);
+		Cassandra cassandra = this.builder.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("systemProperties",
 				Collections.singletonMap("cassandra.jmx.local.port", 7199));
@@ -256,9 +241,8 @@ class EmbeddedCassandraFactoryTests {
 	@Test
 	void testAddress() throws UnknownHostException {
 		InetAddress localhost = InetAddress.getByName("localhost");
-		this.cassandraFactory.setAddress(localhost);
-		assertThat(this.cassandraFactory.getAddress()).isEqualTo(localhost);
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withAddress(localhost);
+		Cassandra cassandra = this.builder.create();
 		Object node = ReflectionTestUtils.getField(ReflectionTestUtils.getField(cassandra, "database"), "node");
 		assertThat(node).hasFieldOrPropertyWithValue("properties",
 				Collections.singletonMap("rpc_address", localhost.getHostAddress()));
@@ -267,9 +251,9 @@ class EmbeddedCassandraFactoryTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void testShutdownHook() throws Exception {
-		this.cassandraFactory.setRegisterShutdownHook(true);
-		this.cassandraFactory.setName("myname");
-		Cassandra cassandra = this.cassandraFactory.create();
+		this.builder.withRegisterShutdownHook(true);
+		this.builder.withName("myname");
+		Cassandra cassandra = this.builder.create();
 		Map<Thread, Thread> hooks = (Map<Thread, Thread>) ReflectionTestUtils.getField(
 				Class.forName("java.lang.ApplicationShutdownHooks"), "hooks");
 		assertThat(hooks.keySet()).anyMatch(thread -> thread.getName().equals("myname-sh"));

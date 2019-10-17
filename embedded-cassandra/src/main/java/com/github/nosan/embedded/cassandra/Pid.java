@@ -63,11 +63,8 @@ final class Pid {
 			}
 			return getLong(field.get(process));
 		}
-		catch (NoSuchFieldException ex) {
+		catch (Throwable ex) {
 			return -1;
-		}
-		catch (ReflectiveOperationException ex) {
-			throw new IllegalStateException(ex);
 		}
 	}
 

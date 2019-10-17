@@ -107,14 +107,16 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 
 	private boolean daemon = true;
 
-	private Logger logger = LoggerFactory.getLogger(Cassandra.class);
-
 	private boolean registerShutdownHook = true;
 
-	private Duration timeout = Duration.ofSeconds(90);
+	@Nullable
+	private Logger logger;
 
 	@Nullable
-	private Path javaHome = Optional.ofNullable(System.getProperty("java.home")).map(Paths::get).orElse(null);
+	private Duration timeout;
+
+	@Nullable
+	private Path javaHome;
 
 	@Nullable
 	private String name;
@@ -242,6 +244,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 *
 	 * @return the logger
 	 */
+	@Nullable
 	public Logger getLogger() {
 		return this.logger;
 	}
@@ -251,8 +254,8 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 *
 	 * @param logger the logger
 	 */
-	public void setLogger(Logger logger) {
-		this.logger = Objects.requireNonNull(logger, "'logger' must not be null");
+	public void setLogger(@Nullable Logger logger) {
+		this.logger = logger;
 	}
 
 	/**
@@ -332,6 +335,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 *
 	 * @return the timeout (always positive)
 	 */
+	@Nullable
 	public Duration getTimeout() {
 		return this.timeout;
 	}
@@ -341,11 +345,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 	 *
 	 * @param timeout startup timeout (must be positive)
 	 */
-	public void setTimeout(Duration timeout) {
-		Objects.requireNonNull(timeout, "'timeout' must not be null");
-		if (timeout.isNegative() || timeout.isZero()) {
-			throw new IllegalArgumentException("'" + timeout + "' must be positive");
-		}
+	public void setTimeout(@Nullable Duration timeout) {
 		this.timeout = timeout;
 	}
 
@@ -596,9 +596,17 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		if (!Files.isDirectory(directory)) {
 			throw new IllegalStateException(directory + " is not a directory");
 		}
+		Logger logger = getLogger();
+		if (logger == null) {
+			logger = LoggerFactory.getLogger(Cassandra.class);
+		}
+		Duration timeout = getTimeout();
+		if (timeout == null || timeout.toMillis() <= 0) {
+			timeout = Duration.ofSeconds(90);
+		}
 		CassandraNode node = createNode(version, workingDirectory);
 		CassandraDatabase database = new EmbeddedCassandraDatabase(name, version, directory, workingDirectory,
-				isDaemon(), getLogger(), getTimeout(), getConfig(), getRackConfig(), getTopologyConfig(), node);
+				isDaemon(), logger, timeout, getConfig(), getRackConfig(), getTopologyConfig(), node);
 		EmbeddedCassandra cassandra = new EmbeddedCassandra(name, version, database);
 		if (isRegisterShutdownHook()) {
 			Runtime.getRuntime().addShutdownHook(new Thread(cassandra::stop, name + "-sh"));
@@ -617,7 +625,8 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		jvmOptions.removeIf(Objects::isNull);
 		LinkedHashMap<String, Object> configProperties = new LinkedHashMap<>(getConfigProperties());
 		configProperties.keySet().removeIf(Objects::isNull);
-		Path javaHome = getJavaHome();
+		Path javaHome = Optional.ofNullable(getJavaHome())
+				.orElseGet(() -> Optional.ofNullable(System.getProperty("java.home")).map(Paths::get).orElse(null));
 		if (javaHome != null) {
 			environmentVariables.put("JAVA_HOME", javaHome);
 		}
