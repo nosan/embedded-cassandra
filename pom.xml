@@ -47,9 +47,9 @@
         <junit.version>4.12</junit.version>
         <testng.version>7.0.0</testng.version>
         <spring.version>5.2.0.RELEASE</spring.version>
-        <spring-boot.version>2.1.9.RELEASE</spring-boot.version>
+        <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
         <asciidoctorj.version>2.1.0</asciidoctorj.version>
-        <java-driver-core.version>4.2.1</java-driver-core.version>
+        <java-driver-core.version>4.2.2</java-driver-core.version>
         <commons-compress.version>1.19</commons-compress.version>
         <nexus.url>https://oss.sonatype.org</nexus.url>
     </properties>
