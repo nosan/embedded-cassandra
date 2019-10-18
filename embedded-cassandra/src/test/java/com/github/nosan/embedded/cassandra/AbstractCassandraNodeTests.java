@@ -142,7 +142,7 @@ class AbstractCassandraNodeTests {
 		};
 		node.start();
 		assertThat(node.isAlive()).isEqualTo(mockProcess.isAlive());
-		assertThat(node.toString()).contains(":" + mockProcess.pid);
+		assertThat(node.toString()).contains(mockProcess.pid + "");
 		node.stop();
 	}
 
