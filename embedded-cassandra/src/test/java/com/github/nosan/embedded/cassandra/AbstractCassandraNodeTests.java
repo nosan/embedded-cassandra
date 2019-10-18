@@ -134,14 +134,13 @@ class AbstractCassandraNodeTests {
 			}
 
 			@Override
-			void doStop(Process process, long pid) throws IOException, InterruptedException {
+			void doStop(Process process, long pid) {
 				assertThat(process).isEqualTo(mockProcess);
 				assertThat(pid).isEqualTo(mockProcess.pid);
 			}
 
 		};
 		node.start();
-		assertThat(node.getProcess()).isEqualTo(mockProcess);
 		assertThat(node.isAlive()).isEqualTo(mockProcess.isAlive());
 		assertThat(node.toString()).contains(":" + mockProcess.pid);
 		node.stop();

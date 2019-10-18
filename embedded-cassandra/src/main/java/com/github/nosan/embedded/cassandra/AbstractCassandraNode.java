@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -48,6 +49,8 @@ import com.github.nosan.embedded.cassandra.commons.io.UrlResource;
 abstract class AbstractCassandraNode implements CassandraNode {
 
 	private static final String JVM_EXTRA_OPTS = "JVM_EXTRA_OPTS";
+
+	private static final ByteArrayInputStream EMPTY_STREAM = new ByteArrayInputStream(new byte[0]);
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -113,12 +116,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	@Override
-	public final Process getProcess() {
+	public final InputStream getInputStream() {
 		Process process = this.process;
-		if (process == null) {
-			throw new IllegalStateException("Process cannot be null!");
-		}
-		return process;
+		return process != null ? process.getInputStream() : EMPTY_STREAM;
 	}
 
 	@Override
@@ -128,8 +128,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	@Override
-	public String toString() {
-		return String.format("%s:%s", getClass().getSimpleName(), this.pid);
+	public final String toString() {
+		return String.format("%s[pid='%s', exitValue='%s']", getClass().getSimpleName(), this.pid, exitValue());
 	}
 
 	/**
@@ -161,6 +161,14 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	 * @throws InterruptedException if  {@code Cassandra's} node has been interrupted.
 	 */
 	abstract void doStop(Process process, long pid) throws IOException, InterruptedException;
+
+	private String exitValue() {
+		Process process = this.process;
+		if (process == null) {
+			return "does not exist";
+		}
+		return isAlive() ? "not exited" : String.valueOf(process.exitValue());
+	}
 
 	private Map<String, Object> loadProperties() throws IOException {
 		try (InputStream is = getConfig().getInputStream()) {

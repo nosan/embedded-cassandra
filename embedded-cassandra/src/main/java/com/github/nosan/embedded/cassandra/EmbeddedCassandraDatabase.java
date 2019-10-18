@@ -114,7 +114,7 @@ class EmbeddedCassandraDatabase implements CassandraDatabase {
 		log.info("{} has been started", toString());
 		NativeTransportReadinessConsumer nativeTransportReadiness = new NativeTransportReadinessConsumer(this.version);
 		RpcTransportReadinessConsumer rpcTransportReadiness = new RpcTransportReadinessConsumer(this.version);
-		await(this.node.getProcess(), nativeTransportReadiness, rpcTransportReadiness);
+		await(nativeTransportReadiness, rpcTransportReadiness);
 		int sslPort = nativeTransportReadiness.getSslPort();
 		int port = nativeTransportReadiness.getPort();
 		this.port = (port != -1) ? port : sslPort;
@@ -157,7 +157,8 @@ class EmbeddedCassandraDatabase implements CassandraDatabase {
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", EmbeddedCassandraDatabase.class.getSimpleName() + "[", "]")
-				.add("name='" + this.name + "'").add("version=" + this.version).add("node=" + this.node).toString();
+				.add("name='" + this.name + "'").add("version='" + this.version + "'").add("node=" + this.node)
+				.toString();
 	}
 
 	private void initialize() throws IOException {
@@ -189,8 +190,7 @@ class EmbeddedCassandraDatabase implements CassandraDatabase {
 		}
 	}
 
-	private void await(Process process, ReadinessConsumer... readinessConsumers)
-			throws IOException, InterruptedException {
+	private void await(ReadinessConsumer... readinessConsumers) throws IOException, InterruptedException {
 		CompositeConsumer<String> compositeConsumer = new CompositeConsumer<>();
 		CacheConsumer<String> cacheConsumer = new CacheConsumer<>(30);
 		compositeConsumer.add(this.logger::info);
@@ -202,7 +202,7 @@ class EmbeddedCassandraDatabase implements CassandraDatabase {
 		Thread thread = new Thread(() -> {
 			Optional.ofNullable(context).ifPresent(MDC::setContextMap);
 			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+					new InputStreamReader(this.node.getInputStream(), StandardCharsets.UTF_8))) {
 				try {
 					reader.lines().filter(StringUtils::hasText).forEach(compositeConsumer);
 				}
@@ -220,18 +220,17 @@ class EmbeddedCassandraDatabase implements CassandraDatabase {
 		thread.setDaemon(this.daemon);
 		thread.setUncaughtExceptionHandler((t, ex) -> log.error("Exception in thread " + t, ex));
 		thread.start();
-
 		long start = System.nanoTime();
 		long rem = this.timeout.toNanos();
-		while (rem > 0 && process.isAlive() && !isReady(readinessConsumers)) {
+		while (rem > 0 && this.node.isAlive() && !isReady(readinessConsumers)) {
 			Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
 			rem = this.timeout.toNanos() - (System.nanoTime() - start);
 		}
-		if (!process.isAlive()) {
+		if (!this.node.isAlive()) {
 			thread.join(100);
 			List<String> lines = new ArrayList<>(cacheConsumer.get());
 			Collections.reverse(lines);
-			throw new IOException(String.format("'%s' is not alive. Please see logs for more details%n\t%s", process,
+			throw new IOException(String.format("'%s' is not alive. Please see logs for more details%n\t%s", this.node,
 					String.join(String.format("%n\t"), lines)));
 		}
 		if (rem <= 0) {

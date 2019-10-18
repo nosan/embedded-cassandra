@@ -136,7 +136,7 @@ class EmbeddedCassandra implements Cassandra {
 	public String toString() {
 		return new StringJoiner(", ", EmbeddedCassandra.class.getSimpleName() + "[", "]")
 				.add("name='" + this.name + "'")
-				.add("version=" + this.version)
+				.add("version='" + this.version + "'")
 				.toString();
 	}
 
