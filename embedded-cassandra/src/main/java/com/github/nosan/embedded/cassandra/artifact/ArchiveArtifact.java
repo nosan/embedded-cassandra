@@ -64,6 +64,20 @@ public final class ArchiveArtifact implements Artifact {
 	}
 
 	/**
+	 * Constructs a new {@link ArchiveArtifact}.
+	 *
+	 * @param version Cassandra's version
+	 * @param archiveResource the archive resource (Can be {@link ArchiveResource}).
+	 * @param destination directory used to extract an archive file
+	 * @since 3.0.1
+	 */
+	public ArchiveArtifact(Version version, Resource archiveResource, @Nullable Path destination) {
+		this.version = version;
+		this.archiveResource = archiveResource;
+		this.destination = destination;
+	}
+
+	/**
 	 * Returns Cassandra's version.
 	 *
 	 * @return the version

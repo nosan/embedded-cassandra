@@ -60,13 +60,13 @@ public final class RemoteArtifact implements Artifact {
 
 	private final Version version;
 
-	private Duration readTimeout = Duration.ofSeconds(10);
+	private Duration readTimeout;
 
-	private Duration connectTimeout = Duration.ofSeconds(3);
+	private Duration connectTimeout;
 
-	private Proxy proxy = Proxy.NO_PROXY;
+	private Proxy proxy;
 
-	private UrlFactory urlFactory = new DefaultUrlFactory();
+	private UrlFactory urlFactory;
 
 	@Nullable
 	private Path destination;
@@ -77,7 +77,28 @@ public final class RemoteArtifact implements Artifact {
 	 * @param version the version
 	 */
 	public RemoteArtifact(Version version) {
+		this(version, null, null, null, null, null);
+	}
+
+	/**
+	 * Constructs a new {@link RemoteArtifact}.
+	 *
+	 * @param version the version
+	 * @param destination directory used to extract an archive file
+	 * @param readTimeout timeout when reading from Input stream when a connection is established to the URL
+	 * @param connectTimeout connection timeout to be used when opening a communications link to the URL
+	 * @param proxy proxy through which artifact will download an archive file
+	 * @param urlFactory factory that can be used to create a list of URLs to the Apache Cassandra repositories
+	 * @since 3.0.1
+	 */
+	public RemoteArtifact(Version version, @Nullable Path destination, @Nullable Duration readTimeout,
+			@Nullable Duration connectTimeout, @Nullable Proxy proxy, @Nullable UrlFactory urlFactory) {
 		this.version = Objects.requireNonNull(version, "'version' must not be null");
+		this.readTimeout = (readTimeout != null) ? readTimeout : Duration.ofSeconds(10);
+		this.connectTimeout = (connectTimeout != null) ? connectTimeout : Duration.ofSeconds(3);
+		this.proxy = (proxy != null) ? proxy : Proxy.NO_PROXY;
+		this.urlFactory = (urlFactory != null) ? urlFactory : new DefaultUrlFactory();
+		this.destination = destination;
 	}
 
 	/**
