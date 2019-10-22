@@ -291,6 +291,11 @@
                     <configuration>
                         <updatePomFile>true</updatePomFile>
                         <flattenMode>ossrh</flattenMode>
+                        <pomElements>
+                            <parent>remove</parent>
+                            <distributionManagement>remove</distributionManagement>
+                            <repositories>remove</repositories>
+                        </pomElements>
                     </configuration>
                 </plugin>
                 <plugin>
