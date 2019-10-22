@@ -81,7 +81,7 @@ public class ClassPathResource implements Resource {
 
 	@Override
 	public URL toURL() throws FileNotFoundException {
-		URL url = getResource();
+		URL url = getURL();
 		if (url == null) {
 			throw new FileNotFoundException(String.format("ClassPathResource '%s' does not exist", this.path));
 		}
@@ -97,7 +97,7 @@ public class ClassPathResource implements Resource {
 
 	@Override
 	public boolean exists() {
-		return getResource() != null;
+		return getURL() != null;
 	}
 
 	@Override
@@ -119,21 +119,14 @@ public class ClassPathResource implements Resource {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ClassPathResource.class.getSimpleName() + "[", "]").add(
-				"path='" + this.path + "'").toString();
+		return new StringJoiner(", ", ClassPathResource.class.getSimpleName() + "[", "]")
+				.add("path='" + this.path + "'").toString();
 	}
 
 	@Nullable
-	private URL getResource() {
-		URL url;
-		String name = this.path;
-		if (this.classLoader != null) {
-			url = this.classLoader.getResource(name);
-		}
-		else {
-			url = ClassLoader.getSystemResource(name);
-		}
-		return url;
+	private URL getURL() {
+		ClassLoader cl = this.classLoader;
+		return (cl != null) ? cl.getResource(this.path) : ClassLoader.getSystemResource(this.path);
 	}
 
 	private static String cleanPath(String name) {
