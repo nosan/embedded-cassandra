@@ -39,20 +39,20 @@ final class Parser {
 	List<String> getStatements() {
 		List<String> statements = new ArrayList<>();
 		StringBuilder statement = new StringBuilder();
-		State state = State.TEXT;
+		Context context = Context.NONE;
 		for (int i = 0; i < this.chars.length; i++) {
 			char c = this.chars[i];
-			if (state == State.TEXT) {
+			if (context == Context.NONE) {
 				if (c == '/' && next(i, '/')) {
-					state = State.COMMENT;
+					context = Context.COMMENT;
 					i++;
 				}
 				else if (c == '-' && next(i, '-')) {
-					state = State.COMMENT;
+					context = Context.COMMENT;
 					i++;
 				}
 				else if (c == '/' && next(i, '*')) {
-					state = State.MULTI_COMMENT;
+					context = Context.MULTI_COMMENT;
 					i++;
 				}
 				else if (c == '\n' || c == '\r' || c == '\t' || c == ' ') {
@@ -75,16 +75,16 @@ final class Parser {
 				else {
 					if (c == '"') {
 						statement.append(c);
-						state = State.DOUBLE_QUOTE;
+						context = Context.DOUBLE_QUOTE;
 					}
 					else if (c == '\'') {
 						statement.append(c);
-						state = State.QUOTE;
+						context = Context.QUOTE;
 					}
 					else if (c == '$' && next(i, '$')) {
 						statement.append(c).append('$');
 						i++;
-						state = State.DOUBLE_DOLLAR;
+						context = Context.DOUBLE_DOLLAR;
 					}
 					else if (c == ';') {
 						statements.add(statement.toString());
@@ -95,30 +95,30 @@ final class Parser {
 					}
 				}
 			}
-			else if (state == State.MULTI_COMMENT && c == '*' && next(i, '/')) {
-				state = State.TEXT;
+			else if (context == Context.MULTI_COMMENT && c == '*' && next(i, '/')) {
+				context = Context.NONE;
 				i++;
 			}
-			else if (state == State.COMMENT && c == '\n') {
-				state = State.TEXT;
+			else if (context == Context.COMMENT && c == '\n') {
+				context = Context.NONE;
 			}
-			else if (state == State.QUOTE) {
+			else if (context == Context.QUOTE) {
 				statement.append(c);
 				if (c == '\'') {
-					state = State.TEXT;
+					context = Context.NONE;
 				}
 			}
-			else if (state == State.DOUBLE_QUOTE) {
+			else if (context == Context.DOUBLE_QUOTE) {
 				statement.append(c);
 				if (c == '"') {
-					state = State.TEXT;
+					context = Context.NONE;
 				}
 			}
-			else if (state == State.DOUBLE_DOLLAR) {
+			else if (context == Context.DOUBLE_DOLLAR) {
 				statement.append(c);
 				if (c == '$' && next(i, '$')) {
 					statement.append('$');
-					state = State.TEXT;
+					context = Context.NONE;
 					i++;
 				}
 			}
@@ -133,8 +133,8 @@ final class Parser {
 		return index + 1 < this.chars.length && this.chars[index + 1] == expected;
 	}
 
-	private enum State {
-		TEXT,
+	private enum Context {
+		NONE,
 		COMMENT,
 		MULTI_COMMENT,
 		QUOTE,
