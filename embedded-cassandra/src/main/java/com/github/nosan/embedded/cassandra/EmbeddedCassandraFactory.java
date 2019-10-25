@@ -616,11 +616,9 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 
 	private CassandraNode createNode(Version version, Path workingDirectory) {
 		Map<String, Object> systemProperties = new LinkedHashMap<>(getSystemProperties());
-		systemProperties.entrySet().removeIf(
-				entry -> Objects.isNull(entry.getKey()) || Objects.isNull(entry.getValue()));
+		systemProperties.keySet().removeIf(Objects::isNull);
 		Map<String, Object> environmentVariables = new LinkedHashMap<>(getEnvironmentVariables());
-		environmentVariables.entrySet().removeIf(
-				entry -> Objects.isNull(entry.getKey()) || Objects.isNull(entry.getValue()));
+		environmentVariables.keySet().removeIf(Objects::isNull);
 		List<String> jvmOptions = new ArrayList<>(getJvmOptions());
 		jvmOptions.removeIf(Objects::isNull);
 		LinkedHashMap<String, Object> configProperties = new LinkedHashMap<>(getConfigProperties());

@@ -91,7 +91,9 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		systemProperties.put("cassandra.config", configFile.toUri().toString());
 		List<String> jvmOptions = new ArrayList<>(this.jvmOptions);
 		for (Map.Entry<String, Object> entry : systemProperties.entrySet()) {
-			jvmOptions.add(String.format("-D%s=%s", entry.getKey(), entry.getValue()));
+			Object value = entry.getValue();
+			String name = entry.getKey();
+			jvmOptions.add((value != null) ? String.format("-D%s=%s", name, value) : String.format("-D%s", name));
 		}
 		runProcess.getEnvironment().putAll(this.environmentVariables);
 		runProcess.putEnvironment(JVM_EXTRA_OPTS, String.join(" ", jvmOptions));
