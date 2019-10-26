@@ -130,7 +130,12 @@ class EmbeddedCassandraDatabase implements CassandraDatabase {
 			this.node.stop();
 			log.info("{} has been stopped", toString());
 		}
-		FileUtils.delete(this.workingDirectory);
+		try {
+			FileUtils.delete(this.workingDirectory);
+		}
+		catch (IOException ex) {
+			log.error("Working Directory '" + this.workingDirectory + "' has not been deleted", ex);
+		}
 	}
 
 	@Override
