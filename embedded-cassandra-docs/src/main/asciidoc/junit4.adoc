@@ -42,7 +42,7 @@ WARNING: By default, `CassandraRule` runs Cassandra on the random ports.
 
 == Customize Default Cassandra Factory
 
-Default `CassandraFactory` can be customized via (`CassandraFactoryCustomizer<T>`) customizers.
+Default `EmbeddedCassandraFactory` can be customized via (`CassandraFactoryCustomizer<T>`) customizers.
 
 [source,java,indent=0]
 ----
@@ -60,7 +60,7 @@ include::{test-sources}/examples/junit4/configuration/factory/CassandraCustomFac
 
 == Configure Cql Scripts
 
-`CassandraRule` provides a smooth way to initialize Cassandra with `CqlDataSet`.
+`CassandraRule` provides a way to initialize Apache Cassandra with `CqlDataSet`.
 
 [source,java,indent=0]
 ----

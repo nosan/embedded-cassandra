@@ -92,13 +92,13 @@ Contributions to Embedded Cassandra should be made in the form of `GitHub pull r
 compile group: 'com.github.nosan', name: 'embedded-cassandra', version: '{project-version}'
 ----
 
-=== First run
+=== Quick Start
 
 The Apache Cassandra can be started using the following lines of code:
 
 [source,java,indent=0]
 ----
-include::{test-sources}/examples/FirstRun.java[tag=source]
+include::{test-sources}/examples/QuickStart.java[tag=source]
 ----
 
 .schema.cql
@@ -107,3 +107,5 @@ include::{test-sources}/examples/FirstRun.java[tag=source]
 include::{test-resources}/schema.cql[]
 ----
 
+NOTE: The first start can take a while because Apache Casandra must be initialized. Current implementation downloads the archive
+just once and then initialize Apache Cassandra with it all subsequent times.

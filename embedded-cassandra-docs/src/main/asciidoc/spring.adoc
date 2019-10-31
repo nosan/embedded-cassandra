@@ -75,7 +75,7 @@ include::{test-resources}/schema.cql[]
 
 == Configure Custom Cassandra Connection Factory
 
-`CassandraConnectionFactory` bean can be registered to control `CassandraConnection` isntance.
+`CassandraConnectionFactory` bean can be registered to control `CassandraConnection` instance.
 
 [source,java,indent=0]
 ----

@@ -4,6 +4,8 @@ This section provides answers to some common ‘how do I do that…​’ questi
 
 == Running more than one Cassandra instance
 
+There is possible to start more than one Cassandra instance
+
 [source,java,indent=0]
 ----
 include::{test-sources}/examples/configuration/CassandraMoreOneInstance.java[tag=source]
@@ -20,8 +22,7 @@ include::{test-sources}/examples/configuration/CassandraArchiveArtifact.java[tag
 
 == Using Local Directory
 
-There is also possible to initialize Cassandra with a local directory. In case if you have downloaded Cassandra
-by yourself and extracted it into the local directory.
+There is also possible to start/stop Cassandra using a local directory.
 
 [source,java,indent=0]
 ----

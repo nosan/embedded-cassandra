@@ -42,7 +42,7 @@ WARNING: By default, `CassandraExtension` runs Cassandra on the random ports.
 
 == Customize Default Cassandra Factory
 
-In the following example, there is a showcase of how to change Cassandra's port using (`CassandraFactoryCustomizer<T>`) customizers.
+It is possible to customize default `EmbeddedCassandraFactory` via  (`CassandraFactoryCustomizer<T>`) customizers.
 
 [source,java,indent=0]
 ----
@@ -60,8 +60,7 @@ include::{test-sources}/examples/junit5/configuration/factory/CassandraCustomFac
 
 == Configure Cql Scripts
 
-`Cassandra` can be initialized with `CqlDataSet`. `CQL` statements will be executed immediately after Cassandra start.
-`CassandraExtension` has a factory method to set a `CqlDataSet`.
+Apache Cassandra can be initialized with `CqlDataSet`.
 
 [source,java,indent=0]
 ----

@@ -23,7 +23,7 @@ import com.github.nosan.embedded.cassandra.api.connection.CassandraConnection;
 import com.github.nosan.embedded.cassandra.api.connection.DefaultCassandraConnectionFactory;
 import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
 
-public class FirstRun {
+public class QuickStart {
 
 	public static void main(String[] args) {
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
