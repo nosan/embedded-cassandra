@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
@@ -71,6 +73,8 @@ import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
  * @since 3.0.0
  */
 public abstract class AbstractCassandraTests {
+
+	private static final Logger log = LoggerFactory.getLogger(AbstractCassandraTests.class);
 
 	private CassandraFactory cassandraFactory;
 
@@ -241,7 +245,7 @@ public abstract class AbstractCassandraTests {
 				connection.close();
 			}
 			catch (Throwable ex) {
-				//ignore
+				log.error("CassandraConnection '" + connection + "' is not closed", ex);
 			}
 		}
 		Cassandra cassandra = this.cassandra;

@@ -29,6 +29,8 @@ import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
@@ -75,6 +77,8 @@ import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
  * @since 3.0.0
  */
 public final class CassandraExtension implements BeforeAllCallback, AfterAllCallback {
+
+	private static final Logger log = LoggerFactory.getLogger(CassandraExtension.class);
 
 	private CassandraFactory cassandraFactory;
 
@@ -247,7 +251,7 @@ public final class CassandraExtension implements BeforeAllCallback, AfterAllCall
 				connection.close();
 			}
 			catch (Throwable ex) {
-				//ignore
+				log.error("CassandraConnection '" + connection + "' is not closed", ex);
 			}
 		}
 		Cassandra cassandra = this.cassandra;

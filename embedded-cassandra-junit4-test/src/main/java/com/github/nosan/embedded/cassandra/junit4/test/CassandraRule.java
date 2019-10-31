@@ -27,6 +27,8 @@ import java.util.Objects;
 
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
@@ -73,6 +75,8 @@ import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
  * @since 3.0.0
  */
 public final class CassandraRule extends ExternalResource {
+
+	private static final Logger log = LoggerFactory.getLogger(CassandraRule.class);
 
 	private CassandraFactory cassandraFactory;
 
@@ -245,7 +249,7 @@ public final class CassandraRule extends ExternalResource {
 				connection.close();
 			}
 			catch (Throwable ex) {
-				//ignore
+				log.error("CassandraConnection '" + connection + "' is not closed", ex);
 			}
 		}
 		Cassandra cassandra = this.cassandra;
