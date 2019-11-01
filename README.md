@@ -1,5 +1,5 @@
 # Embedded Cassandra [![Build Status OSX/Linux](https://img.shields.io/travis/nosan/embedded-cassandra/master.svg?logo=travis&logoColor=white&style=flat)](https://travis-ci.org/nosan/embedded-cassandra) [![Build Status Windows](https://img.shields.io/appveyor/ci/nosan/embedded-cassandra/master.svg?logo=appveyor&logoColor=white&style=flat)](https://ci.appveyor.com/project/nosan/embedded-cassandra)
-Embedded Cassandra provides an easy way to start and stop [Apache Cassandra](https://cassandra.apache.org/) as an embedded database. Apacha Cassandra is not started within the same JVM, but instead that, it is started as a `java.lang.Process`. 
+Embedded Cassandra provides an easy way to start and stop [Apache Cassandra](https://cassandra.apache.org/) as an embedded database. Apache Cassandra is not started within the same JVM, but instead that, it is started as a `java.lang.Process`. 
 
 To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra/).
 
