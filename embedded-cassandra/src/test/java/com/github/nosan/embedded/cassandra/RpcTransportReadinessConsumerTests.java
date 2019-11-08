@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class RpcTransportReadinessConsumerTests {
 
-	private final RpcTransportReadinessConsumer readiness = new RpcTransportReadinessConsumer(Version.of("3.11.4"));
+	private final RpcTransportReadinessConsumer readiness = new RpcTransportReadinessConsumer(Version.of("3.11.5"));
 
 	@Test
 	void isReady() {
