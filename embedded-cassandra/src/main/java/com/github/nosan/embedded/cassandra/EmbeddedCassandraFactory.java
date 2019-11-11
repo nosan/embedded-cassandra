@@ -578,7 +578,7 @@ public final class EmbeddedCassandraFactory implements CassandraFactory {
 		}
 		Artifact artifact = getArtifact();
 		if (artifact == null) {
-			artifact = Artifact.ofVersion("3.11.5");
+			artifact = Artifact.ofVersion("3.11.4");
 		}
 		Artifact.Distribution distribution = artifact.getDistribution();
 		Version version = distribution.getVersion();
