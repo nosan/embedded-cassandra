@@ -94,8 +94,8 @@ public final class RemoteArtifact implements Artifact {
 	public RemoteArtifact(Version version, @Nullable Path destination, @Nullable Duration readTimeout,
 			@Nullable Duration connectTimeout, @Nullable Proxy proxy, @Nullable UrlFactory urlFactory) {
 		this.version = Objects.requireNonNull(version, "'version' must not be null");
-		this.readTimeout = (readTimeout != null) ? readTimeout : Duration.ofSeconds(10);
-		this.connectTimeout = (connectTimeout != null) ? connectTimeout : Duration.ofSeconds(3);
+		this.readTimeout = (readTimeout != null) ? readTimeout : Duration.ofSeconds(30);
+		this.connectTimeout = (connectTimeout != null) ? connectTimeout : Duration.ofSeconds(10);
 		this.proxy = (proxy != null) ? proxy : Proxy.NO_PROXY;
 		this.urlFactory = (urlFactory != null) ? urlFactory : new DefaultUrlFactory();
 		this.destination = destination;
@@ -166,7 +166,7 @@ public final class RemoteArtifact implements Artifact {
 	}
 
 	/**
-	 * Timeout when reading from Input stream when a connection is established to the URL. Defaults to {@code 10
+	 * Timeout when reading from Input stream when a connection is established to the URL. Defaults to {@code 30
 	 * seconds}.
 	 *
 	 * @return the read timeout
@@ -185,7 +185,7 @@ public final class RemoteArtifact implements Artifact {
 	}
 
 	/**
-	 * Connection timeout to be used when opening a communications link to the URL. Defaults to {@code 3 seconds}.
+	 * Connection timeout to be used when opening a communications link to the URL. Defaults to {@code 10 seconds}.
 	 *
 	 * @return the connection timeout
 	 */
