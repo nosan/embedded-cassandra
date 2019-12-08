@@ -28,3 +28,21 @@ There is also possible to start/stop Cassandra using a local directory.
 ----
 include::{test-sources}/examples/configuration/CassandraDefaultArtifact.java[tag=source]
 ----
+
+== Run with Java 13
+
+There are several ways to use `Java 13`:
+
+- Use Apache-Cassandra `4.0-alpha2` version
+- Use a custom java home directory with `Java 8`.
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraAlphaVersion.java[tag=source]
+----
+
+[source,java,indent=0]
+----
+include::{test-sources}/examples/configuration/CassandraJava8Home.java[tag=source]
+----
+

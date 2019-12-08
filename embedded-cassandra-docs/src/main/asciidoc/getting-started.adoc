@@ -108,4 +108,4 @@ include::{test-resources}/schema.cql[]
 ----
 
 NOTE: The first start can take a while because Apache Casandra must be initialized. Current implementation downloads the archive
-just once and then initialize Apache Cassandra with it all subsequent times.
+just once and then initialize Apache Cassandra with it.
