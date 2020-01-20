@@ -1,36 +1,17 @@
-language: minimal
-dist: trusty
+language: java
 sudo: true
+dist: trusty
 
-stages:
-  - prepare
-  - test
+matrix:
+  include:
+    - os: linux
+      jdk: oraclejdk8
+    - os: osx
+      osx_image: xcode9.3
+
+script:
+  - ./mvnw clean verify -B -V
 
 cache:
   directories:
     - $HOME/.m2
-    - $HOME/openjdk8
-
-env:
-  global: JAVA_HOME=$HOME/openjdk8
-
-jobs:
-  include:
-    - stage: prepare
-      os: linux
-      script:
-        - rm -rf $JAVA_HOME
-        - mkdir $JAVA_HOME
-        - curl -L 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk8?openjdk_impl=hotspot&os=linux&type=jdk&release=latest&arch=x64' | tar zx --strip-components=1 --directory $JAVA_HOME
-    - os: osx
-      script:
-        - rm -rf $JAVA_HOME
-        - mkdir $JAVA_HOME
-        - curl -L 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk8?openjdk_impl=hotspot&os=mac&type=jdk&release=latest&arch=x64' | tar zx --strip-components=3  --directory $JAVA_HOME
-    - stage: test
-      os: linux
-      script:
-        - ./mvnw clean verify -B -V
-    - os: osx
-      script:
-        - ./mvnw clean verify -B -V
