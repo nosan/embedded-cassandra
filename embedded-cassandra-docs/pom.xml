@@ -96,7 +96,7 @@
 
     <profiles>
         <profile>
-            <id>docs</id>
+            <id>embedded-cassandra-docs</id>
             <build>
                 <plugins>
                     <plugin>

@@ -71,7 +71,7 @@ fi
 git commit -a -m "Release version ${RELEASE_VERSION}" || abort "Failed to commit a release version!"
 
 #deploy to nexus
-./mvnw clean deploy -V -B -Prelease,docs -DskipTests || (git reset --hard HEAD^1 || abort "Git reset command failed!" && abort "Aborted")
+./mvnw clean deploy -V -B -Pembedded-cassandra-release,embedded-cassandra-docs -DskipTests || (git reset --hard HEAD^1 || abort "Git reset command failed!" && abort "Aborted")
 
 #prepare gh-pages
 cd "${PAGES_DIRECTORY}"
