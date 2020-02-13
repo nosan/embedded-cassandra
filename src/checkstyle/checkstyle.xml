@@ -12,9 +12,8 @@
         <property name="headerFile" value="${checkstyle.header.file}"/>
         <property name="fileExtensions" value="java"/>
     </module>
-    <module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck">
-        <property name="lineSeparator" value="lf"/>
-    </module>
+
+    <module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck"/>
 
     <module name="JavadocPackage"/>
 
