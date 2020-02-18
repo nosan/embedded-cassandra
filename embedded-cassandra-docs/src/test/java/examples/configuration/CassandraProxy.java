@@ -28,7 +28,7 @@ class CassandraProxy {
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		RemoteArtifact artifact = new RemoteArtifact(Version.of("3.11.4"));
+		RemoteArtifact artifact = new RemoteArtifact(Version.of("3.11.6"));
 		artifact.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("my.proxy", 80)));
 		cassandraFactory.setArtifact(artifact);
 		// end::source[]

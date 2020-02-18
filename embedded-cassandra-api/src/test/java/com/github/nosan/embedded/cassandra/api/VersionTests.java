@@ -30,16 +30,16 @@ class VersionTests {
 
 	@Test
 	void shouldParseMajorMinorPatch() {
-		Version version = Version.of("3.11.3");
-		assertThat(version).isEqualTo(of(3, 11, 3));
+		Version version = Version.of("3.11.6");
+		assertThat(version).isEqualTo(of(3, 11, 6));
 		assertThat(version).isEqualTo(version);
-		assertThat(version).isEqualByComparingTo(of(3, 11, 3));
+		assertThat(version).isEqualByComparingTo(of(3, 11, 6));
 		assertThat(version).isNotEqualByComparingTo(of(3, 12));
 		assertThat(version).isNotEqualByComparingTo(of(3, 11, 2));
 		assertThat(version.getMajor()).isEqualTo(3);
 		assertThat(version.getMinor()).isEqualTo(11);
-		assertThat(version.getPatch()).hasValue(3);
-		assertThat(version.toString()).isEqualTo("3.11.3");
+		assertThat(version.getPatch()).hasValue(6);
+		assertThat(version.toString()).isEqualTo("3.11.6");
 	}
 
 	@Test
