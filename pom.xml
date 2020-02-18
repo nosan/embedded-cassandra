@@ -36,8 +36,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <assertj.version>3.14.0</assertj.version>
-        <junit5.version>5.5.2</junit5.version>
+        <assertj.version>3.15.0</assertj.version>
+        <junit5.version>5.6.0</junit5.version>
         <checkstyle.version>8.29</checkstyle.version>
         <slf4j-api.version>1.7.29</slf4j-api.version>
         <logback-classic.version>1.2.3</logback-classic.version>
@@ -47,10 +47,10 @@
         <junit.version>4.13</junit.version>
         <testng.version>7.1.0</testng.version>
         <spring.version>5.2.3.RELEASE</spring.version>
-        <spring-boot.version>2.2.3.RELEASE</spring-boot.version>
+        <spring-boot.version>2.2.4.RELEASE</spring-boot.version>
         <asciidoctorj.version>2.2.0</asciidoctorj.version>
         <java-driver-core.version>4.4.0</java-driver-core.version>
-        <commons-compress.version>1.19</commons-compress.version>
+        <commons-compress.version>1.20</commons-compress.version>
         <nexus.url>https://oss.sonatype.org</nexus.url>
     </properties>
 
