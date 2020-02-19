@@ -144,6 +144,11 @@ public class ArchiveResource implements Resource {
 	}
 
 	@Override
+	public byte[] getBytes() throws IOException {
+		throw new UnsupportedOperationException("Archive Resource does not support `getBytes`");
+	}
+
+	@Override
 	public URI toURI() throws IOException {
 		return this.resource.toURI();
 	}

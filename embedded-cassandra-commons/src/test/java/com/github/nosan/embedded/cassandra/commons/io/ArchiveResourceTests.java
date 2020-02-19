@@ -18,7 +18,6 @@ package com.github.nosan.embedded.cassandra.commons.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -26,7 +25,6 @@ import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,13 +52,6 @@ class ArchiveResourceTests {
 	@Test
 	void toFile() throws IOException, URISyntaxException {
 		assertThat(this.resource.toFile()).isEqualTo(new File(this.url.toURI()));
-	}
-
-	@Test
-	void getBytes() throws IOException {
-		try (InputStream inputStream = this.resource.getInputStream()) {
-			assertThat(this.resource.getBytes()).isEqualTo(StreamUtils.copyToByteArray(inputStream));
-		}
 	}
 
 	@Test
@@ -99,7 +90,7 @@ class ArchiveResourceTests {
 	void extract(@TempDir Path destination) throws IOException {
 		this.resource.extract(destination);
 		assertThat(destination.resolve("test")).isDirectory();
-		assertThat(destination.resolve("test/file.txt")).isRegularFile();
+		assertThat(destination.resolve("test/text.txt")).isRegularFile();
 	}
 
 }
