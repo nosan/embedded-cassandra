@@ -49,7 +49,7 @@
         <spring.version>5.2.4.RELEASE</spring.version>
         <spring-boot.version>2.2.5.RELEASE</spring-boot.version>
         <asciidoctorj.version>2.2.0</asciidoctorj.version>
-        <java-driver-core.version>4.5.0</java-driver-core.version>
+        <java-driver-core.version>4.5.1</java-driver-core.version>
         <commons-compress.version>1.20</commons-compress.version>
         <nexus.url>https://oss.sonatype.org</nexus.url>
     </properties>
