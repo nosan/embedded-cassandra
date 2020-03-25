@@ -46,7 +46,7 @@
         <cassandra-driver-core.version>3.8.0</cassandra-driver-core.version>
         <junit.version>4.13</junit.version>
         <testng.version>7.1.0</testng.version>
-        <spring.version>5.2.4.RELEASE</spring.version>
+        <spring.version>5.2.5.RELEASE</spring.version>
         <spring-boot.version>2.2.5.RELEASE</spring-boot.version>
         <asciidoctorj.version>2.2.0</asciidoctorj.version>
         <java-driver-core.version>4.5.1</java-driver-core.version>
