@@ -33,7 +33,7 @@ include::{test-sources}/examples/configuration/CassandraDefaultArtifact.java[tag
 
 There are several ways to use `Java 13`:
 
-- Use Apache-Cassandra `4.0-alpha3` version
+- Use Apache-Cassandra `4.0-alpha4` version
 - Use a custom java home directory with `Java 8`.
 
 [source,java,indent=0]
