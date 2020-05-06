@@ -64,6 +64,7 @@ public final class RemoteArtifact implements Artifact {
 
 	private Duration connectTimeout;
 
+	@Nullable
 	private Proxy proxy;
 
 	private UrlFactory urlFactory;
@@ -96,7 +97,7 @@ public final class RemoteArtifact implements Artifact {
 		this.version = Objects.requireNonNull(version, "'version' must not be null");
 		this.readTimeout = (readTimeout != null) ? readTimeout : Duration.ofSeconds(30);
 		this.connectTimeout = (connectTimeout != null) ? connectTimeout : Duration.ofSeconds(10);
-		this.proxy = (proxy != null) ? proxy : Proxy.NO_PROXY;
+		this.proxy = proxy;
 		this.urlFactory = (urlFactory != null) ? urlFactory : new DefaultUrlFactory();
 		this.destination = destination;
 	}
@@ -111,10 +112,11 @@ public final class RemoteArtifact implements Artifact {
 	}
 
 	/**
-	 * Proxy through which artifact will download an archive file. Defaults to {@code NO_PROXY}.
+	 * Proxy through which artifact will download an archive file.
 	 *
 	 * @return the proxy
 	 */
+	@Nullable
 	public Proxy getProxy() {
 		return this.proxy;
 	}
@@ -312,9 +314,10 @@ public final class RemoteArtifact implements Artifact {
 
 		private final Duration connectTimeout;
 
+		@Nullable
 		private final Proxy proxy;
 
-		FileDownloader(Duration readTimeout, Duration connectTimeout, Proxy proxy) {
+		FileDownloader(Duration readTimeout, Duration connectTimeout, @Nullable Proxy proxy) {
 			this.readTimeout = readTimeout;
 			this.connectTimeout = connectTimeout;
 			this.proxy = proxy;
@@ -377,9 +380,9 @@ public final class RemoteArtifact implements Artifact {
 
 		}
 
-		private static URLConnection connect(URL url, Duration readTimeout, Duration connectTimeout, Proxy proxy)
-				throws IOException {
-			URLConnection connection = url.openConnection(proxy);
+		private static URLConnection connect(URL url, Duration readTimeout, Duration connectTimeout,
+				@Nullable Proxy proxy) throws IOException {
+			URLConnection connection = (proxy != null) ? url.openConnection(proxy) : url.openConnection();
 			connection.setConnectTimeout(Math.toIntExact(connectTimeout.toMillis()));
 			connection.setReadTimeout(Math.toIntExact(readTimeout.toMillis()));
 			return connection;
