@@ -37,12 +37,12 @@ class DefaultUrlFactoryTests {
 
 	@Test
 	void testCreate() throws IOException {
-		assertThat(this.urlFactory.create(Version.of("3.11.6"))).isEqualTo(Arrays.asList(
-				new URL("https://apache.org/dyn/closer.cgi?action=download&filename=cassandra/3.11.6/"
-						+ "apache-cassandra-3.11.6-bin.tar.gz"),
-				new URL("https://dist.apache.org/repos/dist/release/cassandra/3.11.6/"
-						+ "apache-cassandra-3.11.6-bin.tar.gz"),
-				new URL("https://archive.apache.org/dist/cassandra/3.11.6/apache-cassandra-3.11.6-bin.tar.gz")));
+		assertThat(this.urlFactory.create(Version.of("4.0-beta1"))).isEqualTo(Arrays.asList(
+				new URL("https://apache.org/dyn/closer.cgi?action=download&filename=cassandra/4.0-beta1/"
+						+ "apache-cassandra-4.0-beta1-bin.tar.gz"),
+				new URL("https://dist.apache.org/repos/dist/release/cassandra/4.0-beta1/"
+						+ "apache-cassandra-4.0-beta1-bin.tar.gz"),
+				new URL("https://archive.apache.org/dist/cassandra/4.0-beta1/apache-cassandra-4.0-beta1-bin.tar.gz")));
 
 	}
 

@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NativeTransportReadinessConsumerTests {
 
 	private final NativeTransportReadinessConsumer readiness = new NativeTransportReadinessConsumer(
-			Version.of("3.11.6"));
+			Version.of("4.0-beta1"));
 
 	@Test
 	void isReadyWhenTransportStarted() {

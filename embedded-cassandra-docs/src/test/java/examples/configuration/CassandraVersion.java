@@ -24,7 +24,7 @@ class CassandraVersion {
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setArtifact(Artifact.ofVersion("3.11.6"));
+		cassandraFactory.setArtifact(Artifact.ofVersion("4.0-beta1"));
 		// end::source[]
 	}
 

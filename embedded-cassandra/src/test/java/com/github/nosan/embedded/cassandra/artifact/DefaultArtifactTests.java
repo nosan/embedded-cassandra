@@ -36,13 +36,13 @@ class DefaultArtifactTests {
 
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) throws Exception {
-		Path home = temporaryFolder.resolve("apache-cassandra-3.11.6");
+		Path home = temporaryFolder.resolve("apache-cassandra-4.0-beta1");
 		Files.createDirectories(home);
 		Files.createDirectories(home.resolve("bin"));
 		Files.createDirectories(home.resolve("lib"));
 		Files.createDirectories(home.resolve("conf"));
 		Files.createFile(home.resolve("conf/cassandra.yaml"));
-		Version version = Version.of("3.11.6");
+		Version version = Version.of("4.0-beta1");
 		Artifact artifact = new DefaultArtifact(version, temporaryFolder);
 		Artifact.Distribution distribution = artifact.getDistribution();
 		assertThat(distribution.getVersion()).isEqualTo(version);
@@ -56,7 +56,7 @@ class DefaultArtifactTests {
 	@Test
 	void testArtifactFailNoCassandraHome(@TempDir Path temporaryFolder) {
 		assertThatIllegalStateException().isThrownBy(() -> {
-			Version version = Version.of("3.11.6");
+			Version version = Version.of("4.0-beta1");
 			Artifact artifact = new DefaultArtifact(version, temporaryFolder);
 			artifact.getDistribution();
 		});
@@ -64,14 +64,14 @@ class DefaultArtifactTests {
 
 	@Test
 	void testArtifactFailTwoDirectories(@TempDir Path temporaryFolder) throws Exception {
-		Path home = temporaryFolder.resolve("apache-cassandra-3.11.6-home");
+		Path home = temporaryFolder.resolve("apache-cassandra-4.0-beta1-home");
 		Files.createDirectories(home);
 		Files.createDirectories(home.resolve("bin"));
 		Files.createDirectories(home.resolve("lib"));
 		Files.createDirectories(home.resolve("conf"));
 		Files.createFile(home.resolve("conf/cassandra.yaml"));
 
-		Path home1 = temporaryFolder.resolve("apache-cassandra-3.11.6-home1");
+		Path home1 = temporaryFolder.resolve("apache-cassandra-4.0-beta1-home1");
 		Files.createDirectories(home1);
 		Files.createDirectories(home1.resolve("bin"));
 		Files.createDirectories(home1.resolve("lib"));
@@ -79,7 +79,7 @@ class DefaultArtifactTests {
 		Files.createFile(home1.resolve("conf/cassandra.yaml"));
 
 		assertThatIllegalStateException().isThrownBy(() -> {
-			Version version = Version.of("3.11.6");
+			Version version = Version.of("4.0-beta1");
 			Artifact artifact = new DefaultArtifact(version, temporaryFolder);
 			artifact.getDistribution();
 		});
