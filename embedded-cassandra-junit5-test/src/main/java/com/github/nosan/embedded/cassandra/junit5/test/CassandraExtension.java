@@ -50,17 +50,14 @@ import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
  * <p>Example:</p>
  * <pre>
  * class CassandraTests {
- *
  *     &#64;RegisterExtension
  *     static final CassandraExtension CASSANDRA_EXTENSION = new CassandraExtension();
- *
  *     &#64;Test
  *     void test() {
  *      //
  *     }
  * }
  * </pre>
- *
  * <p><strong>Exposed properties:</strong>
  * The following properties will be added to {@code System Properties} after {@link Cassandra} has started:
  * <pre>

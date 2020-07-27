@@ -51,7 +51,6 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  * <p><strong>Example:</strong>
  * <pre>
  * class Scratch {
- *
  *   public static void main(String[] args) {
  *     EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
  *     Cassandra cassandra = cassandraFactory.create();
@@ -63,7 +62,6 @@ import com.github.nosan.embedded.cassandra.commons.util.StringUtils;
  *       cassandra.stop();
  *     }
  *   }
- *
  * }
  * </pre>
  * <p><strong>Configuration:</strong>

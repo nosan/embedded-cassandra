@@ -49,10 +49,8 @@ import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
  * <p>Example:
  * <pre>
  * class CassandraTests {
- *
  *     &#64;ClassRule
  *     public static final CassandraRule CASSANDRA_RULE = new CassandraRule();
- *
  *     &#64;Test
  *     public void test() {
  *     //

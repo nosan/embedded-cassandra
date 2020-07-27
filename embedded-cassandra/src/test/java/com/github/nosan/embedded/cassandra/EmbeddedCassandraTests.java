@@ -83,7 +83,7 @@ class EmbeddedCassandraTests {
 			assertThat(cassandra.getSslPort()).isEqualTo(-1);
 		});
 	}
-	
+
 	@Test
 	void testSuccessWhenTransportDisabled() throws Throwable {
 		this.configProperties.put("start_native_transport", false);

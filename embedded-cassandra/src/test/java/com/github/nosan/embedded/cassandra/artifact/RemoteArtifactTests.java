@@ -65,7 +65,8 @@ class RemoteArtifactTests {
 		this.httpServer.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
 		this.httpServer.start();
 		byte[] content;
-		try (InputStream inputStream = new ClassPathResource("apache-cassandra-4.0-beta1-bin.tar.gz").getInputStream()) {
+		try (InputStream inputStream = new ClassPathResource("apache-cassandra-4.0-beta1-bin.tar.gz")
+				.getInputStream()) {
 			content = IOUtils.toByteArray(inputStream);
 		}
 		this.httpServer.createContext("/apache-cassandra-4.0-beta1-bin.tar.gz", exchange -> {
@@ -93,7 +94,8 @@ class RemoteArtifactTests {
 		RemoteArtifact artifact = new RemoteArtifact(VERSION);
 		artifact.setDestination(temporaryFolder);
 		artifact.setUrlFactory(version -> Collections.singletonList(
-				new URL(String.format("http:/%s/apache-cassandra-4.0-beta1-bin.tar.gz", this.httpServer.getAddress()))));
+				new URL(String
+						.format("http:/%s/apache-cassandra-4.0-beta1-bin.tar.gz", this.httpServer.getAddress()))));
 		assertDistribution(artifact.getDistribution());
 		assertThat(this.output.toString()).contains("Downloaded");
 		this.output.reset();
@@ -174,7 +176,8 @@ class RemoteArtifactTests {
 		artifact.setDestination(temporaryFolder);
 		artifact.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
 		artifact.setUrlFactory(version -> Collections.singletonList(
-				new URL(String.format("http:/%s/apache-cassandra-4.0-beta1-bin.tar.gz", this.httpServer.getAddress()))));
+				new URL(String
+						.format("http:/%s/apache-cassandra-4.0-beta1-bin.tar.gz", this.httpServer.getAddress()))));
 		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("Connection refused");
 	}
 

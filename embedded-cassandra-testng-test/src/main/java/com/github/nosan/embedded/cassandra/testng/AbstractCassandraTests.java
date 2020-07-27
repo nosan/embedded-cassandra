@@ -48,15 +48,12 @@ import com.github.nosan.embedded.cassandra.api.cql.CqlDataSet;
  * <p>Example:
  * <pre>
  * class CassandraTests extends AbstractCassandraTests {
- *
  *     &#64;Test
  *     public void test() {
  *        //
  *     }
- *
  * }
  * </pre>
- *
  * <p><strong>Exposed properties:</strong>
  * The following properties will be added to {@code System Properties} after {@link Cassandra} has started:
  * <pre>

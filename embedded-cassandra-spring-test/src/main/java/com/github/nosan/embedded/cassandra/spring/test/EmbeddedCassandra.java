@@ -35,13 +35,11 @@ import com.github.nosan.embedded.cassandra.api.connection.CassandraConnectionFac
 /**
  * Annotation that allows the {@link Cassandra} to be started and stopped.
  * <p>By default, {@link Cassandra} runs on the random ports.
- *
  * <p>Example:
  * <pre>
  * &#64;EmbeddedCassandra(scripts = "schema.cql")
  * &#64;ExtendWith(SpringExtension.class)
  * class CassandraTests {
- *
  *      &#64;Test
  *      void test() {
  *      }
@@ -58,7 +56,6 @@ import com.github.nosan.embedded.cassandra.api.connection.CassandraConnectionFac
  * </pre>
  * <p>
  * Use {@link #exposeProperties()}  to disable properties exposing.
- *
  * <p>
  * It is possible to register your own {@link CassandraFactory}, {@link CassandraConnectionFactory} or {@link
  * CassandraFactoryCustomizer CassandraFactoryCustomizers} bean(s) to control {@link Cassandra} and {@link
