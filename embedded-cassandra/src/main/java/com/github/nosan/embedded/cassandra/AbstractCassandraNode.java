@@ -201,6 +201,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		configurePort(properties, "rpc_port");
 		configurePort(properties, "storage_port");
 		configurePort(properties, "ssl_storage_port");
+		configureSeeds(properties);
 	}
 
 	private void configureSystemProperties(Map<String, Object> systemProperties) throws IOException {
@@ -218,6 +219,24 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 		try (ServerSocket ss = new ServerSocket(0)) {
 			properties.put(name, ss.getLocalPort());
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void configureSeeds(Map<String, Object> properties) {
+		List<Map<String, Object>> seedProvider = (List<Map<String, Object>>) properties.get("seed_provider");
+		if (seedProvider != null) {
+			seedProvider.forEach(each -> {
+				List<Map<String, Object>> parameters = (List<Map<String, Object>>) each.get("parameters");
+				if (parameters != null) {
+					parameters.forEach(parameter -> {
+						String seeds = ((String) parameter.get("seeds"));
+						if (seeds != null) {
+							parameter.put("seeds", seeds.replaceAll(":\\d+", ""));
+						}
+					});
+				}
+			});
 		}
 	}
 
