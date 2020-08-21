@@ -112,7 +112,8 @@ class EmbeddedCassandraDatabase implements CassandraDatabase {
 		initialize();
 		this.node.start();
 		log.info("{} has been started", toString());
-		NativeTransportReadinessConsumer nativeTransportReadiness = new NativeTransportReadinessConsumer(this.version);
+		NativeTransportReadinessConsumer nativeTransportReadiness = new NativeTransportReadinessConsumer(this.version,
+				this.node.isSslEnabled());
 		RpcTransportReadinessConsumer rpcTransportReadiness = new RpcTransportReadinessConsumer(this.version);
 		await(nativeTransportReadiness, rpcTransportReadiness);
 		int sslPort = nativeTransportReadiness.getSslPort();

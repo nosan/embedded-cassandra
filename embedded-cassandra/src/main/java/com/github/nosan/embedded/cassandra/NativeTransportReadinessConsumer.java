@@ -48,6 +48,8 @@ class NativeTransportReadinessConsumer implements ReadinessConsumer {
 
 	private final Version version;
 
+	private final boolean ssl;
+
 	@Nullable
 	private volatile Integer port;
 
@@ -57,11 +59,11 @@ class NativeTransportReadinessConsumer implements ReadinessConsumer {
 	@Nullable
 	private volatile InetAddress address;
 
-	@Nullable
-	private volatile Boolean started;
+	private volatile boolean disabled;
 
-	NativeTransportReadinessConsumer(Version version) {
+	NativeTransportReadinessConsumer(Version version, boolean ssl) {
 		this.version = version;
+		this.ssl = ssl;
 	}
 
 	@Override
@@ -76,16 +78,24 @@ class NativeTransportReadinessConsumer implements ReadinessConsumer {
 			else {
 				this.port = Integer.parseInt(matcher.group(2));
 			}
-			this.started = true;
 		}
 		else if (TRANSPORT_NOT_START_PATTERN.matcher(line).matches()) {
-			this.started = false;
+			this.disabled = true;
 		}
 	}
 
 	@Override
 	public boolean isReady() {
-		return this.version.getMajor() < 2 || this.started != null;
+		if (this.version.getMajor() < 2) {
+			return true;
+		}
+		if (this.disabled) {
+			return true;
+		}
+		if (this.ssl && this.sslPort == null) {
+			return false;
+		}
+		return this.port != null;
 	}
 
 	/**

@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NativeTransportReadinessConsumerTests {
 
 	private final NativeTransportReadinessConsumer readiness = new NativeTransportReadinessConsumer(
-			Version.of("3.11.6"));
+			Version.of("3.11.6"), false);
 
 	@Test
 	void isReadyWhenTransportStarted() {
@@ -51,7 +51,7 @@ class NativeTransportReadinessConsumerTests {
 
 	@Test
 	void isReadyWhenLowerVersionTwo() {
-		assertThat(new NativeTransportReadinessConsumer(Version.of("1.0.0")).isReady()).isTrue();
+		assertThat(new NativeTransportReadinessConsumer(Version.of("1.0.0"), false).isReady()).isTrue();
 	}
 
 	@Test
