@@ -58,7 +58,7 @@ interface CassandraNode {
 	InputStream getInputStream();
 
 	/**
-	 * Returns whether client encryption is enabled
+	 * Returns whether client encryption is enabled.
 	 *
 	 * @return {@code true} if encryption is enabled
 	 */
