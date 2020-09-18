@@ -47,7 +47,7 @@
         <junit.version>4.13</junit.version>
         <testng.version>7.1.0</testng.version>
         <spring.version>5.2.8.RELEASE</spring.version>
-        <spring-boot.version>2.2.9.RELEASE</spring-boot.version>
+        <spring-boot.version>2.2.10.RELEASE</spring-boot.version>
         <asciidoctorj.version>2.4.0</asciidoctorj.version>
         <java-driver-core.version>4.7.2</java-driver-core.version>
         <commons-compress.version>1.20</commons-compress.version>
