@@ -44,7 +44,7 @@
         <jsr305.version>3.0.2</jsr305.version>
         <snakeyaml.version>1.26</snakeyaml.version>
         <cassandra-driver-core.version>3.9.0</cassandra-driver-core.version>
-        <junit.version>4.13</junit.version>
+        <junit.version>4.13.1</junit.version>
         <testng.version>7.1.0</testng.version>
         <spring.version>5.2.8.RELEASE</spring.version>
         <spring-boot.version>2.2.9.RELEASE</spring-boot.version>
