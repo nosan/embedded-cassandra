@@ -43,7 +43,7 @@
         <logback-classic.version>1.2.3</logback-classic.version>
         <jsr305.version>3.0.2</jsr305.version>
         <snakeyaml.version>1.27</snakeyaml.version>
-        <cassandra-driver-core.version>3.9.0</cassandra-driver-core.version>
+        <cassandra-driver-core.version>3.10.2</cassandra-driver-core.version>
         <junit.version>4.13.1</junit.version>
         <testng.version>7.1.0</testng.version>
         <spring.version>5.2.9.RELEASE</spring.version>
