@@ -42,7 +42,7 @@
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <logback-classic.version>1.2.3</logback-classic.version>
         <jsr305.version>3.0.2</jsr305.version>
-        <snakeyaml.version>1.26</snakeyaml.version>
+        <snakeyaml.version>1.27</snakeyaml.version>
         <cassandra-driver-core.version>3.9.0</cassandra-driver-core.version>
         <junit.version>4.13.1</junit.version>
         <testng.version>7.1.0</testng.version>
