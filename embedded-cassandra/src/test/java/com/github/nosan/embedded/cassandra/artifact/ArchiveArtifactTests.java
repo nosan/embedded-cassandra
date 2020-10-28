@@ -91,7 +91,7 @@ class ArchiveArtifactTests {
 
 		private final AtomicBoolean alreadyCalled = new AtomicBoolean(false);
 
-		private final ClassPathResource resource = new ClassPathResource("apache-cassandra-4.0-beta1-bin.tar.gz");
+		private final ClassPathResource resource = new ClassPathResource("apache-cassandra-4.0-beta2-bin.tar.gz");
 
 		@Override
 		public String getFileName() {

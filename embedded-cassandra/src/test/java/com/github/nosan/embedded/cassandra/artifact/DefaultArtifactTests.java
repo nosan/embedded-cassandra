@@ -36,7 +36,7 @@ class DefaultArtifactTests {
 
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) throws Exception {
-		Path home = temporaryFolder.resolve("apache-cassandra-4.0-beta1");
+		Path home = temporaryFolder.resolve("apache-cassandra-4.0-beta2");
 		Files.createDirectories(home);
 		Files.createDirectories(home.resolve("bin"));
 		Files.createDirectories(home.resolve("lib"));
@@ -64,14 +64,14 @@ class DefaultArtifactTests {
 
 	@Test
 	void testArtifactFailTwoDirectories(@TempDir Path temporaryFolder) throws Exception {
-		Path home = temporaryFolder.resolve("apache-cassandra-4.0-beta1-home");
+		Path home = temporaryFolder.resolve("apache-cassandra-4.0-beta2-home");
 		Files.createDirectories(home);
 		Files.createDirectories(home.resolve("bin"));
 		Files.createDirectories(home.resolve("lib"));
 		Files.createDirectories(home.resolve("conf"));
 		Files.createFile(home.resolve("conf/cassandra.yaml"));
 
-		Path home1 = temporaryFolder.resolve("apache-cassandra-4.0-beta1-home1");
+		Path home1 = temporaryFolder.resolve("apache-cassandra-4.0-beta2-home1");
 		Files.createDirectories(home1);
 		Files.createDirectories(home1.resolve("bin"));
 		Files.createDirectories(home1.resolve("lib"));
