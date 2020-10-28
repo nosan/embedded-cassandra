@@ -45,7 +45,7 @@ class WindowsCassandraNode extends AbstractCassandraNode {
 	WindowsCassandraNode(Version version, Path workingDirectory, List<String> jvmOptions,
 			Map<String, Object> systemProperties,
 			Map<String, Object> environmentVariables, Map<String, Object> properties) {
-		super(workingDirectory, properties, jvmOptions, systemProperties, environmentVariables);
+		super(version, workingDirectory, properties, jvmOptions, systemProperties, environmentVariables);
 		this.version = version;
 		this.workingDirectory = workingDirectory;
 	}

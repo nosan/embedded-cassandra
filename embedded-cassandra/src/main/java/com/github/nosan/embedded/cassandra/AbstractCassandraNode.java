@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.nosan.embedded.cassandra.annotations.Nullable;
+import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.io.FileSystemResource;
 import com.github.nosan.embedded.cassandra.commons.io.Resource;
 import com.github.nosan.embedded.cassandra.commons.io.UrlResource;
@@ -53,6 +55,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	private static final ByteArrayInputStream EMPTY_STREAM = new ByteArrayInputStream(new byte[0]);
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+	private final Version version;
 
 	private final Path workingDirectory;
 
@@ -71,8 +75,10 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private volatile boolean sslEnabled;
 
-	AbstractCassandraNode(Path workingDirectory, Map<String, Object> properties, List<String> jvmOptions,
+	AbstractCassandraNode(Version version, Path workingDirectory,
+			Map<String, Object> properties, List<String> jvmOptions,
 			Map<String, Object> systemProperties, Map<String, Object> environmentVariables) {
+		this.version = version;
 		this.workingDirectory = workingDirectory;
 		this.properties = Collections.unmodifiableMap(new LinkedHashMap<>(properties));
 		this.jvmOptions = Collections.unmodifiableList(new ArrayList<>(jvmOptions));
@@ -83,13 +89,15 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Override
 	public final void start() throws IOException, InterruptedException {
 		RunProcess runProcess = new RunProcess(this.workingDirectory);
-		Map<String, Object> properties = loadProperties();
-		properties.putAll(this.properties);
+		Map<String, Object> oldProperties = loadProperties();
+		Map<String, Object> newProperties = new LinkedHashMap<>(oldProperties);
+		newProperties.putAll(this.properties);
 		Map<String, Object> systemProperties = new LinkedHashMap<>(this.systemProperties);
 		configureSystemProperties(systemProperties);
-		configureProperties(properties);
+		configureProperties(newProperties);
+		configureSeeds(this.version, oldProperties, newProperties, systemProperties);
 		Path configFile = Files.createTempFile(this.workingDirectory.resolve("conf"), "", "-cassandra.yaml");
-		dumpProperties(properties, configFile);
+		dumpProperties(newProperties, configFile);
 		systemProperties.put("cassandra.config", configFile.toUri().toString());
 		List<String> jvmOptions = new ArrayList<>(this.jvmOptions);
 		for (Map.Entry<String, Object> entry : systemProperties.entrySet()) {
@@ -102,7 +110,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		Process process = doStart(runProcess);
 		this.process = process;
 		this.pid = getPid(process);
-		this.sslEnabled = isSslEnabled(properties);
+		this.sslEnabled = isSslEnabled(newProperties);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -221,7 +229,6 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		configurePort(properties, "rpc_port");
 		configurePort(properties, "storage_port");
 		configurePort(properties, "ssl_storage_port");
-		configureSeeds(properties);
 	}
 
 	private void configureSystemProperties(Map<String, Object> systemProperties) throws IOException {
@@ -243,20 +250,42 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void configureSeeds(Map<String, Object> properties) {
-		List<Map<String, Object>> seedProvider = (List<Map<String, Object>>) properties.get("seed_provider");
-		if (seedProvider != null) {
-			seedProvider.forEach(each -> {
-				List<Map<String, Object>> parameters = (List<Map<String, Object>>) each.get("parameters");
-				if (parameters != null) {
-					parameters.forEach(parameter -> {
-						String seeds = ((String) parameter.get("seeds"));
-						if (seeds != null) {
-							parameter.put("seeds", seeds.replaceAll(":\\d+", ""));
-						}
-					});
-				}
-			});
+	private static void configureSeeds(Version version, Map<String, Object> oldProperties,
+			Map<String, Object> newProperties,
+			Map<String, Object> systemProperties) {
+		if (version.getMajor() > 4) {
+			List<Map<String, Object>> seedProvider = (List<Map<String, Object>>) newProperties.get("seed_provider");
+			if (seedProvider != null) {
+				seedProvider.forEach(each -> {
+					List<Map<String, Object>> parameters = (List<Map<String, Object>>) each.get("parameters");
+					if (parameters != null) {
+						parameters.forEach(parameter -> {
+							String seeds = ((String) parameter.get("seeds"));
+							if (seeds != null) {
+								String oldStoragePort = Objects.toString(oldProperties.get("storage_port"), null);
+								String storagePort = Objects.toString(newProperties.get("storage_port"), null);
+								String cassandraStoragePort = Objects
+										.toString(systemProperties.get("cassandra.storage_port"), null);
+								String oldSslStoragePort = Objects
+										.toString(oldProperties.get("ssl_storage_port"), null);
+								String cassandraSslStoragePort = Objects
+										.toString(systemProperties.get("cassandra.ssl_storage_port"), null);
+								String sslStoragePort = Objects.toString(newProperties.get("ssl_storage_port"), null);
+								if (oldStoragePort != null && (cassandraStoragePort != null || storagePort != null)) {
+									seeds = seeds.replaceAll("\\b" + oldStoragePort + "\\b",
+											Optional.ofNullable(cassandraStoragePort).orElse(storagePort));
+								}
+								if (oldSslStoragePort != null && (cassandraSslStoragePort != null
+										|| sslStoragePort != null)) {
+									seeds = seeds.replaceAll("\\b" + oldSslStoragePort + "\\b",
+											Optional.ofNullable(cassandraSslStoragePort).orElse(sslStoragePort));
+								}
+								parameter.put("seeds", seeds);
+							}
+						});
+					}
+				});
+			}
 		}
 	}
 

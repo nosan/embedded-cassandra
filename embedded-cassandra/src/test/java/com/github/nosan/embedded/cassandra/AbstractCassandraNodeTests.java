@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.yaml.snakeyaml.Yaml;
 
+import com.github.nosan.embedded.cassandra.api.Version;
 import com.github.nosan.embedded.cassandra.commons.io.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dmytro Nosan
  */
-@SuppressWarnings("NullableProblems")
 class AbstractCassandraNodeTests {
 
 	private final Map<String, Object> properties = new LinkedHashMap<>();
@@ -123,7 +123,8 @@ class AbstractCassandraNodeTests {
 
 	private void start(RunProcessConsumer consumer) throws IOException, InterruptedException {
 		MockProcess mockProcess = new MockProcess();
-		AbstractCassandraNode node = new AbstractCassandraNode(this.workingDirectory, this.properties, this.jvmOptions,
+		AbstractCassandraNode node = new AbstractCassandraNode(Version.of("3.11.6"), this.workingDirectory,
+				this.properties, this.jvmOptions,
 				this.systemProperties,
 				this.environmentVariables) {
 
