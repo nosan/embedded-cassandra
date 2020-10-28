@@ -19,12 +19,12 @@ package examples.configuration;
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 import com.github.nosan.embedded.cassandra.artifact.Artifact;
 
-class CassandraAlphaVersion {
+class CassandraBetaVersion {
 
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		cassandraFactory.setArtifact(Artifact.ofVersion("4.0-alpha3"));
+		cassandraFactory.setArtifact(Artifact.ofVersion("4.0-beta2"));
 		// end::source[]
 	}
 

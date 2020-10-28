@@ -27,7 +27,7 @@ public class CassandraArchiveArtifact {
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-		Version version = Version.of("4.0-beta1");
+		Version version = Version.of("4.0-beta2");
 		ClassPathResource archiveFile = new ClassPathResource("apache-cassandra-4.0-beta1-bin.tar.gz");
 		cassandraFactory.setArtifact(new ArchiveArtifact(version, archiveFile));
 		Cassandra cassandra = cassandraFactory.create();

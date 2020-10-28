@@ -13,7 +13,7 @@ This section covers how to configure Embedded Cassandra.
 include::{test-sources}/examples/configuration/CassandraVersion.java[tag=source]
 ----
 
-TIP: Default version is *4.0-beta1*
+TIP: Default version is *4.0-beta2*
 
 === Configure Config
 

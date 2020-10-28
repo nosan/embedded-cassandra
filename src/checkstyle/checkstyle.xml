@@ -61,13 +61,13 @@
         <module name="com.puppycrawl.tools.checkstyle.checks.coding.SimplifyBooleanReturnCheck"/>
         <module name="com.puppycrawl.tools.checkstyle.checks.coding.StringLiteralEqualityCheck"/>
         <module name="com.puppycrawl.tools.checkstyle.checks.coding.NestedForDepthCheck">
-            <property name="max" value="3"/>
+            <property name="max" value="5"/>
         </module>
         <module name="com.puppycrawl.tools.checkstyle.checks.coding.NestedIfDepthCheck">
-            <property name="max" value="3"/>
+            <property name="max" value="5"/>
         </module>
         <module name="com.puppycrawl.tools.checkstyle.checks.coding.NestedTryDepthCheck">
-            <property name="max" value="3"/>
+            <property name="max" value="5"/>
         </module>
         <module name="com.puppycrawl.tools.checkstyle.checks.coding.MultipleVariableDeclarationsCheck"/>
         <module name="com.puppycrawl.tools.checkstyle.checks.coding.DeclarationOrderCheck"/>

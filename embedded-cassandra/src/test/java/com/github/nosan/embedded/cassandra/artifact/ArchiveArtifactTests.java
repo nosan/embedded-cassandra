@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ArchiveArtifactTests {
 
-	private static final Version VERSION = Version.of("4.0-beta1");
+	private static final Version VERSION = Version.of("4.0-beta2");
 
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) throws Exception {

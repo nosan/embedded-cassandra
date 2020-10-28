@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class RemoteArtifactTests {
 
-	private static final Version VERSION = Version.of("4.0-beta1");
+	private static final Version VERSION = Version.of("4.0-beta2");
 
 	private final ByteArrayOutputStream output = new ByteArrayOutputStream();
 

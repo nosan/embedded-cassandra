@@ -30,7 +30,7 @@ public class CassandraDefaultArtifact {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
 		Path directory = Paths.get("<path to Cassandra's home>");
-		Version version = Version.of("4.0-beta1");
+		Version version = Version.of("4.0-beta2");
 		cassandraFactory.setArtifact(new DefaultArtifact(version, directory));
 		Cassandra cassandra = cassandraFactory.create();
 		cassandra.start();

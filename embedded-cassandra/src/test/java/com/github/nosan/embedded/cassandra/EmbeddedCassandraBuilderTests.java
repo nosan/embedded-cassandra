@@ -70,7 +70,7 @@ class EmbeddedCassandraBuilderTests {
 
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) {
-		final Version version = Version.of("4.0-beta1");
+		final Version version = Version.of("4.0-beta2");
 		Artifact artifact = () -> new DefaultDistribution(version, temporaryFolder);
 		this.builder.withArtifact(artifact);
 		Cassandra cassandra = this.builder.create();

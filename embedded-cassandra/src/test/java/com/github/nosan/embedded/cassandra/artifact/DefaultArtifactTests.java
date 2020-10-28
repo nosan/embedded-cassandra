@@ -42,7 +42,7 @@ class DefaultArtifactTests {
 		Files.createDirectories(home.resolve("lib"));
 		Files.createDirectories(home.resolve("conf"));
 		Files.createFile(home.resolve("conf/cassandra.yaml"));
-		Version version = Version.of("4.0-beta1");
+		Version version = Version.of("4.0-beta2");
 		Artifact artifact = new DefaultArtifact(version, temporaryFolder);
 		Artifact.Distribution distribution = artifact.getDistribution();
 		assertThat(distribution.getVersion()).isEqualTo(version);
@@ -56,7 +56,7 @@ class DefaultArtifactTests {
 	@Test
 	void testArtifactFailNoCassandraHome(@TempDir Path temporaryFolder) {
 		assertThatIllegalStateException().isThrownBy(() -> {
-			Version version = Version.of("4.0-beta1");
+			Version version = Version.of("4.0-beta2");
 			Artifact artifact = new DefaultArtifact(version, temporaryFolder);
 			artifact.getDistribution();
 		});
@@ -79,7 +79,7 @@ class DefaultArtifactTests {
 		Files.createFile(home1.resolve("conf/cassandra.yaml"));
 
 		assertThatIllegalStateException().isThrownBy(() -> {
-			Version version = Version.of("4.0-beta1");
+			Version version = Version.of("4.0-beta2");
 			Artifact artifact = new DefaultArtifact(version, temporaryFolder);
 			artifact.getDistribution();
 		});
