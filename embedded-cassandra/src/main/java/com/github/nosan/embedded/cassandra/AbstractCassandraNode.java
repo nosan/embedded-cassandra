@@ -253,7 +253,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	private static void configureSeeds(Version version, Map<String, Object> oldProperties,
 			Map<String, Object> newProperties,
 			Map<String, Object> systemProperties) {
-		if (version.getMajor() > 4) {
+		if (version.getMajor() >= 4) {
 			List<Map<String, Object>> seedProvider = (List<Map<String, Object>>) newProperties.get("seed_provider");
 			if (seedProvider != null) {
 				seedProvider.forEach(each -> {
