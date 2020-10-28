@@ -27,4 +27,4 @@ include::testing.adoc[leveloffset=+1]
 include::howto.adoc[leveloffset=+1]
 
 [.text-right]
-Copyright &#169; 2012-{docyear}
+Copyright &#169; 2019-{docyear}
