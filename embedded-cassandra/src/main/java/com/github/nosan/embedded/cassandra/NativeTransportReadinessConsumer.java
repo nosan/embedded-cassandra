@@ -48,7 +48,7 @@ class NativeTransportReadinessConsumer implements ReadinessConsumer {
 
 	private final Version version;
 
-	private final boolean ssl;
+	private final boolean sslPortPresent;
 
 	@Nullable
 	private volatile Integer port;
@@ -61,9 +61,9 @@ class NativeTransportReadinessConsumer implements ReadinessConsumer {
 
 	private volatile boolean disabled;
 
-	NativeTransportReadinessConsumer(Version version, boolean ssl) {
+	NativeTransportReadinessConsumer(Version version, boolean sslPortPresent) {
 		this.version = version;
-		this.ssl = ssl;
+		this.sslPortPresent = sslPortPresent;
 	}
 
 	@Override
@@ -72,7 +72,7 @@ class NativeTransportReadinessConsumer implements ReadinessConsumer {
 		if (matcher.matches()) {
 			this.address = getAddress(matcher.group(1));
 			boolean ssl = line.toLowerCase(Locale.ENGLISH).contains(ENCRYPTED);
-			if (ssl) {
+			if (ssl && this.sslPortPresent) {
 				this.sslPort = Integer.parseInt(matcher.group(2));
 			}
 			else {
@@ -92,7 +92,7 @@ class NativeTransportReadinessConsumer implements ReadinessConsumer {
 		if (this.disabled) {
 			return true;
 		}
-		if (this.ssl && this.sslPort == null) {
+		if (this.sslPortPresent && this.sslPort == null) {
 			return false;
 		}
 		return this.port != null;

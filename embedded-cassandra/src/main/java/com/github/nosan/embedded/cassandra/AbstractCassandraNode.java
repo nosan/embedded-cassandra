@@ -73,7 +73,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 
 	private volatile long pid = -1;
 
-	private volatile boolean sslEnabled;
+	private volatile boolean sslPortPresent;
 
 	AbstractCassandraNode(Version version, Path workingDirectory,
 			Map<String, Object> properties, List<String> jvmOptions,
@@ -110,19 +110,7 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		Process process = doStart(runProcess);
 		this.process = process;
 		this.pid = getPid(process);
-		this.sslEnabled = isSslEnabled(newProperties);
-	}
-
-	@SuppressWarnings("unchecked")
-	private boolean isSslEnabled(Map<String, Object> properties) {
-		if (properties.get("native_transport_port_ssl") != null) {
-			return true;
-		}
-		Map<String, Object> clientEncryptionOptions = (Map<String, Object>) properties.get("client_encryption_options");
-		if (clientEncryptionOptions != null) {
-			return Boolean.parseBoolean(Objects.toString(clientEncryptionOptions.get("enabled"), null));
-		}
-		return false;
+		this.sslPortPresent = this.properties.get("native_transport_port_ssl") != null;
 	}
 
 	@Override
@@ -147,8 +135,8 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	}
 
 	@Override
-	public boolean isSslEnabled() {
-		return this.sslEnabled;
+	public boolean hasSslPort() {
+		return this.sslPortPresent;
 	}
 
 	@Override

@@ -58,10 +58,10 @@ interface CassandraNode {
 	InputStream getInputStream();
 
 	/**
-	 * Returns whether client encryption is enabled.
+	 * Returns whether ssl port present.
 	 *
-	 * @return {@code true} if encryption is enabled
+	 * @return {@code true} if ssl port present
 	 */
-	boolean isSslEnabled();
+	boolean hasSslPort();
 
 }
