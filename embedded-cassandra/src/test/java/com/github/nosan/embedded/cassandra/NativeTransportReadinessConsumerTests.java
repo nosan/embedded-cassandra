@@ -33,12 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NativeTransportReadinessConsumerTests {
 
 	private final NativeTransportReadinessConsumer readiness = new NativeTransportReadinessConsumer(
-			Version.of("3.11.6"), false);
+			Version.of("3.11.6"), true);
 
 	@Test
 	void isReadyWhenTransportStarted() {
 		assertThat(this.readiness.isReady()).isFalse();
 		this.readiness.accept("Starting listening for CQL clients on localhost/127.0.0.1:9042 (unencrypted)");
+		this.readiness.accept("Starting listening for CQL clients on localhost/127.0.0.1:9142 (encrypted)");
 		assertThat(this.readiness.isReady()).isTrue();
 	}
 
