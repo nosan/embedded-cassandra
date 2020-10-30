@@ -45,7 +45,7 @@
         <snakeyaml.version>1.26</snakeyaml.version>
         <jackson-dataformat-yaml.version>2.11.1</jackson-dataformat-yaml.version>
         <commons-compress.version>1.20</commons-compress.version>
-        <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
+        <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-site-plugin.version>3.7.1</maven-site-plugin.version>
