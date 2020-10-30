@@ -40,7 +40,7 @@
         <checkstyle.version>8.36.2</checkstyle.version>
         <cassandra-driver-core.version>3.8.0</cassandra-driver-core.version>
         <java-driver-core.version>4.5.0</java-driver-core.version>
-        <assertj.version>3.16.1</assertj.version>
+        <assertj.version>3.18.0</assertj.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <snakeyaml.version>1.27</snakeyaml.version>
         <jackson-dataformat-yaml.version>2.11.1</jackson-dataformat-yaml.version>
