@@ -262,8 +262,8 @@ class DefaultCassandra implements Cassandra {
 				}
 				throw new IOException(message.toString());
 			}
-			if (rem <= 0 &&
-					!(transportReadiness.isStartedOrDisabled() && rpcTransportReadiness.isStartedOrDisabled())) {
+			if (rem <= 0
+					&& !(transportReadiness.isStartedOrDisabled() && rpcTransportReadiness.isStartedOrDisabled())) {
 				throw new IllegalStateException(String.format("%s couldn't be started within %sms",
 						database, this.startupTimeout.toMillis()));
 			}
