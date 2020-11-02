@@ -38,8 +38,6 @@ The following properties will be added to `System Properties` after Cassandra ha
 * `embedded.cassandra.rpc-port`
 
 
-WARNING: By default, `AbstractCassandraTests` runs Cassandra on the random ports.
-
 == Customize Default Cassandra Factory
 
 `AbstractCassandraTests` also provides a way to customize a default `EmbeddedCassandraFactory` via (`CassandraFactoryCustomizer<T>`) customizers.

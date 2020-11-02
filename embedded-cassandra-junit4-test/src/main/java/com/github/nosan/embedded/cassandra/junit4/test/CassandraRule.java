@@ -92,8 +92,7 @@ public final class CassandraRule extends ExternalResource {
 
 	/**
 	 * Constructs a new {@link CassandraRule} with a default {@link CassandraFactory} with the specified {@link
-	 * CassandraFactoryCustomizer}(s). The default factory is {@link EmbeddedCassandraFactory} which is configured to
-	 * use random ports.
+	 * CassandraFactoryCustomizer}(s). The default factory is {@link EmbeddedCassandraFactory}.
 	 *
 	 * @param customizers Any instances of this type will get a callback with the {@link EmbeddedCassandraFactory}
 	 * before the {@link Cassandra} itself is started
@@ -276,10 +275,6 @@ public final class CassandraRule extends ExternalResource {
 		@Override
 		public Cassandra create() throws CassandraCreationException {
 			EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-			cassandraFactory.setPort(0);
-			cassandraFactory.setRpcPort(0);
-			cassandraFactory.setJmxLocalPort(0);
-			cassandraFactory.setStoragePort(0);
 			this.customizers.forEach(customizer -> customizer.customize(cassandraFactory));
 			return cassandraFactory.create();
 		}

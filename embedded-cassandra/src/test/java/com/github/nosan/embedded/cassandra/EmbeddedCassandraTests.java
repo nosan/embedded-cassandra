@@ -75,11 +75,12 @@ class EmbeddedCassandraTests {
 	@Test
 	void testSuccessWhenOnlyNativeEnabled() throws Throwable {
 		this.configProperties.put("start_native_transport", true);
+		this.configProperties.put("start_rpc", false);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getAddress()).isNotNull();
 			assertThat(cassandra.getPort()).isEqualTo(9042);
-			assertThat(cassandra.getRpcPort()).isEqualTo(-1);
+			assertThat(cassandra.getRpcPort()).isEqualTo(9160);
 			assertThat(cassandra.getSslPort()).isEqualTo(-1);
 		});
 	}

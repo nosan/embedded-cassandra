@@ -34,7 +34,6 @@ import com.github.nosan.embedded.cassandra.api.connection.CassandraConnectionFac
 
 /**
  * Annotation that allows the {@link Cassandra} to be started and stopped.
- * <p>By default, {@link Cassandra} runs on the random ports.
  * <p>Example:
  * <pre>
  * &#64;EmbeddedCassandra(scripts = "schema.cql")

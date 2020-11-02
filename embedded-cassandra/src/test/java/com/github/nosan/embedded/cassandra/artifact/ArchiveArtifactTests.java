@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ArchiveArtifactTests {
 
-	private static final Version VERSION = Version.of("4.0-beta2");
+	private static final Version VERSION = Version.of("3.11.8");
 
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) throws Exception {
@@ -91,7 +91,7 @@ class ArchiveArtifactTests {
 
 		private final AtomicBoolean alreadyCalled = new AtomicBoolean(false);
 
-		private final ClassPathResource resource = new ClassPathResource("apache-cassandra-4.0-beta2-bin.tar.gz");
+		private final ClassPathResource resource = new ClassPathResource("apache-cassandra-3.11.8-bin.tar.gz");
 
 		@Override
 		public String getFileName() {

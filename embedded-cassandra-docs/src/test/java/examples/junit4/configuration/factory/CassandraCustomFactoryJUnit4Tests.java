@@ -32,7 +32,7 @@ public class CassandraCustomFactoryJUnit4Tests {
 	@ClassRule
 	public static final CassandraRule CASSANDRA_RULE = new CassandraRule()
 			.withCassandraFactory(new EmbeddedCassandraBuilder()
-					.withArtifact(Artifact.ofVersion("4.0-beta2")));
+					.withArtifact(Artifact.ofVersion("3.11.8")));
 
 	@Test
 	public void testCassandra() {

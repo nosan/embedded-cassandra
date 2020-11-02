@@ -292,10 +292,6 @@ class EmbeddedCassandraContextCustomizer implements ContextCustomizer {
 		@Override
 		public Cassandra create() throws CassandraCreationException {
 			EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
-			cassandraFactory.setPort(0);
-			cassandraFactory.setRpcPort(0);
-			cassandraFactory.setJmxLocalPort(0);
-			cassandraFactory.setStoragePort(0);
 			this.customizers.forEach(customizer -> customizer.customize(cassandraFactory));
 			return cassandraFactory.create();
 		}

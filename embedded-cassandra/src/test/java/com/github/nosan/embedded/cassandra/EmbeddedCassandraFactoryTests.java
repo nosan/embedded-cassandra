@@ -71,7 +71,7 @@ class EmbeddedCassandraFactoryTests {
 
 	@Test
 	void testArtifact(@TempDir Path temporaryFolder) {
-		final Version version = Version.of("4.0-beta2");
+		final Version version = Version.of("3.11.8");
 		Artifact artifact = () -> new DefaultDistribution(version, temporaryFolder);
 		this.cassandraFactory.setArtifact(artifact);
 		Cassandra cassandra = this.cassandraFactory.create();

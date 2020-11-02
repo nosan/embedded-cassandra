@@ -16,6 +16,10 @@
 
 package examples.configuration;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import com.github.nosan.embedded.cassandra.EmbeddedCassandraFactory;
 
 class CassandraPorts {
@@ -23,12 +27,27 @@ class CassandraPorts {
 	void source() {
 		// tag::source[]
 		EmbeddedCassandraFactory cassandraFactory = new EmbeddedCassandraFactory();
+		//set random ports
+		//if start_native_transport = true
 		cassandraFactory.setPort(0);
+		//if client encryption options enabled
 		cassandraFactory.setSslPort(0);
+		//set cassandra.jmx.local.port
+		cassandraFactory.setJmxLocalPort(0);
+		//if rpc_start = true
 		cassandraFactory.setRpcPort(0);
 		cassandraFactory.setStoragePort(0);
+		//if server encryption options enabled
 		cassandraFactory.setSslStoragePort(0);
-		cassandraFactory.setJmxLocalPort(0);
+		//only for Cassandra version >=4
+		Map<String, Object> result = new LinkedHashMap<>();
+		result.put("class_name", "org.apache.cassandra.locator.SimpleSeedProvider");
+		result.put("parameters", Collections.singletonList(Collections.singletonMap("seeds",
+				//localhost == listen_address
+				//0 means that set storage_port
+				"localhost:0")));
+		cassandraFactory.getConfigProperties().put("seed_provider", Collections.singletonList(result));
+
 		// end::source[]
 	}
 

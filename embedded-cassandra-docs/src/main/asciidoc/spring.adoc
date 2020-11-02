@@ -36,8 +36,6 @@ The following properties will be added to `Environment` after Cassandra has star
 * `embedded.cassandra.ssl-port`
 * `embedded.cassandra.rpc-port`
 
-WARNING: By default, `@EmbeddedCassandra` runs Cassandra on the random ports.
-
 == Configure Custom Cassandra Factory
 
 It is possible to register you own `CassandraFactory` to control Cassandra instance.

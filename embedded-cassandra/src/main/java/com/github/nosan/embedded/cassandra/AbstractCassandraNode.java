@@ -25,6 +25,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,15 +91,16 @@ abstract class AbstractCassandraNode implements CassandraNode {
 	@Override
 	public final void start() throws IOException, InterruptedException {
 		RunProcess runProcess = new RunProcess(this.workingDirectory);
-		Map<String, Object> oldProperties = loadProperties();
-		Map<String, Object> newProperties = new LinkedHashMap<>(oldProperties);
-		newProperties.putAll(this.properties);
+		Map<String, Object> properties = new LinkedHashMap<>(loadProperties());
+		properties.putAll(this.properties);
 		Map<String, Object> systemProperties = new LinkedHashMap<>(this.systemProperties);
 		configureSystemProperties(systemProperties);
-		configureProperties(newProperties);
-		configureSeeds(this.version, oldProperties, newProperties, systemProperties);
+		configureProperties(properties);
+		if (this.version.getMajor() >= 4) {
+			configureSeeds(properties, systemProperties);
+		}
 		Path configFile = Files.createTempFile(this.workingDirectory.resolve("conf"), "", "-cassandra.yaml");
-		dumpProperties(newProperties, configFile);
+		dumpProperties(properties, configFile);
 		systemProperties.put("cassandra.config", configFile.toUri().toString());
 		List<String> jvmOptions = new ArrayList<>(this.jvmOptions);
 		for (Map.Entry<String, Object> entry : systemProperties.entrySet()) {
@@ -237,44 +240,56 @@ abstract class AbstractCassandraNode implements CassandraNode {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private static void configureSeeds(Version version, Map<String, Object> oldProperties,
-			Map<String, Object> newProperties,
-			Map<String, Object> systemProperties) {
-		if (version.getMajor() >= 4) {
-			List<Map<String, Object>> seedProvider = (List<Map<String, Object>>) newProperties.get("seed_provider");
-			if (seedProvider != null) {
-				seedProvider.forEach(each -> {
-					List<Map<String, Object>> parameters = (List<Map<String, Object>>) each.get("parameters");
-					if (parameters != null) {
-						parameters.forEach(parameter -> {
-							String seeds = ((String) parameter.get("seeds"));
-							if (seeds != null) {
-								String oldStoragePort = Objects.toString(oldProperties.get("storage_port"), null);
-								String storagePort = Objects.toString(newProperties.get("storage_port"), null);
-								String cassandraStoragePort = Objects
-										.toString(systemProperties.get("cassandra.storage_port"), null);
-								String oldSslStoragePort = Objects
-										.toString(oldProperties.get("ssl_storage_port"), null);
-								String cassandraSslStoragePort = Objects
-										.toString(systemProperties.get("cassandra.ssl_storage_port"), null);
-								String sslStoragePort = Objects.toString(newProperties.get("ssl_storage_port"), null);
-								if (oldStoragePort != null && (cassandraStoragePort != null || storagePort != null)) {
-									seeds = seeds.replaceAll("\\b" + oldStoragePort + "\\b",
-											Optional.ofNullable(cassandraStoragePort).orElse(storagePort));
-								}
-								if (oldSslStoragePort != null && (cassandraSslStoragePort != null
-										|| sslStoragePort != null)) {
-									seeds = seeds.replaceAll("\\b" + oldSslStoragePort + "\\b",
-											Optional.ofNullable(cassandraSslStoragePort).orElse(sslStoragePort));
-								}
-								parameter.put("seeds", seeds);
-							}
-						});
-					}
-				});
+	private static void configureSeeds(Map<String, Object> configProperties, Map<String, Object> systemProperties) {
+		String storagePort = Optional.ofNullable(Objects.toString(systemProperties.get("cassandra.storage_port"), null))
+				.orElseGet(() -> Objects.toString(configProperties.get("storage_port"), "7000"));
+		for (Map<String, Object> seedProvider : getSeedProvider(configProperties)) {
+			for (Map<String, Object> parameter : getParameters(seedProvider)) {
+				List<String> seeds = getSeeds(parameter);
+				if (!seeds.isEmpty()) {
+					seeds.replaceAll(seed -> {
+						int index = seed.indexOf(':');
+						//IPV6, [IP]:port
+						if (index != -1 && seed.indexOf(':', index + 1) != -1) {
+							return seed.replaceAll("]:0\\b(\\s*)$", String.format("]:%s$1", storagePort));
+						}
+						//IPV4, IP:port
+						if (index != -1) {
+							return seed.replaceAll(":0\\b(\\s*)$", String.format(":%s$1", storagePort));
+						}
+						return seed;
+					});
+					parameter.put("seeds", String.join(",", seeds));
+				}
 			}
 		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	private static List<Map<String, Object>> getSeedProvider(Map<String, Object> configProperties) {
+		List<Map<String, Object>> seedProvider = (List<Map<String, Object>>) configProperties.get("seed_provider");
+		if (seedProvider == null) {
+			return Collections.emptyList();
+		}
+		return seedProvider;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static List<Map<String, Object>> getParameters(Map<String, Object> seedProvider) {
+		List<Map<String, Object>> parameters = (List<Map<String, Object>>) seedProvider.get("parameters");
+		if (parameters == null) {
+			return Collections.emptyList();
+		}
+		return parameters;
+	}
+
+	private static List<String> getSeeds(@Nullable Map<String, Object> parameter) {
+		return Optional.ofNullable(parameter)
+				.map(p -> p.get("seeds"))
+				.map(String::valueOf)
+				.map(seeds -> Arrays.stream(seeds.split(",")).collect(Collectors.toList()))
+				.orElse(Collections.emptyList());
 	}
 
 }
