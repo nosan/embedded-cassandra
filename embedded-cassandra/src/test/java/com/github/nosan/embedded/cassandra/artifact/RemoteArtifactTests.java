@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class RemoteArtifactTests {
 
-	private static final Version VERSION = Version.of("3.11.8");
+	private static final Version VERSION = Version.of("3.11.9");
 
 	private final ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -65,18 +65,18 @@ class RemoteArtifactTests {
 		this.httpServer.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
 		this.httpServer.start();
 		byte[] content;
-		try (InputStream inputStream = new ClassPathResource("apache-cassandra-3.11.8-bin.tar.gz")
+		try (InputStream inputStream = new ClassPathResource("apache-cassandra-3.11.9-bin.tar.gz")
 				.getInputStream()) {
 			content = IOUtils.toByteArray(inputStream);
 		}
-		this.httpServer.createContext("/apache-cassandra-3.11.8-bin.tar.gz", exchange -> {
+		this.httpServer.createContext("/apache-cassandra-3.11.9-bin.tar.gz", exchange -> {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, content.length);
 			exchange.getResponseBody().write(content);
 			exchange.close();
 		});
-		this.httpServer.createContext("/dist/apache-cassandra-3.11.8-bin.tar.gz", exchange -> {
+		this.httpServer.createContext("/dist/apache-cassandra-3.11.9-bin.tar.gz", exchange -> {
 			exchange.getResponseHeaders().put("Location",
-					Collections.singletonList("/apache-cassandra-3.11.8-bin.tar.gz"));
+					Collections.singletonList("/apache-cassandra-3.11.9-bin.tar.gz"));
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, content.length);
 			exchange.close();
 		});
@@ -95,7 +95,7 @@ class RemoteArtifactTests {
 		artifact.setDestination(temporaryFolder);
 		artifact.setUrlFactory(version -> Collections.singletonList(
 				new URL(String
-						.format("http:/%s/apache-cassandra-3.11.8-bin.tar.gz", this.httpServer.getAddress()))));
+						.format("http:/%s/apache-cassandra-3.11.9-bin.tar.gz", this.httpServer.getAddress()))));
 		assertDistribution(artifact.getDistribution());
 		assertThat(this.output.toString()).contains("Downloaded");
 		this.output.reset();
@@ -108,42 +108,42 @@ class RemoteArtifactTests {
 		RemoteArtifact artifact = new RemoteArtifact(VERSION);
 		artifact.setDestination(temporaryFolder);
 		artifact.setUrlFactory(version -> Collections.singletonList(new URL(String
-				.format("http:/%s/dist/apache-cassandra-3.11.8-bin.tar.gz", this.httpServer.getAddress()))));
+				.format("http:/%s/dist/apache-cassandra-3.11.9-bin.tar.gz", this.httpServer.getAddress()))));
 		assertDistribution(artifact.getDistribution());
 		assertThat(this.output.toString()).contains("Downloaded");
 	}
 
 	@Test
 	void shouldNotDownloadArtifactMaxRedirection(@TempDir Path temporaryFolder) throws Exception {
-		this.httpServer.createContext("/dist/apache-cassandra-3.11.8.zip", exchange -> {
+		this.httpServer.createContext("/dist/apache-cassandra-3.11.9.zip", exchange -> {
 			exchange.getResponseHeaders().put("Location",
-					Collections.singletonList("/dist/apache-cassandra-3.11.8.zip"));
+					Collections.singletonList("/dist/apache-cassandra-3.11.9.zip"));
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_PERM, 0);
 			exchange.close();
 		});
 		RemoteArtifact artifact = new RemoteArtifact(VERSION);
 		artifact.setDestination(temporaryFolder);
 		artifact.setUrlFactory(version -> Collections.singletonList(
-				new URL(String.format("http:/%s/dist/apache-cassandra-3.11.8.zip", this.httpServer.getAddress()))));
+				new URL(String.format("http:/%s/dist/apache-cassandra-3.11.9.zip", this.httpServer.getAddress()))));
 		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("Too many redirects for URL");
 	}
 
 	@Test
 	void shouldNotDownloadArtifactNotFound(@TempDir Path temporaryFolder) throws Exception {
-		this.httpServer.createContext("/dist/apache-cassandra-3.11.8.zip", exchange -> {
+		this.httpServer.createContext("/dist/apache-cassandra-3.11.9.zip", exchange -> {
 			exchange.sendResponseHeaders(404, 0);
 			exchange.close();
 		});
 		RemoteArtifact artifact = new RemoteArtifact(VERSION);
 		artifact.setDestination(temporaryFolder);
 		artifact.setUrlFactory(version -> Collections.singletonList(
-				new URL(String.format("http:/%s/dist/apache-cassandra-3.11.8.zip", this.httpServer.getAddress()))));
+				new URL(String.format("http:/%s/dist/apache-cassandra-3.11.9.zip", this.httpServer.getAddress()))));
 		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("HTTP Status '404' is invalid for URL");
 	}
 
 	@Test
 	void shouldNotDownloadArtifactReadTimeout(@TempDir Path temporaryFolder) throws Exception {
-		this.httpServer.createContext("/dist/apache-cassandra-3.11.8.zip", exchange -> {
+		this.httpServer.createContext("/dist/apache-cassandra-3.11.9.zip", exchange -> {
 			try {
 				Thread.sleep(600);
 			}
@@ -156,7 +156,7 @@ class RemoteArtifactTests {
 		artifact.setDestination(temporaryFolder);
 		artifact.setReadTimeout(Duration.ofMillis(200));
 		artifact.setUrlFactory(version -> Collections.singletonList(
-				new URL(String.format("http:/%s/dist/apache-cassandra-3.11.8.zip", this.httpServer.getAddress()))));
+				new URL(String.format("http:/%s/dist/apache-cassandra-3.11.9.zip", this.httpServer.getAddress()))));
 		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("Read timed out");
 	}
 
@@ -166,7 +166,7 @@ class RemoteArtifactTests {
 		artifact.setDestination(temporaryFolder);
 		artifact.setConnectTimeout(Duration.ofSeconds(1));
 		artifact.setUrlFactory(
-				version -> Collections.singletonList(new URL("http://example.com:81/apache-cassandra-3.11.8.zip")));
+				version -> Collections.singletonList(new URL("http://example.com:81/apache-cassandra-3.11.9.zip")));
 		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("connect timed out");
 	}
 
@@ -177,7 +177,7 @@ class RemoteArtifactTests {
 		artifact.setProxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(1111)));
 		artifact.setUrlFactory(version -> Collections.singletonList(
 				new URL(String
-						.format("http:/%s/apache-cassandra-3.11.8-bin.tar.gz", this.httpServer.getAddress()))));
+						.format("http:/%s/apache-cassandra-3.11.9-bin.tar.gz", this.httpServer.getAddress()))));
 		assertThatThrownBy(artifact::getDistribution).hasStackTraceContaining("Connection refused");
 	}
 
