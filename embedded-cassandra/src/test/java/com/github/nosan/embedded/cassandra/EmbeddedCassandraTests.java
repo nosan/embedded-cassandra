@@ -80,7 +80,7 @@ class EmbeddedCassandraTests {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getAddress()).isNotNull();
 			assertThat(cassandra.getPort()).isEqualTo(9042);
-			assertThat(cassandra.getRpcPort()).isEqualTo(9160);
+			assertThat(cassandra.getRpcPort()).isEqualTo(-1);
 			assertThat(cassandra.getSslPort()).isEqualTo(-1);
 		});
 	}
