@@ -475,12 +475,12 @@
     </profiles>
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype</id>
+            <id>ossrh</id>
             <name>Sonatype Nexus Snapshots</name>
             <url>${nexus.url}/content/repositories/snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype</id>
+            <id>ossrh</id>
             <name>Sonatype Nexus Releases</name>
             <url>${nexus.url}/service/local/staging/deploy/maven2/</url>
         </repository>
