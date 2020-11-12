@@ -362,6 +362,34 @@ class WebCassandraDirectoryProviderTests {
 				.hasStackTraceContaining(" File lock could not be acquire");
 	}
 
+	@Test
+	void construct1() {
+		WebCassandraDirectoryProvider wcdp = new WebCassandraDirectoryProvider();
+		assertThat(wcdp).extracting("httpClient").isInstanceOf(JdkHttpClient.class);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("httpClient.proxy", null);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("httpClient.readTimeout", null);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("httpClient.connectTimeout", null);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("downloadDirectory", Paths.get(System.getProperty("user.home")));
+	}
+
+	@Test
+	void construct2() {
+		JdkHttpClient httpClient = new JdkHttpClient();
+		WebCassandraDirectoryProvider wcdp = new WebCassandraDirectoryProvider(httpClient);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("httpClient", httpClient);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("downloadDirectory", Paths.get(System.getProperty("user.home")));
+	}
+
+	@Test
+	void construct3(@TempDir Path dir) {
+		WebCassandraDirectoryProvider wcdp = new WebCassandraDirectoryProvider(dir);
+		assertThat(wcdp).extracting("httpClient").isInstanceOf(JdkHttpClient.class);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("httpClient.proxy", null);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("httpClient.readTimeout", null);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("httpClient.connectTimeout", null);
+		assertThat(wcdp).hasFieldOrPropertyWithValue("downloadDirectory", dir);
+	}
+
 	private static void assertDirectory(Path directory) {
 		assertThat(directory.resolve("bin")).exists();
 		assertThat(directory.resolve("lib")).exists();
