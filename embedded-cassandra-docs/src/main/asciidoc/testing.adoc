@@ -1,8 +1,0 @@
-= Testing
-
-Embedded Cassandra provides a number of extensions to help when testing your application.
-
-include::junit5.adoc[leveloffset=+1]
-include::junit4.adoc[leveloffset=+1]
-include::testng.adoc[leveloffset=+1]
-include::spring.adoc[leveloffset=+1]

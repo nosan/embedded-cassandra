@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+  pull_request:
+    branches: "master"
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        java: [ 8, 11 ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        exclude:
+          - os: windows-latest
+            java: 11
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ matrix.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ matrix.os }}-maven-
+      - name: Build and Test
+        run: mvn -B clean verify
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./target/site/jacoco/jacoco.xml
+          flags: ${{ matrix.os }}-jdk${{ matrix.java }}

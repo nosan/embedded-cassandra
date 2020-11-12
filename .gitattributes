@@ -1,0 +1,4 @@
+# Normalize line endings to LF.
+* text eol=lf
+
+*.tar.gz   binary
