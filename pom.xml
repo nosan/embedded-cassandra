@@ -379,6 +379,7 @@
                     <show>public</show>
                     <failOnWarnings>true</failOnWarnings>
                     <failOnError>true</failOnError>
+                    <source>8</source>
                 </configuration>
                 <executions>
                     <execution>
