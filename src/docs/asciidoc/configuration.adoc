@@ -1,0 +1,161 @@
+:source-highlighter: rouge
+:sources: ../java
+:resources: ../resources
+
+= Configuration
+
+This section covers how to configure Embedded Cassandra.
+
+== Version
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=version]
+----
+
+TIP: Defaults to *4.0-beta3*
+
+== Config Properties
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=config-property]
+----
+
+== Configuration File
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=config-file]
+----
+
+== Startup Parameters
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=system-property]
+----
+
+== Environment Variables
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=environment-variable]
+----
+
+==  JVM Options
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=jvm-options]
+----
+
+== Working Directory
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=working-directory]
+----
+
+== Working Directory Customizer
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=working-directory-customizer]
+----
+
+== Working Directory Initializer
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=working-directory-initializer]
+----
+
+== Working Directory Destroyer
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=working-directory-destroyer]
+----
+
+== Extend the classpath
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=custom-classpath]
+----
+
+== Client Encryption Options
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=client-encryption-options]
+----
+
+== Authorization and Authentication
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=authenticator]
+----
+<1> Creates a superuser immediately
+
+NOTE: Default super credential is _user_: **cassandra** _password_: **cassandra**
+
+== Java Home
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=java-home]
+----
+
+NOTE: By default, current java is used.
+
+== Random Ports
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=random-ports]
+----
+
+== Seeds
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=configure-seeds]
+----
+<1> Port with a value *0* will be automatically replaced by either `cassandra.storage_port` or `storage_port`.
+
+== Startup Timeout
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=startup-timeout]
+----
+
+NOTE: Defaults to *2 minutes*
+
+== Shutdown Hook
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=shutdown-hook]
+----
+
+NOTE: Defaults to **true**
+
+== Logger
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=logger]
+----
+
+NOTE: Defaults to `Logger.get(Cassandra.class)`
+
+== Proxy
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=proxy]
+----

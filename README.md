@@ -1,5 +1,8 @@
-# Embedded Cassandra ![Github CI](https://github.com/nosan/embedded-cassandra/workflows/Build/badge.svg)  [![codecov](https://codecov.io/gh/nosan/embedded-cassandra/branch/master/graph/badge.svg?token=SNW1ICHYXL)](https://codecov.io/gh/nosan/embedded-cassandra)
-Embedded Cassandra provides an easy way to start and stop [Apache Cassandra](https://cassandra.apache.org/).
+Embedded Cassandra 
+===========
+![Github CI](https://github.com/nosan/embedded-cassandra/workflows/Build/badge.svg)
+[![codecov](https://codecov.io/gh/nosan/embedded-cassandra/branch/master/graph/badge.svg?token=SNW1ICHYXL)](https://codecov.io/gh/nosan/embedded-cassandra)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra/)
 
 To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra).
 

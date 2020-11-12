@@ -1,0 +1,51 @@
+:source-highlighter: rouge
+:sources: ../java
+:resources: ../resources
+
+= F.A.Q
+
+== What OSs does Embedded Cassandra support?
+
+Embedded Cassandra is tested under the `ubuntu-latest`, `macos-latest` and `windows-latest` platforms.
+
+== What compile dependencies are used by Embedded Cassandra?
+
+Embedded Cassandra has only two compile dependencies:
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+<dependecies>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>{commons-compress-version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>{snakeyaml-version}</version>
+    </dependency>
+</dependecies>
+----
+
+== Is it possible to start more than one Cassandra instances?
+
+Yes, it is possible. Of course, both instances should be started on different ports.
+
+== Can I have only one running instance of Cassandra for all my tests?
+
+Yes, it is possible. The following class could be shared across all tests.
+
+[source,java,indent=0]
+----
+include::{sources}/SharedCassandra.java[tag=shared-cassandra]
+----
+<1> Stops Cassandra on JVM exit.
+
+CAUTION: Don't forget to call `Cassandra.start()` before tests.
+
+NOTE: Calling `Cassandra.start()` method on an already started Cassandra has no effect.
+
+== What Cassandra versions are supported by Embedded Cassandra?
+
+Embedded Cassandra project is tested for `2.X.X` - `4.X.X` Cassandra versions.

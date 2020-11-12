@@ -1,0 +1,29 @@
+:doctype: book
+:idprefix:
+:idseparator: -
+:toc: left
+:toclevels: 4
+:tabsize: 4
+:numbered:
+:sectanchors:
+:sectnums:
+:icons: font
+:hide-uri-scheme:
+:docinfo: shared,private
+:apache-cassandra-ref: https://cassandra.apache.org
+:github-repo: nosan/embedded-cassandra
+:github-code: https://github.com/{github-repo}/tree/master
+:github-issues: https://github.com/{github-repo}/issues/
+:source-highlighter: rouge
+:sources: ../java
+:resources: ../resources
+:author: Dmytro Nosan
+
+= Embedded Cassandra Reference Documentation
+
+include::getting-started.adoc[leveloffset=+1]
+include::configuration.adoc[leveloffset=+1]
+include::faq.adoc[leveloffset=+1]
+
+[.text-right]
+Copyright &#169; {docyear}

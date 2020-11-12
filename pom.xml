@@ -31,6 +31,10 @@
         <url>https://github.com/nosan/embedded-cassandra/issues</url>
     </issueManagement>
 
+    <scm>
+        <url>https://github.com/nosan/embedded-cassandra.git</url>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -66,6 +70,7 @@
         <jacoco.version>0.8.6</jacoco.version>
         <jacoco.output.directory>${project.build.directory}/jacoco</jacoco.output.directory>
         <jacoco.report.output.directory>${project.build.directory}/site/jacoco</jacoco.report.output.directory>
+        <asciidoctor-maven-plugin.version>2.1.0</asciidoctor-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -388,6 +393,35 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>${asciidoctor-maven-plugin.version}</version>
+                <configuration>
+                    <attributes>
+                        <revnumber>${project.version}</revnumber>
+                        <revdate>${maven.build.timestamp}</revdate>
+                        <commons-compress-version>${commons-compress.version}</commons-compress-version>
+                        <snakeyaml-version>${snakeyaml.version}</snakeyaml-version>
+                    </attributes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-html-single-documentation</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <backend>html5</backend>
+                            <sourceDocumentExtensions>
+                                <sourceDocumentExtension>index.adoc</sourceDocumentExtension>
+                            </sourceDocumentExtensions>
+                            <doctype>book</doctype>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

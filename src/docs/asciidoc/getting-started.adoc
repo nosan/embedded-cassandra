@@ -1,0 +1,69 @@
+:apache-cassandra-ref: https://cassandra.apache.org
+:github-repo: nosan/embedded-cassandra
+:github-code: https://github.com/{github-repo}/tree/master
+:github-issues: https://github.com/{github-repo}/issues/
+:source-highlighter: rouge
+:sources: ../java
+:resources: ../resources
+
+= Getting Started
+
+== Overview
+
+The goal of this document is to provide comprehensive reference documentation for programmers using Embedded Cassandra.
+
+=== Introducing
+
+Embedded Cassandra provides an easy way to start and stop {apache-cassandra-ref}[Apache Cassandra].
+
+=== Getting Help
+
+Ask Embedded Cassandra related questions on https://stackoverflow.com/questions/tagged/embedded-cassandra[Stack Overflow].
+
+=== Issues
+
+Embedded Cassandra uses GitHub's issue tracking system to report bugs and feature requests.
+If you want to raise an issue, please follow this {github-issues}[link]
+
+=== License
+
+Embedded Cassandra is released under the https://www.apache.org/licenses/LICENSE-2.0[Apache License 2.0]
+
+=== Get Source
+
+Embedded Cassandra repository can be found {github-code}[here]
+
+=== Build Source
+
+Embedded Cassandra can be easily built with the https://github.com/takari/maven-wrapper[maven wrapper].
+You also need `JDK 1.8`.
+
+[source,bash]
+----
+$ ./mvnw clean verify
+----
+
+=== Contributing to 'Embedded Cassandra'
+
+Embedded Cassandra welcomes contributions from everyone.
+
+Contributions to Embedded Cassandra should be made in the form of `GitHub pull requests`.
+
+== Quick Start
+
+The Apache Cassandra can be started by using the following lines of code:
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=quick-start]
+----
+
+.schema.cql
+[source,cql,indent=0]
+----
+include::{resources}/schema.cql[]
+----
+
+
+
+
