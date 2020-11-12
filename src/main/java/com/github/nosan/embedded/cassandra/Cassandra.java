@@ -20,6 +20,9 @@ import java.nio.file.Path;
 
 /**
  * Simple interface that allows the {@code Cassandra} to be {@link #start() started} and {@link #stop() stopped}.
+ * <p>
+ * <a href="package-summary.html#package_description">package overview </a> for more information.
+ * </p>
  *
  * @author Dmytro Nosan
  * @see CassandraBuilder

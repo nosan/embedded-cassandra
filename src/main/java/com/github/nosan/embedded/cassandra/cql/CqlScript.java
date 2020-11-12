@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
 
 /**
- * {@link CqlScript} interface that contains a list of {@code CQL} statements.
+ * {@link CqlScript} interface which loads CQL statements from various sources.
  *
  * @author Dmytro Nosan
  * @see AbstractCqlScript
