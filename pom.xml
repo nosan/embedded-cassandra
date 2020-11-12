@@ -379,7 +379,6 @@
                     <show>public</show>
                     <failOnWarnings>true</failOnWarnings>
                     <failOnError>true</failOnError>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
