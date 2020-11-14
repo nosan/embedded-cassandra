@@ -42,6 +42,9 @@ import com.github.nosan.embedded.cassandra.commons.web.JdkHttpClient;
 
 /**
  * A builder that can be used to configure and create {@link Cassandra}.
+ * <p>
+ * <b>This class is not thread safe and should not be shared across different threads!</b>
+ * </p>
  *
  * @author Dmytro Nosan
  * @see #build()
@@ -55,7 +58,7 @@ public class CassandraBuilder {
 	 */
 	public static final Version DEFAULT_VERSION = Version.parse("4.0-beta3");
 
-	private static final AtomicInteger INSTANCES = new AtomicInteger();
+	private static final AtomicInteger CASSANDRA_ID = new AtomicInteger();
 
 	private final Map<String, Object> environmentVariables = new LinkedHashMap<>();
 
@@ -89,7 +92,7 @@ public class CassandraBuilder {
 	 * @return a {@link Cassandra} instance.
 	 */
 	public Cassandra build() {
-		String name = (this.name != null) ? this.name : "cassandra-" + INSTANCES.getAndIncrement();
+		String name = (this.name != null) ? this.name : "cassandra-" + CASSANDRA_ID.getAndIncrement();
 		Version version = (this.version != null) ? this.version : DEFAULT_VERSION;
 		Path workingDirectory;
 		try {
@@ -142,7 +145,7 @@ public class CassandraBuilder {
 
 	/**
 	 * Sets the Cassandra instance name.
-	 * <p>Defaults to cassandra-[0,...,N]
+	 * <p>Defaults to cassandra-0, cassandra-1, and so on.
 	 *
 	 * @param name the Cassandra name
 	 * @return this builder
@@ -154,6 +157,16 @@ public class CassandraBuilder {
 		}
 		this.name = name;
 		return this;
+	}
+
+	/**
+	 * Gets current Cassandra instance name.
+	 *
+	 * @return Cassandra instance name, never {@code null}
+	 */
+	public String getName() {
+		String name = this.name;
+		return (name != null) ? name : "cassandra-" + CASSANDRA_ID.get();
 	}
 
 	/**
@@ -179,6 +192,16 @@ public class CassandraBuilder {
 		Objects.requireNonNull(version, "Version must not be null");
 		this.version = version;
 		return this;
+	}
+
+	/**
+	 * Gets current Cassandra version.
+	 *
+	 * @return Cassandra version, never {@code null}
+	 */
+	public Version getVersion() {
+		Version version = this.version;
+		return (version != null) ? version : DEFAULT_VERSION;
 	}
 
 	/**

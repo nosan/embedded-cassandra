@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -32,6 +33,7 @@ import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
 import com.github.nosan.embedded.cassandra.commons.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for {@link CassandraBuilder}.
@@ -43,15 +45,35 @@ class CassandraBuilderTests {
 	private final CassandraBuilder builder = new CassandraBuilder();
 
 	@Test
+	void invalidName() {
+		assertThatThrownBy(() -> this.builder.name("")).hasStackTraceContaining("Name must not be empty");
+	}
+
+	@Test
+	void generatedName() {
+		String n1 = this.builder.getName();
+		Cassandra c1 = this.builder.build();
+		String n2 = this.builder.getName();
+		Cassandra c2 = this.builder.build();
+		assertThat(c1.getName()).isEqualTo(n1);
+		assertThat(c2.getName()).isEqualTo(n2);
+		assertThat(n1).isNotEqualTo(n2);
+	}
+
+	@Test
 	void name() {
+		assertThat(this.builder.getName()).startsWith("cassandra-");
 		CassandraBuilder cassandra = this.builder.name("cassandra");
 		assertThat(cassandra).hasFieldOrPropertyWithValue("name", "cassandra");
+		assertThat(this.builder.getName()).isEqualTo("cassandra");
 	}
 
 	@Test
 	void version() {
+		assertThat(this.builder.getVersion()).isEqualTo(CassandraBuilder.DEFAULT_VERSION);
 		Cassandra cassandra = this.builder.version("3.11.9").build();
 		assertThat(cassandra).hasFieldOrPropertyWithValue("version", Version.parse("3.11.9"));
+		assertThat(this.builder.getVersion()).isEqualTo(Version.parse("3.11.9"));
 	}
 
 	@Test
@@ -67,9 +89,28 @@ class CassandraBuilderTests {
 	}
 
 	@Test
+	void startupNegative() {
+		assertThatThrownBy(() -> this.builder.startupTimeout(Duration.ofMinutes(-1)))
+				.hasStackTraceContaining("Startup Timeout must be positive");
+	}
+
+	@Test
+	void startupZero() {
+		assertThatThrownBy(() -> this.builder.startupTimeout(Duration.ofMinutes(-1)))
+				.hasStackTraceContaining("Startup Timeout must be positive");
+	}
+
+	@Test
 	void workingDirectory(@TempDir Path workingDirectory) {
 		Cassandra cassandra = this.builder.workingDirectory(() -> workingDirectory).build();
 		assertThat(cassandra).hasFieldOrPropertyWithValue("workingDirectory", workingDirectory);
+	}
+
+	@Test
+	void invalidWorkingDirectory() {
+		assertThatThrownBy(() -> this.builder.workingDirectory(() -> {
+			throw new IOException("");
+		}).build()).hasStackTraceContaining("Unable to get a working directory");
 	}
 
 	@Test
