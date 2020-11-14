@@ -13,30 +13,32 @@ This section covers how to configure Embedded Cassandra.
 include::{sources}/CassandraExamples.java[tag=version]
 ----
 
-TIP: Defaults to *4.0-beta3*
+NOTE: Defaults to *4.0-beta3*.
 
 == Config Properties
+
+Cassandra config properties which should be merged with properties from `cassandra.yaml`.
+This method is useful when only a few properties should be overridden in the `cassandra.yaml`.
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=config-property]
 ----
 
-== Configuration File
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=config-file]
-----
-
 == Startup Parameters
+
+Use system properties to change the Apache Cassandra settings during start up.
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=system-property]
 ----
 
+CAUTION: *-D* prefix should be omitted as it will be added automatically.
+
 == Environment Variables
+
+Adds Cassandra environment variables.
 
 [source,java,indent=0]
 ----
@@ -45,12 +47,21 @@ include::{sources}/CassandraExamples.java[tag=environment-variable]
 
 ==  JVM Options
 
+Adds Cassandra native Java Virtual Machine (JVM) Options.
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=jvm-options]
 ----
 
 == Working Directory
+
+The supplied directory used as Cassandra home directory.
+
+Before Cassandra starts, the directory will be initialized and customized by `WorkingDirectoryInitializer`
+and `WorkingDirectoryCustomizer(s)` respectively.
+
+On Cassandra stops, the directory is destroyed by `WorkingDirectoryDestroyer` .
 
 [source,java,indent=0]
 ----
@@ -59,6 +70,8 @@ include::{sources}/CassandraExamples.java[tag=working-directory]
 
 == Working Directory Customizer
 
+A callback interface to customize a working directory. This customizer was designed to change the working directory before Cassandra starts.
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=working-directory-customizer]
@@ -66,96 +79,57 @@ include::{sources}/CassandraExamples.java[tag=working-directory-customizer]
 
 == Working Directory Initializer
 
+A strategy interface to initialize the working directory.
+The working directory must contain all necessary Cassandra files after the init method has been called.
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=working-directory-initializer]
 ----
 
+NOTE: Defaults to `DefaultWorkingDirectoryInitializer`.
+
 == Working Directory Destroyer
+
+A strategy interface to destroy the working directory.
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=working-directory-destroyer]
 ----
 
-== Extend the classpath
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=custom-classpath]
-----
-
-== Client Encryption Options
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=client-encryption-options]
-----
-
-== Authorization and Authentication
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=authenticator]
-----
-<1> Creates a superuser immediately
-
-NOTE: Default super credential is _user_: **cassandra** _password_: **cassandra**
-
-== Java Home
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=java-home]
-----
-
-NOTE: By default, current java is used.
-
-== Random Ports
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=random-ports]
-----
-
-== Seeds
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=configure-seeds]
-----
-<1> Port with a value *0* will be automatically replaced by either `cassandra.storage_port` or `storage_port`.
+NOTE: Defaults to delete only *"bin", "pylib", "lib", "tools", "doc", "javadoc", "interface"* folders.
 
 == Startup Timeout
+
+How long to wait when Cassandra is being ready to accept connections.
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=startup-timeout]
 ----
 
-NOTE: Defaults to *2 minutes*
+NOTE: Defaults to *2 minutes*.
 
 == Shutdown Hook
+
+Registers shutdown hook for created Cassandra instance.
+In other words, should Cassandra be stopped when JVM shutdown?
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=shutdown-hook]
 ----
 
-NOTE: Defaults to **true**
+NOTE: Defaults to **true**.
 
 == Logger
+
+Configure a logger which consumes Cassandra `STDOUT` and `STDERR` outputs.
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=logger]
 ----
 
-NOTE: Defaults to `Logger.get(Cassandra.class)`
-
-== Proxy
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=proxy]
-----
+NOTE: Defaults to `Logger.get(Cassandra.class)`.

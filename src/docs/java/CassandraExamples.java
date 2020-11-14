@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraBuilder;
-import com.github.nosan.embedded.cassandra.CassandraDirectoryProvider;
 import com.github.nosan.embedded.cassandra.DefaultWorkingDirectoryInitializer;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.SimpleSeedProviderConfigurator;
@@ -78,19 +77,11 @@ public class CassandraExamples {
 				.build();
 		//end::version[]
 
-		//tag::config-file[]
-		ClassPathResource configFile = new ClassPathResource("cassandra.yaml");
-
-		//Configure via system property
+		//tag::config-file-system-property[]
 		new CassandraBuilder()
-				.addSystemProperty("cassandra.config", configFile)
+				.addSystemProperty("cassandra.config", new ClassPathResource("cassandra.yaml"))
 				.build();
-
-		//Configure via WorkingDirectoryCustomizer
-		new CassandraBuilder()
-				.addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.copy(configFile, "conf/cassandra.yaml"))
-				.build();
-		//end::config-file[]
+		//end::config-file-system-property[]
 
 		//tag::config-property[]
 		new CassandraBuilder()
@@ -109,31 +100,9 @@ public class CassandraExamples {
 		//tag::environment-variable[]
 		new CassandraBuilder()
 				.addEnvironmentVariable("JAVA_HOME", System.getProperty("java.home"))
+				.addEnvironmentVariable("EXTRA_CLASSPATH", new ClassPathResource("lib.jar"))
 				.build();
 		//end::environment-variable[]
-
-		//tag::custom-classpath[]
-		//With environment variable
-		ClassPathResource lib = new ClassPathResource("lib.jar");
-		new CassandraBuilder()
-				.addEnvironmentVariable("EXTRA_CLASSPATH", lib)
-				.build();
-		//With WorkingDirectoryCustomizer
-		new CassandraBuilder()
-				.addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.copy(lib, "lib/lib.jar"))
-				.build();
-		//end::custom-classpath[]
-
-		//tag::java-home[]
-		new CassandraBuilder()
-				//use current java
-				.addEnvironmentVariable("JAVA_HOME", System.getProperty("java.home"))
-				//use java from JAVA_HOME
-				.addEnvironmentVariable("JAVA_HOME", System.getenv("JAVA_HOME"))
-				//use a custom path
-				.addEnvironmentVariable("JAVA_HOME", Paths.get("path to java home"))
-				.build();
-		//end::java-home[]
 
 		//tag::jvm-options[]
 		new CassandraBuilder()
@@ -141,31 +110,20 @@ public class CassandraExamples {
 				.build();
 		//end::jvm-options[]
 		//tag::client-encryption-options[]
-		//Configure keystore and truststore with ClassPathResources (conveniently for tests)
+		ClassPathResource keystore = new ClassPathResource("keystore.node0");
+		ClassPathResource truststore = new ClassPathResource("truststore.node0");
 		new CassandraBuilder()
-				.addConfigProperty("client_encryption_options.enabled", true)
-				.addConfigProperty("client_encryption_options.require_client_auth", true)
-				.addConfigProperty("client_encryption_options.optional", false)
-				.addConfigProperty("client_encryption_options.keystore", new ClassPathResource("keystore.node0"))
-				.addConfigProperty("client_encryption_options.keystore_password", "cassandra")
-				.addConfigProperty("client_encryption_options.truststore", new ClassPathResource("truststore.node0"))
-				.addConfigProperty("client_encryption_options.truststore_password", "cassandra")
-				// use a dedicated ssl port if necessary
 				.addConfigProperty("native_transport_port_ssl", 9142)
-				.build();
-		//Configure keystore and truststore with WorkingDirectoryCustomizers
-		WorkingDirectoryCustomizer keystoreCustomizer = WorkingDirectoryCustomizer
-				.copy(new ClassPathResource("keystore.node0"), "conf/.keystore");
-		WorkingDirectoryCustomizer truststoreCustomizer = WorkingDirectoryCustomizer
-				.copy(new ClassPathResource("truststore.node0"), "conf/.truststore");
-		new CassandraBuilder()
+				.addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.copy(keystore, "conf/.keystore"))
+				.addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.copy(truststore, "conf/.truststore"))
 				.addConfigProperty("client_encryption_options.enabled", true)
 				.addConfigProperty("client_encryption_options.require_client_auth", true)
 				.addConfigProperty("client_encryption_options.optional", false)
+				.addConfigProperty("client_encryption_options.keystore", "conf/.keystore")
+				.addConfigProperty("client_encryption_options.truststore", "conf/.truststore")
 				.addConfigProperty("client_encryption_options.keystore_password", "cassandra")
 				.addConfigProperty("client_encryption_options.truststore_password", "cassandra")
-				.addWorkingDirectoryCustomizers(keystoreCustomizer, truststoreCustomizer)
-				// use a dedicated ssl port if necessary
+				// Use a dedicated SSL port if necessary
 				.addConfigProperty("native_transport_port_ssl", 9142)
 				.build();
 		//end::client-encryption-options[]
@@ -180,7 +138,12 @@ public class CassandraExamples {
 
 		//tag::random-ports[]
 		new CassandraBuilder()
-
+				.addSystemProperty("cassandra.native_transport_port", 0)
+				.addSystemProperty("cassandra.rpc_port", 0)
+				.addSystemProperty("cassandra.storage_port", 0)
+				.addSystemProperty("cassandra.jmx.local.port", 0)
+				//for Cassandra 4.x.x
+				.configure(new SimpleSeedProviderConfigurator("localhost:0"))
 				.build();
 		//end::random-ports[]
 
@@ -220,11 +183,11 @@ public class CassandraExamples {
 
 		//tag::logger[]
 		new CassandraBuilder()
-				//automatically detected logging implementation
+				//Automatically detected logging implementation.
 				.logger(Logger.get("Cassandra"))
-				//use slf4j logger
+				//Use SLF4J Logger implementation
 				.logger(new Slf4jLogger(LoggerFactory.getLogger("Cassandra")))
-				//use console logger
+				//Use Console implementation.
 				.logger(new ConsoleLogger("Cassandra"))
 				.build();
 		//end::logger[]
@@ -235,24 +198,17 @@ public class CassandraExamples {
 
 					@Override
 					public void customize(Path workingDirectory, Version version) throws IOException {
-						//do whatever you want with a working directory
+						//Custom logic
 					}
 				}).build();
 		//end::working-directory-customizer[]
 		//tag::working-directory-destroyer[]
 		new CassandraBuilder()
-				//completely deletes working directory on shutdown
-				.workingDirectoryDestroyer(WorkingDirectoryDestroyer.deleteAll())
-				//Deletes only 'lib' and 'pylib' folders on shutdown
-				.workingDirectoryDestroyer(WorkingDirectoryDestroyer.deleteOnly("lib", "pylib"))
-				//Deletes nothing
-				.workingDirectoryDestroyer(WorkingDirectoryDestroyer.doNothing())
-				//Custom implementation
 				.workingDirectoryDestroyer(new WorkingDirectoryDestroyer() {
 
 					@Override
 					public void destroy(Path workingDirectory, Version version) throws IOException {
-						//custom logic
+						//Custom logic
 					}
 				})
 				.build();
@@ -260,25 +216,11 @@ public class CassandraExamples {
 
 		//tag::working-directory-initializer[]
 		new CassandraBuilder()
-				//Use default initializer which gets Cassandra directory from a given provider
-				.workingDirectoryInitializer(
-						new DefaultWorkingDirectoryInitializer(new WebCassandraDirectoryProvider()))
-				//Use a custom directory provider
-				.workingDirectoryInitializer(new DefaultWorkingDirectoryInitializer(new CassandraDirectoryProvider() {
-
-					@Override
-					public Path getDirectory(Version version) throws IOException {
-						//returns a path to Cassandra Directory. This directory will never be modified
-						//it is only used for initializing working directory
-						return Paths.get("Path to Cassandra Directory");
-					}
-				}))
 				.workingDirectoryInitializer(new WorkingDirectoryInitializer() {
 
 					@Override
 					public void init(Path workingDirectory, Version version) throws IOException {
-						//custom logic for working directory initializing.
-						//for example here, we can initialize working directory from an archive or other sources.
+						//Custom logic
 					}
 				})
 				.build();

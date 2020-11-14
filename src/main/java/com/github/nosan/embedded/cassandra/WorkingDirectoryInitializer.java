@@ -20,9 +20,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 /**
- * A strategy interface to initialize working directory. A class which implements this interface must initialize an
- * empty working directory with Cassandra files. In other words, the working directory must be completely ready for
- * further usage.
+ * A strategy interface to initialize the working directory. The working directory must contain all necessary Cassandra
+ * files after the {@link #init(Path, Version)} method has been called.
  *
  * @author Dmytro Nosan
  * @see DefaultWorkingDirectoryInitializer

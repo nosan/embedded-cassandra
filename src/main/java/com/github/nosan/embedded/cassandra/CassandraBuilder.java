@@ -271,6 +271,7 @@ public class CassandraBuilder {
 	 *
 	 * @param workingDirectoryInitializer the working directory initializer
 	 * @return this builder
+	 * @see DefaultWorkingDirectoryInitializer
 	 */
 	public CassandraBuilder workingDirectoryInitializer(WorkingDirectoryInitializer workingDirectoryInitializer) {
 		Objects.requireNonNull(workingDirectoryInitializer, "Working Directory Initializer must not be null");
@@ -286,6 +287,9 @@ public class CassandraBuilder {
 	 *
 	 * @param workingDirectoryDestroyer the working directory destroyer
 	 * @return this builder
+	 * @see WorkingDirectoryDestroyer#doNothing()
+	 * @see WorkingDirectoryDestroyer#deleteOnly(String...)
+	 * @see WorkingDirectoryDestroyer#deleteAll()
 	 */
 	public CassandraBuilder workingDirectoryDestroyer(WorkingDirectoryDestroyer workingDirectoryDestroyer) {
 		Objects.requireNonNull(workingDirectoryDestroyer, "Working Directory Destroyer must not be null");
@@ -294,9 +298,8 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the {@link WorkingDirectoryCustomizer}. These customizers are useful when there is a goal to
-	 * add/replace/delete some files inside the working directory. Setting this value will replace any previously
-	 * configured customizers.
+	 * Sets the {@link WorkingDirectoryCustomizer}.  Setting this value will replace any previously configured
+	 * customizers.
 	 *
 	 * @param workingDirectoryCustomizers the working directory customizers to set
 	 * @return this builder
@@ -311,9 +314,8 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the {@link WorkingDirectoryCustomizer}. These customizers are useful when there is a goal to
-	 * add/replace/delete some files inside the working directory. Setting this value will replace any previously
-	 * configured customizers.
+	 * Sets the {@link WorkingDirectoryCustomizer}.  Setting this value will replace any previously configured
+	 * customizers.
 	 *
 	 * @param workingDirectoryCustomizers the working directory customizers to set
 	 * @return this builder
@@ -331,8 +333,7 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Adds the {@link WorkingDirectoryCustomizer}. These customizers are useful when there is a goal to
-	 * add/replace/delete some files inside the working directory.
+	 * Adds the {@link WorkingDirectoryCustomizer}.
 	 *
 	 * @param workingDirectoryCustomizers the working directory customizers to add
 	 * @return this builder
@@ -347,8 +348,7 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Adds the {@link WorkingDirectoryCustomizer}. These customizers are useful when there is a goal to
-	 * add/replace/delete some files inside the working directory.
+	 * Adds the {@link WorkingDirectoryCustomizer}.
 	 *
 	 * @param workingDirectoryCustomizers the working directory customizers to add
 	 * @return this builder
@@ -551,9 +551,12 @@ public class CassandraBuilder {
 	 * </pre>
 	 * Output Yaml:
 	 * <pre>
+	 * ...
 	 * cluster_name: "MyCluster"
 	 * client_encryption_options:
 	 *    enabled: true
+	 *    ...
+	 * ...
 	 * </pre>
 	 *
 	 * @param configProperties Cassandra config properties
@@ -577,9 +580,12 @@ public class CassandraBuilder {
 	 * </pre>
 	 * <p>Output Yaml:
 	 * <pre>
+	 * ...
 	 * cluster_name: "MyCluster"
 	 * client_encryption_options:
 	 *    enabled: true
+	 *    ...
+	 * ...
 	 * </pre>
 	 *
 	 * @param name config property name  (e.g. native_transport_port, client_encryption_options.enabled)
@@ -604,9 +610,12 @@ public class CassandraBuilder {
 	 * </pre>
 	 * Output Yaml:
 	 * <pre>
+	 * ...
 	 * cluster_name: "MyCluster"
 	 * client_encryption_options:
 	 *    enabled: true
+	 *    ...
+	 * ...
 	 * </pre>
 	 *
 	 * @param configProperties Cassandra config properties

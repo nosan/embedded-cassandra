@@ -23,6 +23,7 @@
 
 include::getting-started.adoc[leveloffset=+1]
 include::configuration.adoc[leveloffset=+1]
+include::howto.adoc[leveloffset=+1]
 include::faq.adoc[leveloffset=+1]
 
 [.text-right]

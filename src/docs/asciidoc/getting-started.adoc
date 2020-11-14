@@ -12,10 +12,6 @@
 
 The goal of this document is to provide comprehensive reference documentation for programmers using Embedded Cassandra.
 
-=== Introducing
-
-Embedded Cassandra provides an easy way to start and stop {apache-cassandra-ref}[Apache Cassandra].
-
 === Getting Help
 
 Ask Embedded Cassandra related questions on https://stackoverflow.com/questions/tagged/embedded-cassandra[Stack Overflow].
@@ -48,6 +44,20 @@ $ ./mvnw clean verify
 Embedded Cassandra welcomes contributions from everyone.
 
 Contributions to Embedded Cassandra should be made in the form of `GitHub pull requests`.
+
+=== Maven
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+<dependecies>
+    <dependency>
+        <groupId>com.github.nosan</groupId>
+        <artifactId>embedded-cassandra</artifactId>
+        <version>{revnumber}</version>
+        <scope>test</scope>
+    </dependency>
+</dependecies>
+----
 
 == Quick Start
 
