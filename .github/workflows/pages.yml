@@ -1,0 +1,29 @@
+name: "gh-pages"
+
+on: [ workflow_dispatch ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ matrix.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ matrix.os }}-maven-
+      - name: Generate Docs
+        run: mvn -B clean verify -P docs -DskipTests
+      - name: Push GH Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/generated-docs
+          keep_files: true

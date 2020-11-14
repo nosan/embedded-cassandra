@@ -1,14 +1,14 @@
-name: Build
+name: "build"
 
 on:
   push:
     paths-ignore:
-      - '**/docs/**'
+      - '**.adoc'
       - '**.md'
   pull_request:
     branches: "master"
     paths-ignore:
-      - '**/docs/**'
+      - '**.adoc'
       - '**.md'
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
           key: ${{ matrix.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ matrix.os }}-maven-
-      - name: Build and Test
+      - name: Maven Clean Verify
         run: mvn -B clean verify
       - name: Upload to Codecov
         uses: codecov/codecov-action@v1

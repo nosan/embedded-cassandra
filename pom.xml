@@ -396,35 +396,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.asciidoctor</groupId>
-                <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>${asciidoctor-maven-plugin.version}</version>
-                <configuration>
-                    <attributes>
-                        <revnumber>${project.version}</revnumber>
-                        <revdate>${maven.build.timestamp}</revdate>
-                        <commons-compress-version>${commons-compress.version}</commons-compress-version>
-                        <snakeyaml-version>${snakeyaml.version}</snakeyaml-version>
-                    </attributes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>generate-html-single-documentation</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <configuration>
-                            <backend>html5</backend>
-                            <sourceDocumentExtensions>
-                                <sourceDocumentExtension>index.adoc</sourceDocumentExtension>
-                            </sourceDocumentExtensions>
-                            <doctype>book</doctype>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -503,6 +474,44 @@
                             <altStagingDirectory>${session.executionRootDirectory}/target/</altStagingDirectory>
                             <stagingProgressTimeoutMinutes>30</stagingProgressTimeoutMinutes>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docs</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctor-maven-plugin</artifactId>
+                        <version>${asciidoctor-maven-plugin.version}</version>
+                        <configuration>
+                            <attributes>
+                                <revnumber>${project.version}</revnumber>
+                                <revdate>${maven.build.timestamp}</revdate>
+                                <commons-compress-version>${commons-compress.version}</commons-compress-version>
+                                <snakeyaml-version>${snakeyaml.version}</snakeyaml-version>
+                            </attributes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>generate-html-single-documentation</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <configuration>
+                                    <backend>html5</backend>
+                                    <sourceDocumentExtensions>
+                                        <sourceDocumentExtension>index.adoc</sourceDocumentExtension>
+                                    </sourceDocumentExtensions>
+                                    <doctype>book</doctype>
+                                    <outputDirectory>${project.build.directory}/generated-docs/${project.version}
+                                    </outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

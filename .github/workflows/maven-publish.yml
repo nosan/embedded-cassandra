@@ -1,4 +1,4 @@
-name: Deploy
+name: "deploy"
 
 on: [ workflow_dispatch ]
 
@@ -23,8 +23,8 @@ jobs:
           key: ${{ matrix.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ matrix.os }}-maven-
-      - name: Deploy
-        run: mvn -B clean deploy -Pdeploy -DskipTests
+      - name: Maven Clean Deploy
+        run: mvn -B clean deploy -P deploy -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_TOKEN }}
