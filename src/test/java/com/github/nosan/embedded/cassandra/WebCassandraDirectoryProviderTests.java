@@ -137,20 +137,26 @@ class WebCassandraDirectoryProviderTests {
 		doReturn(packages).when(this.directoryProvider).getCassandraPackages(version);
 
 		CountDownLatch l1 = new CountDownLatch(1);
-		CountDownLatch l2 = new CountDownLatch(2);
 		Callable<Path> callable = () -> {
 			l1.await();
-			l2.countDown();
 			return this.directoryProvider.getDirectory(version);
 		};
+		List<Future<Path>> futures = new ArrayList<>();
 		ExecutorService executorService = Executors.newFixedThreadPool(2);
+		List<Path> directories = new ArrayList<>();
 		try {
-			Future<Path> f1 = executorService.submit(callable);
-			Future<Path> f2 = executorService.submit(callable);
+			for (int i = 0; i < 5; i++) {
+				futures.add(executorService.submit(callable));
+			}
 			l1.countDown();
-			l2.await();
-			assertDirectory(f1.get());
-			assertDirectory(f2.get());
+			for (Future<Path> future : futures) {
+				directories.add(future.get());
+			}
+			for (Path directory : directories) {
+				assertDirectory(directory);
+			}
+			assertThat(this.out.toString()).containsOnlyOnce("Downloading");
+			assertThat(this.out.toString()).containsOnlyOnce("Extracting");
 		}
 		finally {
 			executorService.shutdown();
