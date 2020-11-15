@@ -1,13 +1,15 @@
-<html lang="en">
+---
+---
+
+<head>
+    <title>Index of /</title>
+</head>
+
 <body>
-<script>
-    let versions = ['3.1.0', '4.0.0-SNAPSHOT']
-    let htmlString = '<ul>';
-    for (let file of versions) {
-        htmlString += `<li><a href="${file}">${file}</a></li>`;
-    }
-    htmlString += '</ul>';
-    document.getElementsByTagName('body')[0].innerHTML = htmlString;
-</script>
+<h1>Index of /</h1>
+<ul>
+    {% for url in site.static_files %}
+    <li><a href="{{ site.baseurl | escape }}{{ url.path | escape }}">{{ url.path | escape }}</a></li>
+    {% endfor %}
+</ul>
 </body>
-</html>
