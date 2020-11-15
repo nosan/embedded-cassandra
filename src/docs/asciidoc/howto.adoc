@@ -58,3 +58,10 @@ include::{sources}/CassandraExamples.java[tag=configure-seeds]
 ----
 include::{sources}/CassandraExamples.java[tag=proxy]
 ----
+
+=== Add a lib to Cassandra Classpath
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=custom-classpath]
+----

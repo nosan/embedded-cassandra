@@ -16,7 +16,6 @@
 
 import java.io.IOException;
 import java.net.Proxy;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,14 +36,11 @@ import com.github.nosan.embedded.cassandra.WorkingDirectoryCustomizer;
 import com.github.nosan.embedded.cassandra.WorkingDirectoryDestroyer;
 import com.github.nosan.embedded.cassandra.WorkingDirectoryInitializer;
 import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
-import com.github.nosan.embedded.cassandra.commons.UrlResource;
 import com.github.nosan.embedded.cassandra.commons.logging.ConsoleLogger;
 import com.github.nosan.embedded.cassandra.commons.logging.Logger;
 import com.github.nosan.embedded.cassandra.commons.logging.Slf4jLogger;
 import com.github.nosan.embedded.cassandra.commons.web.JdkHttpClient;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
-import com.github.nosan.embedded.cassandra.cql.ResourceCqlScript;
-import com.github.nosan.embedded.cassandra.cql.StringCqlScript;
 
 /**
  * Cassandra examples.
@@ -109,6 +105,7 @@ public class CassandraExamples {
 				.addJvmOptions("-Xmx512m")
 				.build();
 		//end::jvm-options[]
+
 		//tag::client-encryption-options[]
 		ClassPathResource keystore = new ClassPathResource("keystore.node0");
 		ClassPathResource truststore = new ClassPathResource("truststore.node0");
@@ -156,11 +153,13 @@ public class CassandraExamples {
 						.addSeed("localhost", 0)) //<1>
 				.build();
 		//end::configure-seeds[]
+
 		//tag::startup-timeout[]
 		new CassandraBuilder()
 				.startupTimeout(Duration.ofMinutes(1))
 				.build();
 		//end::startup-timeout[]
+
 		//tag::proxy[]
 		new CassandraBuilder()
 				.workingDirectoryInitializer(
@@ -168,12 +167,6 @@ public class CassandraExamples {
 								new JdkHttpClient(Proxy.NO_PROXY))))
 				.build();
 		//end::proxy[]
-
-		//tag::cql[]
-		CqlScript.ofClassPath("schema.cql");
-		new ResourceCqlScript(new UrlResource(new URL("")));
-		new StringCqlScript("CQL SCRIPT");
-		//end::cql[]
 
 		//tag::shutdown-hook[]
 		new CassandraBuilder()
@@ -202,6 +195,7 @@ public class CassandraExamples {
 					}
 				}).build();
 		//end::working-directory-customizer[]
+
 		//tag::working-directory-destroyer[]
 		new CassandraBuilder()
 				.workingDirectoryDestroyer(new WorkingDirectoryDestroyer() {
@@ -233,8 +227,19 @@ public class CassandraExamples {
 				//Use the same directory
 				.workingDirectory(() -> Paths.get("target/cassandra"))
 				.build();
-
 		//end::working-directory[]
+
+		//tag::custom-classpath[]
+		ClassPathResource lib = new ClassPathResource("lib.jar");
+		new CassandraBuilder()
+				.addEnvironmentVariable("EXTRA_CLASSPATH", lib)
+				.build();
+
+		// or lib could be added via WorkingDirectoryCustomizer
+		new CassandraBuilder()
+				.addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.copy(lib, "lib/lib.jar"))
+				.build();
+		//end::custom-classpath[]
 
 	}
 
