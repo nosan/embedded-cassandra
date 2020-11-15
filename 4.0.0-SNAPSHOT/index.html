@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 4.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-11-14T22:51:12Z</span>
+<span id="revdate">2020-11-15T09:51:15Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -488,7 +488,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#authorization-and-authentication">3.3. Authorization and Authentication</a></li>
 <li><a href="#random-ports">3.4. Random Ports</a></li>
 <li><a href="#simple-seed-provider">3.5. Simple Seed Provider</a></li>
-<li><a href="#proxy">3.6. Proxy</a></li>
+<li><a href="#proxy">3.6. Proxy</a>
+<ul class="sectlevel3">
+<li><a href="#add-a-lib-to-cassandra-classpath">3.6.1. Add a lib to Cassandra Classpath</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#f-a-q">4. F.A.Q</a>
@@ -497,6 +501,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#what-cassandra-versions-are-supported-by-embedded-cassandra">4.2. What Cassandra versions are supported by Embedded Cassandra?</a></li>
 <li><a href="#what-compile-dependencies-are-used-by-embedded-cassandra">4.3. What compile dependencies are used by Embedded Cassandra?</a></li>
 <li><a href="#is-it-possible-to-start-more-than-one-cassandra-instances">4.4. Is it possible to start more than one Cassandra instances?</a></li>
+<li><a href="#from-which-urls-apache-cassandra-is-downloaded">4.5. From which URLs Apache Cassandra is downloaded?</a></li>
 </ul>
 </li>
 </ul>
@@ -1025,6 +1030,22 @@ typically from an ephemeral port range.
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
+<div class="sect3">
+<h4 id="add-a-lib-to-cassandra-classpath"><a class="anchor" href="#add-a-lib-to-cassandra-classpath"></a>3.6.1. Add a lib to Cassandra Classpath</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">ClassPathResource</span> <span class="n">lib</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"lib.jar"</span><span class="o">);</span>
+<span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">addEnvironmentVariable</span><span class="o">(</span><span class="s">"EXTRA_CLASSPATH"</span><span class="o">,</span> <span class="n">lib</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+
+<span class="c1">// or lib could be added via WorkingDirectoryCustomizer</span>
+<span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">addWorkingDirectoryCustomizers</span><span class="o">(</span><span class="nc">WorkingDirectoryCustomizer</span><span class="o">.</span><span class="na">copy</span><span class="o">(</span><span class="n">lib</span><span class="o">,</span> <span class="s">"lib/lib.jar"</span><span class="o">))</span>
+        <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -1070,6 +1091,14 @@ typically from an ephemeral port range.
 <div class="paragraph">
 <p>Yes, it is possible. Of course, both instances should be started on different ports.</p>
 </div>
+</div>
+<div class="sect2">
+<h3 id="from-which-urls-apache-cassandra-is-downloaded"><a class="anchor" href="#from-which-urls-apache-cassandra-is-downloaded"></a>4.5. From which URLs Apache Cassandra is downloaded?</h3>
+<div class="paragraph">
+<p>It depends on the version, if it the latest release, it will be downloaded from
+<a href="https://downloads.apache.org/cassandra/" class="bare">downloads.apache.org/cassandra/</a> if it is previous release, it will be downloaded from
+<a href="https://archive.apache.org/dist/cassandra/" class="bare">archive.apache.org/dist/cassandra/</a></p>
+</div>
 <div class="paragraph text-right">
 <p>Copyright &#169; 2020</p>
 </div>
@@ -1080,7 +1109,7 @@ typically from an ephemeral port range.
 <div id="footer">
 <div id="footer-text">
 Version 4.0.0-SNAPSHOT<br>
-Last updated 2020-11-14 22:51:06 UTC
+Last updated 2020-11-15 09:51:07 UTC
 </div>
 </div>
 <style>
