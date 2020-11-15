@@ -2,14 +2,16 @@
 ---
 
 <head>
-    <title>Index of /</title>
+    <title>Embedded Cassandra</title>
 </head>
 
 <body>
-<h1>Index of /</h1>
+<h1>Embedded Cassandra</h1>
 <ul>
     {% for url in site.static_files %}
-    <li><a href="{{ site.baseurl | escape }}{{ url.path | escape }}">{{ url.path | escape }}</a></li>
+    {% assign tokens = url.path | split: "/" %}
+    <li><a href="{{ site.baseurl | escape }}/{{ tokens[1] | escape }}">
+        Reference Documentation {{ tokens[1] | escape }}</a></li>
     {% endfor %}
 </ul>
 </body>
