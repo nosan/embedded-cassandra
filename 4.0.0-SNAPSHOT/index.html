@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 4.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-11-15T09:51:15Z</span>
+<span id="revdate">2020-11-15T20:43:23Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -488,11 +488,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#authorization-and-authentication">3.3. Authorization and Authentication</a></li>
 <li><a href="#random-ports">3.4. Random Ports</a></li>
 <li><a href="#simple-seed-provider">3.5. Simple Seed Provider</a></li>
-<li><a href="#proxy">3.6. Proxy</a>
-<ul class="sectlevel3">
-<li><a href="#add-a-lib-to-cassandra-classpath">3.6.1. Add a lib to Cassandra Classpath</a></li>
-</ul>
-</li>
+<li><a href="#proxy">3.6. Proxy</a></li>
+<li><a href="#add-a-lib-to-cassandra-classpath">3.7. Add a lib to Cassandra Classpath</a></li>
 </ul>
 </li>
 <li><a href="#f-a-q">4. F.A.Q</a>
@@ -1030,8 +1027,9 @@ typically from an ephemeral port range.
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
-<div class="sect3">
-<h4 id="add-a-lib-to-cassandra-classpath"><a class="anchor" href="#add-a-lib-to-cassandra-classpath"></a>3.6.1. Add a lib to Cassandra Classpath</h4>
+</div>
+<div class="sect2">
+<h3 id="add-a-lib-to-cassandra-classpath"><a class="anchor" href="#add-a-lib-to-cassandra-classpath"></a>3.7. Add a lib to Cassandra Classpath</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java"><span class="nc">ClassPathResource</span> <span class="n">lib</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"lib.jar"</span><span class="o">);</span>
@@ -1043,7 +1041,6 @@ typically from an ephemeral port range.
 <span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
         <span class="o">.</span><span class="na">addWorkingDirectoryCustomizers</span><span class="o">(</span><span class="nc">WorkingDirectoryCustomizer</span><span class="o">.</span><span class="na">copy</span><span class="o">(</span><span class="n">lib</span><span class="o">,</span> <span class="s">"lib/lib.jar"</span><span class="o">))</span>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
-</div>
 </div>
 </div>
 </div>
@@ -1109,7 +1106,7 @@ typically from an ephemeral port range.
 <div id="footer">
 <div id="footer-text">
 Version 4.0.0-SNAPSHOT<br>
-Last updated 2020-11-15 09:51:07 UTC
+Last updated 2020-11-15 20:43:13 UTC
 </div>
 </div>
 <style>
