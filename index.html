@@ -10,7 +10,7 @@
 <ul>
     {% for url in site.static_files %}
     {% assign tokens = url.path | split: "/" %}
-    <li><a href="{{ site.baseurl | escape }}/{{ tokens[1] | escape }}">{{ tokens[1] | escape }}</a></li>
+    <li><a href="{{ tokens[1] | escape }}">{{ tokens[1] | escape }}</a></li>
     {% endfor %}
 </ul>
 </body>
