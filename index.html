@@ -6,12 +6,11 @@
 </head>
 
 <body>
-<h1>Embedded Cassandra</h1>
+<h1>Embedded Cassandra Reference Documentation</h1>
 <ul>
     {% for url in site.static_files %}
     {% assign tokens = url.path | split: "/" %}
-    <li><a href="{{ site.baseurl | escape }}/{{ tokens[1] | escape }}">
-        Reference Documentation {{ tokens[1] | escape }}</a></li>
+    <li><a href="{{ site.baseurl | escape }}/{{ tokens[1] | escape }}">{{ tokens[1] | escape }}</a></li>
     {% endfor %}
 </ul>
 </body>
