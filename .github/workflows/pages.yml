@@ -27,3 +27,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/generated-docs
           keep_files: true
+          enable_jekyll: true
