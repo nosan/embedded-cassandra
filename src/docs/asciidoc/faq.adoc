@@ -32,9 +32,9 @@ Embedded Cassandra has only two compile dependencies:
 </dependecies>
 ----
 
-== Is it possible to start more than one Cassandra instances?
+== Is it possible to start more than one Cassandra instance?
 
-Yes, it is possible. Of course, both instances should be started on different ports.
+Yes, it is possible. Both instances must be started on different ports.
 
 == From which URLs Apache Cassandra is downloaded?
 

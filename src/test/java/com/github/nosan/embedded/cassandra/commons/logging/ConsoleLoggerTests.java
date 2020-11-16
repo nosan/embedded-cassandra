@@ -32,10 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ConsoleLoggerTests {
 
-	private PrintStream stdout;
-
-	private PrintStream stderr;
-
 	private final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 	private final ByteArrayOutputStream err = new ByteArrayOutputStream();
@@ -45,6 +41,10 @@ class ConsoleLoggerTests {
 	private final Logger logger = new ConsoleLogger(this.name);
 
 	private final RuntimeException exception = new RuntimeException("EXCEPTION");
+
+	private PrintStream stdout;
+
+	private PrintStream stderr;
 
 	@BeforeEach
 	void setUp() {
