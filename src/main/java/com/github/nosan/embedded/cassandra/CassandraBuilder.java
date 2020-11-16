@@ -378,7 +378,7 @@ public class CassandraBuilder {
 	 * @see #addEnvironmentVariable(String, Object)
 	 * @see #addEnvironmentVariables(Map)
 	 */
-	public CassandraBuilder environmentVariables(Map<String, Object> environmentVariables) {
+	public CassandraBuilder environmentVariables(Map<String, ?> environmentVariables) {
 		Objects.requireNonNull(environmentVariables, "Environment Variables must not be null");
 		this.environmentVariables.clear();
 		this.environmentVariables.putAll(deepCopy(environmentVariables));
@@ -417,7 +417,7 @@ public class CassandraBuilder {
 	 * @see #addEnvironmentVariable(String, Object)
 	 * @see #environmentVariables(Map)
 	 */
-	public CassandraBuilder addEnvironmentVariables(Map<String, Object> environmentVariables) {
+	public CassandraBuilder addEnvironmentVariables(Map<String, ?> environmentVariables) {
 		Objects.requireNonNull(environmentVariables, "Environment Variables must not be null");
 		this.environmentVariables.putAll(deepCopy(environmentVariables));
 		return this;
@@ -437,7 +437,7 @@ public class CassandraBuilder {
 	 * @return this builder
 	 * @see #addSystemProperty(String, Object)
 	 */
-	public CassandraBuilder systemProperties(Map<String, Object> systemProperties) {
+	public CassandraBuilder systemProperties(Map<String, ?> systemProperties) {
 		Objects.requireNonNull(systemProperties, "System Properties must not be null");
 		this.systemProperties.clear();
 		this.systemProperties.putAll(deepCopy(systemProperties));
@@ -471,7 +471,7 @@ public class CassandraBuilder {
 	 * @return this builder
 	 * @see #addSystemProperty(String, Object)
 	 */
-	public CassandraBuilder addSystemProperties(Map<String, Object> systemProperties) {
+	public CassandraBuilder addSystemProperties(Map<String, ?> systemProperties) {
 		Objects.requireNonNull(systemProperties, "System Properties must not be null");
 		this.systemProperties.putAll(deepCopy(systemProperties));
 		return this;
@@ -564,7 +564,7 @@ public class CassandraBuilder {
 	 * @see #addConfigProperty(String, Object)
 	 * @see #addConfigProperties(Map)
 	 */
-	public CassandraBuilder configProperties(Map<String, Object> configProperties) {
+	public CassandraBuilder configProperties(Map<String, ?> configProperties) {
 		Objects.requireNonNull(configProperties, "Config Properties must not be null");
 		this.configProperties.clear();
 		this.configProperties.putAll(deepCopy(configProperties));
@@ -623,7 +623,7 @@ public class CassandraBuilder {
 	 * @see #addConfigProperty(String, Object)
 	 * @see #configProperties(Map)
 	 */
-	public CassandraBuilder addConfigProperties(Map<String, Object> configProperties) {
+	public CassandraBuilder addConfigProperties(Map<String, ?> configProperties) {
 		Objects.requireNonNull(configProperties, "Config Properties must not be null");
 		this.configProperties.putAll(deepCopy(configProperties));
 		return this;
