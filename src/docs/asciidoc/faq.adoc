@@ -12,7 +12,7 @@ Embedded Cassandra is tested under the `ubuntu-latest`, `macos-latest` and `wind
 
 Embedded Cassandra project is tested for `2.X.X` - `4.X.X` Cassandra versions.
 
-== What compile dependencies are used by Embedded Cassandra?
+== What are compile dependencies used by Embedded Cassandra?
 
 Embedded Cassandra has only two compile dependencies:
 
