@@ -419,13 +419,6 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <id>clean</id>
-                                <phase>clean</phase>
-                                <goals>
-                                    <goal>clean</goal>
-                                </goals>
-                            </execution>
-                            <execution>
                                 <id>flatten</id>
                                 <phase>verify</phase>
                                 <goals>
@@ -477,6 +470,18 @@
                     </plugin>
                 </plugins>
             </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <name>Sonatype Nexus Snapshots</name>
+                    <url>${nexus.url}/content/repositories/snapshots/</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <name>Sonatype Nexus Releases</name>
+                    <url>${nexus.url}/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
         </profile>
         <profile>
             <id>docs</id>
@@ -517,18 +522,6 @@
             </build>
         </profile>
     </profiles>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>${nexus.url}/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <name>Sonatype Nexus Releases</name>
-            <url>${nexus.url}/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
 
 </project>
