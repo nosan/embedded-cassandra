@@ -35,6 +35,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DefaultWorkingDirectoryInitializerTests {
 
 	@Test
+	void testConstruct() {
+		CassandraDirectoryProvider directoryProvider = Mockito.mock(CassandraDirectoryProvider.class);
+		WorkingDirectoryInitializer initializer = new DefaultWorkingDirectoryInitializer(
+				directoryProvider,
+				DefaultWorkingDirectoryInitializer.CopyStrategy.SKIP_EXISTING);
+		assertThat(initializer)
+				.hasFieldOrPropertyWithValue("cassandraDirectoryProvider", directoryProvider)
+				.hasFieldOrPropertyWithValue("copyStrategy",
+						DefaultWorkingDirectoryInitializer.CopyStrategy.SKIP_EXISTING);
+	}
+
+	@Test
+	void testConstruct1() {
+		CassandraDirectoryProvider directoryProvider = Mockito.mock(CassandraDirectoryProvider.class);
+		WorkingDirectoryInitializer initializer = new DefaultWorkingDirectoryInitializer(directoryProvider);
+		assertThat(initializer)
+				.hasFieldOrPropertyWithValue("cassandraDirectoryProvider", directoryProvider)
+				.hasFieldOrPropertyWithValue("copyStrategy",
+						DefaultWorkingDirectoryInitializer.CopyStrategy.REPLACE_EXISTING);
+	}
+
+	@Test
 	void initializeWorkingDirReplaceExisting(@TempDir Path tempDir) throws IOException {
 		CassandraDirectoryProvider directoryProvider = Mockito.mock(CassandraDirectoryProvider.class);
 		WorkingDirectoryInitializer initializer = new DefaultWorkingDirectoryInitializer(

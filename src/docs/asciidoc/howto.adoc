@@ -65,3 +65,17 @@ include::{sources}/CassandraExamples.java[tag=proxy]
 ----
 include::{sources}/CassandraExamples.java[tag=custom-classpath]
 ----
+
+== JUnit4
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraJUnit4Example.java[tag=code]
+----
+
+== JUnit5
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraJUnit5Example.java[tag=code]
+----
