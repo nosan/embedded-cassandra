@@ -97,6 +97,7 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void keepDataBetweenLaunches(Version version) throws Throwable {
+		assumeJavaVersion(version);
 		Cassandra cassandra = this.builder.version(version).build();
 		this.runner.run(cassandra, throwable -> {
 			assertThat(throwable).doesNotThrowAnyException();
