@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 4.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-11-15T20:43:23Z</span>
+<span id="revdate">2020-11-17T12:50:40Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -490,6 +490,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#simple-seed-provider">3.5. Simple Seed Provider</a></li>
 <li><a href="#proxy">3.6. Proxy</a></li>
 <li><a href="#add-a-lib-to-cassandra-classpath">3.7. Add a lib to Cassandra Classpath</a></li>
+<li><a href="#junit4">3.8. JUnit4</a></li>
+<li><a href="#junit5">3.9. JUnit5</a></li>
 </ul>
 </li>
 <li><a href="#f-a-q">4. F.A.Q</a>
@@ -497,7 +499,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#what-oss-does-embedded-cassandra-support">4.1. What OSs does Embedded Cassandra support?</a></li>
 <li><a href="#what-cassandra-versions-are-supported-by-embedded-cassandra">4.2. What Cassandra versions are supported by Embedded Cassandra?</a></li>
 <li><a href="#what-compile-dependencies-are-used-by-embedded-cassandra">4.3. What compile dependencies are used by Embedded Cassandra?</a></li>
-<li><a href="#is-it-possible-to-start-more-than-one-cassandra-instances">4.4. Is it possible to start more than one Cassandra instances?</a></li>
+<li><a href="#is-it-possible-to-start-more-than-one-cassandra-instance">4.4. Is it possible to start more than one Cassandra instance?</a></li>
 <li><a href="#from-which-urls-apache-cassandra-is-downloaded">4.5. From which URLs Apache Cassandra is downloaded?</a></li>
 </ul>
 </li>
@@ -1044,6 +1046,64 @@ typically from an ephemeral port range.
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="junit4"><a class="anchor" href="#junit4"></a>3.8. JUnit4</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Cassandra</span> <span class="no">CASSANDRA</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">().</span><span class="na">build</span><span class="o">();</span>
+
+<span class="nd">@BeforeClass</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
+    <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="nc">Settings</span> <span class="n">settings</span> <span class="o">=</span> <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">getSettings</span><span class="o">();</span>
+    <span class="k">try</span> <span class="o">(</span><span class="nc">Cluster</span> <span class="n">cluster</span> <span class="o">=</span> <span class="nc">Cluster</span><span class="o">.</span><span class="na">builder</span><span class="o">().</span><span class="na">addContactPoints</span><span class="o">(</span><span class="n">settings</span><span class="o">.</span><span class="na">getAddress</span><span class="o">())</span>
+            <span class="o">.</span><span class="na">withPort</span><span class="o">(</span><span class="n">settings</span><span class="o">.</span><span class="na">getPort</span><span class="o">()).</span><span class="na">build</span><span class="o">())</span> <span class="o">{</span>
+        <span class="nc">Session</span> <span class="n">session</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="na">connect</span><span class="o">();</span>
+        <span class="nc">CqlScript</span><span class="o">.</span><span class="na">ofClassPath</span><span class="o">(</span><span class="s">"schema.cql"</span><span class="o">).</span><span class="na">forEachStatement</span><span class="o">(</span><span class="nl">session:</span><span class="o">:</span><span class="n">execute</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="nd">@AfterClass</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">stop</span><span class="o">()</span> <span class="o">{</span>
+    <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">stop</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="nd">@Test</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCassandra</span><span class="o">()</span> <span class="o">{</span>
+
+<span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="junit5"><a class="anchor" href="#junit5"></a>3.9. JUnit5</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Cassandra</span> <span class="no">CASSANDRA</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">().</span><span class="na">build</span><span class="o">();</span>
+
+<span class="nd">@BeforeAll</span>
+<span class="kd">static</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
+    <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="nc">Settings</span> <span class="n">settings</span> <span class="o">=</span> <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">getSettings</span><span class="o">();</span>
+    <span class="k">try</span> <span class="o">(</span><span class="nc">Cluster</span> <span class="n">cluster</span> <span class="o">=</span> <span class="nc">Cluster</span><span class="o">.</span><span class="na">builder</span><span class="o">().</span><span class="na">addContactPoints</span><span class="o">(</span><span class="n">settings</span><span class="o">.</span><span class="na">getAddress</span><span class="o">())</span>
+            <span class="o">.</span><span class="na">withPort</span><span class="o">(</span><span class="n">settings</span><span class="o">.</span><span class="na">getPort</span><span class="o">()).</span><span class="na">build</span><span class="o">())</span> <span class="o">{</span>
+        <span class="nc">Session</span> <span class="n">session</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="na">connect</span><span class="o">();</span>
+        <span class="nc">CqlScript</span><span class="o">.</span><span class="na">ofClassPath</span><span class="o">(</span><span class="s">"schema.cql"</span><span class="o">).</span><span class="na">forEachStatement</span><span class="o">(</span><span class="nl">session:</span><span class="o">:</span><span class="n">execute</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="nd">@AfterAll</span>
+<span class="kd">static</span> <span class="kt">void</span> <span class="nf">stop</span><span class="o">()</span> <span class="o">{</span>
+    <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">stop</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="nd">@Test</span>
+<span class="kt">void</span> <span class="nf">testCassandra</span><span class="o">()</span> <span class="o">{</span>
+
+<span class="o">}</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1084,9 +1144,9 @@ typically from an ephemeral port range.
 </div>
 </div>
 <div class="sect2">
-<h3 id="is-it-possible-to-start-more-than-one-cassandra-instances"><a class="anchor" href="#is-it-possible-to-start-more-than-one-cassandra-instances"></a>4.4. Is it possible to start more than one Cassandra instances?</h3>
+<h3 id="is-it-possible-to-start-more-than-one-cassandra-instance"><a class="anchor" href="#is-it-possible-to-start-more-than-one-cassandra-instance"></a>4.4. Is it possible to start more than one Cassandra instance?</h3>
 <div class="paragraph">
-<p>Yes, it is possible. Of course, both instances should be started on different ports.</p>
+<p>Yes, it is possible. Both instances must be started on different ports.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1106,7 +1166,7 @@ typically from an ephemeral port range.
 <div id="footer">
 <div id="footer-text">
 Version 4.0.0-SNAPSHOT<br>
-Last updated 2020-11-15 20:43:13 UTC
+Last updated 2020-11-17 12:50:25 UTC
 </div>
 </div>
 <style>
