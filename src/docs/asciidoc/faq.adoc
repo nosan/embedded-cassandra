@@ -41,3 +41,7 @@ Yes, it is possible. Both instances must be started on different ports.
 It depends on the version, if it the latest release, it will be downloaded from
 https://downloads.apache.org/cassandra/ if it is previous release, it will be downloaded from
 https://archive.apache.org/dist/cassandra/
+
+== Where are the files downloaded?
+
+By default, files are downloaded into *~/.embedded-cassandra/cassandra* directory
