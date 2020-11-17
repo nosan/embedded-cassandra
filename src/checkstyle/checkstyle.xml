@@ -8,6 +8,8 @@
         <property name="tabWidth" value="4"/>
     </module>
 
+    <property name="fileExtensions" value="java"/>
+
     <module name="com.puppycrawl.tools.checkstyle.checks.header.RegexpHeaderCheck">
         <property name="headerFile" value="${checkstyle.header.file}"/>
         <property name="fileExtensions" value="java"/>
