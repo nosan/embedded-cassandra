@@ -19,6 +19,7 @@ package com.github.nosan.embedded.cassandra;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,30 +34,43 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DefaultWorkingDirectoryInitializerTests {
 
-	private final CassandraDirectoryProvider directoryProvider = Mockito.mock(CassandraDirectoryProvider.class);
-
-	private final DefaultWorkingDirectoryInitializer initializer = new DefaultWorkingDirectoryInitializer(
-			this.directoryProvider);
-
 	@Test
-	void initializeWorkingDir(@TempDir Path tempDir) throws IOException {
+	void initializeWorkingDirReplaceExisting(@TempDir Path tempDir) throws IOException {
+		CassandraDirectoryProvider directoryProvider = Mockito.mock(CassandraDirectoryProvider.class);
+		WorkingDirectoryInitializer initializer = new DefaultWorkingDirectoryInitializer(
+				directoryProvider, DefaultWorkingDirectoryInitializer.CopyStrategy.REPLACE_EXISTING);
 		Path cassandraDirectory = Files.createDirectory(tempDir.resolve("cassandraDirectory"));
 		Path workingDirectory = Files.createDirectory(tempDir.resolve("workingDirectory"));
-		Mockito.when(this.directoryProvider.getDirectory(CassandraBuilder.DEFAULT_VERSION))
+		Mockito.when(directoryProvider.getDirectory(CassandraBuilder.DEFAULT_VERSION))
 				.thenReturn(cassandraDirectory);
-		Files.createDirectories(cassandraDirectory.resolve("bin"));
-		Files.createDirectories(cassandraDirectory.resolve("tools"));
-		Files.createDirectories(cassandraDirectory.resolve("lib"));
-		Files.createDirectories(cassandraDirectory.resolve("conf"));
-		Files.createDirectories(cassandraDirectory.resolve("javadoc"));
-		Files.createDirectories(cassandraDirectory.resolve("licenses"));
-		Files.createDirectories(cassandraDirectory.resolve("doc"));
-		Files.createFile(cassandraDirectory.resolve("conf/cassandra.yaml"));
-		Files.createFile(cassandraDirectory.resolve("bin/cassandra"));
-		Files.createFile(cassandraDirectory.resolve("lib/apache-cassandra-4.0-beta3.jar"));
+		prepare(cassandraDirectory);
+		initializer.init(workingDirectory, CassandraBuilder.DEFAULT_VERSION);
+		assertWorkingDirectory(workingDirectory);
+		Files.write(workingDirectory.resolve("conf/cassandra.yaml"), Collections.singleton("Hello World"));
+		initializer.init(workingDirectory, CassandraBuilder.DEFAULT_VERSION);
+		assertWorkingDirectory(workingDirectory);
+		assertThat(workingDirectory.resolve("conf/cassandra.yaml")).hasContent("");
+	}
 
-		this.initializer.init(workingDirectory, CassandraBuilder.DEFAULT_VERSION);
+	@Test
+	void initializeWorkingDirectorySkipExisting(@TempDir Path tempDir) throws IOException {
+		CassandraDirectoryProvider directoryProvider = Mockito.mock(CassandraDirectoryProvider.class);
+		WorkingDirectoryInitializer initializer = new DefaultWorkingDirectoryInitializer(
+				directoryProvider, DefaultWorkingDirectoryInitializer.CopyStrategy.SKIP_EXISTING);
+		Path cassandraDirectory = Files.createDirectory(tempDir.resolve("cassandraDirectory"));
+		Path workingDirectory = Files.createDirectory(tempDir.resolve("workingDirectory"));
+		Mockito.when(directoryProvider.getDirectory(CassandraBuilder.DEFAULT_VERSION))
+				.thenReturn(cassandraDirectory);
+		prepare(cassandraDirectory);
+		initializer.init(workingDirectory, CassandraBuilder.DEFAULT_VERSION);
+		assertWorkingDirectory(workingDirectory);
+		Files.write(workingDirectory.resolve("conf/cassandra.yaml"), Collections.singleton("Hello World"));
+		initializer.init(workingDirectory, CassandraBuilder.DEFAULT_VERSION);
+		assertWorkingDirectory(workingDirectory);
+		assertThat(workingDirectory.resolve("conf/cassandra.yaml")).hasContent("Hello World");
+	}
 
+	private void assertWorkingDirectory(Path workingDirectory) {
 		assertThat(workingDirectory.resolve("bin")).isDirectory().exists();
 		assertThat(workingDirectory.resolve("tools")).isDirectory().exists();
 		assertThat(workingDirectory.resolve("lib")).isDirectory().exists();
@@ -67,6 +81,19 @@ class DefaultWorkingDirectoryInitializerTests {
 		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
 		assertThat(workingDirectory.resolve("licenses")).doesNotExist();
 		assertThat(workingDirectory.resolve("doc")).doesNotExist();
+	}
+
+	private void prepare(Path cassandraDirectory) throws IOException {
+		Files.createDirectories(cassandraDirectory.resolve("bin"));
+		Files.createDirectories(cassandraDirectory.resolve("tools"));
+		Files.createDirectories(cassandraDirectory.resolve("lib"));
+		Files.createDirectories(cassandraDirectory.resolve("conf"));
+		Files.createDirectories(cassandraDirectory.resolve("javadoc"));
+		Files.createDirectories(cassandraDirectory.resolve("licenses"));
+		Files.createDirectories(cassandraDirectory.resolve("doc"));
+		Files.createFile(cassandraDirectory.resolve("conf/cassandra.yaml"));
+		Files.createFile(cassandraDirectory.resolve("bin/cassandra"));
+		Files.createFile(cassandraDirectory.resolve("lib/apache-cassandra-4.0-beta3.jar"));
 	}
 
 }

@@ -96,6 +96,33 @@ class DefaultCassandraIntegrationTests {
 
 	@ParameterizedTest
 	@MethodSource("versions")
+	void keepDataBetweenLaunches(Version version) throws Throwable {
+		Cassandra cassandra = this.builder.version(version).build();
+		this.runner.run(cassandra, throwable -> {
+			assertThat(throwable).doesNotThrowAnyException();
+			assertThat(cassandra.isRunning()).isTrue();
+			assertThat(cassandra.getVersion()).isEqualTo(version);
+			Settings settings = cassandra.getSettings();
+			ClusterFactory clusterFactory = new ClusterFactory();
+			clusterFactory.address = settings.getAddress();
+			clusterFactory.port = settings.getPort();
+			createScheme(clusterFactory);
+		});
+		this.runner.run(cassandra, throwable -> {
+			assertThat(throwable).doesNotThrowAnyException();
+			assertThat(cassandra.isRunning()).isTrue();
+			assertThat(cassandra.getVersion()).isEqualTo(version);
+			Settings settings = cassandra.getSettings();
+			ClusterFactory clusterFactory = new ClusterFactory();
+			clusterFactory.address = settings.getAddress();
+			clusterFactory.port = settings.getPort();
+			assertThatThrownBy(() -> createScheme(clusterFactory))
+					.hasStackTraceContaining("Keyspace test already exists");
+		});
+	}
+
+	@ParameterizedTest
+	@MethodSource("versions")
 	void isRunningAndGetSettings(Version version) {
 		assumeJavaVersion(version);
 		Cassandra cassandra = this.builder.version(version).build();
@@ -420,12 +447,43 @@ class DefaultCassandraIntegrationTests {
 
 	}
 
+	private interface ThrowableConsumer {
+
+		void accept(Throwable throwable) throws Throwable;
+
+	}
+
 	private static final class CassandraRunner {
 
 		private final CassandraBuilder builder;
 
 		private CassandraRunner(CassandraBuilder builder) {
 			this.builder = builder;
+		}
+
+		void run(Cassandra cassandra, ThrowableConsumer consumer) throws Throwable {
+			try {
+				try {
+					cassandra.start();
+				}
+				catch (Throwable ex) {
+					consumer.accept(ex);
+					return;
+				}
+				consumer.accept(null);
+			}
+			catch (Throwable ex) {
+				try {
+					cassandra.stop();
+				}
+				catch (Throwable suppressed) {
+					ex.addSuppressed(suppressed);
+				}
+				throw ex;
+			}
+			finally {
+				cassandra.stop();
+			}
 		}
 
 		void run(CassandraConsumer consumer) throws Throwable {

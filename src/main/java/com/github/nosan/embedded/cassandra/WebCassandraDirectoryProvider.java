@@ -31,6 +31,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -150,7 +151,9 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 			for (CassandraPackage cassandraPackage : cassandraPackages) {
 				try {
 					downloadAndExtract(version, downloadDirectory, cassandraDirectory, cassandraPackage);
-					Files.newOutputStream(successFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE).close();
+					if (!Thread.currentThread().isInterrupted()) {
+						Files.write(successFile, Collections.singleton(ZonedDateTime.now().toString()));
+					}
 					LOGGER.info("Cassandra directory: ''{0}'' is initialized.", cassandraDirectory);
 					return cassandraDirectory;
 				}
@@ -290,12 +293,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 				LOGGER.info("Extracting...");
 				extract(downloadFile, extractDirectory);
 				Path cassandraHome = findCassandraHome(extractDirectory);
-				try {
-					Files.move(cassandraHome, cassandraDirectory);
-				}
-				catch (IOException ex) {
-					FileUtils.copy(cassandraHome, cassandraDirectory, StandardCopyOption.REPLACE_EXISTING);
-				}
+				FileUtils.copy(cassandraHome, cassandraDirectory, StandardCopyOption.REPLACE_EXISTING);
 			}
 			finally {
 				deleteSilently(extractDirectory);

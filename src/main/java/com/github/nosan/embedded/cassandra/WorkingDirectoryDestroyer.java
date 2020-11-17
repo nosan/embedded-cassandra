@@ -28,6 +28,7 @@ import com.github.nosan.embedded.cassandra.commons.FileUtils;
  * @author Dmytro Nosan
  * @see #deleteAll()
  * @see #deleteOnly(String...)
+ * @see #doNothing()
  * @since 4.0.0
  */
 @FunctionalInterface

@@ -17,9 +17,9 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -38,20 +38,37 @@ import com.github.nosan.embedded.cassandra.commons.FileUtils;
  */
 public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryInitializer {
 
-	protected static final Set<String> SKIP_DIRECTORIES = Collections.unmodifiableSet(
+	private static final Set<String> SKIP_DIRECTORIES = Collections.unmodifiableSet(
 			new LinkedHashSet<>(Arrays.asList("javadoc", "doc", "licenses")));
 
 	private final CassandraDirectoryProvider cassandraDirectoryProvider;
+
+	private final CopyStrategy copyStrategy;
+
+	/**
+	 * Creates a new {@link DefaultWorkingDirectoryInitializer} with a {@link CopyStrategy#REPLACE_EXISTING} copy
+	 * strategy.
+	 *
+	 * @param cassandraDirectoryProvider the Cassandra directory provider. This provider is used to get a path to
+	 * Cassandra directory.
+	 */
+	public DefaultWorkingDirectoryInitializer(CassandraDirectoryProvider cassandraDirectoryProvider) {
+		this(cassandraDirectoryProvider, CopyStrategy.REPLACE_EXISTING);
+	}
 
 	/**
 	 * Creates a new {@link DefaultWorkingDirectoryInitializer}.
 	 *
 	 * @param cassandraDirectoryProvider the Cassandra directory provider. This provider is used to get a path to
 	 * Cassandra directory.
+	 * @param copyStrategy Cassandra files copy strategy.
 	 */
-	public DefaultWorkingDirectoryInitializer(CassandraDirectoryProvider cassandraDirectoryProvider) {
+	public DefaultWorkingDirectoryInitializer(CassandraDirectoryProvider cassandraDirectoryProvider,
+			CopyStrategy copyStrategy) {
 		Objects.requireNonNull(cassandraDirectoryProvider, "Cassandra Directory Provider must not be null");
+		Objects.requireNonNull(copyStrategy, "Copy Option must not be null");
 		this.cassandraDirectoryProvider = cassandraDirectoryProvider;
+		this.copyStrategy = copyStrategy;
 	}
 
 	@Override
@@ -60,18 +77,47 @@ public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryIniti
 		Objects.requireNonNull(version, "Version must not be null");
 		Path cassandraDirectory = this.cassandraDirectoryProvider.getDirectory(version);
 		Objects.requireNonNull(cassandraDirectory, "Cassandra Directory must not be null");
-		copy(cassandraDirectory, workingDirectory, version);
+		copy(cassandraDirectory, workingDirectory, this.copyStrategy);
 	}
 
-	protected void copy(Path cassandraDirectory, Path workingDirectory, Version version) throws IOException {
-		FileUtils.copy(cassandraDirectory, workingDirectory, this::include, StandardCopyOption.REPLACE_EXISTING);
-	}
-
-	protected boolean include(Path path, BasicFileAttributes attributes) {
-		if (attributes.isDirectory()) {
-			return !SKIP_DIRECTORIES.contains(path.getFileName().toString());
+	/**
+	 * Copies Cassandra files into a working directory.
+	 *
+	 * @param cassandraDirectory Cassandra directory
+	 * @param workingDirectory Cassandra working directory
+	 * @throws IOException an I/O error occurs
+	 */
+	protected void copy(Path cassandraDirectory, Path workingDirectory, CopyStrategy copyStrategy) throws IOException {
+		if (copyStrategy == CopyStrategy.REPLACE_EXISTING) {
+			FileUtils.copy(cassandraDirectory, workingDirectory, (path, attributes) -> {
+				if (attributes.isDirectory()) {
+					return !SKIP_DIRECTORIES.contains(path.getFileName().toString());
+				}
+				return true;
+			}, StandardCopyOption.REPLACE_EXISTING);
 		}
-		return true;
+		else {
+			FileUtils.copy(cassandraDirectory, workingDirectory, (path, attributes) -> {
+				if (attributes.isDirectory()) {
+					return !SKIP_DIRECTORIES.contains(path.getFileName().toString());
+				}
+				return !Files.exists(workingDirectory.resolve(cassandraDirectory.relativize(path)));
+			});
+		}
+	}
+
+	/**
+	 * Casandra files copy strategies.
+	 */
+	public enum CopyStrategy {
+		/**
+		 * Replace a destination file if it exists.
+		 */
+		REPLACE_EXISTING,
+		/**
+		 * Skip to copy if destination file exists.
+		 */
+		SKIP_EXISTING
 	}
 
 }
