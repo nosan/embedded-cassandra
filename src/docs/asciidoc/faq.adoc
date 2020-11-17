@@ -4,11 +4,11 @@
 
 = F.A.Q
 
-== What OSs does Embedded Cassandra support?
+== What does OSs Embedded Cassandra support?
 
 Embedded Cassandra is tested under the `ubuntu-latest`, `macos-latest` and `windows-latest` platforms.
 
-== What Cassandra versions are supported by Embedded Cassandra?
+== What are versions supported by Embedded Cassandra?
 
 Embedded Cassandra project is tested for `2.X.X` - `4.X.X` Cassandra versions.
 
@@ -36,7 +36,7 @@ Embedded Cassandra has only two compile dependencies:
 
 Yes, it is possible. Both instances must be started on different ports.
 
-== From which URLs Apache Cassandra is downloaded?
+== From which URLs is Apache Cassandra downloaded?
 
 It depends on the version, if it the latest release, it will be downloaded from
 https://downloads.apache.org/cassandra/ if it is previous release, it will be downloaded from
