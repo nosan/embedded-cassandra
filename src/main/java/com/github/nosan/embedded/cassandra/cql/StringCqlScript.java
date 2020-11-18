@@ -31,7 +31,7 @@ public class StringCqlScript extends AbstractCqlScript {
 	/**
 	 * Creates {@link StringCqlScript} with the provided CQL script.
 	 *
-	 * @param script CQL script which contains CQL statements
+	 * @param script CQL script that contains CQL statements
 	 */
 	public StringCqlScript(String script) {
 		Objects.requireNonNull(script, "Script must not be null");

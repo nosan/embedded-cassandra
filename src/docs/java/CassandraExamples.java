@@ -49,7 +49,54 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
  */
 public class CassandraExamples {
 
-	private void examples() throws Exception {
+	private void workingDirectoryInitializer() {
+		//tag::working-directory-initializer[]
+		new CassandraBuilder()
+				.workingDirectoryInitializer(new WorkingDirectoryInitializer() {
+
+					@Override
+					public void init(Path workingDirectory, Version version) throws IOException {
+						//Custom logic
+					}
+				})
+				.build();
+		//end::working-directory-initializer[]
+
+		//tag::working-directory-initializer-skip-existing[]
+		new CassandraBuilder()
+				.workingDirectoryInitializer(new DefaultWorkingDirectoryInitializer(new WebCassandraDirectoryProvider(),
+						DefaultWorkingDirectoryInitializer.CopyStrategy.SKIP_EXISTING))
+				.build();
+		//end::working-directory-initializer-skip-existing[]
+	}
+
+	private void workingDirectory() {
+		//tag::working-directory[]
+		new CassandraBuilder()
+				//Use a temporary directory
+				.workingDirectory(() -> Files.createTempDirectory("apache-cassandra-"))
+				//Use the same directory
+				.workingDirectory(() -> Paths.get("target/cassandra"))
+				.build();
+		//end::working-directory[]
+	}
+
+	private void customClasspath() {
+		//tag::custom-classpath[]
+		ClassPathResource lib = new ClassPathResource("lib.jar");
+
+		new CassandraBuilder()
+				.addEnvironmentVariable("EXTRA_CLASSPATH", lib)
+				.build();
+
+		// or
+		new CassandraBuilder()
+				.addResource(lib, "lib/lib.jar")
+				.build();
+		//end::custom-classpath[]
+	}
+
+	private void quickStart() {
 		// tag::quick-start[]
 		Cassandra cassandra = new CassandraBuilder().build();
 		cassandra.start();
@@ -66,53 +113,66 @@ public class CassandraExamples {
 			cassandra.stop();
 		}
 		// end::quick-start[]
+	}
 
+	private void version() {
 		//tag::version[]
 		new CassandraBuilder()
 				.version("3.11.9")
 				.build();
 		//end::version[]
+	}
 
-		//tag::config-file-system-property[]
+	private void configFile() {
+		//tag::config-file[]
 		new CassandraBuilder()
-				.addSystemProperty("cassandra.config", new ClassPathResource("cassandra.yaml"))
+				.configFile(new ClassPathResource("cassandra.yaml"))
 				.build();
-		//end::config-file-system-property[]
+		//end::config-file[]
+	}
 
+	private void configProperties() {
 		//tag::config-property[]
 		new CassandraBuilder()
 				.addConfigProperty("native_transport_port", 9042)
 				.addConfigProperty("storage_port", 7000)
 				.build();
 		//end::config-property[]
+	}
 
+	private void systemProperties() {
 		//tag::system-property[]
 		new CassandraBuilder()
 				.addSystemProperty("cassandra.native_transport_port", 9042)
 				.addSystemProperty("cassandra.jmx.local.port", 7199)
 				.build();
 		//end::system-property[]
+	}
 
+	private void environmentVariables() {
 		//tag::environment-variable[]
 		new CassandraBuilder()
 				.addEnvironmentVariable("JAVA_HOME", System.getProperty("java.home"))
 				.addEnvironmentVariable("EXTRA_CLASSPATH", new ClassPathResource("lib.jar"))
 				.build();
 		//end::environment-variable[]
+	}
 
+	private void jvmOptions() {
 		//tag::jvm-options[]
 		new CassandraBuilder()
 				.addJvmOptions("-Xmx512m")
 				.build();
 		//end::jvm-options[]
+	}
 
+	private void clientEncryptionOptions() {
 		//tag::client-encryption-options[]
 		ClassPathResource keystore = new ClassPathResource("keystore.node0");
 		ClassPathResource truststore = new ClassPathResource("truststore.node0");
 		new CassandraBuilder()
-				.addConfigProperty("native_transport_port_ssl", 9142)
-				.addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.copy(keystore, "conf/.keystore"))
-				.addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.copy(truststore, "conf/.truststore"))
+				.addResource(keystore, "conf/.keystore")
+				.addResource(truststore, "conf/.truststore")
 				.addConfigProperty("client_encryption_options.enabled", true)
 				.addConfigProperty("client_encryption_options.require_client_auth", true)
 				.addConfigProperty("client_encryption_options.optional", false)
@@ -124,7 +184,9 @@ public class CassandraExamples {
 				.addConfigProperty("native_transport_port_ssl", 9142)
 				.build();
 		//end::client-encryption-options[]
+	}
 
+	private void authenticator() {
 		//tag::authenticator[]
 		new CassandraBuilder()
 				.addConfigProperty("authenticator", "PasswordAuthenticator")
@@ -132,7 +194,9 @@ public class CassandraExamples {
 				.addSystemProperty("cassandra.superuser_setup_delay_ms", 0) //<1>
 				.build();
 		//end::authenticator[]
+	}
 
+	private void randomPorts() {
 		//tag::random-ports[]
 		new CassandraBuilder()
 				.addSystemProperty("cassandra.native_transport_port", 0)
@@ -143,7 +207,9 @@ public class CassandraExamples {
 				.configure(new SimpleSeedProviderConfigurator("localhost:0"))
 				.build();
 		//end::random-ports[]
+	}
 
+	private void seeds() {
 		//tag::configure-seeds[]
 		new CassandraBuilder()
 				.configure(new SimpleSeedProviderConfigurator()
@@ -153,13 +219,17 @@ public class CassandraExamples {
 						.addSeed("localhost", 0)) //<1>
 				.build();
 		//end::configure-seeds[]
+	}
 
+	private void startupTimeout() {
 		//tag::startup-timeout[]
 		new CassandraBuilder()
 				.startupTimeout(Duration.ofMinutes(1))
 				.build();
 		//end::startup-timeout[]
+	}
 
+	private void proxy() {
 		//tag::proxy[]
 		new CassandraBuilder()
 				.workingDirectoryInitializer(
@@ -167,13 +237,17 @@ public class CassandraExamples {
 								new JdkHttpClient(Proxy.NO_PROXY))))
 				.build();
 		//end::proxy[]
+	}
 
+	private void shutdownHook() {
 		//tag::shutdown-hook[]
 		new CassandraBuilder()
 				.registerShutdownHook(true)
 				.build();
 		//end::shutdown-hook[]
+	}
 
+	private void logger() {
 		//tag::logger[]
 		new CassandraBuilder()
 				//Automatically detected logging implementation.
@@ -184,7 +258,9 @@ public class CassandraExamples {
 				.logger(new ConsoleLogger("Cassandra"))
 				.build();
 		//end::logger[]
+	}
 
+	private void workingDirectoryCustomizer() {
 		//tag::working-directory-customizer[]
 		new CassandraBuilder()
 				.addWorkingDirectoryCustomizers(new WorkingDirectoryCustomizer() {
@@ -195,7 +271,9 @@ public class CassandraExamples {
 					}
 				}).build();
 		//end::working-directory-customizer[]
+	}
 
+	private void workingDirectoryDestroyer() {
 		//tag::working-directory-destroyer[]
 		new CassandraBuilder()
 				.workingDirectoryDestroyer(new WorkingDirectoryDestroyer() {
@@ -208,39 +286,24 @@ public class CassandraExamples {
 				.build();
 		//end::working-directory-destroyer[]
 
-		//tag::working-directory-initializer[]
+		//tag::working-directory-destroyer-nothing[]
 		new CassandraBuilder()
-				.workingDirectoryInitializer(new WorkingDirectoryInitializer() {
-
-					@Override
-					public void init(Path workingDirectory, Version version) throws IOException {
-						//Custom logic
-					}
-				})
+				.workingDirectoryDestroyer(WorkingDirectoryDestroyer.doNothing())
 				.build();
-		//end::working-directory-initializer[]
+		//end::working-directory-destroyer-nothing[]
 
-		//tag::working-directory[]
+		//tag::working-directory-destroyer-all[]
 		new CassandraBuilder()
-				//Use a temporary directory
-				.workingDirectory(() -> Files.createTempDirectory("apache-cassandra-"))
-				//Use the same directory
-				.workingDirectory(() -> Paths.get("target/cassandra"))
+				.workingDirectoryDestroyer(WorkingDirectoryDestroyer.deleteAll())
 				.build();
-		//end::working-directory[]
+		//end::working-directory-destroyer-all[]
+	}
 
-		//tag::custom-classpath[]
-		ClassPathResource lib = new ClassPathResource("lib.jar");
+	private void addResource() {
+		//tag::add-resource[]
 		new CassandraBuilder()
-				.addEnvironmentVariable("EXTRA_CLASSPATH", lib)
-				.build();
-
-		// or lib could be added via WorkingDirectoryCustomizer
-		new CassandraBuilder()
-				.addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.copy(lib, "lib/lib.jar"))
-				.build();
-		//end::custom-classpath[]
-
+				.addResource(new ClassPathResource("cassandra-rackdc.properties"), "conf/cassandra-rackdc.properties");
+		//end::add-resource[]
 	}
 
 }

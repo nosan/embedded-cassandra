@@ -29,9 +29,10 @@ import java.util.Set;
 import com.github.nosan.embedded.cassandra.commons.FileUtils;
 
 /**
- * The default implementation of {@link WorkingDirectoryInitializer} which gets Cassandra directory from the {@link
- * CassandraDirectoryProvider} and copies all files from a gotten directory into the working directory except
+ * The default implementation of {@link WorkingDirectoryInitializer}, that gets Cassandra directory from the {@link
+ * CassandraDirectoryProvider} and copies all files from a retrieved directory into the working directory except
  * <b>javadoc, doc and licenses</b> directories.
+ * By default, replace any existing files in the working directory.
  *
  * @author Dmytro Nosan
  * @since 4.0.0

@@ -1,6 +1,7 @@
 :source-highlighter: rouge
 :sources: ../java
 :resources: ../resources
+:apache-cassandra-ref: https://cassandra.apache.org
 
 = Configuration
 
@@ -17,12 +18,21 @@ NOTE: Defaults to *4.0-beta3*.
 
 == Config Properties
 
-Cassandra config properties which should be merged with properties from `cassandra.yaml`.
-This method is useful when only a few properties should be overridden in the `cassandra.yaml`.
+Cassandra config properties, that should be merged with properties from `cassandra.yaml`.
+This method is useful, when only a few properties should be overridden in the `cassandra.yaml`.
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=config-property]
+----
+
+NOTE: Config properties have higher precedence, than properties from the configuration file.
+
+== Configuration File
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=config-file]
 ----
 
 == Startup Parameters
@@ -56,21 +66,24 @@ include::{sources}/CassandraExamples.java[tag=jvm-options]
 
 == Working Directory
 
-The supplied directory used as Cassandra home directory.
+The working directory is used as $CASSANDRA_HOME directory.
 
 Before Cassandra starts, the directory will be initialized and customized by `WorkingDirectoryInitializer`
 and `WorkingDirectoryCustomizer(s)` respectively.
 
-On Cassandra stops, the directory is destroyed by `WorkingDirectoryDestroyer` .
+On Cassandra stop, the directory will be destroyed by `WorkingDirectoryDestroyer` .
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=working-directory]
 ----
 
+NOTE: Defaults to `Files.createTempDirectory("apache-cassandra-" + version + "-")`.
+
 == Working Directory Customizer
 
-A callback interface to customize a working directory. This customizer was designed to change the working directory before Cassandra starts.
+A callback interface to customize a working directory. These customizers are needed to change the working directory before Cassandra starts.
+For instance, add some files.
 
 [source,java,indent=0]
 ----
@@ -87,7 +100,28 @@ The working directory must contain all necessary Cassandra files after the init 
 include::{sources}/CassandraExamples.java[tag=working-directory-initializer]
 ----
 
-NOTE: Defaults to `DefaultWorkingDirectoryInitializer`.
+The default implementation is `DefaultWorkingDirectoryInitializer`,
+that gets Cassandra directory from the `CassandraDirectoryProvider`
+and copies all files from a retrieved directory into the working directory
+except *javadoc*, *doc* and *licenses* directories.
+
+By default, `DefaultWorkingDirectoryInitializer` replaces any existing files in the working directory.
+If you don't want to replace files in the working directory, you can use `CopyStrategy`.
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=working-directory-initializer-skip-existing]
+----
+
+=== Cassandra Directory Provider
+
+`DefaultWorkingDirectoryInitializer` can be configured with a `CassandraDirectoryProvider` implementation.
+
+`CassandraDirectoryProvider` provides a path to Cassandra directory based on a version. Default implementation of this
+interface is `WebCassandraDirectoryProvider`.
+
+`WebCassandraDirectoryProvider` downloads and extracts Cassandra's archive from the well-known URLs into the download directory.
+If the Cassandra directory have already extracted then it will be used, skipping downloading and extracting steps.
 
 == Working Directory Destroyer
 
@@ -98,11 +132,29 @@ A strategy interface to destroy the working directory.
 include::{sources}/CassandraExamples.java[tag=working-directory-destroyer]
 ----
 
-NOTE: Defaults to delete only *"bin", "pylib", "lib", "tools", "doc", "javadoc", "interface"* folders.
+By default, only the following directories *"bin", "pylib", "lib", "tools", "doc", "javadoc", "interface"*
+will be deleted.
+
+However, if you don't want to delete a working directory, you can use:
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=working-directory-destroyer-nothing]
+----
+
+From another side, if you don't want to keep data between launches, it makes sense to use:
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=working-directory-destroyer-all]
+----
+
+It is useful for unit testing. Highly likely, you would not want to start and stop the Cassandra instance
+between tests.
 
 == Startup Timeout
 
-How long to wait when Cassandra is being ready to accept connections.
+A duration of time to wait, while Cassandra is being ready to accept connections.
 
 [source,java,indent=0]
 ----
@@ -114,7 +166,6 @@ NOTE: Defaults to *2 minutes*.
 == Shutdown Hook
 
 Registers shutdown hook for created Cassandra instance.
-In other words, should Cassandra be stopped when JVM shutdown?
 
 [source,java,indent=0]
 ----
@@ -125,7 +176,7 @@ NOTE: Defaults to **true**.
 
 == Logger
 
-Configure a logger which consumes Cassandra `STDOUT` and `STDERR` outputs.
+Configure a logger, that consumes Cassandra `STDOUT` and `STDERR` outputs.
 
 [source,java,indent=0]
 ----
@@ -133,3 +184,15 @@ include::{sources}/CassandraExamples.java[tag=logger]
 ----
 
 NOTE: Defaults to `Logger.get(Cassandra.class)`.
+
+== Resources
+
+If additional files should be added to the working directory, e.g. `cassandra-rackdc.properties`,
+`cassandra-topology.properties`, certificates or something else, `addResource` can be used.
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=add-resource]
+----
+
+In the example above, the `ClassPathResource` will be copied into the working directory by the given path.

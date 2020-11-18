@@ -106,21 +106,21 @@ public interface Settings {
 	Integer getRpcPort();
 
 	/**
-	 * Gets Cassandra JVM Options which were used on start.
+	 * Gets Cassandra JVM Options that were used on start.
 	 *
 	 * @return the JVM options,  never {@code null}
 	 */
 	Set<String> getJvmOptions();
 
 	/**
-	 * Gets Cassandra JVM parameters which were used on start.
+	 * Gets Cassandra JVM parameters that were used on start.
 	 *
 	 * @return the JVM parameters,  never {@code null}
 	 */
 	Map<String, String> getSystemProperties();
 
 	/**
-	 * Gets Cassandra Environment variables which were used on start.
+	 * Gets Cassandra Environment variables that were used on start.
 	 *
 	 * @return the environment variables,  never {@code null}
 	 */

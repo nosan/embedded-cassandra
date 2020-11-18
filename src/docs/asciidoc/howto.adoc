@@ -1,25 +1,23 @@
 :source-highlighter: rouge
 :sources: ../java
 :resources: ../resources
+:apache-cassandra-ref: https://cassandra.apache.org
 
 = How-to?
 
 This section provides answers to some common ‘how do I do that...’ questions
 that often arise when using Embedded Cassandra.
 
-== Configuration File
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=config-file-system-property]
-----
-
 == Client Encryption Options
+
+In order to enable a client SSL communication, `client_encryption_options` should be configured:
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=client-encryption-options]
 ----
+
+NOTE: See {apache-cassandra-ref}/doc/latest/operating/security.html#tls-ssl-encryption
 
 == Authorization and Authentication
 
@@ -29,7 +27,9 @@ include::{sources}/CassandraExamples.java[tag=authenticator]
 ----
 <1> Creates a superuser immediately.
 
-NOTE: Default superuser credential is _user_: **cassandra** _password_: **cassandra**
+NOTE: Default superuser credential is _user_: **cassandra** _password_: **cassandra**.
+
+NOTE: See {apache-cassandra-ref}/doc/latest/operating/security.html#authentication
 
 == Random Ports
 
@@ -41,9 +41,11 @@ include::{sources}/CassandraExamples.java[tag=random-ports]
 NOTE: A port number of *0* means that the port number is automatically allocated,
 typically from an ephemeral port range.
 
+NOTE: *0* ports also can be used in the configuration file.
+
 == Simple Seed Provider
 
-It is possible programmatically configure `org.apache.cassandra.locator.SimpleSeedProvider` via
+It is possible to configure `org.apache.cassandra.locator.SimpleSeedProvider` via
 `SimpleSeedProviderConfigurator` configurator.
 
 [source,java,indent=0]
@@ -52,30 +54,12 @@ include::{sources}/CassandraExamples.java[tag=configure-seeds]
 ----
 <1>  A port number of *0* means that the port number is replaced by either `cassandra.storage_port` or `storage_port`.
 
-== Proxy
+== Add libs to classpath
 
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=proxy]
-----
-
-== Add a lib to Cassandra Classpath
+If you want to add some custom libraries into Cassandra's classpath,
+you can add them this via:
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=custom-classpath]
-----
-
-== JUnit4
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraJUnit4Example.java[tag=code]
-----
-
-== JUnit5
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraJUnit5Example.java[tag=code]
 ----

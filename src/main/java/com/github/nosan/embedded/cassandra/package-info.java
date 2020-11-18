@@ -20,11 +20,11 @@
  * <p>
  * {@link com.github.nosan.embedded.cassandra.Cassandra} Interface that represents Cassandra instance.
  * <p>{@link com.github.nosan.embedded.cassandra.Version}</p>
- * A class which parses and represents Cassandra version.
+ * A class that parses and represents Cassandra version.
  * <p>{@link com.github.nosan.embedded.cassandra.CassandraBuilder}</p> A builder class that can be used to configure
  * and create {@link com.github.nosan.embedded.cassandra.Cassandra} instance.
  * <p>
- * {@link com.github.nosan.embedded.cassandra.cql.CqlScript}</p> Interface which loads CQL statements from various
+ * {@link com.github.nosan.embedded.cassandra.cql.CqlScript}</p> Interface that loads CQL statements from various
  * sources.
  * <p>
  * {@link com.github.nosan.embedded.cassandra.WorkingDirectoryInitializer}
@@ -37,7 +37,7 @@
  * <p>
  * {@link com.github.nosan.embedded.cassandra.WorkingDirectoryCustomizer}
  * </p>
- * A customizers interface which can be used to customize the initialized working directory.
+ * A customizers interface that can be used to customize the initialized working directory.
  * <p>{@link com.github.nosan.embedded.cassandra.CassandraBuilderConfigurator}</p>
  * A callback interface to configure a {@link com.github.nosan.embedded.cassandra.CassandraBuilder}.
  * <p><strong>Example:</strong>

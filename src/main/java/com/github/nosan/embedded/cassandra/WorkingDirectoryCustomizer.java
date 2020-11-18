@@ -29,7 +29,7 @@ import com.github.nosan.embedded.cassandra.commons.Resource;
  * A callback interface to customize a working directory.
  *
  * @author Dmytro Nosan
- * @see #copy(Resource, String)
+ * @see #addResource(Resource, String)
  * @since 4.0.0
  */
 @FunctionalInterface
@@ -43,14 +43,14 @@ public interface WorkingDirectoryCustomizer {
 	 * </pre>
 	 * For example:
 	 * <pre>
-	 * {@code WorkingDirectoryCustomizer.copy(new ClassPathResource("cassandra.yaml"), "conf/cassandra.yaml") }
+	 * {@code WorkingDirectoryCustomizer.addResource(new ClassPathResource("cassandra.yaml"), "conf/cassandra.yaml") }
 	 * </pre>
 	 *
-	 * @param path path within the working directory (e.g conf/cassandra.yaml)
+	 * @param path path (file only) within the working directory (e.g conf/cassandra.yaml)
 	 * @param resource the resource
 	 * @return a new working directory customizer
 	 */
-	static WorkingDirectoryCustomizer copy(Resource resource, String path) {
+	static WorkingDirectoryCustomizer addResource(Resource resource, String path) {
 		Objects.requireNonNull(path, "File Path must not be null");
 		Objects.requireNonNull(resource, "Resource must not be null");
 		return (workingDirectory, version) -> {

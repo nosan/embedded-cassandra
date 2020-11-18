@@ -132,9 +132,9 @@ class CassandraBuilderTests {
 	@Test
 	void workingDirectoryCustomizers() {
 		WorkingDirectoryCustomizer w1 = WorkingDirectoryCustomizer
-				.copy(new ClassPathResource("text.txt"), "conf/text.txt");
+				.addResource(new ClassPathResource("text.txt"), "conf/text.txt");
 		WorkingDirectoryCustomizer w2 = WorkingDirectoryCustomizer
-				.copy(new ClassPathResource("empty.txt"), "conf/empty.txt");
+				.addResource(new ClassPathResource("empty.txt"), "conf/empty.txt");
 		assertThat(this.builder.workingDirectoryCustomizers(w1).build())
 				.hasFieldOrPropertyWithValue("workingDirectoryCustomizers", Collections.singleton(w1));
 		assertThat(this.builder.workingDirectoryCustomizers(w2).build())

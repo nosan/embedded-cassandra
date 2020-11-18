@@ -58,10 +58,11 @@ import com.github.nosan.embedded.cassandra.commons.web.HttpResponse;
 import com.github.nosan.embedded.cassandra.commons.web.JdkHttpClient;
 
 /**
- * The implementation of {@link CassandraDirectoryProvider} which downloads and extracts Cassandra archive from the
- * well-known URLs into the provided directory.
+ * The implementation of {@link CassandraDirectoryProvider}, that downloads and extracts Cassandra archive from the
+ * well-known URLs into the download directory.
  * <p>
- * If the directory already exists then it will be immediately used skipping downloading and extracting steps.
+ * If the Cassandra directory have already existed and initialized then it will be used, skipping downloading and
+ * extracting steps.
  *
  * @author Dmytro Nosan
  * @since 4.0.0

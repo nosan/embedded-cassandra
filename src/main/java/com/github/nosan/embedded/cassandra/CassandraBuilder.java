@@ -246,6 +246,23 @@ public class CassandraBuilder {
 	}
 
 	/**
+	 * Sets the Cassandra configuration file.
+	 * <p>
+	 * Equal to:
+	 * <pre>
+	 *     {@code
+	 *     addSystemProperty("cassandra.config", configFile);
+	 *     }
+	 * </pre>
+	 *
+	 * @param configFile the config file
+	 * @return this builder
+	 */
+	public CassandraBuilder configFile(Resource configFile) {
+		return addSystemProperty("cassandra.config", configFile);
+	}
+
+	/**
 	 * Set the {@code Supplier} of the working directory that should be called each time when {@link #build()} is
 	 * called.
 	 * <p>The supplied directory will be initialized by {@link
@@ -298,12 +315,12 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the {@link WorkingDirectoryCustomizer}.  Setting this value will replace any previously configured
+	 * Sets the {@link WorkingDirectoryCustomizer}. Setting this value will replace any previously configured
 	 * customizers.
 	 *
 	 * @param workingDirectoryCustomizers the working directory customizers to set
 	 * @return this builder
-	 * @see WorkingDirectoryCustomizer#copy(Resource, String)
+	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 * @see #workingDirectoryCustomizers(Collection)
 	 * @see #addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer...)
 	 * @see #addWorkingDirectoryCustomizers(Collection)
@@ -314,12 +331,12 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the {@link WorkingDirectoryCustomizer}.  Setting this value will replace any previously configured
+	 * Sets the {@link WorkingDirectoryCustomizer}. Setting this value will replace any previously configured
 	 * customizers.
 	 *
 	 * @param workingDirectoryCustomizers the working directory customizers to set
 	 * @return this builder
-	 * @see WorkingDirectoryCustomizer#copy(Resource, String)
+	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 * @see #workingDirectoryCustomizers(WorkingDirectoryCustomizer...)
 	 * @see #addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer...)
 	 * @see #addWorkingDirectoryCustomizers(Collection)
@@ -337,7 +354,7 @@ public class CassandraBuilder {
 	 *
 	 * @param workingDirectoryCustomizers the working directory customizers to add
 	 * @return this builder
-	 * @see WorkingDirectoryCustomizer#copy(Resource, String)
+	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 * @see #addWorkingDirectoryCustomizers(Collection)
 	 * @see #workingDirectoryCustomizers(WorkingDirectoryCustomizer...)
 	 * @see #workingDirectoryCustomizers(Collection)
@@ -352,7 +369,7 @@ public class CassandraBuilder {
 	 *
 	 * @param workingDirectoryCustomizers the working directory customizers to add
 	 * @return this builder
-	 * @see WorkingDirectoryCustomizer#copy(Resource, String)
+	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 * @see #addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer...)
 	 * @see #workingDirectoryCustomizers(WorkingDirectoryCustomizer...)
 	 * @see #workingDirectoryCustomizers(Collection)
@@ -539,7 +556,7 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets Cassandra config properties which should be merged with properties from cassandra.yaml. Setting this value
+	 * Sets Cassandra config properties, that should be merged with properties from cassandra.yaml. Setting this value
 	 * will replace any previously configured config properties. For example:
 	 * <pre>
 	 * {@code
@@ -572,7 +589,7 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Puts Cassandra config property which should be merged with a property from cassandra.yaml. For example:
+	 * Puts Cassandra config property, that should be merged with a property from cassandra.yaml. For example:
 	 * <pre>
 	 * {@code
 	 * builder.configProperty("client_encryption_options.enabled",true)
@@ -599,7 +616,7 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Puts Cassandra config properties which should be merged with properties from cassandra.yaml. For example:
+	 * Puts Cassandra config properties, that should be merged with properties from cassandra.yaml. For example:
 	 * <pre>
 	 * {@code
 	 * Map<String,Object> properties = new LinkedHashMap<>();
@@ -627,6 +644,25 @@ public class CassandraBuilder {
 		Objects.requireNonNull(configProperties, "Config Properties must not be null");
 		this.configProperties.putAll(deepCopy(configProperties));
 		return this;
+	}
+
+	/**
+	 * Copy a resource to a target path within the working directory.
+	 * <p>
+	 * Equal to:
+	 * <pre>
+	 *     {@code
+	 *     addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.addResource(resource, path));
+	 *     }
+	 * </pre>
+	 *
+	 * @param path path (file only) within the working directory (e.g conf/cassandra.yaml)
+	 * @param resource the resource
+	 * @return this builder
+	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
+	 */
+	public CassandraBuilder addResource(Resource resource, String path) {
+		return addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.addResource(resource, path));
 	}
 
 	/**

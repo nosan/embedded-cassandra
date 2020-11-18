@@ -40,7 +40,7 @@ public class ResourceCqlScript extends AbstractCqlScript {
 	/**
 	 * Creates a new {@link ResourceCqlScript} with provided resource and default charset.
 	 *
-	 * @param resource the resource which contains CQL statements
+	 * @param resource the resource that contains CQL statements
 	 */
 	public ResourceCqlScript(Resource resource) {
 		this(resource, Charset.defaultCharset());
@@ -49,7 +49,7 @@ public class ResourceCqlScript extends AbstractCqlScript {
 	/**
 	 * Creates a new {@link ResourceCqlScript} with provided resource and charset.
 	 *
-	 * @param resource the resource which contains CQL statements
+	 * @param resource the resource that contains CQL statements
 	 * @param charset the encoding to use of the resource
 	 */
 	public ResourceCqlScript(Resource resource, Charset charset) {

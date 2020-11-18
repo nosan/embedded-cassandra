@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Helper class to lock a file. It is recommended practice to lock file with a try with resources block, such as:
+ * Helper class to lock a file. It is recommended practice to lock a file with a try with resources block, such as:
  * <pre> {@code
  * class X {
  *   public void m() {

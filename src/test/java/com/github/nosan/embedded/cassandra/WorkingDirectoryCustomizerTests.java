@@ -40,13 +40,13 @@ class WorkingDirectoryCustomizerTests {
 	@Test
 	void copy(@TempDir Path directory) throws IOException {
 		ClassPathResource resource = new ClassPathResource("schema.cql");
-		WorkingDirectoryCustomizer.copy(resource, "conf/schema.cql")
+		WorkingDirectoryCustomizer.addResource(resource, "conf/schema.cql")
 				.customize(directory, CassandraBuilder.DEFAULT_VERSION);
 
-		WorkingDirectoryCustomizer.copy(resource, "schema.cql")
+		WorkingDirectoryCustomizer.addResource(resource, "schema.cql")
 				.customize(directory, CassandraBuilder.DEFAULT_VERSION);
 
-		WorkingDirectoryCustomizer.copy(resource, "bin/tools/schema.cql")
+		WorkingDirectoryCustomizer.addResource(resource, "bin/tools/schema.cql")
 				.customize(directory, CassandraBuilder.DEFAULT_VERSION);
 
 		try (InputStream inputStream = resource.getInputStream()) {
@@ -61,7 +61,7 @@ class WorkingDirectoryCustomizerTests {
 	@Test
 	void shouldNotCopyOutOfDirectory(@TempDir Path directory) {
 		ClassPathResource resource = new ClassPathResource("schema.cql");
-		assertThatThrownBy(() -> WorkingDirectoryCustomizer.copy(resource, "/conf/schema.cql")
+		assertThatThrownBy(() -> WorkingDirectoryCustomizer.addResource(resource, "/conf/schema.cql")
 				.customize(directory, CassandraBuilder.DEFAULT_VERSION)).hasMessageContaining("is out of a directory");
 	}
 
@@ -69,7 +69,7 @@ class WorkingDirectoryCustomizerTests {
 	void shouldNotCopyTargetIsDirectory(@TempDir Path directory) throws IOException {
 		Files.createDirectories(directory.resolve("conf/schema.cql"));
 		ClassPathResource resource = new ClassPathResource("schema.cql");
-		assertThatThrownBy(() -> WorkingDirectoryCustomizer.copy(resource, "conf/schema.cql")
+		assertThatThrownBy(() -> WorkingDirectoryCustomizer.addResource(resource, "conf/schema.cql")
 				.customize(directory, CassandraBuilder.DEFAULT_VERSION)).hasMessageContaining("is a directory");
 	}
 

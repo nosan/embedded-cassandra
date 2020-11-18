@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * A simple class which represents HTTP Request and Response headers.
+ * A simple class that represents HTTP Request and Response headers.
  *
  * @author Dmytro Nosan
  * @since 4.0.0

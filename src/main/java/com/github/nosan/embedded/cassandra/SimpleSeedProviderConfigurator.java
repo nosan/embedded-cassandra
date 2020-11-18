@@ -27,7 +27,7 @@ import java.util.Set;
 import com.github.nosan.embedded.cassandra.commons.StringUtils;
 
 /**
- * A {@link CassandraBuilderConfigurator} which configures org.apache.cassandra.locator.SimpleSeedProvider.
+ * A {@link CassandraBuilderConfigurator} that configures org.apache.cassandra.locator.SimpleSeedProvider.
  *
  * @author Dmytro Nosan
  * @since 4.0.0

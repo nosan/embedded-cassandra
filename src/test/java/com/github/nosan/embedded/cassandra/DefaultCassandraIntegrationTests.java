@@ -166,7 +166,8 @@ class DefaultCassandraIntegrationTests {
 		ClassPathResource configFile = new ClassPathResource(String.format("cassandra-random-%s.yaml", version));
 		this.builder.version(version)
 				.addSystemProperty("cassandra.jmx.local.port", 0)
-				.addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.copy(configFile, "conf/cassandra.yaml"));
+				.addWorkingDirectoryCustomizers(
+						WorkingDirectoryCustomizer.addResource(configFile, "conf/cassandra.yaml"));
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
