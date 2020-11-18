@@ -61,8 +61,8 @@ import com.github.nosan.embedded.cassandra.commons.web.JdkHttpClient;
  * The implementation of {@link CassandraDirectoryProvider}, that downloads and extracts Cassandra archive from the
  * well-known URLs into the download directory.
  * <p>
- * If the Cassandra directory have already existed and initialized then it will be used, skipping downloading and
- * extracting steps.
+ * If the Cassandra's archive have already been extracted into the directory, then directory will be used, skipping
+ * downloading and extracting steps.
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -216,7 +216,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 	protected void download(HttpClient httpClient, Version version, URI uri, OutputStream os) throws IOException {
 		try (HttpResponse response = httpClient.send(new HttpRequest(uri))) {
 			if (response.getStatus() == 200) {
-				LOGGER.info("Downloading Apache Cassandra: ''{0}'' file from URI: ''{1}''."
+				LOGGER.info("Downloading Apache Cassandra: ''{0}'' from URI: ''{1}''."
 						+ " It takes a while...", version, response.getUri());
 				long totalBytes = response.getHeaders().getFirst("Content-Length")
 						.map(Long::parseLong).orElse(-1L);
