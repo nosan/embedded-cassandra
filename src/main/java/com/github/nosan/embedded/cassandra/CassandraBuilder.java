@@ -661,7 +661,7 @@ public class CassandraBuilder {
 	 * @return this builder
 	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 */
-	public CassandraBuilder addResource(Resource resource, String path) {
+	public CassandraBuilder addWorkingDirectoryResource(Resource resource, String path) {
 		return addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.addResource(resource, path));
 	}
 

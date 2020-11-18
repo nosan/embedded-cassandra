@@ -91,7 +91,7 @@ public class CassandraExamples {
 
 		// or
 		new CassandraBuilder()
-				.addResource(lib, "lib/lib.jar")
+				.addWorkingDirectoryResource(lib, "lib/lib.jar")
 				.build();
 		//end::custom-classpath[]
 	}
@@ -171,8 +171,8 @@ public class CassandraExamples {
 		ClassPathResource keystore = new ClassPathResource("keystore.node0");
 		ClassPathResource truststore = new ClassPathResource("truststore.node0");
 		new CassandraBuilder()
-				.addResource(keystore, "conf/.keystore")
-				.addResource(truststore, "conf/.truststore")
+				.addWorkingDirectoryResource(keystore, "conf/.keystore")
+				.addWorkingDirectoryResource(truststore, "conf/.truststore")
 				.addConfigProperty("client_encryption_options.enabled", true)
 				.addConfigProperty("client_encryption_options.require_client_auth", true)
 				.addConfigProperty("client_encryption_options.optional", false)
@@ -302,7 +302,8 @@ public class CassandraExamples {
 	private void addResource() {
 		//tag::add-resource[]
 		new CassandraBuilder()
-				.addResource(new ClassPathResource("cassandra-rackdc.properties"), "conf/cassandra-rackdc.properties");
+				.addWorkingDirectoryResource(new ClassPathResource("cassandra-rackdc.properties"),
+						"conf/cassandra-rackdc.properties");
 		//end::add-resource[]
 	}
 

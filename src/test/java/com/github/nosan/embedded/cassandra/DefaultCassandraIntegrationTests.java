@@ -166,8 +166,7 @@ class DefaultCassandraIntegrationTests {
 		ClassPathResource configFile = new ClassPathResource(String.format("cassandra-random-%s.yaml", version));
 		this.builder.version(version)
 				.addSystemProperty("cassandra.jmx.local.port", 0)
-				.addWorkingDirectoryCustomizers(
-						WorkingDirectoryCustomizer.addResource(configFile, "conf/cassandra.yaml"));
+				.configFile(configFile);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
@@ -216,11 +215,13 @@ class DefaultCassandraIntegrationTests {
 		clientEncryptionOptions.put("enabled", true);
 		clientEncryptionOptions.put("require_client_auth", true);
 		clientEncryptionOptions.put("optional", false);
-		clientEncryptionOptions.put("keystore", keystore);
+		clientEncryptionOptions.put("keystore", "conf/.keystore");
 		clientEncryptionOptions.put("keystore_password", "cassandra");
-		clientEncryptionOptions.put("truststore", truststore);
+		clientEncryptionOptions.put("truststore", "conf/.truststore");
 		clientEncryptionOptions.put("truststore_password", "cassandra");
 		this.builder.version(version)
+				.addWorkingDirectoryResource(keystore, "conf/.keystore")
+				.addWorkingDirectoryResource(keystore, "conf/.truststore")
 				.addConfigProperty("native_transport_port_ssl", 9142)
 				.addConfigProperty("client_encryption_options", clientEncryptionOptions);
 		this.runner.run((cassandra, throwable) -> {
