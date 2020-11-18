@@ -122,7 +122,7 @@ include::{sources}/CassandraExamples.java[tag=working-directory-initializer-skip
 Default implementation is `WebCassandraDirectoryProvider`.
 
 `WebCassandraDirectoryProvider` downloads and extracts Cassandra's archive from the well-known URLs into the download directory.
-If the Cassandra's archive has already been extracted then it will be used, skipping downloading and extracting steps.
+If the Cassandra's archive has already been extracted into the directory, then this directory will be used, skipping downloading and extracting steps.
 
 == Working Directory Destroyer
 
