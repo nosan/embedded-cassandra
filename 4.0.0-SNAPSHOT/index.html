@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 4.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-11-18T20:57:56Z</span>
+<span id="revdate">2020-11-18T21:15:04Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -834,7 +834,7 @@ If you don&#8217;t want to replace files in the working directory, you can use <
 </div>
 <div class="paragraph">
 <p><code>WebCassandraDirectoryProvider</code> downloads and extracts Cassandra&#8217;s archive from the well-known URLs into the download directory.
-If the Cassandra&#8217;s archive has already been extracted then it will be used, skipping downloading and extracting steps.</p>
+If the Cassandra&#8217;s archive has already been extracted into the directory, then this directory will be used, skipping downloading and extracting steps.</p>
 </div>
 </div>
 </div>
@@ -879,10 +879,6 @@ will be deleted.</p>
         <span class="o">.</span><span class="na">workingDirectoryDestroyer</span><span class="o">(</span><span class="nc">WorkingDirectoryDestroyer</span><span class="o">.</span><span class="na">deleteAll</span><span class="o">())</span>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>It is useful for unit testing. Highly likely, you would not want to start and stop the Cassandra instance
-between tests.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1226,7 +1222,7 @@ you can add them this via:</p>
 <div id="footer">
 <div id="footer-text">
 Version 4.0.0-SNAPSHOT<br>
-Last updated 2020-11-18 20:57:44 UTC
+Last updated 2020-11-18 21:14:51 UTC
 </div>
 </div>
 <style>
