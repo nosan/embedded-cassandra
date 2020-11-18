@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 4.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-11-18T21:15:04Z</span>
+<span id="revdate">2020-11-18T21:31:39Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -481,10 +481,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </li>
 <li><a href="#working-directory-destroyer">2.10. Working Directory Destroyer</a></li>
-<li><a href="#startup-timeout">2.11. Startup Timeout</a></li>
-<li><a href="#shutdown-hook">2.12. Shutdown Hook</a></li>
-<li><a href="#logger">2.13. Logger</a></li>
-<li><a href="#resources">2.14. Resources</a></li>
+<li><a href="#working-directory-resources">2.11. Working Directory Resources</a></li>
+<li><a href="#startup-timeout">2.12. Startup Timeout</a></li>
+<li><a href="#shutdown-hook">2.13. Shutdown Hook</a></li>
+<li><a href="#logger">2.14. Logger</a></li>
 </ul>
 </li>
 <li><a href="#how-to">3. How-to?</a>
@@ -882,7 +882,24 @@ will be deleted.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="startup-timeout"><a class="anchor" href="#startup-timeout"></a>2.11. Startup Timeout</h3>
+<h3 id="working-directory-resources"><a class="anchor" href="#working-directory-resources"></a>2.11. Working Directory Resources</h3>
+<div class="paragraph">
+<p>If additional files should be added to the working directory, e.g. <code>cassandra-rackdc.properties</code>,
+<code>cassandra-topology.properties</code>, certificates or something else, the following method can be used.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">addWorkingDirectoryResource</span><span class="o">(</span><span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"cassandra-rackdc.properties"</span><span class="o">),</span>
+                <span class="s">"conf/cassandra-rackdc.properties"</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the example above, the <code>ClassPathResource</code> will be copied into the working directory by the given path.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="startup-timeout"><a class="anchor" href="#startup-timeout"></a>2.12. Startup Timeout</h3>
 <div class="paragraph">
 <p>A duration of time to wait, while Cassandra is being ready to accept connections.</p>
 </div>
@@ -907,7 +924,7 @@ Defaults to <strong>2 minutes</strong>.
 </div>
 </div>
 <div class="sect2">
-<h3 id="shutdown-hook"><a class="anchor" href="#shutdown-hook"></a>2.12. Shutdown Hook</h3>
+<h3 id="shutdown-hook"><a class="anchor" href="#shutdown-hook"></a>2.13. Shutdown Hook</h3>
 <div class="paragraph">
 <p>Registers shutdown hook for created Cassandra instance.</p>
 </div>
@@ -932,7 +949,7 @@ Defaults to <strong>true</strong>.
 </div>
 </div>
 <div class="sect2">
-<h3 id="logger"><a class="anchor" href="#logger"></a>2.13. Logger</h3>
+<h3 id="logger"><a class="anchor" href="#logger"></a>2.14. Logger</h3>
 <div class="paragraph">
 <p>Configure a logger, that consumes Cassandra <code>STDOUT</code> and <code>STDERR</code> outputs.</p>
 </div>
@@ -961,22 +978,6 @@ Defaults to <code>Logger.get(Cassandra.class)</code>.
 </table>
 </div>
 </div>
-<div class="sect2">
-<h3 id="resources"><a class="anchor" href="#resources"></a>2.14. Resources</h3>
-<div class="paragraph">
-<p>If additional files should be added to the working directory, e.g. <code>cassandra-rackdc.properties</code>,
-<code>cassandra-topology.properties</code>, certificates or something else, <code>addResource</code> can be used.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">addResource</span><span class="o">(</span><span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"cassandra-rackdc.properties"</span><span class="o">),</span> <span class="s">"conf/cassandra-rackdc.properties"</span><span class="o">);</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>In the example above, the <code>ClassPathResource</code> will be copied into the working directory by the given path.</p>
-</div>
-</div>
 </div>
 </div>
 <div class="sect1">
@@ -996,8 +997,8 @@ that often arise when using Embedded Cassandra.</p>
 <pre class="rouge highlight"><code data-lang="java"><span class="nc">ClassPathResource</span> <span class="n">keystore</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"keystore.node0"</span><span class="o">);</span>
 <span class="nc">ClassPathResource</span> <span class="n">truststore</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"truststore.node0"</span><span class="o">);</span>
 <span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">addResource</span><span class="o">(</span><span class="n">keystore</span><span class="o">,</span> <span class="s">"conf/.keystore"</span><span class="o">)</span>
-        <span class="o">.</span><span class="na">addResource</span><span class="o">(</span><span class="n">truststore</span><span class="o">,</span> <span class="s">"conf/.truststore"</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">addWorkingDirectoryResource</span><span class="o">(</span><span class="n">keystore</span><span class="o">,</span> <span class="s">"conf/.keystore"</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">addWorkingDirectoryResource</span><span class="o">(</span><span class="n">truststore</span><span class="o">,</span> <span class="s">"conf/.truststore"</span><span class="o">)</span>
         <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"client_encryption_options.enabled"</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
         <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"client_encryption_options.require_client_auth"</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
         <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"client_encryption_options.optional"</span><span class="o">,</span> <span class="kc">false</span><span class="o">)</span>
@@ -1149,7 +1150,7 @@ you can add them this via:</p>
 
 <span class="c1">// or</span>
 <span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">addResource</span><span class="o">(</span><span class="n">lib</span><span class="o">,</span> <span class="s">"lib/lib.jar"</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">addWorkingDirectoryResource</span><span class="o">(</span><span class="n">lib</span><span class="o">,</span> <span class="s">"lib/lib.jar"</span><span class="o">)</span>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
@@ -1222,7 +1223,7 @@ you can add them this via:</p>
 <div id="footer">
 <div id="footer-text">
 Version 4.0.0-SNAPSHOT<br>
-Last updated 2020-11-18 21:14:51 UTC
+Last updated 2020-11-18 21:31:29 UTC
 </div>
 </div>
 <style>
