@@ -150,9 +150,6 @@ From another side, if you don't want to keep data between launches, it makes sen
 include::{sources}/CassandraExamples.java[tag=working-directory-destroyer-all]
 ----
 
-It is useful for unit testing. Highly likely, you would not want to start and stop the Cassandra instance
-between tests.
-
 == Startup Timeout
 
 A duration of time to wait, while Cassandra is being ready to accept connections.
