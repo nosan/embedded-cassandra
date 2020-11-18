@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 4.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-11-17T20:52:53Z</span>
+<span id="revdate">2020-11-18T20:47:21Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -469,29 +469,31 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#version">2.1. Version</a></li>
 <li><a href="#config-properties">2.2. Config Properties</a></li>
-<li><a href="#startup-parameters">2.3. Startup Parameters</a></li>
-<li><a href="#environment-variables">2.4. Environment Variables</a></li>
-<li><a href="#jvm-options">2.5. JVM Options</a></li>
-<li><a href="#working-directory">2.6. Working Directory</a></li>
-<li><a href="#working-directory-customizer">2.7. Working Directory Customizer</a></li>
-<li><a href="#working-directory-initializer">2.8. Working Directory Initializer</a></li>
-<li><a href="#working-directory-destroyer">2.9. Working Directory Destroyer</a></li>
-<li><a href="#startup-timeout">2.10. Startup Timeout</a></li>
-<li><a href="#shutdown-hook">2.11. Shutdown Hook</a></li>
-<li><a href="#logger">2.12. Logger</a></li>
+<li><a href="#configuration-file">2.3. Configuration File</a></li>
+<li><a href="#startup-parameters">2.4. Startup Parameters</a></li>
+<li><a href="#environment-variables">2.5. Environment Variables</a></li>
+<li><a href="#jvm-options">2.6. JVM Options</a></li>
+<li><a href="#working-directory">2.7. Working Directory</a></li>
+<li><a href="#working-directory-customizer">2.8. Working Directory Customizer</a></li>
+<li><a href="#working-directory-initializer">2.9. Working Directory Initializer</a>
+<ul class="sectlevel3">
+<li><a href="#cassandra-directory-provider">2.9.1. Cassandra Directory Provider</a></li>
+</ul>
+</li>
+<li><a href="#working-directory-destroyer">2.10. Working Directory Destroyer</a></li>
+<li><a href="#startup-timeout">2.11. Startup Timeout</a></li>
+<li><a href="#shutdown-hook">2.12. Shutdown Hook</a></li>
+<li><a href="#logger">2.13. Logger</a></li>
+<li><a href="#resources">2.14. Resources</a></li>
 </ul>
 </li>
 <li><a href="#how-to">3. How-to?</a>
 <ul class="sectlevel2">
-<li><a href="#configuration-file">3.1. Configuration File</a></li>
-<li><a href="#client-encryption-options">3.2. Client Encryption Options</a></li>
-<li><a href="#authorization-and-authentication">3.3. Authorization and Authentication</a></li>
-<li><a href="#random-ports">3.4. Random Ports</a></li>
-<li><a href="#simple-seed-provider">3.5. Simple Seed Provider</a></li>
-<li><a href="#proxy">3.6. Proxy</a></li>
-<li><a href="#add-a-lib-to-cassandra-classpath">3.7. Add a lib to Cassandra Classpath</a></li>
-<li><a href="#junit4">3.8. JUnit4</a></li>
-<li><a href="#junit5">3.9. JUnit5</a></li>
+<li><a href="#client-encryption-options">3.1. Client Encryption Options</a></li>
+<li><a href="#authorization-and-authentication">3.2. Authorization and Authentication</a></li>
+<li><a href="#random-ports">3.3. Random Ports</a></li>
+<li><a href="#simple-seed-provider">3.4. Simple Seed Provider</a></li>
+<li><a href="#add-libs-to-classpath">3.5. Add libs to classpath</a></li>
 </ul>
 </li>
 <li><a href="#f-a-q">4. F.A.Q</a>
@@ -641,8 +643,8 @@ Defaults to <strong>4.0-beta3</strong>.
 <div class="sect2">
 <h3 id="config-properties"><a class="anchor" href="#config-properties"></a>2.2. Config Properties</h3>
 <div class="paragraph">
-<p>Cassandra config properties which should be merged with properties from <code>cassandra.yaml</code>.
-This method is useful when only a few properties should be overridden in the <code>cassandra.yaml</code>.</p>
+<p>Cassandra config properties, that should be merged with properties from <code>cassandra.yaml</code>.
+This method is useful, when only a few properties should be overridden in the <code>cassandra.yaml</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -652,9 +654,31 @@ This method is useful when only a few properties should be overridden in the <co
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Config properties have higher precedence, than properties from the configuration file.
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
-<h3 id="startup-parameters"><a class="anchor" href="#startup-parameters"></a>2.3. Startup Parameters</h3>
+<h3 id="configuration-file"><a class="anchor" href="#configuration-file"></a>2.3. Configuration File</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">configFile</span><span class="o">(</span><span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"cassandra.yaml"</span><span class="o">))</span>
+        <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="startup-parameters"><a class="anchor" href="#startup-parameters"></a>2.4. Startup Parameters</h3>
 <div class="paragraph">
 <p>Use system properties to change the Apache Cassandra settings during start up.</p>
 </div>
@@ -680,7 +704,7 @@ This method is useful when only a few properties should be overridden in the <co
 </div>
 </div>
 <div class="sect2">
-<h3 id="environment-variables"><a class="anchor" href="#environment-variables"></a>2.4. Environment Variables</h3>
+<h3 id="environment-variables"><a class="anchor" href="#environment-variables"></a>2.5. Environment Variables</h3>
 <div class="paragraph">
 <p>Adds Cassandra environment variables.</p>
 </div>
@@ -694,7 +718,7 @@ This method is useful when only a few properties should be overridden in the <co
 </div>
 </div>
 <div class="sect2">
-<h3 id="jvm-options"><a class="anchor" href="#jvm-options"></a>2.5. JVM Options</h3>
+<h3 id="jvm-options"><a class="anchor" href="#jvm-options"></a>2.6. JVM Options</h3>
 <div class="paragraph">
 <p>Adds Cassandra native Java Virtual Machine (JVM) Options.</p>
 </div>
@@ -707,16 +731,16 @@ This method is useful when only a few properties should be overridden in the <co
 </div>
 </div>
 <div class="sect2">
-<h3 id="working-directory"><a class="anchor" href="#working-directory"></a>2.6. Working Directory</h3>
+<h3 id="working-directory"><a class="anchor" href="#working-directory"></a>2.7. Working Directory</h3>
 <div class="paragraph">
-<p>The supplied directory used as Cassandra home directory.</p>
+<p>The working directory is used as $CASSANDRA_HOME directory.</p>
 </div>
 <div class="paragraph">
 <p>Before Cassandra starts, the directory will be initialized and customized by <code>WorkingDirectoryInitializer</code>
 and <code>WorkingDirectoryCustomizer(s)</code> respectively.</p>
 </div>
 <div class="paragraph">
-<p>On Cassandra stops, the directory is destroyed by <code>WorkingDirectoryDestroyer</code> .</p>
+<p>On Cassandra stop, the directory will be destroyed by <code>WorkingDirectoryDestroyer</code> .</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -728,11 +752,24 @@ and <code>WorkingDirectoryCustomizer(s)</code> respectively.</p>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Defaults to <code>Files.createTempDirectory("apache-cassandra-" + version + "-")</code>.
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
-<h3 id="working-directory-customizer"><a class="anchor" href="#working-directory-customizer"></a>2.7. Working Directory Customizer</h3>
+<h3 id="working-directory-customizer"><a class="anchor" href="#working-directory-customizer"></a>2.8. Working Directory Customizer</h3>
 <div class="paragraph">
-<p>A callback interface to customize a working directory. This customizer was designed to change the working directory before Cassandra starts.</p>
+<p>A callback interface to customize a working directory. These customizers are needed to change the working directory before Cassandra starts.
+For instance, add some files.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -748,7 +785,7 @@ and <code>WorkingDirectoryCustomizer(s)</code> respectively.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="working-directory-initializer"><a class="anchor" href="#working-directory-initializer"></a>2.8. Working Directory Initializer</h3>
+<h3 id="working-directory-initializer"><a class="anchor" href="#working-directory-initializer"></a>2.9. Working Directory Initializer</h3>
 <div class="paragraph">
 <p>A strategy interface to initialize the working directory.
 The working directory must contain all necessary Cassandra files after the init method has been called.</p>
@@ -766,21 +803,41 @@ The working directory must contain all necessary Cassandra files after the init 
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Defaults to <code>DefaultWorkingDirectoryInitializer</code>.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>The default implementation is <code>DefaultWorkingDirectoryInitializer</code>,
+that gets Cassandra directory from the <code>CassandraDirectoryProvider</code>
+and copies all files from a retrieved directory into the working directory
+except <strong>javadoc</strong>, <strong>doc</strong> and <strong>licenses</strong> directories.</p>
+</div>
+<div class="paragraph">
+<p>By default, <code>DefaultWorkingDirectoryInitializer</code> replaces any existing files in the working directory.
+If you don&#8217;t want to replace files in the working directory, you can use <code>CopyStrategy</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">workingDirectoryInitializer</span><span class="o">(</span><span class="k">new</span> <span class="nc">DefaultWorkingDirectoryInitializer</span><span class="o">(</span><span class="k">new</span> <span class="nc">WebCassandraDirectoryProvider</span><span class="o">(),</span>
+                <span class="nc">DefaultWorkingDirectoryInitializer</span><span class="o">.</span><span class="na">CopyStrategy</span><span class="o">.</span><span class="na">SKIP_EXISTING</span><span class="o">))</span>
+        <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="cassandra-directory-provider"><a class="anchor" href="#cassandra-directory-provider"></a>2.9.1. Cassandra Directory Provider</h4>
+<div class="paragraph">
+<p><code>DefaultWorkingDirectoryInitializer</code> can be configured with a <code>CassandraDirectoryProvider</code> implementation.</p>
+</div>
+<div class="paragraph">
+<p><code>CassandraDirectoryProvider</code> provides a path to Cassandra directory based on a version. Default implementation of this
+interface is <code>WebCassandraDirectoryProvider</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>WebCassandraDirectoryProvider</code> downloads and extracts Cassandra&#8217;s archive from the well-known URLs into the download directory.
+If the Cassandra directory have already extracted then it will be used, skipping downloading and extracting steps.</p>
+</div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="working-directory-destroyer"><a class="anchor" href="#working-directory-destroyer"></a>2.9. Working Directory Destroyer</h3>
+<h3 id="working-directory-destroyer"><a class="anchor" href="#working-directory-destroyer"></a>2.10. Working Directory Destroyer</h3>
 <div class="paragraph">
 <p>A strategy interface to destroy the working directory.</p>
 </div>
@@ -797,23 +854,39 @@ Defaults to <code>DefaultWorkingDirectoryInitializer</code>.
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Defaults to delete only <strong>"bin", "pylib", "lib", "tools", "doc", "javadoc", "interface"</strong> folders.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>By default, only the following directories <strong>"bin", "pylib", "lib", "tools", "doc", "javadoc", "interface"</strong>
+will be deleted.</p>
+</div>
+<div class="paragraph">
+<p>However, if you don&#8217;t want to delete a working directory, you can use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">workingDirectoryDestroyer</span><span class="o">(</span><span class="nc">WorkingDirectoryDestroyer</span><span class="o">.</span><span class="na">doNothing</span><span class="o">())</span>
+        <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From another side, if you don&#8217;t want to keep data between launches, it makes sense to use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">workingDirectoryDestroyer</span><span class="o">(</span><span class="nc">WorkingDirectoryDestroyer</span><span class="o">.</span><span class="na">deleteAll</span><span class="o">())</span>
+        <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is useful for unit testing. Highly likely, you would not want to start and stop the Cassandra instance
+between tests.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="startup-timeout"><a class="anchor" href="#startup-timeout"></a>2.10. Startup Timeout</h3>
+<h3 id="startup-timeout"><a class="anchor" href="#startup-timeout"></a>2.11. Startup Timeout</h3>
 <div class="paragraph">
-<p>How long to wait when Cassandra is being ready to accept connections.</p>
+<p>A duration of time to wait, while Cassandra is being ready to accept connections.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -836,10 +909,9 @@ Defaults to <strong>2 minutes</strong>.
 </div>
 </div>
 <div class="sect2">
-<h3 id="shutdown-hook"><a class="anchor" href="#shutdown-hook"></a>2.11. Shutdown Hook</h3>
+<h3 id="shutdown-hook"><a class="anchor" href="#shutdown-hook"></a>2.12. Shutdown Hook</h3>
 <div class="paragraph">
-<p>Registers shutdown hook for created Cassandra instance.
-In other words, should Cassandra be stopped when JVM shutdown?</p>
+<p>Registers shutdown hook for created Cassandra instance.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -862,9 +934,9 @@ Defaults to <strong>true</strong>.
 </div>
 </div>
 <div class="sect2">
-<h3 id="logger"><a class="anchor" href="#logger"></a>2.12. Logger</h3>
+<h3 id="logger"><a class="anchor" href="#logger"></a>2.13. Logger</h3>
 <div class="paragraph">
-<p>Configure a logger which consumes Cassandra <code>STDOUT</code> and <code>STDERR</code> outputs.</p>
+<p>Configure a logger, that consumes Cassandra <code>STDOUT</code> and <code>STDERR</code> outputs.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -891,6 +963,22 @@ Defaults to <code>Logger.get(Cassandra.class)</code>.
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="resources"><a class="anchor" href="#resources"></a>2.14. Resources</h3>
+<div class="paragraph">
+<p>If additional files should be added to the working directory, e.g. <code>cassandra-rackdc.properties</code>,
+<code>cassandra-topology.properties</code>, certificates or something else, <code>addResource</code> can be used.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">addResource</span><span class="o">(</span><span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"cassandra-rackdc.properties"</span><span class="o">),</span> <span class="s">"conf/cassandra-rackdc.properties"</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the example above, the <code>ClassPathResource</code> will be copied into the working directory by the given path.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -901,25 +989,17 @@ Defaults to <code>Logger.get(Cassandra.class)</code>.
 that often arise when using Embedded Cassandra.</p>
 </div>
 <div class="sect2">
-<h3 id="configuration-file"><a class="anchor" href="#configuration-file"></a>3.1. Configuration File</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">addSystemProperty</span><span class="o">(</span><span class="s">"cassandra.config"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"cassandra.yaml"</span><span class="o">))</span>
-        <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
+<h3 id="client-encryption-options"><a class="anchor" href="#client-encryption-options"></a>3.1. Client Encryption Options</h3>
+<div class="paragraph">
+<p>In order to enable a client SSL communication, <code>client_encryption_options</code> should be configured:</p>
 </div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="client-encryption-options"><a class="anchor" href="#client-encryption-options"></a>3.2. Client Encryption Options</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java"><span class="nc">ClassPathResource</span> <span class="n">keystore</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"keystore.node0"</span><span class="o">);</span>
 <span class="nc">ClassPathResource</span> <span class="n">truststore</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"truststore.node0"</span><span class="o">);</span>
 <span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"native_transport_port_ssl"</span><span class="o">,</span> <span class="mi">9142</span><span class="o">)</span>
-        <span class="o">.</span><span class="na">addWorkingDirectoryCustomizers</span><span class="o">(</span><span class="nc">WorkingDirectoryCustomizer</span><span class="o">.</span><span class="na">copy</span><span class="o">(</span><span class="n">keystore</span><span class="o">,</span> <span class="s">"conf/.keystore"</span><span class="o">))</span>
-        <span class="o">.</span><span class="na">addWorkingDirectoryCustomizers</span><span class="o">(</span><span class="nc">WorkingDirectoryCustomizer</span><span class="o">.</span><span class="na">copy</span><span class="o">(</span><span class="n">truststore</span><span class="o">,</span> <span class="s">"conf/.truststore"</span><span class="o">))</span>
+        <span class="o">.</span><span class="na">addResource</span><span class="o">(</span><span class="n">keystore</span><span class="o">,</span> <span class="s">"conf/.keystore"</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">addResource</span><span class="o">(</span><span class="n">truststore</span><span class="o">,</span> <span class="s">"conf/.truststore"</span><span class="o">)</span>
         <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"client_encryption_options.enabled"</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
         <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"client_encryption_options.require_client_auth"</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
         <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"client_encryption_options.optional"</span><span class="o">,</span> <span class="kc">false</span><span class="o">)</span>
@@ -932,9 +1012,21 @@ that often arise when using Embedded Cassandra.</p>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+See <a href="https://cassandra.apache.org/doc/latest/operating/security.html#tls-ssl-encryption" class="bare">cassandra.apache.org/doc/latest/operating/security.html#tls-ssl-encryption</a>
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
-<h3 id="authorization-and-authentication"><a class="anchor" href="#authorization-and-authentication"></a>3.3. Authorization and Authentication</h3>
+<h3 id="authorization-and-authentication"><a class="anchor" href="#authorization-and-authentication"></a>3.2. Authorization and Authentication</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
@@ -959,14 +1051,26 @@ that often arise when using Embedded Cassandra.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Default superuser credential is <em>user</em>: <strong>cassandra</strong> <em>password</em>: <strong>cassandra</strong>
+Default superuser credential is <em>user</em>: <strong>cassandra</strong> <em>password</em>: <strong>cassandra</strong>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+See <a href="https://cassandra.apache.org/doc/latest/operating/security.html#authentication" class="bare">cassandra.apache.org/doc/latest/operating/security.html#authentication</a>
 </td>
 </tr>
 </table>
 </div>
 </div>
 <div class="sect2">
-<h3 id="random-ports"><a class="anchor" href="#random-ports"></a>3.4. Random Ports</h3>
+<h3 id="random-ports"><a class="anchor" href="#random-ports"></a>3.3. Random Ports</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
@@ -992,11 +1096,23 @@ typically from an ephemeral port range.
 </tr>
 </table>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<strong>0</strong> ports also can be used in the configuration file.
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
-<h3 id="simple-seed-provider"><a class="anchor" href="#simple-seed-provider"></a>3.5. Simple Seed Provider</h3>
+<h3 id="simple-seed-provider"><a class="anchor" href="#simple-seed-provider"></a>3.4. Simple Seed Provider</h3>
 <div class="paragraph">
-<p>It is possible programmatically configure <code>org.apache.cassandra.locator.SimpleSeedProvider</code> via
+<p>It is possible to configure <code>org.apache.cassandra.locator.SimpleSeedProvider</code> via
 <code>SimpleSeedProviderConfigurator</code> configurator.</p>
 </div>
 <div class="listingblock">
@@ -1020,88 +1136,23 @@ typically from an ephemeral port range.
 </div>
 </div>
 <div class="sect2">
-<h3 id="proxy"><a class="anchor" href="#proxy"></a>3.6. Proxy</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">workingDirectoryInitializer</span><span class="o">(</span>
-                <span class="k">new</span> <span class="nf">DefaultWorkingDirectoryInitializer</span><span class="o">(</span><span class="k">new</span> <span class="nc">WebCassandraDirectoryProvider</span><span class="o">(</span>
-                        <span class="k">new</span> <span class="nf">JdkHttpClient</span><span class="o">(</span><span class="nc">Proxy</span><span class="o">.</span><span class="na">NO_PROXY</span><span class="o">))))</span>
-        <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
+<h3 id="add-libs-to-classpath"><a class="anchor" href="#add-libs-to-classpath"></a>3.5. Add libs to classpath</h3>
+<div class="paragraph">
+<p>If you want to add some custom libraries into Cassandra&#8217;s classpath,
+you can add them this via:</p>
 </div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="add-a-lib-to-cassandra-classpath"><a class="anchor" href="#add-a-lib-to-cassandra-classpath"></a>3.7. Add a lib to Cassandra Classpath</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java"><span class="nc">ClassPathResource</span> <span class="n">lib</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"lib.jar"</span><span class="o">);</span>
+
 <span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
         <span class="o">.</span><span class="na">addEnvironmentVariable</span><span class="o">(</span><span class="s">"EXTRA_CLASSPATH"</span><span class="o">,</span> <span class="n">lib</span><span class="o">)</span>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span>
 
-<span class="c1">// or lib could be added via WorkingDirectoryCustomizer</span>
+<span class="c1">// or</span>
 <span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">addWorkingDirectoryCustomizers</span><span class="o">(</span><span class="nc">WorkingDirectoryCustomizer</span><span class="o">.</span><span class="na">copy</span><span class="o">(</span><span class="n">lib</span><span class="o">,</span> <span class="s">"lib/lib.jar"</span><span class="o">))</span>
+        <span class="o">.</span><span class="na">addResource</span><span class="o">(</span><span class="n">lib</span><span class="o">,</span> <span class="s">"lib/lib.jar"</span><span class="o">)</span>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="junit4"><a class="anchor" href="#junit4"></a>3.8. JUnit4</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Cassandra</span> <span class="no">CASSANDRA</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">().</span><span class="na">build</span><span class="o">();</span>
-
-<span class="nd">@BeforeClass</span>
-<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
-    <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-    <span class="nc">Settings</span> <span class="n">settings</span> <span class="o">=</span> <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">getSettings</span><span class="o">();</span>
-    <span class="k">try</span> <span class="o">(</span><span class="nc">Cluster</span> <span class="n">cluster</span> <span class="o">=</span> <span class="nc">Cluster</span><span class="o">.</span><span class="na">builder</span><span class="o">().</span><span class="na">addContactPoints</span><span class="o">(</span><span class="n">settings</span><span class="o">.</span><span class="na">getAddress</span><span class="o">())</span>
-            <span class="o">.</span><span class="na">withPort</span><span class="o">(</span><span class="n">settings</span><span class="o">.</span><span class="na">getPort</span><span class="o">()).</span><span class="na">build</span><span class="o">())</span> <span class="o">{</span>
-        <span class="nc">Session</span> <span class="n">session</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="na">connect</span><span class="o">();</span>
-        <span class="nc">CqlScript</span><span class="o">.</span><span class="na">ofClassPath</span><span class="o">(</span><span class="s">"schema.cql"</span><span class="o">).</span><span class="na">forEachStatement</span><span class="o">(</span><span class="nl">session:</span><span class="o">:</span><span class="n">execute</span><span class="o">);</span>
-    <span class="o">}</span>
-<span class="o">}</span>
-
-<span class="nd">@AfterClass</span>
-<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">stop</span><span class="o">()</span> <span class="o">{</span>
-    <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">stop</span><span class="o">();</span>
-<span class="o">}</span>
-
-<span class="nd">@Test</span>
-<span class="kd">public</span> <span class="kt">void</span> <span class="nf">testCassandra</span><span class="o">()</span> <span class="o">{</span>
-
-<span class="o">}</span></code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="junit5"><a class="anchor" href="#junit5"></a>3.9. JUnit5</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">Cassandra</span> <span class="no">CASSANDRA</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">().</span><span class="na">build</span><span class="o">();</span>
-
-<span class="nd">@BeforeAll</span>
-<span class="kd">static</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
-    <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-    <span class="nc">Settings</span> <span class="n">settings</span> <span class="o">=</span> <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">getSettings</span><span class="o">();</span>
-    <span class="k">try</span> <span class="o">(</span><span class="nc">Cluster</span> <span class="n">cluster</span> <span class="o">=</span> <span class="nc">Cluster</span><span class="o">.</span><span class="na">builder</span><span class="o">().</span><span class="na">addContactPoints</span><span class="o">(</span><span class="n">settings</span><span class="o">.</span><span class="na">getAddress</span><span class="o">())</span>
-            <span class="o">.</span><span class="na">withPort</span><span class="o">(</span><span class="n">settings</span><span class="o">.</span><span class="na">getPort</span><span class="o">()).</span><span class="na">build</span><span class="o">())</span> <span class="o">{</span>
-        <span class="nc">Session</span> <span class="n">session</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="na">connect</span><span class="o">();</span>
-        <span class="nc">CqlScript</span><span class="o">.</span><span class="na">ofClassPath</span><span class="o">(</span><span class="s">"schema.cql"</span><span class="o">).</span><span class="na">forEachStatement</span><span class="o">(</span><span class="nl">session:</span><span class="o">:</span><span class="n">execute</span><span class="o">);</span>
-    <span class="o">}</span>
-<span class="o">}</span>
-
-<span class="nd">@AfterAll</span>
-<span class="kd">static</span> <span class="kt">void</span> <span class="nf">stop</span><span class="o">()</span> <span class="o">{</span>
-    <span class="no">CASSANDRA</span><span class="o">.</span><span class="na">stop</span><span class="o">();</span>
-<span class="o">}</span>
-
-<span class="nd">@Test</span>
-<span class="kt">void</span> <span class="nf">testCassandra</span><span class="o">()</span> <span class="o">{</span>
-
-<span class="o">}</span></code></pre>
 </div>
 </div>
 </div>
@@ -1173,7 +1224,7 @@ typically from an ephemeral port range.
 <div id="footer">
 <div id="footer-text">
 Version 4.0.0-SNAPSHOT<br>
-Last updated 2020-11-17 20:52:39 UTC
+Last updated 2020-11-18 20:47:00 UTC
 </div>
 </div>
 <style>
