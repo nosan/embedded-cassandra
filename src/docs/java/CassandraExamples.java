@@ -127,8 +127,9 @@ public class CassandraExamples {
 	private void configProperties() {
 		//tag::config-property[]
 		new CassandraBuilder()
-				.addConfigProperty("native_transport_port", 9042)
+				.addConfigProperty("native_transport_port", 9000)
 				.addConfigProperty("storage_port", 7000)
+				.addConfigProperty("client_encryption_options.enabled", true)
 				.build();
 		//end::config-property[]
 	}
@@ -146,7 +147,6 @@ public class CassandraExamples {
 		//tag::environment-variable[]
 		new CassandraBuilder()
 				.addEnvironmentVariable("JAVA_HOME", System.getProperty("java.home"))
-				.addEnvironmentVariable("EXTRA_CLASSPATH", new ClassPathResource("lib.jar"))
 				.build();
 		//end::environment-variable[]
 	}

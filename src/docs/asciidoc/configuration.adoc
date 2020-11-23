@@ -21,9 +21,39 @@ NOTE: Defaults to *4.0-beta3*.
 Cassandra config properties, that should be merged with properties from `cassandra.yaml`.
 This method is useful, when only a few properties should be overridden in the `cassandra.yaml`.
 
+For example `cassandra.yaml`:
+
+[source,yaml,indent=0]
+----
+...
+storage_port: 7199
+native_transport_port: 9042
+rpc_port: 9160
+client_encryption_options:
+   enabled: false
+   ...
+...
+----
+
+The following config properties are used:
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=config-property]
+----
+
+The output `cassandra.yaml`:
+
+[source,yaml,indent=0]
+----
+...
+storage_port: 7000
+native_transport_port: 9000
+rpc_port: 9160
+client_encryption_options:
+  enabled: true
+  ...
+...
 ----
 
 NOTE: Config properties have higher precedence, than properties from the configuration file.
