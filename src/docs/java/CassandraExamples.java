@@ -83,15 +83,8 @@ public class CassandraExamples {
 
 	private void customClasspath() {
 		//tag::custom-classpath[]
-		ClassPathResource lib = new ClassPathResource("lib.jar");
-
 		new CassandraBuilder()
-				.addEnvironmentVariable("EXTRA_CLASSPATH", lib)
-				.build();
-
-		// or
-		new CassandraBuilder()
-				.addWorkingDirectoryResource(lib, "lib/lib.jar")
+				.addWorkingDirectoryResource(new ClassPathResource("lib.jar"), "lib/lib.jar")
 				.build();
 		//end::custom-classpath[]
 	}

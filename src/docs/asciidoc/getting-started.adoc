@@ -8,6 +8,8 @@
 
 = Getting Started
 
+Embedded Cassandra provides an easy way to start and stop {apache-cassandra-ref}[Apache Cassandra].
+
 == Overview
 
 The goal of this document is to provide comprehensive reference documentation for programmers using Embedded Cassandra.
@@ -54,7 +56,6 @@ Contributions to Embedded Cassandra should be made in the form of `GitHub pull r
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra</artifactId>
         <version>{revnumber}</version>
-        <scope>test</scope>
     </dependency>
 </dependecies>
 ----
