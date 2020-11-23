@@ -57,7 +57,7 @@ include::{sources}/CassandraExamples.java[tag=configure-seeds]
 == Add libs to classpath
 
 If you want to add some custom libraries into Cassandra's classpath,
-you can add them this via:
+you can add them via:
 
 [source,java,indent=0]
 ----
