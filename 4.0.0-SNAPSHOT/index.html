@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 4.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-11-19T09:45:10Z</span>
+<span id="revdate">2020-11-23T08:14:50Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -513,6 +513,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="getting-started"><a class="anchor" href="#getting-started"></a>1. Getting Started</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Embedded Cassandra provides an easy way to start and stop <a href="https://cassandra.apache.org">Apache Cassandra</a>.</p>
+</div>
 <div class="sect2">
 <h3 id="overview"><a class="anchor" href="#overview"></a>1.1. Overview</h3>
 <div class="paragraph">
@@ -573,7 +576,6 @@ You also need <code>JDK 1.8</code>.</p>
         <span class="nt">&lt;groupId&gt;</span>com.github.nosan<span class="nt">&lt;/groupId&gt;</span>
         <span class="nt">&lt;artifactId&gt;</span>embedded-cassandra<span class="nt">&lt;/artifactId&gt;</span>
         <span class="nt">&lt;version&gt;</span>4.0.0-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
-        <span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
     <span class="nt">&lt;/dependency&gt;</span>
 <span class="nt">&lt;/dependecies&gt;</span></code></pre>
 </div>
@@ -1142,15 +1144,8 @@ you can add them this via:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="nc">ClassPathResource</span> <span class="n">lib</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"lib.jar"</span><span class="o">);</span>
-
-<span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">addEnvironmentVariable</span><span class="o">(</span><span class="s">"EXTRA_CLASSPATH"</span><span class="o">,</span> <span class="n">lib</span><span class="o">)</span>
-        <span class="o">.</span><span class="na">build</span><span class="o">();</span>
-
-<span class="c1">// or</span>
-<span class="k">new</span> <span class="nf">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">addWorkingDirectoryResource</span><span class="o">(</span><span class="n">lib</span><span class="o">,</span> <span class="s">"lib/lib.jar"</span><span class="o">)</span>
+<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">addWorkingDirectoryResource</span><span class="o">(</span><span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"lib.jar"</span><span class="o">),</span> <span class="s">"lib/lib.jar"</span><span class="o">)</span>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
@@ -1223,7 +1218,7 @@ you can add them this via:</p>
 <div id="footer">
 <div id="footer-text">
 Version 4.0.0-SNAPSHOT<br>
-Last updated 2020-11-19 09:44:55 UTC
+Last updated 2020-11-23 08:14:34 UTC
 </div>
 </div>
 <style>
