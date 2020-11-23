@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 4.0.0-SNAPSHOT,</span>
-<span id="revdate">2020-11-23T08:19:33Z</span>
+<span id="revdate">2020-11-23T20:33:40Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -648,12 +648,46 @@ Defaults to <strong>4.0-beta3</strong>.
 <p>Cassandra config properties, that should be merged with properties from <code>cassandra.yaml</code>.
 This method is useful, when only a few properties should be overridden in the <code>cassandra.yaml</code>.</p>
 </div>
+<div class="paragraph">
+<p>For example <code>cassandra.yaml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="nn">...</span>
+<span class="na">storage_port</span><span class="pi">:</span> <span class="m">7199</span>
+<span class="na">native_transport_port</span><span class="pi">:</span> <span class="m">9042</span>
+<span class="na">rpc_port</span><span class="pi">:</span> <span class="m">9160</span>
+<span class="na">client_encryption_options</span><span class="pi">:</span>
+   <span class="na">enabled</span><span class="pi">:</span> <span class="no">false</span>
+   <span class="s">...</span>
+<span class="nn">...</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following config properties are used:</p>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
-        <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"native_transport_port"</span><span class="o">,</span> <span class="mi">9042</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"native_transport_port"</span><span class="o">,</span> <span class="mi">9000</span><span class="o">)</span>
         <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"storage_port"</span><span class="o">,</span> <span class="mi">7000</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">addConfigProperty</span><span class="o">(</span><span class="s">"client_encryption_options.enabled"</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output <code>cassandra.yaml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="yaml"><span class="nn">...</span>
+<span class="na">storage_port</span><span class="pi">:</span> <span class="m">7000</span>
+<span class="na">native_transport_port</span><span class="pi">:</span> <span class="m">9000</span>
+<span class="na">rpc_port</span><span class="pi">:</span> <span class="m">9160</span>
+<span class="na">client_encryption_options</span><span class="pi">:</span>
+  <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="s">...</span>
+<span class="nn">...</span></code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -714,7 +748,6 @@ Config properties have higher precedence, than properties from the configuration
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
         <span class="o">.</span><span class="na">addEnvironmentVariable</span><span class="o">(</span><span class="s">"JAVA_HOME"</span><span class="o">,</span> <span class="nc">System</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">"java.home"</span><span class="o">))</span>
-        <span class="o">.</span><span class="na">addEnvironmentVariable</span><span class="o">(</span><span class="s">"EXTRA_CLASSPATH"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">ClassPathResource</span><span class="o">(</span><span class="s">"lib.jar"</span><span class="o">))</span>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
@@ -1218,7 +1251,7 @@ you can add them via:</p>
 <div id="footer">
 <div id="footer-text">
 Version 4.0.0-SNAPSHOT<br>
-Last updated 2020-11-23 08:19:18 UTC
+Last updated 2020-11-23 20:33:29 UTC
 </div>
 </div>
 <style>
