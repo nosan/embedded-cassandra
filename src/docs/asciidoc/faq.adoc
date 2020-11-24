@@ -38,7 +38,7 @@ Yes, it is possible. Both instances must be started on different ports.
 
 == Which are URLs used for downloading Apache Cassandra?
 
-It depends on the version, if it the latest release, it will be downloaded from
+It depends on the version, if it is the latest release, it will be downloaded from
 https://downloads.apache.org/cassandra/. For older versions, https://archive.apache.org/dist/cassandra/  is used.
 
 == Where are the files downloaded?
