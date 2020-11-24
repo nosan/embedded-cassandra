@@ -37,7 +37,7 @@
  * <p>
  * {@link com.github.nosan.embedded.cassandra.WorkingDirectoryCustomizer}
  * </p>
- * A customizers interface that can be used to customize the initialized working directory.
+ * A customizer interface that can be used to customize the working directory.
  * <p>{@link com.github.nosan.embedded.cassandra.CassandraBuilderConfigurator}</p>
  * A callback interface to configure a {@link com.github.nosan.embedded.cassandra.CassandraBuilder}.
  * <p><strong>Example:</strong>
