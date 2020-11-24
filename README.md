@@ -4,6 +4,7 @@ Embedded Cassandra
 [![codecov](https://codecov.io/gh/nosan/embedded-cassandra/branch/master/graph/badge.svg?token=SNW1ICHYXL)](https://codecov.io/gh/nosan/embedded-cassandra)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra/)
 
+
 To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra).
 
 ## Issues
@@ -20,3 +21,7 @@ Also see [CONTRIBUTING.md](CONTRIBUTING.md) if you wish to submit pull requests.
 ## License
 
 Embedded Cassandra is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+
+
+
+<a href="https://www.buymeacoffee.com/nosan" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
