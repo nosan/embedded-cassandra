@@ -178,6 +178,14 @@ class CassandraBuilderTests {
 	}
 
 	@Test
+	void configurationFile() {
+		ClassPathResource resource = new ClassPathResource("test.txt");
+		assertThat(this.builder.configFile(resource).build())
+				.hasFieldOrPropertyWithValue("databaseFactory.systemProperties",
+						mapOf("cassandra.config", resource));
+	}
+
+	@Test
 	void jvmOptions() {
 		assertThat(this.builder.jvmOptions("-Xmx512m").build())
 				.hasFieldOrPropertyWithValue("databaseFactory.jvmOptions",
@@ -202,6 +210,13 @@ class CassandraBuilderTests {
 						mapOf("rpc_port", 9160, "start_rpc", true));
 		assertThat(this.builder.configProperties(mapOf("start_rpc", true)).build())
 				.hasFieldOrPropertyWithValue("databaseFactory.configProperties", mapOf("start_rpc", true));
+	}
+
+	@Test
+	void configPropertiesArrayType() {
+		assertThat(this.builder.addConfigProperty("data_file_directories", new String[]{"./data/data"}).build())
+				.hasFieldOrPropertyWithValue("databaseFactory.configProperties", mapOf("data_file_directories",
+						Collections.singletonList("./data/data")));
 	}
 
 	@Test

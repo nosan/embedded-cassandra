@@ -694,6 +694,14 @@ public class CassandraBuilder {
 			((Collection<?>) object).forEach(each -> result.add(deepCopy(each)));
 			return (T) Collections.unmodifiableList(result);
 		}
+
+		if (object instanceof Object[]) {
+			List<Object> result = new ArrayList<>();
+			for (Object each : ((Object[]) object)) {
+				result.add(deepCopy(each));
+			}
+			return (T) Collections.unmodifiableList(result);
+		}
 		return object;
 	}
 

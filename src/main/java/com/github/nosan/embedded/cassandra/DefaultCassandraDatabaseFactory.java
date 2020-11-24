@@ -119,6 +119,8 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 		}
 		//avoid gc.log error
 		Files.createDirectories(workingDirectory.resolve("logs"));
+		//creates for data
+		Files.createDirectories(workingDirectory.resolve("data"));
 		//create database
 		if (isWindows()) {
 			Path pidFile = Files.createTempFile(workingDirectory.resolve("bin"), "", "-cassandra.pid");
@@ -338,6 +340,14 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 				result.add(getValue(o));
 			}
 			return result;
+		}
+		if (object instanceof Object[]) {
+			List<Object> result = new ArrayList<>();
+			for (Object o : ((Object[]) object)) {
+				result.add(getValue(o));
+			}
+			return result;
+
 		}
 		return object;
 	}

@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -406,6 +407,16 @@ class DefaultCassandraDatabaseFactoryTests {
 		Map<String, Object> configProperties = database.getConfigProperties();
 		assertThat(configProperties.get("test"))
 				.isEqualTo(Paths.get(resource.toURI()).toString());
+	}
+
+	@Test
+	void setConfigPropertyArrayClassPathResource(@TempDir Path workingDirectory) throws Exception {
+		ClassPathResource resource = new ClassPathResource("cassandra-4.0-beta3.yaml");
+		this.configProperties.put("test", new ClassPathResource[]{resource});
+		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
+		Map<String, Object> configProperties = database.getConfigProperties();
+		assertThat(((Collection<Object>) configProperties.get("test")))
+				.containsExactly(Paths.get(resource.toURI()).toString());
 	}
 
 	@Test
