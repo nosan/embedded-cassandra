@@ -6,7 +6,9 @@ Embedded Cassandra
 [![Javadoc](https://javadoc.io/badge2/com.github.nosan/embedded-cassandra/javadoc.svg)](https://javadoc.io/doc/com.github.nosan/embedded-cassandra)
 
 
-To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra).
+To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra/4.0.0).
+
+Older versions of Embedded Cassandra reference documentation are [here](https://nosan.github.io/embedded-cassandra).
 
 ## Issues
 
