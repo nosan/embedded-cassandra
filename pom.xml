@@ -9,8 +9,8 @@
     <version>4.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <description>Embedded Cassandra ${project.version}</description>
-    <name>Embedded Cassandra ${project.version}</name>
+    <description>Embedded Cassandra</description>
+    <name>Embedded Cassandra</name>
 
     <licenses>
         <license>
