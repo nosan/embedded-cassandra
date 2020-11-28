@@ -16,61 +16,60 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
 import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link ResourceCqlScript}.
+ * Tests for {@link DefaultCqlDataSet}.
  *
  * @author Dmytro Nosan
  */
-class ResourceCqlScriptTests {
+class DefaultCqlDataSetTests {
 
 	private final ClassPathResource resource = new ClassPathResource("schema.cql");
 
 	private final ResourceCqlScript script = new ResourceCqlScript(this.resource);
 
+	private final DefaultCqlDataSet dataSet = new DefaultCqlDataSet(Collections.singleton(this.script));
+
 	@Test
 	void testEquals() {
-		assertThat(this.script.equals(this.script)).isTrue();
-		assertThat(this.script.equals(null)).isFalse();
-		assertThat(this.script.equals(new ResourceCqlScript(this.resource))).isTrue();
-		assertThat(this.script.equals(new ResourceCqlScript(this.resource,
-				StandardCharsets.UTF_16LE))).isFalse();
+		assertThat(this.dataSet.equals(this.dataSet)).isTrue();
+		assertThat(this.dataSet.equals(null)).isFalse();
+		assertThat(this.dataSet.equals(new DefaultCqlDataSet(
+				Collections.singleton(new ResourceCqlScript(this.resource))))).isTrue();
+		assertThat(this.dataSet.equals(new DefaultCqlDataSet(Collections.singleton(new ResourceCqlScript(this.resource,
+				StandardCharsets.UTF_16LE))))).isFalse();
 	}
 
 	@Test
 	void testToString() {
-		assertThat(this.script.toString()).contains("schema.cql");
+		assertThat(this.dataSet.toString()).contains(this.script.toString());
 	}
 
 	@Test
 	void testHashcode() {
-		assertThat(this.script.hashCode())
-				.isEqualTo(31 * Charset.defaultCharset().hashCode() + this.resource.hashCode());
-	}
-
-	@Test
-	void testGetStatementsFail() {
-		ClassPathResource resource = new ClassPathResource(UUID.randomUUID().toString());
-		assertThatThrownBy(() -> new ResourceCqlScript(resource).getStatements())
-				.hasStackTraceContaining("Could not open a stream for");
+		assertThat(this.dataSet.hashCode())
+				.isEqualTo(Collections.singleton(this.dataSet).hashCode());
 	}
 
 	@Test
 	void testGetStatements() {
-		List<String> statements = this.script.getStatements();
+		List<String> statements = this.dataSet.getStatements();
 		assertThat(statements).contains(
 				"CREATE KEYSPACE test WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }");
+	}
+
+	@Test
+	void testGetScripts() {
+		assertThat(this.dataSet.getScripts()).contains(this.script);
 	}
 
 }

@@ -29,7 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class StringCqlScriptTests {
 
-	private final StringCqlScript script = new StringCqlScript("CREATE TABLE test.users ( id text PRIMARY KEY )");
+	private final String rawScript = "CREATE TABLE test.users ( id text PRIMARY KEY )";
+
+	private final StringCqlScript script = new StringCqlScript(this.rawScript);
 
 	@Test
 	void testEquals() {
@@ -37,6 +39,11 @@ class StringCqlScriptTests {
 		assertThat(this.script.equals(null)).isFalse();
 		assertThat(this.script.equals("CREATE TABLE test.roles ( id text PRIMARY KEY )")).isFalse();
 		assertThat(this.script.equals(new StringCqlScript("CREATE TABLE test.users ( id text PRIMARY KEY )"))).isTrue();
+	}
+
+	@Test
+	void tesHashCode() {
+		assertThat(this.script.hashCode()).isEqualTo(this.rawScript.hashCode());
 	}
 
 	@Test

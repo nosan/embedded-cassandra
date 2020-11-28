@@ -41,12 +41,12 @@ include::{sources}/CassandraExamples.java[tag=random-ports]
 NOTE: A port number of *0* means that the port number is automatically allocated,
 typically from an ephemeral port range.
 
-NOTE: *0* ports also can be used in the configuration file.
+NOTE: *0* port number also can be used in the configuration file.
 
 == Simple Seed Provider
 
 It is possible to configure `org.apache.cassandra.locator.SimpleSeedProvider` via
-`SimpleSeedProviderConfigurator` configurator.
+`SimpleSeedProviderConfigurator`.
 
 [source,java,indent=0]
 ----
@@ -62,4 +62,13 @@ you can add them via:
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=custom-classpath]
+----
+
+== Load Cql Statements
+
+To load CQL statements from different sources, either `CqlScript` or `CqlDataSet` can be used.
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=cql]
 ----

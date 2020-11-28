@@ -22,11 +22,13 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
+import com.github.nosan.embedded.cassandra.commons.Resource;
 
 /**
  * {@link CqlScript} interface that loads CQL statements from various sources.
  *
  * @author Dmytro Nosan
+ * @see CqlDataSet
  * @see AbstractCqlScript
  * @see ResourceCqlScript
  * @see StringCqlScript
@@ -54,7 +56,32 @@ public interface CqlScript {
 	 * @return a new {@link CqlScript}
 	 */
 	static CqlScript ofClassPath(String name, Charset charset) {
-		return new ResourceCqlScript(new ClassPathResource(name), charset);
+		return ofResource(new ClassPathResource(name), charset);
+	}
+
+	/**
+	 * Creates {@link CqlScript} with the specified resource and default charset.
+	 *
+	 * @param resource the resource to use
+	 * @return a new {@link CqlScript}
+	 * @since 4.0.1
+	 */
+	static CqlScript ofResource(Resource resource) {
+		return ofResource(resource, Charset.defaultCharset());
+	}
+
+	/**
+	 * Creates {@link CqlScript} with the specified resources and charset.
+	 *
+	 * @param resource the resource to use
+	 * @param charset the encoding to use
+	 * @return a new {@link CqlScript}
+	 * @since 4.0.1
+	 */
+	static CqlScript ofResource(Resource resource, Charset charset) {
+		Objects.requireNonNull(charset, "Charset must not be null");
+		Objects.requireNonNull(resource, "Resources must not be null");
+		return new ResourceCqlScript(resource, charset);
 	}
 
 	/**
@@ -68,9 +95,9 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Returns {@code CQL} statements.
+	 * Gets {@code CQL} statements.
 	 *
-	 * @return {@code CQL} statements
+	 * @return {@code CQL} statements (never null)
 	 */
 	List<String> getStatements();
 

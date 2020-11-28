@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Proxy;
 import java.nio.file.Files;
@@ -36,10 +37,12 @@ import com.github.nosan.embedded.cassandra.WorkingDirectoryCustomizer;
 import com.github.nosan.embedded.cassandra.WorkingDirectoryDestroyer;
 import com.github.nosan.embedded.cassandra.WorkingDirectoryInitializer;
 import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
+import com.github.nosan.embedded.cassandra.commons.FileSystemResource;
 import com.github.nosan.embedded.cassandra.commons.logging.ConsoleLogger;
 import com.github.nosan.embedded.cassandra.commons.logging.Logger;
 import com.github.nosan.embedded.cassandra.commons.logging.Slf4jLogger;
 import com.github.nosan.embedded.cassandra.commons.web.JdkHttpClient;
+import com.github.nosan.embedded.cassandra.cql.CqlDataSet;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
 /**
@@ -243,7 +246,7 @@ public class CassandraExamples {
 	private void logger() {
 		//tag::logger[]
 		new CassandraBuilder()
-				//Automatically detected logging implementation.
+				//Automatically detects logging implementation. Either slf4j or console.
 				.logger(Logger.get("Cassandra"))
 				//Use SLF4J Logger implementation
 				.logger(new Slf4jLogger(LoggerFactory.getLogger("Cassandra")))
@@ -292,12 +295,28 @@ public class CassandraExamples {
 		//end::working-directory-destroyer-all[]
 	}
 
-	private void addResource() {
+	private void addWorkingDirectoryResource() {
 		//tag::add-resource[]
 		new CassandraBuilder()
 				.addWorkingDirectoryResource(new ClassPathResource("cassandra-rackdc.properties"),
 						"conf/cassandra-rackdc.properties");
 		//end::add-resource[]
+	}
+
+	private void cqlStatements() {
+		Session session = null;
+		//tag::cql[]
+
+		CqlScript.ofClassPath("schema.cql").forEachStatement(session::execute);
+
+		CqlDataSet.ofClassPaths("schema.cql", "V1__table.cql", "V2__table.cql").forEachStatement(session::execute);
+
+		CqlScript.ofResource(new FileSystemResource(new File("schema.cql"))).forEachStatement(session::execute);
+
+		CqlDataSet.ofResources(new FileSystemResource(new File("schema.cql")),
+				new FileSystemResource(new File("V1__table.cql"))).forEachStatement(session::execute);
+
+		//end::cql[]
 	}
 
 }

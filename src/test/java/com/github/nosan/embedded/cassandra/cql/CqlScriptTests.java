@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -33,6 +35,13 @@ class CqlScriptTests {
 	@Test
 	void ofClassPath() {
 		CqlScript script = CqlScript.ofClassPath("schema.cql");
+		assertThat(script.getStatements()).containsExactly(
+				"CREATE KEYSPACE test WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }");
+	}
+
+	@Test
+	void ofResource() {
+		CqlScript script = CqlScript.ofResource(new ClassPathResource("schema.cql"));
 		assertThat(script.getStatements()).containsExactly(
 				"CREATE KEYSPACE test WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }");
 	}
