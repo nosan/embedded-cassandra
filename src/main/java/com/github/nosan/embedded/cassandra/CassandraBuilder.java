@@ -387,7 +387,6 @@ public class CassandraBuilder {
 	 * <pre>
 	 * {@code
 	 *  JAVA_HOME=System.getEnv("JAVA_HOME") | System.getProperty("java.home")
-	 *  EXTRA_CLASSPATH=new ClassPathResource("lib.jar")
 	 * }</pre>
 	 *
 	 * @param environmentVariables Cassandra environment variables
@@ -407,7 +406,6 @@ public class CassandraBuilder {
 	 * <pre>
 	 * {@code
 	 * 	  JAVA_HOME=System.getEnv("JAVA_HOME") | System.getProperty("java.home")
-	 * 	  EXTRA_CLASSPATH=new ClassPathResource("lib.jar")
 	 * }
 	 * </pre>
 	 *
@@ -426,7 +424,6 @@ public class CassandraBuilder {
 	 * <pre>
 	 * {@code
 	 *  JAVA_HOME=System.getEnv("JAVA_HOME") | System.getProperty("java.home")
-	 *  EXTRA_CLASSPATH=new ClassPathResource("lib.jar")
 	 * }</pre>
 	 *
 	 * @param environmentVariables Cassandra environment variables
