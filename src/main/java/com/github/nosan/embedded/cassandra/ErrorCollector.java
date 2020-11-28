@@ -33,16 +33,16 @@ class ErrorCollector implements Consumer<String>, Closeable {
 	}
 
 	@Override
-	public synchronized void accept(String line) {
+	public void accept(String line) {
 		this.errors.add(line);
 	}
 
 	@Override
-	public synchronized void close() {
+	public void close() {
 		this.database.getStdErr().detach(this);
 	}
 
-	synchronized List<String> getErrors() {
+	List<String> getErrors() {
 		return this.errors;
 	}
 

@@ -33,7 +33,7 @@ class OutputCollector implements Consumer<String>, Closeable {
 	}
 
 	@Override
-	public synchronized void accept(String line) {
+	public void accept(String line) {
 		while (this.output.size() >= 30) {
 			this.output.removeFirst();
 		}
@@ -41,11 +41,11 @@ class OutputCollector implements Consumer<String>, Closeable {
 	}
 
 	@Override
-	public synchronized void close() {
+	public void close() {
 		this.database.getStdOut().detach(this);
 	}
 
-	synchronized Deque<String> getOutput() {
+	Deque<String> getOutput() {
 		return this.output;
 	}
 
