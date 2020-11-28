@@ -73,7 +73,6 @@
         <jacoco.output.directory>${project.build.directory}/jacoco</jacoco.output.directory>
         <jacoco.report.output.directory>${project.build.directory}/site/jacoco</jacoco.report.output.directory>
         <asciidoctor-maven-plugin.version>2.1.0</asciidoctor-maven-plugin.version>
-        <junit.version>4.13.1</junit.version>
     </properties>
 
 
@@ -108,11 +107,6 @@
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
                 <version>${junit5.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.datastax.cassandra</groupId>
@@ -159,11 +153,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
