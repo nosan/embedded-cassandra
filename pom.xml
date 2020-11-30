@@ -43,7 +43,7 @@
         <nexus.url>https://oss.sonatype.org</nexus.url>
         <java.version>1.8</java.version>
         <junit5.version>5.7.0</junit5.version>
-        <checkstyle.version>8.37</checkstyle.version>
+        <checkstyle.version>8.38</checkstyle.version>
         <cassandra-driver-core.version>3.10.2</cassandra-driver-core.version>
         <assertj.version>3.18.1</assertj.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
