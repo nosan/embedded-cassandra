@@ -1,7 +1,6 @@
 Embedded Cassandra 
 ===========
 ![Github CI](https://github.com/nosan/embedded-cassandra/workflows/build/badge.svg)
-[![codecov](https://codecov.io/gh/nosan/embedded-cassandra/branch/master/graph/badge.svg?token=SNW1ICHYXL)](https://codecov.io/gh/nosan/embedded-cassandra)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra/)
 [![Javadoc](https://javadoc.io/badge2/com.github.nosan/embedded-cassandra/javadoc.svg)](https://javadoc.io/doc/com.github.nosan/embedded-cassandra)
 
