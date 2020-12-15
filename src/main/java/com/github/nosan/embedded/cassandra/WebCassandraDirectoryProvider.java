@@ -308,10 +308,9 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 	private void verifyChecksums(HttpClient httpClient, Path archiveFile, CassandraPackage cassandraPackage)
 			throws IOException, NoSuchAlgorithmException {
 		LOGGER.info("Verifying checksum...");
-		List<HttpResponse> failures = new ArrayList<>();
 		Map<String, URI> checksums = cassandraPackage.getChecksums();
 		if (checksums.isEmpty()) {
-			LOGGER.warn("Skipping checksum verifying. No available checksums");
+			LOGGER.warn("No checksum defined for ''{0}'', skipping verification.", cassandraPackage.getName());
 			return;
 		}
 		for (Map.Entry<String, URI> checksum : checksums.entrySet()) {
@@ -334,20 +333,12 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 				LOGGER.info("Checksums are identical");
 				return;
 			}
-			else {
-				failures.add(response);
-			}
 		}
-		StringBuilder builder = new StringBuilder("Could not download checksums").append(System.lineSeparator());
-		for (HttpResponse failure : failures) {
-			builder.append(failure).append(System.lineSeparator());
-		}
-		throw new FileNotFoundException(builder.substring(0, builder.length() - System.lineSeparator().length()));
+		LOGGER.warn("No checksum downloaded for ''{0}'', skipping verification.", cassandraPackage.getName());
 	}
 
 	private void verify(String actual, String expected) {
 		if (!actual.equals(expected)) {
-			LOGGER.error("Checksum mismatch!");
 			throw new IllegalStateException(String.format("Checksum mismatch. "
 					+ "Actual: '%s' Expected: '%s'", actual, expected));
 		}

@@ -217,7 +217,7 @@ class WebCassandraDirectoryProviderTests {
 		assertThat(this.out.toString()).contains("Extracting");
 		assertThat(this.out.toString()).contains("Downloading");
 		assertThat(this.out.toString()).contains("Verifying checksum");
-		assertThat(this.out.toString()).contains("Skipping checksum verifying");
+		assertThat(this.out.toString()).contains("No checksum defined for");
 		assertThat(this.out.toString()).contains("100%");
 	}
 
@@ -243,7 +243,7 @@ class WebCassandraDirectoryProviderTests {
 		assertThat(this.out.toString()).contains("Extracting");
 		assertThat(this.out.toString()).contains("Downloading");
 		assertThat(this.out.toString()).contains("Verifying checksum");
-		assertThat(this.out.toString()).contains("Skipping checksum verifying");
+		assertThat(this.out.toString()).contains("No checksum defined for");
 		assertThat(this.out.toString()).contains("100%");
 
 	}
@@ -291,7 +291,7 @@ class WebCassandraDirectoryProviderTests {
 
 		assertThat(this.out.toString()).contains("Extracting");
 		assertThat(this.out.toString()).contains("Downloading");
-		assertThat(this.out.toString()).contains("Skipping checksum verifying");
+		assertThat(this.out.toString()).contains("No checksum defined for");
 		assertThat(this.out.toString()).contains("100%");
 	}
 
@@ -318,7 +318,7 @@ class WebCassandraDirectoryProviderTests {
 	}
 
 	@Test
-	void downloadAndExtractCouldNotDownloadChecksum() {
+	void downloadAndExtractCouldNotDownloadChecksum() throws IOException {
 		Version version = Version.parse("4.0-beta3");
 
 		List<CassandraPackage> packages = new ArrayList<>();
@@ -329,14 +329,15 @@ class WebCassandraDirectoryProviderTests {
 						version)))));
 		doReturn(packages).when(this.directoryProvider).getCassandraPackages(version);
 
-		assertThatThrownBy(() -> this.directoryProvider.getDirectory(version))
-				.hasStackTraceContaining("Could not download checksums");
+		Path directory = this.directoryProvider.getDirectory(version);
+		assertDirectory(directory);
 
-		assertThat(this.out.toString()).doesNotContain("Extracting");
+		assertThat(this.out.toString()).contains("Extracting");
 		assertThat(this.out.toString()).contains("Downloading");
 		assertThat(this.out.toString()).contains("Verifying checksum");
 		assertThat(this.out.toString()).contains("100%");
 		assertThat(this.out.toString()).doesNotContain("Checksums are identical");
+		assertThat(this.out.toString()).contains("No checksum downloaded for");
 	}
 
 	@Test
