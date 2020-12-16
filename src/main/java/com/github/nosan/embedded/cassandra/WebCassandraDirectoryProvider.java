@@ -316,22 +316,23 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 		for (Map.Entry<String, URI> checksum : checksums.entrySet()) {
 			String algo = checksum.getKey();
 			URI uri = checksum.getValue();
-			HttpResponse response = httpClient.send(new HttpRequest(uri));
-			if (response.getStatus() == 200) {
-				String expected;
-				try (InputStream stream = response.getInputStream()) {
-					expected = StreamUtils.toString(stream, Charset.defaultCharset()).trim();
+			try (HttpResponse response = httpClient.send(new HttpRequest(uri))) {
+				if (response.getStatus() == 200) {
+					String expected;
+					try (InputStream stream = response.getInputStream()) {
+						expected = StreamUtils.toString(stream, Charset.defaultCharset()).trim();
+					}
+					String[] tokens = expected.split("\\s+");
+					String actual = FileUtils.checksum(archiveFile, algo);
+					if (tokens.length == 2) {
+						verify(actual + " " + cassandraPackage.getName(), tokens[0] + " " + tokens[1]);
+					}
+					else {
+						verify(actual, tokens[0]);
+					}
+					LOGGER.info("Checksums are identical");
+					return;
 				}
-				String[] tokens = expected.split("\\s+");
-				String actual = FileUtils.checksum(archiveFile, algo);
-				if (tokens.length == 2) {
-					verify(actual + " " + cassandraPackage.getName(), tokens[0] + " " + tokens[1]);
-				}
-				else {
-					verify(actual, tokens[0]);
-				}
-				LOGGER.info("Checksums are identical");
-				return;
 			}
 		}
 		LOGGER.warn("No checksum downloaded for ''{0}'', skipping verification.", cassandraPackage.getName());
