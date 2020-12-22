@@ -382,6 +382,27 @@ class DefaultCassandraDatabaseFactoryTests {
 	}
 
 	@Test
+	void setConfigPropertiesEmptyName(@TempDir Path workingDirectory) {
+		this.configProperties.put("", true);
+		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory))
+				.hasStackTraceContaining("Config property must not be empty");
+	}
+
+	@Test
+	void setConfigPropertiesSubPropertyEmpty(@TempDir Path workingDirectory) {
+		this.configProperties.put("a.", true);
+		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory))
+				.hasStackTraceContaining("Config property must not be empty");
+	}
+
+	@Test
+	void setConfigPropertiesSubPropertyEmpty1(@TempDir Path workingDirectory) {
+		this.configProperties.put(".", true);
+		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory))
+				.hasStackTraceContaining("Config property: '.' is invalid");
+	}
+
+	@Test
 	void setConfigPropertiesCannotHaveNestedProperties(@TempDir Path workingDirectory) throws Exception {
 		this.configProperties.put("client_encryption_options.enabled.nested", true);
 		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory))

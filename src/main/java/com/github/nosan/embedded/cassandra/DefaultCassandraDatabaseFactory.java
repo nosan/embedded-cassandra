@@ -237,6 +237,9 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 		}
 		if (index != -1) {
 			String rootName = name.substring(0, index);
+			if (rootName.isEmpty()) {
+				throw new IllegalArgumentException(String.format("Config property: '%s' is invalid", name));
+			}
 			if (target.get(rootName) instanceof Map) {
 				Map<String, Object> rootValue = (Map<String, Object>) target.get(rootName);
 				target.put(rootName, rootValue);
@@ -254,6 +257,9 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 						target.get(rootName).getClass().getCanonicalName()));
 			}
 			return;
+		}
+		if (name.isEmpty()) {
+			throw new IllegalArgumentException("Config property must not be empty");
 		}
 		if (target.get(name) instanceof Map && value instanceof Map) {
 			Map<String, Object> rootValue = (Map<String, Object>) target.get(name);
