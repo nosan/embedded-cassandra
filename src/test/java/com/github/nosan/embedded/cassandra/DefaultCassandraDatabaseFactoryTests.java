@@ -348,7 +348,16 @@ class DefaultCassandraDatabaseFactoryTests {
 		this.configProperties.put("native_transport_port", 9142);
 		this.configProperties.put("client_encryption_options.enabled", true);
 		this.configProperties.put("server_encryption_options", Collections.singletonMap("internode_encryption", "all"));
-		this.configProperties.put("test.enabled", true);
+		this.configProperties.put("test.enabled", "A");
+		this.configProperties.put("test\\.enabled", "B");
+		this.configProperties.put("test\\\\.enabled", "C");
+		this.configProperties.put("test\\\\\\.enabled", "D");
+		this.configProperties.put("test\\\\\\\\.enabled", "F");
+		this.configProperties.put("test\\\\\\\\\\.enabled", "E");
+		this.configProperties.put("test.nested.enabled", "AA");
+		this.configProperties.put("test\\.nested.enabled", "BB");
+		this.configProperties.put("test\\.nested\\.enabled", "CC");
+
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
 		assertThat(configProperties.get("native_transport_port")).isEqualTo(9142);
@@ -357,7 +366,19 @@ class DefaultCassandraDatabaseFactoryTests {
 		assertThat(((Map<String, Object>) configProperties.get("server_encryption_options")))
 				.contains(entry("internode_encryption", "all"));
 		assertThat(((Map<String, Object>) configProperties.get("test")))
-				.contains(entry("enabled", true));
+				.contains(entry("enabled", "A"));
+		assertThat((configProperties.get("test.enabled"))).isEqualTo("B");
+		assertThat(((Map<String, Object>) configProperties.get("test\\")))
+				.contains(entry("enabled", "C"));
+		assertThat((configProperties.get("test\\.enabled"))).isEqualTo("D");
+		assertThat(((Map<String, Object>) configProperties.get("test\\\\")))
+				.contains(entry("enabled", "F"));
+		assertThat((configProperties.get("test\\\\.enabled"))).isEqualTo("E");
+		assertThat(((Map<String, Object>) configProperties.get("test")))
+				.contains(entry("nested", Collections.singletonMap("enabled", "AA")));
+		assertThat(((Map<String, Object>) configProperties.get("test.nested")))
+				.contains(entry("enabled", "BB"));
+		assertThat(configProperties.get("test.nested.enabled")).isEqualTo("CC");
 	}
 
 	@Test

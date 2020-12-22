@@ -58,6 +58,8 @@ client_encryption_options:
 
 NOTE: Config properties have higher precedence, than properties from the configuration file.
 
+TIP: Use `\` to escape a period character.
+
 == Configuration File
 
 [source,java,indent=0]

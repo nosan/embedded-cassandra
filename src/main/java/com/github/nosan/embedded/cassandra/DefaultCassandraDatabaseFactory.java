@@ -214,7 +214,27 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 	@SuppressWarnings("unchecked")
 	private static void setProperty(String fullName, String parentName, String name, Object value,
 			Map<String, Object> target) throws IOException {
-		int index = name.indexOf('.');
+		int index = -1;
+		while ((index = name.indexOf('.', index + 1)) != -1) {
+			int backslashes = 0;
+			for (int i = index - 1; i >= 0; i--) {
+				if (name.charAt(i) == '\\') {
+					backslashes++;
+				}
+				else {
+					break;
+				}
+			}
+			String n = name.substring(index - backslashes, index).replace("\\\\", "\\");
+			name = name.substring(0, index - backslashes) + n + name.substring(index);
+			index -= (backslashes / 2);
+			if (backslashes % 2 != 0) {
+				name = name.substring(0, index - 1) + name.substring(index);
+				index--;
+				continue;
+			}
+			break;
+		}
 		if (index != -1) {
 			String rootName = name.substring(0, index);
 			if (target.get(rootName) instanceof Map) {
