@@ -16,6 +16,8 @@ include::{sources}/CassandraExamples.java[tag=version]
 
 NOTE: Defaults to *4.0-beta4*.
 
+CAUTION: Since *4.0-beta4*, Windows scripts were removed. https://issues.apache.org/jira/browse/CASSANDRA-16171[CASSANDRA-16171]
+
 == Config Properties
 
 Cassandra config properties, that should be merged with properties from `cassandra.yaml`.
