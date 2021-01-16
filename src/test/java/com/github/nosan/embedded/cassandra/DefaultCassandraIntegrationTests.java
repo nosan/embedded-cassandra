@@ -17,26 +17,23 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
-import java.security.KeyStore;
-import java.security.SecureRandom;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.RemoteEndpointAwareJdkSSLOptions;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SocketOptions;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.CqlSessionBuilder;
+import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
+import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
+import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
+import com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider;
+import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.io.TempDir;
@@ -104,20 +101,20 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.isRunning()).isTrue();
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			Settings settings = cassandra.getSettings();
-			ClusterFactory clusterFactory = new ClusterFactory();
-			clusterFactory.address = settings.getAddress();
-			clusterFactory.port = settings.getPort();
-			createScheme(clusterFactory);
+			SessionFactory sessionFactory = new SessionFactory();
+			sessionFactory.address = settings.getAddress();
+			sessionFactory.port = settings.getPort();
+			createScheme(sessionFactory);
 		});
 		this.runner.run(cassandra, throwable -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.isRunning()).isTrue();
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			Settings settings = cassandra.getSettings();
-			ClusterFactory clusterFactory = new ClusterFactory();
-			clusterFactory.address = settings.getAddress();
-			clusterFactory.port = settings.getPort();
-			assertThatThrownBy(() -> createScheme(clusterFactory))
+			SessionFactory sessionFactory = new SessionFactory();
+			sessionFactory.address = settings.getAddress();
+			sessionFactory.port = settings.getPort();
+			assertThatThrownBy(() -> createScheme(sessionFactory))
 					.hasStackTraceContaining("Keyspace test already exists");
 		});
 	}
@@ -152,10 +149,10 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
-			ClusterFactory clusterFactory = new ClusterFactory();
-			clusterFactory.address = settings.getAddress();
-			clusterFactory.port = settings.getPort();
-			createScheme(clusterFactory);
+			SessionFactory sessionFactory = new SessionFactory();
+			sessionFactory.address = settings.getAddress();
+			sessionFactory.port = settings.getPort();
+			createScheme(sessionFactory);
 		});
 	}
 
@@ -174,10 +171,10 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
-			ClusterFactory clusterFactory = new ClusterFactory();
-			clusterFactory.address = settings.getAddress();
-			clusterFactory.port = settings.getPort();
-			createScheme(clusterFactory);
+			SessionFactory sessionFactory = new SessionFactory();
+			sessionFactory.address = settings.getAddress();
+			sessionFactory.port = settings.getPort();
+			createScheme(sessionFactory);
 		});
 	}
 
@@ -232,16 +229,17 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getSslPort()).isEqualTo(9142);
-			ClusterFactory clusterFactory = new ClusterFactory();
-			clusterFactory.address = settings.getAddress();
-			clusterFactory.port = settings.getSslPort();
-			assertThatThrownBy(() -> createScheme(clusterFactory)).hasStackTraceContaining("tried for query failed");
-			clusterFactory.sslEnabled = true;
-			clusterFactory.truststore = truststore;
-			clusterFactory.truststorePassword = "cassandra";
-			clusterFactory.keystore = keystore;
-			clusterFactory.keystorePassword = "cassandra";
-			createScheme(clusterFactory);
+			SessionFactory sessionFactory = new SessionFactory();
+			sessionFactory.address = settings.getAddress();
+			sessionFactory.port = settings.getSslPort();
+			assertThatThrownBy(() -> createScheme(sessionFactory))
+					.hasStackTraceContaining("Could not reach any contact point");
+			sessionFactory.sslEnabled = true;
+			sessionFactory.truststore = truststore;
+			sessionFactory.truststorePassword = "cassandra";
+			sessionFactory.keystore = keystore;
+			sessionFactory.keystorePassword = "cassandra";
+			createScheme(sessionFactory);
 		});
 	}
 
@@ -269,16 +267,17 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getSslPort()).isNull();
-			ClusterFactory clusterFactory = new ClusterFactory();
-			clusterFactory.address = settings.getAddress();
-			clusterFactory.port = settings.getPort();
-			assertThatThrownBy(() -> createScheme(clusterFactory)).hasStackTraceContaining("tried for query failed");
-			clusterFactory.sslEnabled = true;
-			clusterFactory.truststore = truststore;
-			clusterFactory.truststorePassword = "cassandra";
-			clusterFactory.keystore = keystore;
-			clusterFactory.keystorePassword = "cassandra";
-			createScheme(clusterFactory);
+			SessionFactory sessionFactory = new SessionFactory();
+			sessionFactory.address = settings.getAddress();
+			sessionFactory.port = settings.getPort();
+			assertThatThrownBy(() -> createScheme(sessionFactory))
+					.hasStackTraceContaining("Could not reach any contact point");
+			sessionFactory.sslEnabled = true;
+			sessionFactory.truststore = truststore;
+			sessionFactory.truststorePassword = "cassandra";
+			sessionFactory.keystore = keystore;
+			sessionFactory.keystorePassword = "cassandra";
+			createScheme(sessionFactory);
 		});
 	}
 
@@ -310,10 +309,10 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getSslPort()).isNull();
-			ClusterFactory clusterFactory = new ClusterFactory();
-			clusterFactory.address = settings.getAddress();
-			clusterFactory.port = settings.getPort();
-			createScheme(clusterFactory);
+			SessionFactory sessionFactory = new SessionFactory();
+			sessionFactory.address = settings.getAddress();
+			sessionFactory.port = settings.getPort();
+			createScheme(sessionFactory);
 		});
 	}
 
@@ -332,13 +331,13 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
-			ClusterFactory clusterFactory = new ClusterFactory();
-			clusterFactory.address = settings.getAddress();
-			clusterFactory.port = settings.getPort();
-			assertThatThrownBy(() -> createScheme(clusterFactory)).hasStackTraceContaining("requires authentication");
-			clusterFactory.username = "cassandra";
-			clusterFactory.password = "cassandra";
-			createScheme(clusterFactory);
+			SessionFactory sessionFactory = new SessionFactory();
+			sessionFactory.address = settings.getAddress();
+			sessionFactory.port = settings.getPort();
+			assertThatThrownBy(() -> createScheme(sessionFactory)).hasStackTraceContaining("requires authentication");
+			sessionFactory.username = "cassandra";
+			sessionFactory.password = "cassandra";
+			createScheme(sessionFactory);
 		});
 	}
 
@@ -433,9 +432,8 @@ class DefaultCassandraIntegrationTests {
 		}
 	}
 
-	private static void createScheme(ClusterFactory clusterFactory) {
-		try (Cluster cluster = clusterFactory.createCluster()) {
-			Session session = cluster.connect();
+	private static void createScheme(SessionFactory sessionFactory) {
+		try (CqlSession session = sessionFactory.createSession()) {
 			CqlScript.ofClassPath("schema.cql").forEachStatement(session::execute);
 		}
 	}
@@ -517,7 +515,7 @@ class DefaultCassandraIntegrationTests {
 
 	}
 
-	private static final class ClusterFactory {
+	private static final class SessionFactory {
 
 		private InetAddress address;
 
@@ -537,63 +535,45 @@ class DefaultCassandraIntegrationTests {
 
 		private String keystorePassword;
 
-		Cluster createCluster() {
-			SocketOptions socketOptions = new SocketOptions();
-			socketOptions.setConnectTimeoutMillis(30000);
-			socketOptions.setReadTimeoutMillis(30000);
-			Cluster.Builder builder = Cluster.builder().addContactPoints(this.address)
-					.withoutMetrics()
-					.withoutJMXReporting()
-					.withPort(this.port)
-					.withSocketOptions(socketOptions);
+		private CqlSession createSession() {
+			ProgrammaticDriverConfigLoaderBuilder driverBuilder = DriverConfigLoader.programmaticBuilder()
+					.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
+					.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3));
 			if (this.username != null && this.password != null) {
-				builder.withCredentials(this.username, this.password);
+				driverBuilder.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, this.username)
+						.withString(DefaultDriverOption.AUTH_PROVIDER_PASSWORD, this.password)
+						.withClass(DefaultDriverOption.AUTH_PROVIDER_CLASS, PlainTextAuthProvider.class);
 			}
 			if (this.sslEnabled) {
-				RemoteEndpointAwareJdkSSLOptions.Builder sslOptionsBuilder = RemoteEndpointAwareJdkSSLOptions
-						.builder();
-				if (this.keystore != null || this.truststore != null) {
-					sslOptionsBuilder.withSSLContext(getSslContext());
+				driverBuilder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, false)
+						.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class);
+				if (this.truststore != null) {
+					driverBuilder
+							.withString(DefaultDriverOption.SSL_TRUSTSTORE_PATH, getPath(this.truststore).toString());
 				}
-				builder.withSSL(sslOptionsBuilder.build());
+				if (this.truststorePassword != null) {
+					driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PASSWORD, this.truststorePassword);
+				}
+				if (this.keystore != null) {
+					driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PATH, getPath(this.keystore).toString());
+				}
+				if (this.keystorePassword != null) {
+					driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PASSWORD, this.keystorePassword);
+				}
 			}
-			return builder.build();
+			InetSocketAddress contactPoint = new InetSocketAddress(this.address, this.port);
+			CqlSessionBuilder sessionBuilder = CqlSession.builder().addContactPoint(contactPoint)
+					.withConfigLoader(driverBuilder.build());
+			sessionBuilder.withLocalDatacenter("datacenter1");
+			return sessionBuilder.build();
 		}
 
-		private SSLContext getSslContext() {
+		private Path getPath(Resource resource) {
 			try {
-				SSLContext context = SSLContext.getInstance("SSL");
-				TrustManagerFactory tmf = null;
-				Resource truststore = this.truststore;
-				if (truststore != null) {
-					try (InputStream tsf = truststore.getInputStream()) {
-						KeyStore ts = KeyStore.getInstance("JKS");
-						String truststorePassword = this.truststorePassword;
-						char[] password = (truststorePassword != null) ? truststorePassword.toCharArray() : null;
-						ts.load(tsf, password);
-						tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-						tmf.init(ts);
-					}
-				}
-				KeyManagerFactory kmf = null;
-				Resource keystore = this.keystore;
-				if (keystore != null) {
-					try (InputStream ksf = keystore.getInputStream()) {
-						KeyStore ks = KeyStore.getInstance("JKS");
-						String keystorePassword = this.keystorePassword;
-						char[] password = (keystorePassword != null) ? keystorePassword.toCharArray() : null;
-						ks.load(ksf, password);
-						kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-						kmf.init(ks, password);
-					}
-				}
-				KeyManager[] keyManagers = (kmf != null) ? kmf.getKeyManagers() : null;
-				TrustManager[] trustManagers = (tmf != null) ? tmf.getTrustManagers() : null;
-				context.init(keyManagers, trustManagers, new SecureRandom());
-				return context;
+				return Paths.get(resource.toURI());
 			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Can not initialize SSL Context", ex);
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
 			}
 		}
 

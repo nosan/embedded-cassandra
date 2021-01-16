@@ -16,14 +16,14 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Session;
+import com.datastax.oss.driver.api.core.CqlSession;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
@@ -98,10 +98,10 @@ public class CassandraExamples {
 		cassandra.start();
 		try {
 			Settings settings = cassandra.getSettings();
-
-			try (Cluster cluster = Cluster.builder().addContactPoints(settings.getAddress())
-					.withPort(settings.getPort()).build()) {
-				Session session = cluster.connect();
+			try (CqlSession session = CqlSession.builder()
+					.addContactPoint(new InetSocketAddress(settings.getAddress(), settings.getPort()))
+					.withLocalDatacenter("datacenter1")
+					.build()) {
 				CqlScript.ofClassPath("schema.cql").forEachStatement(session::execute);
 			}
 		}
@@ -304,7 +304,7 @@ public class CassandraExamples {
 	}
 
 	private void cqlStatements() {
-		Session session = null;
+		CqlSession session = null;
 		//tag::cql[]
 
 		CqlScript.ofClassPath("schema.cql").forEachStatement(session::execute);

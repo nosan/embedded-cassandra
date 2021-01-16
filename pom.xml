@@ -44,7 +44,7 @@
         <java.version>1.8</java.version>
         <junit5.version>5.7.0</junit5.version>
         <checkstyle.version>8.39</checkstyle.version>
-        <cassandra-driver-core.version>3.10.2</cassandra-driver-core.version>
+        <cassandra-java-driver-core.version>4.10.0</cassandra-java-driver-core.version>
         <assertj.version>3.18.1</assertj.version>
         <slf4j-api.version>1.7.30</slf4j-api.version>
         <snakeyaml.version>1.27</snakeyaml.version>
@@ -109,9 +109,9 @@
                 <version>${junit5.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.datastax.cassandra</groupId>
-                <artifactId>cassandra-driver-core</artifactId>
-                <version>${cassandra-driver-core.version}</version>
+                <groupId>com.datastax.oss</groupId>
+                <artifactId>java-driver-core</artifactId>
+                <version>${cassandra-java-driver-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -146,8 +146,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.datastax.cassandra</groupId>
-            <artifactId>cassandra-driver-core</artifactId>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>java-driver-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
