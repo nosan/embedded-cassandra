@@ -164,18 +164,18 @@ public class CassandraExamples {
 
 	private void clientEncryptionOptions() {
 		//tag::client-encryption-options[]
-		ClassPathResource keystore = new ClassPathResource("keystore.node0");
-		ClassPathResource truststore = new ClassPathResource("truststore.node0");
+		ClassPathResource keystore = new ClassPathResource("server.keystore");
+		ClassPathResource truststore = new ClassPathResource("server.truststore");
 		new CassandraBuilder()
-				.addWorkingDirectoryResource(keystore, "conf/.keystore")
-				.addWorkingDirectoryResource(truststore, "conf/.truststore")
+				.addWorkingDirectoryResource(keystore, "conf/server.keystore")
+				.addWorkingDirectoryResource(truststore, "conf/server.truststore")
 				.addConfigProperty("client_encryption_options.enabled", true)
 				.addConfigProperty("client_encryption_options.require_client_auth", true)
 				.addConfigProperty("client_encryption_options.optional", false)
-				.addConfigProperty("client_encryption_options.keystore", "conf/.keystore")
-				.addConfigProperty("client_encryption_options.truststore", "conf/.truststore")
-				.addConfigProperty("client_encryption_options.keystore_password", "cassandra")
-				.addConfigProperty("client_encryption_options.truststore_password", "cassandra")
+				.addConfigProperty("client_encryption_options.keystore", "conf/server.keystore")
+				.addConfigProperty("client_encryption_options.truststore", "conf/server.truststore")
+				.addConfigProperty("client_encryption_options.keystore_password", "123456")
+				.addConfigProperty("client_encryption_options.truststore_password", "123456")
 				// Use a dedicated SSL port if necessary
 				.addConfigProperty("native_transport_port_ssl", 9142)
 				.build();

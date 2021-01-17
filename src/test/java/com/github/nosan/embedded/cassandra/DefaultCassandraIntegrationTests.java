@@ -184,19 +184,17 @@ class DefaultCassandraIntegrationTests {
 		assumeJavaVersion(version);
 		assumeOs(version);
 		assumeTrue(version.getMajor() >= 3, "native_transport_port_ssl only for version >= 3.x.x");
-		Resource keystore = new ClassPathResource("keystore.node0");
-		Resource truststore = new ClassPathResource("truststore.node0");
 		Map<String, Object> clientEncryptionOptions = new LinkedHashMap<>();
 		clientEncryptionOptions.put("enabled", true);
 		clientEncryptionOptions.put("require_client_auth", true);
 		clientEncryptionOptions.put("optional", false);
-		clientEncryptionOptions.put("keystore", "conf/.keystore");
-		clientEncryptionOptions.put("keystore_password", "cassandra");
-		clientEncryptionOptions.put("truststore", "conf/.truststore");
-		clientEncryptionOptions.put("truststore_password", "cassandra");
+		clientEncryptionOptions.put("keystore", "conf/server.keystore");
+		clientEncryptionOptions.put("keystore_password", "123456");
+		clientEncryptionOptions.put("truststore", "conf/server.truststore");
+		clientEncryptionOptions.put("truststore_password", "123456");
 		this.builder.version(version)
-				.addWorkingDirectoryResource(keystore, "conf/.keystore")
-				.addWorkingDirectoryResource(keystore, "conf/.truststore")
+				.addWorkingDirectoryResource(new ClassPathResource("server.keystore"), "conf/server.keystore")
+				.addWorkingDirectoryResource(new ClassPathResource("server.truststore"), "conf/server.truststore")
 				.addConfigProperty("native_transport_port_ssl", 9142)
 				.addConfigProperty("client_encryption_options", clientEncryptionOptions);
 		this.runner.run((cassandra, throwable) -> {
@@ -213,10 +211,10 @@ class DefaultCassandraIntegrationTests {
 			assertThatThrownBy(() -> createScheme(sessionFactory))
 					.hasStackTraceContaining("Could not reach any contact point");
 			sessionFactory.sslEnabled = true;
-			sessionFactory.truststore = truststore;
-			sessionFactory.truststorePassword = "cassandra";
-			sessionFactory.keystore = keystore;
-			sessionFactory.keystorePassword = "cassandra";
+			sessionFactory.truststore = new ClassPathResource("client.truststore");
+			sessionFactory.truststorePassword = "123456";
+			sessionFactory.keystore = new ClassPathResource("client.keystore");
+			sessionFactory.keystorePassword = "123456";
 			createScheme(sessionFactory);
 		});
 	}
@@ -226,16 +224,14 @@ class DefaultCassandraIntegrationTests {
 	void testSuccessWhenSslClientEnabled(Version version) throws Throwable {
 		assumeJavaVersion(version);
 		assumeOs(version);
-		Resource keystore = new ClassPathResource("keystore.node0");
-		Resource truststore = new ClassPathResource("truststore.node0");
 		Map<String, Object> clientEncryptionOptions = new LinkedHashMap<>();
 		clientEncryptionOptions.put("enabled", true);
 		clientEncryptionOptions.put("require_client_auth", true);
 		clientEncryptionOptions.put("optional", false);
-		clientEncryptionOptions.put("keystore", keystore);
-		clientEncryptionOptions.put("keystore_password", "cassandra");
-		clientEncryptionOptions.put("truststore", truststore);
-		clientEncryptionOptions.put("truststore_password", "cassandra");
+		clientEncryptionOptions.put("keystore", new ClassPathResource("server.keystore"));
+		clientEncryptionOptions.put("keystore_password", "123456");
+		clientEncryptionOptions.put("truststore", new ClassPathResource("server.truststore"));
+		clientEncryptionOptions.put("truststore_password", "123456");
 		this.builder.version(version)
 				.addConfigProperty("client_encryption_options", clientEncryptionOptions);
 		this.runner.run((cassandra, throwable) -> {
@@ -252,10 +248,10 @@ class DefaultCassandraIntegrationTests {
 			assertThatThrownBy(() -> createScheme(sessionFactory))
 					.hasStackTraceContaining("Could not reach any contact point");
 			sessionFactory.sslEnabled = true;
-			sessionFactory.truststore = truststore;
-			sessionFactory.truststorePassword = "cassandra";
-			sessionFactory.keystore = keystore;
-			sessionFactory.keystorePassword = "cassandra";
+			sessionFactory.truststore = new ClassPathResource("client.truststore");
+			sessionFactory.truststorePassword = "123456";
+			sessionFactory.keystore = new ClassPathResource("client.keystore");
+			sessionFactory.keystorePassword = "123456";
 			createScheme(sessionFactory);
 		});
 	}
@@ -265,8 +261,6 @@ class DefaultCassandraIntegrationTests {
 	void testSuccessWhenSslServerEnabled(Version version) throws Throwable {
 		assumeJavaVersion(version);
 		assumeOs(version);
-		Resource keystore = new ClassPathResource("keystore.node0");
-		Resource truststore = new ClassPathResource("truststore.node0");
 		Map<String, Object> serverEncryptionOptions = new LinkedHashMap<>();
 		serverEncryptionOptions.put("internode_encryption", "all");
 		if (version.getMajor() >= 4) {
@@ -275,10 +269,10 @@ class DefaultCassandraIntegrationTests {
 			serverEncryptionOptions.put("enabled", true);
 		}
 		serverEncryptionOptions.put("require_client_auth", true);
-		serverEncryptionOptions.put("keystore", keystore);
-		serverEncryptionOptions.put("keystore_password", "cassandra");
-		serverEncryptionOptions.put("truststore", truststore);
-		serverEncryptionOptions.put("truststore_password", "cassandra");
+		serverEncryptionOptions.put("keystore", new ClassPathResource("server.keystore"));
+		serverEncryptionOptions.put("keystore_password", "123456");
+		serverEncryptionOptions.put("truststore", new ClassPathResource("server.truststore"));
+		serverEncryptionOptions.put("truststore_password", "123456");
 		this.builder.version(version)
 				.addConfigProperty("server_encryption_options", serverEncryptionOptions);
 		this.runner.run((cassandra, throwable) -> {
@@ -530,7 +524,7 @@ class DefaultCassandraIntegrationTests {
 
 		private CqlSession createSession() {
 			ProgrammaticDriverConfigLoaderBuilder driverBuilder = DriverConfigLoader.programmaticBuilder()
-					.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(30))
+					.withDuration(DefaultDriverOption.REQUEST_TIMEOUT, Duration.ofSeconds(10))
 					.withDuration(DefaultDriverOption.CONNECTION_INIT_QUERY_TIMEOUT, Duration.ofSeconds(3));
 			if (this.username != null && this.password != null) {
 				driverBuilder.withString(DefaultDriverOption.AUTH_PROVIDER_USER_NAME, this.username)
