@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -28,7 +27,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
@@ -535,29 +533,27 @@ class DefaultCassandraIntegrationTests {
 				driverBuilder.withBoolean(DefaultDriverOption.SSL_HOSTNAME_VALIDATION, false)
 						.withClass(DefaultDriverOption.SSL_ENGINE_FACTORY_CLASS, DefaultSslEngineFactory.class);
 				if (this.truststore != null) {
-					driverBuilder
-							.withString(DefaultDriverOption.SSL_TRUSTSTORE_PATH, getPath(this.truststore).toString());
+					driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PATH, getPath(this.truststore));
 				}
 				if (this.truststorePassword != null) {
 					driverBuilder.withString(DefaultDriverOption.SSL_TRUSTSTORE_PASSWORD, this.truststorePassword);
 				}
 				if (this.keystore != null) {
-					driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PATH, getPath(this.keystore).toString());
+					driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PATH, getPath(this.keystore));
 				}
 				if (this.keystorePassword != null) {
 					driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PASSWORD, this.keystorePassword);
 				}
 			}
-			InetSocketAddress contactPoint = new InetSocketAddress(this.address, this.port);
-			CqlSessionBuilder sessionBuilder = CqlSession.builder().addContactPoint(contactPoint)
-					.withConfigLoader(driverBuilder.build());
-			sessionBuilder.withLocalDatacenter("datacenter1");
-			return sessionBuilder.build();
+			return CqlSession.builder().addContactPoint(new InetSocketAddress(this.address, this.port))
+					.withConfigLoader(driverBuilder.build())
+					.withLocalDatacenter("datacenter1")
+					.build();
 		}
 
-		private Path getPath(Resource resource) {
+		private String getPath(Resource resource) {
 			try {
-				return Paths.get(resource.toURI());
+				return Paths.get(resource.toURI()).toString();
 			}
 			catch (IOException ex) {
 				throw new UncheckedIOException(ex);
