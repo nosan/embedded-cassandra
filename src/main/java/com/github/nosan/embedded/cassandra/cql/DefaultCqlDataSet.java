@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Default implementation of {@link CqlDataSet}.
@@ -37,6 +38,7 @@ public class DefaultCqlDataSet implements CqlDataSet {
 	 * @param scripts the CQL scripts
 	 */
 	public DefaultCqlDataSet(Collection<? extends CqlScript> scripts) {
+		Objects.requireNonNull(scripts, "Scripts must not be null");
 		this.scripts = Collections.unmodifiableList(new ArrayList<>(scripts));
 	}
 
