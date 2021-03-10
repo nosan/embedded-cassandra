@@ -51,21 +51,15 @@ class CassandraBuilderTests {
 
 	@Test
 	void generatedName() {
-		String n1 = this.builder.getName();
 		Cassandra c1 = this.builder.build();
-		String n2 = this.builder.getName();
 		Cassandra c2 = this.builder.build();
-		assertThat(c1.getName()).isEqualTo(n1);
-		assertThat(c2.getName()).isEqualTo(n2);
-		assertThat(n1).isNotEqualTo(n2);
+		assertThat(c1.getName()).isNotEqualTo(c2.getName());
 	}
 
 	@Test
 	void name() {
-		assertThat(this.builder.getName()).startsWith("cassandra-");
 		CassandraBuilder cassandra = this.builder.name("cassandra");
 		assertThat(cassandra).hasFieldOrPropertyWithValue("name", "cassandra");
-		assertThat(this.builder.getName()).isEqualTo("cassandra");
 	}
 
 	@Test
