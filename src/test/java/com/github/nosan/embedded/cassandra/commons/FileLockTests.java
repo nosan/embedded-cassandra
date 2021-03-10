@@ -209,7 +209,7 @@ class FileLockTests {
 
 	private static String readAll(InputStream stream) {
 		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream))) {
-			return bufferedReader.lines().collect(Collectors.joining());
+			return bufferedReader.lines().collect(Collectors.joining(System.lineSeparator()));
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException(ex);
