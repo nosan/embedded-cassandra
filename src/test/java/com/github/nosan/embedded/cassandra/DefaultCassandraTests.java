@@ -39,7 +39,7 @@ class DefaultCassandraTests {
 		this.builder.workingDirectoryInitializer((workingDirectory, version) -> {
 			throw new IOException("Fail");
 		}).build();
-		assertThatThrownBy(() -> this.builder.build().start()).hasStackTraceContaining("Unable to initialize:");
+		assertThatThrownBy(() -> this.builder.build().start()).hasStackTraceContaining("Unable to initialize");
 	}
 
 	@Test
