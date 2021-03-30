@@ -19,6 +19,8 @@ package com.github.nosan.embedded.cassandra.commons.logging;
 import java.text.MessageFormat;
 import java.util.Objects;
 
+import org.slf4j.LoggerFactory;
+
 /**
  * Slf4j delegate {@link Logger} implementation.
  *
@@ -28,6 +30,16 @@ import java.util.Objects;
 public class Slf4jLogger implements Logger {
 
 	private final org.slf4j.Logger logger;
+
+	/**
+	 * Creates {@link Slf4jLogger}.
+	 *
+	 * @param name the slf4j logger name to use
+	 * @since 4.0.2
+	 */
+	public Slf4jLogger(String name) {
+		this(LoggerFactory.getLogger(name));
+	}
 
 	/**
 	 * Creates {@link Slf4jLogger}.
