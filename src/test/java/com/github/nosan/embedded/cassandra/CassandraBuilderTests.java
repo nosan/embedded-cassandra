@@ -66,9 +66,9 @@ class CassandraBuilderTests {
 	@Test
 	void version() {
 		assertThat(this.builder.getVersion()).isEqualTo(CassandraBuilder.DEFAULT_VERSION);
-		Cassandra cassandra = this.builder.version("3.11.9").build();
-		assertThat(cassandra).hasFieldOrPropertyWithValue("version", Version.parse("3.11.9"));
-		assertThat(this.builder.getVersion()).isEqualTo(Version.parse("3.11.9"));
+		Cassandra cassandra = this.builder.version("3.11.10").build();
+		assertThat(cassandra).hasFieldOrPropertyWithValue("version", Version.parse("3.11.10"));
+		assertThat(this.builder.getVersion()).isEqualTo(Version.parse("3.11.10"));
 	}
 
 	@Test

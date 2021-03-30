@@ -114,7 +114,7 @@ public class CassandraExamples {
 	private void version() {
 		//tag::version[]
 		new CassandraBuilder()
-				.version("3.11.9")
+				.version("3.11.10")
 				.build();
 		//end::version[]
 	}
