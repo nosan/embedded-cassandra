@@ -160,6 +160,15 @@ public class CassandraBuilder {
 	}
 
 	/**
+	 * Gets current configured Cassandra instance name.
+	 *
+	 * @return Cassandra instance name, or {@code null}
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
 	 * Sets the Cassandra version.
 	 * <p>Defaults to {@link #DEFAULT_VERSION}
 	 *
@@ -185,7 +194,7 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Gets current Cassandra version.
+	 * Gets current configured Cassandra version or {@link #DEFAULT_VERSION}.
 	 *
 	 * @return Cassandra version, never {@code null}
 	 */

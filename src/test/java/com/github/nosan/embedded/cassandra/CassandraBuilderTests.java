@@ -60,6 +60,7 @@ class CassandraBuilderTests {
 	void name() {
 		CassandraBuilder cassandra = this.builder.name("cassandra");
 		assertThat(cassandra).hasFieldOrPropertyWithValue("name", "cassandra");
+		assertThat(this.builder.getName()).isEqualTo("cassandra");
 	}
 
 	@Test
