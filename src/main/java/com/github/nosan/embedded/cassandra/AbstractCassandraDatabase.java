@@ -72,7 +72,7 @@ abstract class AbstractCassandraDatabase implements CassandraDatabase {
 			doStop(process);
 			if (!process.destroy().waitFor(5, TimeUnit.SECONDS)) {
 				if (!process.destroyForcibly().waitFor(3, TimeUnit.SECONDS)) {
-					throw new IOException("Unable to stop " + toString());
+					throw new IOException("Unable to stop " + this);
 				}
 			}
 		}

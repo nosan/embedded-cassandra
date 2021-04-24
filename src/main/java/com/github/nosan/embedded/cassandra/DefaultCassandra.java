@@ -155,7 +155,7 @@ class DefaultCassandra implements Cassandra {
 		catch (Exception ex) {
 			destroyWorkingDirectory();
 			throw new CassandraException(
-					String.format("Unable to initialize %s. Caused by: %s", toString(), ex), ex);
+					String.format("Unable to initialize %s. Caused by: %s", this, ex), ex);
 		}
 	}
 
@@ -174,7 +174,7 @@ class DefaultCassandra implements Cassandra {
 					ex.addSuppressed(suppressed);
 				}
 				throw new CassandraException(
-						String.format("Unable to start %s. Caused by: %s", toString(), ex), ex);
+						String.format("Unable to start %s. Caused by: %s", this, ex), ex);
 			}
 		}
 	}
@@ -191,7 +191,7 @@ class DefaultCassandra implements Cassandra {
 				}
 				catch (Exception ex) {
 					throw new CassandraException(
-							String.format("Unable to stop %s. Caused by: %s", toString(), ex), ex);
+							String.format("Unable to stop %s. Caused by: %s", this, ex), ex);
 				}
 			}
 			destroyWorkingDirectory();
