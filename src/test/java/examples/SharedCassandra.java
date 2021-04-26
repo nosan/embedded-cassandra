@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package examples;
+
 import com.github.nosan.embedded.cassandra.Cassandra;
 import com.github.nosan.embedded.cassandra.CassandraBuilder;
 import com.github.nosan.embedded.cassandra.Settings;

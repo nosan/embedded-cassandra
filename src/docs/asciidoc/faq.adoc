@@ -1,6 +1,6 @@
 :source-highlighter: rouge
-:sources: ../java
-:resources: ../resources
+:sources: ../../test/java/examples
+:resources: ../../test/resources
 
 = F.A.Q
 

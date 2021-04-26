@@ -1,6 +1,6 @@
 :source-highlighter: rouge
-:sources: ../java
-:resources: ../resources
+:sources: ../../test/java/examples
+:resources: ../../test/resources
 :apache-cassandra-ref: https://cassandra.apache.org
 
 = How-to?
@@ -75,7 +75,7 @@ include::{sources}/CassandraExamples.java[tag=cql]
 
 == Shared Cassandra
 
-In order to have a shared Cassandra among all your tests(test classes) the following class can be used:
+In order to have a shared Cassandra among all your tests (test classes) the following class can be used:
 
 [source,java,indent=0]
 ----

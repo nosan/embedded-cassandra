@@ -3,8 +3,8 @@
 :github-code: https://github.com/{github-repo}/tree/master
 :github-issues: https://github.com/{github-repo}/issues/
 :source-highlighter: rouge
-:sources: ../java
-:resources: ../resources
+:sources: ../../test/java/examples
+:resources: ../../test/resources
 
 = Getting Started
 
