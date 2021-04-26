@@ -72,3 +72,26 @@ To load CQL statements from different sources, either `CqlScript` or `CqlDataSet
 ----
 include::{sources}/CassandraExamples.java[tag=cql]
 ----
+
+== Shared Cassandra
+
+In order to have a shared Cassandra among all your tests(test classes) the following class can be used:
+
+[source,java,indent=0]
+----
+include::{sources}/SharedCassandra.java[tag=shared-cassandra]
+----
+<1>  Shutdown hook is needed for stopping Cassandra after all tests
+
+
+Then in your tests, you just need to start `Cassandra` before all tests.
+
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=start-shared-cassandra]
+----
+
+NOTE: You don't need to explicitly stop Cassandra because a shutdown hook does this at the end.
+
+NOTE: Calling `Cassandra.start()` method on an already started Cassandra has no effect.
+

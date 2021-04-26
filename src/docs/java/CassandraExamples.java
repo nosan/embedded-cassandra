@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import org.junit.jupiter.api.BeforeAll;
 import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.Cassandra;
@@ -51,6 +52,13 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
  * @author Dmytro Nosan
  */
 public class CassandraExamples {
+
+	//tag::start-shared-cassandra[]
+	@BeforeAll
+	public static void startCassandra() {
+		SharedCassandra.start();
+	}
+	//end::start-shared-cassandra[]
 
 	private void workingDirectoryInitializer() {
 		//tag::working-directory-initializer[]
