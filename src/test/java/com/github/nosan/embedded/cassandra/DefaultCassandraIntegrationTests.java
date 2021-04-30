@@ -551,9 +551,7 @@ class DefaultCassandraIntegrationTests {
 					driverBuilder.withString(DefaultDriverOption.SSL_KEYSTORE_PASSWORD, this.keystorePassword);
 				}
 			}
-			if (this.version.getMajor() >= 4) {
-				driverBuilder.withString(DefaultDriverOption.PROTOCOL_VERSION, "V5");
-			}
+
 			return CqlSession.builder().addContactPoint(new InetSocketAddress(this.address, this.port))
 					.withConfigLoader(driverBuilder.build())
 					.withLocalDatacenter("datacenter1")
