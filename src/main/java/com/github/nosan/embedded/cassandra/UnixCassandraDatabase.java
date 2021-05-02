@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,6 +47,9 @@ class UnixCassandraDatabase extends AbstractCassandraDatabase {
 		processBuilder.directory(getWorkingDirectory().toAbsolutePath().toFile());
 		processBuilder.environment().putAll(getEnvironmentVariables());
 		Path executable = getWorkingDirectory().resolve("bin/cassandra").toAbsolutePath();
+		if (!Files.exists(executable)) {
+			throw new FileNotFoundException(String.format("%s does not exist", executable));
+		}
 		setExecutable(executable);
 		List<String> command = new ArrayList<>();
 		command.add(executable.toString());
@@ -72,7 +76,7 @@ class UnixCassandraDatabase extends AbstractCassandraDatabase {
 	}
 
 	void setExecutable(Path executable) throws IOException {
-		if (Files.exists(executable) && !Files.isExecutable(executable)) {
+		if (!Files.isExecutable(executable)) {
 			Set<PosixFilePermission> permissions = new LinkedHashSet<>(Files.getPosixFilePermissions(executable));
 			permissions.add(PosixFilePermission.OWNER_EXECUTE);
 			permissions.add(PosixFilePermission.GROUP_EXECUTE);

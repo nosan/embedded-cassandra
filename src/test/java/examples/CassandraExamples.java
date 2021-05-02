@@ -22,7 +22,6 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 
 import com.datastax.oss.driver.api.core.CqlSession;
@@ -86,10 +85,7 @@ public class CassandraExamples {
 	private void workingDirectory() {
 		//tag::working-directory[]
 		new CassandraBuilder()
-				//Use a temporary directory
 				.workingDirectory(() -> Files.createTempDirectory("apache-cassandra-"))
-				//Use the same directory
-				.workingDirectory(() -> Paths.get("target/cassandra"))
 				.build();
 		//end::working-directory[]
 	}

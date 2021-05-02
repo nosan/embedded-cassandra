@@ -198,7 +198,7 @@ In the example above, the `ClassPathResource` will be copied into the working di
 
 == Startup Timeout
 
-How much time to wait, while Cassandra is being ready to accept connections.
+How long to wait until Cassandra is ready to accept connections.
 
 [source,java,indent=0]
 ----
