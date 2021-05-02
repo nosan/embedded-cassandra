@@ -65,6 +65,9 @@ class WindowsCassandraDatabaseTests {
 	void doStartPowershell() throws IOException {
 		WindowsCassandraDatabase database = this.database;
 		Path workingDirectory = database.getWorkingDirectory();
+		Files.createDirectory(workingDirectory.resolve("bin"));
+		Files.createFile(workingDirectory.resolve("bin/cassandra.bat"));
+		Files.createFile(workingDirectory.resolve("bin/cassandra.ps1"));
 
 		doReturn(this.process).when(database).start(eq("test:bin/cassandra.ps1"), any());
 
@@ -85,6 +88,8 @@ class WindowsCassandraDatabaseTests {
 	void doStartBat() throws IOException {
 		WindowsCassandraDatabase database = this.database;
 		Path workingDirectory = database.getWorkingDirectory();
+		Files.createDirectory(workingDirectory.resolve("bin"));
+		Files.createFile(workingDirectory.resolve("bin/cassandra.bat"));
 
 		doThrow(new IOException("powershell")).when(database).start(eq("test:bin/cassandra.ps1"), any());
 		doReturn(this.process).when(database).start(eq("test:bin/cassandra.bat"), any());
@@ -252,6 +257,7 @@ class WindowsCassandraDatabaseTests {
 		Path workingDirectory = database.getWorkingDirectory();
 		Files.createDirectory(workingDirectory.resolve("bin"));
 		Files.createFile(workingDirectory.resolve("bin/stop-server.ps1"));
+		Files.createFile(workingDirectory.resolve("bin/stop-server.bat"));
 
 		doReturn(this.process).when(this.database).doStart();
 		when(this.process.destroy()).thenReturn(this.process);
@@ -260,6 +266,7 @@ class WindowsCassandraDatabaseTests {
 		when(this.process.waitFor(10, TimeUnit.SECONDS)).thenReturn(true);
 		when(this.process.getPid()).thenReturn(100L);
 		doThrow(new IOException("I/O")).when(database).exec(eq("test:bin/stop-server.ps1"), any());
+		doReturn(1).when(database).exec(eq("test:bin/stop-server.bat"), any());
 		doReturn(1).doReturn(0).when(database).exec(eq("test:taskkill"), any());
 
 		database.start();

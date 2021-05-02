@@ -16,6 +16,7 @@
 
 package com.github.nosan.embedded.cassandra;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,14 +55,14 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(getWorkingDirectory().toAbsolutePath().toFile());
 		processBuilder.environment().putAll(getEnvironmentVariables());
-		if (stopServer(processBuilder, false) == 0 && process.waitFor(10, TimeUnit.SECONDS)) {
+		if (hasStopFiles() && stopServer(processBuilder, false) == 0 && process.waitFor(10, TimeUnit.SECONDS)) {
 			return;
 		}
 		long pid = process.getPid();
 		if (pid > 0 && taskKill(processBuilder, pid, false) == 0 && process.waitFor(10, TimeUnit.SECONDS)) {
 			return;
 		}
-		if (stopServer(processBuilder, true) == 0 && process.waitFor(10, TimeUnit.SECONDS)) {
+		if (hasStopFiles() && stopServer(processBuilder, true) == 0 && process.waitFor(10, TimeUnit.SECONDS)) {
 			return;
 		}
 		if (pid > 0 && taskKill(processBuilder, pid, true) == 0 && process.waitFor(10, TimeUnit.SECONDS)) {
@@ -99,6 +100,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 
 	private Process startServerPowershell(ProcessBuilder processBuilder) throws IOException {
 		Path executable = getWorkingDirectory().resolve("bin/cassandra.ps1").toAbsolutePath();
+		assertFileExistsAndNotDirectory(executable);
 		List<String> command = new ArrayList<>();
 		command.add("powershell");
 		command.add("-ExecutionPolicy");
@@ -110,11 +112,13 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 			command.add("-a");
 		}
 		command.add("-f");
-		return start(getName() + ":bin/cassandra.ps1", processBuilder.command(command));
+		processBuilder.command(command);
+		return start(getName() + ":bin/cassandra.ps1", processBuilder);
 	}
 
 	private Process startServerBat(ProcessBuilder processBuilder) throws IOException {
 		Path executable = getWorkingDirectory().resolve("bin/cassandra.bat").toAbsolutePath();
+		assertFileExistsAndNotDirectory(executable);
 		List<String> command = new ArrayList<>();
 		command.add(executable.toString());
 		command.add("-p");
@@ -124,29 +128,27 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 		}
 		command.add("-f");
 		processBuilder.command(command);
-		return start(getName() + ":bin/cassandra.bat", processBuilder.command(command));
+		return start(getName() + ":bin/cassandra.bat", processBuilder);
 	}
 
 	private int stopServer(ProcessBuilder processBuilder, boolean force) throws IOException {
 		try {
 			return stopServerPowershell(processBuilder, force);
 		}
-		catch (IOException ex) {
+		catch (IOException powershell) {
 			try {
 				return stopServerBat(processBuilder, force);
 			}
 			catch (IOException bat) {
-				ex.addSuppressed(bat);
+				powershell.addSuppressed(bat);
 			}
-			throw ex;
+			throw powershell;
 		}
 	}
 
 	private int stopServerBat(ProcessBuilder processBuilder, boolean force) throws IOException {
 		Path executable = getWorkingDirectory().resolve("bin/stop-server.bat").toAbsolutePath();
-		if (!Files.exists(executable)) {
-			return 1;
-		}
+		assertFileExistsAndNotDirectory(executable);
 		List<String> command = new ArrayList<>();
 		command.add(executable.toString());
 		command.add("-p");
@@ -154,14 +156,13 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 		if (force) {
 			command.add("-f");
 		}
-		return exec(getName() + ":bin/stop-server.bat", processBuilder.command(command));
+		processBuilder.command(command);
+		return exec(getName() + ":bin/stop-server.bat", processBuilder);
 	}
 
 	private int stopServerPowershell(ProcessBuilder processBuilder, boolean force) throws IOException {
 		Path executable = getWorkingDirectory().resolve("bin/stop-server.ps1").toAbsolutePath();
-		if (!Files.exists(executable)) {
-			return 1;
-		}
+		assertFileExistsAndNotDirectory(executable);
 		List<String> command = new ArrayList<>();
 		command.add("powershell");
 		command.add("-ExecutionPolicy");
@@ -172,7 +173,8 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 		if (force) {
 			command.add("-f");
 		}
-		return exec(getName() + ":bin/stop-server.ps1", processBuilder.command(command));
+		processBuilder.command(command);
+		return exec(getName() + ":bin/stop-server.ps1", processBuilder);
 	}
 
 	private int taskKill(ProcessBuilder processBuilder, long pid, boolean forceful) throws IOException {
@@ -185,7 +187,23 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 		}
 		command.add("/PID");
 		command.add(Long.toString(pid));
-		return exec(name, processBuilder.command(command));
+		processBuilder.command(command);
+		return exec(name, processBuilder);
+	}
+
+	private boolean hasStopFiles() {
+		Path powershell = getWorkingDirectory().resolve("bin/stop-server.ps1").toAbsolutePath();
+		Path bat = getWorkingDirectory().resolve("bin/stop-server.bat").toAbsolutePath();
+		return Files.exists(powershell) || Files.exists(bat);
+	}
+
+	private void assertFileExistsAndNotDirectory(Path file) throws IOException {
+		if (!Files.exists(file)) {
+			throw new FileNotFoundException(String.format("%s does not exist", file));
+		}
+		if (Files.isDirectory(file)) {
+			throw new IOException(String.format("%s is a directory but must be a file", file));
+		}
 	}
 
 }
