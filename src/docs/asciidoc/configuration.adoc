@@ -112,7 +112,7 @@ On Cassandra stop, the directory will be destroyed by `WorkingDirectoryDestroyer
 include::{sources}/CassandraExamples.java[tag=working-directory]
 ----
 
-NOTE: Defaults to `Files.createTempDirectory("apache-cassandra-" + version + "-")`.
+NOTE: Defaults to `Files.createTempDirectory("")`.
 
 == Working Directory Customizer
 

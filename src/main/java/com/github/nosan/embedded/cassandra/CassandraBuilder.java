@@ -102,7 +102,7 @@ public class CassandraBuilder {
 				Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
 			}
 			else {
-				workingDirectory = Files.createTempDirectory("apache-cassandra-" + version + "-");
+				workingDirectory = Files.createTempDirectory("");
 			}
 		}
 		catch (IOException ex) {
@@ -268,7 +268,7 @@ public class CassandraBuilder {
 	 * WorkingDirectoryInitializer} and used as Cassandra home directory.
 	 * <p>
 	 * In the end, provided working directory may be deleted or partly deleted by {@link WorkingDirectoryDestroyer}.
-	 * <p>Defaults to {@code Files.createTempDirectory("apache-cassandra-" + version + "-")}
+	 * <p>Defaults to {@code Files.createTempDirectory("")}
 	 *
 	 * @param workingDirectorySupplier the working directory supplier
 	 * @return this builder
