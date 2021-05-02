@@ -4,3 +4,9 @@ coverage:
       default:
         target: 90%
         threshold: 2%
+codecov:
+  require_ci_to_pass: true
+  notify:
+    after_n_builds: 5
+    wait_for_ci: true
+
