@@ -77,13 +77,11 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 	public CassandraDatabase create(Path workingDirectory) throws Exception {
 		Version version = this.version;
 		Resource configFile = getConfigFile(workingDirectory, this.systemProperties.get("cassandra.config"));
-		//configure system props
 		Map<String, String> systemProperties = new LinkedHashMap<>();
 		for (Map.Entry<String, Object> entry : this.systemProperties.entrySet()) {
 			systemProperties.put(entry.getKey(), Objects.toString(getValue(entry.getValue()), ""));
 		}
 		configureSystemProperties(systemProperties);
-		//configure config properties
 		Map<String, Object> configProperties = loadProperties(configFile);
 		setProperties(null, this.configProperties, configProperties);
 		configureConfigProperties(configProperties);
@@ -91,12 +89,10 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 		if (version.getMajor() >= 4) {
 			configureSeeds(configProperties, systemProperties);
 		}
-		//create new config file
 		Path newConfigFile = Files.createTempFile(workingDirectory.resolve("conf"), "",
 				"-" + configFile.getFileName().orElse("cassandra.yaml")).toAbsolutePath();
 		writeProperties(configProperties, newConfigFile);
 		systemProperties.put("cassandra.config", newConfigFile.toUri().toString());
-		//prepare jvm extra opts
 		List<String> jvmExtraOpts = new ArrayList<>(this.jvmOptions);
 		systemProperties.forEach((name, value) -> {
 			if (value.equals("")) {
@@ -106,22 +102,17 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 				jvmExtraOpts.add("-D" + name + "=" + value);
 			}
 		});
-		//configure envs
 		Map<String, String> environmentVariables = new LinkedHashMap<>();
 		for (Map.Entry<String, Object> entry : this.environmentVariables.entrySet()) {
 			environmentVariables.put(entry.getKey(), Objects.toString(entry.getValue(), ""));
 		}
 		environmentVariables.merge("JVM_EXTRA_OPTS", String.join(" ", jvmExtraOpts), (s1, s2) -> s1 + " " + s2);
-		//set java home
 		if (!environmentVariables.containsKey("JAVA_HOME")) {
 			Optional.ofNullable(System.getProperty("java.home"))
 					.filter(StringUtils::hasText).ifPresent(path -> environmentVariables.put("JAVA_HOME", path));
 		}
-		//avoid gc.log error
 		Files.createDirectories(workingDirectory.resolve("logs"));
-		//creates for data
 		Files.createDirectories(workingDirectory.resolve("data"));
-		//create database
 		if (isWindows()) {
 			Path pidFile = Files.createTempFile(workingDirectory.resolve("bin"), "", "-cassandra.pid");
 			return new WindowsCassandraDatabase(this.name, version, newConfigFile, workingDirectory,

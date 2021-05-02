@@ -100,9 +100,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 
 	private Process startServerPowershell(ProcessBuilder processBuilder) throws IOException {
 		Path executable = getWorkingDirectory().resolve("bin/cassandra.ps1").toAbsolutePath();
-		if (!Files.exists(executable)) {
-			throw new FileNotFoundException(String.format("%s does not exist", executable));
-		}
+		assertFileExists(executable);
 		List<String> command = new ArrayList<>();
 		command.add("powershell");
 		command.add("-ExecutionPolicy");
@@ -120,9 +118,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 
 	private Process startServerBat(ProcessBuilder processBuilder) throws IOException {
 		Path executable = getWorkingDirectory().resolve("bin/cassandra.bat").toAbsolutePath();
-		if (!Files.exists(executable)) {
-			throw new FileNotFoundException(String.format("%s does not exist", executable));
-		}
+		assertFileExists(executable);
 		List<String> command = new ArrayList<>();
 		command.add(executable.toString());
 		command.add("-p");
@@ -152,9 +148,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 
 	private int stopServerBat(ProcessBuilder processBuilder, boolean force) throws IOException {
 		Path executable = getWorkingDirectory().resolve("bin/stop-server.bat").toAbsolutePath();
-		if (!Files.exists(executable)) {
-			throw new FileNotFoundException(String.format("%s does not exist", executable));
-		}
+		assertFileExists(executable);
 		List<String> command = new ArrayList<>();
 		command.add(executable.toString());
 		command.add("-p");
@@ -168,9 +162,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 
 	private int stopServerPowershell(ProcessBuilder processBuilder, boolean force) throws IOException {
 		Path executable = getWorkingDirectory().resolve("bin/stop-server.ps1").toAbsolutePath();
-		if (!Files.exists(executable)) {
-			throw new FileNotFoundException(String.format("%s does not exist", executable));
-		}
+		assertFileExists(executable);
 		List<String> command = new ArrayList<>();
 		command.add("powershell");
 		command.add("-ExecutionPolicy");
@@ -203,6 +195,12 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 		Path powershell = getWorkingDirectory().resolve("bin/stop-server.ps1").toAbsolutePath();
 		Path bat = getWorkingDirectory().resolve("bin/stop-server.bat").toAbsolutePath();
 		return Files.exists(powershell) || Files.exists(bat);
+	}
+
+	private static void assertFileExists(Path executable) throws FileNotFoundException {
+		if (!Files.exists(executable)) {
+			throw new FileNotFoundException(String.format("%s does not exist", executable));
+		}
 	}
 
 }
