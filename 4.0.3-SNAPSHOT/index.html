@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 4.0.3-SNAPSHOT,</span>
-<span id="revdate">2021-05-02T17:30:58Z</span>
+<span id="revdate">2021-05-02T17:57:28Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -806,10 +806,7 @@ and <code>WorkingDirectoryCustomizer(s)</code> respectively.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
-        <span class="c1">//Use a temporary directory</span>
         <span class="o">.</span><span class="na">workingDirectory</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="nc">Files</span><span class="o">.</span><span class="na">createTempDirectory</span><span class="o">(</span><span class="s">"apache-cassandra-"</span><span class="o">))</span>
-        <span class="c1">//Use the same directory</span>
-        <span class="o">.</span><span class="na">workingDirectory</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="nc">Paths</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"target/cassandra"</span><span class="o">))</span>
         <span class="o">.</span><span class="na">build</span><span class="o">();</span></code></pre>
 </div>
 </div>
@@ -962,7 +959,7 @@ will be deleted.</p>
 <div class="sect2">
 <h3 id="startup-timeout"><a class="anchor" href="#startup-timeout"></a>2.12. Startup Timeout</h3>
 <div class="paragraph">
-<p>How much time to wait, while Cassandra is being ready to accept connections.</p>
+<p>How long to wait until Cassandra is ready to accept connections.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1412,7 +1409,7 @@ Since <strong>4.0-beta4</strong>, Windows scripts were removed <a href="https://
 <div id="footer">
 <div id="footer-text">
 Version 4.0.3-SNAPSHOT<br>
-Last updated 2021-05-02 17:30:52 UTC
+Last updated 2021-05-02 17:57:20 UTC
 </div>
 </div>
 <style>
