@@ -90,7 +90,7 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 			configureSeeds(configProperties, systemProperties);
 		}
 		Path newConfigFile = Files.createTempFile(workingDirectory.resolve("conf"), "",
-				"-" + configFile.getFileName().orElse("cassandra.yaml")).toAbsolutePath();
+				"-" + configFile.getFileName().orElse("cassandra.yaml"));
 		writeProperties(configProperties, newConfigFile);
 		systemProperties.put("cassandra.config", newConfigFile.toUri().toString());
 		List<String> jvmExtraOpts = new ArrayList<>(this.jvmOptions);

@@ -44,9 +44,9 @@ class UnixCassandraDatabase extends AbstractCassandraDatabase {
 	@Override
 	protected Process doStart() throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(getWorkingDirectory().toAbsolutePath().toFile());
+		processBuilder.directory(getWorkingDirectory().toFile());
 		processBuilder.environment().putAll(getEnvironmentVariables());
-		Path executable = getWorkingDirectory().resolve("bin/cassandra").toAbsolutePath();
+		Path executable = getWorkingDirectory().resolve("bin/cassandra");
 		if (!Files.exists(executable)) {
 			throw new FileNotFoundException(String.format("%s does not exist", executable));
 		}
@@ -63,7 +63,7 @@ class UnixCassandraDatabase extends AbstractCassandraDatabase {
 	@Override
 	protected void doStop(Process process) throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(getWorkingDirectory().toAbsolutePath().toFile());
+		processBuilder.directory(getWorkingDirectory().toFile());
 		processBuilder.environment().putAll(getEnvironmentVariables());
 		long pid = process.getPid();
 		if (pid > 0 && kill(processBuilder, pid) == 0 && process.waitFor(10, TimeUnit.SECONDS)) {

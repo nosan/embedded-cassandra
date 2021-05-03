@@ -258,7 +258,7 @@ class DefaultCassandra implements Cassandra {
 				Thread.currentThread().interrupt();
 			}
 			throw new CassandraException(
-					String.format("Unable to await %s. Caused by: %s", toString(), ex), ex);
+					String.format("Unable to await %s. Caused by: %s", this, ex), ex);
 		}
 	}
 

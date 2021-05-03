@@ -45,7 +45,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 	@Override
 	protected Process doStart() throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(getWorkingDirectory().toAbsolutePath().toFile());
+		processBuilder.directory(getWorkingDirectory().toFile());
 		processBuilder.environment().putAll(getEnvironmentVariables());
 		return startServer(processBuilder);
 	}
@@ -53,7 +53,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 	@Override
 	protected void doStop(Process process) throws IOException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
-		processBuilder.directory(getWorkingDirectory().toAbsolutePath().toFile());
+		processBuilder.directory(getWorkingDirectory().toFile());
 		processBuilder.environment().putAll(getEnvironmentVariables());
 		if (hasStopFiles() && stopServer(processBuilder, false) == 0 && process.waitFor(10, TimeUnit.SECONDS)) {
 			return;
@@ -99,7 +99,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 	}
 
 	private Process startServerPowershell(ProcessBuilder processBuilder) throws IOException {
-		Path executable = getWorkingDirectory().resolve("bin/cassandra.ps1").toAbsolutePath();
+		Path executable = getWorkingDirectory().resolve("bin/cassandra.ps1");
 		assertFileExists(executable);
 		List<String> command = new ArrayList<>();
 		command.add("powershell");
@@ -107,7 +107,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 		command.add("Unrestricted");
 		command.add(executable.toString());
 		command.add("-p");
-		command.add(this.pidFile.toAbsolutePath().toString());
+		command.add(this.pidFile.toString());
 		if (getVersion().compareTo(Version.parse("2.2")) >= 0) {
 			command.add("-a");
 		}
@@ -117,12 +117,12 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 	}
 
 	private Process startServerBat(ProcessBuilder processBuilder) throws IOException {
-		Path executable = getWorkingDirectory().resolve("bin/cassandra.bat").toAbsolutePath();
+		Path executable = getWorkingDirectory().resolve("bin/cassandra.bat");
 		assertFileExists(executable);
 		List<String> command = new ArrayList<>();
 		command.add(executable.toString());
 		command.add("-p");
-		command.add(this.pidFile.toAbsolutePath().toString());
+		command.add(this.pidFile.toString());
 		if (getVersion().compareTo(Version.parse("2.2")) >= 0) {
 			command.add("-a");
 		}
@@ -147,12 +147,12 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 	}
 
 	private int stopServerBat(ProcessBuilder processBuilder, boolean force) throws IOException {
-		Path executable = getWorkingDirectory().resolve("bin/stop-server.bat").toAbsolutePath();
+		Path executable = getWorkingDirectory().resolve("bin/stop-server.bat");
 		assertFileExists(executable);
 		List<String> command = new ArrayList<>();
 		command.add(executable.toString());
 		command.add("-p");
-		command.add(this.pidFile.toAbsolutePath().toString());
+		command.add(this.pidFile.toString());
 		if (force) {
 			command.add("-f");
 		}
@@ -161,7 +161,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 	}
 
 	private int stopServerPowershell(ProcessBuilder processBuilder, boolean force) throws IOException {
-		Path executable = getWorkingDirectory().resolve("bin/stop-server.ps1").toAbsolutePath();
+		Path executable = getWorkingDirectory().resolve("bin/stop-server.ps1");
 		assertFileExists(executable);
 		List<String> command = new ArrayList<>();
 		command.add("powershell");
@@ -169,7 +169,7 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 		command.add("Unrestricted");
 		command.add(executable.toString());
 		command.add("-p");
-		command.add(this.pidFile.toAbsolutePath().toString());
+		command.add(this.pidFile.toString());
 		if (force) {
 			command.add("-f");
 		}
@@ -192,8 +192,8 @@ class WindowsCassandraDatabase extends AbstractCassandraDatabase {
 	}
 
 	private boolean hasStopFiles() {
-		Path powershell = getWorkingDirectory().resolve("bin/stop-server.ps1").toAbsolutePath();
-		Path bat = getWorkingDirectory().resolve("bin/stop-server.bat").toAbsolutePath();
+		Path powershell = getWorkingDirectory().resolve("bin/stop-server.ps1");
+		Path bat = getWorkingDirectory().resolve("bin/stop-server.bat");
 		return Files.exists(powershell) || Files.exists(bat);
 	}
 

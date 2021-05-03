@@ -167,7 +167,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 			for (Exception failure : failures) {
 				StringWriter writer = new StringWriter();
 				failure.printStackTrace(new PrintWriter(writer));
-				builder.append(writer.toString()).append(System.lineSeparator());
+				builder.append(writer).append(System.lineSeparator());
 			}
 			throw new IOException(builder.substring(0, builder.length() - System.lineSeparator().length()));
 		}
