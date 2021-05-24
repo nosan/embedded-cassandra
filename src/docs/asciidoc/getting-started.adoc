@@ -2,6 +2,7 @@
 :github-repo: nosan/embedded-cassandra
 :github-code: https://github.com/{github-repo}/tree/master
 :github-issues: https://github.com/{github-repo}/issues/
+:maven-central: https://search.maven.org/artifact/com.github.nosan/embedded-cassandra/{revnumber}/jar
 :source-highlighter: rouge
 :sources: ../../test/java/examples
 :resources: ../../test/resources
@@ -59,6 +60,8 @@ Contributions to Embedded Cassandra should be made in the form of `GitHub pull r
     </dependency>
 </dependecies>
 ----
+
+NOTE: For other build tools, please use the following {maven-central}[link]
 
 == Quick Start
 
