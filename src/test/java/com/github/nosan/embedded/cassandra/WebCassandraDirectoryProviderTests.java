@@ -125,7 +125,7 @@ class WebCassandraDirectoryProviderTests {
 
 	@RepeatedTest(10)
 	void parallelDownloadAndExtract() throws Exception {
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 
 		List<CassandraPackage> packages = new ArrayList<>();
 		packages.add(new CassandraPackage(String.format("apache-cassandra-%1$s-bin.tar.gz", version),
@@ -166,7 +166,7 @@ class WebCassandraDirectoryProviderTests {
 
 	@Test
 	void failNoPackages() {
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 
 		List<CassandraPackage> packages = new ArrayList<>();
 		doReturn(packages).when(this.directoryProvider).getCassandraPackages(version);
@@ -177,7 +177,7 @@ class WebCassandraDirectoryProviderTests {
 	@Test
 	void failDownloadAndExtract() {
 
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 
 		List<CassandraPackage> packages = new ArrayList<>();
 		Map<String, URI> checksums = new LinkedHashMap<>();
@@ -196,7 +196,7 @@ class WebCassandraDirectoryProviderTests {
 
 	@Test
 	void failToMoveDownloadedShouldBeCopy(@TempDir Path root) throws IOException {
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 
 		Files.createDirectories(root.resolve(".embedded-cassandra")
 				.resolve("cassandra")
@@ -224,7 +224,7 @@ class WebCassandraDirectoryProviderTests {
 	@Test
 	void failAndThenDownload() throws IOException {
 
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 
 		List<CassandraPackage> packages = new ArrayList<>();
 		Map<String, URI> checksums = new LinkedHashMap<>();
@@ -251,7 +251,7 @@ class WebCassandraDirectoryProviderTests {
 	@Test
 	void downloadAndExtractSha1() throws IOException {
 
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 
 		List<CassandraPackage> packages = new ArrayList<>();
 		Map<String, URI> checksums = new LinkedHashMap<>();
@@ -278,7 +278,7 @@ class WebCassandraDirectoryProviderTests {
 
 	@Test
 	void downloadAndExtractChecksumsAreNotPresent() throws IOException {
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 
 		List<CassandraPackage> packages = new ArrayList<>();
 		packages.add(new CassandraPackage(String.format("apache-cassandra-%1$s-bin.tar.gz", version),
@@ -297,7 +297,7 @@ class WebCassandraDirectoryProviderTests {
 
 	@Test
 	void downloadAndExtractFailChecksumMismatch() {
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 
 		List<CassandraPackage> packages = new ArrayList<>();
 		packages.add(new CassandraPackage(String.format("apache-cassandra-%1$s-bin.tar.gz", version),
@@ -319,7 +319,7 @@ class WebCassandraDirectoryProviderTests {
 
 	@Test
 	void downloadAndExtractCouldNotDownloadChecksum() throws IOException {
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 
 		List<CassandraPackage> packages = new ArrayList<>();
 		packages.add(new CassandraPackage(String.format("apache-cassandra-%1$s-bin.tar.gz", version),
@@ -342,7 +342,7 @@ class WebCassandraDirectoryProviderTests {
 
 	@Test
 	void directoryPresentJustReturn(@TempDir Path root) throws IOException {
-		Version version = Version.parse("4.0-rc1");
+		Version version = Version.parse("4.0-rc2");
 		Path expected = Files.createDirectories(root.resolve(".embedded-cassandra")
 				.resolve("cassandra")
 				.resolve(version.toString())
@@ -365,7 +365,7 @@ class WebCassandraDirectoryProviderTests {
 	void failToLock() throws IOException {
 		doReturn(false).when(this.directoryProvider).tryLock(any());
 
-		assertThatThrownBy(() -> this.directoryProvider.getDirectory(Version.parse("4.0-rc1")))
+		assertThatThrownBy(() -> this.directoryProvider.getDirectory(Version.parse("4.0-rc2")))
 				.hasStackTraceContaining(" File lock could not be acquire");
 	}
 
