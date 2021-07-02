@@ -9,7 +9,7 @@ Embedded Cassandra
 
 Embedded Cassandra provides an easy way to start and stop [Apache Cassandra](https://cassandra.apache.org).
 
-To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra/4.0.3).
+To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra/4.0.4).
 
 All versions of Embedded Cassandra reference documentation are [here](https://nosan.github.io/embedded-cassandra).
 
