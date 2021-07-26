@@ -72,7 +72,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.isRunning()).isTrue();
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			Settings settings = cassandra.getSettings();
-			SessionFactory sessionFactory = new SessionFactory(version);
+			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
 			createScheme(sessionFactory);
@@ -82,7 +82,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.isRunning()).isTrue();
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			Settings settings = cassandra.getSettings();
-			SessionFactory sessionFactory = new SessionFactory(version);
+			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
 			assertThatThrownBy(() -> createScheme(sessionFactory))
@@ -122,7 +122,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
-			SessionFactory sessionFactory = new SessionFactory(version);
+			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
 			createScheme(sessionFactory);
@@ -145,7 +145,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
-			SessionFactory sessionFactory = new SessionFactory(version);
+			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
 			createScheme(sessionFactory);
@@ -203,7 +203,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getSslPort()).isEqualTo(9142);
-			SessionFactory sessionFactory = new SessionFactory(version);
+			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getSslPort();
 			assertThatThrownBy(() -> createScheme(sessionFactory))
@@ -240,7 +240,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getSslPort()).isNull();
-			SessionFactory sessionFactory = new SessionFactory(version);
+			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
 			assertThatThrownBy(() -> createScheme(sessionFactory))
@@ -281,7 +281,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getSslPort()).isNull();
-			SessionFactory sessionFactory = new SessionFactory(version);
+			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
 			createScheme(sessionFactory);
@@ -304,7 +304,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(cassandra.getVersion()).isEqualTo(version);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
-			SessionFactory sessionFactory = new SessionFactory(version);
+			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
 			assertThatThrownBy(() -> createScheme(sessionFactory)).hasStackTraceContaining("requires authentication");
@@ -502,8 +502,6 @@ class DefaultCassandraIntegrationTests {
 
 	private static final class SessionFactory {
 
-		private final Version version;
-
 		private InetAddress address;
 
 		private int port;
@@ -521,10 +519,6 @@ class DefaultCassandraIntegrationTests {
 		private Resource keystore;
 
 		private String keystorePassword;
-
-		private SessionFactory(Version version) {
-			this.version = version;
-		}
 
 		private CqlSession createSession() {
 			ProgrammaticDriverConfigLoaderBuilder driverBuilder = DriverConfigLoader.programmaticBuilder()
