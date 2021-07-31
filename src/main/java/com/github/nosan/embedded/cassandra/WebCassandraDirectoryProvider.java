@@ -393,11 +393,11 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 		 * Creates {@link CassandraPackage}.
 		 *
 		 * @param name the name of the package.
-		 * <pre>apache-cassandra-4.0-rc2-bin.tar.gz</pre>
+		 * <pre>apache-cassandra-4.0.0-bin.tar.gz</pre>
 		 * @param uri the URI to the package to download.
-		 * <pre>https://URL/apache-cassandra-4.0-rc2-bin.tar.gz</pre>
+		 * <pre>https://URL/apache-cassandra-4.0.0-bin.tar.gz</pre>
 		 * @param checksums URIs to download checksums. If empty checksum verifying will be skipped.
-		 * <pre>SHA-512 : https://URL/apache-cassandra-4.0-rc2-bin.tar.gz.sha512</pre>
+		 * <pre>SHA-512 : https://URL/apache-cassandra-4.0.0-bin.tar.gz.sha512</pre>
 		 */
 		public CassandraPackage(String name, URI uri, Map<String, URI> checksums) {
 			Objects.requireNonNull(name, "Name must not be null");

@@ -50,8 +50,8 @@ class DefaultCassandraTests {
 
 	@Test
 	void getVersion() {
-		Cassandra cassandra = this.builder.version("3.11.10").build();
-		assertThat(cassandra.getVersion()).isEqualTo(Version.parse("3.11.10"));
+		Cassandra cassandra = this.builder.version("3.11.11").build();
+		assertThat(cassandra.getVersion()).isEqualTo(Version.parse("3.11.11"));
 	}
 
 	@Test

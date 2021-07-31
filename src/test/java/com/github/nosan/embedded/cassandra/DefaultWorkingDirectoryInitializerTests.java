@@ -98,7 +98,7 @@ class DefaultWorkingDirectoryInitializerTests {
 		assertThat(workingDirectory.resolve("lib")).isDirectory().exists();
 		assertThat(workingDirectory.resolve("conf")).isDirectory().exists();
 		assertThat(workingDirectory.resolve("conf/cassandra.yaml")).isRegularFile().exists();
-		assertThat(workingDirectory.resolve("lib/apache-cassandra-4.0-rc2.jar")).isRegularFile().exists();
+		assertThat(workingDirectory.resolve("lib/apache-cassandra-4.0.0.jar")).isRegularFile().exists();
 		assertThat(workingDirectory.resolve("bin/cassandra")).isRegularFile().exists();
 		assertThat(workingDirectory.resolve("javadoc")).doesNotExist();
 		assertThat(workingDirectory.resolve("licenses")).doesNotExist();
@@ -115,7 +115,7 @@ class DefaultWorkingDirectoryInitializerTests {
 		Files.createDirectories(cassandraDirectory.resolve("doc"));
 		Files.createFile(cassandraDirectory.resolve("conf/cassandra.yaml"));
 		Files.createFile(cassandraDirectory.resolve("bin/cassandra"));
-		Files.createFile(cassandraDirectory.resolve("lib/apache-cassandra-4.0-rc2.jar"));
+		Files.createFile(cassandraDirectory.resolve("lib/apache-cassandra-4.0.0.jar"));
 	}
 
 }
