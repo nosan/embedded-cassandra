@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        java: [ 8.0.232, 11 ]
+        java: [ 8.0.192, 11 ]
         os: [ ubuntu-latest, windows-latest, macos-latest ]
         exclude:
           - os: windows-latest
