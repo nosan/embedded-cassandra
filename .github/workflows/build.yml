@@ -5,11 +5,13 @@ on:
     paths-ignore:
       - '**.adoc'
       - '**.md'
+      - '.github/**'
   pull_request:
-    branches:  [ master ]
+    branches: [ master ]
     paths-ignore:
       - '**.adoc'
       - '**.md'
+      - '.github/**'
 
 jobs:
   build:

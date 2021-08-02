@@ -533,9 +533,7 @@
                                 </goals>
                                 <configuration>
                                     <backend>html5</backend>
-                                    <sourceDocumentExtensions>
-                                        <sourceDocumentExtension>index.adoc</sourceDocumentExtension>
-                                    </sourceDocumentExtensions>
+                                    <sourceDocumentName>index.adoc</sourceDocumentName>
                                     <doctype>book</doctype>
                                     <outputDirectory>${project.build.directory}/generated-docs/${project.version}
                                     </outputDirectory>
