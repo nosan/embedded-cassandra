@@ -32,8 +32,6 @@ import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
 import com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider;
 import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
-import org.junit.jupiter.api.condition.JRE;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -43,8 +41,6 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Tests for {@link DefaultCassandra}.
@@ -64,8 +60,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void keepDataBetweenLaunches(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		Cassandra cassandra = this.builder.version(version).build();
 		this.runner.run(cassandra, throwable -> {
 			assertThat(throwable).doesNotThrowAnyException();
@@ -93,8 +87,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void isRunningAndGetSettings(Version version) {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		Cassandra cassandra = this.builder.version(version).build();
 		assertThat(cassandra.isRunning()).isFalse();
 		assertThatThrownBy(cassandra::getSettings)
@@ -112,8 +104,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testSuccessWhenDefault(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		this.builder.version(version);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
@@ -132,8 +122,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testSuccessWhenCustomCassandraYaml(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		ClassPathResource configFile = new ClassPathResource(String.format("cassandra-random-%s.yaml", version));
 		this.builder.version(version)
 				.addSystemProperty("cassandra.jmx.local.port", 0)
@@ -155,13 +143,9 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testSuccessWhenTransportDisabled(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		this.builder.version(version)
 				.addConfigProperty("start_native_transport", false);
-		if (version.getMajor() < 4) {
-			this.builder.addConfigProperty("start_rpc", false);
-		}
+
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
@@ -179,9 +163,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testSuccessWhenSslClientEnabledSslPort(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
-		assumeTrue(version.getMajor() >= 3, "native_transport_port_ssl only for version >= 3.x.x");
 		Map<String, Object> clientEncryptionOptions = new LinkedHashMap<>();
 		clientEncryptionOptions.put("enabled", true);
 		clientEncryptionOptions.put("require_client_auth", true);
@@ -220,8 +201,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testSuccessWhenSslClientEnabled(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		Map<String, Object> clientEncryptionOptions = new LinkedHashMap<>();
 		clientEncryptionOptions.put("enabled", true);
 		clientEncryptionOptions.put("require_client_auth", true);
@@ -257,15 +236,11 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testSuccessWhenSslServerEnabled(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		Map<String, Object> serverEncryptionOptions = new LinkedHashMap<>();
 		serverEncryptionOptions.put("internode_encryption", "all");
-		if (version.getMajor() >= 4) {
-			serverEncryptionOptions.put("enable_legacy_ssl_storage_port", "true");
-			serverEncryptionOptions.put("optional", false);
-			serverEncryptionOptions.put("enabled", true);
-		}
+		serverEncryptionOptions.put("enable_legacy_ssl_storage_port", "true");
+		serverEncryptionOptions.put("optional", false);
+		serverEncryptionOptions.put("enabled", true);
 		serverEncryptionOptions.put("require_client_auth", true);
 		serverEncryptionOptions.put("keystore", new ClassPathResource("server.keystore"));
 		serverEncryptionOptions.put("keystore_password", "123456");
@@ -291,8 +266,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testSuccessWhenAuthenticatorEnabled(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		this.builder.version(version)
 				.addConfigProperty("authenticator", "PasswordAuthenticator")
 				.addConfigProperty("authorizer", "CassandraAuthorizer")
@@ -317,8 +290,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testFailStartupTimeout(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		this.builder.version(version)
 				.startupTimeout(Duration.ofMillis(200));
 		this.runner.run((cassandra, throwable) -> assertThat(throwable).isNotNull()
@@ -328,8 +299,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testFailInvalidProperty(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		this.builder.version(version)
 				.addConfigProperty("invalid_property", "");
 		this.runner.run((cassandra, throwable) -> assertThat(throwable).isNotNull()
@@ -339,8 +308,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testFailJmxPortBusy(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		this.builder.version(version);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
@@ -353,8 +320,6 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testFailStoragePortBusy(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		this.builder.version(version);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
@@ -367,54 +332,15 @@ class DefaultCassandraIntegrationTests {
 	@ParameterizedTest
 	@MethodSource("versions")
 	void testFailNativePortBusy(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
 		this.builder.version(version);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			this.builder.addSystemProperty("cassandra.jmx.local.port", 0)
 					.addSystemProperty("cassandra.storage_port", 0)
-					.configure(builder -> {
-						if (version.getMajor() >= 4) {
-							new SimpleSeedProviderConfigurator("localhost:0").configure(builder);
-						}
-						else {
-							builder.addConfigProperty("start_rpc", false);
-						}
-					});
+					.configure(new SimpleSeedProviderConfigurator("localhost:0"));
 			this.runner.run((cassandra2, throwable2) -> assertThat(throwable2).isNotNull()
 					.hasStackTraceContaining("Failed to bind port "));
 		});
-	}
-
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testFailRpcPortBusy(Version version) throws Throwable {
-		assumeJavaVersion(version);
-		assumeOs(version);
-		assumeTrue(version.getMajor() < 4, "RPC only for version < 4.x.x");
-		this.builder.version(version)
-				.addConfigProperty("start_rpc", true);
-		this.runner.run((cassandra, throwable) -> {
-			assertThat(throwable).doesNotThrowAnyException();
-			this.builder.addSystemProperty("cassandra.jmx.local.port", 0)
-					.addSystemProperty("cassandra.storage_port", 0)
-					.addSystemProperty("cassandra.native_transport_port", 0);
-			this.runner.run((cassandra2, throwable2) -> assertThat(throwable2).isNotNull()
-					.hasStackTraceContaining("Unable to create thrift socket"));
-		});
-	}
-
-	private static void assumeJavaVersion(Version version) {
-		if (version.getMajor() < 4) {
-			assumeTrue(JRE.JAVA_8.isCurrentVersion(), "Cassandra 3.x.x supports only JAVA 8");
-		}
-	}
-
-	private static void assumeOs(Version version) {
-		if (version.getMajor() >= 4) {
-			assumeFalse(OS.WINDOWS.isCurrentOs(), "Cassandra 4.X.X is not supported on Windows anymore");
-		}
 	}
 
 	private static void createScheme(SessionFactory sessionFactory) {
