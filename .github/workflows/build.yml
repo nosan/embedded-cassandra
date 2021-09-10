@@ -18,11 +18,8 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        java: [ 8.0.192, 11 ]
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-        exclude:
-          - os: windows-latest
-            java: 11
+        java: [ 11 ]
+        os: [ ubuntu-latest, macos-latest ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2

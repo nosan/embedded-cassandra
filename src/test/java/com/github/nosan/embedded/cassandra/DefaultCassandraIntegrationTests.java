@@ -424,7 +424,7 @@ class DefaultCassandraIntegrationTests {
 	}
 
 	private static Stream<Version> versions() {
-		return Stream.of(Version.parse("4.0.0"), Version.parse("3.11.11"));
+		return Stream.of(Version.parse("4.0.1"));
 	}
 
 	private interface CassandraConsumer {
