@@ -32,6 +32,8 @@ import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
 import com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider;
 import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -47,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * @author Dmytro Nosan
  */
+@DisabledOnOs(OS.WINDOWS)
 class DefaultCassandraIntegrationTests {
 
 	private final CassandraBuilder builder = new CassandraBuilder().configure(builder -> {
