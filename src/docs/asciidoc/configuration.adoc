@@ -14,7 +14,7 @@ This section covers how to configure Embedded Cassandra.
 include::{sources}/CassandraExamples.java[tag=version]
 ----
 
-NOTE: Defaults to *4.0.1*.
+NOTE: Defaults to *4.0.3*.
 
 CAUTION: Since *4.0-beta4*, Windows scripts were removed. https://issues.apache.org/jira/browse/CASSANDRA-16171[CASSANDRA-16171]
 
