@@ -32,14 +32,13 @@ import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
 import com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider;
 import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
+import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
+import com.github.nosan.embedded.cassandra.commons.Resource;
+import com.github.nosan.embedded.cassandra.cql.CqlScript;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
-import com.github.nosan.embedded.cassandra.commons.Resource;
-import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -55,6 +54,7 @@ class DefaultCassandraIntegrationTests {
 	private final CassandraBuilder builder = new CassandraBuilder().configure(builder -> {
 		if (System.getenv("CI") != null) {
 			builder.startupTimeout(Duration.ofMinutes(10));
+			builder.jvmOptions("-Xms512m", "-Xmx512m");
 		}
 	});
 
@@ -283,7 +283,8 @@ class DefaultCassandraIntegrationTests {
 			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
-			assertThatThrownBy(() -> createScheme(sessionFactory)).hasStackTraceContaining("requires authentication");
+			assertThatThrownBy(() -> createScheme(sessionFactory)).hasStackTraceContaining(
+					"requires authentication");
 			sessionFactory.username = "cassandra";
 			sessionFactory.password = "cassandra";
 			createScheme(sessionFactory);
