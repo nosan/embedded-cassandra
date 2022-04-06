@@ -32,6 +32,7 @@ import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
 import com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider;
 import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -63,6 +64,7 @@ class DefaultCassandraIntegrationTests {
 
 	@ParameterizedTest
 	@MethodSource("versions")
+	@Disabled
 	void keepDataBetweenLaunches(Version version) throws Throwable {
 		Cassandra cassandra = this.builder.version(version).build();
 		this.runner.run(cassandra, throwable -> {
