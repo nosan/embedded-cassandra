@@ -298,8 +298,8 @@ public class CassandraBuilder {
 	/**
 	 * Sets the {@link WorkingDirectoryDestroyer}.
 	 * <p>
-	 * Defaults to {@code WorkingDirectoryDestroyer.deleteOnly("bin", "pylib", "lib", "tools", "doc", "javadoc",
-	 * "interface")}
+	 * Defaults to
+	 * {@code WorkingDirectoryDestroyer.deleteOnly("bin", "pylib", "lib", "tools", "doc", "javadoc", "interface")}
 	 *
 	 * @param workingDirectoryDestroyer the working directory destroyer
 	 * @return this builder
@@ -385,7 +385,9 @@ public class CassandraBuilder {
 	 * variables. For example:
 	 * <pre>
 	 * {@code
-	 *  JAVA_HOME=System.getEnv("JAVA_HOME") | System.getProperty("java.home")
+	 *  Map<String,Object> environmentVariables = new LinkedHashMap<>();
+	 *  environmentVariables.put("TZ", "Europe/London");
+	 *  builder.environmentVariables(environmentVariables);
 	 * }</pre>
 	 *
 	 * @param environmentVariables Cassandra environment variables
@@ -404,7 +406,7 @@ public class CassandraBuilder {
 	 * Puts Cassandra environment variable. For example:
 	 * <pre>
 	 * {@code
-	 * 	  JAVA_HOME=System.getEnv("JAVA_HOME") | System.getProperty("java.home")
+	 *  builder.addEnvironmentVariable("TZ", "Europe/London");
 	 * }
 	 * </pre>
 	 *
@@ -422,7 +424,9 @@ public class CassandraBuilder {
 	 * Puts Cassandra environment variables. For example:
 	 * <pre>
 	 * {@code
-	 *  JAVA_HOME=System.getEnv("JAVA_HOME") | System.getProperty("java.home")
+	 *  Map<String,Object> environmentVariables = new LinkedHashMap<>();
+	 *  environmentVariables.put("TZ", "Europe/London");
+	 *  builder.addEnvironmentVariables(environmentVariables);
 	 * }</pre>
 	 *
 	 * @param environmentVariables Cassandra environment variables
@@ -441,9 +445,11 @@ public class CassandraBuilder {
 	 * previously configured system parameters. For example:
 	 * <pre>
 	 * {@code
-	 *  cassandra.config=new ClassPathResource("cassandra.yaml")
-	 *  cassandra.native_transport_port=9042
-	 *  cassandra.jmx.local.port=7199
+	 *  Map<String,Object> systemProperties = new LinkedHashMap<>();
+	 *  systemProperties.put("cassandra.config", new ClassPathResource("cassandra.yaml"));
+	 *  systemProperties.put("cassandra.native_transport_port", 9042);
+	 *  systemProperties.put("cassandra.jmx.local.port", 7199);
+	 *  builder.systemProperties(systemProperties);
 	 * }</pre>
 	 *
 	 * @param systemProperties Cassandra system parameters
@@ -459,7 +465,8 @@ public class CassandraBuilder {
 
 	/**
 	 * Puts Cassandra native Java Virtual Machine (JVM) system parameter, For example:
-	 * <pre>{@code cassandra.config=new ClassPathResource("cassandra.yaml")}.
+	 * <pre>{@code addSystemProperty("cassandra.config",new ClassPathResource("cassandra.yaml"))
+	 * addSystemProperty("user.timezone","Europe/London")}.
 	 * </pre>
 	 *
 	 * @param name Cassandra system parameter name
@@ -475,9 +482,11 @@ public class CassandraBuilder {
 	 * Puts Cassandra native Java Virtual Machine (JVM) system parameters. For example:
 	 * <pre>
 	 * {@code
-	 *  cassandra.config=new ClassPathResource("cassandra.yaml")
-	 *  cassandra.native_transport_port=9042
-	 *  cassandra.jmx.local.port=7199
+	 *  Map<String,Object> systemProperties = new LinkedHashMap<>();
+	 *  systemProperties.put("cassandra.config", new ClassPathResource("cassandra.yaml"));
+	 *  systemProperties.put("cassandra.native_transport_port", 9042);
+	 *  systemProperties.put("cassandra.jmx.local.port", 7199);
+	 *  builder.addSystemProperties(systemProperties);
 	 * }</pre>
 	 *
 	 * @param systemProperties Cassandra system parameters
