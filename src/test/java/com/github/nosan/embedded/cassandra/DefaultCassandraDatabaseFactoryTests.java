@@ -70,7 +70,7 @@ class DefaultCassandraDatabaseFactoryTests {
 	void prepareWorkingDirectory(@TempDir Path workingDirectory) throws IOException {
 		Files.createDirectories(workingDirectory.resolve("bin"));
 		Files.createDirectories(workingDirectory.resolve("conf"));
-		try (InputStream is = new ClassPathResource("cassandra-4.0.4.yaml").getInputStream()) {
+		try (InputStream is = new ClassPathResource("cassandra-4.0.5.yaml").getInputStream()) {
 			Files.copy(is, workingDirectory.resolve("conf/cassandra.yaml"));
 		}
 	}
@@ -126,7 +126,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigFileResource(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.4.yaml");
+		ClassPathResource resource = new ClassPathResource("cassandra-4.0.5.yaml");
 		this.systemProperties.put("cassandra.config", resource);
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -146,7 +146,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigFileUri(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.4.yaml");
+		ClassPathResource resource = new ClassPathResource("cassandra-4.0.5.yaml");
 		this.systemProperties.put("cassandra.config", resource.toURI());
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -165,7 +165,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigFileUrl(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.4.yaml");
+		ClassPathResource resource = new ClassPathResource("cassandra-4.0.5.yaml");
 		this.systemProperties.put("cassandra.config", resource.toURL());
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -184,7 +184,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigFileString(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.4.yaml");
+		ClassPathResource resource = new ClassPathResource("cassandra-4.0.5.yaml");
 		this.systemProperties.put("cassandra.config", resource.toURL().toString());
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -203,7 +203,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigFilePath(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.4.yaml");
+		ClassPathResource resource = new ClassPathResource("cassandra-4.0.5.yaml");
 		this.systemProperties.put("cassandra.config", Paths.get(resource.toURI()));
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -222,7 +222,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigFileFile(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.4.yaml");
+		ClassPathResource resource = new ClassPathResource("cassandra-4.0.5.yaml");
 		this.systemProperties.put("cassandra.config", new File(resource.toURI()));
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -443,7 +443,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigPropertyClassPathResource(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.4.yaml");
+		ClassPathResource resource = new ClassPathResource("cassandra-4.0.5.yaml");
 		this.configProperties.put("test", resource);
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
@@ -453,7 +453,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigPropertyArrayClassPathResource(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.4.yaml");
+		ClassPathResource resource = new ClassPathResource("cassandra-4.0.5.yaml");
 		this.configProperties.put("test", new ClassPathResource[]{resource});
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();

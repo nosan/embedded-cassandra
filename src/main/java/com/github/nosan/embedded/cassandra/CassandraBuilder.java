@@ -56,7 +56,7 @@ public class CassandraBuilder {
 	/**
 	 * Default Cassandra version.
 	 */
-	public static final Version DEFAULT_VERSION = Version.parse("4.0.4");
+	public static final Version DEFAULT_VERSION = Version.parse("4.0.5");
 
 	private static final AtomicInteger CASSANDRA_ID = new AtomicInteger();
 
