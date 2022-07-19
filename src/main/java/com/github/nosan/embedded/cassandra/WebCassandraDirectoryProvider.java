@@ -257,7 +257,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 			ArchiveEntry entry;
 			while ((entry = archiveInputStream.getNextEntry()) != null) {
 				if (entry.isDirectory()) {
-					Files.createDirectories(destination.resolve(entry.getName()).normalize()).toAbsolutePath();
+					Files.createDirectories(destination.resolve(entry.getName()).normalize().toAbsolutePath());
 				}
 				else {
 					Path file = destination.resolve(entry.getName()).normalize().toAbsolutePath();
