@@ -256,16 +256,19 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 		try (ArchiveInputStream archiveInputStream = createArchiveInputStream(archiveFile)) {
 			ArchiveEntry entry;
 			while ((entry = archiveInputStream.getNextEntry()) != null) {
+				Path entryPath = destination.resolve(entry.getName()).normalize().toAbsolutePath();
+				if (!entryPath.startsWith(destination)) {
+					throw new IOException("Bad zip entry [" + entry.getName() + "]");
+				}
 				if (entry.isDirectory()) {
-					Files.createDirectories(destination.resolve(entry.getName()).normalize().toAbsolutePath());
+					Files.createDirectories(entryPath);
 				}
 				else {
-					Path file = destination.resolve(entry.getName()).normalize().toAbsolutePath();
-					Path parent = file.getParent();
+					Path parent = entryPath.getParent();
 					if (!Files.exists(parent)) {
 						Files.createDirectories(parent);
 					}
-					Files.copy(archiveInputStream, file, StandardCopyOption.REPLACE_EXISTING);
+					Files.copy(archiveInputStream, entryPath, StandardCopyOption.REPLACE_EXISTING);
 				}
 			}
 		}
