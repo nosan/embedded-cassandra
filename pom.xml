@@ -47,7 +47,7 @@
         <cassandra-java-driver-core.version>4.14.1</cassandra-java-driver-core.version>
         <assertj.version>3.23.1</assertj.version>
         <slf4j-api.version>2.0.1</slf4j-api.version>
-        <snakeyaml.version>1.32</snakeyaml.version>
+        <snakeyaml.version>1.33</snakeyaml.version>
         <commons-compress.version>1.21</commons-compress.version>
         <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>
         <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
