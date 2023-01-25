@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.yaml.snakeyaml.Yaml;
@@ -66,17 +65,9 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	private final Set<String> jvmOptions = new LinkedHashSet<>();
 
-	@BeforeEach
-	void prepareWorkingDirectory(@TempDir Path workingDirectory) throws IOException {
-		Files.createDirectories(workingDirectory.resolve("bin"));
-		Files.createDirectories(workingDirectory.resolve("conf"));
-		try (InputStream is = new ClassPathResource("cassandra-4.0.6.yaml").getInputStream()) {
-			Files.copy(is, workingDirectory.resolve("conf/cassandra.yaml"));
-		}
-	}
-
 	@Test
 	void configureJavaHomeEnvVariable(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.environmentVariables.put("JAVA_HOME", "/home");
 
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
@@ -86,6 +77,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void configureEnvVariables(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.jvmOptions.add("-Xmx512m");
 		this.systemProperties.put("namevalue", "value");
 		this.environmentVariables.put("JVM_EXTRA_OPTS", "-Xms1024m");
@@ -93,12 +85,14 @@ class DefaultCassandraDatabaseFactoryTests {
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> environmentVariables = database.getEnvironmentVariables();
 		assertThat(environmentVariables.get("JAVA_HOME")).isEqualTo(System.getProperty("java.home"));
-		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).isEqualTo("-Xms1024m -Xmx512m -Dnamevalue=value"
-				+ " -Dcassandra.config=%s", database.getConfigurationFile().toUri());
+		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).isEqualTo(
+				"-Xms1024m -Xmx512m -Dnamevalue=value" + " -Dcassandra.config=%s",
+				database.getConfigurationFile().toUri());
 	}
 
 	@Test
 	void configSystemProperties(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.systemProperties.put("nameonly", null);
 		this.systemProperties.put("namevalue", "value");
 
@@ -106,27 +100,29 @@ class DefaultCassandraDatabaseFactoryTests {
 		Map<String, String> environmentVariables = database.getEnvironmentVariables();
 
 		assertThat(database.getJvmOptions()).containsExactlyElementsOf(this.jvmOptions);
-		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).isEqualTo("-Dnameonly -Dnamevalue=value"
-				+ " -Dcassandra.config=%s", database.getConfigurationFile().toUri());
+		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).isEqualTo(
+				"-Dnameonly -Dnamevalue=value" + " -Dcassandra.config=%s", database.getConfigurationFile().toUri());
 
 	}
 
 	@Test
 	void configJvmOptions(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.jvmOptions.add("-Xmx512m");
 
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> environmentVariables = database.getEnvironmentVariables();
 
 		assertThat(database.getJvmOptions()).containsExactlyElementsOf(this.jvmOptions);
-		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).isEqualTo("-Xmx512m"
-				+ " -Dcassandra.config=%s", database.getConfigurationFile().toUri());
+		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).isEqualTo("-Xmx512m" + " -Dcassandra.config=%s",
+				database.getConfigurationFile().toUri());
 
 	}
 
 	@Test
 	void setConfigFileResource(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.6.yaml");
+		initWorkingDir(workingDirectory);
+		ClassPathResource resource = new ClassPathResource("cassandra-4.1.0.yaml");
 		this.systemProperties.put("cassandra.config", resource);
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -137,16 +133,17 @@ class DefaultCassandraDatabaseFactoryTests {
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
 			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
 		}
-		assertThat(systemProperties.get("cassandra.config"))
-				.isEqualTo(database.getConfigurationFile().toUri().toString());
-		assertThat(environmentVariables.get("JVM_EXTRA_OPTS"))
-				.contains("-Dcassandra.config=" + database.getConfigurationFile().toUri());
+		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
+				database.getConfigurationFile().toUri().toString());
+		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).contains(
+				"-Dcassandra.config=" + database.getConfigurationFile().toUri());
 
 	}
 
 	@Test
 	void setConfigFileUri(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.6.yaml");
+		initWorkingDir(workingDirectory);
+		ClassPathResource resource = new ClassPathResource("cassandra-4.1.0.yaml");
 		this.systemProperties.put("cassandra.config", resource.toURI());
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -157,15 +154,16 @@ class DefaultCassandraDatabaseFactoryTests {
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
 			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
 		}
-		assertThat(systemProperties.get("cassandra.config"))
-				.isEqualTo(database.getConfigurationFile().toUri().toString());
-		assertThat(environmentVariables.get("JVM_EXTRA_OPTS"))
-				.contains("-Dcassandra.config=" + database.getConfigurationFile().toUri());
+		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
+				database.getConfigurationFile().toUri().toString());
+		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).contains(
+				"-Dcassandra.config=" + database.getConfigurationFile().toUri());
 	}
 
 	@Test
 	void setConfigFileUrl(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.6.yaml");
+		initWorkingDir(workingDirectory);
+		ClassPathResource resource = new ClassPathResource("cassandra-4.1.0.yaml");
 		this.systemProperties.put("cassandra.config", resource.toURL());
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -176,15 +174,16 @@ class DefaultCassandraDatabaseFactoryTests {
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
 			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
 		}
-		assertThat(systemProperties.get("cassandra.config"))
-				.isEqualTo(database.getConfigurationFile().toUri().toString());
-		assertThat(environmentVariables.get("JVM_EXTRA_OPTS"))
-				.contains("-Dcassandra.config=" + database.getConfigurationFile().toUri());
+		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
+				database.getConfigurationFile().toUri().toString());
+		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).contains(
+				"-Dcassandra.config=" + database.getConfigurationFile().toUri());
 	}
 
 	@Test
 	void setConfigFileString(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.6.yaml");
+		initWorkingDir(workingDirectory);
+		ClassPathResource resource = new ClassPathResource("cassandra-4.1.0.yaml");
 		this.systemProperties.put("cassandra.config", resource.toURL().toString());
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -195,15 +194,16 @@ class DefaultCassandraDatabaseFactoryTests {
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
 			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
 		}
-		assertThat(systemProperties.get("cassandra.config"))
-				.isEqualTo(database.getConfigurationFile().toUri().toString());
-		assertThat(environmentVariables.get("JVM_EXTRA_OPTS"))
-				.contains("-Dcassandra.config=" + database.getConfigurationFile().toUri());
+		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
+				database.getConfigurationFile().toUri().toString());
+		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).contains(
+				"-Dcassandra.config=" + database.getConfigurationFile().toUri());
 	}
 
 	@Test
 	void setConfigFilePath(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.6.yaml");
+		initWorkingDir(workingDirectory);
+		ClassPathResource resource = new ClassPathResource("cassandra-4.1.0.yaml");
 		this.systemProperties.put("cassandra.config", Paths.get(resource.toURI()));
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -214,15 +214,16 @@ class DefaultCassandraDatabaseFactoryTests {
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
 			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
 		}
-		assertThat(systemProperties.get("cassandra.config"))
-				.isEqualTo(database.getConfigurationFile().toUri().toString());
-		assertThat(environmentVariables.get("JVM_EXTRA_OPTS"))
-				.contains("-Dcassandra.config=" + database.getConfigurationFile().toUri());
+		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
+				database.getConfigurationFile().toUri().toString());
+		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).contains(
+				"-Dcassandra.config=" + database.getConfigurationFile().toUri());
 	}
 
 	@Test
 	void setConfigFileFile(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.6.yaml");
+		initWorkingDir(workingDirectory);
+		ClassPathResource resource = new ClassPathResource("cassandra-4.1.0.yaml");
 		this.systemProperties.put("cassandra.config", new File(resource.toURI()));
 		CassandraDatabase database = create(Version.parse("4.0.1"), workingDirectory);
 		Map<String, String> systemProperties = database.getSystemProperties();
@@ -233,14 +234,15 @@ class DefaultCassandraDatabaseFactoryTests {
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
 			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
 		}
-		assertThat(systemProperties.get("cassandra.config"))
-				.isEqualTo(database.getConfigurationFile().toUri().toString());
-		assertThat(environmentVariables.get("JVM_EXTRA_OPTS"))
-				.contains("-Dcassandra.config=" + database.getConfigurationFile().toUri());
+		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
+				database.getConfigurationFile().toUri().toString());
+		assertThat(environmentVariables.get("JVM_EXTRA_OPTS")).contains(
+				"-Dcassandra.config=" + database.getConfigurationFile().toUri());
 	}
 
 	@Test
 	void setSystemPropertiesReplaceRandomPorts(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.systemProperties.put("cassandra.native_transport_port", 0);
 		this.systemProperties.put("cassandra.rpc_port", 0);
 		this.systemProperties.put("cassandra.storage_port", 0);
@@ -261,6 +263,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigPropertiesReplaceRandomPorts(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("native_transport_port", 0);
 		this.configProperties.put("rpc_port", 0);
 		this.configProperties.put("storage_port", 0);
@@ -277,13 +280,13 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void configureSeedsConfigStoragePort(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		Map<String, Object> seeds = new LinkedHashMap<>();
 		seeds.put("class_name", "org.apache.cassandra.locator.SimpleSeedProvider");
 		seeds.put("parameters", Collections.singletonList(Collections.singletonMap("seeds",
 				"localhost,127.0.0.1:8080,127.0.0.1:0,[::1]:8080,::1:0,::1,[::1]:0")));
 		this.configProperties.put("storage_port", 7010);
-		this.configProperties.put("seed_provider", Collections.singletonList(
-				Collections.unmodifiableMap(seeds)));
+		this.configProperties.put("seed_provider", Collections.singletonList(Collections.unmodifiableMap(seeds)));
 
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 
@@ -293,20 +296,19 @@ class DefaultCassandraDatabaseFactoryTests {
 		List<Map<String, Object>> parameters = getParameters(seedProvider.get(0));
 		assertThat(parameters).hasSize(1);
 		List<String> actualSeeds = getSeeds(parameters.get(0));
-		assertThat(actualSeeds)
-				.containsExactly("localhost", "127.0.0.1:8080", "127.0.0.1:7010", "[::1]:8080", "::1:0", "::1",
-						"[::1]:7010");
+		assertThat(actualSeeds).containsExactly("localhost", "127.0.0.1:8080", "127.0.0.1:7010", "[::1]:8080", "::1:0",
+				"::1", "[::1]:7010");
 	}
 
 	@Test
 	void configureSeedsSystemStoragePort(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		Map<String, Object> seeds = new LinkedHashMap<>();
 		seeds.put("class_name", "org.apache.cassandra.locator.SimpleSeedProvider");
 		seeds.put("parameters", Collections.singletonList(Collections.singletonMap("seeds",
 				"localhost,127.0.0.1:8080,127.0.0.1:0,[::1]:8080,::1:0,::1,[::1]:0")));
 		this.systemProperties.put("cassandra.storage_port", 7009);
-		this.configProperties.put("seed_provider", Collections.singletonList(
-				Collections.unmodifiableMap(seeds)));
+		this.configProperties.put("seed_provider", Collections.singletonList(Collections.unmodifiableMap(seeds)));
 
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 
@@ -316,19 +318,18 @@ class DefaultCassandraDatabaseFactoryTests {
 		List<Map<String, Object>> parameters = getParameters(seedProvider.get(0));
 		assertThat(parameters).hasSize(1);
 		List<String> actualSeeds = getSeeds(parameters.get(0));
-		assertThat(actualSeeds)
-				.containsExactly("localhost", "127.0.0.1:8080", "127.0.0.1:7009", "[::1]:8080", "::1:0", "::1",
-						"[::1]:7009");
+		assertThat(actualSeeds).containsExactly("localhost", "127.0.0.1:8080", "127.0.0.1:7009", "[::1]:8080", "::1:0",
+				"::1", "[::1]:7009");
 	}
 
 	@Test
 	void configureSeeds(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		Map<String, Object> seeds = new LinkedHashMap<>();
 		seeds.put("class_name", "org.apache.cassandra.locator.SimpleSeedProvider");
 		seeds.put("parameters", Collections.singletonList(Collections.singletonMap("seeds",
 				"localhost,127.0.0.1:8080,127.0.0.1:0,[::1]:8080,::1:0,::1,[::1]:0")));
-		this.configProperties.put("seed_provider", Collections.singletonList(
-				Collections.unmodifiableMap(seeds)));
+		this.configProperties.put("seed_provider", Collections.singletonList(Collections.unmodifiableMap(seeds)));
 
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 
@@ -338,13 +339,13 @@ class DefaultCassandraDatabaseFactoryTests {
 		List<Map<String, Object>> parameters = getParameters(seedProvider.get(0));
 		assertThat(parameters).hasSize(1);
 		List<String> actualSeeds = getSeeds(parameters.get(0));
-		assertThat(actualSeeds)
-				.containsExactly("localhost", "127.0.0.1:8080", "127.0.0.1:7000", "[::1]:8080", "::1:0", "::1",
-						"[::1]:7000");
+		assertThat(actualSeeds).containsExactly("localhost", "127.0.0.1:8080", "127.0.0.1:7000", "[::1]:8080", "::1:0",
+				"::1", "[::1]:7000");
 	}
 
 	@Test
 	void setConfigProperties(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("native_transport_port", 9142);
 		this.configProperties.put("client_encryption_options.enabled", true);
 		this.configProperties.put("server_encryption_options", Collections.singletonMap("internode_encryption", "all"));
@@ -361,56 +362,57 @@ class DefaultCassandraDatabaseFactoryTests {
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
 		assertThat(configProperties.get("native_transport_port")).isEqualTo(9142);
-		assertThat(((Map<String, Object>) configProperties.get("client_encryption_options")))
-				.contains(entry("enabled", true));
-		assertThat(((Map<String, Object>) configProperties.get("server_encryption_options")))
-				.contains(entry("internode_encryption", "all"));
-		assertThat(((Map<String, Object>) configProperties.get("test")))
-				.contains(entry("enabled", "A"));
+		assertThat(((Map<String, Object>) configProperties.get("client_encryption_options"))).contains(
+				entry("enabled", true));
+		assertThat(((Map<String, Object>) configProperties.get("server_encryption_options"))).contains(
+				entry("internode_encryption", "all"));
+		assertThat(((Map<String, Object>) configProperties.get("test"))).contains(entry("enabled", "A"));
 		assertThat((configProperties.get("test.enabled"))).isEqualTo("B");
-		assertThat(((Map<String, Object>) configProperties.get("test\\")))
-				.contains(entry("enabled", "C"));
+		assertThat(((Map<String, Object>) configProperties.get("test\\"))).contains(entry("enabled", "C"));
 		assertThat((configProperties.get("test\\.enabled"))).isEqualTo("D");
-		assertThat(((Map<String, Object>) configProperties.get("test\\\\")))
-				.contains(entry("enabled", "F"));
+		assertThat(((Map<String, Object>) configProperties.get("test\\\\"))).contains(entry("enabled", "F"));
 		assertThat((configProperties.get("test\\\\.enabled"))).isEqualTo("E");
-		assertThat(((Map<String, Object>) configProperties.get("test")))
-				.contains(entry("nested", Collections.singletonMap("enabled", "AA")));
-		assertThat(((Map<String, Object>) configProperties.get("test.nested")))
-				.contains(entry("enabled", "BB"));
+		assertThat(((Map<String, Object>) configProperties.get("test"))).contains(
+				entry("nested", Collections.singletonMap("enabled", "AA")));
+		assertThat(((Map<String, Object>) configProperties.get("test.nested"))).contains(entry("enabled", "BB"));
 		assertThat(configProperties.get("test.nested.enabled")).isEqualTo("CC");
 	}
 
 	@Test
-	void setConfigPropertiesEmptyName(@TempDir Path workingDirectory) {
+	void setConfigPropertiesEmptyName(@TempDir Path workingDirectory) throws IOException {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("", true);
-		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory))
-				.hasStackTraceContaining("Config property must not be empty");
+		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory)).hasStackTraceContaining(
+				"Config property must not be empty");
 	}
 
 	@Test
-	void setConfigPropertiesSubPropertyEmpty(@TempDir Path workingDirectory) {
+	void setConfigPropertiesSubPropertyEmpty(@TempDir Path workingDirectory) throws IOException {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("a.", true);
-		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory))
-				.hasStackTraceContaining("Config property must not be empty");
+		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory)).hasStackTraceContaining(
+				"Config property must not be empty");
 	}
 
 	@Test
-	void setConfigPropertiesSubPropertyEmpty1(@TempDir Path workingDirectory) {
+	void setConfigPropertiesSubPropertyEmpty1(@TempDir Path workingDirectory) throws IOException {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put(".", true);
-		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory))
-				.hasStackTraceContaining("Config property: '.' is invalid");
+		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory)).hasStackTraceContaining(
+				"Config property: '.' is invalid");
 	}
 
 	@Test
 	void setConfigPropertiesCannotHaveNestedProperties(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("client_encryption_options.enabled.nested", true);
-		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory))
-				.hasStackTraceContaining("and it cannot have nested properties");
+		assertThatThrownBy(() -> create(Version.parse("4.0"), workingDirectory)).hasStackTraceContaining(
+				"and it cannot have nested properties");
 	}
 
 	@Test
 	void setConfigPropertyPath(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("test", workingDirectory);
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
@@ -419,6 +421,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigPropertyFile(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("test", workingDirectory.toFile());
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
@@ -427,6 +430,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigPropertyUri(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("test", workingDirectory.toUri());
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
@@ -435,6 +439,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigPropertyUrl(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("test", workingDirectory.toUri().toURL());
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
@@ -443,26 +448,28 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigPropertyClassPathResource(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.6.yaml");
+		initWorkingDir(workingDirectory);
+		ClassPathResource resource = new ClassPathResource("cassandra-4.1.0.yaml");
 		this.configProperties.put("test", resource);
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
-		assertThat(configProperties.get("test"))
-				.isEqualTo(Paths.get(resource.toURI()).toString());
+		assertThat(configProperties.get("test")).isEqualTo(Paths.get(resource.toURI()).toString());
 	}
 
 	@Test
 	void setConfigPropertyArrayClassPathResource(@TempDir Path workingDirectory) throws Exception {
-		ClassPathResource resource = new ClassPathResource("cassandra-4.0.6.yaml");
+		initWorkingDir(workingDirectory);
+		ClassPathResource resource = new ClassPathResource("cassandra-4.1.0.yaml");
 		this.configProperties.put("test", new ClassPathResource[]{resource});
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
-		assertThat(((Collection<Object>) configProperties.get("test")))
-				.containsExactly(Paths.get(resource.toURI()).toString());
+		assertThat(((Collection<Object>) configProperties.get("test"))).containsExactly(
+				Paths.get(resource.toURI()).toString());
 	}
 
 	@Test
 	void setConfigPropertyUrlResource(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		URL url = new URL("http://localhost:8080/cassandra.yaml");
 		Resource resource = mock(Resource.class);
 		when(resource.toURI()).thenThrow(IOException.class);
@@ -475,6 +482,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigPropertyUriResource(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		UrlResource resource = new UrlResource(new URL("http://localhost:8080/cassandra.yaml"));
 		this.configProperties.put("test", resource);
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
@@ -484,6 +492,7 @@ class DefaultCassandraDatabaseFactoryTests {
 
 	@Test
 	void setConfigPropertyInetAddress(@TempDir Path workingDirectory) throws Exception {
+		initWorkingDir(workingDirectory);
 		this.configProperties.put("test", InetAddress.getLoopbackAddress());
 		CassandraDatabase database = create(Version.parse("4.0"), workingDirectory);
 		Map<String, Object> configProperties = database.getConfigProperties();
@@ -491,8 +500,16 @@ class DefaultCassandraDatabaseFactoryTests {
 	}
 
 	private CassandraDatabase create(Version version, Path workingDirectory) throws Exception {
-		return new DefaultCassandraDatabaseFactory("test", version, this.environmentVariables,
-				this.configProperties, this.systemProperties, this.jvmOptions).create(workingDirectory);
+		return new DefaultCassandraDatabaseFactory("test", version, this.environmentVariables, this.configProperties,
+				this.systemProperties, this.jvmOptions).create(workingDirectory);
+	}
+
+	private static void initWorkingDir(Path workingDirectory) throws IOException {
+		Files.createDirectories(workingDirectory.resolve("bin"));
+		Files.createDirectories(workingDirectory.resolve("conf"));
+		try (InputStream is = new ClassPathResource("cassandra-4.1.0.yaml").getInputStream()) {
+			Files.copy(is, workingDirectory.resolve("conf/cassandra.yaml"));
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -514,11 +531,8 @@ class DefaultCassandraDatabaseFactoryTests {
 	}
 
 	private static List<String> getSeeds(Map<String, Object> parameter) {
-		return Optional.ofNullable(parameter)
-				.map(p -> p.get("seeds"))
-				.map(String::valueOf)
-				.map(seeds -> Arrays.stream(seeds.split(",")).collect(Collectors.toList()))
-				.orElse(Collections.emptyList());
+		return Optional.ofNullable(parameter).map(p -> p.get("seeds")).map(String::valueOf).map(
+				seeds -> Arrays.stream(seeds.split(",")).collect(Collectors.toList())).orElse(Collections.emptyList());
 	}
 
 }

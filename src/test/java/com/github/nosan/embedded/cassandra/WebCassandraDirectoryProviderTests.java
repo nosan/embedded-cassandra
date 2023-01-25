@@ -342,6 +342,7 @@ class WebCassandraDirectoryProviderTests {
 
 	@Test
 	void directoryPresentJustReturn(@TempDir Path root) throws IOException {
+		this.directoryProvider = spy(new WebCassandraDirectoryProvider(httpClient, root));
 		Version version = Version.parse("4.0.1");
 		Path expected = Files.createDirectories(root.resolve(".embedded-cassandra")
 				.resolve("cassandra")

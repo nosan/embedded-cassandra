@@ -57,6 +57,20 @@ class DefaultWorkingDirectoryInitializerTests {
 	}
 
 	@Test
+	void qq() {
+		CassandraDirectoryProvider directoryProvider = Mockito.mock(CassandraDirectoryProvider.class);
+
+		WorkingDirectoryInitializer initializer = new DefaultWorkingDirectoryInitializer(
+				directoryProvider, new DefaultWorkingDirectoryInitializer.CopyStrategy() {
+
+			@Override
+			public void copy(Path cassandraDirectory, Path workingDirectory) throws IOException {
+
+			}
+		});
+	}
+
+	@Test
 	void initializeWorkingDirReplaceExisting(@TempDir Path tempDir) throws IOException {
 		CassandraDirectoryProvider directoryProvider = Mockito.mock(CassandraDirectoryProvider.class);
 		WorkingDirectoryInitializer initializer = new DefaultWorkingDirectoryInitializer(
