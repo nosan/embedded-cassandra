@@ -128,10 +128,12 @@ class DefaultCassandraDatabaseFactoryTests {
 		Map<String, String> systemProperties = database.getSystemProperties();
 		Map<String, String> environmentVariables = database.getEnvironmentVariables();
 		try (InputStream inputStream = resource.getInputStream()) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
 				database.getConfigurationFile().toUri().toString());
@@ -149,10 +151,12 @@ class DefaultCassandraDatabaseFactoryTests {
 		Map<String, String> systemProperties = database.getSystemProperties();
 		Map<String, String> environmentVariables = database.getEnvironmentVariables();
 		try (InputStream inputStream = resource.getInputStream()) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
 				database.getConfigurationFile().toUri().toString());
@@ -169,10 +173,12 @@ class DefaultCassandraDatabaseFactoryTests {
 		Map<String, String> systemProperties = database.getSystemProperties();
 		Map<String, String> environmentVariables = database.getEnvironmentVariables();
 		try (InputStream inputStream = resource.getInputStream()) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
 				database.getConfigurationFile().toUri().toString());
@@ -189,10 +195,12 @@ class DefaultCassandraDatabaseFactoryTests {
 		Map<String, String> systemProperties = database.getSystemProperties();
 		Map<String, String> environmentVariables = database.getEnvironmentVariables();
 		try (InputStream inputStream = resource.getInputStream()) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
 				database.getConfigurationFile().toUri().toString());
@@ -209,10 +217,12 @@ class DefaultCassandraDatabaseFactoryTests {
 		Map<String, String> systemProperties = database.getSystemProperties();
 		Map<String, String> environmentVariables = database.getEnvironmentVariables();
 		try (InputStream inputStream = resource.getInputStream()) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
 				database.getConfigurationFile().toUri().toString());
@@ -229,10 +239,12 @@ class DefaultCassandraDatabaseFactoryTests {
 		Map<String, String> systemProperties = database.getSystemProperties();
 		Map<String, String> environmentVariables = database.getEnvironmentVariables();
 		try (InputStream inputStream = resource.getInputStream()) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		try (InputStream inputStream = Files.newInputStream(database.getConfigurationFile())) {
-			assertThat(new Yaml().loadAs(inputStream, Map.class)).containsAllEntriesOf(database.getConfigProperties());
+			Map<String, Object> actual = new Yaml().loadAs(inputStream, Map.class);
+			assertThat(actual).containsAllEntriesOf(database.getConfigProperties());
 		}
 		assertThat(systemProperties.get("cassandra.config")).isEqualTo(
 				database.getConfigurationFile().toUri().toString());
