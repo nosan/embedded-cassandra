@@ -56,7 +56,7 @@ public class CassandraBuilder {
 	/**
 	 * Default Cassandra version.
 	 */
-	public static final Version DEFAULT_VERSION = Version.parse("4.0.6");
+	public static final Version DEFAULT_VERSION = Version.parse("4.1.3");
 
 	private static final AtomicInteger CASSANDRA_ID = new AtomicInteger();
 
@@ -111,12 +111,11 @@ public class CassandraBuilder {
 		WorkingDirectoryInitializer workingDirectoryInitializer = this.workingDirectoryInitializer;
 		if (workingDirectoryInitializer == null) {
 			workingDirectoryInitializer = new DefaultWorkingDirectoryInitializer(new WebCassandraDirectoryProvider(
-					new JdkHttpClient(Duration.ofSeconds(30), Duration.ofSeconds(30))));
+					new JdkHttpClient(Duration.ofMinutes(1), Duration.ofMinutes(1))));
 		}
 		WorkingDirectoryDestroyer workingDirectoryDestroyer = this.workingDirectoryDestroyer;
 		if (workingDirectoryDestroyer == null) {
-			workingDirectoryDestroyer = WorkingDirectoryDestroyer.deleteOnly("bin", "pylib", "lib", "tools",
-					"doc", "javadoc", "interface");
+			workingDirectoryDestroyer = WorkingDirectoryDestroyer.deleteAll();
 		}
 		Duration startupTimeout = this.startupTimeout;
 		if (startupTimeout == null) {
@@ -696,10 +695,9 @@ public class CassandraBuilder {
 		}
 		if (object instanceof Collection<?>) {
 			List<Object> result = new ArrayList<>();
-			((Collection<?>) object).forEach(each -> result.add(deepCopy(each)));
+			((Iterable<?>) object).forEach(each -> result.add(deepCopy(each)));
 			return (T) Collections.unmodifiableList(result);
 		}
-
 		if (object instanceof Object[]) {
 			List<Object> result = new ArrayList<>();
 			for (Object each : ((Object[]) object)) {

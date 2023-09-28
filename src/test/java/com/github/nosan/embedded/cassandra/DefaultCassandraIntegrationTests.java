@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
@@ -32,11 +31,9 @@ import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import com.datastax.oss.driver.api.core.config.ProgrammaticDriverConfigLoaderBuilder;
 import com.datastax.oss.driver.internal.core.auth.PlainTextAuthProvider;
 import com.datastax.oss.driver.internal.core.ssl.DefaultSslEngineFactory;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
 import com.github.nosan.embedded.cassandra.commons.Resource;
@@ -62,38 +59,9 @@ class DefaultCassandraIntegrationTests {
 
 	private final CassandraRunner runner = new CassandraRunner(this.builder);
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	@Disabled
-	void keepDataBetweenLaunches(Version version) throws Throwable {
-		Cassandra cassandra = this.builder.version(version).build();
-		this.runner.run(cassandra, throwable -> {
-			assertThat(throwable).doesNotThrowAnyException();
-			assertThat(cassandra.isRunning()).isTrue();
-			assertThat(cassandra.getVersion()).isEqualTo(version);
-			Settings settings = cassandra.getSettings();
-			SessionFactory sessionFactory = new SessionFactory();
-			sessionFactory.address = settings.getAddress();
-			sessionFactory.port = settings.getPort();
-			createScheme(sessionFactory);
-		});
-		this.runner.run(cassandra, throwable -> {
-			assertThat(throwable).doesNotThrowAnyException();
-			assertThat(cassandra.isRunning()).isTrue();
-			assertThat(cassandra.getVersion()).isEqualTo(version);
-			Settings settings = cassandra.getSettings();
-			SessionFactory sessionFactory = new SessionFactory();
-			sessionFactory.address = settings.getAddress();
-			sessionFactory.port = settings.getPort();
-			assertThatThrownBy(() -> createScheme(sessionFactory))
-					.hasStackTraceContaining("Keyspace test already exists");
-		});
-	}
-
-	@ParameterizedTest
-	@MethodSource("versions")
-	void isRunningAndGetSettings(Version version) {
-		Cassandra cassandra = this.builder.version(version).build();
+	@Test
+	void isRunningAndGetSettings() {
+		Cassandra cassandra = this.builder.build();
 		assertThat(cassandra.isRunning()).isFalse();
 		assertThatThrownBy(cassandra::getSettings)
 				.hasMessage("The getSettings() method was called but start() had not been called");
@@ -107,15 +75,13 @@ class DefaultCassandraIntegrationTests {
 		assertThat(cassandra.getSettings()).isSameAs(settings);
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testSuccessWhenDefault(Version version) throws Throwable {
-		this.builder.version(version);
+	@Test
+	void testSuccessWhenDefault() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
 			assertThat(cassandra.getWorkingDirectory()).isNotNull();
-			assertThat(cassandra.getVersion()).isEqualTo(version);
+			assertThat(cassandra.getVersion()).isEqualTo(CassandraBuilder.DEFAULT_VERSION);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			SessionFactory sessionFactory = new SessionFactory();
@@ -125,18 +91,17 @@ class DefaultCassandraIntegrationTests {
 		});
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testSuccessWhenCustomCassandraYaml(Version version) throws Throwable {
-		ClassPathResource configFile = new ClassPathResource(String.format("cassandra-random-%s.yaml", version));
-		this.builder.version(version)
+	@Test
+	void testSuccessWhenCustomCassandraYaml() throws Throwable {
+		ClassPathResource configFile = new ClassPathResource("cassandra-random.yaml");
+		this.builder
 				.addSystemProperty("cassandra.jmx.local.port", 0)
 				.configFile(configFile);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
 			assertThat(cassandra.getWorkingDirectory()).isNotNull();
-			assertThat(cassandra.getVersion()).isEqualTo(version);
+			assertThat(cassandra.getVersion()).isEqualTo(CassandraBuilder.DEFAULT_VERSION);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			SessionFactory sessionFactory = new SessionFactory();
@@ -146,17 +111,16 @@ class DefaultCassandraIntegrationTests {
 		});
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testSuccessWhenTransportDisabled(Version version) throws Throwable {
-		this.builder.version(version)
+	@Test
+	void testSuccessWhenTransportDisabled() throws Throwable {
+		this.builder
 				.addConfigProperty("start_native_transport", false);
 
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
 			assertThat(cassandra.getWorkingDirectory()).isNotNull();
-			assertThat(cassandra.getVersion()).isEqualTo(version);
+			assertThat(cassandra.getVersion()).isEqualTo(CassandraBuilder.DEFAULT_VERSION);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getAddress()).isNull();
@@ -166,9 +130,8 @@ class DefaultCassandraIntegrationTests {
 		});
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testSuccessWhenSslClientEnabledSslPort(Version version) throws Throwable {
+	@Test
+	void testSuccessWhenSslClientEnabledSslPort() throws Throwable {
 		Map<String, Object> clientEncryptionOptions = new LinkedHashMap<>();
 		clientEncryptionOptions.put("enabled", true);
 		clientEncryptionOptions.put("require_client_auth", true);
@@ -177,7 +140,7 @@ class DefaultCassandraIntegrationTests {
 		clientEncryptionOptions.put("keystore_password", "123456");
 		clientEncryptionOptions.put("truststore", "conf/server.truststore");
 		clientEncryptionOptions.put("truststore_password", "123456");
-		this.builder.version(version)
+		this.builder
 				.addWorkingDirectoryResource(new ClassPathResource("server.keystore"), "conf/server.keystore")
 				.addWorkingDirectoryResource(new ClassPathResource("server.truststore"), "conf/server.truststore")
 				.addConfigProperty("native_transport_port_ssl", 9142)
@@ -186,7 +149,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
 			assertThat(cassandra.getWorkingDirectory()).isNotNull();
-			assertThat(cassandra.getVersion()).isEqualTo(version);
+			assertThat(cassandra.getVersion()).isEqualTo(CassandraBuilder.DEFAULT_VERSION);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getSslPort()).isEqualTo(9142);
@@ -204,9 +167,8 @@ class DefaultCassandraIntegrationTests {
 		});
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testSuccessWhenSslClientEnabled(Version version) throws Throwable {
+	@Test
+	void testSuccessWhenSslClientEnabled() throws Throwable {
 		Map<String, Object> clientEncryptionOptions = new LinkedHashMap<>();
 		clientEncryptionOptions.put("enabled", true);
 		clientEncryptionOptions.put("require_client_auth", true);
@@ -215,13 +177,13 @@ class DefaultCassandraIntegrationTests {
 		clientEncryptionOptions.put("keystore_password", "123456");
 		clientEncryptionOptions.put("truststore", new ClassPathResource("server.truststore"));
 		clientEncryptionOptions.put("truststore_password", "123456");
-		this.builder.version(version)
+		this.builder
 				.addConfigProperty("client_encryption_options", clientEncryptionOptions);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
 			assertThat(cassandra.getWorkingDirectory()).isNotNull();
-			assertThat(cassandra.getVersion()).isEqualTo(version);
+			assertThat(cassandra.getVersion()).isEqualTo(CassandraBuilder.DEFAULT_VERSION);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getSslPort()).isNull();
@@ -239,9 +201,8 @@ class DefaultCassandraIntegrationTests {
 		});
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testSuccessWhenSslServerEnabled(Version version) throws Throwable {
+	@Test
+	void testSuccessWhenSslServerEnabled() throws Throwable {
 		Map<String, Object> serverEncryptionOptions = new LinkedHashMap<>();
 		serverEncryptionOptions.put("internode_encryption", "all");
 		serverEncryptionOptions.put("enable_legacy_ssl_storage_port", "true");
@@ -252,13 +213,13 @@ class DefaultCassandraIntegrationTests {
 		serverEncryptionOptions.put("keystore_password", "123456");
 		serverEncryptionOptions.put("truststore", new ClassPathResource("server.truststore"));
 		serverEncryptionOptions.put("truststore_password", "123456");
-		this.builder.version(version)
+		this.builder
 				.addConfigProperty("server_encryption_options", serverEncryptionOptions);
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
 			assertThat(cassandra.getWorkingDirectory()).isNotNull();
-			assertThat(cassandra.getVersion()).isEqualTo(version);
+			assertThat(cassandra.getVersion()).isEqualTo(CassandraBuilder.DEFAULT_VERSION);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			assertThat(settings.getSslPort()).isNull();
@@ -269,10 +230,9 @@ class DefaultCassandraIntegrationTests {
 		});
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testSuccessWhenAuthenticatorEnabled(Version version) throws Throwable {
-		this.builder.version(version)
+	@Test
+	void testSuccessWhenAuthenticatorEnabled() throws Throwable {
+		this.builder
 				.addConfigProperty("authenticator", "PasswordAuthenticator")
 				.addConfigProperty("authorizer", "CassandraAuthorizer")
 				.addSystemProperty("cassandra.superuser_setup_delay_ms", 0);
@@ -280,7 +240,7 @@ class DefaultCassandraIntegrationTests {
 			assertThat(throwable).doesNotThrowAnyException();
 			assertThat(cassandra.getName()).isNotBlank();
 			assertThat(cassandra.getWorkingDirectory()).isNotNull();
-			assertThat(cassandra.getVersion()).isEqualTo(version);
+			assertThat(cassandra.getVersion()).isEqualTo(CassandraBuilder.DEFAULT_VERSION);
 			assertThat(cassandra.isRunning()).isTrue();
 			Settings settings = cassandra.getSettings();
 			SessionFactory sessionFactory = new SessionFactory();
@@ -294,28 +254,24 @@ class DefaultCassandraIntegrationTests {
 		});
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testFailStartupTimeout(Version version) throws Throwable {
-		this.builder.version(version)
+	@Test
+	void testFailStartupTimeout() throws Throwable {
+		this.builder
 				.startupTimeout(Duration.ofMillis(200));
 		this.runner.run((cassandra, throwable) -> assertThat(throwable).isNotNull()
 				.hasStackTraceContaining("couldn't be started within 200ms"));
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testFailInvalidProperty(Version version) throws Throwable {
-		this.builder.version(version)
+	@Test
+	void testFailInvalidProperty() throws Throwable {
+		this.builder
 				.addConfigProperty("invalid_property", "");
 		this.runner.run((cassandra, throwable) -> assertThat(throwable).isNotNull()
 				.hasStackTraceContaining("[invalid_property] from your cassandra.yaml"));
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testFailJmxPortBusy(Version version) throws Throwable {
-		this.builder.version(version);
+	@Test
+	void testFailJmxPortBusy() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			this.runner.run((cassandra2, throwable2) -> assertThat(throwable2).isNotNull()
@@ -324,10 +280,8 @@ class DefaultCassandraIntegrationTests {
 
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testFailStoragePortBusy(Version version) throws Throwable {
-		this.builder.version(version);
+	@Test
+	void testFailStoragePortBusy() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			this.builder.addSystemProperty("cassandra.jmx.local.port", 0);
@@ -336,10 +290,8 @@ class DefaultCassandraIntegrationTests {
 		});
 	}
 
-	@ParameterizedTest
-	@MethodSource("versions")
-	void testFailNativePortBusy(Version version) throws Throwable {
-		this.builder.version(version);
+	@Test
+	void testFailNativePortBusy() throws Throwable {
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
 			this.builder.addSystemProperty("cassandra.jmx.local.port", 0)
@@ -354,10 +306,6 @@ class DefaultCassandraIntegrationTests {
 		try (CqlSession session = sessionFactory.createSession()) {
 			CqlScript.ofClassPath("schema.cql").forEachStatement(session::execute);
 		}
-	}
-
-	private static Stream<Version> versions() {
-		return Stream.of(Version.parse("4.1.0"));
 	}
 
 	private interface CassandraConsumer {

@@ -95,7 +95,7 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 		systemProperties.put("cassandra.config", newConfigFile.toUri().toString());
 		List<String> jvmExtraOpts = new ArrayList<>(this.jvmOptions);
 		systemProperties.forEach((name, value) -> {
-			if (value.equals("")) {
+			if (value.isEmpty()) {
 				jvmExtraOpts.add("-D" + name);
 			}
 			else {
@@ -135,7 +135,6 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Map<String, Object> loadProperties(Resource file) throws IOException {
 		try (InputStream is = file.getInputStream()) {
 			Map<String, Object> properties = new Yaml().loadAs(is, Map.class);

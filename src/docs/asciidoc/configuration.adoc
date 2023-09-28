@@ -14,7 +14,7 @@ This section covers how to configure Embedded Cassandra.
 include::{sources}/CassandraExamples.java[tag=version]
 ----
 
-NOTE: Defaults to *4.0.6*.
+NOTE: Defaults to *4.1.3*.
 
 CAUTION: Since *4.0-beta4*, Windows scripts were removed. https://issues.apache.org/jira/browse/CASSANDRA-16171[CASSANDRA-16171]
 
@@ -167,21 +167,13 @@ A strategy interface to destroy the working directory.
 include::{sources}/CassandraExamples.java[tag=working-directory-destroyer]
 ----
 
-By default, only the following directories *"bin", "pylib", "lib", "tools", "doc", "javadoc", "interface"*
-will be deleted.
+By default, the whole working directory will be deleted.
 
 However, if you don't want to delete a working directory, you can use:
 
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=working-directory-destroyer-nothing]
-----
-
-From another side, if you don't want to keep data between launches, it makes sense to use:
-
-[source,java,indent=0]
-----
-include::{sources}/CassandraExamples.java[tag=working-directory-destroyer-all]
 ----
 
 == Working Directory Resources
