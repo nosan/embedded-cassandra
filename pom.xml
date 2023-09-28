@@ -48,7 +48,7 @@
         <assertj.version>3.24.2</assertj.version>
         <slf4j-api.version>2.0.7</slf4j-api.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <commons-compress.version>1.22</commons-compress.version>
+        <commons-compress.version>1.24.0</commons-compress.version>
         <maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
         <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
