@@ -62,10 +62,6 @@ Also see [CONTRIBUTING.md](CONTRIBUTING.md) if you wish to submit pull requests.
 
 Embedded Cassandra is released under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-## Extensions
-
-- [Embedded Cassandra Spring Boot Starter](https://github.com/nosan/embedded-cassandra-spring-boot-starter)
-
 ___
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?business=D3ESQ4RY4XN7J&no_recurring=0&currency_code=USD) <a href="https://www.buymeacoffee.com/nosan" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/white_img.png" alt="Buy Me A Coffee"></a>
