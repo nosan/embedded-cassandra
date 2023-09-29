@@ -42,7 +42,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <nexus.url>https://oss.sonatype.org</nexus.url>
         <java.version>1.8</java.version>
-        <junit5.version>5.9.2</junit5.version>
+        <junit5.version>5.10.0</junit5.version>
         <checkstyle.version>9.3</checkstyle.version>
         <cassandra-java-driver-core.version>4.15.0</cassandra-java-driver-core.version>
         <assertj.version>3.24.2</assertj.version>
