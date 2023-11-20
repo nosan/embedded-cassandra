@@ -25,7 +25,7 @@ import com.github.nosan.embedded.cassandra.CassandraBuilder;
 import com.github.nosan.embedded.cassandra.Settings;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
-public class CassandraExamples {
+public class CassandraExample {
 
 	public static void main(String[] args) {
 		Cassandra cassandra = new CassandraBuilder().build();
