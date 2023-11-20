@@ -297,8 +297,7 @@ public class CassandraBuilder {
 	/**
 	 * Sets the {@link WorkingDirectoryDestroyer}.
 	 * <p>
-	 * Defaults to
-	 * {@code WorkingDirectoryDestroyer.deleteOnly("bin", "pylib", "lib", "tools", "doc", "javadoc", "interface")}
+	 * Defaults to {@code WorkingDirectoryDestroyer.deleteAll()}
 	 *
 	 * @param workingDirectoryDestroyer the working directory destroyer
 	 * @return this builder
