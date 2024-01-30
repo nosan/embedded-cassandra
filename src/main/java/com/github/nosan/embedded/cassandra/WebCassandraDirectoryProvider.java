@@ -119,18 +119,18 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 	@Override
 	public final Path getDirectory(Version version) throws IOException {
 		Objects.requireNonNull(version, "Version must not be null");
-		Path downloadDirectory = this.downloadDirectory.resolve(".embedded-cassandra").resolve("cassandra")
-				.resolve(version.toString());
+		Path downloadDirectory = getDownloadPath(this.downloadDirectory, version);
 
-		Path successFile = downloadDirectory.resolve(".success");
-		Path cassandraDirectory = downloadDirectory.resolve(String.format("apache-cassandra-%s", version));
+		Path successFile = downloadDirectory.resolve(".success").normalize().toAbsolutePath();
+		Path cassandraDirectory = downloadDirectory.resolve(String.format("apache-cassandra-%s", version))
+				.normalize().toAbsolutePath();
 
 		if (Files.exists(successFile) && Files.exists(cassandraDirectory)) {
 			return cassandraDirectory;
 		}
 		LOGGER.info("Cassandra directory: ''{0}'' is not found. Initializing...", cassandraDirectory);
 		Files.createDirectories(downloadDirectory);
-		Path lockFile = downloadDirectory.resolve(".lock");
+		Path lockFile = downloadDirectory.resolve(".lock").normalize().toAbsolutePath();
 
 		try (FileLock fileLock = FileLock.of(lockFile)) {
 			LOGGER.info("Acquires a lock to the file ''{0}''...", lockFile);
@@ -171,6 +171,18 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 			}
 			throw new IOException(builder.substring(0, builder.length() - System.lineSeparator().length()));
 		}
+	}
+
+	/**
+	 * Gets a full download path. By default {@code downloadDirectory/.embedded-cassandra/cassandra/$version}
+	 *
+	 * @param downloadDirectory base download directory
+	 * @param version Cassandra version
+	 * @return the full download path.
+	 */
+	protected Path getDownloadPath(Path downloadDirectory, Version version) {
+		return downloadDirectory.resolve(".embedded-cassandra").resolve("cassandra")
+				.resolve(version.toString()).normalize().toAbsolutePath();
 	}
 
 	/**
@@ -287,12 +299,13 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 
 	private void downloadAndExtract(Version version, Path downloadDirectory, Path cassandraDirectory,
 			CassandraPackage cassandraPackage) throws IOException, NoSuchAlgorithmException {
-		Path downloadFile = Files.createTempFile(downloadDirectory, "", "-" + cassandraPackage.getName());
+		Path downloadFile = Files.createTempFile(downloadDirectory, "", "-" + cassandraPackage.getName())
+				.normalize().toAbsolutePath();
 		try (OutputStream outputStream = Files.newOutputStream(downloadFile, StandardOpenOption.WRITE)) {
 			download(this.httpClient, version, cassandraPackage.getUri(), outputStream);
 			verifyChecksums(this.httpClient, downloadFile, cassandraPackage);
 			Path extractDirectory = Files.createTempDirectory(downloadDirectory,
-					String.format("apache-cassandra-%s-", version));
+					String.format("apache-cassandra-%s-", version)).normalize().toAbsolutePath();
 			try {
 				LOGGER.info("Extracting...");
 				extract(downloadFile, extractDirectory);
