@@ -41,7 +41,6 @@ class DefaultSettingsTests {
 		InetAddress address = InetAddress.getLoopbackAddress();
 		int port = 9042;
 		int sslPort = 9142;
-		int rpcPort = 9160;
 		Path configurationFile = workingDirectory.resolve("conf/cassandra.yaml");
 		LinkedHashSet<String> jvmOptions = new LinkedHashSet<>(Collections.singletonList("-Xmx512m"));
 		LinkedHashMap<String, String> systemProperties = new LinkedHashMap<>(
@@ -51,15 +50,13 @@ class DefaultSettingsTests {
 		LinkedHashMap<String, Object> configProperties = new LinkedHashMap<>(
 				Collections.singletonMap("rpc_port", 9160));
 		DefaultSettings settings = new DefaultSettings(name, version, address, true, port, sslPort,
-				true, rpcPort, configurationFile, workingDirectory, jvmOptions, systemProperties,
+				configurationFile, workingDirectory, jvmOptions, systemProperties,
 				environmentVariables, configProperties);
 
 		assertThat(settings.getName()).isEqualTo(name);
 		assertThat(settings.getVersion()).isEqualTo(version);
 		assertThat(settings.getAddress()).isEqualTo(address);
 		assertThat(settings.isNativeTransportEnabled()).isTrue();
-		assertThat(settings.isRpcTransportEnabled()).isTrue();
-		assertThat(settings.getRpcPort()).isEqualTo(rpcPort);
 		assertThat(settings.getConfigurationFile()).isEqualTo(configurationFile);
 		assertThat(settings.getWorkingDirectory()).isEqualTo(workingDirectory);
 		assertThat(settings.getJvmOptions()).containsAll(jvmOptions);

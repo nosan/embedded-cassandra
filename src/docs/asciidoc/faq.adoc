@@ -6,26 +6,11 @@
 
 == What are OSs supported by Embedded Cassandra?
 
-Embedded Cassandra is tested under the `ubuntu-latest`, `macos-latest` and `windows-latest` platforms.
+Embedded Cassandra is tested under the `ubuntu-latest` and `macos-latest` platforms.
 
 == What are versions supported by Embedded Cassandra?
 
-Embedded Cassandra project is tested for `2.X.X` - `4.X.X` Cassandra versions.
-
-|===
-|OS |Version Range
-
-|Windows
-|2.X.X - 4.0-beta3
-
-|OSX
-|2.X.X - 4.X.X
-
-|Linux
-|2.X.X - 4.X.X
-|===
-
-CAUTION: Since *4.0-beta4*, Windows scripts were removed https://issues.apache.org/jira/browse/CASSANDRA-16171[CASSANDRA-16171]
+Embedded Cassandra project is tested for `>= 4.x.x` Cassandra versions.
 
 == What are compile dependencies used by Embedded Cassandra?
 
@@ -44,6 +29,11 @@ Embedded Cassandra has only two compile dependencies:
         <artifactId>snakeyaml</artifactId>
         <version>{snakeyaml-version}</version>
     </dependency>
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>{logback-classic-version}</version>
+    </dependency>
 </dependecies>
 ----
 
@@ -58,4 +48,4 @@ https://downloads.apache.org/cassandra/. For older versions, https://archive.apa
 
 == Where are the files downloaded?
 
-By default, files are downloaded into *~/.embedded-cassandra/cassandra* directory
+By default, files are downloaded into *~/.embedded-cassandra/* directory

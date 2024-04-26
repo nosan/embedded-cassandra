@@ -91,7 +91,7 @@ class NativeTransportParser implements Consumer<String>, Closeable {
 		return this.failed;
 	}
 
-	boolean isParsed() {
+	boolean isComplete() {
 		if (this.disabled) {
 			return true;
 		}

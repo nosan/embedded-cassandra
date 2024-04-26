@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 abstract class AbstractCassandraDatabase implements CassandraDatabase {
 
@@ -45,7 +44,7 @@ abstract class AbstractCassandraDatabase implements CassandraDatabase {
 
 	private final Set<String> jvmOptions;
 
-	private volatile Process process;
+	private volatile ProcessWrapper process;
 
 	AbstractCassandraDatabase(String name, Version version, Path configurationFile, Path workingDirectory,
 			Map<String, String> environmentVariables, Map<String, Object> configProperties,
@@ -67,7 +66,7 @@ abstract class AbstractCassandraDatabase implements CassandraDatabase {
 
 	@Override
 	public final synchronized void stop() throws IOException {
-		Process process = this.process;
+		ProcessWrapper process = this.process;
 		if (process != null && process.isAlive()) {
 			doStop(process);
 			if (!process.destroy().waitFor(5, TimeUnit.SECONDS)) {
@@ -105,13 +104,12 @@ abstract class AbstractCassandraDatabase implements CassandraDatabase {
 
 	@Override
 	public final synchronized CompletableFuture<? extends CassandraDatabase> onExit() {
-		return this.process.onExit()
-				.thenApply((Function<Process, CassandraDatabase>) processHandler -> this);
+		return this.process.onExit().thenApply(p -> this);
 	}
 
 	@Override
 	public final synchronized boolean isAlive() {
-		Process process = this.process;
+		ProcessWrapper process = this.process;
 		return (process != null) && process.isAlive();
 	}
 
@@ -131,12 +129,12 @@ abstract class AbstractCassandraDatabase implements CassandraDatabase {
 	}
 
 	@Override
-	public final synchronized Process.Output getStdOut() {
+	public final synchronized ProcessWrapper.Output getStdOut() {
 		return this.process.getStdOut();
 	}
 
 	@Override
-	public final synchronized Process.Output getStdErr() {
+	public final synchronized ProcessWrapper.Output getStdErr() {
 		return this.process.getStdErr();
 	}
 
@@ -145,8 +143,8 @@ abstract class AbstractCassandraDatabase implements CassandraDatabase {
 		return getClass().getSimpleName() + "{" + "process=" + this.process + '}';
 	}
 
-	protected abstract Process doStart() throws IOException;
+	protected abstract ProcessWrapper doStart() throws IOException;
 
-	protected abstract void doStop(Process process) throws IOException;
+	protected abstract void doStop(ProcessWrapper process) throws IOException;
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,33 +21,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import com.github.nosan.embedded.cassandra.commons.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-final class DefaultProcess implements Process {
-
-	private static final Logger LOGGER = Logger.get(DefaultProcess.class);
+final class DefaultProcessWrapper implements ProcessWrapper {
 
 	private final String name;
 
-	private final java.lang.Process process;
+	private final Process process;
 
 	private final ProcessOutput stdout;
 
 	private final ProcessOutput stderr;
 
-	DefaultProcess(String name, java.lang.Process process) {
+	DefaultProcessWrapper(String name, Process process) {
 		this.name = name;
 		this.process = process;
 		this.stdout = new ProcessOutput(name + ":OUT", process.getInputStream());
@@ -61,23 +57,17 @@ final class DefaultProcess implements Process {
 
 	@Override
 	public long getPid() {
-		try {
-			return Pid.get(this.process);
-		}
-		catch (Exception ex) {
-			LOGGER.error(ex, "Could not get a PID of a process: ''{0}''", this.process);
-			return -1;
-		}
+		return this.process.pid();
 	}
 
 	@Override
-	public Process destroy() {
+	public ProcessWrapper destroy() {
 		this.process.destroy();
 		return this;
 	}
 
 	@Override
-	public Process destroyForcibly() {
+	public ProcessWrapper destroyForcibly() {
 		this.process.destroyForcibly();
 		return this;
 	}
@@ -131,36 +121,8 @@ final class DefaultProcess implements Process {
 	}
 
 	@Override
-	public CompletableFuture<? extends Process> onExit() {
-		java.lang.Process process = this.process;
-		return CompletableFuture.supplyAsync(() -> {
-			boolean interrupted = false;
-			while (true) {
-				try {
-					ForkJoinPool.managedBlock(new ForkJoinPool.ManagedBlocker() {
-
-						@Override
-						public boolean block() throws InterruptedException {
-							process.waitFor();
-							return true;
-						}
-
-						@Override
-						public boolean isReleasable() {
-							return !process.isAlive();
-						}
-					});
-					break;
-				}
-				catch (InterruptedException x) {
-					interrupted = true;
-				}
-			}
-			if (interrupted) {
-				Thread.currentThread().interrupt();
-			}
-			return this;
-		});
+	public CompletableFuture<? extends ProcessWrapper> onExit() {
+		return this.process.onExit().thenApply(p -> this);
 	}
 
 	@Override
@@ -180,7 +142,7 @@ final class DefaultProcess implements Process {
 
 	private static final class ProcessOutput extends Thread implements Output {
 
-		private static final Logger LOGGER = Logger.get(ProcessOutput.class);
+		private static final Logger log = LoggerFactory.getLogger(ProcessOutput.class);
 
 		private final List<Consumer<? super String>> consumers = new CopyOnWriteArrayList<>();
 
@@ -192,12 +154,13 @@ final class DefaultProcess implements Process {
 			super(name);
 			this.is = is;
 			setDaemon(true);
-			setUncaughtExceptionHandler((thread, ex) -> LOGGER.error(ex, "Exception in thread: ''{0}''", thread));
+			setUncaughtExceptionHandler((thread, ex) -> log.error("Exception in thread: ''{}''", thread, ex));
 		}
 
 		@Override
 		public void run() {
-			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.is))) {
+			try (BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(this.is, StandardCharsets.UTF_8))) {
 				String line;
 				while ((line = readLine(bufferedReader)) != null) {
 					for (Consumer<? super String> consumer : this.consumers) {
@@ -237,33 +200,6 @@ final class DefaultProcess implements Process {
 				}
 				throw ex;
 			}
-		}
-
-	}
-
-	private static final class Pid {
-
-		private static long get(java.lang.Process process) throws InvocationTargetException, IllegalAccessException {
-			try {
-				Method method = java.lang.Process.class.getMethod("pid");
-				return getLong(method.invoke(process));
-			}
-			catch (NoSuchMethodException ex) {
-				//ignore
-			}
-			try {
-				Field field = process.getClass().getDeclaredField("pid");
-				field.setAccessible(true);
-				return getLong(field.get(process));
-			}
-			catch (NoSuchFieldException ex) {
-				return -1;
-			}
-
-		}
-
-		private static long getLong(Object result) {
-			return Long.parseLong(Objects.toString(result, "-1").trim());
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-interface Process {
+interface ProcessWrapper {
 
 	String getName();
 
 	long getPid();
 
-	Process destroy();
+	ProcessWrapper destroy();
 
-	Process destroyForcibly();
+	ProcessWrapper destroyForcibly();
 
 	boolean isAlive();
 
@@ -36,7 +36,7 @@ interface Process {
 
 	boolean waitFor(int timeout, TimeUnit unit);
 
-	CompletableFuture<? extends Process> onExit();
+	CompletableFuture<? extends ProcessWrapper> onExit();
 
 	Output getStdOut();
 

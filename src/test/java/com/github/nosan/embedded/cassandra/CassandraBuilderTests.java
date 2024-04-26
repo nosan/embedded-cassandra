@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,10 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
-import com.github.nosan.embedded.cassandra.commons.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -141,7 +142,7 @@ class CassandraBuilderTests {
 
 	@Test
 	void logger() {
-		Logger logger = Logger.get("TEST");
+		Logger logger = LoggerFactory.getLogger("TEST");
 		assertThat(this.builder.logger(logger).build()).hasFieldOrPropertyWithValue("logger", logger);
 	}
 

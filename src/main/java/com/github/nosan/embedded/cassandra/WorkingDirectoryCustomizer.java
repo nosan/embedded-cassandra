@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public interface WorkingDirectoryCustomizer {
 		return (workingDirectory, version) -> {
 			Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
 			Objects.requireNonNull(version, "Version must not be null");
-			Path normalizedPath = workingDirectory.resolve(path).normalize();
+			Path normalizedPath = workingDirectory.resolve(path).normalize().toAbsolutePath();
 			if (!normalizedPath.startsWith(workingDirectory)) {
 				throw new IllegalArgumentException("Path: '" + normalizedPath
 						+ "' is out of a directory: '" + workingDirectory + "'");

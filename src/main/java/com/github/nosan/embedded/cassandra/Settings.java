@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public interface Settings {
 	/**
 	 * Gets the working directory.
 	 *
-	 * @return working directory,  never {@code null}
+	 * @return working directory, never {@code null}
 	 */
 	Path getWorkingDirectory();
 
@@ -65,18 +65,9 @@ public interface Settings {
 	boolean isNativeTransportEnabled();
 
 	/**
-	 * Checks whether RPC transport is enabled.
-	 *
-	 * @return {@code true} if RPC transport is enabled, otherwise {@code false}
-	 */
-	boolean isRpcTransportEnabled();
-
-	/**
 	 * Gets address this {@code Cassandra} is listening on.
 	 *
-	 * @return the address, or {@code null} if both native and RPC transports are disabled
-	 * @see #isNativeTransportEnabled()
-	 * @see #isRpcTransportEnabled()
+	 * @return the address, or {@code null} if native transport is disabled.
 	 */
 	InetAddress getAddress();
 
@@ -84,26 +75,15 @@ public interface Settings {
 	 * Gets port this {@code Cassandra} is listening on.
 	 *
 	 * @return the port, or {@code null} if native transport is disabled.
-	 * @see #isNativeTransportEnabled()
 	 */
 	Integer getPort();
 
 	/**
 	 * Gets SSL port this {@code Cassandra} is listening on.
 	 *
-	 * @return the SSL port, or {@code null} if either {@code native_transport_port_ssl} was not set or native transport
-	 * is disabled.
-	 * @see #isNativeTransportEnabled()
+	 * @return the SSL port, or {@code null} if {@code native_transport_port_ssl} was not set.
 	 */
 	Integer getSslPort();
-
-	/**
-	 * Gets RPC port this {@code Cassandra} is listening on.
-	 *
-	 * @return the port, or {@code null} if RPC transport is disabled
-	 * @see #isRpcTransportEnabled()
-	 */
-	Integer getRpcPort();
 
 	/**
 	 * Gets Cassandra JVM Options that were used on start.
@@ -122,14 +102,14 @@ public interface Settings {
 	/**
 	 * Gets Cassandra Environment variables that were used on start.
 	 *
-	 * @return the environment variables,  never {@code null}
+	 * @return the environment variables, never {@code null}
 	 */
 	Map<String, String> getEnvironmentVariables();
 
 	/**
 	 * Gets Cassandra Configuration properties.
 	 *
-	 * @return the configuration properties,  never {@code null}
+	 * @return the configuration properties, never {@code null}
 	 */
 	Map<String, Object> getConfigProperties();
 

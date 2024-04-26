@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.when;
  */
 class UnixCassandraDatabaseTests {
 
-	private final Process process = mock(Process.class);
+	private final ProcessWrapper process = mock(ProcessWrapper.class);
 
 	private UnixCassandraDatabase database;
 
@@ -69,12 +69,12 @@ class UnixCassandraDatabaseTests {
 		Files.createDirectory(workingDirectory.resolve("bin"));
 		Files.createFile(workingDirectory.resolve("bin/cassandra"));
 
-		doReturn(this.process).when(database).start(eq("test:bin/cassandra"), any());
+		doReturn(this.process).when(database).start(eq("test"), any());
 
 		database.start();
 
 		ArgumentCaptor<ProcessBuilder> pbCapture = ArgumentCaptor.forClass(ProcessBuilder.class);
-		verify(database).start(eq("test:bin/cassandra"), pbCapture.capture());
+		verify(database).start(eq("test"), pbCapture.capture());
 		ProcessBuilder processBuilder = pbCapture.getValue();
 		assertThat(processBuilder.command()).containsExactly(workingDirectory.resolve("bin/cassandra").toString(),
 				"-R", "-f");

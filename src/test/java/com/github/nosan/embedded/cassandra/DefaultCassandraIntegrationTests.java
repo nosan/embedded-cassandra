@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,8 +113,7 @@ class DefaultCassandraIntegrationTests {
 
 	@Test
 	void testSuccessWhenTransportDisabled() throws Throwable {
-		this.builder
-				.addConfigProperty("start_native_transport", false);
+		this.builder.addConfigProperty("start_native_transport", false);
 
 		this.runner.run((cassandra, throwable) -> {
 			assertThat(throwable).doesNotThrowAnyException();
@@ -126,7 +125,6 @@ class DefaultCassandraIntegrationTests {
 			assertThat(settings.getAddress()).isNull();
 			assertThat(settings.getPort()).isNull();
 			assertThat(settings.getSslPort()).isNull();
-			assertThat(settings.getRpcPort()).isNull();
 		});
 	}
 
@@ -326,31 +324,6 @@ class DefaultCassandraIntegrationTests {
 
 		private CassandraRunner(CassandraBuilder builder) {
 			this.builder = builder;
-		}
-
-		void run(Cassandra cassandra, ThrowableConsumer consumer) throws Throwable {
-			try {
-				try {
-					cassandra.start();
-				}
-				catch (Throwable ex) {
-					consumer.accept(ex);
-					return;
-				}
-				consumer.accept(null);
-			}
-			catch (Throwable ex) {
-				try {
-					cassandra.stop();
-				}
-				catch (Throwable suppressed) {
-					ex.addSuppressed(suppressed);
-				}
-				throw ex;
-			}
-			finally {
-				cassandra.stop();
-			}
 		}
 
 		void run(CassandraConsumer consumer) throws Throwable {
