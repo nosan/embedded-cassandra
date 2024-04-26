@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,31 +28,31 @@ import org.junit.jupiter.api.condition.OS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link DefaultProcess}.
+ * Tests for {@link DefaultProcessWrapper}.
  *
  * @author Dmytro Nosan
  */
 @DisabledOnOs(OS.WINDOWS)
-class DefaultProcessTests {
+class DefaultProcessWrapperTests {
 
 	private final String message = "Hello Process!";
 
 	@Test
 	void getName() throws IOException {
-		Process process = echo();
+		ProcessWrapper process = echo();
 		assertThat(process.getName()).isEqualTo("echo");
 	}
 
 	@Test
 	void getPid() throws IOException {
-		Process process = echo();
+		ProcessWrapper process = echo();
 		assertThat(process.getPid()).isPositive();
 	}
 
 	@Test
 	@Timeout(5)
 	void destroy() throws IOException {
-		Process process = echo(10);
+		ProcessWrapper process = echo(10);
 		process.destroy();
 		process.waitFor();
 	}
@@ -60,7 +60,7 @@ class DefaultProcessTests {
 	@Test
 	@Timeout(5)
 	void destroyForcibly() throws IOException {
-		Process process = echo(10);
+		ProcessWrapper process = echo(10);
 		process.destroyForcibly();
 		process.waitFor();
 	}
@@ -68,7 +68,7 @@ class DefaultProcessTests {
 	@Test
 	void uninterruptedWaitFor() throws IOException, InterruptedException {
 		long start = System.currentTimeMillis();
-		Process process = echo(1);
+		ProcessWrapper process = echo(1);
 		Thread thread = new Thread(process::waitFor);
 		thread.start();
 		thread.join(100);
@@ -80,7 +80,7 @@ class DefaultProcessTests {
 	@Test
 	void uninterruptedWaitForTimeout() throws IOException, InterruptedException {
 		long start = System.currentTimeMillis();
-		Process process = echo(1);
+		ProcessWrapper process = echo(1);
 		Thread thread = new Thread(() -> process.waitFor(2, TimeUnit.SECONDS));
 		thread.start();
 		thread.join(100);
@@ -91,7 +91,7 @@ class DefaultProcessTests {
 
 	@Test
 	void isAlive() throws IOException {
-		Process process = echo(1);
+		ProcessWrapper process = echo(1);
 		assertThat(process.isAlive()).isTrue();
 		assertThat(process.waitFor()).isZero();
 		assertThat(process.isAlive()).isFalse();
@@ -99,14 +99,14 @@ class DefaultProcessTests {
 
 	@Test
 	void waitForTimeout() throws IOException {
-		Process process = echo(1);
+		ProcessWrapper process = echo(1);
 		assertThat(process.waitFor(100, TimeUnit.MILLISECONDS)).isFalse();
 		assertThat(process.waitFor(2, TimeUnit.SECONDS)).isTrue();
 	}
 
 	@Test
 	void onExit() throws IOException, InterruptedException {
-		Process process = echo(1);
+		ProcessWrapper process = echo(1);
 		CountDownLatch latch = new CountDownLatch(1);
 		process.onExit().thenRun(latch::countDown);
 		latch.await();
@@ -116,7 +116,7 @@ class DefaultProcessTests {
 	@Test
 	void getStdOut() throws IOException, InterruptedException {
 		StringBuffer buffer = new StringBuffer();
-		Process process = echo(0, Stream.STDOUT);
+		ProcessWrapper process = echo(0, Stream.STDOUT);
 		process.getStdOut().attach(buffer::append);
 		assertThat(process.waitFor()).isZero();
 		((Thread) process.getStdOut()).join();
@@ -126,25 +126,25 @@ class DefaultProcessTests {
 	@Test
 	void getStdErr() throws IOException, InterruptedException {
 		StringBuffer buffer = new StringBuffer();
-		Process process = echo(0, Stream.STDERR);
+		ProcessWrapper process = echo(0, Stream.STDERR);
 		process.getStdErr().attach(buffer::append);
 		assertThat(process.waitFor()).isZero();
 		((Thread) process.getStdErr()).join();
 		assertThat(buffer).contains(this.message);
 	}
 
-	private Process echo() throws IOException {
+	private ProcessWrapper echo() throws IOException {
 		return echo(0);
 	}
 
-	private Process echo(int seconds) throws IOException {
+	private ProcessWrapper echo(int seconds) throws IOException {
 		return echo(seconds, Stream.STDOUT);
 	}
 
-	private Process echo(int seconds, Stream stream) throws IOException {
+	private ProcessWrapper echo(int seconds, Stream stream) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder("bash", "-c",
 				args("sleep", Integer.toString(seconds), "&&", "echo", this.message, "1>&" + stream));
-		return new DefaultProcess("echo", builder.start());
+		return new DefaultProcessWrapper("echo", builder.start());
 	}
 
 	private String args(String... args) {

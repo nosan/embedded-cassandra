@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.assertj.core.description.Description;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-
-import com.github.nosan.embedded.cassandra.commons.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -218,7 +218,7 @@ class FileLockTests {
 
 	static final class Suite {
 
-		private static final Logger log = Logger.get(Suite.class);
+		private static final Logger log = LoggerFactory.getLogger(Suite.class);
 
 		public static void main(String[] args) throws Exception {
 			Path lockFile = Paths.get(args[0]);
@@ -227,9 +227,9 @@ class FileLockTests {
 					throw new IllegalStateException(lockFile + " can not be locked");
 				}
 				Path file = Paths.get(args[1]);
-				log.info("Current count : {0}", Long.parseLong(readAll(Files.newInputStream(file))));
+				log.info("Current count : {}", Long.parseLong(readAll(Files.newInputStream(file))));
 				writeToFile(file, Long.parseLong(readAll(Files.newInputStream(file))) + 1);
-				log.info("New count : {0}", Long.parseLong(readAll(Files.newInputStream(file))));
+				log.info("New count : {}", Long.parseLong(readAll(Files.newInputStream(file))));
 			}
 		}
 

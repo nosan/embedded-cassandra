@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,12 +46,13 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.nosan.embedded.cassandra.commons.FileLock;
 import com.github.nosan.embedded.cassandra.commons.FileUtils;
 import com.github.nosan.embedded.cassandra.commons.StreamUtils;
 import com.github.nosan.embedded.cassandra.commons.StringUtils;
-import com.github.nosan.embedded.cassandra.commons.logging.Logger;
 import com.github.nosan.embedded.cassandra.commons.web.HttpClient;
 import com.github.nosan.embedded.cassandra.commons.web.HttpRequest;
 import com.github.nosan.embedded.cassandra.commons.web.HttpResponse;
@@ -71,7 +72,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 
 	protected static final String[] ALGORITHMS = {"SHA-512", "SHA-256", "SHA-1", "MD5"};
 
-	private static final Logger LOGGER = Logger.get(WebCassandraDirectoryProvider.class);
+	private static final Logger log = LoggerFactory.getLogger(WebCassandraDirectoryProvider.class);
 
 	private final HttpClient httpClient;
 
@@ -119,7 +120,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 	@Override
 	public final Path getDirectory(Version version) throws IOException {
 		Objects.requireNonNull(version, "Version must not be null");
-		Path downloadDirectory = getDownloadPath(this.downloadDirectory, version);
+		Path downloadDirectory = this.downloadDirectory.resolve(".embedded-cassandra").resolve(version.toString());
 
 		Path successFile = downloadDirectory.resolve(".success").normalize().toAbsolutePath();
 		Path cassandraDirectory = downloadDirectory.resolve(String.format("apache-cassandra-%s", version))
@@ -128,12 +129,12 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 		if (Files.exists(successFile) && Files.exists(cassandraDirectory)) {
 			return cassandraDirectory;
 		}
-		LOGGER.info("Cassandra directory: ''{0}'' is not found. Initializing...", cassandraDirectory);
+		log.info("Cassandra directory: ''{}'' is not found. Initializing...", cassandraDirectory);
 		Files.createDirectories(downloadDirectory);
 		Path lockFile = downloadDirectory.resolve(".lock").normalize().toAbsolutePath();
 
 		try (FileLock fileLock = FileLock.of(lockFile)) {
-			LOGGER.info("Acquires a lock to the file ''{0}''...", lockFile);
+			log.info("Acquires a lock to the file ''{}''...", lockFile);
 			if (!tryLock(fileLock)) {
 				throw new IOException(String.format("Unable to provide Cassandra Directory for a version: '%s'."
 						+ " File lock could not be acquired for a file: '%s'", version, lockFile));
@@ -155,7 +156,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 					if (!Thread.currentThread().isInterrupted()) {
 						Files.write(successFile, Collections.singleton(ZonedDateTime.now().toString()));
 					}
-					LOGGER.info("Cassandra directory: ''{0}'' is initialized.", cassandraDirectory);
+					log.info("Cassandra directory: ''{}'' is initialized.", cassandraDirectory);
 					return cassandraDirectory;
 				}
 				catch (Exception ex) {
@@ -171,18 +172,6 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 			}
 			throw new IOException(builder.substring(0, builder.length() - System.lineSeparator().length()));
 		}
-	}
-
-	/**
-	 * Gets a full download path. By default {@code downloadDirectory/.embedded-cassandra/cassandra/$version}
-	 *
-	 * @param downloadDirectory base download directory
-	 * @param version Cassandra version
-	 * @return the full download path.
-	 */
-	protected Path getDownloadPath(Path downloadDirectory, Version version) {
-		return downloadDirectory.resolve(".embedded-cassandra").resolve("cassandra")
-				.resolve(version.toString()).normalize().toAbsolutePath();
 	}
 
 	/**
@@ -228,7 +217,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 	protected void download(HttpClient httpClient, Version version, URI uri, OutputStream os) throws IOException {
 		try (HttpResponse response = httpClient.send(new HttpRequest(uri))) {
 			if (response.getStatus() == 200) {
-				LOGGER.info("Downloading Apache Cassandra: ''{0}'' from URI: ''{1}''."
+				log.info("Downloading Apache Cassandra: ''{}'' from URI: ''{}''."
 						+ " It takes a while...", version, response.getUri());
 				long totalBytes = response.getHeaders().getFirst("Content-Length")
 						.map(Long::parseLong).orElse(-1L);
@@ -243,7 +232,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 							readBytes += read;
 							int percent = (int) (readBytes * 100 / totalBytes);
 							if (percent - lastPercent >= 10 || percent == 100) {
-								LOGGER.info("{0} / {1} {2}%", readBytes, totalBytes, percent);
+								log.info("{} / {} {}%", readBytes, totalBytes, percent);
 								lastPercent = percent;
 							}
 						}
@@ -265,7 +254,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 	 * @throws IOException an I/O error occurs
 	 */
 	protected void extract(Path archiveFile, Path destination) throws IOException {
-		try (ArchiveInputStream archiveInputStream = createArchiveInputStream(archiveFile)) {
+		try (ArchiveInputStream<? extends ArchiveEntry> archiveInputStream = createArchiveInputStream(archiveFile)) {
 			ArchiveEntry entry;
 			while ((entry = archiveInputStream.getNextEntry()) != null) {
 				Path entryPath = destination.resolve(entry.getName()).normalize().toAbsolutePath();
@@ -293,7 +282,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 	 * @return the input stream to use
 	 * @throws IOException an I/O error occurs
 	 */
-	protected ArchiveInputStream createArchiveInputStream(Path archiveFile) throws IOException {
+	protected ArchiveInputStream<? extends ArchiveEntry> createArchiveInputStream(Path archiveFile) throws IOException {
 		return new TarArchiveInputStream(new GzipCompressorInputStream(Files.newInputStream(archiveFile)));
 	}
 
@@ -307,7 +296,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 			Path extractDirectory = Files.createTempDirectory(downloadDirectory,
 					String.format("apache-cassandra-%s-", version)).normalize().toAbsolutePath();
 			try {
-				LOGGER.info("Extracting...");
+				log.info("Extracting...");
 				extract(downloadFile, extractDirectory);
 				Path cassandraHome = findCassandraHome(extractDirectory);
 				FileUtils.copy(cassandraHome, cassandraDirectory, StandardCopyOption.REPLACE_EXISTING);
@@ -323,10 +312,10 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 
 	private void verifyChecksums(HttpClient httpClient, Path archiveFile, CassandraPackage cassandraPackage)
 			throws IOException, NoSuchAlgorithmException {
-		LOGGER.info("Verifying checksum...");
+		log.info("Verifying checksum...");
 		Map<String, URI> checksums = cassandraPackage.getChecksums();
 		if (checksums.isEmpty()) {
-			LOGGER.warn("No checksum defined for ''{0}'', skipping verification.", cassandraPackage.getName());
+			log.warn("No checksum defined for ''{}'', skipping verification.", cassandraPackage.getName());
 			return;
 		}
 		for (Map.Entry<String, URI> checksum : checksums.entrySet()) {
@@ -346,16 +335,16 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 					else {
 						verify(actual, tokens[0]);
 					}
-					LOGGER.info("Checksums are identical");
+					log.info("Checksums are identical");
 					return;
 				}
 			}
 		}
-		LOGGER.warn("No checksum downloaded for ''{0}'', skipping verification.", cassandraPackage.getName());
+		log.warn("No checksum downloaded for ''{}'', skipping verification.", cassandraPackage.getName());
 	}
 
 	private void verify(String actual, String expected) {
-		if (!actual.equals(expected)) {
+		if (!actual.equalsIgnoreCase(expected)) {
 			throw new IllegalStateException(String.format("Checksum mismatch. "
 					+ "Actual: '%s' Expected: '%s'", actual, expected));
 		}
@@ -411,7 +400,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 		 * @param name the name of the package.
 		 * <pre>apache-cassandra-4.0.1-bin.tar.gz</pre>
 		 * @param uri the URI to the package to download.
-		 * <pre>https://URL/apache-cassandra-4.0.1-bin.tar.gz</pre>
+		 * <pre><a href="https://URL/apache-cassandra-4.0.1-bin.tar.gz">...</a></pre>
 		 * @param checksums URIs to download checksums. If empty checksum verifying will be skipped.
 		 * <pre>SHA-512 : https://URL/apache-cassandra-4.0.1-bin.tar.gz.sha512</pre>
 		 */

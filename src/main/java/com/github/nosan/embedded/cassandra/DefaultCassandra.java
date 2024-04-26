@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,20 @@
 package com.github.nosan.embedded.cassandra;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.github.nosan.embedded.cassandra.commons.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class DefaultCassandra implements Cassandra {
 
-	private static final Logger LOGGER = Logger.get(DefaultCassandra.class);
+	private static final Logger log = LoggerFactory.getLogger(DefaultCassandra.class);
 
 	private final String name;
 
@@ -207,23 +204,17 @@ class DefaultCassandra implements Cassandra {
 		Duration timeout = this.startupTimeout;
 		database.getStdOut().attach(this.logger::info);
 		database.getStdErr().attach(this.logger::error);
-		try (NativeTransportParser nativeTransport = new NativeTransportParser(database);
-				RpcTransportParser rpcTransport = new RpcTransportParser(database);
-				OutputCollector outputCollector = new OutputCollector(database);
+		try (OutputCollector outputCollector = new OutputCollector(database);
+				NativeTransportParser nativeTransport = new NativeTransportParser(database);
 				ErrorCollector errorCollector = new ErrorCollector(database);
 				StartupParser startup = new StartupParser(database)) {
 			long start = System.nanoTime();
 			long rem = timeout.toNanos();
-			while (rem > 0 && database.isAlive()
-					&& !(nativeTransport.isParsed() && rpcTransport.isParsed() && startup.isComplete())) {
+			while (rem > 0 && database.isAlive() && !(nativeTransport.isComplete() && startup.isComplete())) {
 				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
 				rem = timeout.toNanos() - (System.nanoTime() - start);
 			}
-			while (rem > 0 && database.isAlive() && !(connect(nativeTransport) && connect(rpcTransport))) {
-				Thread.sleep(Math.min(TimeUnit.NANOSECONDS.toMillis(rem) + 1, 100));
-				rem = timeout.toNanos() - (System.nanoTime() - start);
-			}
-			if (!database.isAlive() || nativeTransport.isFailed() || rpcTransport.isFailed()) {
+			if (!database.isAlive() || nativeTransport.isFailed()) {
 				StringBuilder message = new StringBuilder(String.format("'%s' is not alive.", database))
 						.append(" Please see logs for more details.");
 				List<String> errors = errorCollector.getErrors();
@@ -238,13 +229,10 @@ class DefaultCassandra implements Cassandra {
 				throw new IllegalStateException(String.format("%s couldn't be started within %sms",
 						database, this.startupTimeout.toMillis()));
 			}
-			InetAddress address = Optional.ofNullable(nativeTransport.getAddress())
-					.orElseGet(rpcTransport::getAddress);
-			this.settings = new DefaultSettings(database.getName(), database.getVersion(), address,
+			this.settings = new DefaultSettings(database.getName(), database.getVersion(), nativeTransport.getAddress(),
 					nativeTransport.isStarted(), nativeTransport.getPort(), nativeTransport.getSslPort(),
-					rpcTransport.isStarted(), rpcTransport.getPort(), database.getConfigurationFile(),
-					database.getWorkingDirectory(), database.getJvmOptions(), database.getSystemProperties(),
-					database.getEnvironmentVariables(), database.getConfigProperties());
+					database.getConfigurationFile(), database.getWorkingDirectory(), database.getJvmOptions(),
+					database.getSystemProperties(), database.getEnvironmentVariables(), database.getConfigProperties());
 			this.running = true;
 		}
 		catch (Exception ex) {
@@ -288,35 +276,7 @@ class DefaultCassandra implements Cassandra {
 			this.workingDirectoryDestroyer.destroy(this.workingDirectory, this.version);
 		}
 		catch (Exception ex) {
-			LOGGER.error(ex, "Working directory: ''{0}'' could not be destroyed", this.workingDirectory);
-		}
-	}
-
-	private static boolean connect(NativeTransportParser nativeTransport) {
-		if (!nativeTransport.isStarted()) {
-			return true;
-		}
-		InetAddress address = nativeTransport.getAddress();
-		if (nativeTransport.getSslPort() != null) {
-			return connect(address, nativeTransport.getPort()) && connect(address, nativeTransport.getSslPort());
-		}
-		return connect(address, nativeTransport.getPort());
-	}
-
-	private static boolean connect(RpcTransportParser rpcTransport) {
-		if (!rpcTransport.isStarted()) {
-			return true;
-		}
-		return connect(rpcTransport.getAddress(), rpcTransport.getPort());
-	}
-
-	private static boolean connect(InetAddress address, int port) {
-		try (Socket socket = new Socket()) {
-			socket.connect(new InetSocketAddress(address, port), 100);
-			return true;
-		}
-		catch (IOException ex) {
-			return false;
+			log.error("Working directory: ''{}'' could not be destroyed", this.workingDirectory, ex);
 		}
 	}
 

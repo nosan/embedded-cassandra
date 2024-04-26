@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.github.nosan.embedded.cassandra.cql;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -82,6 +83,30 @@ public interface CqlScript {
 		Objects.requireNonNull(charset, "Charset must not be null");
 		Objects.requireNonNull(resource, "Resources must not be null");
 		return new ResourceCqlScript(resource, charset);
+	}
+
+	/**
+	 * Creates {@link CqlScript} with the specified statements.
+	 *
+	 * @param statements the statements to use
+	 * @return a new {@link CqlScript}
+	 * @since 5.0.0
+	 */
+	static CqlScript ofStatements(String... statements) {
+		Objects.requireNonNull(statements, "Statements must not be null");
+		return ofStatements(Arrays.asList(statements));
+	}
+
+	/**
+	 * Creates {@link CqlScript} with the specified statements.
+	 *
+	 * @param statements the statements to use
+	 * @return a new {@link CqlScript}
+	 * @since 5.0.0
+	 */
+	static CqlScript ofStatements(List<? extends String> statements) {
+		Objects.requireNonNull(statements, "Statements must not be null");
+		return new StatementsCqlScript(statements);
 	}
 
 	/**

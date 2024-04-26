@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -113,18 +112,8 @@ class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 		}
 		Files.createDirectories(workingDirectory.resolve("logs"));
 		Files.createDirectories(workingDirectory.resolve("data"));
-		if (isWindows()) {
-			Path pidFile = Files.createTempFile(workingDirectory.resolve("bin"), "", "-cassandra.pid");
-			return new WindowsCassandraDatabase(this.name, version, newConfigFile, workingDirectory,
-					environmentVariables, configProperties, systemProperties, this.jvmOptions, pidFile);
-		}
 		return new UnixCassandraDatabase(this.name, version, newConfigFile, workingDirectory, environmentVariables,
 				configProperties, systemProperties, this.jvmOptions);
-	}
-
-	private static boolean isWindows() {
-		String os = System.getProperty("os.name");
-		return os.toLowerCase(Locale.ENGLISH).startsWith("windows");
 	}
 
 	private static void writeProperties(Map<String, Object> properties, Path configFile) throws IOException {

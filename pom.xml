@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.nosan</groupId>
     <artifactId>embedded-cassandra</artifactId>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <description>Embedded Cassandra</description>
@@ -41,7 +41,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <nexus.url>https://oss.sonatype.org</nexus.url>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
         <junit5.version>5.11.0</junit5.version>
         <checkstyle.version>9.3</checkstyle.version>
         <cassandra-java-driver-core.version>4.17.0</cassandra-java-driver-core.version>
@@ -131,9 +131,8 @@
             <artifactId>snakeyaml</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <optional>true</optional>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
@@ -239,7 +238,6 @@
                             <configLocation>src/checkstyle/checkstyle.xml</configLocation>
                             <suppressionsLocation>src/checkstyle/checkstyle-suppressions.xml</suppressionsLocation>
                             <headerLocation>src/checkstyle/checkstyle-header.txt</headerLocation>
-                            <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>

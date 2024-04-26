@@ -16,53 +16,50 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
- * {@link CqlScript} implementation for string scripts.
+ * {@link CqlScript} implementation for static statements.
  *
  * @author Dmytro Nosan
- * @since 4.0.0
+ * @since 5.0.0
  */
-public class StringCqlScript extends AbstractCqlScript {
+public class StatementsCqlScript implements CqlScript {
 
-	private final String script;
+	private final List<String> statements;
 
-	/**
-	 * Creates {@link StringCqlScript} with the provided CQL script.
-	 *
-	 * @param script CQL script that contains CQL statements
-	 */
-	public StringCqlScript(String script) {
-		Objects.requireNonNull(script, "Script must not be null");
-		this.script = script;
+	public StatementsCqlScript(List<? extends String> statements) {
+		this.statements = List.copyOf(statements);
 	}
 
 	@Override
-	protected String getScript() {
-		return this.script;
+	public List<String> getStatements() {
+		return this.statements;
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		if (this == other) {
+	public boolean equals(Object o) {
+		if (this == o) {
 			return true;
 		}
-		if (other == null || getClass() != other.getClass()) {
+		if (o == null || getClass() != o.getClass()) {
 			return false;
 		}
-		StringCqlScript that = (StringCqlScript) other;
-		return this.script.equals(that.script);
+		StatementsCqlScript that = (StatementsCqlScript) o;
+		return Objects.equals(this.statements, that.statements);
 	}
 
 	@Override
 	public int hashCode() {
-		return this.script.hashCode();
+		return Objects.hashCode(this.statements);
 	}
 
 	@Override
 	public String toString() {
-		return "StringCqlScript{" + "script='" + this.script + '\'' + '}';
+		return new StringJoiner(", ", StatementsCqlScript.class.getSimpleName() + "[", "]").add(
+				"statements=" + this.statements).toString();
 	}
 
 }

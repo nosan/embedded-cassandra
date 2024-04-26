@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.nosan.embedded.cassandra.commons.Resource;
 import com.github.nosan.embedded.cassandra.commons.StringUtils;
 import com.github.nosan.embedded.cassandra.commons.function.IOSupplier;
-import com.github.nosan.embedded.cassandra.commons.logging.Logger;
 import com.github.nosan.embedded.cassandra.commons.web.JdkHttpClient;
 
 /**
@@ -56,7 +58,7 @@ public class CassandraBuilder {
 	/**
 	 * Default Cassandra version.
 	 */
-	public static final Version DEFAULT_VERSION = Version.parse("4.1.3");
+	public static final Version DEFAULT_VERSION = Version.parse("5.0.0");
 
 	private static final AtomicInteger CASSANDRA_ID = new AtomicInteger();
 
@@ -110,8 +112,8 @@ public class CassandraBuilder {
 		}
 		WorkingDirectoryInitializer workingDirectoryInitializer = this.workingDirectoryInitializer;
 		if (workingDirectoryInitializer == null) {
-			workingDirectoryInitializer = new DefaultWorkingDirectoryInitializer(new WebCassandraDirectoryProvider(
-					new JdkHttpClient(Duration.ofMinutes(1), Duration.ofMinutes(1))));
+			workingDirectoryInitializer = new DefaultWorkingDirectoryInitializer(
+					new WebCassandraDirectoryProvider(new JdkHttpClient(Duration.ofMinutes(1), Duration.ofMinutes(1))));
 		}
 		WorkingDirectoryDestroyer workingDirectoryDestroyer = this.workingDirectoryDestroyer;
 		if (workingDirectoryDestroyer == null) {
@@ -123,7 +125,7 @@ public class CassandraBuilder {
 		}
 		Logger logger = this.logger;
 		if (logger == null) {
-			logger = Logger.get(Cassandra.class);
+			logger = LoggerFactory.getLogger(Cassandra.class);
 		}
 		Map<String, Object> environmentVariables = new LinkedHashMap<>(this.environmentVariables);
 		environmentVariables.values().removeIf(Objects::isNull);
@@ -204,7 +206,7 @@ public class CassandraBuilder {
 
 	/**
 	 * Sets the Cassandra logger. This logger will consume Cassandra stdout and stderr outputs.
-	 * <p>Defaults to {@code Logger.get(Cassandra.class)}
+	 * <p>Defaults to {@code LoggerFactory.getLogger(Cassandra.class)}
 	 *
 	 * @param logger the Cassandra logger
 	 * @return this builder
@@ -659,7 +661,7 @@ public class CassandraBuilder {
 	 *     }
 	 * </pre>
 	 *
-	 * @param path path (file only) within the working directory (e.g conf/cassandra.yaml)
+	 * @param path path (file only) within the working directory (e.g. conf/cassandra.yaml)
 	 * @param resource the resource
 	 * @return this builder
 	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)

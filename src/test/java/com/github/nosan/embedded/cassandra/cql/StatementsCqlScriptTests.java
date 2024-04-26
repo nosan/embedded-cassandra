@@ -23,27 +23,23 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link StringCqlScript}.
+ * Tests for {@link StatementsCqlScript}.
  *
  * @author Dmytro Nosan
  */
-class StringCqlScriptTests {
+class StatementsCqlScriptTests {
 
 	private final String rawScript = "CREATE TABLE test.users ( id text PRIMARY KEY )";
 
-	private final StringCqlScript script = new StringCqlScript(this.rawScript);
+	private final StatementsCqlScript script = new StatementsCqlScript(List.of(this.rawScript));
 
 	@Test
 	void testEquals() {
 		assertThat(this.script.equals(this.script)).isTrue();
 		assertThat(this.script.equals(null)).isFalse();
 		assertThat(this.script.equals("CREATE TABLE test.roles ( id text PRIMARY KEY )")).isFalse();
-		assertThat(this.script.equals(new StringCqlScript("CREATE TABLE test.users ( id text PRIMARY KEY )"))).isTrue();
-	}
-
-	@Test
-	void tesHashCode() {
-		assertThat(this.script.hashCode()).isEqualTo(this.rawScript.hashCode());
+		assertThat(this.script.equals(
+				new StatementsCqlScript(List.of("CREATE TABLE test.users ( id text PRIMARY KEY )")))).isTrue();
 	}
 
 	@Test

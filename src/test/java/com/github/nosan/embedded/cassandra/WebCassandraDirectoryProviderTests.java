@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,6 @@ class WebCassandraDirectoryProviderTests {
 		Version version = Version.parse("4.0.1");
 
 		Files.createDirectories(root.resolve(".embedded-cassandra")
-				.resolve("cassandra")
 				.resolve(version.toString())
 				.resolve(String.format("apache-cassandra-%s", version)));
 
@@ -345,12 +344,10 @@ class WebCassandraDirectoryProviderTests {
 		this.directoryProvider = spy(new WebCassandraDirectoryProvider(httpClient, root));
 		Version version = Version.parse("4.0.1");
 		Path expected = Files.createDirectories(root.resolve(".embedded-cassandra")
-				.resolve("cassandra")
 				.resolve(version.toString())
 				.resolve(String.format("apache-cassandra-%s", version)));
 
 		Files.createDirectories(root.resolve(".embedded-cassandra")
-				.resolve("cassandra")
 				.resolve(version.toString()).resolve(".success"));
 
 		Path actual = this.directoryProvider.getDirectory(version);

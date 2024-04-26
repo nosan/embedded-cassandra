@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,12 @@ class CqlScriptTests {
 		List<String> statements = new ArrayList<>();
 		CqlScript.ofClassPath("schema.cql").forEachStatement(statements::add);
 		assertThat(statements).hasSize(1);
+	}
+
+	@Test
+	void ofStatements() {
+		CqlScript cqlScript = CqlScript.ofStatements("1", "2", "3");
+		assertThat(cqlScript.getStatements()).containsExactly("1", "2", "3");
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package com.github.nosan.embedded.cassandra.cql;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import com.github.nosan.embedded.cassandra.commons.Resource;
 
 /**
  * Default implementation of {@link CqlDataSet}.
@@ -39,7 +42,7 @@ public class DefaultCqlDataSet implements CqlDataSet {
 	 */
 	public DefaultCqlDataSet(Collection<? extends CqlScript> scripts) {
 		Objects.requireNonNull(scripts, "Scripts must not be null");
-		this.scripts = Collections.unmodifiableList(new ArrayList<>(scripts));
+		this.scripts = List.copyOf(scripts);
 	}
 
 	@Override
@@ -67,6 +70,60 @@ public class DefaultCqlDataSet implements CqlDataSet {
 	@Override
 	public String toString() {
 		return "DefaultCqlDataSet{" + "scripts=" + this.scripts + '}';
+	}
+
+	static class Builder implements CqlDataSet.Builder {
+
+		private final List<CqlScript> scripts = new ArrayList<>();
+
+		@Override
+		public Builder addScript(CqlScript script) {
+			Objects.requireNonNull(script, "Script must not be null");
+			this.scripts.add(script);
+			return this;
+		}
+
+		@Override
+		public Builder addScript(String script) {
+			Objects.requireNonNull(script, "Script must not be null");
+			this.scripts.add(new StringCqlScript(script));
+			return this;
+		}
+
+		@Override
+		public Builder addResource(Resource resource) {
+			Objects.requireNonNull(resource, "Resource must not be null");
+			addResource(resource, StandardCharsets.UTF_8);
+			return this;
+		}
+
+		@Override
+		public Builder addResource(Resource resource, Charset charset) {
+			Objects.requireNonNull(resource, "Resource must not be null");
+			Objects.requireNonNull(charset, "Charset must not be null");
+			this.scripts.add(CqlScript.ofResource(resource, charset));
+			return this;
+		}
+
+		@Override
+		public Builder addStatements(String... statements) {
+			Objects.requireNonNull(statements, "Statements must not be null");
+			this.scripts.add(CqlScript.ofStatements(statements));
+			return this;
+		}
+
+		@Override
+		public Builder addStatements(List<? extends String> statements) {
+			Objects.requireNonNull(statements, "Statements must not be null");
+			this.scripts.add(CqlScript.ofStatements(statements));
+			return this;
+		}
+
+		@Override
+		public CqlDataSet build() {
+			return new DefaultCqlDataSet(this.scripts);
+		}
+
 	}
 
 }
