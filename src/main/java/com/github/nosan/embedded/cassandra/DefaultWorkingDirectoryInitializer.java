@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import java.util.Set;
 import com.github.nosan.embedded.cassandra.commons.FileUtils;
 
 /**
- * The default implementation of {@link WorkingDirectoryInitializer}, that gets Cassandra directory from the {@link
- * CassandraDirectoryProvider} and copies all files from a retrieved directory into the working directory except
+ * The default implementation of {@link WorkingDirectoryInitializer}, that gets Cassandra directory from the
+ * {@link CassandraDirectoryProvider} and copies all files from a retrieved directory into the working directory except
  * <b>javadoc, doc and licenses</b> directories.
  * By default, replace any existing files in the working directory.
  *
@@ -54,7 +54,7 @@ public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryIniti
 	 * Cassandra directory.
 	 */
 	public DefaultWorkingDirectoryInitializer(CassandraDirectoryProvider cassandraDirectoryProvider) {
-		this(cassandraDirectoryProvider, CopyStrategy.REPLACE_EXISTING);
+		this(cassandraDirectoryProvider, DefaultWorkingDirectoryInitializer.CopyStrategy.REPLACE_EXISTING);
 	}
 
 	/**
@@ -78,47 +78,45 @@ public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryIniti
 		Objects.requireNonNull(version, "Version must not be null");
 		Path cassandraDirectory = this.cassandraDirectoryProvider.getDirectory(version);
 		Objects.requireNonNull(cassandraDirectory, "Cassandra Directory must not be null");
-		copy(cassandraDirectory, workingDirectory, this.copyStrategy);
-	}
-
-	/**
-	 * Copies Cassandra files into a working directory.
-	 *
-	 * @param cassandraDirectory Cassandra directory
-	 * @param workingDirectory Cassandra working directory
-	 * @throws IOException an I/O error occurs
-	 */
-	protected void copy(Path cassandraDirectory, Path workingDirectory, CopyStrategy copyStrategy) throws IOException {
-		if (copyStrategy == CopyStrategy.REPLACE_EXISTING) {
-			FileUtils.copy(cassandraDirectory, workingDirectory, (path, attributes) -> {
-				if (attributes.isDirectory()) {
-					return !SKIP_DIRECTORIES.contains(path.getFileName().toString());
-				}
-				return true;
-			}, StandardCopyOption.REPLACE_EXISTING);
-		}
-		else {
-			FileUtils.copy(cassandraDirectory, workingDirectory, (path, attributes) -> {
-				if (attributes.isDirectory()) {
-					return !SKIP_DIRECTORIES.contains(path.getFileName().toString());
-				}
-				return !Files.exists(workingDirectory.resolve(cassandraDirectory.relativize(path)));
-			});
-		}
+		this.copyStrategy.copy(cassandraDirectory, workingDirectory);
 	}
 
 	/**
 	 * Casandra files copy strategies.
 	 */
-	public enum CopyStrategy {
+	public interface CopyStrategy {
+
 		/**
 		 * Replace a destination file if it exists.
 		 */
-		REPLACE_EXISTING,
+		CopyStrategy REPLACE_EXISTING = (cassandraDirectory, workingDirectory) -> FileUtils.copy(cassandraDirectory,
+				workingDirectory, (path, attributes) -> {
+					if (attributes.isDirectory()) {
+						return !SKIP_DIRECTORIES.contains(path.getFileName().toString());
+					}
+					return true;
+				}, StandardCopyOption.REPLACE_EXISTING);
+
 		/**
 		 * Skip to copy if destination file exists.
 		 */
-		SKIP_EXISTING
+		CopyStrategy SKIP_EXISTING = (cassandraDirectory, workingDirectory) -> FileUtils.copy(cassandraDirectory,
+				workingDirectory, (path, attributes) -> {
+					if (attributes.isDirectory()) {
+						return !SKIP_DIRECTORIES.contains(path.getFileName().toString());
+					}
+					return !Files.exists(workingDirectory.resolve(cassandraDirectory.relativize(path)));
+				});
+
+		/**
+		 * Copies Cassandra files into a working directory.
+		 *
+		 * @param cassandraDirectory Cassandra directory
+		 * @param workingDirectory Cassandra working directory
+		 * @throws IOException an I/O error occurs
+		 */
+		void copy(Path cassandraDirectory, Path workingDirectory) throws IOException;
+
 	}
 
 }

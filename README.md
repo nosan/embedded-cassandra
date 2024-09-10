@@ -56,7 +56,7 @@ Also see [CONTRIBUTING.md](CONTRIBUTING.md) if you wish to submit pull requests.
 
 ## Build
 
-`Embedded Cassandra` can be easily built with the [maven wrapper](https://github.com/takari/maven-wrapper). You also need `JDK 1.8`.
+`Embedded Cassandra` can be easily built with the [maven wrapper](https://github.com/takari/maven-wrapper). You also need `JDK 11`.
 
 ## License
 

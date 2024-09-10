@@ -14,9 +14,7 @@ This section covers how to configure Embedded Cassandra.
 include::{sources}/CassandraExamples.java[tag=version]
 ----
 
-NOTE: Defaults to *4.1.3*.
-
-CAUTION: Since *4.0-beta4*, Windows scripts were removed. https://issues.apache.org/jira/browse/CASSANDRA-16171[CASSANDRA-16171]
+NOTE: Defaults to *5.0.0*.
 
 == Config Properties
 
@@ -30,7 +28,6 @@ For example `cassandra.yaml`:
 ...
 storage_port: 7199
 native_transport_port: 9042
-rpc_port: 9160
 client_encryption_options:
    enabled: false
    ...
@@ -51,7 +48,6 @@ The output `cassandra.yaml`:
 ...
 storage_port: 7000
 native_transport_port: 9000
-rpc_port: 9160
 client_encryption_options:
   enabled: true
   ...
@@ -219,4 +215,5 @@ Configure a logger, that consumes Cassandra `STDOUT` and `STDERR` outputs.
 include::{sources}/CassandraExamples.java[tag=logger]
 ----
 
-NOTE: Defaults to `Logger.get(Cassandra.class)`.
+NOTE: Defaults to `LoggerFactory.getLogger(Cassandra.class)`.
+

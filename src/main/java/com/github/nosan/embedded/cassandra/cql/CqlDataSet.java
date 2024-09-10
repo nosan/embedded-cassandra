@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,16 @@ import com.github.nosan.embedded.cassandra.commons.Resource;
 public interface CqlDataSet extends CqlScript {
 
 	/**
+	 * Creates a new {@link CqlDataSet.Builder}.
+	 *
+	 * @return a new {@link CqlDataSet.Builder}
+	 * @since 5.0.0
+	 */
+	static Builder builder() {
+		return new DefaultCqlDataSet.Builder();
+	}
+
+	/**
 	 * Creates {@link CqlDataSet} with the specified resource names and default charset.
 	 *
 	 * @param names the resource names
@@ -59,10 +69,8 @@ public interface CqlDataSet extends CqlScript {
 	static CqlDataSet ofClassPaths(Charset charset, String... names) {
 		Objects.requireNonNull(charset, "Charset must not be null");
 		Objects.requireNonNull(names, "Classpath resources must not be null");
-		return new DefaultCqlDataSet(Arrays.stream(names)
-				.map(ClassPathResource::new)
-				.map(resource -> new ResourceCqlScript(resource, charset))
-				.collect(Collectors.toList()));
+		return new DefaultCqlDataSet(Arrays.stream(names).map(ClassPathResource::new)
+				.map(resource -> new ResourceCqlScript(resource, charset)).collect(Collectors.toList()));
 	}
 
 	/**
@@ -85,8 +93,7 @@ public interface CqlDataSet extends CqlScript {
 	static CqlDataSet ofResources(Charset charset, Resource... resources) {
 		Objects.requireNonNull(charset, "Charset must not be null");
 		Objects.requireNonNull(resources, "Resources must not be null");
-		return new DefaultCqlDataSet(Arrays.stream(resources)
-				.map(resource -> new ResourceCqlScript(resource, charset))
+		return new DefaultCqlDataSet(Arrays.stream(resources).map(resource -> new ResourceCqlScript(resource, charset))
 				.collect(Collectors.toList()));
 	}
 
@@ -133,5 +140,70 @@ public interface CqlDataSet extends CqlScript {
 	 * @return {@code CQL} scripts (never null)
 	 */
 	List<? extends CqlScript> getScripts();
+
+	/**
+	 * A {@link  CqlDataSet} builder.
+	 *
+	 * @since 5.0.0
+	 */
+	interface Builder {
+
+		/**
+		 * Add {@link  CqlScript} to the builder.
+		 *
+		 * @param script {@link  CqlScript} to add
+		 * @return self
+		 */
+		Builder addScript(CqlScript script);
+
+		/**
+		 * Add plain script to the builder.
+		 *
+		 * @param script plain strings script to add
+		 * @return self
+		 */
+		Builder addScript(String script);
+
+		/**
+		 * Add {@link  Resource} with default UTF-8 encoding to the builder.
+		 *
+		 * @param resource {@link  Resource} to add
+		 * @return self
+		 */
+		Builder addResource(Resource resource);
+
+		/**
+		 * Add {@link  Resource} with the provided encoding to the builder.
+		 *
+		 * @param resource {@link  Resource} to add
+		 * @param charset encoding to use
+		 * @return self
+		 */
+		Builder addResource(Resource resource, Charset charset);
+
+		/**
+		 * Add static statements to the builder.
+		 *
+		 * @param statements static statements
+		 * @return self
+		 */
+		Builder addStatements(String... statements);
+
+		/**
+		 * Add static statements to the builder.
+		 *
+		 * @param statements static statements
+		 * @return self
+		 */
+		Builder addStatements(List<? extends String> statements);
+
+		/**
+		 * Build a new {@link  CqlDataSet}.
+		 *
+		 * @return a new {@link CqlDataSet}
+		 */
+		CqlDataSet build();
+
+	}
 
 }

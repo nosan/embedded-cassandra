@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,6 @@ import com.github.nosan.embedded.cassandra.WorkingDirectoryDestroyer;
 import com.github.nosan.embedded.cassandra.WorkingDirectoryInitializer;
 import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
 import com.github.nosan.embedded.cassandra.commons.FileSystemResource;
-import com.github.nosan.embedded.cassandra.commons.logging.ConsoleLogger;
-import com.github.nosan.embedded.cassandra.commons.logging.Logger;
-import com.github.nosan.embedded.cassandra.commons.logging.Slf4jLogger;
 import com.github.nosan.embedded.cassandra.commons.web.JdkHttpClient;
 import com.github.nosan.embedded.cassandra.cql.CqlDataSet;
 import com.github.nosan.embedded.cassandra.cql.CqlScript;
@@ -120,7 +117,7 @@ public class CassandraExamples {
 	private void version() {
 		//tag::version[]
 		new CassandraBuilder()
-				.version("3.11.11")
+				.version("5.0.0")
 				.build();
 		//end::version[]
 	}
@@ -202,7 +199,6 @@ public class CassandraExamples {
 		//tag::random-ports[]
 		new CassandraBuilder()
 				.addSystemProperty("cassandra.native_transport_port", 0)
-				.addSystemProperty("cassandra.rpc_port", 0)
 				.addSystemProperty("cassandra.storage_port", 0)
 				.addSystemProperty("cassandra.jmx.local.port", 0)
 				//for Cassandra 4.x.x
@@ -216,7 +212,7 @@ public class CassandraExamples {
 		new CassandraBuilder()
 				.configure(new SimpleSeedProviderConfigurator()
 						.addSeeds("localhost", "127.0.0.1")
-						//for Cassandra 4.x.x
+						//for Cassandra >= 4.x.x
 						.addSeed("localhost", 7199)
 						.addSeed("localhost", 0)) //<1>
 				.build();
@@ -252,12 +248,7 @@ public class CassandraExamples {
 	private void logger() {
 		//tag::logger[]
 		new CassandraBuilder()
-				//Automatically detects logging implementation. Either slf4j or console.
-				.logger(Logger.get("Cassandra"))
-				//Use SLF4J Logger implementation
-				.logger(new Slf4jLogger(LoggerFactory.getLogger("Cassandra")))
-				//Use Console implementation.
-				.logger(new ConsoleLogger("Cassandra"))
+				.logger(LoggerFactory.getLogger("Cassandra"))
 				.build();
 		//end::logger[]
 	}

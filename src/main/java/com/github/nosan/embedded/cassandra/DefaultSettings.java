@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,7 @@ class DefaultSettings implements Settings {
 
 	private final boolean nativeTransportEnabled;
 
-	private final boolean rpcTransportEnabled;
-
 	private final Integer port;
-
-	private final Integer rpcPort;
 
 	private final Integer sslPort;
 
@@ -57,15 +53,12 @@ class DefaultSettings implements Settings {
 	private final Map<String, Object> configProperties;
 
 	DefaultSettings(String name, Version version, InetAddress address, boolean nativeTransportEnabled,
-			Integer port, Integer sslPort, boolean rpcTransportEnabled, Integer rpcPort,
-			Path configurationFile, Path workingDirectory, Set<String> jvmOptions,
+			Integer port, Integer sslPort, Path configurationFile, Path workingDirectory, Set<String> jvmOptions,
 			Map<String, String> systemProperties, Map<String, String> environmentVariables,
 			Map<String, Object> configProperties) {
 		this.name = name;
 		this.version = version;
 		this.nativeTransportEnabled = nativeTransportEnabled;
-		this.rpcTransportEnabled = rpcTransportEnabled;
-		this.rpcPort = rpcPort;
 		this.configurationFile = configurationFile;
 		this.environmentVariables = readOnly(environmentVariables);
 		this.systemProperties = readOnly(systemProperties);
@@ -93,11 +86,6 @@ class DefaultSettings implements Settings {
 	}
 
 	@Override
-	public boolean isRpcTransportEnabled() {
-		return this.rpcTransportEnabled;
-	}
-
-	@Override
 	public InetAddress getAddress() {
 		return this.address;
 	}
@@ -108,11 +96,6 @@ class DefaultSettings implements Settings {
 			return getSslPort();
 		}
 		return this.port;
-	}
-
-	@Override
-	public Integer getRpcPort() {
-		return this.rpcPort;
 	}
 
 	@Override

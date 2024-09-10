@@ -35,7 +35,7 @@ Embedded Cassandra repository can be found {github-code}[here]
 === Build Source
 
 Embedded Cassandra can be easily built with the https://github.com/takari/maven-wrapper[maven wrapper].
-You also need `JDK 1.8`.
+You also need `JDK 11`.
 
 [source,bash]
 ----

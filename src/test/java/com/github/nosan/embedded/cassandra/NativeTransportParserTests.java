@@ -36,9 +36,9 @@ import static org.mockito.Mockito.when;
  */
 class NativeTransportParserTests {
 
-	private final Process.Output stdout = Mockito.mock(Process.Output.class);
+	private final ProcessWrapper.Output stdout = Mockito.mock(ProcessWrapper.Output.class);
 
-	private final Process.Output stderr = Mockito.mock(Process.Output.class);
+	private final ProcessWrapper.Output stderr = Mockito.mock(ProcessWrapper.Output.class);
 
 	private final CassandraDatabase database = Mockito.mock(CassandraDatabase.class);
 
@@ -128,7 +128,7 @@ class NativeTransportParserTests {
 		verify(this.stderr).attach(parser);
 		verify(this.stdout).attach(parser);
 		assertThat(parser.isStarted()).isFalse();
-		assertThat(parser.isParsed()).isTrue();
+		assertThat(parser.isComplete()).isTrue();
 		parser.close();
 		verify(this.stderr).detach(parser);
 		verify(this.stdout).detach(parser);
@@ -141,10 +141,10 @@ class NativeTransportParserTests {
 		verify(this.stderr).attach(parser);
 		verify(this.stdout).attach(parser);
 		assertThat(parser.isStarted()).isFalse();
-		assertThat(parser.isParsed()).isFalse();
+		assertThat(parser.isComplete()).isFalse();
 		parser.accept("Not starting native transport as requested.");
 		assertThat(parser.isStarted()).isFalse();
-		assertThat(parser.isParsed()).isTrue();
+		assertThat(parser.isComplete()).isTrue();
 		parser.close();
 		verify(this.stderr).detach(parser);
 		verify(this.stdout).detach(parser);
@@ -157,10 +157,10 @@ class NativeTransportParserTests {
 		verify(this.stderr).attach(parser);
 		verify(this.stdout).attach(parser);
 		assertThat(parser.isStarted()).isFalse();
-		assertThat(parser.isParsed()).isFalse();
+		assertThat(parser.isComplete()).isFalse();
 		parser.accept("Not starting client transports");
 		assertThat(parser.isStarted()).isFalse();
-		assertThat(parser.isParsed()).isTrue();
+		assertThat(parser.isComplete()).isTrue();
 		parser.close();
 		verify(this.stderr).detach(parser);
 		verify(this.stdout).detach(parser);
@@ -175,7 +175,7 @@ class NativeTransportParserTests {
 		parser.accept("Starting listening for CQL clients on localhost/127.0.0.1:9042 (unencrypted)");
 		parser.accept("Failed to bind port 9042 on 127.0.0.1.");
 		assertThat(parser.isFailed()).isTrue();
-		assertThat(parser.isParsed()).isTrue();
+		assertThat(parser.isComplete()).isTrue();
 		parser.close();
 		verify(this.stderr).detach(parser);
 		verify(this.stdout).detach(parser);
