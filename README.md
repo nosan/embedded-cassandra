@@ -9,11 +9,22 @@ Embedded Cassandra
 
 Embedded Cassandra provides an easy way to start and stop [Apache Cassandra](https://cassandra.apache.org).
 
-To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra/4.1.0).
+To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra/5.0.0).
 
 All versions of Embedded Cassandra reference documentation are [here](https://nosan.github.io/embedded-cassandra).
 
 Here is a quick teaser of starting Cassandra: 
+
+```xml
+
+<dependecies>
+    <dependency>
+        <groupId>com.github.nosan</groupId>
+        <artifactId>embedded-cassandra</artifactId>
+        <version>5.0.0</version>
+    </dependency>
+</dependecies>
+```
 
 ```java
 import java.net.InetSocketAddress;
@@ -46,6 +57,7 @@ public class CassandraExample {
 
 }
 ```
+
 
 ## Issues
 
