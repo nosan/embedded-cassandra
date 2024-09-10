@@ -316,4 +316,11 @@ public class CassandraExamples {
 		//end::cql[]
 	}
 
+	private void jdk21SecurityManager() {
+		//tag::security-manager[]
+		new CassandraBuilder()
+				.addSystemProperty("java.security.manager", "allow").build();
+		//end::security-manager[]
+	}
+
 }

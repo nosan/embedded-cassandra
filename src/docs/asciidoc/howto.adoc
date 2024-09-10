@@ -95,3 +95,25 @@ NOTE: You don't need to explicitly stop Cassandra because a shutdown hook does t
 
 NOTE: Calling `Cassandra.start()` method on an already started Cassandra has no effect.
 
+== JDK21 and Security Manager
+
+If you have a trouble to use `JDK21` because of the following error:
+
+[source,java,indent=0]
+ERROR [main] 2024-02-27 20:08:26,984 CassandraDaemon.java:897 - Exception encountered during startup
+java.lang.UnsupportedOperationException: The Security Manager is deprecated and will be removed in a future release
+	at java.base/java.lang.System.setSecurityManager(System.java:429)
+	at org.apache.cassandra.security.ThreadAwareSecurityManager.install(ThreadAwareSecurityManager.java:96)
+	at org.apache.cassandra.service.CassandraDaemon.setup(CassandraDaemon.java:248)
+	at org.apache.cassandra.service.CassandraDaemon.activate(CassandraDaemon.java:751)
+	at org.apache.cassandra.service.CassandraDaemon.main(CassandraDaemon.java:875)
+	at com.github.nosan.embedded.cassandra.DefaultCassandra.await(DefaultCassandra.java:261)
+	at com.github.nosan.embedded.cassandra.DefaultCassandra.start(DefaultCassandra.java:97)
+
+Add the following the property to `CassandraBuilder`:
+[source,java,indent=0]
+----
+include::{sources}/CassandraExamples.java[tag=security-manager]
+----
+
+
