@@ -656,7 +656,7 @@ pre.rouge {
 <div class="details">
 <span id="author" class="author">Dmytro Nosan</span><br>
 <span id="revnumber">version 5.0.0,</span>
-<span id="revdate">2024-09-10T18:38:24Z</span>
+<span id="revdate">2024-09-10T18:59:29Z</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -708,6 +708,7 @@ pre.rouge {
 <li><a href="#add-libs-to-classpath">3.5. Add libs to classpath</a></li>
 <li><a href="#load-cql-statements">3.6. Load Cql Statements</a></li>
 <li><a href="#shared-cassandra">3.7. Shared Cassandra</a></li>
+<li><a href="#jdk21-and-security-manager">3.8. JDK21 and Security Manager</a></li>
 </ul>
 </li>
 <li><a href="#f-a-q">4. F.A.Q</a>
@@ -1497,6 +1498,34 @@ Calling <code>Cassandra.start()</code> method on an already started Cassandra ha
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="jdk21-and-security-manager"><a class="anchor" href="#jdk21-and-security-manager"></a>3.8. JDK21 and Security Manager</h3>
+<div class="paragraph">
+<p>If you have a trouble to use <code>JDK21</code> because of the following error:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="no">ERROR</span> <span class="o">[</span><span class="n">main</span><span class="o">]</span> <span class="mi">2024</span><span class="o">-</span><span class="mo">02</span><span class="o">-</span><span class="mi">27</span> <span class="mi">20</span><span class="o">:</span><span class="mi">08</span><span class="o">:</span><span class="mi">26</span><span class="o">,</span><span class="mi">984</span> <span class="nc">CassandraDaemon</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">897</span> <span class="o">-</span> <span class="nc">Exception</span> <span class="n">encountered</span> <span class="n">during</span> <span class="n">startup</span>
+<span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">UnsupportedOperationException</span><span class="o">:</span> <span class="nc">The</span> <span class="nc">Security</span> <span class="nc">Manager</span> <span class="n">is</span> <span class="n">deprecated</span> <span class="n">and</span> <span class="n">will</span> <span class="n">be</span> <span class="n">removed</span> <span class="n">in</span> <span class="n">a</span> <span class="n">future</span> <span class="n">release</span>
+    <span class="n">at</span> <span class="n">java</span><span class="o">.</span><span class="na">base</span><span class="o">/</span><span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">System</span><span class="o">.</span><span class="na">setSecurityManager</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">429</span><span class="o">)</span>
+    <span class="n">at</span> <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">security</span><span class="o">.</span><span class="na">ThreadAwareSecurityManager</span><span class="o">.</span><span class="na">install</span><span class="o">(</span><span class="nc">ThreadAwareSecurityManager</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">96</span><span class="o">)</span>
+    <span class="n">at</span> <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">service</span><span class="o">.</span><span class="na">CassandraDaemon</span><span class="o">.</span><span class="na">setup</span><span class="o">(</span><span class="nc">CassandraDaemon</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">248</span><span class="o">)</span>
+    <span class="n">at</span> <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">service</span><span class="o">.</span><span class="na">CassandraDaemon</span><span class="o">.</span><span class="na">activate</span><span class="o">(</span><span class="nc">CassandraDaemon</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">751</span><span class="o">)</span>
+    <span class="n">at</span> <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">service</span><span class="o">.</span><span class="na">CassandraDaemon</span><span class="o">.</span><span class="na">main</span><span class="o">(</span><span class="nc">CassandraDaemon</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">875</span><span class="o">)</span>
+    <span class="n">at</span> <span class="n">com</span><span class="o">.</span><span class="na">github</span><span class="o">.</span><span class="na">nosan</span><span class="o">.</span><span class="na">embedded</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">DefaultCassandra</span><span class="o">.</span><span class="na">await</span><span class="o">(</span><span class="nc">DefaultCassandra</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">261</span><span class="o">)</span>
+    <span class="n">at</span> <span class="n">com</span><span class="o">.</span><span class="na">github</span><span class="o">.</span><span class="na">nosan</span><span class="o">.</span><span class="na">embedded</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">DefaultCassandra</span><span class="o">.</span><span class="na">start</span><span class="o">(</span><span class="nc">DefaultCassandra</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">97</span><span class="o">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add the following the property to <code>CassandraBuilder</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="k">new</span> <span class="nc">CassandraBuilder</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">addSystemProperty</span><span class="o">(</span><span class="s">"java.security.manager"</span><span class="o">,</span> <span class="s">"allow"</span><span class="o">).</span><span class="na">build</span><span class="o">();</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1569,7 +1598,7 @@ Calling <code>Cassandra.start()</code> method on an already started Cassandra ha
 <div id="footer">
 <div id="footer-text">
 Version 5.0.0<br>
-Last updated 2024-09-10 18:38:08 UTC
+Last updated 2024-09-10 18:59:17 UTC
 </div>
 </div>
 </body>
