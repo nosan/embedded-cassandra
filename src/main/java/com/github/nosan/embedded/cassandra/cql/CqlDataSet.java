@@ -157,7 +157,7 @@ public interface CqlDataSet extends CqlScript {
 		Builder addScript(CqlScript script);
 
 		/**
-		 * Add plain script to the builder.
+		 * Add a plain script to the builder.
 		 *
 		 * @param script plain strings script to add
 		 * @return self

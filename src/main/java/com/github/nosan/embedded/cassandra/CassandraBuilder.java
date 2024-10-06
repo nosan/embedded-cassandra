@@ -89,6 +89,12 @@ public class CassandraBuilder {
 	private WorkingDirectoryInitializer workingDirectoryInitializer;
 
 	/**
+	 * Creates a new {@link  CassandraBuilder}.
+	 */
+	public CassandraBuilder() {
+	}
+
+	/**
 	 * Build a new {@link Cassandra} instance.
 	 *
 	 * @return a {@link Cassandra} instance.
@@ -195,7 +201,7 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Gets current configured Cassandra version or {@link #DEFAULT_VERSION}.
+	 * Gets the current configured Cassandra version or {@link #DEFAULT_VERSION}.
 	 *
 	 * @return Cassandra version, never {@code null}
 	 */
@@ -571,7 +577,7 @@ public class CassandraBuilder {
 	 * builder.configProperties(properties);
 	 * }
 	 * </pre>
-	 * Output Yaml:
+	 * Output YAML:
 	 * <pre>
 	 * ...
 	 * cluster_name: "MyCluster"
@@ -600,7 +606,7 @@ public class CassandraBuilder {
 	 * builder.configProperty("client_encryption_options.enabled",true)
 	 *        .configProperty("cluster_name","MyCluster")}
 	 * </pre>
-	 * <p>Output Yaml:
+	 * <p>Output YAML:
 	 * <pre>
 	 * ...
 	 * cluster_name: "MyCluster"
@@ -630,7 +636,7 @@ public class CassandraBuilder {
 	 * builder.configProperties(properties);
 	 * }
 	 * </pre>
-	 * Output Yaml:
+	 * Output YAML:
 	 * <pre>
 	 * ...
 	 * cluster_name: "MyCluster"
@@ -661,7 +667,7 @@ public class CassandraBuilder {
 	 *     }
 	 * </pre>
 	 *
-	 * @param path path (file only) within the working directory (e.g. conf/cassandra.yaml)
+	 * @param path path (file only) within the working directory (e.g., conf/cassandra.yaml)
 	 * @param resource the resource
 	 * @return this builder
 	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)

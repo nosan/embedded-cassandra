@@ -98,7 +98,7 @@ public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryIniti
 				}, StandardCopyOption.REPLACE_EXISTING);
 
 		/**
-		 * Skip to copy if destination file exists.
+		 * Skip to copy if a destination file exists.
 		 */
 		CopyStrategy SKIP_EXISTING = (cassandraDirectory, workingDirectory) -> FileUtils.copy(cassandraDirectory,
 				workingDirectory, (path, attributes) -> {

@@ -20,7 +20,7 @@
  * <p>
  * {@link com.github.nosan.embedded.cassandra.Cassandra} Interface that represents Cassandra instance.
  * <p>{@link com.github.nosan.embedded.cassandra.Version}</p>
- * A class that parses and represents Cassandra version.
+ * A class that parses and represents a Cassandra version.
  * <p>{@link com.github.nosan.embedded.cassandra.CassandraBuilder}</p> A builder class that can be used to configure
  * and create {@link com.github.nosan.embedded.cassandra.Cassandra} instance.
  * <p>
@@ -59,4 +59,3 @@
  */
 
 package com.github.nosan.embedded.cassandra;
-

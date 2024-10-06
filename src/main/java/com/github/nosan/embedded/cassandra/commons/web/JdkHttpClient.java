@@ -82,7 +82,7 @@ public class JdkHttpClient implements HttpClient {
 	}
 
 	/**
-	 * Creates {@link JdkHttpClient} with provided timeouts and  proxy.
+	 * Creates {@link JdkHttpClient} with provided timeouts and proxy.
 	 *
 	 * @param connectTimeout connection timeout
 	 * @param readTimeout read timeout

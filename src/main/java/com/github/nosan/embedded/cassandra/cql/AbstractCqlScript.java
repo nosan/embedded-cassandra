@@ -29,6 +29,9 @@ import com.github.nosan.embedded.cassandra.commons.StringUtils;
  */
 public abstract class AbstractCqlScript implements CqlScript {
 
+	protected AbstractCqlScript() {
+	}
+
 	@Override
 	public final List<String> getStatements() {
 		String script = getScript();
@@ -42,7 +45,7 @@ public abstract class AbstractCqlScript implements CqlScript {
 	/**
 	 * Gets the {@code CQL} script.
 	 *
-	 * @return the script, may be a null
+	 * @return the script may be a null
 	 */
 	protected abstract String getScript();
 

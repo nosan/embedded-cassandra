@@ -46,7 +46,7 @@ public interface WorkingDirectoryDestroyer {
 	/**
 	 * Deletes the provided paths in the working directory.
 	 *
-	 * @param paths paths within the working directory. (e.g. lib, bin, tools, conf/cassandra.yaml)
+	 * @param paths paths within the working directory. (e.g., lib, bin, tools, conf/cassandra.yaml)
 	 * @return a new working directory destroyer
 	 */
 	static WorkingDirectoryDestroyer deleteOnly(String... paths) {
@@ -69,7 +69,7 @@ public interface WorkingDirectoryDestroyer {
 	}
 
 	/**
-	 * Do nothing to the working directory. In other words, just leave it as is.
+	 * Do nothing to the working directory. In other words, leave it as is.
 	 *
 	 * @return a new working directory destroyer
 	 */

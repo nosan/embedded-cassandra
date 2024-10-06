@@ -30,6 +30,11 @@ public class StatementsCqlScript implements CqlScript {
 
 	private final List<String> statements;
 
+	/**
+	 * Creates {@link  StatementsCqlScript} for a given statements.
+	 *
+	 * @param statements the statements.
+	 */
 	public StatementsCqlScript(List<? extends String> statements) {
 		this.statements = List.copyOf(statements);
 	}

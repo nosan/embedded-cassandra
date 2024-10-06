@@ -79,7 +79,12 @@ public class DefaultCqlDataSet implements CqlDataSet {
 		@Override
 		public Builder addScript(CqlScript script) {
 			Objects.requireNonNull(script, "Script must not be null");
-			this.scripts.add(script);
+			if (script instanceof CqlDataSet) {
+				this.scripts.addAll(((CqlDataSet) script).getScripts());
+			}
+			else {
+				this.scripts.add(script);
+			}
 			return this;
 		}
 

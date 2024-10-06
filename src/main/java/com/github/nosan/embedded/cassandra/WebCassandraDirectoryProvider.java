@@ -62,7 +62,7 @@ import com.github.nosan.embedded.cassandra.commons.web.JdkHttpClient;
  * The implementation of {@link CassandraDirectoryProvider}, that downloads and extracts Cassandra archive from the
  * well-known URLs into the download directory.
  * <p>
- * If the Cassandra's archive have already been extracted into the directory, then directory will be used, skipping
+ * If the Cassandra's archive has already been extracted into the directory, then directory will be used, skipping
  * downloading and extracting steps.
  *
  * @author Dmytro Nosan
@@ -401,7 +401,7 @@ public class WebCassandraDirectoryProvider implements CassandraDirectoryProvider
 		 * <pre>apache-cassandra-4.0.1-bin.tar.gz</pre>
 		 * @param uri the URI to the package to download.
 		 * <pre><a href="https://URL/apache-cassandra-4.0.1-bin.tar.gz">...</a></pre>
-		 * @param checksums URIs to download checksums. If empty checksum verifying will be skipped.
+		 * @param checksums URIs to download checksums. If empty checksum verifying is skipped.
 		 * <pre>SHA-512 : https://URL/apache-cassandra-4.0.1-bin.tar.gz.sha512</pre>
 		 */
 		public CassandraPackage(String name, URI uri, Map<String, URI> checksums) {

@@ -56,7 +56,7 @@ public class HttpHeaders implements Map<String, List<String>> {
 	 * Creates read-only HTTP headers.
 	 *
 	 * @param headers the headers for which read-only view is to be returned.
-	 * @return read only HTTP headers
+	 * @return read-only HTTP headers
 	 */
 	public static HttpHeaders readOnly(Map<String, List<String>> headers) {
 		if (headers instanceof ReadOnlyHttpHeaders) {

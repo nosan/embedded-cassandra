@@ -30,7 +30,7 @@ public final class StringUtils {
 	/**
 	 * Check whether the provided {@code string} contains actual <em>text</em>.
 	 *
-	 * @param source the {@code string} to check (may be {@code null})
+	 * @param source the {@code string} to check (maybe {@code null})
 	 * @return {@code true} if the {@code string} is not {@code null}, its length is greater than 0, and it does not
 	 * contain whitespace only
 	 */

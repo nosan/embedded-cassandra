@@ -46,7 +46,7 @@ public interface WorkingDirectoryCustomizer {
 	 * {@code WorkingDirectoryCustomizer.addResource(new ClassPathResource("cassandra.yaml"), "conf/cassandra.yaml") }
 	 * </pre>
 	 *
-	 * @param path path (file only) within the working directory (e.g. conf/cassandra.yaml)
+	 * @param path path (file only) within the working directory (e.g., conf/cassandra.yaml)
 	 * @param resource the resource
 	 * @return a new working directory customizer
 	 */
