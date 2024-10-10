@@ -51,10 +51,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class DefaultCassandraIntegrationTests {
 
 	private final CassandraBuilder builder = new CassandraBuilder().configure(builder -> {
-		if (System.getenv("CI") != null) {
-			builder.startupTimeout(Duration.ofMinutes(10));
-			builder.jvmOptions("-Xms512m", "-Xmx512m");
-		}
+		builder.startupTimeout(Duration.ofMinutes(3));
+		builder.jvmOptions("-Xms512m", "-Xmx512m", "-Xss640k");
 	});
 
 	private final CassandraRunner runner = new CassandraRunner(this.builder);

@@ -1,15 +1,11 @@
 Embedded Cassandra 
 ===========
-![Github CI](https://github.com/nosan/embedded-cassandra/workflows/build/badge.svg)
-[![codecov](https://codecov.io/gh/nosan/embedded-cassandra/branch/master/graph/badge.svg?token=SNW1ICHYXL)](https://codecov.io/gh/nosan/embedded-cassandra)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.nosan/embedded-cassandra/)
-[![Javadoc](https://javadoc.io/badge2/com.github.nosan/embedded-cassandra/javadoc.svg)](https://javadoc.io/doc/com.github.nosan/embedded-cassandra)
 
 ## Getting Started
 
 Embedded Cassandra provides an easy way to start and stop [Apache Cassandra](https://cassandra.apache.org).
 
-To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra/4.1.0).
+To learn more about Embedded Cassandra, please consult the [reference documentation](https://nosan.github.io/embedded-cassandra/4.1.1).
 
 All versions of Embedded Cassandra reference documentation are [here](https://nosan.github.io/embedded-cassandra).
 
@@ -65,4 +61,3 @@ Embedded Cassandra is released under the [Apache License 2.0](https://www.apache
 ___
 
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?business=D3ESQ4RY4XN7J&no_recurring=0&currency_code=USD) <a href="https://www.buymeacoffee.com/nosan" target="_blank">
-
