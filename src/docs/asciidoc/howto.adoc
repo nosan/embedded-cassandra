@@ -110,10 +110,8 @@ java.lang.UnsupportedOperationException: The Security Manager is deprecated and 
 	at com.github.nosan.embedded.cassandra.DefaultCassandra.await(DefaultCassandra.java:261)
 	at com.github.nosan.embedded.cassandra.DefaultCassandra.start(DefaultCassandra.java:97)
 
-Add the following the property to `CassandraBuilder`:
+Add the following property to `CassandraBuilder`:
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=security-manager]
 ----
-
-
