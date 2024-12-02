@@ -14,7 +14,7 @@ Embedded Cassandra project is tested for `>= 4.x.x` Cassandra versions.
 
 == What are compile dependencies used by Embedded Cassandra?
 
-Embedded Cassandra has only two compile dependencies:
+Embedded Cassandra has the following compile dependencies:
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
