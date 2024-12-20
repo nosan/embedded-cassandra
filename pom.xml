@@ -45,7 +45,7 @@
         <junit5.version>5.11.4</junit5.version>
         <checkstyle.version>9.3</checkstyle.version>
         <cassandra-java-driver-core.version>4.17.0</cassandra-java-driver-core.version>
-        <assertj.version>3.26.3</assertj.version>
+        <assertj.version>3.27.0</assertj.version>
         <slf4j-api.version>2.0.16</slf4j-api.version>
         <snakeyaml.version>2.3</snakeyaml.version>
         <commons-compress.version>1.27.1</commons-compress.version>
