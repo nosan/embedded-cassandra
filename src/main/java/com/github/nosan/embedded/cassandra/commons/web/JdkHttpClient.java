@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import com.github.nosan.embedded.cassandra.commons.StringUtils;
 import com.github.nosan.embedded.cassandra.commons.function.IOSupplier;
 
 /**
- * {@link HttpURLConnection} based implementation of {@link HttpClient}.
+ * A {@link HttpClient} implementation based on {@link HttpURLConnection}.
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -50,7 +50,7 @@ public class JdkHttpClient implements HttpClient {
 	private final Proxy proxy;
 
 	/**
-	 * Creates {@link JdkHttpClient} with no timeouts and proxy.
+	 * Creates a {@link JdkHttpClient} with no connection or read timeouts and no proxy.
 	 */
 	public JdkHttpClient() {
 		this.readTimeout = null;
@@ -59,9 +59,9 @@ public class JdkHttpClient implements HttpClient {
 	}
 
 	/**
-	 * Creates {@link JdkHttpClient} with no timeouts and provided proxy.
+	 * Creates a {@link JdkHttpClient} with no connection or read timeouts and a specific proxy.
 	 *
-	 * @param proxy proxy to use
+	 * @param proxy the proxy to use for HTTP requests (can be {@code null})
 	 */
 	public JdkHttpClient(Proxy proxy) {
 		this.readTimeout = null;
@@ -70,10 +70,10 @@ public class JdkHttpClient implements HttpClient {
 	}
 
 	/**
-	 * Creates {@link JdkHttpClient} with provided timeouts and no proxy.
+	 * Creates a {@link JdkHttpClient} with specified connection and read timeouts, but no proxy.
 	 *
-	 * @param connectTimeout connection timeout
-	 * @param readTimeout read timeout
+	 * @param connectTimeout the duration to wait for establishing a connection (can be {@code null})
+	 * @param readTimeout the duration to wait for reading data (can be {@code null})
 	 */
 	public JdkHttpClient(Duration connectTimeout, Duration readTimeout) {
 		this.connectTimeout = connectTimeout;
@@ -82,11 +82,11 @@ public class JdkHttpClient implements HttpClient {
 	}
 
 	/**
-	 * Creates {@link JdkHttpClient} with provided timeouts and proxy.
+	 * Creates a {@link JdkHttpClient} with specified connection and read timeouts and a proxy.
 	 *
-	 * @param connectTimeout connection timeout
-	 * @param readTimeout read timeout
-	 * @param proxy proxy to use
+	 * @param connectTimeout the duration to wait for establishing a connection (can be {@code null})
+	 * @param readTimeout the duration to wait for reading data (can be {@code null})
+	 * @param proxy the proxy to use for HTTP requests (can be {@code null})
 	 */
 	public JdkHttpClient(Duration connectTimeout, Duration readTimeout, Proxy proxy) {
 		this.connectTimeout = connectTimeout;
@@ -94,6 +94,15 @@ public class JdkHttpClient implements HttpClient {
 		this.proxy = proxy;
 	}
 
+	/**
+	 * Sends an HTTP request using the {@link HttpURLConnection} API.
+	 *
+	 * @param httpRequest the HTTP request to send (must not be {@code null})
+	 * @param bodySupplier an optional supplier for the request body (can be {@code null})
+	 * @return the HTTP response representing the server's reply (never {@code null})
+	 * @throws IOException if an I/O error occurs while sending the request or reading the response
+	 * @throws IllegalStateException if the connection cannot be established correctly
+	 */
 	@Override
 	public final HttpResponse send(HttpRequest httpRequest, IOSupplier<? extends InputStream> bodySupplier)
 			throws IOException {
@@ -113,6 +122,15 @@ public class JdkHttpClient implements HttpClient {
 		}
 	}
 
+	/**
+	 * Configures and opens the {@link HttpURLConnection}.
+	 *
+	 * @param url the target URL for the HTTP request (must not be {@code null})
+	 * @param proxy the proxy to use for the connection (can be {@code null})
+	 * @return the configured {@link HttpURLConnection}
+	 * @throws IOException if an error occurs while opening the connection
+	 * @throws IllegalStateException if the connection does not use {@link HttpURLConnection}
+	 */
 	protected HttpURLConnection open(URL url, Proxy proxy) throws IOException {
 		URLConnection urlConnection = (proxy != null) ? url.openConnection(proxy) : url.openConnection();
 		if (!(urlConnection instanceof HttpURLConnection)) {
@@ -159,12 +177,20 @@ public class JdkHttpClient implements HttpClient {
 		connection.connect();
 	}
 
+	/**
+	 * Represents an HTTP response based on {@link HttpURLConnection}.
+	 */
 	private static final class JdkHttpResponse implements HttpResponse {
 
 		private final HttpURLConnection connection;
 
 		private final HttpHeaders headers;
 
+		/**
+		 * Creates a new {@code JdkHttpResponse} for the given {@link HttpURLConnection}.
+		 *
+		 * @param connection the HTTP connection (must not be {@code null})
+		 */
 		JdkHttpResponse(HttpURLConnection connection) {
 			this.connection = connection;
 			this.headers = HttpHeaders.readOnly(connection.getHeaderFields());

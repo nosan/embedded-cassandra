@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,12 @@ import java.io.Closeable;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+/**
+ * The {@code StartupParser} class is responsible for monitoring the output of a {@link CassandraDatabase} instance to
+ * determine when the startup process has completed.
+ *
+ * @author Dmytro Nosan
+ */
 class StartupParser implements Consumer<String>, Closeable {
 
 	private static final Pattern STARTUP_COMPLETE = Pattern.compile("Startup complete$", Pattern.CASE_INSENSITIVE);

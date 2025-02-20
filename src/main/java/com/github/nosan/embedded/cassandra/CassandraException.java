@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package com.github.nosan.embedded.cassandra;
 
 /**
- * Exceptions thrown by a {@link Cassandra}.
+ * An exception thrown by a {@link Cassandra}.
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -25,10 +25,10 @@ package com.github.nosan.embedded.cassandra;
 public class CassandraException extends RuntimeException {
 
 	/**
-	 * Constructs a new {@link CassandraException} with the specified message and cause.
+	 * Constructs a new {@link CassandraException} with the specified detail message and cause.
 	 *
 	 * @param message the detail message
-	 * @param cause cause exception
+	 * @param cause the cause of the exception
 	 */
 	public CassandraException(String message, Throwable cause) {
 		super(message, cause);

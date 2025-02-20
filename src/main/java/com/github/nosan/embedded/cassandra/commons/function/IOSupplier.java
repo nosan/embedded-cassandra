@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,12 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * Supplier that can safely throws {@link IOException}.
+ * Represents a supplier that may throw an {@link IOException}.
  *
- * @param <T> the supplied type
+ * <p>This is a functional interface that can be used as a safety wrapper
+ * for operations that supply values and may trigger I/O exceptions.</p>
+ *
+ * @param <T> the type of the supplied value
  * @author Dmytro Nosan
  * @see #wrap(Supplier)
  * @since 4.0.0
@@ -32,11 +35,15 @@ import java.util.function.Supplier;
 public interface IOSupplier<T> {
 
 	/**
-	 * Wrap a provided {@link Supplier} into {@link IOSupplier}.
+	 * Wraps the given {@link Supplier} into an {@link IOSupplier}.
 	 *
-	 * @param supplier the underlying supplier
-	 * @param <T> the supplied type
-	 * @return the new {@link IOSupplier}
+	 * <p>This method adapts a standard Java {@link Supplier} into an {@link IOSupplier}.
+	 * The original {@link Supplier}'s {@link Supplier#get()} method is used as the implementation.</p>
+	 *
+	 * @param supplier The original supplier to be wrapped
+	 * @param <T> The type of the supplied value
+	 * @return A new {@link IOSupplier} wrapping the provided supplier
+	 * @throws NullPointerException if the supplier is {@code null}
 	 */
 	static <T> IOSupplier<T> wrap(Supplier<? extends T> supplier) {
 		Objects.requireNonNull(supplier, "Supplier must not be null");
@@ -44,10 +51,10 @@ public interface IOSupplier<T> {
 	}
 
 	/**
-	 * Gets the supplied value.
+	 * Supplies a value, potentially throwing an {@link IOException}.
 	 *
-	 * @return the supplied value
-	 * @throws IOException an I/O error occurs
+	 * @return The supplied value
+	 * @throws IOException If an I/O error occurs
 	 */
 	T get() throws IOException;
 

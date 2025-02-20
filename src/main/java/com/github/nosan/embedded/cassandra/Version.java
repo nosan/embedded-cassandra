@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +52,11 @@ public final class Version implements Comparable<Version> {
 	}
 
 	/**
-	 * Obtain a {@link Version} from a text string such as {@code 4.0}.
+	 * Creates a {@link Version} from a textual representation, such as {@code 4.0}.
 	 *
 	 * @param version the version to parse
 	 * @return the parsed {@link Version}
-	 * @throws IllegalArgumentException version is invalid
+	 * @throws IllegalArgumentException if the version is invalid
 	 */
 	public static Version parse(String version) throws IllegalArgumentException {
 		if (version == null || version.trim().isEmpty()) {
@@ -74,27 +74,27 @@ public final class Version implements Comparable<Version> {
 	}
 
 	/**
-	 * Gets a major value.
+	 * Retrieves the major version.
 	 *
-	 * @return the major
+	 * @return the major version
 	 */
 	public int getMajor() {
 		return this.major;
 	}
 
 	/**
-	 * Gets a minor value.
+	 * Retrieves the minor version.
 	 *
-	 * @return the minor
+	 * @return the minor version
 	 */
 	public int getMinor() {
 		return this.minor;
 	}
 
 	/**
-	 * Gets a patch value.
+	 * Retrieves the patch version, if available.
 	 *
-	 * @return the patch
+	 * @return an {@link OptionalInt} containing the patch version, or an empty {@code OptionalInt} if not present
 	 */
 	public OptionalInt getPatch() {
 		Integer patch = this.patch;
@@ -102,9 +102,9 @@ public final class Version implements Comparable<Version> {
 	}
 
 	/**
-	 * Gets a pre-release label.
+	 * Retrieves the pre-release label, if available.
 	 *
-	 * @return the label
+	 * @return an {@link Optional} containing the label, or an empty {@code Optional} if not present
 	 */
 	public Optional<String> getLabel() {
 		return Optional.ofNullable(this.label);
@@ -131,8 +131,8 @@ public final class Version implements Comparable<Version> {
 	public int compareTo(Version other) {
 		int majorCmp = Integer.compare(getMajor(), other.getMajor());
 		if (majorCmp == 0) {
-			int minCmp = Integer.compare(getMinor(), other.getMinor());
-			if (minCmp == 0) {
+			int minorCmp = Integer.compare(getMinor(), other.getMinor());
+			if (minorCmp == 0) {
 				int patchCmp = Integer.compare(getPatch().orElse(0), other.getPatch().orElse(0));
 				if (patchCmp == 0) {
 					if (this.label == null && other.label == null) {
@@ -148,7 +148,7 @@ public final class Version implements Comparable<Version> {
 				}
 				return patchCmp;
 			}
-			return minCmp;
+			return minorCmp;
 		}
 		return majorCmp;
 	}

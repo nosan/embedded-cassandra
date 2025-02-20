@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,11 @@ import com.github.nosan.embedded.cassandra.commons.Resource;
 import com.github.nosan.embedded.cassandra.commons.StringUtils;
 import com.github.nosan.embedded.cassandra.commons.UrlResource;
 
+/**
+ * Factory class for creating instances of {@code CassandraDatabase}.
+ *
+ * @author Dmytro Nosan
+ */
 class DefaultCassandraDatabaseFactory implements CassandraDatabaseFactory {
 
 	private final String name;

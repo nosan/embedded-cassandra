@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,31 @@ import java.util.List;
 import com.github.nosan.embedded.cassandra.commons.StringUtils;
 
 /**
- * Abstract {@link CqlScript} that parses a CQL script into the statements.
+ * An abstract implementation of the {@link CqlScript} interface that facilitates parsing a CQL (Cassandra Query
+ * Language) script into individual statements.
+ *
+ * <p>This class provides the base functionality for handling CQL scripts by converting them into a list of statements.
+ * The actual script content is determined by the implementation of the {@link #getScript()} method in subclasses.</p>
+ *
+ * <p>Subclasses need only to provide the actual CQL script content by implementing the {@link #getScript()}
+ * method.</p>
  *
  * @author Dmytro Nosan
  * @since 4.0.0
  */
 public abstract class AbstractCqlScript implements CqlScript {
 
+	/**
+	 * Creates a new instance of {@link AbstractCqlScript}.
+	 */
 	protected AbstractCqlScript() {
 	}
 
+	/**
+	 * Retrieves the list of statements parsed from the CQL script.
+	 *
+	 * @return the list of parsed CQL statements, or an empty list if the script is null, empty, or whitespace-only
+	 */
 	@Override
 	public final List<String> getStatements() {
 		String script = getScript();
@@ -43,9 +58,9 @@ public abstract class AbstractCqlScript implements CqlScript {
 	}
 
 	/**
-	 * Gets the {@code CQL} script.
+	 * Retrieves the CQL script that will be parsed into statements.
 	 *
-	 * @return the script may be a null
+	 * @return the CQL script to parse, or {@code null} if no script is defined
 	 */
 	protected abstract String getScript();
 

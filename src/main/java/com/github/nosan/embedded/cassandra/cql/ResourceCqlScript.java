@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,14 @@ import com.github.nosan.embedded.cassandra.commons.Resource;
 import com.github.nosan.embedded.cassandra.commons.StreamUtils;
 
 /**
- * {@link CqlScript} implementation for resources.
+ * An implementation of {@link CqlScript} that reads CQL statements from a {@link Resource}.
+ *
+ * <p><b>Example Usage:</b></p>
+ * <pre>{@code
+ * ResourceCqlScript script = new ResourceCqlScript(new ClassPathResource("schema.cql"), StandardCharsets.UTF_8);
+ * List<String> statements = script.getStatements();
+ * statements.forEach(statement -> System.out.println(statement));
+ * }</pre>
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -38,19 +45,21 @@ public class ResourceCqlScript extends AbstractCqlScript {
 	private final Charset charset;
 
 	/**
-	 * Creates a new {@link ResourceCqlScript} with provided resource and default charset.
+	 * Creates a new {@link ResourceCqlScript} with the given {@link Resource} and the default platform charset.
 	 *
-	 * @param resource the resource that contains CQL statements
+	 * @param resource the resource containing CQL statements (must not be {@code null})
+	 * @throws NullPointerException if {@code resource} is {@code null}
 	 */
 	public ResourceCqlScript(Resource resource) {
 		this(resource, Charset.defaultCharset());
 	}
 
 	/**
-	 * Creates a new {@link ResourceCqlScript} with provided resource and charset.
+	 * Creates a new {@link ResourceCqlScript} with the given {@link Resource} and a specified {@link Charset}.
 	 *
-	 * @param resource the resource that contains CQL statements
-	 * @param charset the encoding to use of the resource
+	 * @param resource the resource containing CQL statements (must not be {@code null})
+	 * @param charset the character encoding to use when reading the resource (must not be {@code null})
+	 * @throws NullPointerException if {@code resource} or {@code charset} is {@code null}
 	 */
 	public ResourceCqlScript(Resource resource, Charset charset) {
 		Objects.requireNonNull(resource, "Resource must not be null");
@@ -59,6 +68,15 @@ public class ResourceCqlScript extends AbstractCqlScript {
 		this.resource = resource;
 	}
 
+	/**
+	 * Reads and returns the entire content of the resource as a single CQL script.
+	 *
+	 * <p>The resource's input stream is converted to a string using the specified character encoding,
+	 * and any {@link IOException} encountered will be wrapped in an {@link UncheckedIOException}.</p>
+	 *
+	 * @return the content of the resource as a string
+	 * @throws UncheckedIOException if the resource cannot be read or a stream cannot be opened
+	 */
 	@Override
 	protected String getScript() {
 		try (InputStream is = this.resource.getInputStream()) {

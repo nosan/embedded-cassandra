@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import java.util.Set;
 import com.github.nosan.embedded.cassandra.commons.FileUtils;
 
 /**
- * The default implementation of {@link WorkingDirectoryInitializer}, that gets Cassandra directory from the
- * {@link CassandraDirectoryProvider} and copies all files from a retrieved directory into the working directory except
- * <b>javadoc, doc and licenses</b> directories.
- * By default, replace any existing files in the working directory.
+ * The default implementation of {@link WorkingDirectoryInitializer} retrieves the Cassandra directory from the
+ * {@link CassandraDirectoryProvider} and copies all files from the retrieved directory into the working directory,
+ * except for the <b>javadoc</b>, <b>doc</b>, and <b>licenses</b> directories. By default, it replaces any existing
+ * files in the working directory.
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -47,11 +47,11 @@ public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryIniti
 	private final CopyStrategy copyStrategy;
 
 	/**
-	 * Creates a new {@link DefaultWorkingDirectoryInitializer} with a {@link CopyStrategy#REPLACE_EXISTING} copy
+	 * Creates a new {@link DefaultWorkingDirectoryInitializer} with the {@link CopyStrategy#REPLACE_EXISTING} copy
 	 * strategy.
 	 *
-	 * @param cassandraDirectoryProvider the Cassandra directory provider. This provider is used to get a path to
-	 * Cassandra directory.
+	 * @param cassandraDirectoryProvider the Cassandra directory provider. This provider is used to retrieve the path to
+	 * the Cassandra directory.
 	 */
 	public DefaultWorkingDirectoryInitializer(CassandraDirectoryProvider cassandraDirectoryProvider) {
 		this(cassandraDirectoryProvider, DefaultWorkingDirectoryInitializer.CopyStrategy.REPLACE_EXISTING);
@@ -60,14 +60,14 @@ public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryIniti
 	/**
 	 * Creates a new {@link DefaultWorkingDirectoryInitializer}.
 	 *
-	 * @param cassandraDirectoryProvider the Cassandra directory provider. This provider is used to get a path to
-	 * Cassandra directory.
-	 * @param copyStrategy Cassandra files copy strategy.
+	 * @param cassandraDirectoryProvider the Cassandra directory provider. This provider is used to retrieve the path to
+	 * the Cassandra directory.
+	 * @param copyStrategy the strategy for copying Cassandra files.
 	 */
 	public DefaultWorkingDirectoryInitializer(CassandraDirectoryProvider cassandraDirectoryProvider,
 			CopyStrategy copyStrategy) {
 		Objects.requireNonNull(cassandraDirectoryProvider, "Cassandra Directory Provider must not be null");
-		Objects.requireNonNull(copyStrategy, "Copy Option must not be null");
+		Objects.requireNonNull(copyStrategy, "Copy Strategy must not be null");
 		this.cassandraDirectoryProvider = cassandraDirectoryProvider;
 		this.copyStrategy = copyStrategy;
 	}
@@ -82,12 +82,12 @@ public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryIniti
 	}
 
 	/**
-	 * Casandra files copy strategies.
+	 * Cassandra file copy strategies.
 	 */
 	public interface CopyStrategy {
 
 		/**
-		 * Replace a destination file if it exists.
+		 * Replaces a destination file if it exists.
 		 */
 		CopyStrategy REPLACE_EXISTING = (cassandraDirectory, workingDirectory) -> FileUtils.copy(cassandraDirectory,
 				workingDirectory, (path, attributes) -> {
@@ -98,7 +98,7 @@ public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryIniti
 				}, StandardCopyOption.REPLACE_EXISTING);
 
 		/**
-		 * Skip to copy if a destination file exists.
+		 * Skips copying if a destination file already exists.
 		 */
 		CopyStrategy SKIP_EXISTING = (cassandraDirectory, workingDirectory) -> FileUtils.copy(cassandraDirectory,
 				workingDirectory, (path, attributes) -> {
@@ -109,11 +109,11 @@ public class DefaultWorkingDirectoryInitializer implements WorkingDirectoryIniti
 				});
 
 		/**
-		 * Copies Cassandra files into a working directory.
+		 * Copies Cassandra files into the working directory.
 		 *
-		 * @param cassandraDirectory Cassandra directory
-		 * @param workingDirectory Cassandra working directory
-		 * @throws IOException an I/O error occurs
+		 * @param cassandraDirectory the Cassandra directory
+		 * @param workingDirectory the Cassandra working directory
+		 * @throws IOException if an I/O error occurs
 		 */
 		void copy(Path cassandraDirectory, Path workingDirectory) throws IOException;
 

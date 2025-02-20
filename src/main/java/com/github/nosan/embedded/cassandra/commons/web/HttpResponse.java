@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,38 +29,51 @@ import java.net.URI;
 public interface HttpResponse extends AutoCloseable {
 
 	/**
-	 * Gets the URI of the response.
+	 * Returns the URI of the HTTP request that resulted in this response.
 	 *
-	 * @return the URI of the response
+	 * @return the URI of the associated HTTP request
 	 */
 	URI getUri();
 
 	/**
-	 * Gets the HTTP response status.
+	 * Returns the HTTP status code of the response.
 	 *
-	 * @return the status
+	 * @return the HTTP status code
 	 */
 	int getStatus();
 
 	/**
-	 * Gets the headers of this response.
+	 * Returns the headers associated with this HTTP response.
 	 *
-	 * @return a corresponding HttpHeaders object
+	 * @return a {@link HttpHeaders} object representing the response headers
 	 */
 	HttpHeaders getHeaders();
 
 	/**
-	 * The HTTP response body.
+	 * Returns the body of the HTTP response as an {@link InputStream}.
 	 *
-	 * @return the body
-	 * @throws IOException an I/O error occurs
+	 * <p>The response body is available for reading as raw byte content using this
+	 * stream. It is important to ensure this stream is fully read or closed to properly release resources.</p>
+	 *
+	 * @return an {@link InputStream} containing the response body
+	 * @throws IOException if an I/O error occurs while retrieving the body
 	 */
 	InputStream getInputStream() throws IOException;
 
 	/**
-	 * Close the current response.
+	 * Closes the response and releases any underlying resources.
 	 *
-	 * @throws IOException an I/O error occurs
+	 * <p>It is recommended to use a try-with-resources statement when working with
+	 * {@code HttpResponse} to automatically handle resource cleanup:</p>
+	 *
+	 * <pre>{@code
+	 * try (HttpResponse response = client.send(request)) {
+	 *     InputStream body = response.getInputStream();
+	 *     // Process the response body
+	 * }
+	 * }</pre>
+	 *
+	 * @throws IOException if an I/O error occurs while closing the response
 	 */
 	@Override
 	void close() throws IOException;

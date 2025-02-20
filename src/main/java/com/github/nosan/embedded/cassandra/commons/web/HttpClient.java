@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,11 @@ import java.util.Objects;
 import com.github.nosan.embedded.cassandra.commons.function.IOSupplier;
 
 /**
- * Simple interface to send HTTP requests.
+ * A simple interface for sending HTTP requests.
+ *
+ * <p>This interface is designed to abstract the implementation of HTTP clients,
+ * allowing for sending requests and receiving responses. It provides methods for sending a request either with or
+ * without a body.</p>
  *
  * @author Dmytro Nosan
  * @see JdkHttpClient
@@ -34,30 +38,33 @@ import com.github.nosan.embedded.cassandra.commons.function.IOSupplier;
 public interface HttpClient {
 
 	/**
-	 * Sends HTTP request.
+	 * Sends an HTTP request.
 	 *
-	 * @param httpRequest the request to be sent
-	 * @return HTTP response
-	 * @throws IOException an I/O error occurs
+	 * @param httpRequest The request to be sent
+	 * @return The HTTP response
+	 * @throws IOException If an I/O error occurs
 	 */
 	default HttpResponse send(HttpRequest httpRequest) throws IOException {
 		return send(httpRequest, null);
 	}
 
 	/**
-	 * Sends HTTP request with a provided body.
+	 * Sends an HTTP request with an optional body.
 	 *
-	 * @param httpRequest the request to be sent
-	 * @param bodySupplier HTTP body to be sent
-	 * @return HTTP response
-	 * @throws IOException an I/O error occurs
+	 * @param httpRequest The request to be sent
+	 * @param bodySupplier A supplier for the request body, or {@code null} if no body is needed
+	 * @return The HTTP response
+	 * @throws IOException If an I/O error occurs
 	 * @see BodySuppliers
 	 */
 	HttpResponse send(HttpRequest httpRequest, IOSupplier<? extends InputStream> bodySupplier)
 			throws IOException;
 
 	/**
-	 * Utility class for creating different body suppliers.
+	 * A utility class for creating different kinds of body suppliers.
+	 *
+	 * <p>This class contains convenient factory methods for generating
+	 * {@link IOSupplier}s that provide the body content as an input stream.</p>
 	 */
 	final class BodySuppliers {
 
@@ -65,10 +72,11 @@ public interface HttpClient {
 		}
 
 		/**
-		 * Creates a body supplier of the provided string.
+		 * Creates a body supplier from the given string.
 		 *
-		 * @param body the string body
-		 * @return the supplier
+		 * @param body The string to be used as the body
+		 * @return An {@link IOSupplier} that provides the string as an input stream
+		 * @throws NullPointerException If the body is {@code null}
 		 */
 		public static IOSupplier<? extends InputStream> ofString(String body) {
 			Objects.requireNonNull(body, "Body must not be null");
@@ -76,11 +84,12 @@ public interface HttpClient {
 		}
 
 		/**
-		 * Creates a body supplier of the provided string and charset.
+		 * Creates a body supplier from the given string and charset.
 		 *
-		 * @param body the string body
-		 * @param charset the charset to use
-		 * @return the supplier
+		 * @param body The string to be used as the body
+		 * @param charset The charset to encode the string
+		 * @return An {@link IOSupplier} that provides the encoded string as an input stream
+		 * @throws NullPointerException If the body or charset is {@code null}
 		 */
 		public static IOSupplier<? extends InputStream> ofString(String body, Charset charset) {
 			Objects.requireNonNull(body, "Body must not be null");
@@ -89,10 +98,11 @@ public interface HttpClient {
 		}
 
 		/**
-		 * Creates a body supplier of the provided byte array.
+		 * Creates a body supplier from the given byte array.
 		 *
-		 * @param body the byte array
-		 * @return the supplier
+		 * @param body The byte array to be used as the body
+		 * @return An {@link IOSupplier} that provides the byte array as an input stream
+		 * @throws NullPointerException If the body is {@code null}
 		 */
 		public static IOSupplier<? extends InputStream> ofBytes(byte[] body) {
 			Objects.requireNonNull(body, "Body must not be null");

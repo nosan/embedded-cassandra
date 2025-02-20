@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,12 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
+/**
+ * The ErrorCollector listener to collect error messages from the standard error stream of a CassandraDatabase
+ * instance.
+ *
+ * @author Dmytro Nosan
+ */
 class ErrorCollector implements Consumer<String>, Closeable {
 
 	private final List<String> errors = new CopyOnWriteArrayList<>();

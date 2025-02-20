@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,44 +16,39 @@
 
 /**
  * Embedded Cassandra provides an easy way to start and stop Apache Cassandra.
- * <p>Public API contains the following classes and interfaces:
- * <p>
- * {@link com.github.nosan.embedded.cassandra.Cassandra} Interface that represents Cassandra instance.
- * <p>{@link com.github.nosan.embedded.cassandra.Version}</p>
- * A class that parses and represents a Cassandra version.
- * <p>{@link com.github.nosan.embedded.cassandra.CassandraBuilder}</p> A builder class that can be used to configure
- * and create {@link com.github.nosan.embedded.cassandra.Cassandra} instance.
- * <p>
- * {@link com.github.nosan.embedded.cassandra.cql.CqlScript}</p> Interface that loads CQL statements from various
- * sources.
- * <p>
- * {@link com.github.nosan.embedded.cassandra.WorkingDirectoryInitializer}
- * </p>
- * A strategy interface to initialize working directory.
- * <p>
- * {@link com.github.nosan.embedded.cassandra.WorkingDirectoryDestroyer}
- * </p>
- * A strategy interface to destroy the working directory.
- * <p>
- * {@link com.github.nosan.embedded.cassandra.WorkingDirectoryCustomizer}
- * </p>
- * A customizer interface that can be used to customize the working directory.
- * <p>{@link com.github.nosan.embedded.cassandra.CassandraBuilderConfigurator}</p>
- * A callback interface to configure a {@link com.github.nosan.embedded.cassandra.CassandraBuilder}.
- * <p><strong>Example:</strong>
+ * <p>The public API includes the following classes and interfaces:</p>
+ * <ul>
+ *     <li>{@link com.github.nosan.embedded.cassandra.Cassandra} - An interface that represents a Cassandra
+ *     instance.</li>
+ *     <li>{@link com.github.nosan.embedded.cassandra.Version} - A class that parses and represents a Cassandra
+ *     version.</li>
+ *     <li>{@link com.github.nosan.embedded.cassandra.CassandraBuilder} - A builder class used to configure
+ *         and create a {@link com.github.nosan.embedded.cassandra.Cassandra} instance.</li>
+ *     <li>{@link com.github.nosan.embedded.cassandra.cql.CqlScript} - An interface that loads CQL statements from
+ *     various sources.</li>
+ *     <li>{@link com.github.nosan.embedded.cassandra.WorkingDirectoryInitializer} - A strategy interface to initialize
+ *         the working directory.</li>
+ *     <li>{@link com.github.nosan.embedded.cassandra.WorkingDirectoryDestroyer} - A strategy interface to destroy the
+ *         working directory.</li>
+ *     <li>{@link com.github.nosan.embedded.cassandra.WorkingDirectoryCustomizer} - A customizer interface used to
+ *         modify the working directory.</li>
+ *     <li>{@link com.github.nosan.embedded.cassandra.CassandraBuilderConfigurator} - A callback interface to configure
+ *     a {@link com.github.nosan.embedded.cassandra.CassandraBuilder}.</li>
+ * </ul>
+ *
+ * <p><strong>Example:</strong></p>
  * <pre>
  * Cassandra cassandra = new CassandraBuilder().build();
  * cassandra.start();
  * try {
- * 	Settings settings = cassandra.getSettings();
- * 	try (Cluster cluster = Cluster.builder().addContactPoints(settings.getAddress())
- * 			.withPort(settings.getPort()).build()) {
- * 		Session session = cluster.connect();
- * 		CqlScript.ofClassPath("schema.cql").forEachStatement(session::execute);
- *        }
- * }
- * finally {
- * 	cassandra.stop();
+ *     Settings settings = cassandra.getSettings();
+ *     try (Cluster cluster = Cluster.builder().addContactPoints(settings.getAddress())
+ *                                    .withPort(settings.getPort()).build()) {
+ *         Session session = cluster.connect();
+ *         CqlScript.ofClassPath("schema.cql").forEachStatement(session::execute);
+ *     }
+ * } finally {
+ *     cassandra.stop();
  * }
  * </pre>
  */

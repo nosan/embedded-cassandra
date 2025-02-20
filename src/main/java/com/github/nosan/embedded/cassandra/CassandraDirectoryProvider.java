@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 /**
- * Provides a path to Cassandra directory based on a version.
+ * Provides the path to the Cassandra directory based on a specified version.
  *
  * @author Dmytro Nosan
  * @see WebCassandraDirectoryProvider
@@ -29,11 +29,11 @@ import java.nio.file.Path;
 public interface CassandraDirectoryProvider {
 
 	/**
-	 * Returns the path to Cassandra directory by provided version.
+	 * Returns the path to the Cassandra directory for the specified version.
 	 *
-	 * @param version Cassandra version
-	 * @return the path to Cassandra directory
-	 * @throws IOException an I/O error occurs
+	 * @param version the Cassandra version
+	 * @return the path to the Cassandra directory
+	 * @throws IOException if an I/O error occurs
 	 */
 	Path getDirectory(Version version) throws IOException;
 

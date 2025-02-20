@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * A simple class that represents HTTP Request and Response headers.
+ * Represents HTTP request and response headers in a case-insensitive manner.
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -39,24 +39,26 @@ public class HttpHeaders implements Map<String, List<String>> {
 	protected final HeaderValues headers;
 
 	/**
-	 * Create new empty {@link HttpHeaders}.
+	 * Creates a new empty {@link HttpHeaders} instance.
 	 */
 	public HttpHeaders() {
 		this(new HeaderValues());
 	}
 
 	/**
-	 * Creates a {@link HttpHeaders} with the provided headers.
+	 * Creates an {@link HttpHeaders} instance with the specified header values.
+	 *
+	 * @param headers The initial header values
 	 */
 	protected HttpHeaders(HeaderValues headers) {
 		this.headers = headers;
 	}
 
 	/**
-	 * Creates read-only HTTP headers.
+	 * Creates a read-only view of the specified HTTP headers.
 	 *
-	 * @param headers the headers for which read-only view is to be returned.
-	 * @return read-only HTTP headers
+	 * @param headers The headers to create a read-only view for
+	 * @return A read-only {@link HttpHeaders} instance
 	 */
 	public static HttpHeaders readOnly(Map<String, List<String>> headers) {
 		if (headers instanceof ReadOnlyHttpHeaders) {
@@ -69,10 +71,11 @@ public class HttpHeaders implements Map<String, List<String>> {
 	}
 
 	/**
-	 * Creates HTTP headers.
+	 * Creates an {@link HttpHeaders} instance by copying the provided headers.
 	 *
-	 * @param headers the headers to copy from
-	 * @return HTTP headers
+	 * @param headers The headers to copy
+	 * @return A new {@link HttpHeaders} instance
+	 * @throws NullPointerException If {@code headers} is {@code null}
 	 */
 	public static HttpHeaders copyOf(Map<String, List<String>> headers) {
 		Objects.requireNonNull(headers, "Headers must not be null");
@@ -118,10 +121,10 @@ public class HttpHeaders implements Map<String, List<String>> {
 	}
 
 	/**
-	 * Gets a first header value.
+	 * Retrieves the first value associated with the given header name.
 	 *
-	 * @param name the header name
-	 * @return the first string value associated with the name or empty
+	 * @param name The header name
+	 * @return An {@link Optional} containing the first header value, or {@link Optional#empty()} if no value exists
 	 */
 	public Optional<String> getFirst(String name) {
 		return getOrDefault(name, Collections.emptyList()).stream().findFirst();
@@ -133,22 +136,21 @@ public class HttpHeaders implements Map<String, List<String>> {
 	}
 
 	/**
-	 * Adds the given value to the list of headers for the given name. If the mapping does not already exist, then it is
-	 * created.
+	 * Adds a value to the list of values for the specified header name. If the header does not already exist, it will
+	 * be created.
 	 *
-	 * @param name the header name
-	 * @param value the header value
+	 * @param name The header name
+	 * @param value The header value to add
 	 */
 	public void add(String name, String value) {
 		computeIfAbsent(name, (k) -> new LinkedList<>()).add(value);
 	}
 
 	/**
-	 * Sets the given value as the sole header value for the given name. If the mapping does not already exist, then it
-	 * is created.
+	 * Sets a single value for the specified header name. This replaces any existing values for the header.
 	 *
-	 * @param name the header name
-	 * @param value the header value to set.
+	 * @param name The header name
+	 * @param value The header value to set
 	 */
 	public void set(String name, String value) {
 		List<String> values = new LinkedList<>();
@@ -204,11 +206,20 @@ public class HttpHeaders implements Map<String, List<String>> {
 		return this.headers.toString();
 	}
 
+	/**
+	 * A case-insensitive map for storing HTTP header names and values.
+	 *
+	 * <p>This implementation ensures that header names are treated as case-insensitive,
+	 * following the HTTP specification.</p>
+	 */
 	protected static final class HeaderValues extends TreeMap<String, List<String>> {
 
 		private static final Comparator<String> CASE_INSENSITIVE_COMPARATOR = Comparator
 				.comparing(name -> name.toLowerCase(Locale.ENGLISH));
 
+		/**
+		 * Creates a new instance with a case-insensitive comparator.
+		 */
 		public HeaderValues() {
 			super(CASE_INSENSITIVE_COMPARATOR);
 		}

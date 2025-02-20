@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package com.github.nosan.embedded.cassandra;
 import java.nio.file.Path;
 
 /**
- * Simple interface that allows the {@code Cassandra} to be {@link #start() started} and {@link #stop() stopped}.
+ * A simple interface that allows {@code Cassandra} to be {@link #start() started} and {@link #stop() stopped}.
  * <p>
- * <a href="package-summary.html#package_description">package overview </a> for more information.
+ * Refer to the <a href="package-summary.html#package_description">package overview</a> for more information.
  * </p>
  *
  * @author Dmytro Nosan
@@ -31,56 +31,56 @@ import java.nio.file.Path;
 public interface Cassandra {
 
 	/**
-	 * Starts the {@code Cassandra}. Calling this method on an already started {@code Cassandra} has no effect. Causes
-	 * the current thread to wait, until the {@code Cassandra} has started.
+	 * Starts {@code Cassandra}. Calling this method on an already started {@code Cassandra} has no effect. Causes the
+	 * current thread to wait until {@code Cassandra} has started.
 	 *
-	 * @throws CassandraException if the {@code Cassandra} cannot be started
+	 * @throws CassandraException if {@code Cassandra} cannot be started
 	 */
 	void start() throws CassandraException;
 
 	/**
-	 * Stops the {@code Cassandra}. Calling this method on an already stopped {@code Cassandra} has no effect. Causes
-	 * the current thread to wait, until the {@code Cassandra} has stopped.
+	 * Stops {@code Cassandra}. Calling this method on an already stopped {@code Cassandra} has no effect. Causes the
+	 * current thread to wait until {@code Cassandra} has stopped.
 	 *
-	 * @throws CassandraException if the {@code Cassandra} cannot be stopped
+	 * @throws CassandraException if {@code Cassandra} cannot be stopped
 	 */
 	void stop() throws CassandraException;
 
 	/**
-	 * Checks whether this Cassandra is running.
+	 * Checks whether this {@code Cassandra} instance is running.
 	 *
-	 * @return {@code true} if the Cassandra is running
+	 * @return {@code true} if {@code Cassandra} is running, otherwise {@code false}
 	 */
 	boolean isRunning();
 
 	/**
 	 * Gets the name of this {@code Cassandra} instance.
 	 *
-	 * @return a name, never {@code null}
+	 * @return the name of the instance, never {@code null}
 	 */
 	String getName();
 
 	/**
-	 * Gets the {@link Version} of this {@code Cassandra} instance.
+	 * Retrieves the {@link Version} of this {@code Cassandra} instance.
 	 *
-	 * @return a version, never {@code null}
+	 * @return the version of the instance, never {@code null}
 	 */
 	Version getVersion();
 
 	/**
-	 * Gets the working directory.
+	 * Retrieves the working directory of this {@code Cassandra} instance.
 	 *
-	 * @return working directory, never {@code null}
+	 * @return the working directory, never {@code null}
 	 */
 	Path getWorkingDirectory();
 
 	/**
-	 * Gets the {@link Settings} of this {@code Cassandra} instance. The settings can be obtained only if Cassandra was
-	 * successfully started. Causes the current thread to wait, until either the {@code Cassandra} has started or
-	 * stopped.
+	 * Retrieves the {@link Settings} of this {@code Cassandra} instance. The settings can only be obtained if
+	 * {@code Cassandra} was successfully started. Causes the current thread to wait until {@code Cassandra} has either
+	 * started or stopped.
 	 *
-	 * @return the settings
-	 * @throws IllegalStateException if Cassandra was not started
+	 * @return the settings of the instance
+	 * @throws IllegalStateException if {@code Cassandra} was not started
 	 */
 	Settings getSettings() throws IllegalStateException;
 

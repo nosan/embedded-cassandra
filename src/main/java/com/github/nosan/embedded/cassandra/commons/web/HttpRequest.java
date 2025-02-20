@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,15 @@ import java.util.Objects;
 /**
  * Represents an HTTP request message.
  *
+ * <p>This class encapsulates the important components of an HTTP request,
+ * including the URI, HTTP method, and headers, to provide a structured way to create and use HTTP requests.</p>
+ *
+ * <p>By default, if not specified, the HTTP method is set to {@code GET}
+ * and no headers are included.</p>
+ *
+ * <p>The {@link HttpHeaders} object is used to manage request headers,
+ * supporting case-insensitive header names and convenient methods for adding or retrieving header values.</p>
+ *
  * @author Dmytro Nosan
  * @since 4.0.0
  */
@@ -35,30 +44,33 @@ public class HttpRequest {
 	private final HttpHeaders headers;
 
 	/**
-	 * Creates {@link HttpRequest} with provided uri and GET method.
+	 * Creates a new {@link HttpRequest} with the specified URI and the default HTTP {@code GET} method.
 	 *
-	 * @param uri uri of the request
+	 * @param uri the URI of the request
+	 * @throws NullPointerException if {@code uri} is {@code null}
 	 */
 	public HttpRequest(URI uri) {
 		this(uri, "GET", new HttpHeaders());
 	}
 
 	/**
-	 * Creates {@link HttpRequest} with provided uri and method.
+	 * Creates a new {@link HttpRequest} with the specified URI and HTTP method.
 	 *
-	 * @param uri uri of the request
-	 * @param method HTTP method
+	 * @param uri the URI of the request
+	 * @param method the HTTP method of the request (e.g., {@code GET}, {@code POST})
+	 * @throws NullPointerException if {@code uri} or {@code method} is {@code null}
 	 */
 	public HttpRequest(URI uri, String method) {
 		this(uri, method, new HttpHeaders());
 	}
 
 	/**
-	 * Creates {@link HttpRequest} with provided uri, method and headers.
+	 * Creates a new {@link HttpRequest} with the specified URI, HTTP method, and headers.
 	 *
-	 * @param uri uri of the request
-	 * @param method HTTP method
-	 * @param headers HTTP headers
+	 * @param uri the URI of the request
+	 * @param method the HTTP method of the request (e.g., {@code GET}, {@code POST})
+	 * @param headers the HTTP headers of the request
+	 * @throws NullPointerException if {@code uri}, {@code method}, or {@code headers} is {@code null}
 	 */
 	public HttpRequest(URI uri, String method, HttpHeaders headers) {
 		Objects.requireNonNull(uri, "URI must not be null");
@@ -70,7 +82,7 @@ public class HttpRequest {
 	}
 
 	/**
-	 * Gets the URI of the request.
+	 * Returns the URI of the request.
 	 *
 	 * @return the URI of the request
 	 */
@@ -79,23 +91,37 @@ public class HttpRequest {
 	}
 
 	/**
-	 * Gets the HTTP method of the request.
+	 * Returns the HTTP method of the request.
 	 *
-	 * @return the HTTP method
+	 * <p>The method is always returned in uppercase to ensure compatibility
+	 * with standard HTTP conventions.</p>
+	 *
+	 * @return the HTTP method of the request
 	 */
 	public String getMethod() {
 		return this.method;
 	}
 
 	/**
-	 * Gets the headers of this request.
+	 * Returns the HTTP headers associated with this request.
 	 *
-	 * @return a corresponding HttpHeaders object
+	 * <p>The headers are represented as a {@link HttpHeaders} object, allowing
+	 * for easy access and modification of individual headers.</p>
+	 *
+	 * @return the HTTP headers of the request
 	 */
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
 
+	/**
+	 * Returns a string representation of the HTTP request.
+	 *
+	 * <p>The string representation includes the URI and HTTP method of the
+	 * request. Headers are not included in this output.</p>
+	 *
+	 * @return a string representation of the HTTP request
+	 */
 	@Override
 	public String toString() {
 		return "HttpRequest{" + "uri=" + this.uri + ", method='" + this.method + '\'' + '}';

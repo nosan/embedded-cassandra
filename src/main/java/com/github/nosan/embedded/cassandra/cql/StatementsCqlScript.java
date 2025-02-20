@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * {@link CqlScript} implementation for static statements.
+ * A {@link CqlScript} implementation that wraps a predefined list of CQL statements.
  *
  * @author Dmytro Nosan
  * @since 5.0.0
@@ -31,14 +31,20 @@ public class StatementsCqlScript implements CqlScript {
 	private final List<String> statements;
 
 	/**
-	 * Creates {@link  StatementsCqlScript} for a given statements.
+	 * Constructs a {@link StatementsCqlScript} with the specified list of CQL statements.
 	 *
-	 * @param statements the statements.
+	 * @param statements the list of CQL statements (must not be {@code null})
+	 * @throws NullPointerException if {@code statements} is {@code null}
 	 */
 	public StatementsCqlScript(List<? extends String> statements) {
 		this.statements = List.copyOf(statements);
 	}
 
+	/**
+	 * Retrieves the list of CQL statements.
+	 *
+	 * @return the list of CQL statements (never {@code null})
+	 */
 	@Override
 	public List<String> getStatements() {
 		return this.statements;
@@ -63,8 +69,9 @@ public class StatementsCqlScript implements CqlScript {
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", StatementsCqlScript.class.getSimpleName() + "[", "]").add(
-				"statements=" + this.statements).toString();
+		return new StringJoiner(", ", StatementsCqlScript.class.getSimpleName() + "[", "]")
+				.add("statements=" + this.statements)
+				.toString();
 	}
 
 }

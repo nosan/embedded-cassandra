@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,82 +32,82 @@ public interface Settings {
 	/**
 	 * Gets the name of this {@code Cassandra} instance.
 	 *
-	 * @return name of this {@code Cassandra} instance, never {@code null}
+	 * @return the name of this {@code Cassandra} instance, never {@code null}
 	 */
 	String getName();
 
 	/**
 	 * Gets the {@link Version} of this {@code Cassandra} instance.
 	 *
-	 * @return a version,  never {@code null}
+	 * @return the version, never {@code null}
 	 */
 	Version getVersion();
 
 	/**
-	 * Gets Cassandra configuration file.
+	 * Gets the Cassandra configuration file.
 	 *
-	 * @return the configuration file,  never {@code null}
+	 * @return the configuration file, never {@code null}
 	 */
 	Path getConfigurationFile();
 
 	/**
 	 * Gets the working directory.
 	 *
-	 * @return working directory, never {@code null}
+	 * @return the working directory, never {@code null}
 	 */
 	Path getWorkingDirectory();
 
 	/**
-	 * Checks whether native transport is enabled.
+	 * Checks whether the native transport is enabled.
 	 *
-	 * @return {@code true} if native transport is enabled, otherwise {@code false}
+	 * @return {@code true} if the native transport is enabled, otherwise {@code false}
 	 */
 	boolean isNativeTransportEnabled();
 
 	/**
-	 * Gets address this {@code Cassandra} is listening on.
+	 * Gets the address this {@code Cassandra} instance is listening on.
 	 *
-	 * @return the address, or {@code null} if native transport is disabled.
+	 * @return the address, or {@code null} if the native transport is disabled
 	 */
 	InetAddress getAddress();
 
 	/**
-	 * Gets port this {@code Cassandra} is listening on.
+	 * Gets the port this {@code Cassandra} instance is listening on.
 	 *
-	 * @return the port, or {@code null} if native transport is disabled.
+	 * @return the port, or {@code null} if the native transport is disabled
 	 */
 	Integer getPort();
 
 	/**
-	 * Gets SSL port this {@code Cassandra} is listening on.
+	 * Gets the SSL port this {@code Cassandra} instance is listening on.
 	 *
-	 * @return the SSL port, or {@code null} if {@code native_transport_port_ssl} was not set.
+	 * @return the SSL port, or {@code null} if {@code native_transport_port_ssl} is not set
 	 */
 	Integer getSslPort();
 
 	/**
-	 * Gets Cassandra JVM Options used on start.
+	 * Gets the Cassandra JVM options used at startup.
 	 *
-	 * @return the JVM options,  never {@code null}
+	 * @return the JVM options, never {@code null}
 	 */
 	Set<String> getJvmOptions();
 
 	/**
-	 * Gets Cassandra JVM parameters used on start.
+	 * Gets the Cassandra JVM parameters used at startup.
 	 *
-	 * @return the JVM parameters,  never {@code null}
+	 * @return the JVM parameters, never {@code null}
 	 */
 	Map<String, String> getSystemProperties();
 
 	/**
-	 * Gets Cassandra Environment variables used on start.
+	 * Gets the Cassandra environment variables used at startup.
 	 *
 	 * @return the environment variables, never {@code null}
 	 */
 	Map<String, String> getEnvironmentVariables();
 
 	/**
-	 * Gets Cassandra Configuration properties.
+	 * Gets the Cassandra configuration properties.
 	 *
 	 * @return the configuration properties, never {@code null}
 	 */

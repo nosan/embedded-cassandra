@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.nio.charset.Charset;
 import java.util.Objects;
 
 /**
- * Simple utility methods for dealing with streams.
+ * Utility class providing simple methods for working with streams.
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -38,34 +38,41 @@ public final class StreamUtils {
 	}
 
 	/**
-	 * Copy the contents of the provided InputStream into a String.
-	 * <p>Note! InputStream will not be closed.
+	 * Converts the contents of an {@link InputStream} to a {@link String} using the specified {@link Charset}.
 	 *
-	 * @param inputStream the InputStream to copy from
-	 * @param charset A charset
-	 * @return the String
-	 * @throws IOException inputStream case of I/O errors
+	 * <p><b>Note:</b> The provided {@link InputStream} will <strong>not</strong> be closed by this method. It is the
+	 * caller's responsibility to close the stream once processing is complete.</p>
+	 *
+	 * @param inputStream the {@link InputStream} to read from
+	 * @param charset the character encoding to use
+	 * @return the decoded {@link String} representation of the {@link InputStream}'s contents
+	 * @throws IOException if an I/O error occurs while reading the {@link InputStream}
+	 * @throws NullPointerException if {@code inputStream} or {@code charset} is {@code null}
 	 */
 	public static String toString(InputStream inputStream, Charset charset) throws IOException {
 		Objects.requireNonNull(inputStream, "InputStream must not be null");
 		Objects.requireNonNull(charset, "Charset must not be null");
 		StringBuilder out = new StringBuilder();
-		InputStreamReader reader = new InputStreamReader(inputStream, charset);
-		char[] buffer = new char[BUFFER_SIZE];
-		int read;
-		while ((read = reader.read(buffer)) != -1) {
-			out.append(buffer, 0, read);
+		try (InputStreamReader reader = new InputStreamReader(inputStream, charset)) {
+			char[] buffer = new char[BUFFER_SIZE];
+			int read;
+			while ((read = reader.read(buffer)) != -1) {
+				out.append(buffer, 0, read);
+			}
 		}
 		return out.toString();
 	}
 
 	/**
-	 * Copy the contents of the provided InputStream into a byte array.
-	 * <p>Note! InputStream will not be closed.
+	 * Reads the entire contents of an {@link InputStream} into a byte array.
 	 *
-	 * @param inputStream the InputStream to copy from
-	 * @return the byte array
-	 * @throws IOException inputStream case of I/O errors
+	 * <p><b>Note:</b> The provided {@link InputStream} will <strong>not</strong> be closed by this method. It is the
+	 * caller's responsibility to close the stream once processing is complete.</p>
+	 *
+	 * @param inputStream the {@link InputStream} to read from
+	 * @return a byte array containing the data read from the {@link InputStream}
+	 * @throws IOException if an I/O error occurs while reading the {@link InputStream}
+	 * @throws NullPointerException if {@code inputStream} is {@code null}
 	 */
 	public static byte[] toByteArray(InputStream inputStream) throws IOException {
 		Objects.requireNonNull(inputStream, "InputStream must not be null");
@@ -75,12 +82,15 @@ public final class StreamUtils {
 	}
 
 	/**
-	 * Copy the contents of the provided InputStream to the provided OutputStream.
-	 * <p>Note! InputStream and OutputStream will not be closed.
+	 * Copies the contents of an {@link InputStream} to an {@link OutputStream}.
 	 *
-	 * @param inputStream the InputStream to copy from
-	 * @param outputStream the OutputStream to copy to
-	 * @throws IOException inputStream case of I/O errors
+	 * <p><b>Note:</b> Neither the {@link InputStream} nor the {@link OutputStream} will be closed by this method. It
+	 * is the caller's responsibility to close the streams once processing is complete.</p>
+	 *
+	 * @param inputStream the {@link InputStream} to read from
+	 * @param outputStream the {@link OutputStream} to write to
+	 * @throws IOException if an I/O error occurs while reading or writing
+	 * @throws NullPointerException if {@code inputStream} or {@code outputStream} is {@code null}
 	 */
 	public static void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
 		Objects.requireNonNull(inputStream, "InputStream must not be null");

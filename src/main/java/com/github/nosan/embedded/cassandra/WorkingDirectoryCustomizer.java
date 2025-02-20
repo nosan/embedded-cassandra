@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,30 +36,32 @@ import com.github.nosan.embedded.cassandra.commons.Resource;
 public interface WorkingDirectoryCustomizer {
 
 	/**
-	 * Copy a resource to a target path within the working directory.
+	 * Copies a resource to a target path within the working directory.
 	 * <pre>
-	 * - If target file does not exist, it will be created.
-	 * - If target file exists, it will be replaced.
+	 * - If the target file does not exist, it will be created.
+	 * - If the target file exists, it will be replaced.
 	 * </pre>
 	 * For example:
 	 * <pre>
-	 * {@code WorkingDirectoryCustomizer.addResource(new ClassPathResource("cassandra.yaml"), "conf/cassandra.yaml") }
+	 * {@code WorkingDirectoryCustomizer.addResource(new ClassPathResource("cassandra.yaml"), "conf/cassandra.yaml")}
 	 * </pre>
 	 *
-	 * @param path path (file only) within the working directory (e.g., conf/cassandra.yaml)
-	 * @param resource the resource
-	 * @return a new working directory customizer
+	 * @param path The path (file only) within the working directory (e.g., conf/cassandra.yaml)
+	 * @param resource The resource to be copied
+	 * @return A new working directory customizer
+	 * @throws NullPointerException if the path or resource is {@code null}
+	 * @throws IllegalArgumentException if the target path points outside the working directory or is a directory
 	 */
 	static WorkingDirectoryCustomizer addResource(Resource resource, String path) {
-		Objects.requireNonNull(path, "File Path must not be null");
+		Objects.requireNonNull(path, "File path must not be null");
 		Objects.requireNonNull(resource, "Resource must not be null");
 		return (workingDirectory, version) -> {
-			Objects.requireNonNull(workingDirectory, "Working Directory must not be null");
+			Objects.requireNonNull(workingDirectory, "Working directory must not be null");
 			Objects.requireNonNull(version, "Version must not be null");
 			Path normalizedPath = workingDirectory.resolve(path).normalize().toAbsolutePath();
 			if (!normalizedPath.startsWith(workingDirectory)) {
 				throw new IllegalArgumentException("Path: '" + normalizedPath
-						+ "' is out of a directory: '" + workingDirectory + "'");
+						+ "' is out of the directory: '" + workingDirectory + "'");
 			}
 			if (Files.isDirectory(normalizedPath)) {
 				throw new IllegalArgumentException("Path: '" + normalizedPath + "' is a directory");
@@ -77,9 +79,9 @@ public interface WorkingDirectoryCustomizer {
 	/**
 	 * Customizes the working directory.
 	 *
-	 * @param workingDirectory a working directory
-	 * @param version a version
-	 * @throws IOException in the case of any I/O errors
+	 * @param workingDirectory The working directory
+	 * @param version The version
+	 * @throws IOException If an I/O error occurs
 	 */
 	void customize(Path workingDirectory, Version version) throws IOException;
 

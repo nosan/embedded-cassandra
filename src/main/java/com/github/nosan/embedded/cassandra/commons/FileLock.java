@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,28 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Helper class to lock a file. It is recommended practice to lock a file with a try with resources block, such as:
- * <pre> {@code
- * class X {
- *   public void m() {
- *     try(FileLock lock = FileLock.of(lockFile)){
- *         if(lock.tryLock(1, TimeUnit.MINUTES){
- *             // locked
- *         } else {
- *             // not locked
- *         }
+ * Utility class for obtaining an exclusive lock on a file.
+ *
+ * <p>The {@code FileLock} class simplifies the process of locking files, allowing controlled access
+ * to shared resources in a multi-threaded environment. It uses Java NIO's {@link java.nio.channels.FileLock} to handle
+ * file locks.</p>
+ *
+ * <p><strong>Usage:</strong></p>
+ * <p>It is recommended to use {@link FileLock} with a try-with-resources block to ensure that
+ * any underlying file resources are properly released:</p>
+ *
+ * <pre>{@code
+ * Path lockFile = Path.of("example.lock");
+ * try (FileLock lock = FileLock.of(lockFile)) {
+ *     if (lock.tryLock(1, TimeUnit.MINUTES)) {
+ *         // Perform actions while the file is locked
+ *     } else {
+ *         // Handle inability to acquire lock
  *     }
- * }}}
- * </pre>
- * <b>An instance of this class must not be shared across different threads.</b>
+ * }
+ * }</pre>
+ *
+ * <p><b>Note:</b> An instance of this class should not be shared across different threads.</p>
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -57,11 +65,15 @@ public final class FileLock implements AutoCloseable {
 	}
 
 	/**
-	 * Creates a new {@link FileLock} instance for the specified file.
+	 * Creates a {@link FileLock} instance for the specified file.
 	 *
-	 * @param file the file that should be locked
-	 * @return a new {@link FileLock}
-	 * @throws IOException in the case of I/O errors
+	 * <p>The specified file will be opened in write mode with the {@link StandardOpenOption#CREATE}
+	 * option to ensure that the file will be created if it does not already exist.</p>
+	 *
+	 * @param file the path to the file to lock
+	 * @return a new {@link FileLock} instance
+	 * @throws IOException if an I/O error occurs while opening the file
+	 * @throws NullPointerException if the {@code file} is {@code null}
 	 */
 	public static FileLock of(Path file) throws IOException {
 		Objects.requireNonNull(file, "File must not be null");
@@ -69,13 +81,19 @@ public final class FileLock implements AutoCloseable {
 	}
 
 	/**
-	 * Acquires an exclusive lock on the file.
+	 * Attempts to acquire an exclusive lock on the file.
 	 *
-	 * @param timeout the maximum time to wait
-	 * @param timeUnit the time unit of the {@code timeout} argument
-	 * @return {@code true} if lock has been acquired otherwise {@code false}
-	 * @throws FileLockInterruptionException If the invoking thread is interrupted while blocked in this method
-	 * @throws IOException If some other I/O error occurs
+	 * <p>This method tries to acquire a lock on the file within the given timeout period.
+	 * If the lock is successfully acquired during this time, the method returns {@code true}. Otherwise, it returns
+	 * {@code false} after the timeout period has elapsed.</p>
+	 *
+	 * @param timeout the maximum amount of time to wait for the lock
+	 * @param timeUnit the unit of time for the {@code timeout} parameter
+	 * @return {@code true} if the lock was successfully acquired, otherwise {@code false}
+	 * @throws IllegalArgumentException if the {@code timeout} is negative
+	 * @throws FileLockInterruptionException if the thread is interrupted while waiting for the lock
+	 * @throws IOException if an I/O error occurs while trying to acquire the lock
+	 * @throws NullPointerException if {@code timeUnit} is {@code null}
 	 */
 	public synchronized boolean tryLock(long timeout, TimeUnit timeUnit)
 			throws FileLockInterruptionException, IOException {
@@ -109,9 +127,12 @@ public final class FileLock implements AutoCloseable {
 	}
 
 	/**
-	 * Closes the underlying {@link FileChannel} and releases all locks.
+	 * Releases all locks and closes the underlying {@link FileChannel}.
 	 *
-	 * @throws IOException If some other I/O error occurs
+	 * <p>After this method is called, the file associated with this {@link FileLock} will
+	 * no longer be locked, and its {@link FileChannel} will be closed.</p>
+	 *
+	 * @throws IOException if an I/O error occurs while closing the {@link FileChannel}
 	 */
 	@Override
 	public synchronized void close() throws IOException {
@@ -124,7 +145,7 @@ public final class FileLock implements AutoCloseable {
 			return fileChannel.tryLock();
 		}
 		catch (OverlappingFileLockException ex) {
-			return null;
+			return null; // Another thread or process already owns the lock
 		}
 	}
 

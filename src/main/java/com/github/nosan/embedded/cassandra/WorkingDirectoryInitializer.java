@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 /**
- * A strategy interface to initialize the working directory. The working directory must contain all necessary Cassandra
- * files after the {@link #init(Path, Version)} method has been called.
+ * A strategy interface for initializing the working directory. After the {@link #init(Path, Version)} method is
+ * executed, the working directory must contain all the necessary Cassandra files required for operation.
+ *
+ * <p>This interface provides an abstraction for setting up the working directory
+ * with required files and configurations.</p>
  *
  * @author Dmytro Nosan
  * @see DefaultWorkingDirectoryInitializer
@@ -31,11 +34,11 @@ import java.nio.file.Path;
 public interface WorkingDirectoryInitializer {
 
 	/**
-	 * Initializes working directory.
+	 * Initializes the working directory by copying or setting up all required files.
 	 *
-	 * @param workingDirectory working directory
-	 * @param version Cassandra version
-	 * @throws IOException an I/O error occurs
+	 * @param workingDirectory The working directory to initialize
+	 * @param version The Cassandra version
+	 * @throws IOException If an I/O error occurs during the initialization process
 	 */
 	void init(Path workingDirectory, Version version) throws IOException;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,16 @@ import java.util.Set;
 import com.github.nosan.embedded.cassandra.commons.StringUtils;
 
 /**
- * A {@link CassandraBuilderConfigurator} that configures org.apache.cassandra.locator.SimpleSeedProvider.
+ * A {@link CassandraBuilderConfigurator} implementation that configures the
+ * `org.apache.cassandra.locator.SimpleSeedProvider` class.
+ *
+ * This configurator allows the user to define seed nodes for Cassandra by specifying their addresses, as well as adding
+ * single or multiple addresses with or without port information.
  *
  * @author Dmytro Nosan
  * @since 4.0.0
  */
+
 public final class SimpleSeedProviderConfigurator implements CassandraBuilderConfigurator {
 
 	private static final String SIMPLE_SEED_PROVIDER_CLASS = "org.apache.cassandra.locator.SimpleSeedProvider";

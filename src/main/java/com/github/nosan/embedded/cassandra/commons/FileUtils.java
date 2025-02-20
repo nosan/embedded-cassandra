@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 
 /**
- * Simple utility methods for dealing with files and directories.
+ * A utility class providing simple methods for dealing with files and directories.
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -45,11 +45,14 @@ public final class FileUtils {
 	}
 
 	/**
-	 * Deletes the supplied {@link Path}. For directories, recursively delete any nested directories or files as well.
+	 * Deletes the specified {@link Path}. If the path refers to a directory, it will recursively delete its contents
+	 * before deleting the directory itself.
 	 *
-	 * @param path the {@code path} to delete
-	 * @return {@code true} if the {@code path} existed and was deleted, or {@code false} it did not exist
-	 * @throws IOException in the case of I/O errors
+	 * <p>This method is safe to use even if the specified path does not exist.</p>
+	 *
+	 * @param path the path to delete; if {@code null}, this method will return {@code false}
+	 * @return {@code true} if the path existed and was deleted, or {@code false} if it did not exist
+	 * @throws IOException if an I/O error occurs while deleting the path
 	 */
 	public static boolean delete(Path path) throws IOException {
 		if (path == null) {
@@ -81,31 +84,36 @@ public final class FileUtils {
 	}
 
 	/**
-	 * Copies a path to a target path. For directories, it will be copied recursively.
+	 * Copies a file or directory to the target location. If the source path refers to a directory, it will be copied
+	 * recursively, including its contents.
 	 *
 	 * @param src the source path
-	 * @param dest the destination path
-	 * @param options specifying how the copy should be done the path to the target file
-	 * @throws IOException in the case of I/O errors
+	 * @param dest the target path
+	 * @param options the options specifying how the copy should be performed
+	 * @throws IOException if an I/O error occurs during the copy
+	 * @throws NullPointerException if any of the arguments are {@code null}
 	 */
 	public static void copy(Path src, Path dest, CopyOption... options) throws IOException {
 		copy(src, dest, (path, attributes) -> true, options);
 	}
 
 	/**
-	 * Copies a path to a target path. For directories, it will be copied recursively.
+	 * Copies a file or directory to the target location with a filtering function. If the source path refers to a
+	 * directory, it will be copied recursively, but only files and directories that pass the filter will be included.
 	 *
 	 * @param src the source path
 	 * @param dest the destination path
-	 * @param options specifying how the copy should be done the path to the target file
-	 * @param filter the function used to decide whether a path should be copied or not
-	 * @throws IOException in the case of I/O errors
+	 * @param filter a predicate used to determine whether a file or directory should be copied
+	 * @param options the options specifying how the copy should be performed
+	 * @throws IOException if an I/O error occurs during the copy
+	 * @throws NullPointerException if the source path, destination path, or options array is {@code null}
 	 */
 	public static void copy(Path src, Path dest, BiPredicate<? super Path, ? super BasicFileAttributes> filter,
 			CopyOption... options) throws IOException {
 		Objects.requireNonNull(src, "Source Path must not be null");
 		Objects.requireNonNull(dest, "Destination Path must not be null");
 		Objects.requireNonNull(options, "Copy Options must not be null");
+
 		Files.walkFileTree(src, new SimpleFileVisitor<>() {
 
 			@Override
@@ -129,32 +137,39 @@ public final class FileUtils {
 	}
 
 	/**
-	 * Computes the checksum of the file using the provided algorithm.
+	 * Computes the checksum of the specified file using the given algorithm.
 	 *
-	 * @param file the file to read
-	 * @param algorithm the name of the algorithm.
-	 * @return the computed checksum in lowercase hex format
-	 * @throws NoSuchAlgorithmException if no Provider supports a MessageDigestSpi implementation for the specified
-	 * algorithm.
-	 * @throws IOException in the case of I/O errors
+	 * <p>This method reads the file's content and computes the hash using the provided
+	 * algorithm (e.g., {@code MD5}, {@code SHA-1}, {@code SHA-256}). The result is returned as a lowercase hexadecimal
+	 * string.</p>
+	 *
+	 * @param file the file for which the checksum is computed
+	 * @param algorithm the name of the algorithm to use for the hash computation
+	 * @return the computed checksum as a lowercase hexadecimal string
+	 * @throws IOException if an I/O error occurs while reading the file
+	 * @throws NoSuchAlgorithmException if the specified algorithm is not available
+	 * @throws NullPointerException if the file or algorithm is {@code null}
 	 */
 	public static String checksum(Path file, String algorithm) throws NoSuchAlgorithmException, IOException {
 		Objects.requireNonNull(file, "File must not be null");
-		Objects.requireNonNull(file, "Algorithm must not be null");
+		Objects.requireNonNull(algorithm, "Algorithm must not be null");
 		MessageDigest md = MessageDigest.getInstance(algorithm);
 		byte[] buffer = new byte[BUFFER_SIZE];
+
 		try (InputStream is = Files.newInputStream(file)) {
 			int read;
 			while ((read = is.read(buffer)) != -1) {
 				md.update(buffer, 0, read);
 			}
 		}
-		byte[] data = md.digest();
-		StringBuilder hex = new StringBuilder(data.length * 2);
-		for (byte b : data) {
+
+		byte[] hash = md.digest();
+		StringBuilder hex = new StringBuilder(hash.length * 2);
+		for (byte b : hash) {
 			hex.append(HEX_CODE[(b >> 4) & 0xF]);
-			hex.append(HEX_CODE[(b & 0xF)]);
+			hex.append(HEX_CODE[b & 0xF]);
 		}
+
 		return hex.toString();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,12 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
+/**
+ * A class that collects and manages the output of a Cassandra database process. The collected output consists of lines
+ * from the database's standard output stream, with a maximum capacity of 30 lines.
+ *
+ * @author Dmytro Nosan
+ */
 class OutputCollector implements Consumer<String>, Closeable {
 
 	private final Deque<String> output = new ConcurrentLinkedDeque<>();

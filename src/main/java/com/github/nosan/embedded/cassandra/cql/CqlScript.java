@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,45 +26,61 @@ import com.github.nosan.embedded.cassandra.commons.ClassPathResource;
 import com.github.nosan.embedded.cassandra.commons.Resource;
 
 /**
- * {@link CqlScript} interface that loads CQL statements from various sources.
+ * A {@link CqlScript} represents a collection of executable Cassandra Query Language (CQL) statements.
+ *
+ * <p>This functional interface provides methods for constructing {@code CqlScript} instances from various sources,
+ * such as resources, classpath files, or raw strings. Implementations of this interface encapsulate CQL statements and
+ * provide convenient functionality for working with them.</p>
+ * <p><b>Example Usage:</b></p>
+ * <pre>{@code
+ * // Load CQL from a classpath resource
+ * CqlScript script = CqlScript.ofClassPath("example.cql");
+ * script.forEachStatement(System.out::println);
+ *
+ * // Create CQL script from explicit statements
+ * CqlScript script = CqlScript.ofStatements("CREATE TABLE test (...)", "INSERT INTO test VALUES (...)");
+ * script.getStatements().forEach(System.out::println);
+ * }</pre>
  *
  * @author Dmytro Nosan
  * @see CqlDataSet
  * @see AbstractCqlScript
  * @see ResourceCqlScript
  * @see StringCqlScript
- * @see #ofClassPath(String)
  * @since 4.0.0
  */
 @FunctionalInterface
 public interface CqlScript {
 
 	/**
-	 * Creates {@link CqlScript} with the specified resource name and default charset.
+	 * Creates a {@link CqlScript} instance using a classpath resource and the default {@link Charset}.
 	 *
-	 * @param name the resource name
-	 * @return a new {@link CqlScript}
+	 * @param name the name of the resource (must not be {@code null})
+	 * @return a new {@link CqlScript} instance
+	 * @throws NullPointerException if {@code name} is {@code null}
 	 */
 	static CqlScript ofClassPath(String name) {
 		return ofClassPath(name, Charset.defaultCharset());
 	}
 
 	/**
-	 * Creates {@link CqlScript} with the specified resource name and charset.
+	 * Creates a {@link CqlScript} instance using a classpath resource and the specified {@link Charset}.
 	 *
-	 * @param name the resource name
-	 * @param charset the encoding to use
-	 * @return a new {@link CqlScript}
+	 * @param name the name of the resource (must not be {@code null})
+	 * @param charset the character encoding to use when reading the resource (must not be {@code null})
+	 * @return a new {@link CqlScript} instance
+	 * @throws NullPointerException if {@code name} or {@code charset} is {@code null}
 	 */
 	static CqlScript ofClassPath(String name, Charset charset) {
 		return ofResource(new ClassPathResource(name), charset);
 	}
 
 	/**
-	 * Creates {@link CqlScript} with the specified resource and default charset.
+	 * Creates a {@link CqlScript} instance using the specified {@link Resource} and the default {@link Charset}.
 	 *
-	 * @param resource the resource to use
-	 * @return a new {@link CqlScript}
+	 * @param resource the {@link Resource} to use (must not be {@code null})
+	 * @return a new {@link CqlScript} instance
+	 * @throws NullPointerException if {@code resource} is {@code null}
 	 * @since 4.0.1
 	 */
 	static CqlScript ofResource(Resource resource) {
@@ -72,24 +88,26 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Creates {@link CqlScript} with the specified resources and charset.
+	 * Creates a {@link CqlScript} instance using the specified {@link Resource} and {@link Charset}.
 	 *
-	 * @param resource the resource to use
-	 * @param charset the encoding to use
-	 * @return a new {@link CqlScript}
+	 * @param resource the {@link Resource} to use (must not be {@code null})
+	 * @param charset the character encoding to use when reading the resource (must not be {@code null})
+	 * @return a new {@link CqlScript} instance
+	 * @throws NullPointerException if {@code resource} or {@code charset} is {@code null}
 	 * @since 4.0.1
 	 */
 	static CqlScript ofResource(Resource resource, Charset charset) {
 		Objects.requireNonNull(charset, "Charset must not be null");
-		Objects.requireNonNull(resource, "Resources must not be null");
+		Objects.requireNonNull(resource, "Resource must not be null");
 		return new ResourceCqlScript(resource, charset);
 	}
 
 	/**
-	 * Creates {@link CqlScript} with the specified statements.
+	 * Creates a {@link CqlScript} instance from an array of CQL statements.
 	 *
-	 * @param statements the statements to use
-	 * @return a new {@link CqlScript}
+	 * @param statements an array of CQL statements (must not be {@code null})
+	 * @return a new {@link CqlScript} instance
+	 * @throws NullPointerException if {@code statements} is {@code null}
 	 * @since 5.0.0
 	 */
 	static CqlScript ofStatements(String... statements) {
@@ -98,10 +116,11 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Creates {@link CqlScript} with the specified statements.
+	 * Creates a {@link CqlScript} instance from a {@link List} of CQL statements.
 	 *
-	 * @param statements the statements to use
-	 * @return a new {@link CqlScript}
+	 * @param statements a list of CQL statements (must not be {@code null})
+	 * @return a new {@link CqlScript} instance
+	 * @throws NullPointerException if {@code statements} is {@code null}
 	 * @since 5.0.0
 	 */
 	static CqlScript ofStatements(List<? extends String> statements) {
@@ -110,9 +129,13 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Performs the provided {@code callback} for each statement of the {@link CqlScript}.
+	 * Iterates over all the statements in this {@link CqlScript}, applying the provided {@link Consumer}.
 	 *
-	 * @param callback The action to be performed for each statement
+	 * <p>This method allows developers to perform an action (e.g., execution, logging) for each individual
+	 * CQL statement.</p>
+	 *
+	 * @param callback a {@link Consumer} that processes each statement (must not be {@code null})
+	 * @throws NullPointerException if {@code callback} is {@code null}
 	 */
 	default void forEachStatement(Consumer<? super String> callback) {
 		Objects.requireNonNull(callback, "Callback must not be null");
@@ -120,9 +143,13 @@ public interface CqlScript {
 	}
 
 	/**
-	 * Gets {@code CQL} statements.
+	 * Retrieves the list of CQL statements encapsulated within this {@link CqlScript}.
 	 *
-	 * @return {@code CQL} statements (never null)
+	 * <p>The returned {@link List} contains all the parsed or explicitly provided statements. This method
+	 * guarantees that the result is never {@code null}, but the list may be empty if no statements are provided or
+	 * parsed.</p>
+	 *
+	 * @return an unmodifiable list of CQL statements (never {@code null})
 	 */
 	List<String> getStatements();
 

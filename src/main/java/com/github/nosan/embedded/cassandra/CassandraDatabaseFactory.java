@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,20 @@ package com.github.nosan.embedded.cassandra;
 
 import java.nio.file.Path;
 
+/**
+ * A factory interface for creating instances of {@link CassandraDatabase}.
+ *
+ * @author Dmytro Nosan
+ */
 interface CassandraDatabaseFactory {
 
+	/**
+	 * Creates an instance of {@link CassandraDatabase} using the specified working directory.
+	 *
+	 * @param workingDirectory the directory where the Cassandra database will operate
+	 * @return a new {@link CassandraDatabase} instance
+	 * @throws Exception if an error occurs during the creation of the database instance
+	 */
 	CassandraDatabase create(Path workingDirectory) throws Exception;
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.github.nosan.embedded.cassandra.cql;
 import java.util.Objects;
 
 /**
- * {@link CqlScript} implementation for string scripts.
+ * A {@link CqlScript} implementation that encapsulates a CQL script as a plain string.
  *
  * @author Dmytro Nosan
  * @since 4.0.0
@@ -29,15 +29,21 @@ public class StringCqlScript extends AbstractCqlScript {
 	private final String script;
 
 	/**
-	 * Creates {@link StringCqlScript} with the provided CQL script.
+	 * Constructs a new {@link StringCqlScript} using the given CQL script.
 	 *
-	 * @param script CQL script that contains CQL statements
+	 * @param script the CQL script as a string (must not be {@code null})
+	 * @throws NullPointerException if {@code script} is {@code null}
 	 */
 	public StringCqlScript(String script) {
 		Objects.requireNonNull(script, "Script must not be null");
 		this.script = script;
 	}
 
+	/**
+	 * Retrieves the raw CQL script as a string.
+	 *
+	 * @return the raw CQL script as a string
+	 */
 	@Override
 	protected String getScript() {
 		return this.script;

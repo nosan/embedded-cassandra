@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,13 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The NativeTransportParser class monitors and parses output from a Cassandra database instance to detect the state of
+ * the native transport service, handle address and port binding, and determine if the service has started, failed, or
+ * been disabled.
+ *
+ * @author Dmytro Nosan
+ */
 class NativeTransportParser implements Consumer<String>, Closeable {
 
 	private static final Pattern TRANSPORT_START_PATTERN = Pattern

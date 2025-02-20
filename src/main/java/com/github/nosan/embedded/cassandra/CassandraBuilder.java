@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,9 +152,9 @@ public class CassandraBuilder {
 
 	/**
 	 * Sets the Cassandra instance name.
-	 * <p>Defaults to cassandra-0, cassandra-1, and so on.
+	 * <p> Defaults to "cassandra-0", "cassandra-1", and so on.
 	 *
-	 * @param name the Cassandra name
+	 * @param name the Cassandra instance name
 	 * @return this builder
 	 */
 	public CassandraBuilder name(String name) {
@@ -167,9 +167,9 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Gets current configured Cassandra instance name.
+	 * Gets the currently configured Cassandra instance name.
 	 *
-	 * @return Cassandra instance name, or {@code null}
+	 * @return the Cassandra instance name, or {@code null} if not configured
 	 */
 	public String getName() {
 		return this.name;
@@ -177,9 +177,9 @@ public class CassandraBuilder {
 
 	/**
 	 * Sets the Cassandra version.
-	 * <p>Defaults to {@link #DEFAULT_VERSION}
+	 * <p> Defaults to {@link #DEFAULT_VERSION}.
 	 *
-	 * @param version the Cassandra version
+	 * @param version the Cassandra version to set
 	 * @return this builder
 	 */
 	public CassandraBuilder version(String version) {
@@ -189,10 +189,10 @@ public class CassandraBuilder {
 
 	/**
 	 * Sets the Cassandra version.
-	 * <p>Defaults to {@link #DEFAULT_VERSION}
+	 * <p> Defaults to {@link #DEFAULT_VERSION}.
 	 *
-	 * @param version the Cassandra version
-	 * @return this builder
+	 * @param version the Cassandra version to be set
+	 * @return this builder instance
 	 */
 	public CassandraBuilder version(Version version) {
 		Objects.requireNonNull(version, "Version must not be null");
@@ -201,9 +201,10 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Gets the current configured Cassandra version or {@link #DEFAULT_VERSION}.
+	 * Gets the currently configured Cassandra version.
+	 * <p> Defaults to {@link #DEFAULT_VERSION} if no version is explicitly set.
 	 *
-	 * @return Cassandra version, never {@code null}
+	 * @return the configured Cassandra version, never {@code null}
 	 */
 	public Version getVersion() {
 		Version version = this.version;
@@ -211,11 +212,11 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the Cassandra logger. This logger will consume Cassandra stdout and stderr outputs.
-	 * <p>Defaults to {@code LoggerFactory.getLogger(Cassandra.class)}
+	 * Sets the Cassandra logger. This logger will capture and consume Cassandra's stdout and stderr outputs.
+	 * <p> Defaults to {@code LoggerFactory.getLogger(Cassandra.class)}.
 	 *
-	 * @param logger the Cassandra logger
-	 * @return this builder
+	 * @param logger the logger to be used for Cassandra
+	 * @return this builder instance
 	 */
 	public CassandraBuilder logger(Logger logger) {
 		Objects.requireNonNull(logger, "Logger must not be null");
@@ -224,11 +225,11 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets if the created {@link Cassandra} should have a shutdown hook registered.
-	 * <p>Defaults to {@code true}.
+	 * Specifies whether the created {@link Cassandra} instance should have a shutdown hook registered.
+	 * <p> Defaults to {@code true}.
 	 *
-	 * @param registerShutdownHook {@code true} if shutdown hook should be registered, otherwise {@code false}
-	 * @return this builder
+	 * @param registerShutdownHook {@code true} to register a shutdown hook, {@code false} otherwise
+	 * @return this builder instance
 	 */
 	public CassandraBuilder registerShutdownHook(boolean registerShutdownHook) {
 		this.registerShutdownHook = registerShutdownHook;
@@ -252,33 +253,32 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the Cassandra configuration file.
+	 * Sets the Cassandra configuration file path.
 	 * <p>
-	 * Equal to:
+	 * This is equivalent to:
 	 * <pre>
-	 *     {@code
-	 *     addSystemProperty("cassandra.config", configFile);
-	 *     }
+	 * {@code
+	 * addSystemProperty("cassandra.config", configFile);
+	 * }
 	 * </pre>
 	 *
-	 * @param configFile the config file
-	 * @return this builder
+	 * @param configFile the path to the Cassandra configuration file, must not be {@code null}
+	 * @return this builder instance
 	 */
 	public CassandraBuilder configFile(Resource configFile) {
 		return addSystemProperty("cassandra.config", configFile);
 	}
 
 	/**
-	 * Set the {@code Supplier} of the working directory that should be called each time when {@link #build()} is
-	 * called.
-	 * <p>The supplied directory will be initialized by {@link
-	 * WorkingDirectoryInitializer} and used as Cassandra home directory.
-	 * <p>
-	 * In the end, provided working directory may be deleted or partly deleted by {@link WorkingDirectoryDestroyer}.
-	 * <p>Defaults to {@code Files.createTempDirectory("")}
+	 * Sets the {@code Supplier} for the working directory, which will be invoked each time {@link #build()} is called.
+	 * <p> The supplied directory will be initialized by {@link WorkingDirectoryInitializer} and used as the Cassandra
+	 * home directory.
+	 * <p> At the end of the process, the provided working directory may be fully or partially deleted by
+	 * {@link WorkingDirectoryDestroyer}.
+	 * <p> Defaults to {@code Files.createTempDirectory("")}.
 	 *
-	 * @param workingDirectorySupplier the working directory supplier
-	 * @return this builder
+	 * @param workingDirectorySupplier the supplier providing the working directory, must not be {@code null}
+	 * @return this builder instance
 	 * @see IOSupplier#wrap(Supplier)
 	 */
 	public CassandraBuilder workingDirectory(IOSupplier<? extends Path> workingDirectorySupplier) {
@@ -288,12 +288,13 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the {@link WorkingDirectoryInitializer}.
-	 * <p>Defaults to {@link DefaultWorkingDirectoryInitializer} with the
-	 * underlying {@link WebCassandraDirectoryProvider}.
+	 * Sets the {@link WorkingDirectoryInitializer} to be used for initializing the working directory.
+	 * <p> Defaults to {@link DefaultWorkingDirectoryInitializer}, which uses the underlying
+	 * {@link WebCassandraDirectoryProvider}.
 	 *
-	 * @param workingDirectoryInitializer the working directory initializer
-	 * @return this builder
+	 * @param workingDirectoryInitializer the initializer responsible for setting up the working directory, must not be
+	 * {@code null}
+	 * @return this builder instance
 	 * @see DefaultWorkingDirectoryInitializer
 	 */
 	public CassandraBuilder workingDirectoryInitializer(WorkingDirectoryInitializer workingDirectoryInitializer) {
@@ -303,12 +304,12 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the {@link WorkingDirectoryDestroyer}.
-	 * <p>
-	 * Defaults to {@code WorkingDirectoryDestroyer.deleteAll()}
+	 * Sets the {@link WorkingDirectoryDestroyer} to handle the cleanup of the working directory.
+	 * <p> Defaults to {@code WorkingDirectoryDestroyer.deleteAll()}.
 	 *
-	 * @param workingDirectoryDestroyer the working directory destroyer
-	 * @return this builder
+	 * @param workingDirectoryDestroyer the destroyer responsible for managing the cleanup of the working directory,
+	 * must not be {@code null}
+	 * @return this builder instance
 	 * @see WorkingDirectoryDestroyer#doNothing()
 	 * @see WorkingDirectoryDestroyer#deleteOnly(String...)
 	 * @see WorkingDirectoryDestroyer#deleteAll()
@@ -320,11 +321,12 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the {@link WorkingDirectoryCustomizer}. Setting this value will replace any previously configured
-	 * customizers.
+	 * Sets the {@link WorkingDirectoryCustomizer} to customize the working directory. Setting this value will replace
+	 * any previously configured customizers.
 	 *
-	 * @param workingDirectoryCustomizers the working directory customizers to set
-	 * @return this builder
+	 * @param workingDirectoryCustomizers the customizers to use for configuring the working directory, must not be
+	 * {@code null}
+	 * @return this builder instance
 	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 * @see #workingDirectoryCustomizers(Collection)
 	 * @see #addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer...)
@@ -336,11 +338,11 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets the {@link WorkingDirectoryCustomizer}. Setting this value will replace any previously configured
-	 * customizers.
+	 * Sets the {@link WorkingDirectoryCustomizer} instances to customize the working directory. This operation will
+	 * replace any previously configured customizers.
 	 *
-	 * @param workingDirectoryCustomizers the working directory customizers to set
-	 * @return this builder
+	 * @param workingDirectoryCustomizers the customizers to configure the working directory, must not be {@code null}
+	 * @return this builder instance
 	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 * @see #workingDirectoryCustomizers(WorkingDirectoryCustomizer...)
 	 * @see #addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer...)
@@ -355,10 +357,10 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Adds the {@link WorkingDirectoryCustomizer}.
+	 * Adds one or more {@link WorkingDirectoryCustomizer} instances to customize the working directory.
 	 *
-	 * @param workingDirectoryCustomizers the working directory customizers to add
-	 * @return this builder
+	 * @param workingDirectoryCustomizers the customizers to add, must not be {@code null}
+	 * @return this builder instance
 	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 * @see #addWorkingDirectoryCustomizers(Collection)
 	 * @see #workingDirectoryCustomizers(WorkingDirectoryCustomizer...)
@@ -370,10 +372,10 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Adds the {@link WorkingDirectoryCustomizer}.
+	 * Adds one or more {@link WorkingDirectoryCustomizer} instances to the current configuration.
 	 *
-	 * @param workingDirectoryCustomizers the working directory customizers to add
-	 * @return this builder
+	 * @param workingDirectoryCustomizers the customizers to add, must not be {@code null} or empty
+	 * @return this builder instance for chaining
 	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 * @see #addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer...)
 	 * @see #workingDirectoryCustomizers(WorkingDirectoryCustomizer...)
@@ -387,17 +389,18 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets Cassandra environment variables. Setting this value will replace any previously configured environment
-	 * variables. For example:
-	 * <pre>
-	 * {@code
-	 *  Map<String,Object> environmentVariables = new LinkedHashMap<>();
-	 *  environmentVariables.put("TZ", "Europe/London");
-	 *  builder.environmentVariables(environmentVariables);
+	 * Sets the Cassandra environment variables. This operation will replace any previously configured environment
+	 * variables.
+	 *
+	 * <p>Example usage:</p>
+	 * <pre>{@code
+	 * Map<String, Object> environmentVariables = new LinkedHashMap<>();
+	 * environmentVariables.put("TZ", "Europe/London");
+	 * builder.environmentVariables(environmentVariables);
 	 * }</pre>
 	 *
-	 * @param environmentVariables Cassandra environment variables
-	 * @return this builder
+	 * @param environmentVariables a map containing the Cassandra environment variables, must not be {@code null}
+	 * @return this builder instance for method chaining
 	 * @see #addEnvironmentVariable(String, Object)
 	 * @see #addEnvironmentVariables(Map)
 	 */
@@ -409,16 +412,16 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Puts Cassandra environment variable. For example:
-	 * <pre>
-	 * {@code
-	 *  builder.addEnvironmentVariable("TZ", "Europe/London");
-	 * }
-	 * </pre>
+	 * Adds a Cassandra environment variable to the current configuration.
 	 *
-	 * @param name Cassandra environment variable name
-	 * @param value Cassandra environment variable value
-	 * @return this builder
+	 * <p>Example usage:</p>
+	 * <pre>{@code
+	 * builder.addEnvironmentVariable("TZ", "Europe/London");
+	 * }</pre>
+	 *
+	 * @param name the name of the Cassandra environment variable, must not be {@code null} or empty
+	 * @param value the value of the Cassandra environment variable, must not be {@code null}
+	 * @return this builder instance for method chaining
 	 * @see #addEnvironmentVariables(Map)
 	 * @see #environmentVariables(Map)
 	 */
@@ -427,16 +430,17 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Puts Cassandra environment variables. For example:
-	 * <pre>
-	 * {@code
-	 *  Map<String,Object> environmentVariables = new LinkedHashMap<>();
-	 *  environmentVariables.put("TZ", "Europe/London");
-	 *  builder.addEnvironmentVariables(environmentVariables);
+	 * Adds multiple Cassandra environment variables to the current configuration.
+	 *
+	 * <p>Example usage:</p>
+	 * <pre>{@code
+	 * Map<String, Object> environmentVariables = new LinkedHashMap<>();
+	 * environmentVariables.put("TZ", "Europe/London");
+	 * builder.addEnvironmentVariables(environmentVariables);
 	 * }</pre>
 	 *
-	 * @param environmentVariables Cassandra environment variables
-	 * @return this builder
+	 * @param environmentVariables a map containing Cassandra environment variables, must not be {@code null} or empty
+	 * @return this builder instance for method chaining
 	 * @see #addEnvironmentVariable(String, Object)
 	 * @see #environmentVariables(Map)
 	 */
@@ -447,19 +451,20 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets Cassandra native Java Virtual Machine (JVM) system parameters. Setting this value will replace any
-	 * previously configured system parameters. For example:
-	 * <pre>
-	 * {@code
-	 *  Map<String,Object> systemProperties = new LinkedHashMap<>();
-	 *  systemProperties.put("cassandra.config", new ClassPathResource("cassandra.yaml"));
-	 *  systemProperties.put("cassandra.native_transport_port", 9042);
-	 *  systemProperties.put("cassandra.jmx.local.port", 7199);
-	 *  builder.systemProperties(systemProperties);
+	 * Sets the Cassandra native Java Virtual Machine (JVM) system properties. This action replaces any previously
+	 * configured system properties.
+	 *
+	 * <p>Example usage:</p>
+	 * <pre>{@code
+	 * Map<String, Object> systemProperties = new LinkedHashMap<>();
+	 * systemProperties.put("cassandra.config", new ClassPathResource("cassandra.yaml"));
+	 * systemProperties.put("cassandra.native_transport_port", 9042);
+	 * systemProperties.put("cassandra.jmx.local.port", 7199);
+	 * builder.systemProperties(systemProperties);
 	 * }</pre>
 	 *
-	 * @param systemProperties Cassandra system parameters
-	 * @return this builder
+	 * @param systemProperties a map of Cassandra system properties, must not be {@code null} or empty
+	 * @return this builder instance for method chaining
 	 * @see #addSystemProperty(String, Object)
 	 */
 	public CassandraBuilder systemProperties(Map<String, ?> systemProperties) {
@@ -470,14 +475,17 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Puts Cassandra native Java Virtual Machine (JVM) system parameter, For example:
-	 * <pre>{@code addSystemProperty("cassandra.config",new ClassPathResource("cassandra.yaml"))
-	 * addSystemProperty("user.timezone","Europe/London")}.
-	 * </pre>
+	 * Adds a single Cassandra native Java Virtual Machine (JVM) system property to the current configuration.
 	 *
-	 * @param name Cassandra system parameter name
-	 * @param value Cassandra system parameter value
-	 * @return this builder
+	 * <p>Example usage:</p>
+	 * <pre>{@code
+	 * builder.addSystemProperty("cassandra.config", new ClassPathResource("cassandra.yaml"));
+	 * builder.addSystemProperty("user.timezone", "Europe/London");
+	 * }</pre>
+	 *
+	 * @param name the name of the Cassandra system property, must not be {@code null} or empty
+	 * @param value the value of the Cassandra system property, must not be {@code null}
+	 * @return this builder instance for method chaining
 	 * @see #addSystemProperties(Map)
 	 */
 	public CassandraBuilder addSystemProperty(String name, Object value) {
@@ -485,18 +493,20 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Puts Cassandra native Java Virtual Machine (JVM) system parameters. For example:
-	 * <pre>
-	 * {@code
-	 *  Map<String,Object> systemProperties = new LinkedHashMap<>();
-	 *  systemProperties.put("cassandra.config", new ClassPathResource("cassandra.yaml"));
-	 *  systemProperties.put("cassandra.native_transport_port", 9042);
-	 *  systemProperties.put("cassandra.jmx.local.port", 7199);
-	 *  builder.addSystemProperties(systemProperties);
+	 * Adds multiple Cassandra native Java Virtual Machine (JVM) system properties to the current configuration. This
+	 * method can be used to set or override existing system properties.
+	 *
+	 * <p>Example usage:</p>
+	 * <pre>{@code
+	 * Map<String, Object> systemProperties = new LinkedHashMap<>();
+	 * systemProperties.put("cassandra.config", new ClassPathResource("cassandra.yaml"));
+	 * systemProperties.put("cassandra.native_transport_port", 9042);
+	 * systemProperties.put("cassandra.jmx.local.port", 7199);
+	 * builder.addSystemProperties(systemProperties);
 	 * }</pre>
 	 *
-	 * @param systemProperties Cassandra system parameters
-	 * @return this builder
+	 * @param systemProperties a map of Cassandra system properties, must not be {@code null} or empty
+	 * @return this builder instance for method chaining
 	 * @see #addSystemProperty(String, Object)
 	 */
 	public CassandraBuilder addSystemProperties(Map<String, ?> systemProperties) {
@@ -521,11 +531,16 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets Cassandra native Java Virtual Machine (JVM) Options. Setting this value will replace any previously
-	 * configured options.
+	 * Sets the Cassandra native Java Virtual Machine (JVM) options. This method replaces any previously configured JVM
+	 * options with the specified values.
 	 *
-	 * @param jvmOptions the JVM options to set
-	 * @return this builder
+	 * <p>Example usage:</p>
+	 * <pre>{@code
+	 * builder.setJvmOptions(Arrays.asList("-Xmx1024m", "-Xms512m"));
+	 * }</pre>
+	 *
+	 * @param jvmOptions a collection of JVM options to set, must not be {@code null} or contain {@code null} elements
+	 * @return this builder instance for method chaining
 	 * @see #jvmOptions(Collection)
 	 * @see #addJvmOptions(Collection)
 	 * @see #addJvmOptions(String...)
@@ -538,10 +553,16 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Adds Cassandra native Java Virtual Machine (JVM) Options.
+	 * Adds Cassandra native Java Virtual Machine (JVM) options to the current configuration. This method appends the
+	 * specified options to the existing list without replacing them.
 	 *
-	 * @param jvmOptions the JVM options to add
-	 * @return this builder
+	 * <p>Example usage:</p>
+	 * <pre>{@code
+	 * builder.addJvmOptions("-Xmx1024m", "-Xms512m");
+	 * }</pre>
+	 *
+	 * @param jvmOptions the JVM options to add, must not be {@code null} or contain {@code null} elements
+	 * @return this builder instance for method chaining
 	 * @see #addJvmOptions(Collection)
 	 * @see #jvmOptions(Collection)
 	 * @see #jvmOptions(String...)
@@ -552,10 +573,16 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Adds Cassandra native Java Virtual Machine (JVM) Options.
+	 * Adds the specified Cassandra native Java Virtual Machine (JVM) options to the existing configuration. This method
+	 * appends the given options rather than replacing any previously configured ones.
 	 *
-	 * @param jvmOptions the JVM options to add
-	 * @return this builder
+	 * <p>Example usage:</p>
+	 * <pre>{@code
+	 * builder.addJvmOptions(Arrays.asList("-Xmx2048m", "-Xms1024m"));
+	 * }</pre>
+	 *
+	 * @param jvmOptions a collection of JVM options to add; must not be {@code null} or contain {@code null} elements
+	 * @return this builder instance for method chaining
 	 * @see #addJvmOptions(String...)
 	 * @see #jvmOptions(Collection)
 	 * @see #jvmOptions(String...)
@@ -567,17 +594,18 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Sets Cassandra config properties, that should be merged with properties from cassandra.yaml. Setting this value
-	 * will replace any previously configured config properties. For example:
-	 * <pre>
-	 * {@code
-	 * Map<String,Object> properties = new LinkedHashMap<>();
+	 * Sets the Cassandra configuration properties to be merged with the properties defined in the `cassandra.yaml`
+	 * file. Setting this value replaces any previously configured properties.
+	 *
+	 * <p>For example:</p>
+	 * <pre>{@code
+	 * Map<String, Object> properties = new LinkedHashMap<>();
 	 * properties.put("client_encryption_options.enabled", true);
 	 * properties.put("cluster_name", "MyCluster");
 	 * builder.configProperties(properties);
-	 * }
-	 * </pre>
-	 * Output YAML:
+	 * }</pre>
+	 *
+	 * This will produce the following YAML output:
 	 * <pre>
 	 * ...
 	 * cluster_name: "MyCluster"
@@ -587,8 +615,12 @@ public class CassandraBuilder {
 	 * ...
 	 * </pre>
 	 *
-	 * @param configProperties Cassandra config properties
-	 * @return this builder
+	 * <p>Note that this method fully replaces any previously set configuration
+	 * properties. To add or modify specific properties incrementally, use {@link #addConfigProperty(String, Object)} or
+	 * {@link #addConfigProperties(Map)}.</p>
+	 *
+	 * @param configProperties the Cassandra configuration properties to set; must not be {@code null}
+	 * @return this builder instance for method chaining
 	 * @see #addConfigProperty(String, Object)
 	 * @see #addConfigProperties(Map)
 	 */
@@ -600,13 +632,16 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Puts Cassandra config property, that should be merged with a property from cassandra.yaml. For example:
-	 * <pre>
-	 * {@code
-	 * builder.configProperty("client_encryption_options.enabled",true)
-	 *        .configProperty("cluster_name","MyCluster")}
-	 * </pre>
-	 * <p>Output YAML:
+	 * Sets a single Cassandra configuration property, which will be merged with properties defined in the
+	 * `cassandra.yaml` file.
+	 *
+	 * <p>For example:</p>
+	 * <pre>{@code
+	 * builder.configProperty("client_encryption_options.enabled", true)
+	 *        .configProperty("cluster_name", "MyCluster");
+	 * }</pre>
+	 *
+	 * <p>This will produce the following YAML output:</p>
 	 * <pre>
 	 * ...
 	 * cluster_name: "MyCluster"
@@ -616,9 +651,13 @@ public class CassandraBuilder {
 	 * ...
 	 * </pre>
 	 *
-	 * @param name config property name  (e.g. native_transport_port, client_encryption_options.enabled)
-	 * @param value config property value
-	 * @return this builder
+	 * <p>This method allows for fine-grained updates of individual configuration
+	 * properties. If multiple updates are needed, consider using {@link #addConfigProperties(Map)} for efficiency.</p>
+	 *
+	 * @param name the name of the configuration property (e.g., {@code native_transport_port},
+	 * {@code client_encryption_options.enabled}); must not be {@code null} or empty
+	 * @param value the value of the configuration property
+	 * @return this builder instance for method chaining
 	 * @see #addConfigProperties(Map)
 	 * @see #configProperties(Map)
 	 */
@@ -627,16 +666,18 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Puts Cassandra config properties, that should be merged with properties from cassandra.yaml. For example:
-	 * <pre>
-	 * {@code
-	 * Map<String,Object> properties = new LinkedHashMap<>();
+	 * Adds multiple Cassandra configuration properties to the current configuration, merging them with the properties
+	 * defined in the `cassandra.yaml` file. This method allows for bulk updates of configuration settings.
+	 *
+	 * <p>For example:</p>
+	 * <pre>{@code
+	 * Map<String, Object> properties = new LinkedHashMap<>();
 	 * properties.put("client_encryption_options.enabled", true);
 	 * properties.put("cluster_name", "MyCluster");
 	 * builder.configProperties(properties);
-	 * }
-	 * </pre>
-	 * Output YAML:
+	 * }</pre>
+	 *
+	 * <p>This will result in the following YAML structure:</p>
 	 * <pre>
 	 * ...
 	 * cluster_name: "MyCluster"
@@ -646,8 +687,12 @@ public class CassandraBuilder {
 	 * ...
 	 * </pre>
 	 *
-	 * @param configProperties Cassandra config properties
-	 * @return this builder
+	 * <p>Note that this method replaces any previously configured properties with
+	 * the provided ones. If granular updates are needed, consider using
+	 * {@link #addConfigProperty(String, Object)}.</p>
+	 *
+	 * @param configProperties a map of Cassandra configuration properties to add
+	 * @return this builder instance for method chaining
 	 * @see #addConfigProperty(String, Object)
 	 * @see #configProperties(Map)
 	 */
@@ -658,18 +703,20 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Copy a resource to a target path within the working directory.
-	 * <p>
-	 * Equal to:
-	 * <pre>
-	 *     {@code
-	 *     addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.addResource(resource, path));
-	 *     }
-	 * </pre>
+	 * Copies a resource to a specified target path within the working directory.
 	 *
-	 * @param path path (file only) within the working directory (e.g., conf/cassandra.yaml)
-	 * @param resource the resource
-	 * @return this builder
+	 * <p>This method is equivalent to the following:</p>
+	 * <pre>{@code
+	 * addWorkingDirectoryCustomizers(WorkingDirectoryCustomizer.addResource(resource, path));
+	 * }</pre>
+	 *
+	 * <p>Use this method to place files like configuration files, such as
+	 * {@code conf/cassandra.yaml}, into the appropriate location within the working directory.</p>
+	 *
+	 * @param path the target path (file only) within the working directory (e.g., {@code conf/cassandra.yaml}); must
+	 * not be {@code null} or empty
+	 * @param resource the resource to copy; must not be {@code null}
+	 * @return this builder instance for method chaining
 	 * @see WorkingDirectoryCustomizer#addResource(Resource, String)
 	 */
 	public CassandraBuilder addWorkingDirectoryResource(Resource resource, String path) {
@@ -677,11 +724,15 @@ public class CassandraBuilder {
 	}
 
 	/**
-	 * Applies the provided configurator to this builder.
+	 * Applies the specified configurator to customize this builder.
 	 *
-	 * @param configurator configurator to use
-	 * @return this builder
-	 * @see SimpleSeedProviderConfigurator
+	 * <p>This method provides a way to modify the builder using the logic defined
+	 * in the given configurator. Configurators can encapsulate reusable configuration logic, making it easier to apply
+	 * pre-defined settings to multiple builders.</p>
+	 *
+	 * @param configurator the configurator to apply to this builder; must not be {@code null}
+	 * @return this builder instance for method chaining
+	 * @see SimpleSeedProviderConfigurator for an example configurator
 	 */
 	public CassandraBuilder configure(CassandraBuilderConfigurator configurator) {
 		Objects.requireNonNull(configurator, "Cassandra Builder Configurator must not be null");
