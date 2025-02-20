@@ -19,10 +19,12 @@ include::{sources}/CassandraExamples.java[tag=client-encryption-options]
 NOTE: See {apache-cassandra-ref}/doc/latest/operating/security.html#tls-ssl-encryption
 
 == Authorization and Authentication
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=authenticator]
 ----
+
 <1> Creates a superuser immediately.
 
 NOTE: The default superuser credentials are _user_: **cassandra** and _password_: **cassandra**.
@@ -30,17 +32,20 @@ NOTE: The default superuser credentials are _user_: **cassandra** and _password_
 NOTE: See {apache-cassandra-ref}/doc/latest/operating/security.html#authentication
 
 == Random Ports
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=random-ports]
 ----
-NOTE: A port number of *0* means that the port number is automatically allocated,
-typically from an ephemeral port range.
+
+NOTE: A port number of *0* means that the port number is automatically allocated, typically from an ephemeral port range.
 NOTE: The *0* port number can also be used in the configuration file.
 
 == Simple Seed Provider
+
 You can configure `org.apache.cassandra.locator.SimpleSeedProvider` using
 `SimpleSeedProviderConfigurator`.
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=configure-seeds]
@@ -49,7 +54,9 @@ include::{sources}/CassandraExamples.java[tag=configure-seeds]
 <1> A port number of *0* means that the port number is replaced by either `cassandra.storage_port` or `storage_port`.
 
 == Add Libraries to Classpath
+
 If you want to include custom libraries in Cassandra's classpath, you can add them using:
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=custom-classpath]
@@ -58,13 +65,16 @@ include::{sources}/CassandraExamples.java[tag=custom-classpath]
 == Load CQL Statements
 
 To load CQL statements from various sources, you can use either `CqlScript` or `CqlDataSet`.
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=cql]
 ----
+
 == Shared Cassandra
 
 To use a shared Cassandra instance across all your tests (test classes), you can use the following class:
+
 [source,java,indent=0]
 ----
 include::{sources}/SharedCassandra.java[tag=shared-cassandra]
@@ -72,16 +82,20 @@ include::{sources}/SharedCassandra.java[tag=shared-cassandra]
 
 <1> A shutdown hook is needed for stopping Cassandra after all tests.
 In your tests, you only need to start `Cassandra` before all tests:
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=start-shared-cassandra]
 ----
 
 NOTE: You don't need to explicitly stop Cassandra because the shutdown hook handles this at the end.
+
 NOTE: Calling the `Cassandra.start()` method on an already started Cassandra has no effect.
 
 == JDK21 and Security Manager
+
 If you encounter issues using `JDK21`, such as the following error:
+
 [source,java,indent=0]
 ----
 ERROR [main] 2024-02-27 20:08:26,984 CassandraDaemon.java:897 - Exception encountered during startup
@@ -94,7 +108,9 @@ java.lang.UnsupportedOperationException: The Security Manager is deprecated and 
 	at com.github.nosan.embedded.cassandra.DefaultCassandra.await(DefaultCassandra.java:261)
 	at com.github.nosan.embedded.cassandra.DefaultCassandra.start(DefaultCassandra.java:97)
 ----
+
 Add the following property to `CassandraBuilder`:
+
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=security-manager]
