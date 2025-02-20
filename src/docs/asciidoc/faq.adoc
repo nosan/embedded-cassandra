@@ -4,21 +4,21 @@
 
 = F.A.Q
 
-== What are OSs supported by Embedded Cassandra?
+== What operating systems are supported by Embedded Cassandra?
 
-Embedded Cassandra is tested under the `ubuntu-latest` and `macos-latest` platforms.
+Embedded Cassandra is tested on the `ubuntu-latest` and `macos-latest` platforms.
 
-== What are versions supported by Embedded Cassandra?
+== What versions are supported by Embedded Cassandra?
 
-Embedded Cassandra project is tested for `>= 4.x.x` Cassandra versions.
+The Embedded Cassandra project is tested with Cassandra versions `>= 4.x.x`.
 
-== What are compile dependencies used by Embedded Cassandra?
+== What are the compile dependencies used by Embedded Cassandra?
 
 Embedded Cassandra has the following compile dependencies:
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
-<dependecies>
+<dependencies>
     <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-compress</artifactId>
@@ -34,18 +34,20 @@ Embedded Cassandra has the following compile dependencies:
         <artifactId>logback-classic</artifactId>
         <version>{logback-classic-version}</version>
     </dependency>
-</dependecies>
+</dependencies>
 ----
 
 == Is it possible to start more than one Cassandra instance?
 
 Yes, it is possible. Both instances must be started on different ports.
 
-== Which are URLs used for downloading Apache Cassandra?
+== What are the URLs used for downloading Apache Cassandra?
 
-It depends on the version, if it is the latest release, it will be downloaded from
-https://downloads.apache.org/cassandra/. For older versions, https://archive.apache.org/dist/cassandra/  is used.
+The URLs depend on the version.
+For the latest releases, it will be downloaded from:
+https://downloads.apache.org/cassandra/.
+For older versions, the following URL is used: https://archive.apache.org/dist/cassandra/.
 
 == Where are the files downloaded?
 
-By default, files are downloaded into *~/.embedded-cassandra/* directory
+By default, files are downloaded into the *~/.embedded-cassandra/* directory.

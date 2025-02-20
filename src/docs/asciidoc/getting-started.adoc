@@ -8,34 +8,31 @@
 :resources: ../../test/resources
 
 = Getting Started
-
 Embedded Cassandra provides an easy way to start and stop {apache-cassandra-ref}[Apache Cassandra].
 
 == Overview
-
 The goal of this document is to provide comprehensive reference documentation for programmers using Embedded Cassandra.
 
 === Getting Help
 
-Ask Embedded Cassandra related questions on https://stackoverflow.com/questions/tagged/embedded-cassandra[Stack Overflow].
+Ask Embedded Cassandra-related questions on https://stackoverflow.com/questions/tagged/embedded-cassandra[Stack Overflow].
 
 === Issues
-
 Embedded Cassandra uses GitHub's issue tracking system to report bugs and feature requests.
-If you want to raise an issue, please follow this {github-issues}[link]
+If you want to raise an issue, please follow this {github-issues}[link].
 
 === License
 
-Embedded Cassandra is released under the https://www.apache.org/licenses/LICENSE-2.0[Apache License 2.0]
+Embedded Cassandra is released under the https://www.apache.org/licenses/LICENSE-2.0[Apache License 2.0].
 
 === Get Source
 
-Embedded Cassandra repository can be found {github-code}[here]
+The Embedded Cassandra repository can be found {github-code}[here].
 
 === Build Source
 
-Embedded Cassandra can be easily built with the https://github.com/takari/maven-wrapper[maven wrapper].
-You also need `JDK 11`.
+Embedded Cassandra can be easily built using the https://github.com/takari/maven-wrapper[Maven Wrapper].
+You will also need `JDK 11`.
 
 [source,bash]
 ----
@@ -43,29 +40,26 @@ $ ./mvnw clean verify
 ----
 
 === Contributing to 'Embedded Cassandra'
-
 Embedded Cassandra welcomes contributions from everyone.
-
 Contributions to Embedded Cassandra should be made in the form of `GitHub pull requests`.
 
 === Maven
-
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
-<dependecies>
+<dependencies>
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra</artifactId>
         <version>{revnumber}</version>
     </dependency>
-</dependecies>
+</dependencies>
 ----
 
-NOTE: For other build tools, please use the following {maven-central}[link]
+NOTE: For other build tools, please use the following {maven-central}[link].
 
 == Quick Start
 
-The Apache Cassandra can be started by using the following lines of code:
+Apache Cassandra can be started by using the following lines of code:
 
 [source,java,indent=0]
 ----
@@ -77,7 +71,3 @@ include::{sources}/CassandraExamples.java[tag=quick-start]
 ----
 include::{resources}/schema.cql[]
 ----
-
-
-
-

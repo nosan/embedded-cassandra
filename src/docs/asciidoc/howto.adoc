@@ -4,13 +4,12 @@
 :apache-cassandra-ref: https://cassandra.apache.org
 
 = How-to?
-
 This section provides answers to some common ‘how do I do that...’ questions
-that often arise when using Embedded Cassandra.
+that often arise while using Embedded Cassandra.
 
 == Client Encryption Options
 
-In order to enable a client SSL communication, `client_encryption_options` should be configured:
+To enable client SSL communication, you need to configure `client_encryption_options`:
 
 [source,java,indent=0]
 ----
@@ -20,86 +19,71 @@ include::{sources}/CassandraExamples.java[tag=client-encryption-options]
 NOTE: See {apache-cassandra-ref}/doc/latest/operating/security.html#tls-ssl-encryption
 
 == Authorization and Authentication
-
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=authenticator]
 ----
 <1> Creates a superuser immediately.
 
-NOTE: Default superuser credential is _user_: **cassandra** _password_: **cassandra**.
+NOTE: The default superuser credentials are _user_: **cassandra** and _password_: **cassandra**.
 
 NOTE: See {apache-cassandra-ref}/doc/latest/operating/security.html#authentication
 
 == Random Ports
-
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=random-ports]
 ----
-
 NOTE: A port number of *0* means that the port number is automatically allocated,
 typically from an ephemeral port range.
-
-NOTE: *0* port number also can be used in the configuration file.
+NOTE: The *0* port number can also be used in the configuration file.
 
 == Simple Seed Provider
-
-It is possible to configure `org.apache.cassandra.locator.SimpleSeedProvider` via
+You can configure `org.apache.cassandra.locator.SimpleSeedProvider` using
 `SimpleSeedProviderConfigurator`.
-
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=configure-seeds]
 ----
-<1>  A port number of *0* means that the port number is replaced by either `cassandra.storage_port` or `storage_port`.
 
-== Add libs to classpath
+<1> A port number of *0* means that the port number is replaced by either `cassandra.storage_port` or `storage_port`.
 
-If you want to add some custom libraries into Cassandra's classpath,
-you can add them via:
-
+== Add Libraries to Classpath
+If you want to include custom libraries in Cassandra's classpath, you can add them using:
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=custom-classpath]
 ----
 
-== Load Cql Statements
+== Load CQL Statements
 
-To load CQL statements from different sources, either `CqlScript` or `CqlDataSet` can be used.
-
+To load CQL statements from various sources, you can use either `CqlScript` or `CqlDataSet`.
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=cql]
 ----
-
 == Shared Cassandra
 
-In order to have a shared Cassandra among all your tests (test classes) the following class can be used:
-
+To use a shared Cassandra instance across all your tests (test classes), you can use the following class:
 [source,java,indent=0]
 ----
 include::{sources}/SharedCassandra.java[tag=shared-cassandra]
 ----
-<1>  Shutdown hook is needed for stopping Cassandra after all tests
 
-
-Then in your tests, you just need to start `Cassandra` before all tests.
-
+<1> A shutdown hook is needed for stopping Cassandra after all tests.
+In your tests, you only need to start `Cassandra` before all tests:
 [source,java,indent=0]
 ----
 include::{sources}/CassandraExamples.java[tag=start-shared-cassandra]
 ----
 
-NOTE: You don't need to explicitly stop Cassandra because a shutdown hook does this at the end.
-
-NOTE: Calling `Cassandra.start()` method on an already started Cassandra has no effect.
+NOTE: You don't need to explicitly stop Cassandra because the shutdown hook handles this at the end.
+NOTE: Calling the `Cassandra.start()` method on an already started Cassandra has no effect.
 
 == JDK21 and Security Manager
-
-If you have a trouble to use `JDK21` because of the following error:
-
+If you encounter issues using `JDK21`, such as the following error:
 [source,java,indent=0]
+----
 ERROR [main] 2024-02-27 20:08:26,984 CassandraDaemon.java:897 - Exception encountered during startup
 java.lang.UnsupportedOperationException: The Security Manager is deprecated and will be removed in a future release
 	at java.base/java.lang.System.setSecurityManager(System.java:429)
@@ -109,7 +93,7 @@ java.lang.UnsupportedOperationException: The Security Manager is deprecated and 
 	at org.apache.cassandra.service.CassandraDaemon.main(CassandraDaemon.java:875)
 	at com.github.nosan.embedded.cassandra.DefaultCassandra.await(DefaultCassandra.java:261)
 	at com.github.nosan.embedded.cassandra.DefaultCassandra.start(DefaultCassandra.java:97)
-
+----
 Add the following property to `CassandraBuilder`:
 [source,java,indent=0]
 ----
