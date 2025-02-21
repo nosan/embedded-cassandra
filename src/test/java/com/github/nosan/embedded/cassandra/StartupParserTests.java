@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests for {@link  StartupParser}.
+ *
+ * @author Dmytro Nosan
+ */
 class StartupParserTests {
 
 	private final ProcessWrapper.Output stdout = Mockito.mock(ProcessWrapper.Output.class);
