@@ -22,14 +22,14 @@ jobs:
         os: [ ubuntu-latest, macos-latest ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
           java-version: ${{ matrix.java }}
       - name: Cache local Maven repository
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ matrix.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -37,9 +37,3 @@ jobs:
             ${{ matrix.os }}-maven-
       - name: Maven Clean Verify
         run: mvn -B clean verify
-      - name: Upload to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./target/site/jacoco/jacoco.xml
-          flags: ${{ matrix.os }}-jdk${{ matrix.java }}
