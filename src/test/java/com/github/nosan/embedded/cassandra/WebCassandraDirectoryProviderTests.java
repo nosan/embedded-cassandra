@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.file.Files;
@@ -81,7 +82,7 @@ class WebCassandraDirectoryProviderTests {
 
 	@BeforeAll
 	static void beforeAll() throws IOException {
-		httpServer = HttpServer.create(new InetSocketAddress(0), 0);
+		httpServer = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
 		httpServer.createContext("/", exchange -> {
 			String uri = exchange.getRequestURI().toString();
 			ClassPathResource resource = new ClassPathResource(uri.substring(uri.lastIndexOf('/')));
@@ -96,7 +97,7 @@ class WebCassandraDirectoryProviderTests {
 		});
 		httpServer.setExecutor(Executors.newCachedThreadPool());
 		httpServer.start();
-		httpClient = new JdkHttpClient(Duration.ofSeconds(1), Duration.ofSeconds(1));
+		httpClient = new JdkHttpClient(Duration.ofSeconds(5), Duration.ofSeconds(5));
 	}
 
 	@AfterAll
