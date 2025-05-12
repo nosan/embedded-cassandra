@@ -6,7 +6,7 @@ on:
     branches:
       - master
 jobs:
-  publish:
+  build:
     runs-on: 'ubuntu-latest'
     steps:
       - name: Check Out Code

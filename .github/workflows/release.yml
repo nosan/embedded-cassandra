@@ -6,7 +6,7 @@ on:
     tags:
       - '5.*.*'
 jobs:
-  publish:
+  build:
     runs-on: 'ubuntu-latest'
     steps:
       - name: Check Out Code
