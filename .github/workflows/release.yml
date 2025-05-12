@@ -1,4 +1,6 @@
 name: Build and Deploy Snapshot
+permissions:
+  contents: write
 on:
   push:
     tags:
@@ -20,7 +22,6 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
       - name: Build and Deploy
-        if:
         run: mvn clean deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}

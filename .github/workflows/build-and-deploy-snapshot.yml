@@ -1,4 +1,6 @@
 name: Build and Deploy Snapshot
+permissions:
+  contents: write
 on:
   push:
     branches:
@@ -20,6 +22,7 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
       - name: Get Version
+        id: get_version
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
