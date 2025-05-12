@@ -56,7 +56,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <nexus.url>https://s01.oss.sonatype.org</nexus.url>
         <java.version>11</java.version>
         <junit5.version>5.12.1</junit5.version>
         <checkstyle.version>9.3</checkstyle.version>
@@ -70,7 +69,6 @@
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
         <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
-        <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
         <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
         <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
@@ -89,6 +87,7 @@
         <jacoco.output.directory>${project.build.directory}/jacoco</jacoco.output.directory>
         <jacoco.report.output.directory>${project.build.directory}/site/jacoco</jacoco.report.output.directory>
         <asciidoctor-maven-plugin.version>3.1.1</asciidoctor-maven-plugin.version>
+        <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
     </properties>
 
 
@@ -487,40 +486,16 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${nexus-staging-maven-plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>default-deploy</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>deploy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central-publishing-maven-plugin.version}</version>
+                        <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>${nexus.url}</nexusUrl>
-                            <stagingDescription>${project.description}</stagingDescription>
-                            <altStagingDirectory>${session.executionRootDirectory}/target/</altStagingDirectory>
-                            <stagingProgressTimeoutMinutes>30</stagingProgressTimeoutMinutes>
+                            <publishingServerId>central</publishingServerId>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>ossrh</id>
-                    <name>Sonatype Nexus Snapshots</name>
-                    <url>${nexus.url}/content/repositories/snapshots/</url>
-                </snapshotRepository>
-                <repository>
-                    <id>ossrh</id>
-                    <name>Sonatype Nexus Releases</name>
-                    <url>${nexus.url}/service/local/staging/deploy/maven2/</url>
-                </repository>
-            </distributionManagement>
         </profile>
         <profile>
             <id>docs</id>
