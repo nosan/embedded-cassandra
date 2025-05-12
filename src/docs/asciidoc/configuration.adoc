@@ -12,7 +12,7 @@ This section explains how to configure Embedded Cassandra.
 include::{sources}/CassandraExamples.java[tag=version]
 ----
 
-NOTE: Defaults to *5.0.3*.
+NOTE: Defaults to *5.0.4*.
 
 == Config Properties
 
