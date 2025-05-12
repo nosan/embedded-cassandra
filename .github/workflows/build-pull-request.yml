@@ -15,4 +15,4 @@ jobs:
           java-version: 11
           distribution: 'liberica'
       - name: Build
-        run: mvn clean verify
+        run: mvn -B clean verify

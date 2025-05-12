@@ -28,7 +28,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
       - name: Build and Deploy
         if: ${{ endsWith(steps.get_version.outputs.version, '-SNAPSHOT') }}
-        run: mvn clean deploy
+        run: mvn -B clean deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_TOKEN }}
