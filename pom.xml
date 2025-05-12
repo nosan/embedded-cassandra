@@ -34,7 +34,9 @@
     <url>https://github.com/nosan/embedded-cassandra</url>
 
     <scm>
-        <url>https://github.com/nosan/embedded-cassandra.git</url>
+        <connection>scm:git:git@github.com:nosan/embedded-cassandra.git</connection>
+        <url>https://github.com/nosan/embedded-cassandra</url>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
