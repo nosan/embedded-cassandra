@@ -1,0 +1,41 @@
+name: Build and Deploy Snapshot
+on:
+  push:
+    branches:
+      - master
+jobs:
+  publish:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v4
+      - name: Set up Project
+        uses: actions/setup-java@v4
+        with:
+          java-version: 11
+          distribution: 'liberica'
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_CENTRAL_TOKEN
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+      - name: Get Version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Build and Deploy
+        if: ${{ endsWith(steps.get_version.outputs.version, '-SNAPSHOT') }}
+        run: mvn clean deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE  }}
+      - name: Update Documentation
+        if: ${{ endsWith(steps.get_version.outputs.version, '-SNAPSHOT') }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/generated-docs
+          keep_files: true
+          enable_jekyll: true

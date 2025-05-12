@@ -1,36 +1,32 @@
-name: "deploy"
-
-on: [ workflow_dispatch ]
-
+name: Build and Deploy Snapshot
+on:
+  push:
+    tags:
+      - '5.*.*'
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: 'ubuntu-latest'
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Maven Central Repository
+      - name: Check Out Code
+        uses: actions/checkout@v4
+      - name: Set up Project
         uses: actions/setup-java@v4
         with:
           java-version: 11
-          distribution: 'zulu'
+          distribution: 'liberica'
           server-id: central
           server-username: MAVEN_USERNAME
           server-password: MAVEN_CENTRAL_TOKEN
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-      - name: Cache local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ matrix.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ matrix.os }}-maven-
-      - name: Maven Clean Deploy
-        run: mvn -B clean deploy -Pdocs,deploy -DskipTests
+      - name: Build and Deploy
+        if:
+        run: mvn clean deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE  }}
-      - name: Push Docs
+      - name: Update Documentation
         uses: peaceiris/actions-gh-pages@v4
         with:
           publish_branch: gh-pages

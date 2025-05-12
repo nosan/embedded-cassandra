@@ -1,26 +1,20 @@
-name: "docs"
+name: "Manual Update documentation"
 
 on: [ workflow_dispatch ]
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: 'ubuntu-latest'
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Maven Central Repository
+      - name: Check Out Code
+        uses: actions/checkout@v4
+      - name: Set up Project
         uses: actions/setup-java@v4
         with:
           java-version: 11
-          distribution: 'zulu'
-      - name: Cache local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ matrix.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ matrix.os }}-maven-
-      - name: Maven Clean Verify
-        run: mvn -B clean verify -Pdocs -DskipTests
+          distribution: 'liberica'
+      - name: Build
+        run: mvn clean verify
       - name: Push Docs
         uses: peaceiris/actions-gh-pages@v4
         with:
