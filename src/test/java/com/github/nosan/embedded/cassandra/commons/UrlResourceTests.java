@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.github.nosan.embedded.cassandra.commons;
 
 import java.io.IOException;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -48,7 +49,7 @@ class UrlResourceTests {
 
 	@BeforeAll
 	static void beforeAll() throws IOException {
-		httpServer = HttpServer.create(new InetSocketAddress(0), 0);
+		httpServer = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), 0), 0);
 		httpServer.createContext("/api", exchange -> exchange.sendResponseHeaders(200, 0));
 		httpServer.setExecutor(Executors.newCachedThreadPool());
 		httpServer.start();
