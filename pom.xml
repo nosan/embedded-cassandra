@@ -33,7 +33,7 @@
     <url>https://github.com/nosan/embedded-cassandra</url>
 
     <scm>
-        <url>https://github.com/nosan/embedded-cassandra.git</url>
+        <url>https://github.com/nosan/embedded-cassandra</url>
     </scm>
 
     <properties>
