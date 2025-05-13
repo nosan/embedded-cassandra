@@ -6,13 +6,11 @@
 
 `Embedded Cassandra` welcomes contributions from everyone.
 
-Contributions to `Embedded Cassandra` should be made in the form of `GitHub pull requests`. Each pull request will
-be reviewed by a contributor.
+Contributions to `Embedded Cassandra` should be made in the form of `GitHub pull requests`. 
 
 ## Pull Request Checklist
 
-- Branch from the `master` branch and, if needed, rebase to the current `master`
-  branch before submitting your pull request.
+- Branch from the `master` branch and, if needed, rebase to the current `master` branch before submitting your pull request.
 
 - Commits should be as small as possible.
 
