@@ -10,7 +10,7 @@ jobs:
       - name: Check Out Code
         uses: actions/checkout@v5
       - name: Set up Project
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: 11
           distribution: 'liberica'
