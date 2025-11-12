@@ -69,6 +69,7 @@ final class Parser {
 					i++;
 				}
 				else if (c == '\n' || c == '\r' || c == '\t' || c == ' ') {
+					int start = i;
 					while (next(i, '\n')) {
 						i++;
 					}
@@ -81,8 +82,9 @@ final class Parser {
 					while (next(i, ' ')) {
 						i++;
 					}
+					int end = i;
 					if (statement.length() > 0 && i != this.chars.length - 1) {
-						statement.append(' ');
+						statement.append(this.chars, start, end - start + 1);
 					}
 				}
 				else {

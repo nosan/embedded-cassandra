@@ -38,7 +38,8 @@ class ParserTests {
 	@Test
 	void shouldParseStatementsIgnoringSpecialSymbols() {
 		List<String> statements = parse(" USE KEYSPACE  test; DROP KEYSPACE \n\n\r\r\t\t     test  ");
-		assertThat(statements).containsExactly("USE KEYSPACE test", "DROP KEYSPACE test");
+		assertThat(statements).containsExactly("USE KEYSPACE  test",
+				"DROP KEYSPACE \n\n\r\r\t\t     test");
 	}
 
 	@Test
@@ -111,7 +112,7 @@ class ParserTests {
 	void ignoreStatementSymbolInDoubleDollars() {
 		List<String> statements = parse("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
 				+ "  (201, $$Women's Tour of New Zealand;  New England$$);");
-		assertThat(statements).containsExactly("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
+		assertThat(statements).containsExactly("INSERT INTO cycling.calendar (race_id, race_name) VALUES   "
 				+ "(201, $$Women's Tour of New Zealand;  New England$$)");
 	}
 
@@ -119,7 +120,7 @@ class ParserTests {
 	void shouldNotTrimSpacesInDoubleQuotes() {
 		List<String> statements = parse("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
 				+ "  (201, \"Women's Tour   of New Zealand; New England\");");
-		assertThat(statements).containsExactly("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
+		assertThat(statements).containsExactly("INSERT INTO cycling.calendar (race_id, race_name) VALUES   "
 				+ "(201, \"Women's Tour   of New Zealand; New England\")");
 	}
 
@@ -127,7 +128,7 @@ class ParserTests {
 	void shouldNotTrimSpacesInQuotes() {
 		List<String> statements = parse("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
 				+ "  (201, 'Women''s Tour   of New Zealand; New England');");
-		assertThat(statements).containsExactly("INSERT INTO cycling.calendar (race_id, race_name) VALUES "
+		assertThat(statements).containsExactly("INSERT INTO cycling.calendar (race_id, race_name) VALUES   "
 				+ "(201, 'Women''s Tour   of New Zealand; New England')");
 	}
 
