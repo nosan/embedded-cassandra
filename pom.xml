@@ -496,6 +496,7 @@
                 <version>${central-publishing-maven-plugin.version}</version>
                 <configuration>
                     <deploymentName>${project.name}</deploymentName>
+                    <autoPublish>true</autoPublish>
                 </configuration>
                 <executions>
                     <execution>
