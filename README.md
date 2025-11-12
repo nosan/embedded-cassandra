@@ -7,7 +7,7 @@ Embedded Cassandra
 Embedded Cassandra provides an easy way to start and stop [Apache Cassandra](https://cassandra.apache.org).
 
 To learn more about Embedded Cassandra, please consult
-the [reference documentation](https://nosan.github.io/embedded-cassandra/5.0.2).
+the [reference documentation](https://nosan.github.io/embedded-cassandra/5.0.3).
 
 All versions of Embedded Cassandra reference documentation are [here](https://nosan.github.io/embedded-cassandra).
 
@@ -19,7 +19,7 @@ Here is a quick teaser of starting Cassandra:
     <dependency>
         <groupId>com.github.nosan</groupId>
         <artifactId>embedded-cassandra</artifactId>
-        <version>5.0.2</version>
+        <version>5.0.3</version>
     </dependency>
 </dependecies>
 ```
@@ -36,7 +36,7 @@ import com.github.nosan.embedded.cassandra.cql.CqlScript;
 
 public class CassandraExample {
 
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		Cassandra cassandra = new CassandraBuilder().build();
 		cassandra.start();
 		try {
