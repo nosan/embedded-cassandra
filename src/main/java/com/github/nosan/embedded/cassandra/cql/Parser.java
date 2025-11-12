@@ -119,7 +119,11 @@ final class Parser {
 			}
 			else if (context == Context.QUOTE) {
 				statement.append(c);
-				if (c == '\'') {
+				if (c == '\'' && next(i, '\'')) {
+					statement.append('\'');
+					i++;
+				}
+				else if (c == '\'') {
 					context = Context.NONE;
 				}
 			}
