@@ -87,7 +87,7 @@ class DefaultCassandraIntegrationTests {
 			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
-			createScheme(sessionFactory);
+			runScripts(sessionFactory);
 		});
 	}
 
@@ -107,7 +107,7 @@ class DefaultCassandraIntegrationTests {
 			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
-			createScheme(sessionFactory);
+			runScripts(sessionFactory);
 		});
 	}
 
@@ -154,14 +154,14 @@ class DefaultCassandraIntegrationTests {
 			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getSslPort();
-			assertThatThrownBy(() -> createScheme(sessionFactory))
+			assertThatThrownBy(() -> runScripts(sessionFactory))
 					.hasStackTraceContaining("Could not reach any contact point");
 			sessionFactory.sslEnabled = true;
 			sessionFactory.truststore = new ClassPathResource("client.truststore");
 			sessionFactory.truststorePassword = "123456";
 			sessionFactory.keystore = new ClassPathResource("client.keystore");
 			sessionFactory.keystorePassword = "123456";
-			createScheme(sessionFactory);
+			runScripts(sessionFactory);
 		});
 	}
 
@@ -188,14 +188,14 @@ class DefaultCassandraIntegrationTests {
 			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
-			assertThatThrownBy(() -> createScheme(sessionFactory))
+			assertThatThrownBy(() -> runScripts(sessionFactory))
 					.hasStackTraceContaining("Could not reach any contact point");
 			sessionFactory.sslEnabled = true;
 			sessionFactory.truststore = new ClassPathResource("client.truststore");
 			sessionFactory.truststorePassword = "123456";
 			sessionFactory.keystore = new ClassPathResource("client.keystore");
 			sessionFactory.keystorePassword = "123456";
-			createScheme(sessionFactory);
+			runScripts(sessionFactory);
 		});
 	}
 
@@ -224,7 +224,7 @@ class DefaultCassandraIntegrationTests {
 			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
-			createScheme(sessionFactory);
+			runScripts(sessionFactory);
 		});
 	}
 
@@ -244,11 +244,11 @@ class DefaultCassandraIntegrationTests {
 			SessionFactory sessionFactory = new SessionFactory();
 			sessionFactory.address = settings.getAddress();
 			sessionFactory.port = settings.getPort();
-			assertThatThrownBy(() -> createScheme(sessionFactory)).hasStackTraceContaining(
+			assertThatThrownBy(() -> runScripts(sessionFactory)).hasStackTraceContaining(
 					"requires authentication");
 			sessionFactory.username = "cassandra";
 			sessionFactory.password = "cassandra";
-			createScheme(sessionFactory);
+			runScripts(sessionFactory);
 		});
 	}
 
@@ -300,9 +300,9 @@ class DefaultCassandraIntegrationTests {
 		});
 	}
 
-	private static void createScheme(SessionFactory sessionFactory) {
+	private static void runScripts(SessionFactory sessionFactory) {
 		try (CqlSession session = sessionFactory.createSession()) {
-			CqlScript.ofClassPath("schema.cql").forEachStatement(session::execute);
+			CqlScript.ofClassPath("statements.cql").forEachStatement(session::execute);
 		}
 	}
 

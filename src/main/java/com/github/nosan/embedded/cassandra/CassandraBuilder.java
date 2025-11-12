@@ -45,7 +45,7 @@ import com.github.nosan.embedded.cassandra.commons.web.JdkHttpClient;
 /**
  * A builder that can be used to configure and create {@link Cassandra}.
  * <p>
- * <b>This class is not thread safe and should not be shared across different threads!</b>
+ * <b>This class is not thread-safe and should not be shared across different threads!</b>
  * </p>
  *
  * @author Dmytro Nosan
@@ -58,7 +58,7 @@ public class CassandraBuilder {
 	/**
 	 * Default Cassandra version.
 	 */
-	public static final Version DEFAULT_VERSION = Version.parse("5.0.4");
+	public static final Version DEFAULT_VERSION = Version.parse("5.0.6");
 
 	private static final AtomicInteger CASSANDRA_ID = new AtomicInteger();
 
