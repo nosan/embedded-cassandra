@@ -30,7 +30,7 @@ import com.github.nosan.embedded.cassandra.commons.StreamUtils;
  *
  * <p><b>Example Usage:</b></p>
  * <pre>{@code
- * ResourceCqlScript script = new ResourceCqlScript(new ClassPathResource("schema.cql"), StandardCharsets.UTF_8);
+ * ResourceCqlScript script = new ResourceCqlScript(new ClassPathResource("schema.cql"), Charset.defaultCharset());
  * List<String> statements = script.getStatements();
  * statements.forEach(statement -> System.out.println(statement));
  * }</pre>

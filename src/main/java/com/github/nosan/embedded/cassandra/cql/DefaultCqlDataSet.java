@@ -17,7 +17,6 @@
 package com.github.nosan.embedded.cassandra.cql;
 
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -142,7 +141,7 @@ public class DefaultCqlDataSet implements CqlDataSet {
 		}
 
 		/**
-		 * Adds a {@link Resource} with the default UTF-8 encoding to the builder.
+		 * Adds a {@link Resource} with the default charset to the builder.
 		 *
 		 * @param resource the {@link Resource} to add (must not be {@code null})
 		 * @return this builder
@@ -151,7 +150,7 @@ public class DefaultCqlDataSet implements CqlDataSet {
 		@Override
 		public Builder addResource(Resource resource) {
 			Objects.requireNonNull(resource, "Resource must not be null");
-			addResource(resource, StandardCharsets.UTF_8);
+			addResource(resource, Charset.defaultCharset());
 			return this;
 		}
 

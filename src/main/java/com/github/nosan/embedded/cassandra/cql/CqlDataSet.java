@@ -205,7 +205,7 @@ public interface CqlDataSet extends CqlScript {
 		Builder addScript(String script);
 
 		/**
-		 * Adds a {@link Resource} with the default UTF-8 charset to the builder.
+		 * Adds a {@link Resource} with the default charset to the builder.
 		 *
 		 * @param resource the {@link Resource} to add (must not be {@code null})
 		 * @return this builder
