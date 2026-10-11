@@ -1,6 +1,6 @@
 Embedded Cassandra
 ===========
-![Github CI](https://github.com/nosan/embedded-cassandra/workflows/build/badge.svg)
+[![Build](https://github.com/nosan/embedded-cassandra/actions/workflows/build.yml/badge.svg)](https://github.com/nosan/embedded-cassandra/actions/workflows/build.yml)
 
 ## Getting Started
 
