@@ -13,7 +13,7 @@ jobs:
         os: [ 'ubuntu-latest', 'macos-latest' ]
     steps:
       - name: Check Out Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Set up Project
         uses: actions/setup-java@v6
         with:
